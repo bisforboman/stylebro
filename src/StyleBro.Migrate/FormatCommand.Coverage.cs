@@ -25,15 +25,15 @@ internal static partial class FormatCommand
     /// <summary>The start of <see cref="NotVerifiedLine"/>.</summary>
     public const string NotVerifiedMarker = "Not verified:";
 
+    /// <summary>The reason of <see cref="HeldBackGap"/>'s line, which tells it from the gaps that count.</summary>
+    public const string HeldBackWhy = "this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)";
+
     /// <summary>A gap line: <paramref name="what"/> wasn't checked, <paramref name="why"/>.</summary>
     public static string Gap(string what, string why) => $"{NotCheckedPrefix} {what}: {why}";
 
     /// <summary>The first few of <paramref name="items"/> and how many more, for a gap line.</summary>
     public static string ShortList(IReadOnlyCollection<string> items, int shown = 3) =>
         string.Join(", ", items.Take(shown)) + (items.Count > shown ? $" and {items.Count - shown} more" : string.Empty);
-
-    /// <summary>The reason of <see cref="HeldBackGap"/>'s line, which tells it from the gaps that count.</summary>
-    public const string HeldBackWhy = "this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)";
 
     /// <summary>The gap line for the SDK rules format holds back (<see cref="HeldBackIds"/>): listed, but not counted (<see cref="Unverified"/>).</summary>
     public static string HeldBackGap(IReadOnlyList<string> ids) => Gap(string.Join(", ", ids), HeldBackWhy);
