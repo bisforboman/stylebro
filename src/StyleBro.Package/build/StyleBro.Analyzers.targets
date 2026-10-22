@@ -47,6 +47,18 @@
   </Target>
 
   <!--
+    A file-based program ('dotnet run app.cs', .NET 10) imports the repository's Directory.Build.props like any project,
+    StyleBro's PackageReference included, but 'dotnet format' can't load it, so 'bro format' can't fix what the analyzers
+    report there (trial 42, PolyShim: its build runs GenerateSignatures.csx with 'dotnet run', which then failed on 37
+    findings with warnings as errors). Its analyzers from this package are left out (owner's decision 2026-10-22).
+  -->
+  <Target Name="_StyleBroLeaveFileBasedPrograms" AfterTargets="ResolveLockFileAnalyzers" BeforeTargets="CoreCompile" Condition="'$(FileBasedProgram)' == 'true'">
+    <ItemGroup>
+      <Analyzer Remove="@(Analyzer)" Condition="'%(Analyzer.NuGetPackageId)' == 'StyleBro.Analyzers'" />
+    </ItemGroup>
+  </Target>
+
+  <!--
     The baseline: existing violations that aren't reported (docs/baseline.md). The nearest stylebro.baseline above the
     project, or the file <StyleBroBaseline> names (it must be called stylebro.baseline); 'none' turns it off.
   -->

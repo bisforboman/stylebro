@@ -73,6 +73,7 @@ internal static class ParamsArrays
         if (removed.Any(span => !Trivia.IsBlank(call, span))
             || model.GetSymbolInfo(call, cancellationToken).Symbol is not IMethodSymbol { Parameters.Length: > 0 } method
             || method.Parameters[method.Parameters.Length - 1] is not { IsParams: true } parameter
+            || IsExtensionMember(method)
             || (parameter.Type is not IArrayTypeSymbol && !Modernize.MultiTargetSuppressor.AllHave(options, ParamsCollections))
             || MayBindElsewhere(method, options, cancellationToken)
             || list.Arguments.Count != method.Parameters.Length
@@ -90,6 +91,12 @@ internal static class ParamsArrays
                 ? changes
                 : null;
     }
+
+    // A member of a C# 14 extension block (its containing type is the extension, TypeKind.Extension, which Roslyn 4.8 doesn't
+    // name): the compiler checks the elements passed one by one against the params array's type for nullability and reports
+    // CS8620 for each (trial 42, PolyShim: 'Task.WhenEach(a, b, c)' on its Task.WhenEach polyfill broke the build with warnings
+    // as errors), so the array stays.
+    private static bool IsExtensionMember(IMethodSymbol method) => (int)method.ContainingType.TypeKind == 14;
 
     // Multi-targeted: the fix from one framework's findings goes into the file every framework compiles, and another
     // framework can bind the elements to an overload this compilation doesn't see (trial 23: net8.0's expansions of

@@ -20,6 +20,9 @@ internal static partial class FormatCommand
     /// <summary>The start of a line that names one part of the build a run didn't check, and why (<see cref="Gap"/>).</summary>
     public const string NotCheckedPrefix = "Not checked:";
 
+    /// <summary>Why the IDE fixes <see cref="HeldBackIds"/> leaves out aren't checked (their gap line).</summary>
+    public const string HeldBackReason = "this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked";
+
     /// <summary>The start of <see cref="NotVerifiedLine"/>.</summary>
     public const string NotVerifiedMarker = "Not verified:";
 
