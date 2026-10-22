@@ -181,6 +181,11 @@ guard) spends 21 s in all fixes. The guards' scans aren't where the time goes; d
 analyzers run again over all 17 project copies before each of ~70 ids, ~8 s per id), as docs/proposals/format-speed.md
 found. That loop is what the planned in-process host (phases 1-2) would replace.
 
+**Per id** (follow-up, 2026-10-22): [fix-loop-costs-2026-10.md](fix-loop-costs-2026-10.md) names every step of this loop
+(a startup-hook probe in dotnet format) on Newtonsoft.Json, Shouldly and Serilog: the analysis before each id is 77-90 %
+of the fix phase, the renames are the most expensive Fix Alls, and merged fix rounds would save an estimated 34-68 % of
+Newtonsoft.Json's fix phase.
+
 Why nothing caught it: CI's `performance` job measures analyzers only, and the real-world jobs print phase durations but
 don't fail on them. A fix-side check is listed under "Next" below.
 
