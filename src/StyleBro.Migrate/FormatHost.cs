@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 namespace StyleBro.Migrate;
 
 /// <summary>
-/// The in-process engine of 'bro format' (--engine host, docs/proposals/format-speed.md, phase 1: the checks). It loads
+/// The in-process engine of 'bro format' (--engine host, docs/proposals/format-speed.md, phases 1 and 2: checks and fixes). It loads
 /// StyleBro.FormatHost into a load context of its own that resolves Roslyn, MSBuild and dotnet-format from the SDK the
 /// repository's global.json selects (owner's decision 2026-10-17), next to the Roslyn 4.8 the tool itself uses; the two
 /// never share a type, so everything crossing over is a string, an array of them, a delegate or an exit code. One host per
@@ -120,8 +120,8 @@ internal sealed class FormatHost : IDisposable
             ? Directory.GetDirectories(shared).Select(d => Version.TryParse(Regex.Replace(Path.GetFileName(d), "-.*$", string.Empty), out var v) ? v.Major : (int?)null).Max()
             : null;
 
-    /// <summary>What to say when the host can't run: 'dotnet format' runs the checks instead.</summary>
-    public static string FallbackLine(string reason) => $"Engine: the host can't run here ({reason.TrimEnd('.')}), so 'dotnet format' runs the checks.";
+    /// <summary>What to say when the host can't run: 'dotnet format' runs the checks and fixes instead.</summary>
+    public static string FallbackLine(string reason) => $"Engine: the host can't run here ({reason.TrimEnd('.')}), so 'dotnet format' runs the checks and fixes.";
 
     /// <summary>
     /// The SDK's dotnet-format folder for the SDK 'dotnet --version' names in <paramref name="root"/>, from 'dotnet --list-sdks',
@@ -171,11 +171,12 @@ internal sealed class FormatHost : IDisposable
         !File.Exists(Path.Combine(formatFolder, name + ".dll")) && File.Exists(Path.Combine(toolFolder, name + ".dll"));
 
     /// <summary>
-    /// Runs 'dotnet <paramref name="arguments"/>' (a 'format' check) in the host, or returns null for a command it doesn't run
-    /// (bro then starts it). <paramref name="environment"/>: what the child process would get that changes how MSBuild loads
-    /// the projects; <paramref name="selections"/>: the run's projects ('path|framework'), empty for the whole workspace.
+    /// Runs 'dotnet <paramref name="arguments"/>' (a 'format' check or fix run) in the host, or returns null for a command it
+    /// doesn't run (bro then starts it). <paramref name="environment"/>: what the child process would get that changes how
+    /// MSBuild loads the projects; <paramref name="variables"/>: what else it would get, which the fixers read;
+    /// <paramref name="selections"/>: the run's projects ('path|framework'), empty for the whole workspace.
     /// </summary>
-    public int? Run(string workspace, string folder, IEnumerable<string> environment, IEnumerable<string> selections, IEnumerable<string> arguments, Action<string> output)
+    public int? Run(string workspace, string folder, IEnumerable<string> environment, IEnumerable<string> variables, IEnumerable<string> selections, IEnumerable<string> arguments, Action<string> output)
     {
         var list = arguments.ToList();
         if (list.Count == 0 || list[0] != "format")
@@ -183,7 +184,7 @@ internal sealed class FormatHost : IDisposable
             return null;
         }
 
-        var code = (int)this.run.Invoke(null, [this.session, workspace, folder, environment.ToArray(), selections.ToArray(), list.Skip(1).ToArray(), output])!;
+        var code = (int)this.run.Invoke(null, [this.session, workspace, folder, environment.ToArray(), variables.ToArray(), selections.ToArray(), list.Skip(1).ToArray(), output])!;
         return code < 0 ? null : code;
     }
 

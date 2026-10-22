@@ -114,6 +114,25 @@ public sealed class FormatHostTests : IDisposable
         Assert.Single(Views.WarningsOf([new ProjectDiagnostic(WorkspaceDiagnosticKind.Warning, "Found project reference without a matching metadata reference: /r/A/A.csproj", b)], solution, solution));
     }
 
+    // Serilog on Linux: its net462 instance doesn't load, and the failure names the project, whose other instances did. The
+    // net462 run reports it, as a 'dotnet format' run of net462 alone does, not the net10.0 run that has the project.
+    [Fact]
+    public void ALoadFailure_OfAnInstance_GoesToTheRunThatAsksForIt()
+    {
+        using var workspace = new AdhocWorkspace();
+        var solution = workspace.CurrentSolution
+            .AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Lib(net10.0)", "Lib", LanguageNames.CSharp, filePath: "/r/Lib/Lib.csproj"))
+            .AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Lib(net8.0)", "Lib", LanguageNames.CSharp, filePath: "/r/Lib/Lib.csproj"));
+        var failure = new WorkspaceDiagnostic(WorkspaceDiagnosticKind.Failure, "Msbuild failed when processing the file '/r/Lib/Lib.csproj' with message: Project does not contain 'Compile' target.");
+        var net10 = Views.Of(solution, ["/r/Lib/Lib.csproj|net10.0"], []);
+        var net462 = Views.Of(solution, ["/r/Lib/Lib.csproj|net462"], []);
+
+        Assert.Empty(Views.Missing(solution, ["/r/Lib/Lib.csproj|net10.0", "/r/Lib/Lib.csproj|"]));
+        Assert.Equal(["/r/Lib/Lib.csproj"], Views.Missing(solution, ["/r/Lib/Lib.csproj|net462"]));
+        Assert.Empty(Views.WarningsOf([failure], solution, net10, Views.Missing(solution, ["/r/Lib/Lib.csproj|net10.0"])));
+        Assert.Single(Views.WarningsOf([failure], solution, net462, Views.Missing(solution, ["/r/Lib/Lib.csproj|net462"])));
+    }
+
     [Fact]
     public void TheEngineOption_IsTakenOut()
     {
@@ -225,22 +244,67 @@ public sealed class FormatHostTests : IDisposable
         Assert.True(host is not null, string.Join("\n", log));
 
         var whole = new List<string>();
-        var wholeCode = host.Run(solution, root, [], [], check, whole.Add);
+        var wholeCode = host.Run(solution, root, [], [], [], check, whole.Add);
         Assert.Equal(2, plainCode);
         Assert.Equal(plainCode, wholeCode);
         Assert.Equal(plain.Where(FormatCommand.IsFindingLine).Order(), whole.Where(FormatCommand.IsFindingLine).Order());
         Assert.Equal(2, whole.Count(FormatCommand.IsFindingLine));
 
         var net8 = new List<string>();
-        Assert.Equal(0, host.Run(solution, root, [], [$"{Path.Combine(root, "Lib", "Lib.csproj")}|net8.0"], check, net8.Add));
+        Assert.Equal(0, host.Run(solution, root, [], [], [$"{Path.Combine(root, "Lib", "Lib.csproj")}|net8.0"], check, net8.Add));
         Assert.DoesNotContain(net8, FormatCommand.IsFindingLine);
 
         var net10 = new List<string>();
-        Assert.Equal(2, host.Run(solution, root, [], [$"{Path.Combine(root, "Lib", "Lib.csproj")}|net10.0"], check, net10.Add));
+        Assert.Equal(2, host.Run(solution, root, [], [], [$"{Path.Combine(root, "Lib", "Lib.csproj")}|net10.0"], check, net10.Add));
         Assert.Single(net10, l => FormatCommand.IsFindingLine(l) && l.Contains("C.cs(8,", StringComparison.Ordinal));
 
         // A command it doesn't run goes back to 'dotnet format'.
-        Assert.Null(host.Run(solution, root, [], [], ["format", solution, "--no-restore"], _ => { }));
+        Assert.Null(host.Run(solution, root, [], [], [], ["format", solution, "--no-restore", "--binarylog", "x.binlog"], _ => { }));
+    }
+
+    // Against the SDK on this machine: a fix run in the host writes what 'dotnet format' writes, the next run of the same host
+    // sees it (and what else changed on disk), and a framework's fix reaches the other frameworks' copies of the file.
+    [Fact]
+    public void AHostFix_WritesWhatDotnetFormatWrites()
+    {
+        var root = this.NewFolder();
+        Write(root, ".editorconfig", "root = true\n\n[*.cs]\ncsharp_prefer_braces = true\ndotnet_diagnostic.IDE0011.severity = warning\n");
+        Write(root, "App.slnx", "<Solution>\n  <Project Path=\"Lib/Lib.csproj\" />\n</Solution>\n");
+        Write(root, "Lib/Lib.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>\n  </PropertyGroup>\n</Project>\n");
+        Write(root, "Lib/C.cs", "namespace Lib;\n\npublic static class C\n{\n    public static int M(int x)\n    {\n        if (x > 2) return 3;\n#if NET10_0_OR_GREATER\n        if (x > 1) return 2;\n#endif\n        return x;\n    }\n}\n");
+        Write(root, "Lib/D.cs", "namespace Lib;\n\npublic static class D\n{\n    public static int M(int x)\n    {\n        return x;\n    }\n}\n");
+        Assert.Equal(0, Dotnet(root, out _, "restore", "App.slnx"));
+        var copy = this.NewFolder();
+        foreach (var file in Directory.GetFiles(root, "*", SearchOption.AllDirectories))
+        {
+            Write(copy, Path.GetRelativePath(root, file), File.ReadAllText(file));
+        }
+
+        // 'dotnet format' on the copy, one framework at a time as bro runs it.
+        string[] Fix(string folder) => ["format", "style", Path.Combine(folder, "App.slnx"), "--no-restore", "--diagnostics", "IDE0011", "--severity", "warn"];
+        Assert.Equal(0, Dotnet(copy, out _, Fix(copy)));
+        var expected = File.ReadAllText(Path.Combine(copy, "Lib", "C.cs"));
+        Assert.Contains("{", expected.Split('\n')[6 + 1], StringComparison.Ordinal);
+
+        var log = new List<string>();
+        using var host = FormatHost.Open(root, log.Add);
+        Assert.True(host is not null, string.Join("\n", log));
+        var solution = Path.Combine(root, "App.slnx");
+        var lib = Path.Combine(root, "Lib", "Lib.csproj");
+        Assert.Equal(0, host.Run(solution, root, [], [], [$"{lib}|net8.0"], Fix(root), _ => { }));
+        Assert.Equal(0, host.Run(solution, root, [], [], [$"{lib}|net10.0"], Fix(root), _ => { }));
+        Assert.Equal(expected, File.ReadAllText(Path.Combine(root, "Lib", "C.cs")));
+
+        // The net8.0 copy has the net10.0 run's text: neither framework finds anything now.
+        string[] check = [.. Fix(root), "--verify-no-changes"];
+        Assert.Equal(0, host.Run(solution, root, [], [], [$"{lib}|net8.0"], check, _ => { }));
+        Assert.Equal(0, host.Run(solution, root, [], [], [$"{lib}|net10.0"], check, _ => { }));
+
+        // A file changed on disk between runs (by bro, CSharpier, ...) is what the next run sees.
+        File.WriteAllText(Path.Combine(root, "Lib", "D.cs"), "namespace Lib;\n\npublic static class D\n{\n    public static int M(int x)\n    {\n        if (x > 2) return 3;\n        return x;\n    }\n}\n");
+        var found = new List<string>();
+        Assert.Equal(2, host.Run(solution, root, [], [], [$"{lib}|net8.0"], check, found.Add));
+        Assert.Single(found, l => FormatCommand.IsFindingLine(l) && l.Contains("D.cs(7,", StringComparison.Ordinal));
     }
 
     public void Dispose()
