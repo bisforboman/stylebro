@@ -72,4 +72,17 @@ public sealed partial class MigrationTests
         var staged = PreviewCommand.Git(root, "diff", "--cached", "--name-only").Output.Split('\n', StringSplitOptions.RemoveEmptyEntries);
         Assert.Equal([".editorconfig", "src/.editorconfig"], staged.Order(StringComparer.Ordinal));
     }
+
+    [Fact]
+    public void HiddenLine_CountsAGlobalConfigAboveTheFolder_WithoutScanningAboveIt()
+    {
+        // The SDK gives a project the .globalconfig files of the folders above it. Only those files count from above: a scan
+        // of everything below the outermost folder reached '/' without a 'root = true' .editorconfig (the test host spun).
+        Write(".globalconfig", "is_global = true\ndotnet_analyzer_diagnostic.severity = silent\n");
+        Write("App/App.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
+        Write("Other/.globalconfig", "is_global = true\ndotnet_analyzer_diagnostic.severity = none\n");
+
+        Assert.StartsWith("Not clean: A .globalconfig's bulk severity", FormatCommand.HiddenLine(Path.Combine(root, "App")), StringComparison.Ordinal);
+        Assert.Equal("silent", Migration.WithGlobalBulk(Path.Combine(root, "App"), new Dictionary<string, string>(), [root])["dotnet_analyzer_diagnostic.severity"]);
+    }
 }

@@ -598,15 +598,18 @@ internal static partial class Migration
 
     /// <summary>
     /// <paramref name="own"/> (.editorconfig settings for all C# files) over the bulk and category severities ('dotnet_analyzer
-    /// _diagnostic.severity', '...category-X.severity') of every .globalconfig in <paramref name="root"/> and below it (the SDK
-    /// gives a project every .globalconfig in the folders above its files), the lowest of each key. Trial 43: NServiceBus.Gateway's
+    /// _diagnostic.severity', '...category-X.severity') of every .globalconfig in <paramref name="root"/> and below it, and in the
+    /// folders <paramref name="above"/> (not below them: the SDK gives a project every .globalconfig in the folders above its
+    /// files), the lowest of each key. Trial 43: NServiceBus.Gateway's
     /// src/.globalconfig said 'none'; 'dotnet format' then skipped StyleBro's rules while the build reported them (the preset's
     /// own entries win there). An .editorconfig 'default' doesn't override a global one in 'dotnet format', so it doesn't here.
     /// </summary>
-    public static Dictionary<string, string> WithGlobalBulk(string root, IReadOnlyDictionary<string, string> own)
+    public static Dictionary<string, string> WithGlobalBulk(string root, IReadOnlyDictionary<string, string> own, IEnumerable<string>? above = null)
     {
         var merged = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var file in StyleCopSetup.EnumerateFiles(root).Where(f => Path.GetFileName(f) == ".globalconfig"))
+        var files = StyleCopSetup.EnumerateFiles(root).Where(f => Path.GetFileName(f) == ".globalconfig")
+            .Concat((above ?? []).Select(f => Path.Combine(f, ".globalconfig")).Where(File.Exists));
+        foreach (var file in files.Distinct(StringComparer.Ordinal))
         {
             foreach (var (key, value) in GlobalConfigSettings(file).Where(p => p.Key.StartsWith("dotnet_analyzer_diagnostic.", StringComparison.OrdinalIgnoreCase)))
             {

@@ -328,7 +328,7 @@ internal static partial class FormatCommand
         var ownRoots = StyleCopSetup.EditorConfigRoots(top).Select(f => Path.Combine(top, f)).ToList();
 
         // A .globalconfig's bulk severity too (trial 43): 'dotnet format' reads it; the build lets the preset's own entries win.
-        var bulk = Migration.WithGlobalBulk(folders[0], settings);
+        var bulk = Migration.WithGlobalBulk(top, settings, folders);
         var ids = InitCommand.HiddenFromFormat(bulk)
             .Concat(InitCommand.NestedHiddenFromFormat(top, settings, withBlocks: true, written).Values.SelectMany(l => l))
             .Concat(ownRoots.SelectMany(f => Migration.OwnSettings(f, withBlocks: true) is var own && InitCommand.OptsOut(Migration.OwnSettings(f))
