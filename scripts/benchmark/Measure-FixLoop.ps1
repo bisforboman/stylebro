@@ -2,7 +2,7 @@
 # Fix All, and the documents it changes (performance audit 2026-10, the "Fix loop per id" section of
 # docs/proposals/performance-audit-2026-10.md).
 #
-#   ./scripts/benchmark/Measure-FixLoop.ps1 -Repo Newtonsoft [-Runs 2] [-Work <dir>] [-Only BRO1112,BRO1001]
+#   ./scripts/benchmark/Measure-FixLoop.ps1 -Repo Newtonsoft [-Runs 2] [-Work <dir>] [-Only BRO1112,BRO1001] [-Properties NuGetAudit=false]
 #   ./scripts/benchmark/Measure-FixLoop.ps1 -Url https://github.com/shouldly/shouldly -Commit b9b5293... -Solution Shouldly.sln
 #
 # -Repo takes a scripts/realworld/repos.psd1 entry; -Url/-Commit/-Solution any other repository. Like the real-world
@@ -24,7 +24,8 @@ param(
     [int]$Runs = 2,
     [string]$Work = (Join-Path ([IO.Path]::GetTempPath()) 'stylebro-fixloop'),
     [string[]]$Only = @(),
-    [hashtable]$Properties = @{}
+    # MSBuild properties for the restore, 'Name=Value' (Serilog: NuGetAudit=false).
+    [string[]]$Properties = @()
 )
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
@@ -91,7 +92,7 @@ git -C $path clean -fdxq
 function Remove-GlobalJson { Get-ChildItem $path -Recurse -Filter global.json -File | Remove-Item }
 Remove-GlobalJson
 $sln = Join-Path $path $Solution
-$props = @($Properties.Keys | ForEach-Object { "-p:$_=$($Properties[$_])" })
+$props = @($Properties | ForEach-Object { $_ -split ',' } | Where-Object { $_ } | ForEach-Object { "-p:$_" })
 
 $env:CustomAfterMicrosoftCommonTargets = $hook
 try {
@@ -107,7 +108,7 @@ try {
         $env:DOTNET_STARTUP_HOOKS = $probe
         $env:FORMAT_PROBE_LOG = $tsv
         try {
-            python (Join-Path $PSScriptRoot 'time-format.py') $log -- dotnet format analyzers $sln --diagnostics @ids --severity warn --no-restore -v diag @props | Out-Host
+            python (Join-Path $PSScriptRoot 'time-format.py') $log -- dotnet format analyzers $sln --diagnostics @ids --severity warn --no-restore -v diag | Out-Host
         }
         finally { Remove-Item Env:\DOTNET_STARTUP_HOOKS, Env:\FORMAT_PROBE_LOG -ErrorAction SilentlyContinue }
         $changed = @(git -C $path diff --name-only).Count
