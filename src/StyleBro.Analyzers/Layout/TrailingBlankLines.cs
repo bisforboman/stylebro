@@ -32,7 +32,9 @@ internal static class TrailingBlankLines
     /// whitespace inside trivia, never string contents.
     /// </summary>
     public static IReadOnlyList<TextLine> GetBlankLinesAfterComment(SyntaxTrivia comment, SourceText text, bool removeStandalone) =>
-        GetCheckedBlankLines(comment, text, removeStandalone) ?? [];
+        comment.IsKind(SyntaxKind.SingleLineCommentTrivia) && HasBlankLineBelow(comment, text)
+            ? GetCheckedBlankLines(comment, text, removeStandalone) ?? []
+            : [];
 
     /// <summary>
     /// The same, but null for a comment BRO1506 doesn't check at all (init counts the checked ones, with blank lines below
@@ -145,6 +147,16 @@ internal static class TrailingBlankLines
     public static int GetEndOfContent(SourceText text)
     {
         return LastContentLine(text) is { } line ? line.Start + text.ToString(line.Span).TrimEnd().Length : 0;
+    }
+
+    /// <summary>
+    /// Whether the line below the comment's is blank (and isn't the empty line after the file's last line break): without
+    /// that, <see cref="GetCheckedBlankLines"/> finds no blank line. Checked first, as most comments have code below them.
+    /// </summary>
+    private static bool HasBlankLineBelow(SyntaxTrivia comment, SourceText text)
+    {
+        var number = text.Lines.GetLineFromPosition(comment.SpanStart).LineNumber + 1;
+        return number < text.Lines.Count && text.Lines[number].End < text.Length && IsBlank(text, text.Lines[number].Span);
     }
 
     private static TextLine? LastContentLine(SourceText text)

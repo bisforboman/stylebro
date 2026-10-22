@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -47,6 +48,9 @@ internal static class DocumentationComments
 
     private static readonly System.Text.RegularExpressions.Regex Entity = new(@"^&(?:[A-Za-z_][\w.-]*|#[0-9]+|#x[0-9A-Fa-f]+);$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
 
+    // Several rules ask about the same comment (summaries, tags, periods, style): its XML is walked once.
+    private static readonly ConditionalWeakTable<DocumentationCommentTriviaSyntax, StrongBox<bool>> Malformed = new();
+
     /// <summary>
     /// Whether the comment's XML is malformed: an element isn't closed by its own end tag. 'IComparable&lt;T&gt; can use it' in
     /// prose starts an element 'T' that takes the summary's end tag, so the rules that edit text would guess where it ends
@@ -59,8 +63,7 @@ internal static class DocumentationComments
     /// would be judged differently with and without it.
     /// </summary>
     public static bool IsMalformed(DocumentationCommentTriviaSyntax documentation) =>
-        documentation.DescendantTokens().Any(t => (t.IsMissing && !t.Parent!.AncestorsAndSelf().Any(n => n is XmlAttributeSyntax)) || IsBareAmpersand(t))
-        || documentation.DescendantNodes().OfType<XmlElementSyntax>().Any(e => e.EndTag.Name.LocalName.ValueText != e.StartTag.Name.LocalName.ValueText);
+        Malformed.GetValue(documentation, d => new StrongBox<bool>(ComputeIsMalformed(d))).Value;
 
     /// <summary>
     /// The places in a comment a rule would edit, or none when its XML is malformed (<see cref="IsMalformed"/>). Shared by
@@ -98,6 +101,11 @@ internal static class DocumentationComments
     /// </summary>
     public static bool HasConditionalDirective(MemberDeclarationSyntax member)
     {
+        if (!member.ContainsDirectives)
+        {
+            return false;
+        }
+
         var end = member.AttributeLists.Count > 0 ? member.AttributeLists.Last().GetLastToken().GetNextToken().SpanStart : member.SpanStart;
         return member.DescendantTrivia(TextSpan.FromBounds(member.FullSpan.Start, end)).Any(t =>
             t.IsKind(SyntaxKind.IfDirectiveTrivia) || t.IsKind(SyntaxKind.ElifDirectiveTrivia)
@@ -253,6 +261,10 @@ internal static class DocumentationComments
         };
         return options.TryGetValue(key, out var value) && bool.TryParse(value.Trim(), out var configured) ? configured : defaultValue;
     }
+
+    private static bool ComputeIsMalformed(DocumentationCommentTriviaSyntax documentation) =>
+        documentation.DescendantTokens().Any(t => (t.IsMissing && !t.Parent!.AncestorsAndSelf().Any(n => n is XmlAttributeSyntax)) || IsBareAmpersand(t))
+        || documentation.DescendantNodes().OfType<XmlElementSyntax>().Any(e => e.EndTag.Name.LocalName.ValueText != e.StartTag.Name.LocalName.ValueText);
 
     private static bool IsDocumentationComment(SyntaxTrivia trivia)
     {

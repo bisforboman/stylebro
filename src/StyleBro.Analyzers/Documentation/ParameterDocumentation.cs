@@ -72,8 +72,14 @@ internal static class ParameterDocumentation
     /// </summary>
     public static Finding? GetFinding(SyntaxNode member, SourceText text, TagKind kind = TagKind.Parameter)
     {
-        var parameters = kind == TagKind.Parameter ? GetParameterNames(member) : GetTypeParameterNames(member);
+        // Most members have no tag of the kind: found without allocating, before anything else is read.
         var element = kind == TagKind.Parameter ? "param" : "typeparam";
+        if (!HasTag(member, element))
+        {
+            return null;
+        }
+
+        var parameters = kind == TagKind.Parameter ? GetParameterNames(member) : GetTypeParameterNames(member);
         var noun = kind == TagKind.Parameter ? "parameter" : "type parameter";
         var matchId = kind == TagKind.Parameter ? DiagnosticIds.ParameterTagsMatch : DiagnosticIds.TypeParameterTagsMatch;
         var nameId = kind == TagKind.Parameter ? DiagnosticIds.ParameterTagHasName : DiagnosticIds.TypeParameterTagHasName;
@@ -213,6 +219,29 @@ internal static class ParameterDocumentation
         var first = text.Lines.GetLineFromPosition(DocumentationTags.GetStart(tag));
         var last = text.Lines.GetLineFromPosition(tag.Span.End);
         return TextSpan.FromBounds(first.Start, last.End);
+    }
+
+    /// <summary>Whether the member's documentation has a top-level element named <paramref name="element"/>.</summary>
+    private static bool HasTag(SyntaxNode member, string element)
+    {
+        foreach (var trivia in member.GetLeadingTrivia())
+        {
+            if ((!trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) && !trivia.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia))
+                || trivia.GetStructure() is not DocumentationCommentTriviaSyntax documentation)
+            {
+                continue;
+            }
+
+            foreach (var node in documentation.Content)
+            {
+                if (node is XmlElementSyntax tag && tag.StartTag.Name.LocalName.ValueText == element)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private static bool IsInheritDoc(XmlNodeSyntax node) =>
