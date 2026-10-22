@@ -230,3 +230,15 @@ adamralph/minver	rejected trial 44	79 files; .globalconfig bulk warning, but cha
 chtoucas/Calendrie	rejected trial 44	1,198 IDE0055 warnings in the untouched build (category-Style warning)
 NikaNats/NetCommerce	rejected trial 44	600 files, mostly a net10.0 app
 dailydevops/pulse	rejected trial 44	746 files, health-check tests need services (arguments has the same NetEvolve.Defaults setup)
+dailydevops/guard	trial 45	NetEvolve.Defaults 2.0.0 copies its template.editorconfig over the root one before every build (the committed file is an older copy), CSharpier.MSBuild, Sonar, TUnit, netstandard2.0-net10.0; untouched TWAE build fails on CS9057 (NetEvolve analyzer built for Roslyn 5.3) and CS0618, NuGetAudit off
+sebastienros/parlot	trial 45	xunit.v3.mtp-v2 4.0.2, in-solution source generator, net472;netstandard2.0;net8.0;net10.0, TWAE, ~6,400 tests (1 generator packaging test fails untouched)
+martincostello/lambda-test-server	trial 45	StyleCop.Analyzers 1.3.151-beta (migrate), xunit.v3, Shouldly, net8.0-net10.0; global.json 10.0.402 lowered; 1 trace-id test fails untouched
+microsoft/FASTER	trial 45 (random, seed 45)	cs/FASTER.sln, 468 files, net7.0;net6.0;netstandard2.x, NUnit (1,306 tests, LogPathtooLong fails untouched, Azure tests skipped); NuGetAudit off; seed 45 drew ScottPlot first
+ScottPlot/ScottPlot	rejected trial 45	random pick (seed 45): 1,079 .cs files (src/ScottPlot5 with WinForms/WPF/MAUI/Avalonia controls), too large
+microsoft/vs-validation	rejected trial 45	37 .cs files; lambda-test-server has StyleCop + xunit.v3 too
+martincostello/alexa-london-travel	rejected trial 45	net11.0 (global.json SDK 11 rc)
+martincostello/project-euler	rejected trial 45	net11.0 (global.json SDK 11 rc)
+martincostello/aspnet-core-pseudo-localization	rejected trial 45	17 .cs files, no StyleCop
+Cysharp/ZString	rejected trial 45	tests target netcoreapp2.1/3.1 and net472
+dailydevops/extensions.tasks	rejected trial 45	17 .cs files (same NetEvolve.Defaults setup as guard)
+dailydevops/http.correlation	rejected trial 45	53 .cs files (same NetEvolve.Defaults setup as guard, which is larger)
