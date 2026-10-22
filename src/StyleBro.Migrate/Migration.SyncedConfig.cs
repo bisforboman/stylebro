@@ -151,10 +151,13 @@ internal static partial class Migration
                     continue;
                 }
 
-                foreach (var file in files.EnumerateArray().Select(f => f.GetString() ?? string.Empty).Where(f => f.EndsWith("editorconfig", StringComparison.OrdinalIgnoreCase)))
+                var names = files.EnumerateArray().Select(f => f.GetString() ?? string.Empty).ToList();
+                var folder = folders.Select(f => Path.Combine(f, libraryPath.GetString() ?? string.Empty)).FirstOrDefault(Directory.Exists);
+                foreach (var file in names.Where(f => f.EndsWith("editorconfig", StringComparison.OrdinalIgnoreCase)))
                 {
-                    var candidate = folders.Select(f => Path.Combine(f, libraryPath.GetString() ?? string.Empty, file)).FirstOrDefault(File.Exists);
-                    if (candidate is not null && ConfigLines(File.ReadAllText(candidate)).SequenceEqual(own, StringComparer.Ordinal))
+                    var candidate = folder is null ? null : Path.Combine(folder, file);
+                    if (candidate is not null && File.Exists(candidate)
+                        && (ConfigLines(File.ReadAllText(candidate)).SequenceEqual(own, StringComparer.Ordinal) || BuildFilesName(folder!, names, file)))
                     {
                         return new PackageConfig(library.Name.Replace('/', ' '), file);
                     }
@@ -163,6 +166,22 @@ internal static partial class Migration
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Whether one of the package's build files (.props/.targets under build/, buildTransitive/, buildMultiTargeting/) names
+    /// <paramref name="file"/> (its file name, or its path for a file named just '.editorconfig'). Trial 45, dailydevops/guard:
+    /// the committed root file was an older version of NetEvolve.Defaults' template (the build rewrites it, nobody commits
+    /// that), so comparing the text missed it. Owner's decision 2026-10-22: the targets naming the file is enough.
+    /// </summary>
+    private static bool BuildFilesName(string folder, IEnumerable<string> names, string file)
+    {
+        var name = Path.GetFileName(file);
+        var needle = name.Equals(".editorconfig", StringComparison.OrdinalIgnoreCase) ? file : name;
+        return names.Where(n => (n.StartsWith("build", StringComparison.OrdinalIgnoreCase) && n.Contains('/'))
+                && (n.EndsWith(".props", StringComparison.OrdinalIgnoreCase) || n.EndsWith(".targets", StringComparison.OrdinalIgnoreCase)))
+            .Select(n => Path.Combine(folder, n))
+            .Any(n => File.Exists(n) && File.ReadAllText(n).Replace('\\', '/').Contains(needle, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>What init and migrate say after writing into a root .editorconfig that <see cref="PackageCopy"/> finds.</summary>

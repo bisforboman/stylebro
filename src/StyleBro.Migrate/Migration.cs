@@ -868,7 +868,10 @@ internal static partial class Migration
         var body = newLine + child + "<PropertyGroup>" + newLine + child + unit + property + newLine + child + "</PropertyGroup>";
         return !project.Success ? null
             : project.Groups[1].Length > 0 ? existing.Remove(project.Index, project.Length).Insert(project.Index, existing[project.Index..project.Groups[1].Index].TrimEnd() + ">" + body + newLine + "</Project>")
-            : existing.Insert(project.Index + project.Length, body);
+            : Regex.Match(existing[(project.Index + project.Length)..], @"^[ \t]*</Project>") is { Success: true } close
+                // '<Project></Project>' on one line (dailydevops/guard, trial 45): the closing tag gets its own line, which CSharpier's check wants.
+                ? existing.Remove(project.Index + project.Length, close.Length - "</Project>".Length).Insert(project.Index + project.Length, body + newLine)
+                : existing.Insert(project.Index + project.Length, body);
     }
 
     /// <summary>
