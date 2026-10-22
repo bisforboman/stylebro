@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    bro format's in-process engine (the host engine, docs/proposals/format-speed.md, phase 1: checks). It runs inside a load
+    context that resolves Roslyn, MSBuild and dotnet-format from the SDK the repository uses (owner's decision 2026-10-17:
+    the SDK's own Roslyn and MSBuild), so it is compiled against Roslyn 4.8's API and none of these assemblies ship with it.
+    StyleBro.Migrate loads it by path and talks to it with plain types only (FormatHost.cs there).
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" PrivateAssets="all" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+</Project>

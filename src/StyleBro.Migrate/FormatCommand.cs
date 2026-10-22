@@ -280,6 +280,15 @@ internal static partial class FormatCommand
     {
         // --timings: how long each phase took, after everything else (docs/proposals/format-speed.md, "Also seen").
         using var timings = args.Contains(TimingsOption) ? PhaseTimes.Start() : null;
+
+        // --engine host: the checks run in this process (FormatHost); fixes still run in 'dotnet format'.
+        if (TakeEngine(ref args, out var engineError) is not { } engineName)
+        {
+            (output ?? Console.Error.WriteLine)(engineError!);
+            return 1;
+        }
+
+        using var engine = UseEngine(engineName);
         int exit;
         using (PhaseTimes.Measure("total"))
         {
@@ -5004,6 +5013,9 @@ internal static partial class FormatCommand
 
         using var directiveMask = new DirectiveMask(root, directiveFiles);
 
+        // --engine host: the checks of this run in this process, each configuration's workspace loaded once.
+        using var hostScope = HostScope.For(root, log);
+
         int Format(string target, List<string> options, Func<IEnumerable<string>, int> run, string[]? runPasses = null)
         {
             // Each pass would write its own format-report.json over the last one: each gets a folder, merged after.
@@ -5433,7 +5445,9 @@ internal static partial class FormatCommand
                 int single;
                 using (PhaseTimes.Measure(passThrough.Contains("--verify-no-changes") ? "check: all projects" : "fix: all projects"))
                 {
-                    single = Format(workspacePath, passThrough, a => Dotnet(root, plain, a, Watch));
+                    single = Format(workspacePath, passThrough, a => hostScope is not null && passThrough.Contains("--verify-no-changes")
+                        ? hostScope.Run(workspacePath, plain, [], a.ToList(), Watch, () => Dotnet(root, plain, a, Watch))
+                        : Dotnet(root, plain, a, Watch));
                 }
 
                 if (single == NotCleanExitCode && passThrough.Contains("--verify-no-changes") && findingsIgnored > 0 && findingsShown == 0)
@@ -5584,6 +5598,13 @@ internal static partial class FormatCommand
                 var (alias, aliases) = framework.Length == 0 ? (string.Empty, string.Empty) : Aliases(byPath, keep, framework);
                 var other = framework.Length == 0 ? new HashSet<string>() : Other(byPath, keep, framework);
                 var environment = new RunEnvironment(alias, select, PathList(keep), PathList(other), aliases, names, notAsErrors.Count > 0, configuration, oldCSharp);
+                if (verify && hostScope is not null)
+                {
+                    // The host loads every framework: the run's projects as the instances of its framework.
+                    var selections = selected.Select(x => $"{projects[x].FullPath}|{(framework.Length == 0 ? string.Empty : Spelling(projects[x].FullPath, framework))}").ToList();
+                    return Format(filter ?? workspacePath, options, a => hostScope.Run(workspacePath, environment, selections, a.ToList(), output, () => Dotnet(root, environment, a, output)), Passes(whitespaceExclusions, include));
+                }
+
                 return Format(filter ?? workspacePath, options, a => Dotnet(root, environment, a, output), Passes(whitespaceExclusions, include));
             }
             finally

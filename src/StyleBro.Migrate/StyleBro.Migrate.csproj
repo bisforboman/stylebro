@@ -28,6 +28,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <ProjectReference Include="..\StyleBro.Analyzers\StyleBro.Analyzers.csproj" />
+    <!-- Loaded by path into a load context of its own (FormatHost.cs), never referenced from the tool's code. -->
+    <ProjectReference Include="..\StyleBro.FormatHost\StyleBro.FormatHost.csproj" />
   </ItemGroup>
 
   <ItemGroup>
