@@ -75,7 +75,7 @@ internal static class CamelCaseRenamer
         // Every rename is computed on the original solution, so they run in parallel (FindReferencesAsync in every copy of
         // a multi-targeted file was most of BRO1303's Fix All); the results are used in the diagnostics' order.
         var keptTypes = new ConcurrentDictionary<ISymbol, bool>(SymbolEqualityComparer.Default);
-        var results = await LinkedFileFixAllProvider.ForEachAsync(renames, item => GetItemChangesAsync(solution, item.Document, item.Diagnostic, keptTypes, cancellationToken), cancellationToken).ConfigureAwait(false);
+        var results = await LinkedFileFixAllProvider.ForEachAsync(renames, item => GetCheckedChangesAsync(solution, item.Document, item.Diagnostic, keptTypes, cancellationToken), cancellationToken).ConfigureAwait(false);
         for (var i = 0; i < renames.Count; i++)
         {
             var (itemChanges, reason, where) = results[i];
@@ -117,7 +117,23 @@ internal static class CamelCaseRenamer
         }
 
         var keptTypes = new ConcurrentDictionary<ISymbol, bool>(SymbolEqualityComparer.Default);
-        return (await GetItemChangesAsync(solution, document, diagnostic, keptTypes, cancellationToken).ConfigureAwait(false)).Reason;
+        return (await GetCheckedChangesAsync(solution, document, diagnostic, keptTypes, cancellationToken).ConfigureAwait(false)).Reason;
+    }
+
+    /// <summary>
+    /// <see cref="GetItemChangesAsync"/> once per solution and diagnostic (<see cref="RenameChecks"/>): the registration's
+    /// check and Fix All's are the same question.
+    /// </summary>
+    private static Task<(List<(string File, TextChange Change)> Changes, KeptReason? Reason, string? Where)> GetCheckedChangesAsync(
+        Solution solution,
+        Document document,
+        Diagnostic diagnostic,
+        ConcurrentDictionary<ISymbol, bool> keptTypes,
+        CancellationToken cancellationToken)
+    {
+        diagnostic.Properties.TryGetValue(CamelCaseNamingAnalyzer.NewNameKey, out var newName);
+        var key = $"{nameof(CamelCaseRenamer)}|{document.Id.Id}|{diagnostic.Id}|{diagnostic.Location.SourceSpan}|{newName}";
+        return RenameChecks.GetAsync(solution, key, ct => GetItemChangesAsync(solution, document, diagnostic, keptTypes, ct), cancellationToken);
     }
 
     /// <summary>
