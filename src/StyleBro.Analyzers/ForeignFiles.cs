@@ -24,6 +24,8 @@ internal static class ForeignFiles
 {
     private static readonly ConditionalWeakTable<SyntaxTree, StrongBox<bool>> Cache = new();
 
+    private static readonly ConditionalWeakTable<SyntaxNode, MethodDeclarationSyntax[]> PartialBodies = new();
+
     // The last tree asked on this thread: node actions ask once per node, mostly for the same tree in a row.
     [ThreadStatic]
     private static SyntaxTree? lastTree;
@@ -103,14 +105,8 @@ internal static class ForeignFiles
             }
 
             SemanticModel? model = null;
-            foreach (var node in TreeWalk.NodesOfKind(c.Tree.GetRoot(c.CancellationToken), SyntaxKind.MethodDeclaration))
+            foreach (var method in PartialBodies.GetValue(c.Tree.GetRoot(c.CancellationToken), GetPartialBodies))
             {
-                var method = (MethodDeclarationSyntax)node;
-                if ((method.Body is null && method.ExpressionBody is null) || !method.Modifiers.Any(SyntaxKind.PartialKeyword))
-                {
-                    continue;
-                }
-
                 // The driver gives analyzers a compilation whose semantic models are cached and shared (RS1030's concern).
 #pragma warning disable RS1030
                 model ??= compilation.GetSemanticModel(c.Tree);
@@ -132,6 +128,25 @@ internal static class ForeignFiles
                 }
             }
         });
+    }
+
+    /// <summary>
+    /// The partial methods with a body in the tree, read once for every node action of every analyzer (each one's tree
+    /// action used to walk the tree's methods itself; most trees have none).
+    /// </summary>
+    private static MethodDeclarationSyntax[] GetPartialBodies(SyntaxNode root)
+    {
+        List<MethodDeclarationSyntax>? found = null;
+        foreach (var node in TreeWalk.NodesOfKind(root, SyntaxKind.MethodDeclaration))
+        {
+            var method = (MethodDeclarationSyntax)node;
+            if ((method.Body is not null || method.ExpressionBody is not null) && method.Modifiers.Any(SyntaxKind.PartialKeyword))
+            {
+                (found ??= []).Add(method);
+            }
+        }
+
+        return found?.ToArray() ?? [];
     }
 
     /// <summary>

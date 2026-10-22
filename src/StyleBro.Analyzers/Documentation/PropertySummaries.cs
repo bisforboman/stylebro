@@ -81,6 +81,12 @@ internal static class PropertySummaries
     /// </remarks>
     public static Finding? GetFinding(PropertyDeclarationSyntax property, SourceText text, SemanticModel? model, bool styleSharp = false)
     {
+        // Without a documentation comment there's no summary (GetSummaryTextStart): nothing below is needed.
+        if (!property.GetLeadingTrivia().Any(t => t.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) || t.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia)))
+        {
+            return null;
+        }
+
         var getter = property.ExpressionBody is not null || property.AccessorList?.Accessors.Any(a => a.IsKind(SyntaxKind.GetAccessorDeclaration)) == true;
         var setter = property.AccessorList?.Accessors.FirstOrDefault(a => a.IsKind(SyntaxKind.SetAccessorDeclaration) || a.IsKind(SyntaxKind.InitAccessorDeclaration));
         var initOnly = setter is not null && setter.IsKind(SyntaxKind.InitAccessorDeclaration);
@@ -220,12 +226,12 @@ internal static class PropertySummaries
     /// <summary>Where the summary's text starts, or null when there's no summary or it starts with an element.</summary>
     private static int? GetSummaryTextStart(SyntaxNode member)
     {
+        // The first summary of a well-formed comment; the XML is checked once a summary is found.
         var summary = member.GetLeadingTrivia()
             .Select(t => t.GetStructure())
             .OfType<DocumentationCommentTriviaSyntax>()
-            .Where(d => !DocumentationComments.IsMalformed(d))
-            .SelectMany(d => d.Content.OfType<XmlElementSyntax>())
-            .FirstOrDefault(e => e.StartTag.Name.LocalName.ValueText == "summary");
+            .Select(d => d.Content.OfType<XmlElementSyntax>().FirstOrDefault(e => e.StartTag.Name.LocalName.ValueText == "summary") is { } found && !DocumentationComments.IsMalformed(d) ? found : null)
+            .FirstOrDefault(e => e is not null);
         if (summary is null)
         {
             return null;

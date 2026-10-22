@@ -14,21 +14,10 @@ namespace StyleBro.Analyzers.Naming;
 /// </summary>
 internal static class DisabledCode
 {
-    private static readonly ConditionalWeakTable<Compilation, List<string>> Texts = new();
+    private static readonly ConditionalWeakTable<Compilation, string> Texts = new();
 
     /// <summary>Whether <paramref name="name"/> is a word in disabled code anywhere in the compilation (for members and types other files can use).</summary>
-    public static bool Mentions(Compilation compilation, string name)
-    {
-        foreach (var text in Texts.GetValue(compilation, Collect))
-        {
-            if (IsWordIn(text, name))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
+    public static bool Mentions(Compilation compilation, string name) => IsWordIn(Texts.GetValue(compilation, Collect), name);
 
     /// <summary>Whether <paramref name="name"/> is a word in disabled code inside one of the symbol's declarations (a type's, a method's).</summary>
     public static bool Mentions(ISymbol owner, string name, System.Threading.CancellationToken cancellationToken)
@@ -73,8 +62,9 @@ internal static class DisabledCode
     private static bool IsIdentifierChar(char c) => char.IsLetterOrDigit(c) || c == '_';
 
     // The disabled code of every tree with directives, read once per compilation; names are looked up in it only for the
-    // few symbols that are about to be reported (a word set of Newtonsoft.Json's disabled code cost ~30 ms).
-    private static List<string> Collect(Compilation compilation)
+    // few symbols that are about to be reported (a word set of Newtonsoft.Json's disabled code cost ~30 ms). One string,
+    // the parts joined by line breaks (not identifier characters, so a word can't span two parts): one search per name.
+    private static string Collect(Compilation compilation)
     {
         var texts = new List<string>();
         foreach (var tree in compilation.SyntaxTrees)
@@ -94,6 +84,6 @@ internal static class DisabledCode
             }
         }
 
-        return texts;
+        return string.Join("\n", texts);
     }
 }

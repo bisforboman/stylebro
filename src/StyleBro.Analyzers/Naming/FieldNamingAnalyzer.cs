@@ -83,10 +83,12 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
         if (rename is ({ } rule, { } newName)
             && !PascalCaseNamingAnalyzer.HidesBaseMember(field)
             && PublicApi.CanRename(field, options)
-            && (field.DeclaredAccessibility == Accessibility.Private || !IsInDisabledCode(field, context))
             && !(rule == FieldRule.Prefix && FieldNames.IsPrefixRequiredByNamingRule(field.Name.Substring(0, 2), options))
             && FieldNames.CanRename(field, newName, style, cache.GetOrAdd(field.ContainingType, t => new Lazy<FieldNames.TypeFacts>(() => FieldNames.TypeFacts.For(t, context.CancellationToken))).Value, hungarian)
-            && NamingRules.AllowsRename(context.Compilation, options, location, field, newName, context.CancellationToken))
+            && NamingRules.AllowsRename(context.Compilation, options, location, field, newName, context.CancellationToken)
+
+            // Last: it searches the compilation's disabled code for the name.
+            && (field.DeclaredAccessibility == Accessibility.Private || !IsInDisabledCode(field, context)))
         {
             context.ReportDiagnostic(Diagnostic.Create(
                 rule switch

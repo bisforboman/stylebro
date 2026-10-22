@@ -50,7 +50,8 @@ internal static class DocumentationStyle
 
     private static IEnumerable<Finding> GetAllFindings(DocumentationCommentTriviaSyntax documentation, SourceText text)
     {
-        foreach (var node in documentation.DescendantNodes(n => !IsCode(n)))
+        // Crefs sit in start tags, '<c>' elements inside elements: nothing else (a cref's own syntax, names, text) is opened.
+        foreach (var node in documentation.DescendantNodes(n => n is DocumentationCommentTriviaSyntax or XmlElementStartTagSyntax or XmlEmptyElementSyntax || (n is XmlElementSyntax && !IsCode(n))))
         {
             if (node is XmlCrefAttributeSyntax cref && GetGenericCrefChanges(cref) is { } crefChanges)
             {
