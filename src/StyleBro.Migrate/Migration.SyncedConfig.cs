@@ -105,25 +105,6 @@ internal static partial class Migration
         return result.ToString().TrimEnd('\n') + "\n";
     }
 
-    /// <summary>A section's pattern for <paramref name="folder"/>'s .editorconfig, or null when it matches nothing there.</summary>
-    private static string? RebasePattern(string pattern, string folder)
-    {
-        pattern = pattern.TrimStart('/');
-        if (!pattern.Contains('/') || pattern.StartsWith("**/", StringComparison.Ordinal))
-        {
-            return pattern;
-        }
-
-        // '{src,tests}/**.cs': the folder's own alternative.
-        if (pattern.StartsWith('{') && pattern.IndexOf("}/", StringComparison.Ordinal) is var close and > 0)
-        {
-            var alternatives = pattern.Substring(1, close - 1).Split(',');
-            return alternatives.Contains(folder, StringComparer.Ordinal) ? pattern.Substring(close + 2) : null;
-        }
-
-        return pattern.StartsWith(folder + "/", StringComparison.Ordinal) ? pattern.Substring(folder.Length + 1) : null;
-    }
-
     /// <summary>
     /// The restored package whose file the root .editorconfig of <paramref name="root"/> is a copy of (the stylebro-migrate
     /// block aside), or null. Trial 44, dailydevops/arguments: NetEvolve.Defaults' build copies its template.editorconfig over
@@ -193,6 +174,25 @@ internal static partial class Migration
     /// <summary>The gap format and check name for a <see cref="PackageCopy"/> (<see cref="FormatCommand.Gap"/>).</summary>
     public static string PackageCopyGap(PackageConfig copy) =>
         FormatCommand.Gap("the build's settings", $"the root .editorconfig is a copy of {copy.Package}'s {copy.File}, which the build copies back over it, so the build doesn't read the settings format checked with");
+
+    /// <summary>A section's pattern for <paramref name="folder"/>'s .editorconfig, or null when it matches nothing there.</summary>
+    private static string? RebasePattern(string pattern, string folder)
+    {
+        pattern = pattern.TrimStart('/');
+        if (!pattern.Contains('/') || pattern.StartsWith("**/", StringComparison.Ordinal))
+        {
+            return pattern;
+        }
+
+        // '{src,tests}/**.cs': the folder's own alternative.
+        if (pattern.StartsWith('{') && pattern.IndexOf("}/", StringComparison.Ordinal) is var close and > 0)
+        {
+            var alternatives = pattern.Substring(1, close - 1).Split(',');
+            return alternatives.Contains(folder, StringComparer.Ordinal) ? pattern.Substring(close + 2) : null;
+        }
+
+        return pattern.StartsWith(folder + "/", StringComparison.Ordinal) ? pattern.Substring(folder.Length + 1) : null;
+    }
 
     /// <summary>The non-empty lines of an .editorconfig, trimmed: a copy compares equal whatever its blank lines and line endings.</summary>
     private static List<string> ConfigLines(string text) =>

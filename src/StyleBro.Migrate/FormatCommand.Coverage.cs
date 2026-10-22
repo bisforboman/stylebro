@@ -31,6 +31,9 @@ internal static partial class FormatCommand
     /// <summary>The start of <see cref="NotVerifiedLine"/>.</summary>
     public const string NotVerifiedMarker = "Not verified:";
 
+    /// <summary>How a gap line that is only a note ends (<see cref="Unverified"/>).</summary>
+    private const string NoteEnd = "the verdict doesn't count them)";
+
     /// <summary>A gap line: <paramref name="what"/> wasn't checked, <paramref name="why"/>.</summary>
     public static string Gap(string what, string why) => $"{NotCheckedPrefix} {what}: {why}";
 
@@ -51,9 +54,6 @@ internal static partial class FormatCommand
 
     /// <summary>The gaps that make the verdict "Not verified": all but the notes (<see cref="HeldBackGap"/>, <see cref="XunitGap"/>).</summary>
     public static List<string> Unverified(IEnumerable<string> gaps) => gaps.Where(g => !g.EndsWith(NoteEnd, StringComparison.Ordinal)).ToList();
-
-    /// <summary>How a gap line that is only a note ends (<see cref="Unverified"/>).</summary>
-    private const string NoteEnd = "the verdict doesn't count them)";
 
     /// <summary>Whether a run's line names a gap (<see cref="Gap"/>).</summary>
     public static bool IsGapLine(string line) => line.StartsWith(NotCheckedPrefix, StringComparison.Ordinal);
