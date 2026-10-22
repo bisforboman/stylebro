@@ -1,0 +1,25 @@
+{
+  "repo": "dailydevops/arguments",
+  "branch": "main",
+  "commit": "ad7ca9067d3935a59e2362e71c1f639cfd8333fa",
+  "csFiles": 77,
+  "tags": [
+    "multi-target",
+    "library",
+    "csharpier",
+    "sonar",
+    "generated-editorconfig",
+    "analyzer-project"
+  ],
+  "setups": "NetEvolve.Defaults 2.8.51: its build copies template.editorconfig/.gitignore/.gitattributes over the root files before every build; CSharpier, SonarAnalyzer, TUnit + Verify, net6.0-net10.0;netstandard2.0, in-solution analyzer project.",
+  "build": "ok with workaround",
+  "workaround": "-p:Verify_SponsorshipExemption=OpenSource -p:Verify_SponsorshipExemptionUntil=2027-06 (Verify's SC021 sponsor check fails the build); nuget.config <clear/>: add the trial feed with a StyleBro.* pattern",
+  "tests": "dotnet test --solution Arguments.slnx (MTP): 1,444 passed; untouched TWAE build fails on 2 IDE0059",
+  "usedIn": "trial 44",
+  "verified": {
+    "by": "trial 44 session",
+    "date": "2026-10-22",
+    "sdks": "10.0.113, 8.0.132 (no 9.0 runtime; DOTNET_ROLL_FORWARD=Major)"
+  },
+  "notes": "Other dailydevops repositories use the same package."
+}
