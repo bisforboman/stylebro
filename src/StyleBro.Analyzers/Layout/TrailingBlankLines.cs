@@ -129,16 +129,6 @@ internal static class TrailingBlankLines
     }
 
     /// <summary>
-    /// Whether the line below the comment's is blank (and isn't the empty line after the file's last line break): without
-    /// that, <see cref="GetCheckedBlankLines"/> finds no blank line. Checked first, as most comments have code below them.
-    /// </summary>
-    private static bool HasBlankLineBelow(SyntaxTrivia comment, SourceText text)
-    {
-        var number = text.Lines.GetLineFromPosition(comment.SpanStart).LineNumber + 1;
-        return number < text.Lines.Count && text.Lines[number].End < text.Length && IsBlank(text, text.Lines[number].Span);
-    }
-
-    /// <summary>
     /// The text after the last line with content, when it holds more than that line's line break: extra blank lines,
     /// or lines of spaces. A file that ends without a line break, or with exactly one, is fine (StyleCop's default).
     /// </summary>
@@ -157,6 +147,16 @@ internal static class TrailingBlankLines
     public static int GetEndOfContent(SourceText text)
     {
         return LastContentLine(text) is { } line ? line.Start + text.ToString(line.Span).TrimEnd().Length : 0;
+    }
+
+    /// <summary>
+    /// Whether the line below the comment's is blank (and isn't the empty line after the file's last line break): without
+    /// that, <see cref="GetCheckedBlankLines"/> finds no blank line. Checked first, as most comments have code below them.
+    /// </summary>
+    private static bool HasBlankLineBelow(SyntaxTrivia comment, SourceText text)
+    {
+        var number = text.Lines.GetLineFromPosition(comment.SpanStart).LineNumber + 1;
+        return number < text.Lines.Count && text.Lines[number].End < text.Length && IsBlank(text, text.Lines[number].Span);
     }
 
     private static TextLine? LastContentLine(SourceText text)
