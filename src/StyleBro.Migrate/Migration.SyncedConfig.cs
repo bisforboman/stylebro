@@ -17,6 +17,12 @@ namespace StyleBro.Migrate;
 internal static partial class Migration
 {
     /// <summary>
+    /// A build file that copies files: an MSBuild Copy task, or a copy command in an Exec. Meziantou.Analyzer's props name its
+    /// configuration/*.editorconfig files only as GlobalAnalyzerConfigFiles (Mapperly's real-world run, trial 45's PR): that isn't a copy.
+    /// </summary>
+    private static readonly Regex CopiesFiles = new(@"<Copy\b|\bcp\s|\bCopy-Item\b|\bcopy\s", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+    /// <summary>
     /// The redirection for <paramref name="root"/>, or null: its .editorconfig has the same text as an .editorconfig inside a
     /// git submodule, and every C# project lies in a top-level folder (one at the root would see only the root's file).
     /// </summary>
@@ -180,9 +186,10 @@ internal static partial class Migration
 
     /// <summary>
     /// Whether one of the package's build files (.props/.targets under build/, buildTransitive/, buildMultiTargeting/) names
-    /// <paramref name="file"/> (its file name, or its path for a file named just '.editorconfig'). Trial 45, dailydevops/guard:
-    /// the committed root file was an older version of NetEvolve.Defaults' template (the build rewrites it, nobody commits
-    /// that), so comparing the text missed it. Owner's decision 2026-10-22: the targets naming the file is enough.
+    /// <paramref name="file"/> (its file name, or its path for a file named just '.editorconfig') and copies files
+    /// (<see cref="CopiesFiles"/>). Trial 45, dailydevops/guard: the committed root file was an older version of
+    /// NetEvolve.Defaults' template (the build rewrites it, nobody commits that), so comparing the text missed it. Owner's
+    /// decision 2026-10-22: the targets naming the file is enough.
     /// </summary>
     private static bool BuildFilesName(string folder, IEnumerable<string> names, string file)
     {
@@ -191,7 +198,8 @@ internal static partial class Migration
         return names.Where(n => (n.StartsWith("build", StringComparison.OrdinalIgnoreCase) && n.Contains('/'))
                 && (n.EndsWith(".props", StringComparison.OrdinalIgnoreCase) || n.EndsWith(".targets", StringComparison.OrdinalIgnoreCase)))
             .Select(n => Path.Combine(folder, n))
-            .Any(n => File.Exists(n) && File.ReadAllText(n).Replace('\\', '/').Contains(needle, StringComparison.OrdinalIgnoreCase));
+            .Select(n => File.Exists(n) ? File.ReadAllText(n) : string.Empty)
+            .Any(text => text.Replace('\\', '/').Contains(needle, StringComparison.OrdinalIgnoreCase) && CopiesFiles.IsMatch(text));
     }
 
     /// <summary>A section's pattern for <paramref name="folder"/>'s .editorconfig, or null when it matches nothing there.</summary>
