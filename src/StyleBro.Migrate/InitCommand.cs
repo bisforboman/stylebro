@@ -1772,7 +1772,7 @@ internal static class InitCommand
         var byId = migrated ? [] : HiddenFromFormat(Migration.WithGlobalBulk(repository, ownSettings), styleSettings).Where(l => !detected.Concat(sonarLines).Any(d => KeyOf(d) == KeyOf(l))).ToList();
         if (byId.Count > 0)
         {
-            var source = HiddenFromFormat(ownSettings, styleSettings).Count > 0 ? prefix + ".editorconfig" : "a .globalconfig";
+            var source = HiddenFromFormat(ownSettings, styleSettings).Count > 0 ? prefix + ".editorconfig" : "A .globalconfig";
             Console.WriteLine($"{source} sets a bulk severity below warning: 'dotnet format' would skip {byId.Count} StyleBro rules the build reports. The block sets them by id, so both agree.");
         }
 

@@ -93,6 +93,7 @@ internal static class SnapshotFiles
             Merge(words.ApiListings, scanned.ApiListings);
             Merge(words.Xaml, scanned.Xaml);
             Merge(words.XamlMarkup, scanned.XamlMarkup);
+            words.Texts.AddRange(scanned.Texts);
         }
 
         return words;
@@ -305,8 +306,11 @@ internal static class SnapshotFiles
         }
     }
 
-    private static void AddSnapshot(Words words, string path, string text) =>
+    private static void AddSnapshot(Words words, string path, string text)
+    {
+        words.Texts.Add((path, text));
         Add(IsApiListing(text) ? words.ApiListings : words.Snapshots, path, text);
+    }
 
     private static void Add(Dictionary<string, string> words, string path, string text)
     {
@@ -339,5 +343,8 @@ internal static class SnapshotFiles
 
         /// <summary>Gets the XAML element and attribute names from the project's own namespaces (its types and properties).</summary>
         public Dictionary<string, string> XamlMarkup { get; } = new(StringComparer.Ordinal);
+
+        /// <summary>Gets the snapshot files' whole texts, for phrases (documentation text, <see cref="Documentation.QuotedDocumentation"/>).</summary>
+        public List<(string Path, string Text)> Texts { get; } = new();
     }
 }

@@ -211,3 +211,14 @@ radzenhq/radzen-blazor	rejected trial 42	1,499 .cs and 1,592 .razor files, too l
 AArnott/Xunit.SkippableFact	rejected trial 42	17 .cs files, too small
 eiriktsarpalis/PolyType	rejected trial 42	net11.0 projects (needs SDK 11)
 RehanSaeed/Serilog.Exceptions	rejected trial 42	checked as a StyleCop candidate: no StyleCop
+RicoSuter/NSwag	trial 43 (random, seed 43)	438 files, net462-net10.0, TWAE, EnforceCodeStyleInBuild + AnalysisLevel latest-Recommended, '.editorconfig' in .gitignore, a file two projects compile with '#if AspNetOwin' class headers; WiX installer left out (NSwag.NoInstaller.slnf); 53 tests fail untouched (network, npm, sample builds); seed 43 drew yarp (rejected trial 38), git-credential-manager (trial 38), N_m3u8DL-RE (trial 42), DnsServer
+TechnitiumSoftware/DnsServer	rejected trial 43	random pick (seed 43): no test project; its build needs the TechnitiumLibrary repository cloned next to it
+martincostello/xunit-logging	trial 43	StyleCop 1.3.149-beta (migrate), C# 14 extension block, MartinCostello.BuildKit (EnforceCodeStyleInBuild), net472/net8.0/net10.0; global.json 10.0.402 lowered
+Particular/NServiceBus.Gateway	trial 43	EnforceCodeStyleInBuild + 52 IDE rules at warning/error, src/.globalconfig 'dotnet_analyzer_diagnostic.severity = none'; feedz.io removed, Particular.Analyzers 2.1.4 -> 1.8.0, Particular.Packaging removed, Particular.Approvals 2.0.1 packed locally
+Tyrrrz/Gress	trial 43	CSharpier.MsBuild (runs csharpier in the build), C# 14 extension blocks, TWAE, netstandard2.0-net10.0, 25 tests
+Particular/Particular.Approvals	rejected trial 43	5 .cs files (packed locally for NServiceBus.Gateway's tests)
+Particular/NServiceBus.Persistence.NonDurable	rejected trial 43	same setup as NServiceBus.Gateway (the larger one taken)
+nietras/Sep	rejected trial 43	net11.0 target (needs SDK 11)
+martincostello/openapi-extensions	rejected trial 43	global.json needs SDK 11.0.100-rc.2
+martincostello/adventofcode	rejected trial 43	global.json needs SDK 11.0.100-rc.2
+SimonCropp/Delta	rejected trial 43	global.json needs SDK 10.0.402 (latestFeature)

@@ -109,6 +109,12 @@ public enum KeptReason
     /// (an expected message: "`methodCall()` should not throw").
     /// </summary>
     NameInShouldlyMessage,
+
+    /// <summary>
+    /// The documentation text the fix would change is a string, or is in a snapshot file, in the solution: code reads XML docs
+    /// at run time (NSwag's and Swashbuckle's OpenAPI descriptions) and a test compares the text.
+    /// </summary>
+    DocumentationTextInString,
 }
 
 /// <summary>
@@ -162,6 +168,7 @@ public sealed class KeptFinding
         KeptReason.UsedThroughDynamic => "code uses the name through 'dynamic', which binds it by name at run time",
         KeptReason.NameInSnapshotFile => "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
         KeptReason.NameInShouldlyMessage => "the project uses Shouldly, whose failure messages quote the code, and a string in the file has the name (an expected message): renaming would fail that test",
+        KeptReason.DocumentationTextInString => "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
         KeptReason.UsedFromVisualBasic => "Visual Basic code uses the name, and StyleBro doesn't edit VB code",
         KeptReason.NameInXamlFile => "a XAML file uses the name (a binding path, x:Name, an event handler), which binds it by name at run time: renaming would break the binding silently",
         KeptReason.NameInXamlMarkup => "a XAML file names it as an element or attribute (a type or property of the project's own namespace): renaming would break the XAML build (MC3074, MC3072)",
