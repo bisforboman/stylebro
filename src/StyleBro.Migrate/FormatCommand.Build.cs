@@ -280,6 +280,53 @@ internal static partial class FormatCommand
             .ToList();
     }
 
+    /// <summary>
+    /// The ids of <paramref name="gapLines"/> when every one of them is the IDE fixes this SDK's 'dotnet format' holds back
+    /// (<see cref="HeldBackReason"/>), else null: any other gap is something the build doesn't check for format.
+    /// </summary>
+    public static List<string>? HeldBackGapIds(IReadOnlyList<string> gapLines)
+    {
+        var ids = new List<string>();
+        foreach (var line in gapLines.Distinct(StringComparer.Ordinal))
+        {
+            var suffix = $": {HeldBackReason}";
+            if (!line.StartsWith(NotCheckedPrefix, StringComparison.Ordinal) || !line.EndsWith(suffix, StringComparison.Ordinal))
+            {
+                return null;
+            }
+
+            ids.AddRange(line.Substring(NotCheckedPrefix.Length, line.Length - NotCheckedPrefix.Length - suffix.Length).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+        }
+
+        return ids.Count > 0 ? ids.Distinct(StringComparer.OrdinalIgnoreCase).ToList() : null;
+    }
+
+    /// <summary>
+    /// Whether a build of <paramref name="workspacePath"/> reports <paramref name="ids"/> (IDE rules) everywhere: every project it
+    /// builds sets EnforceCodeStyleInBuild, and every C# file under <paramref name="root"/> has each id at warning or error.
+    /// </summary>
+    public static bool BuildEnforces(string root, string workspacePath, IReadOnlyList<string> ids)
+    {
+        try
+        {
+            var projects = ReadProjects(workspacePath).Values.Select(p => p.FullPath).ToList();
+            var notBuilt = NotBuiltFolders(workspacePath, projects, root).Select(f => Path.GetFullPath(Path.Combine(root, f))).ToList();
+            var built = projects.Where(p => !notBuilt.Any(f => p.StartsWith(f, StringComparison.OrdinalIgnoreCase))).ToList();
+            if (built.Count == 0 || !built.All(p => Capture(Path.GetDirectoryName(p)!, "msbuild", p, "-getProperty:EnforceCodeStyleInBuild", "-nologo").Trim().Equals("true", StringComparison.OrdinalIgnoreCase)))
+            {
+                return false;
+            }
+
+            var set = ConfigSet(root, ConfigTexts(root));
+            return StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+                .All(f => ids.All(id => Severity(set, Path.GetFullPath(f), id) is Microsoft.CodeAnalysis.ReportDiagnostic.Warn or Microsoft.CodeAnalysis.ReportDiagnostic.Error));
+        }
+        catch (Exception e) when (e is ToolException or IOException)
+        {
+            return false;
+        }
+    }
+
     /// <summary>Runs <paramref name="action"/> with <see cref="HookVariable"/> set to <paramref name="hook"/> (every MSBuild node inherits it).</summary>
     private static T WithHook<T>(string hook, Func<T> action)
     {

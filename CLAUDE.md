@@ -1886,6 +1886,37 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
   in the package cache restores anyway, a new one fails (NU1102). The mutation loop's `git checkout` reverted uncommitted
   source once more: commit before testing mutations (third time this has bitten).
 
+## Trial 42 (2026-10-22, not clean: owner "Not clean", tally 0)
+
+- Repos: nilaoda/N_m3u8DL-RE (random, seed 42: the list walked from nunit past ten used/rejected entries; net10.0 console app,
+  Shouldly tests), microsoft/sbom-tool (StyleCop 1.2, migrate, EnforceCodeStyleInBuild, TWAE, net8.0;net472), Tyrrrz/PolyShim
+  (CSharpier, TWAE, 23 frameworks net35-net10.0, C# 14 extension blocks), microsoft/kiota-dotnet (netstandard2.0-net10.0-browser,
+  net462, in-solution generator). Lens 1 (one-line members with attributes, else-if after jumps) was a spot repro: none of the
+  four had such members; trial 41's fixes held (one run, preview = format, a later plain `dotnet format` clean).
+- MSBuild's query mode (`-getProperty` without a target) evaluates every item's Condition, also inside a group whose own
+  Condition is false: PolyShim's `VersionGreaterThanOrEquals($(TargetFrameworkVersion), '4.5')` under a .NETFramework group
+  failed the outer evaluation (MSB4184) and init/format/preview stopped at the first query. `Capture` retries such a query
+  with `-target:InitializeSourceControlInformation` (empty in single- and multi-targeted targets; `WithEmptyTarget`).
+- File-based programs (owner: "Package skips them"): `dotnet run app.cs` imports the repository's Directory.Build.props, so
+  PolyShim's build-time `dotnet run` of GenerateSignatures.csx failed on 37 BRO findings (the init block's `[*.cs]` doesn't
+  cover `.csx`, the preset does). `dotnet format` 10.0.113 can't load such files. `_StyleBroLeaveFileBasedPrograms` removes
+  the package's Analyzer items where `FileBasedProgram` is true.
+- BRO1151 skips members of C# 14 extension blocks (`ContainingType.TypeKind` 14, unnamed in Roslyn 4.8): the compiler reports
+  CS8620 for params elements passed one by one there (Task.WhenEach polyfill: 6 TWAE errors). Covered by Messy
+  (TextExtensions.cs `TaskCounts`); unit tests can't parse C# 14, so no mutation entry.
+- Preview: its runs are `RunPlain`, so the in-solution-generator configuration gap `Repeat` adds was missing; the preview now
+  adds `FormatCommand.GeneratorGaps` after each run (`RememberGeneratorBuilds`).
+- check --build (owner: "Build covers it"): when the only gaps are held-back IDE fixes (`HeldBackReason`) and the builds are
+  clean, `BuildEnforces` (every built project's EnforceCodeStyleInBuild true, every C# file's severity warning/error) turns
+  the verdict into "Clean." (exit 0). sbom-tool now exits 0; kiota (no EnforceCodeStyleInBuild) keeps exit 3.
+- Kept as designed: PolyShim's netstandard1.x-only code doesn't load in `dotnet format` (named as Not checked); check --build
+  reports its BRO1303 `HashSizeValue` there.
+- Environment: SDK 10.0.113 + 8.0.132 and pwsh were there (`ln -s ~/.dotnet/tools/bro /usr/local/bin/bro`). kiota: global.json
+  10.0.401 -> 10.0.100, Microsoft.CodeAnalysis 5.9 -> 4.14 (CS9057), net472 tests need mono. PolyShim's tests are net6.0
+  (`DOTNET_ROLL_FORWARD=Major`). GOTCHA: a clone left in `.trials/` with `*.verified.txt` files (OpenAPI.NET) made
+  verify-format fail (Messy renames kept: SnapshotFiles scans the git root on disk, `.trials/` included); delete unused clones.
+  Two background jobs on one worktree collided after a worker restart: check `ps` before rerunning.
+
 ## xUnit fixes in format (backlog 073/074, 2026-10-18)
 
 - Owner's choices (docs/decisions/2026-10-18-which-xunit-fixes-bro-format-applies.md): `bro format` adds an allowlist of

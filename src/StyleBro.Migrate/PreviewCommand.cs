@@ -332,6 +332,8 @@ internal static class PreviewCommand
                     return Fail(tail, 1, "'dotnet format' wrote no report.");
                 }
 
+                gaps.AddRange(FormatCommand.GeneratorGaps(formatRoot).Except(gaps, StringComparer.Ordinal).ToList());
+
                 var next = Tree(copy);
                 List<string> Between(string from, string to) => from == to ? [] : GitChecked(copy, "diff", "--name-only", from, to).Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(f => f.Trim()).ToList();
 

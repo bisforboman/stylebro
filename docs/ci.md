@@ -65,7 +65,10 @@ saw, `#if !DEBUG` code for example. Any other error fails only when it is new: t
 (the working tree is never touched) don't have it, compared by file, rule and message (a fix may move the line). Errors
 the untouched code has too are counted but don't fail it, and without git every error does. A build that fails like the
 untouched code's (a missing workload at the restore, a compile error) checked only what built before the error: the
-check then ends "Not verified" (exit code 3), naming the projects a failed one kept from compiling (`Didn't compile: App`). Tests aren't run. It takes a
+check then ends "Not verified" (exit code 3), naming the projects a failed one kept from compiling (`Didn't compile: App`). Where
+the only part `format` couldn't check is IDE fixes it holds back on this .NET SDK (IDE0049), clean builds count as that
+check when every project sets `EnforceCodeStyleInBuild` and every file has the rule at warning or error: the check ends
+"Clean." (exit code 0). Tests aren't run. It takes a
 build per configuration, two after `bro format` changed files, so it's slow: run it in CI or before a release rather
 than after every edit.
 

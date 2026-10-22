@@ -23,6 +23,18 @@ public static class TextExtensions
     public static int Twice(int x) => x * 2;
 }
 
+// BRO1151 leaves an array passed to a static extension member's params parameter alone: the compiler reports CS8620 for the
+// elements passed one by one (trial 42, PolyShim's Task.WhenEach polyfill).
+public static class TaskCounts
+{
+    extension(Task)
+    {
+        public static int Count(params Task[] tasks) => tasks.Length;
+    }
+
+    public static int Both(Task a, Task b) => Task.Count([a, b]);
+}
+
 // A primary constructor parameter named 'field' (a private field named 'field' would be kept by BRO1303's string guard
 // here: the StyleBro projects this sample references contain the string "field").
 public class BackingStore(int field)
