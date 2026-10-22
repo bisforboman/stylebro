@@ -17,6 +17,12 @@ namespace StyleBro.Migrate;
 internal static partial class Migration
 {
     /// <summary>
+    /// A build file that copies files: an MSBuild Copy task, or a copy command in an Exec. Meziantou.Analyzer's props name its
+    /// configuration/*.editorconfig files only as GlobalAnalyzerConfigFiles (Mapperly's real-world run, trial 45's PR): that isn't a copy.
+    /// </summary>
+    private static readonly Regex CopiesFiles = new(@"<Copy\b|\bcp\s|\bCopy-Item\b|\bcopy\s", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+    /// <summary>
     /// The redirection for <paramref name="root"/>, or null: its .editorconfig has the same text as an .editorconfig inside a
     /// git submodule, and every C# project lies in a top-level folder (one at the root would see only the root's file).
     /// </summary>
@@ -151,10 +157,13 @@ internal static partial class Migration
                     continue;
                 }
 
-                foreach (var file in files.EnumerateArray().Select(f => f.GetString() ?? string.Empty).Where(f => f.EndsWith("editorconfig", StringComparison.OrdinalIgnoreCase)))
+                var names = files.EnumerateArray().Select(f => f.GetString() ?? string.Empty).ToList();
+                var folder = folders.Select(f => Path.Combine(f, libraryPath.GetString() ?? string.Empty)).FirstOrDefault(Directory.Exists);
+                foreach (var file in names.Where(f => f.EndsWith("editorconfig", StringComparison.OrdinalIgnoreCase)))
                 {
-                    var candidate = folders.Select(f => Path.Combine(f, libraryPath.GetString() ?? string.Empty, file)).FirstOrDefault(File.Exists);
-                    if (candidate is not null && ConfigLines(File.ReadAllText(candidate)).SequenceEqual(own, StringComparer.Ordinal))
+                    var candidate = folder is null ? null : Path.Combine(folder, file);
+                    if (candidate is not null && File.Exists(candidate)
+                        && (ConfigLines(File.ReadAllText(candidate)).SequenceEqual(own, StringComparer.Ordinal) || BuildFilesName(folder!, names, file)))
                     {
                         return new PackageConfig(library.Name.Replace('/', ' '), file);
                     }
@@ -174,6 +183,24 @@ internal static partial class Migration
     /// <summary>The gap format and check name for a <see cref="PackageCopy"/> (<see cref="FormatCommand.Gap"/>).</summary>
     public static string PackageCopyGap(PackageConfig copy) =>
         FormatCommand.Gap("the build's settings", $"the root .editorconfig is a copy of {copy.Package}'s {copy.File}, which the build copies back over it, so the build doesn't read the settings format checked with");
+
+    /// <summary>
+    /// Whether one of the package's build files (.props/.targets under build/, buildTransitive/, buildMultiTargeting/) names
+    /// <paramref name="file"/> (its file name, or its path for a file named just '.editorconfig') and copies files
+    /// (<see cref="CopiesFiles"/>). Trial 45, dailydevops/guard: the committed root file was an older version of
+    /// NetEvolve.Defaults' template (the build rewrites it, nobody commits that), so comparing the text missed it. Owner's
+    /// decision 2026-10-22: the targets naming the file is enough.
+    /// </summary>
+    private static bool BuildFilesName(string folder, IEnumerable<string> names, string file)
+    {
+        var name = Path.GetFileName(file);
+        var needle = name.Equals(".editorconfig", StringComparison.OrdinalIgnoreCase) ? file : name;
+        return names.Where(n => (n.StartsWith("build", StringComparison.OrdinalIgnoreCase) && n.Contains('/'))
+                && (n.EndsWith(".props", StringComparison.OrdinalIgnoreCase) || n.EndsWith(".targets", StringComparison.OrdinalIgnoreCase)))
+            .Select(n => Path.Combine(folder, n))
+            .Select(n => File.Exists(n) ? File.ReadAllText(n) : string.Empty)
+            .Any(text => text.Replace('\\', '/').Contains(needle, StringComparison.OrdinalIgnoreCase) && CopiesFiles.IsMatch(text));
+    }
 
     /// <summary>A section's pattern for <paramref name="folder"/>'s .editorconfig, or null when it matches nothing there.</summary>
     private static string? RebasePattern(string pattern, string folder)

@@ -2016,3 +2016,26 @@ branch, not committed to main). StyleCop parity is complete (every rule is Style
   bro). MessagePack: dnceng feed removed, global.json lowered; tests net9.0 with `DOTNET_ROLL_FORWARD=Major`. charls: build the
   .slnx by name (its .sln.DotSettings confuses a bare `dotnet build`). A worker restart killed a background pipeline: rerun what
   its log doesn't show as finished.
+
+## Trial 45 (2026-10-22, not clean: owner "Not clean", tally 0)
+
+- Repos: dailydevops/guard (NetEvolve.Defaults 2.0.0, CSharpier, Sonar, TUnit; lens 1), sebastienros/parlot (xunit.v3 4.0.2,
+  in-solution generator, net472-net10.0; lenses 2 and 4), martincostello/lambda-test-server (StyleCop 1.3.151-beta, migrate;
+  lens 3), microsoft/FASTER (random, seed 45: random.json has 27 entries, index 8 ScottPlot was too large, 1,079 files). parlot:
+  preview, format and check printed the same verdicts on a fresh clone and after a restore (format exit 3 for its generator
+  projects in Release, check exit 0: by design); lambda-test-server changed nothing; FASTER converged in one run (260 kept
+  findings baselined in cs/stylebro.baseline). TWAE builds and tests matched the untouched code everywhere.
+- guard (owner: "Targets name the file"): the committed root .editorconfig is an OLDER version of NetEvolve.Defaults'
+  template (the build rewrites it, Renovate bumps the package, nobody commits the result), so trial 44's exact-copy check
+  missed it: preview/format/check said Clean, the first TWAE build had 214 BRO findings. `Migration.PackageCopy` also counts
+  a package `*editorconfig` file whose name one of the package's build .props/.targets names and that file copies files
+  (`BuildFilesName`, `CopiesFiles`: a `<Copy` task or `cp`/`copy`/`Copy-Item`; Meziantou.Analyzer names its configs only as
+  `GlobalAnalyzerConfigFiles`, which the first version took for a copy: Mapperly's real-world check failed). The check needs restore output; preview and format run it after their restore.
+- `SetPreset` on `<Project></Project>` (one line) wrote `</PropertyGroup></Project>`: CSharpier's check (CSharpier.MSBuild
+  formats .props too) said Not clean right after a clean format. The closing tag now gets its own line.
+- Environment: SDK 10.0.113 + 8.0.132 and pwsh were there (`ln -s ~/.dotnet/tools/bro /usr/local/bin/bro`). guard, parlot and
+  lambda-test-server `<clear/>` their sources: the trial feed + a `StyleBro.*` mapping go into their nuget.configs. guard:
+  `-p:NuGetAudit=false`, CS9057/CS0618 not as errors for the untouched comparison (CS9057 stops compilation, so check --build
+  is honestly Not verified there), a net9.0 apphost MSB3030 untouched; its tests are TUnit executables (net8.0/net10.0).
+  lambda-test-server: global.json 10.0.402 lowered, outputs in artifacts/bin. FASTER: `-p:NuGetAudit=false`, net7.0 tests with
+  `DOTNET_ROLL_FORWARD=Major`. The stop hook flags trial clones' commits and dirty trees (third-party repos): never push them.
