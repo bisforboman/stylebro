@@ -222,7 +222,17 @@ internal static class TupleElementRenamer
         return any ? (solution, null, null) : (null, (KeptReason.NothingToRename, null), null);
     }
 
-    private static async Task<(Solution? Renamed, (KeptReason Reason, string? Where)? Reason)> TryRenameAsync(Solution solution, string oldName, string newName, ISet<string>? onlyIn, CancellationToken cancellationToken)
+    /// <summary>
+    /// <see cref="CheckRenameAsync"/> once per solution and rename (<see cref="RenameChecks"/>): the registration's check and
+    /// Fix All's first group ask the same question of the same solution.
+    /// </summary>
+    private static Task<(Solution? Renamed, (KeptReason Reason, string? Where)? Reason)> TryRenameAsync(Solution solution, string oldName, string newName, ISet<string>? onlyIn, CancellationToken cancellationToken)
+    {
+        var files = onlyIn is null ? "*" : string.Join("|", onlyIn.OrderBy(f => f, System.StringComparer.Ordinal));
+        return RenameChecks.GetAsync(solution, $"{nameof(TupleElementRenamer)}|{oldName}|{newName}|{files}", ct => CheckRenameAsync(solution, oldName, newName, onlyIn, ct), cancellationToken);
+    }
+
+    private static async Task<(Solution? Renamed, (KeptReason Reason, string? Where)? Reason)> CheckRenameAsync(Solution solution, string oldName, string newName, ISet<string>? onlyIn, CancellationToken cancellationToken)
     {
         var (renamed, visible, logKey) = await RenameOneAsync(solution, oldName, newName, onlyIn, cancellationToken).ConfigureAwait(false);
         if (logKey is { } where)

@@ -203,6 +203,45 @@ public class LinkedFileFixAllTests
         Assert.Equal(text, (await fixedSolution.GetDocument(ids[1])!.GetTextAsync()).ToString());
     }
 
+    // The fix-loop measurement (2026-10): Serilog's Log.cs got 'ref Serilog.Log.logger' in some 'dotnet format' runs and
+    // 'ref Log.logger' in others. A static field's qualifier was spelled with the field's type from the copy whose
+    // diagnostic started the rename, against another copy's semantic model, where that type isn't the one 'Log' binds to.
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    public async Task StaticFieldQualifier_IsTheSameWhicheverCopyIsFixed(int copy)
+    {
+        var path = Path.Combine(Path.GetTempPath(), "Log.cs");
+        var text = "namespace Serilog;\n\npublic static class Log\n{\n    static object _logger = new object();\n\n    public static object Logger => _logger;\n\n    public static void CloseAndFlush()\n    {\n        var logger = System.Threading.Interlocked.Exchange(ref _logger, new object());\n    }\n}\n";
+        var corlib = Microsoft.CodeAnalysis.MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
+        var solution = new Microsoft.CodeAnalysis.AdhocWorkspace().CurrentSolution;
+        var ids = new List<Microsoft.CodeAnalysis.DocumentId>();
+        foreach (var name in new[] { "net8", "net10" })
+        {
+            var project = Microsoft.CodeAnalysis.ProjectId.CreateNewId();
+            var document = Microsoft.CodeAnalysis.DocumentId.CreateNewId(project);
+            solution = solution
+                .AddProject(project, name, name, Microsoft.CodeAnalysis.LanguageNames.CSharp)
+                .WithProjectCompilationOptions(project, new Microsoft.CodeAnalysis.CSharp.CSharpCompilationOptions(Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary))
+                .AddMetadataReference(project, corlib)
+                .AddDocument(document, "Log.cs", SourceText.From(text), filePath: path);
+            ids.Add(document);
+        }
+
+        var analyzer = new StyleBro.Analyzers.Naming.FieldNamingAnalyzer();
+        var fixer = new StyleBro.CodeFixes.Naming.CamelCaseNamingCodeFixProvider();
+        var first = solution.GetDocument(ids[copy])!;
+        var diagnostic = (await GetDiagnosticsAsync(first, analyzer)).Single(d => d.Id == "BRO1303");
+        Microsoft.CodeAnalysis.CodeActions.CodeAction? action = null;
+        await fixer.RegisterCodeFixesAsync(new Microsoft.CodeAnalysis.CodeFixes.CodeFixContext(first, diagnostic, (a, _) => action ??= a, CancellationToken.None));
+        var operations = await action!.GetOperationsAsync(CancellationToken.None);
+        var fixedSolution = operations.OfType<Microsoft.CodeAnalysis.CodeActions.ApplyChangesOperation>().Single().ChangedSolution;
+
+        var expected = text.Replace("_logger", "logger", StringComparison.Ordinal).Replace("ref logger", "ref Log.logger", StringComparison.Ordinal);
+        Assert.Equal(expected, (await fixedSolution.GetDocument(ids[0])!.GetTextAsync()).ToString());
+        Assert.Equal(expected, (await fixedSolution.GetDocument(ids[1])!.GetTextAsync()).ToString());
+    }
+
     // The performance audit (2026-10): BRO1112's and BRO1409's fixes sort with BRO1001 on the document they have just
     // changed, a new solution each, and the names in code (cached per solution) were collected again for every fixed file:
     // Newtonsoft.Json's BRO1112 Fix All took 387 s instead of 15.5 s. One Fix All scans the solution once.
