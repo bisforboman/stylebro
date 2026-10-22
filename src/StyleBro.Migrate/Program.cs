@@ -120,6 +120,12 @@ internal static class Program
 
     public static int Main(string[] args)
     {
+        // --engine host loads the SDK's dotnet-format, built for the SDK's runtime: on an older one, run again on the newest.
+        if (FormatHost.RollForward(args) is { } rolled)
+        {
+            return rolled;
+        }
+
         // --json may come first ('bro --json check'): the short commands are expanded without it.
         var json = args.Contains(JsonReport.Option);
         if (Expand(args.Where(a => a != JsonReport.Option).ToArray()) is not { } expanded)

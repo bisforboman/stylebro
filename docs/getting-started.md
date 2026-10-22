@@ -257,7 +257,7 @@ packages it expects are in the package folder, and nothing it depends on changed
 `.props`/`.targets`, `Directory.Packages.props`, `nuget.config` and `global.json` files of the repository and the folders
 above it, your user `NuGet.Config`). `--restore` restores anyway (a package replaced under the same version, a changed
 package source), `--no-restore` never restores. `--timings` prints how long each phase took at the end (evaluating the
-projects, the restore, each check and fix run, CSharpier, the builds `--verify-no-changes` makes). A solution filter (`.slnf`) works like
+projects, the restore, each check and fix run, CSharpier, the builds `--verify-no-changes` makes). `--engine host` (experimental) runs the checks inside the `bro` process instead of one `dotnet format` per run: [The in-process engine](format-engine.md). A solution filter (`.slnf`) works like
 its solution, with only its projects. A solution with several filters of it next to it (Steeltoe's
 `Steeltoe.All.slnx` and its seven `.slnf` parts) counts as that solution; the command says how to name a filter instead.
 A folder with several solutions or projects needs one named (`bro format MySolution.slnx`): the command lists them instead of picking one.
