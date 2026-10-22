@@ -1460,7 +1460,7 @@ internal static class PreviewCommand
         var ignored = GitChecked(folder, "ls-files", "--others", "--ignored", "--exclude-standard", "--", ":(glob)**/.editorconfig")
             .Split('\n', StringSplitOptions.RemoveEmptyEntries)
             .Select(f => f.Trim())
-            .Where(f => !Regex.IsMatch(f, @"(^|/)(bin|obj)/"))
+            .Where(f => !Regex.IsMatch(f, "(^|/)(bin|obj)/"))
             .ToList();
         foreach (var chunk in ignored.Chunk(100))
         {
