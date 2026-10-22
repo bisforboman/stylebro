@@ -11,7 +11,7 @@ namespace StyleBro.Migrate;
 /// </summary>
 internal static partial class FormatCommand
 {
-    /// <summary>Picks what runs the checks: <see cref="HostEngine"/> or <see cref="DotnetFormatEngine"/> (the default).</summary>
+    /// <summary>Picks what runs the checks and fixes: <see cref="HostEngine"/> or <see cref="DotnetFormatEngine"/> (the default).</summary>
     public const string EngineOption = "--engine";
 
     /// <summary>The in-process host (experimental).</summary>
@@ -42,7 +42,7 @@ internal static partial class FormatCommand
         var value = at + 1 < args.Length ? args[at + 1] : null;
         if (value is not (HostEngine or DotnetFormatEngine))
         {
-            error = $"{EngineOption} takes '{HostEngine}' (experimental: the checks run in this process) or '{DotnetFormatEngine}' (the default).";
+            error = $"{EngineOption} takes '{HostEngine}' (experimental: checks and fixes run in this process) or '{DotnetFormatEngine}' (the default).";
             return null;
         }
 
