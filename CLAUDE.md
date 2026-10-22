@@ -2028,8 +2028,9 @@ branch, not committed to main). StyleCop parity is complete (every rule is Style
 - guard (owner: "Targets name the file"): the committed root .editorconfig is an OLDER version of NetEvolve.Defaults'
   template (the build rewrites it, Renovate bumps the package, nobody commits the result), so trial 44's exact-copy check
   missed it: preview/format/check said Clean, the first TWAE build had 214 BRO findings. `Migration.PackageCopy` also counts
-  a package `*editorconfig` file whose name one of the package's build .props/.targets names (`BuildFilesName`; the path for
-  a file named just `.editorconfig`). The check needs restore output; preview and format run it after their restore.
+  a package `*editorconfig` file whose name one of the package's build .props/.targets names and that file copies files
+  (`BuildFilesName`, `CopiesFiles`: a `<Copy` task or `cp`/`copy`/`Copy-Item`; Meziantou.Analyzer names its configs only as
+  `GlobalAnalyzerConfigFiles`, which the first version took for a copy: Mapperly's real-world check failed). The check needs restore output; preview and format run it after their restore.
 - `SetPreset` on `<Project></Project>` (one line) wrote `</PropertyGroup></Project>`: CSharpier's check (CSharpier.MSBuild
   formats .props too) said Not clean right after a clean format. The closing tag now gets its own line.
 - Environment: SDK 10.0.113 + 8.0.132 and pwsh were there (`ln -s ~/.dotnet/tools/bro /usr/local/bin/bro`). guard, parlot and

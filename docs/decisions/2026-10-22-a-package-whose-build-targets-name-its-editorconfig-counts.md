@@ -19,3 +19,7 @@ package's `*editorconfig` file) missed it: format and check said Clean, the firs
 ## Decision
 
 Targets name the file.
+
+Applied as: a build file that names the file AND copies files (an MSBuild `Copy` task, or `cp`/`copy`/`Copy-Item` in a
+command). The first version took any build file naming it, and Mapperly's real-world check failed: Meziantou.Analyzer's props
+name its `configuration/*.editorconfig` files only as opt-in `GlobalAnalyzerConfigFiles`, which copies nothing.
