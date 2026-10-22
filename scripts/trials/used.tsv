@@ -222,3 +222,11 @@ nietras/Sep	rejected trial 43	net11.0 target (needs SDK 11)
 martincostello/openapi-extensions	rejected trial 43	global.json needs SDK 11.0.100-rc.2
 martincostello/adventofcode	rejected trial 43	global.json needs SDK 11.0.100-rc.2
 SimonCropp/Delta	rejected trial 43	global.json needs SDK 10.0.402 (latestFeature)
+team-charls/charls-dotnet	trial 44	StyleCop 1.2 (migrate), root .globalconfig bulk severity error, AnalysisLevel latest-All, TWAE, net8.0;net9.0;net10.0, xunit.v3
+RicoSuter/NJsonSchema	trial 44	netstandard2.0;net462;net8.0, TWAE, XmlDocsTests read doc text at run time, Verify snapshots; 98 tests fail untouched (network, tsc)
+dailydevops/arguments	trial 44	NetEvolve.Defaults copies its template .editorconfig over the root one before every build; CSharpier, Sonar, TUnit; Verify sponsor check needs an exemption property
+MessagePack-CSharp/MessagePack-CSharp	trial 44 (random, seed 44)	693 files, StyleCop.Analyzers.Unstable 1.2.0.556 (migrate), netstandard2.0-net9.0;net472, in-solution generator; dnceng feed removed, global.json lowered; seed 44 drew FastEndpoints (pool: fails), then 20 used/rejected entries down to index 7
+adamralph/minver	rejected trial 44	79 files; .globalconfig bulk warning, but charls-dotnet has StyleCop and bulk error
+chtoucas/Calendrie	rejected trial 44	1,198 IDE0055 warnings in the untouched build (category-Style warning)
+NikaNats/NetCommerce	rejected trial 44	600 files, mostly a net10.0 app
+dailydevops/pulse	rejected trial 44	746 files, health-check tests need services (arguments has the same NetEvolve.Defaults setup)

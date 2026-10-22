@@ -5283,11 +5283,22 @@ internal static partial class FormatCommand
         }
 
         // A restore just now can bring xunit.analyzers 1.24+ along, which Diagnostics couldn't see before it.
-        if (passThrough.Contains(Analyzers.Baseline.BaselineSuppressor.XunitIds[0]) && XunitWithoutFixAll(root) is { } xunitVersion)
+        // Either way it is a note (XunitGap; trial 44: a fresh preview copy said Not verified, the restored checkout Clean).
+        if (ReferencesXunit(root) && XunitWithoutFixAll(root) is { } xunitVersion)
         {
-            log(XunitWithoutFixAllLine(xunitVersion));
-            gaps.Add(Gap("xunit.analyzers' rules", $"xunit.analyzers {xunitVersion}'s fixes have no Fix All, so 'dotnet format' can't apply or check them"));
-            passThrough.RemoveAll(Analyzers.Baseline.BaselineSuppressor.XunitIds.Contains);
+            if (passThrough.Contains(Analyzers.Baseline.BaselineSuppressor.XunitIds[0]))
+            {
+                log(XunitWithoutFixAllLine(xunitVersion));
+                passThrough.RemoveAll(Analyzers.Baseline.BaselineSuppressor.XunitIds.Contains);
+            }
+
+            gaps.Add(XunitGap(xunitVersion));
+        }
+
+        // A root .editorconfig the build puts back from a package (trial 44): the build reads other settings than this run.
+        if (Migration.PackageCopy(RepositoryRoot(root) ?? root) is { } packageCopy)
+        {
+            gaps.Add(Migration.PackageCopyGap(packageCopy));
         }
 
         // Without StyleBro's analyzers 'dotnet format' fixes whitespace and the built-in rules and says clean.

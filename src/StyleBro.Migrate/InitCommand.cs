@@ -271,6 +271,12 @@ internal static class InitCommand
                 Console.Write(target.HasModernize ? null : target.Modernize);
             }
 
+            // A root .editorconfig a package's build copies back (trial 44): written or already there, the build won't read it.
+            if (Migration.PackageCopy(root) is { } copied)
+            {
+                Console.WriteLine(Migration.PackageCopyLine(copied));
+            }
+
             PinPreset(root, write: false, pinnedStyle);
             AgentsFile.Update(root, write: false, agentsMd).ForEach(Console.WriteLine);
             return 0;
@@ -310,6 +316,12 @@ internal static class InitCommand
                 PreviewCommand.EditFile(target.Path, _ => text);
                 changed = true;
             }
+        }
+
+        // A root .editorconfig a package's build copies back (trial 44): written or already there, the build won't read it.
+        if (Migration.PackageCopy(root) is { } packageCopy)
+        {
+            Console.WriteLine(Migration.PackageCopyLine(packageCopy));
         }
 
         PinPreset(root, write: true, pinnedStyle);

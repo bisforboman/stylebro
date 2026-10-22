@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace StyleBro.Migrate;
 
@@ -103,6 +105,76 @@ internal static partial class Migration
         return result.ToString().TrimEnd('\n') + "\n";
     }
 
+    /// <summary>
+    /// The restored package whose file the root .editorconfig of <paramref name="root"/> is a copy of (the stylebro-migrate
+    /// block aside), or null. Trial 44, dailydevops/arguments: NetEvolve.Defaults' build copies its template.editorconfig over
+    /// the root file before every build, so init's block was gone after the first build, which then reported 610 findings
+    /// 'format' and 'check' didn't see. Its template .gitignore ignores nested .editorconfig files, so <see cref="Synced"/>'s
+    /// folder files aren't a way out. Owner's decision 2026-10-22: say so, and the verdict is Not verified.
+    /// </summary>
+    public static PackageConfig? PackageCopy(string root)
+    {
+        var path = Path.Combine(root, ".editorconfig");
+        if (!File.Exists(path))
+        {
+            return null;
+        }
+
+        var own = ConfigLines(Regex.Replace(File.ReadAllText(path), $"{BeginMarker}.*?{EndMarker}", string.Empty, RegexOptions.Singleline));
+        if (own.Count == 0)
+        {
+            return null;
+        }
+
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var assets in AssetsFiles(root))
+        {
+            var text = File.ReadAllText(assets);
+            if (!text.Contains("editorconfig", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            using var document = JsonDocument.Parse(text);
+            if (!document.RootElement.TryGetProperty("libraries", out var libraries) || !document.RootElement.TryGetProperty("packageFolders", out var packageFolders))
+            {
+                continue;
+            }
+
+            var folders = packageFolders.EnumerateObject().Select(f => f.Name).ToList();
+            foreach (var library in libraries.EnumerateObject())
+            {
+                if (!seen.Add(library.Name)
+                    || !library.Value.TryGetProperty("type", out var type) || type.GetString() != "package"
+                    || !library.Value.TryGetProperty("path", out var libraryPath) || !library.Value.TryGetProperty("files", out var files))
+                {
+                    continue;
+                }
+
+                foreach (var file in files.EnumerateArray().Select(f => f.GetString() ?? string.Empty).Where(f => f.EndsWith("editorconfig", StringComparison.OrdinalIgnoreCase)))
+                {
+                    var candidate = folders.Select(f => Path.Combine(f, libraryPath.GetString() ?? string.Empty, file)).FirstOrDefault(File.Exists);
+                    if (candidate is not null && ConfigLines(File.ReadAllText(candidate)).SequenceEqual(own, StringComparer.Ordinal))
+                    {
+                        return new PackageConfig(library.Name.Replace('/', ' '), file);
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>What init and migrate say after writing into a root .editorconfig that <see cref="PackageCopy"/> finds.</summary>
+    public static string PackageCopyLine(PackageConfig copy) =>
+        $"Note: the root .editorconfig is a copy of {copy.Package}'s {copy.File}, and that package's build copies it back over the file before "
+        + "every build: these settings are gone after the next build, which then reports what 'bro format' and 'bro check' don't. Turn "
+        + "the package's copying off (or remove the package), then run this again; until then format and check say Not verified.";
+
+    /// <summary>The gap format and check name for a <see cref="PackageCopy"/> (<see cref="FormatCommand.Gap"/>).</summary>
+    public static string PackageCopyGap(PackageConfig copy) =>
+        FormatCommand.Gap("the build's settings", $"the root .editorconfig is a copy of {copy.Package}'s {copy.File}, which the build copies back over it, so the build doesn't read the settings format checked with");
+
     /// <summary>A section's pattern for <paramref name="folder"/>'s .editorconfig, or null when it matches nothing there.</summary>
     private static string? RebasePattern(string pattern, string folder)
     {
@@ -121,6 +193,26 @@ internal static partial class Migration
 
         return pattern.StartsWith(folder + "/", StringComparison.Ordinal) ? pattern.Substring(folder.Length + 1) : null;
     }
+
+    /// <summary>The non-empty lines of an .editorconfig, trimmed: a copy compares equal whatever its blank lines and line endings.</summary>
+    private static List<string> ConfigLines(string text) =>
+        text.Replace("\r\n", "\n").Split('\n').Select(l => l.Trim()).Where(l => l.Length > 0).ToList();
+
+    /// <summary>The restore outputs (project.assets.json) below <paramref name="root"/>: each project's obj/, and artifacts/obj or obj/ at the root (UseArtifactsOutput, a shared BaseIntermediateOutputPath).</summary>
+    private static IEnumerable<string> AssetsFiles(string root)
+    {
+        var projects = StyleCopSetup.EnumerateFiles(root).Where(f => Path.GetExtension(f).Equals(".csproj", StringComparison.OrdinalIgnoreCase))
+            .Select(p => Path.Combine(Path.GetDirectoryName(p)!, "obj", "project.assets.json"));
+        var shared = new[] { Path.Combine(root, "artifacts", "obj"), Path.Combine(root, "obj") }.Where(Directory.Exists)
+            .SelectMany(d => Directory.EnumerateFiles(d, "project.assets.json", SearchOption.AllDirectories));
+        return projects.Concat(shared).Where(File.Exists).Distinct(StringComparer.Ordinal);
+    }
+
+    /// <summary>
+    /// A package file the root .editorconfig is a copy of (<see cref="PackageCopy"/>): <paramref name="Package"/> is its id and
+    /// version ('NetEvolve.Defaults 2.8.51'), <paramref name="File"/> its path inside the package.
+    /// </summary>
+    public sealed record PackageConfig(string Package, string File);
 
     /// <summary>
     /// The settings files to write instead of the root .editorconfig: <paramref name="Source"/> is the submodule's file the

@@ -1,0 +1,24 @@
+{
+  "repo": "team-charls/charls-dotnet",
+  "branch": "main",
+  "commit": "b91d5ed99d826af861b958becfe406ff8e27d68b",
+  "csFiles": 87,
+  "tags": [
+    "stylecop",
+    "multi-target",
+    "library",
+    "twae",
+    "globalconfig"
+  ],
+  "setups": "StyleCop.Analyzers 1.2.0-beta.556 in src/CharLS.Managed.csproj only, root .globalconfig 'dotnet_analyzer_diagnostic.severity = error', AnalysisLevel latest-All, EnforceCodeStyleInBuild, TWAE, net8.0;net9.0;net10.0, UseArtifactsOutput, xunit.v3 (xunit.analyzers 2.2.0).",
+  "build": "ok with workaround",
+  "workaround": "global.json 10.0.402 lowered to 10.0.100; nuget.config <clear/> + packageSourceMapping: add the trial feed with a StyleBro.* pattern; build CharLSDotNet.slnx (the .sln.DotSettings file confuses 'dotnet build' without a name)",
+  "tests": "dotnet test --solution CharLSDotNet.slnx (MTP): 1,146 passed",
+  "usedIn": "trial 44",
+  "verified": {
+    "by": "trial 44 session",
+    "date": "2026-10-22",
+    "sdks": "10.0.113, 8.0.132 (no 9.0 runtime; DOTNET_ROLL_FORWARD=Major)"
+  },
+  "notes": "StyleCop runs only in src/: migrate leaves test/, samples/, benchmark/ alone."
+}
