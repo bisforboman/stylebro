@@ -9,34 +9,41 @@
 # The repos left on Windows also keep the CRLF checkouts (git on the Windows runners converts line endings).
 # Formatter: 'csharpier' for a repository CSharpier formats: the init flow, then CSharpier, then both must be clean
 # (Invoke-RealWorld.ps1). Its CSharpier version is the one in the repository's tool manifest.
+# MaxFixSeconds: the fix-time budget, the 'dotnet format' runs together (until no changes). Over it, the job prints a
+# GitHub Actions warning and the report (job summary) says so; it doesn't fail yet. The values are PROVISIONAL: twice
+# the slower of the nightlies of 2026-10-21 and -22 on each repo's own runner (Newtonsoft's still include BRO1112's
+# per-file solution scan, the regression the 2026-10-22 performance audit found). Next step (owner, 2026-10-22): once
+# a few nightlies have run, set each limit to about 2x the observed median on the actual runners (Windows and Ubuntu
+# differ; never from a local or cloud-container run) and turn the warning into a failure (Invoke-RealWorld.ps1:
+# add it to $problems).
 @{
-    FFMpegCore    = @{ Url = 'https://github.com/rosenbjerg/FFMpegCore'; Commit = '1fd8c88c45bc683c0c2cd0fe7e9a2f74642e9646'; Solution = 'FFMpegCore.sln'; Tests = 'dotnet' }
-    Polly         = @{ Url = 'https://github.com/App-vNext/Polly'; Commit = '0275bc22a5a8defb77415313112454a558d0f43a'; Solution = 'Polly.slnx'; Tests = 'mtp' }
-    OpenTelemetry = @{ Url = 'https://github.com/open-telemetry/opentelemetry-dotnet'; Commit = 'ea1e3f36105ecfeac0595b7807ad73983bab1f75'; Solution = 'OpenTelemetry.slnx'; Tests = $null }
-    Newtonsoft    = @{ Url = 'https://github.com/JamesNK/Newtonsoft.Json'; Commit = '52fa3aef1f2cadcd3a3f874251eddc98d3efbbaa'; Solution = 'Src/Newtonsoft.Json.slnx'; Tests = 'dotnet'
+    FFMpegCore    = @{ MaxFixSeconds = 120; Url = 'https://github.com/rosenbjerg/FFMpegCore'; Commit = '1fd8c88c45bc683c0c2cd0fe7e9a2f74642e9646'; Solution = 'FFMpegCore.sln'; Tests = 'dotnet' }
+    Polly         = @{ MaxFixSeconds = 600; Url = 'https://github.com/App-vNext/Polly'; Commit = '0275bc22a5a8defb77415313112454a558d0f43a'; Solution = 'Polly.slnx'; Tests = 'mtp' }
+    OpenTelemetry = @{ MaxFixSeconds = 960; Url = 'https://github.com/open-telemetry/opentelemetry-dotnet'; Commit = 'ea1e3f36105ecfeac0595b7807ad73983bab1f75'; Solution = 'OpenTelemetry.slnx'; Tests = $null }
+    Newtonsoft    = @{ MaxFixSeconds = 2700; Url = 'https://github.com/JamesNK/Newtonsoft.Json'; Commit = '52fa3aef1f2cadcd3a3f874251eddc98d3efbbaa'; Solution = 'Src/Newtonsoft.Json.slnx'; Tests = 'dotnet'
         # BRO1001 sorts PrivateMembersClass's fields; the test serializes them by reflection (BindingFlags.NonPublic), with no
         # attribute that would show the order matters (docs/rules/BRO1001.md, Not reported).
         KnownFailures = @('Newtonsoft.Json.Tests.Serialization.CamelCasePropertyNamesContractResolverTests.MemberSearchFlags') }
-    Serilog       = @{ Url = 'https://github.com/serilog/serilog'; Commit = 'bebc7719004f76187ae72e64ce138ec2540f2070'; Solution = 'Serilog.sln'; Tests = 'dotnet' }
+    Serilog       = @{ MaxFixSeconds = 400; Url = 'https://github.com/serilog/serilog'; Commit = 'bebc7719004f76187ae72e64ce138ec2540f2070'; Solution = 'Serilog.sln'; Tests = 'dotnet' }
     # An application (a media server) that uses StyleCop.Analyzers.
-    Jellyfin      = @{ Url = 'https://github.com/jellyfin/jellyfin'; Os = 'ubuntu-26.04'; Commit = '305a96471509f11de4d3a93e1ea268d4fd2af76c'; Solution = 'Jellyfin.sln'; Tests = 'dotnet' }
-    FluentValidation = @{ Url = 'https://github.com/FluentValidation/FluentValidation'; Os = 'ubuntu-26.04'; Commit = 'fa3c160b17796ff67d6aa5ae6c4b05b471f1a791'; Solution = 'FluentValidation.sln'; Tests = 'dotnet' }
+    Jellyfin      = @{ MaxFixSeconds = 540; Url = 'https://github.com/jellyfin/jellyfin'; Os = 'ubuntu-26.04'; Commit = '305a96471509f11de4d3a93e1ea268d4fd2af76c'; Solution = 'Jellyfin.sln'; Tests = 'dotnet' }
+    FluentValidation = @{ MaxFixSeconds = 270; Url = 'https://github.com/FluentValidation/FluentValidation'; Os = 'ubuntu-26.04'; Commit = 'fa3c160b17796ff67d6aa5ae6c4b05b471f1a791'; Solution = 'FluentValidation.sln'; Tests = 'dotnet' }
     # Seven target frameworks (net462 to net9.0). Three tests fail on the untouched code too; only new failures count.
-    CsvHelper     = @{ Url = 'https://github.com/JoshClose/CsvHelper'; Commit = '33970e5183383bdac1fbce3b3fbcdf46b318ca52'; Solution = 'CsvHelper.sln'; Tests = 'dotnet' }
+    CsvHelper     = @{ MaxFixSeconds = 480; Url = 'https://github.com/JoshClose/CsvHelper'; Commit = '33970e5183383bdac1fbce3b3fbcdf46b318ca52'; Solution = 'CsvHelper.sln'; Tests = 'dotnet' }
     # An ASP.NET Core application: MVC controllers, Razor Pages, Blazor WebAssembly, minimal API endpoints, DI, EF Core.
-    eShopOnWeb    = @{ Url = 'https://github.com/dotnet-architecture/eShopOnWeb'; Os = 'ubuntu-26.04'; Commit = '4da8212117e87d808d4bbc7da6286fd2147ce606'; Solution = 'eShopOnWeb.sln'; Tests = 'dotnet' }
+    eShopOnWeb    = @{ MaxFixSeconds = 120; Url = 'https://github.com/dotnet-architecture/eShopOnWeb'; Os = 'ubuntu-26.04'; Commit = '4da8212117e87d808d4bbc7da6286fd2147ce606'; Solution = 'eShopOnWeb.sln'; Tests = 'dotnet' }
     # Generic interfaces and open generics resolved through DI.
-    MediatR       = @{ Url = 'https://github.com/jbogard/MediatR'; Commit = '916ef1b3d68ccdc96db8f914eaf1b32fc7db52c5'; Solution = 'MediatR.slnx'; Tests = 'dotnet' }
+    MediatR       = @{ MaxFixSeconds = 180; Url = 'https://github.com/jbogard/MediatR'; Commit = '916ef1b3d68ccdc96db8f914eaf1b32fc7db52c5'; Solution = 'MediatR.slnx'; Tests = 'dotnet' }
     # P/Invoke into libgit2 (native binaries come from a NuGet package), net472 + net8.0 with #if.
     # Its fetch, clone, push and remote-listing tests talk to remote git servers: they failed on CI after the fixes but
     # passed on the untouched code in the same job and locally, so they say nothing about the code. Left out.
-    LibGit2Sharp  = @{ Url = 'https://github.com/libgit2/libgit2sharp'; Commit = 'eaa698d078941fd5e3cc82b59b885cd35d8cc0f8'; Solution = 'LibGit2Sharp.sln'; Tests = 'dotnet'
+    LibGit2Sharp  = @{ MaxFixSeconds = 390; Url = 'https://github.com/libgit2/libgit2sharp'; Commit = 'eaa698d078941fd5e3cc82b59b885cd35d8cc0f8'; Solution = 'LibGit2Sharp.sln'; Tests = 'dotnet'
         TestFilter = 'FullyQualifiedName!~FetchFixture&FullyQualifiedName!~NetworkFixture&FullyQualifiedName!~CloneFixture&FullyQualifiedName!~PushFixture&FullyQualifiedName!~CanFetchFromRemoteByName' }
     # A Roslyn source generator on the newest C#.
-    Mapperly      = @{ Url = 'https://github.com/riok/mapperly'; Os = 'ubuntu-26.04'; Commit = 'f87d48b12a6010a224ca26ad112fb48c07cd6d5d'; Solution = 'Riok.Mapperly.slnx'; Tests = 'dotnet' }
+    Mapperly      = @{ MaxFixSeconds = 150; Url = 'https://github.com/riok/mapperly'; Os = 'ubuntu-26.04'; Commit = 'f87d48b12a6010a224ca26ad112fb48c07cd6d5d'; Solution = 'Riok.Mapperly.slnx'; Tests = 'dotnet' }
     # CSharpier repositories (Formatter): StyleBro's init flow and the repository's own CSharpier must settle. Mapperly again
     # (CSharpier 1.3.0), and Mediator, a source generator with snapshot tests (CSharpier 1.2.1).
-    MapperlyCSharpier = @{ Url = 'https://github.com/riok/mapperly'; Os = 'ubuntu-26.04'; Commit = 'f87d48b12a6010a224ca26ad112fb48c07cd6d5d'; Solution = 'Riok.Mapperly.slnx'; Tests = 'dotnet'; Formatter = 'csharpier' }
-    Mediator      = @{ Url = 'https://github.com/martinothamar/Mediator'; Os = 'ubuntu-26.04'; Commit = '8b87a0ed74747b7e4be907db220b930a50fbeb98'; Solution = 'Mediator.slnx'; Tests = 'dotnet'; Formatter = 'csharpier'
+    MapperlyCSharpier = @{ MaxFixSeconds = 420; Url = 'https://github.com/riok/mapperly'; Os = 'ubuntu-26.04'; Commit = 'f87d48b12a6010a224ca26ad112fb48c07cd6d5d'; Solution = 'Riok.Mapperly.slnx'; Tests = 'dotnet'; Formatter = 'csharpier' }
+    Mediator      = @{ MaxFixSeconds = 840; Url = 'https://github.com/martinothamar/Mediator'; Os = 'ubuntu-26.04'; Commit = '8b87a0ed74747b7e4be907db220b930a50fbeb98'; Solution = 'Mediator.slnx'; Tests = 'dotnet'; Formatter = 'csharpier'
         Env = @{ NBGV_GitEngine = 'Disabled' } }
 }

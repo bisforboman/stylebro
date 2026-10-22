@@ -42,6 +42,9 @@ of the analyzers on the same sources rather than reading the absolute numbers.
 
 Used for the performance audit (docs/proposals/performance-audit-2026-10.md); each file's header says how to run it.
 
+- `Test-Drift.ps1`: the nightly drift check (`.github/workflows/drift.yml`): main's analyzers against the release the
+  self-check downloads (`StyleBroSelfVersion`), compare mode with `--all-rules` on Newtonsoft.Json at the real-world pin,
+  the PR gate's thresholds. A failed nightly opens or updates the issue "Nightly drift check failed".
 - `Compare-Releases.ps1`: compare mode against released StyleBro.Analyzers versions and StyleCop.Analyzers from
   nuget.org, with and without `--all-rules`, repeated; `summarize-compare.py` turns its logs into tables.
 - `make-scaled.py`: copies of a file with its namespace block repeated N times, for the per-file scaling check.

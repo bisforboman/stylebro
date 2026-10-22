@@ -16,7 +16,8 @@
 # -TestCache: a JSON file with the tests that fail on the untouched code. Read when it exists (that build and test run is
 # skipped), written otherwise. Those results depend only on the pinned commit, the SDK and FailedTests.ps1, not on
 # StyleBro; CI keys the file on exactly those (realworld.yml).
-# Every phase prints its duration, and the report lists them.
+# Every phase prints its duration, and the report lists them. The fix phase (the 'dotnet format' runs until no changes)
+# is compared with the repo's MaxFixSeconds (repos.psd1): over it, a GitHub Actions warning (not a failure yet).
 param(
     [Parameter(Mandatory)][string]$Repo,
     [string]$Work = (Join-Path ([IO.Path]::GetTempPath()) 'stylebro-realworld'),
@@ -241,9 +242,12 @@ $before.Crashes | ForEach-Object { $problems.Add("analyzer crash: $_") }
 $runs = 0
 $converged = $false
 $state = (Get-Diff | Out-String)
+$fixWatch = [Diagnostics.Stopwatch]::new()
 while ($runs -lt 3) {
     $runs++
-    [void](Measure-Phase "dotnet format run $runs" { Invoke-Format })
+    $fixWatch.Start()
+    try { [void](Measure-Phase "dotnet format run $runs" { Invoke-Format }) }
+    finally { $fixWatch.Stop() }
     $next = (Get-Diff | Out-String)
     if ($next -eq $state) { $converged = $true; break }
     $state = $next
@@ -253,6 +257,20 @@ $allowed = if ($r.MaxRuns) { $r.MaxRuns } else { 2 }
 $report.Add("- files changed: $changed; runs until no changes: $(if ($converged) { $runs } else { "more than $runs" }) (allowed: $allowed)")
 if (-not $converged) { $problems.Add('the fixes did not converge in 3 runs') }
 elseif ($runs -gt $allowed) { $problems.Add("$runs runs until no changes, allowed $allowed (one that changes, one clean; MaxRuns in repos.psd1 for a documented exception)") }
+
+# Fix-time budget (the audit of 2026-10-22: a fix that re-scanned the solution per file went unnoticed, CI only timed the
+# analyzers). Warn only for now; the next step, once the nightlies have shown each repo's median, is to make it a problem.
+$fixSeconds = [int]$fixWatch.Elapsed.TotalSeconds
+if ($r.MaxFixSeconds) {
+    $report.Add("- fix time: $fixSeconds s in $runs runs (budget $($r.MaxFixSeconds) s, MaxFixSeconds)")
+    if ($fixSeconds -gt $r.MaxFixSeconds) {
+        $over = "the fixes took $fixSeconds s, over the budget of $($r.MaxFixSeconds) s (MaxFixSeconds in repos.psd1)"
+        $report.Add("- **OVER BUDGET** (warning only): $over")
+        if ($env:GITHUB_ACTIONS) { Write-Host "::warning title=Fix-time budget ($Repo)::$Repo`: $over" }
+        else { Write-Warning "$Repo`: $over" }
+    }
+}
+else { $report.Add("- fix time: $fixSeconds s in $runs runs (no budget set)") }
 
 $markers = @(Get-Diff | Select-String '^\+(<<<<<<<|>>>>>>>) ')
 if ($markers.Count) { $problems.Add("conflict markers written: $($markers.Count) lines") }
