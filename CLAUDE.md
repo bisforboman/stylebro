@@ -1227,6 +1227,11 @@ Decisions for all of this are in `docs/decisions.md`; rule details on the rule p
   both builds in one process (order alternates, GC before each), fastest run per analyzer, up to two more rounds
   before a slowdown counts; fails at total >10 % and 25 ms, one analyzer >50 % and 15 ms, a new analyzer >60 ms.
   `STYLEBRO_BENCH_ONLY=Name,...` times only those. CI job `performance` runs it on every PR; a REQUIRED check.
+  Nightly drift check (2026-10-22, owner, after the performance audit): `.github/workflows/drift.yml` (04:00 UTC +
+  `workflow_dispatch`) runs `scripts/benchmark/Test-Drift.ps1`: main against the `StyleBroSelfVersion` package the
+  self-check downloads, same thresholds; a failure opens or updates "Nightly drift check failed". Fix-time budget:
+  `MaxFixSeconds` per repo in scripts/realworld/repos.psd1 (the `dotnet format` runs together), warn only
+  (`::warning::` + job summary); provisional values, the owner sets ~2x the nightlies' median per runner, then it fails.
   Since 2026-10-09 CI compares with `--all-rules` (off-by-default rules measured too). The flag works (checked: 4,087
   -> 4,439 reports on Newtonsoft.Json); an earlier "totals match" was a misreading.
 - The benchmark builds and times `TreeWalk`'s arrays before the analyzers, as their own line (2026-10-09): the first

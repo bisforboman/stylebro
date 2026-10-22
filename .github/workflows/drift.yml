@@ -1,0 +1,45 @@
+name: Drift check
+
+# main's analyzers against the last released ones (StyleBroSelfVersion, the package the self-check downloads), in the
+# benchmark's compare mode with --all-rules and the PR gate's thresholds (scripts/benchmark/Test-Drift.ps1). CI's
+# `performance` job compares each pull request with its base only, so slowdowns under its 10 % threshold add up
+# unnoticed (the 2026-10-22 performance audit: +4-7 % since 0.7.0-alpha.1). Nightly, next to the real-world (02:00) and
+# mutation (03:00) runs; a failure opens or updates the issue "Nightly drift check failed".
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: drift-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  drift:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Compare main's analyzer speed with the last release
+        shell: pwsh
+        run: ./scripts/benchmark/Test-Drift.ps1 -Work '${{ runner.temp }}/drift'
+
+  nightly-issue:
+    needs: drift
+    if: ${{ failure() && github.event_name == 'schedule' }}
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      issues: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - run: bash .github/nightly-issue.sh "Nightly drift check failed"
+        env:
+          GH_TOKEN: ${{ github.token }}

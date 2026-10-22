@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# A failed nightly run (realworld.yml, mutation.yml): opens the issue titled $1, or comments on it while it is still
+# A failed nightly run (realworld.yml, mutation.yml, drift.yml): opens the issue titled $1, or comments on it while it is still
 # open (one issue per failure streak, no duplicates). The body lists the failed jobs and links the run.
 # Needs GH_TOKEN with issues: write and actions: read.
 set -euo pipefail
