@@ -12,4 +12,9 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
   </ItemGroup>
 
+  <!-- The fix-loop probe is its own project (FormatProbe/FormatProbe.csproj). -->
+  <ItemGroup>
+    <Compile Remove="FormatProbe/**" />
+  </ItemGroup>
+
 </Project>
