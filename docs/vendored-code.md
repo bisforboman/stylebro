@@ -39,6 +39,11 @@ the build: `bro format` still leaves files outside the repository alone (it does
 fix them by hand or in their own repository. In a submodule's own checkout, its own files are checked: the superproject's
 `.gitmodules` above it doesn't count for it.
 
+**File-based programs.** A script run with `dotnet run app.cs` (.NET 10) imports the repository's Directory.Build.props
+like any project, StyleBro's package reference included, but `dotnet format` can't load it, so `bro format` can't fix it.
+The package's build targets leave StyleBro's analyzers out where the SDK builds such a program (`FileBasedProgram`), so
+neither the script nor a build that runs it reports StyleBro findings there.
+
 **Files a T4 template writes.** A C# file that a `.tt` template writes (the project lists it with
 `<DependentUpon>Name.tt</DependentUpon>` or `<AutoGen>True</AutoGen>`) is generated code: the template writes it again.
 StyleBro doesn't report findings there (nor the built-in rules it turns on), and `bro format` leaves the

@@ -38,6 +38,19 @@ The optional fourth argument sets preprocessor symbols (`HAVE_ASYNC;NET8_0`). Mi
 the sources are compiled against the .NET runtime only, so code using other packages binds partly. Compare two builds
 of the analyzers on the same sources rather than reading the absolute numbers.
 
+## Audit scripts
+
+Used for the performance audit (docs/proposals/performance-audit-2026-10.md); each file's header says how to run it.
+
+- `Compare-Releases.ps1`: compare mode against released StyleBro.Analyzers versions and StyleCop.Analyzers from
+  nuget.org, with and without `--all-rules`, repeated; `summarize-compare.py` turns its logs into tables.
+- `make-scaled.py`: copies of a file with its namespace block repeated N times, for the per-file scaling check.
+- `time-format.py`: runs `dotnet format ... -v diag` and splits the time into load, first analysis, and per id the
+  analysis and the Fix All.
+- `speedscope-top.py`: the frames with the most time in a `dotnet-trace --format speedscope` file.
+- `Measure-Format.ps1`: `bro format`, `bro check`, `bro check --build` with `--timings` on a fresh clone, next to plain
+  `dotnet format` and `dotnet build`.
+
 ## Per file (IDE)
 
 Visual Studio analyzes the open document on every edit, in a new compilation: the syntax tree, syntax node and semantic

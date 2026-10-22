@@ -200,3 +200,14 @@ sta/websocket-sharp	rejected trial 41	random pick (seed 41): no tests (examples 
 AutoFixture/AutoFixture	rejected trial 41	1,036 files; its combined attribute lists are on their own lines (2 share a line, both parameters)
 SixLabors/ImageSharp.Drawing	rejected trial 41	499 files, same shared-infrastructure setup as PolygonClipper (smaller one taken)
 Blazored/Modal	rejected trial 41	18 files; Havit.Blazor covers the same lenses with more code
+nilaoda/N_m3u8DL-RE	trial 42 (random, seed 42)	net10.0 console app, LangVersion 13, xunit 2 + Shouldly, 965 tests (22 fail untouched: ffmpeg, timing); untouched TWAE build fails on nullable warnings; seed 42 drew nunit/nunit (rejected trial 35), then sqlite-net, shouldly, DiscordChatExporter, Verify, WireMock.Net, xunit, MudBlazor, yarp, git-credential-manager
+microsoft/sbom-tool	trial 42	StyleCop 1.2.0-beta.556 (migrate), AnalysisMode All, EnforceCodeStyleInBuild, TWAE, net8.0;net472
+Tyrrrz/PolyShim	trial 42	CSharpier.MsBuild, TWAE, 23 frameworks net35-net10.0 incl. netstandard1.x, C# 14 extension blocks, a file-based program (GenerateSignatures.csx) its build runs
+microsoft/kiota-dotnet	trial 42	netstandard2.0/2.1, net8.0/net10.0, net462/net472, net*-browser, in-solution generator (Roslyn pinned 5.9 -> 4.14 locally), global.json lowered; net472 tests need mono
+microsoft/vs-servicehub	rejected trial 42	internal VS packages (MicroBuild, Microsoft.VisualStudio.Utilities 18.12) not on nuget.org
+AArnott/Nerdbank.Cryptocurrencies	rejected trial 42	its Zcash projects need a Rust build (libnerdbank_zcash_rust.so)
+Dotnet-Boxed/Framework	rejected trial 42	untouched TWAE build fails on 58 IDE errors with SDK 10 (AnalysisMode All); net6.0/net7.0 only
+radzenhq/radzen-blazor	rejected trial 42	1,499 .cs and 1,592 .razor files, too large
+AArnott/Xunit.SkippableFact	rejected trial 42	17 .cs files, too small
+eiriktsarpalis/PolyType	rejected trial 42	net11.0 projects (needs SDK 11)
+RehanSaeed/Serilog.Exceptions	rejected trial 42	checked as a StyleCop candidate: no StyleCop

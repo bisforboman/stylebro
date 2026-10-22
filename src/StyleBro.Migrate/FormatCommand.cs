@@ -3980,6 +3980,18 @@ internal static partial class FormatCommand
             ? arguments.Take(1).Append("-restore:false").Concat(arguments.Skip(1))
             : arguments;
 
+    /// <summary>
+    /// A failed MSBuild query without a target (<paramref name="arguments"/>) again with one that does nothing, when its
+    /// <paramref name="output"/> is an error evaluating a Condition (MSB4184), else null (<see cref="Capture"/>):
+    /// InitializeSourceControlInformation is empty in the targets of single- and multi-targeted projects alike.
+    /// </summary>
+    public static string[]? WithEmptyTarget(IReadOnlyList<string> arguments, string output) =>
+        arguments.Count > 0 && arguments[0] == "msbuild"
+            && !arguments.Any(a => a.StartsWith("-target:", StringComparison.OrdinalIgnoreCase) || a.StartsWith("-t:", StringComparison.OrdinalIgnoreCase) || a.StartsWith("/t:", StringComparison.OrdinalIgnoreCase) || a.StartsWith("/target:", StringComparison.OrdinalIgnoreCase))
+            && output.Contains("error MSB4184", StringComparison.Ordinal)
+            ? [.. arguments, "-target:InitializeSourceControlInformation"]
+            : null;
+
     internal static string Capture(string directory, params string[] arguments)
     {
         var start = new ProcessStartInfo("dotnet") { WorkingDirectory = directory, RedirectStandardOutput = true, RedirectStandardError = true };
@@ -3997,6 +4009,15 @@ internal static partial class FormatCommand
         var errors = process.StandardError.ReadToEnd();
         reader.Join();
         process.WaitForExit();
+
+        // A query without a target evaluates the project as an editor sees it, every item's Condition included, also inside a
+        // group whose own Condition is false (trial 42, PolyShim: VersionGreaterThanOrEquals($(TargetFrameworkVersion), '4.5')
+        // under a .NETFramework-only group failed on the outer evaluation, MSB4184, so init and format stopped at the first
+        // query). A build's evaluation skips such items: the same query again with a target that does nothing.
+        if (process.ExitCode != 0 && WithEmptyTarget(arguments, output + errors) is { } retry)
+        {
+            return Capture(directory, retry);
+        }
 
         // A project MSBuild can't evaluate prints its error instead of JSON (GameDemo: "NuGet.Config is not valid XML"; it
         // was a JsonReaderException with a stack trace before).
@@ -4250,7 +4271,8 @@ internal static partial class FormatCommand
                 log(hidden is null ? line : line.Replace(" changed, clean.", " changed.", StringComparison.Ordinal));
             }
         };
-        var exit = verify ? Verify(args, root, runLog, runOnce) : Repeat(args, root, runLog, output, runOnce, once ? 1 : MaxRuns);
+        var gapLines = new List<string>();
+        var exit = verify ? Verify(args, root, line => { if (IsGapLine(line)) { gapLines.Add(line); } runLog(line); }, runOnce) : Repeat(args, root, runLog, output, runOnce, once ? 1 : MaxRuns);
 
         // --build builds every configuration, the generator projects' too.
         var workspaceForBuild = buildAll ? File.Exists(path) ? path : BaselineCommand.FindWorkspace(root) is { } found ? Path.Combine(root, found) : null : null;
@@ -4267,9 +4289,31 @@ internal static partial class FormatCommand
             exit = line.StartsWith(NotVerifiedMarker, StringComparison.Ordinal) ? WithGaps(exit, [line]) : exit is 0 or NotVerifiedExitCode ? NotCleanExitCode : exit;
         }
 
+        // The IDE fixes held back on this SDK are what the builds just checked, where they enforce them (trial 42, sbom-tool:
+        // EnforceCodeStyleInBuild and IDE0049 at warning, both builds clean, and still "Not verified"; owner's decision 2026-10-22).
+        // Since the held-back fixes are a note that leaves the verdict alone (owner, 2026-10-22), this only says the builds checked them.
+        if (buildAll && workspaceForBuild is not null && exit == 0 && buts.Count == 0 && gapLines.Count > 0
+            && HeldBackGapIds(gapLines) is { } heldBack && BuildEnforces(root, workspaceForBuild, heldBack))
+        {
+            log($"The builds above check {string.Join(", ", heldBack)}: every project enforces code style in the build (EnforceCodeStyleInBuild) and every file has {(heldBack.Count == 1 ? "it" : "them")} at warning or error.");
+        }
+
         JsonReport.Set("clean", exit == 0);
         return exit;
     }
+
+    /// <summary>Keeps the configurations an in-solution generator keeps from a format run on <paramref name="root"/> (<see cref="GeneratorGaps"/>).</summary>
+    internal static void RememberGeneratorBuilds(string root, List<(string Project, string Configuration)> builds) => UncheckedByFormat[Key(root)] = builds;
+
+    /// <summary>
+    /// The gap lines for the configurations an in-solution generator kept from the last run on <paramref name="root"/>
+    /// ('bro check' builds them, format doesn't). The preview adds them after each of its plain runs, as Repeat does (trial 42,
+    /// kiota-dotnet: the preview didn't name Microsoft.Kiota.Http.HttpClientLibrary in Release, format did).
+    /// </summary>
+    public static IEnumerable<string> GeneratorGaps(string root) =>
+        UncheckedByFormat.TryGetValue(Key(root), out var generatorBuilds)
+            ? generatorBuilds.Select(b => Gap($"{Path.GetFileNameWithoutExtension(b.Project)} in {b.Configuration}", "it takes an in-solution source generator, so only a build checks that configuration ('bro check' builds it)"))
+            : [];
 
     /// <summary>Whether 'dotnet format' leaves a file alone as generated code: its name ('.g.cs', '.designer.cs', ...) or an '&lt;auto-generated' header.</summary>
     private static bool IsGeneratedCode(string file) =>
@@ -4536,9 +4580,7 @@ internal static partial class FormatCommand
             var checkFindings = TakeCheckFindings(root);
 
             // The configurations an in-solution generator keeps from the runs: 'bro check' builds them, format doesn't (a gap).
-            gaps = Gaps(gaps.Concat(UncheckedByFormat.TryGetValue(Key(root), out var generatorBuilds)
-                ? generatorBuilds.Select(b => Gap($"{Path.GetFileNameWithoutExtension(b.Project)} in {b.Configuration}", "it takes an in-solution source generator, so only a build checks that configuration ('bro check' builds it)"))
-                : []));
+            gaps = Gaps(gaps.Concat(GeneratorGaps(root)));
 
             // Usings the run's fixes left unused ('Int32' -> 'int' keeps 'using System;') go in the same run, where IDE0005 is
             // enforced: otherwise they took a run of their own, and a third run said clean (trial 21).
@@ -5354,7 +5396,7 @@ internal static partial class FormatCommand
             }
             else
             {
-                UncheckedByFormat[checkedKey] = notChecked;
+                RememberGeneratorBuilds(root, notChecked);
                 GeneratorLines[checkedKey] = GeneratorConfigurationsLine(withGenerator.Select(k => Path.GetFileNameWithoutExtension(k)).ToList());
             }
         }
