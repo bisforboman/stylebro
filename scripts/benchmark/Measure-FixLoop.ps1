@@ -111,6 +111,8 @@ try {
             python (Join-Path $PSScriptRoot 'time-format.py') $log -- dotnet format analyzers $sln --diagnostics @ids --severity warn --no-restore -v diag | Out-Host
         }
         finally { Remove-Item Env:\DOTNET_STARTUP_HOOKS, Env:\FORMAT_PROBE_LOG -ErrorAction SilentlyContinue }
+        # The diff itself, to compare runs: the id order changes between processes, and FixOrderTests covers only its cases.
+        git -C $path diff > (Join-Path $Work "$Name-run$run.diff")
         $changed = @(git -C $path diff --name-only).Count
         $hash = (git -C $path diff | Out-String | ForEach-Object { [BitConverter]::ToString([Security.Cryptography.MD5]::HashData([Text.Encoding]::UTF8.GetBytes($_))) })
         "run $run`: $changed files changed, diff md5 $hash" | Tee-Object -Append (Join-Path $Work "$Name-runs.txt") | Out-Host
