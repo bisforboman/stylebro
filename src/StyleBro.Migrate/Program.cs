@@ -340,6 +340,11 @@ internal static class Program
                     {
                         Console.WriteLine(ignored);
                     }
+
+                    if (Path.GetFileName(path) == ".editorconfig" && Migration.PackageCopy(Path.GetDirectoryName(Path.GetFullPath(path))!) is { } packageCopy)
+                    {
+                        Console.WriteLine(Migration.PackageCopyLine(packageCopy));
+                    }
                 }
                 else
                 {

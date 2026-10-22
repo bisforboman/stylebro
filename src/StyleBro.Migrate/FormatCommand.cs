@@ -5278,6 +5278,12 @@ internal static partial class FormatCommand
             passThrough.RemoveAll(Analyzers.Baseline.BaselineSuppressor.XunitIds.Contains);
         }
 
+        // A root .editorconfig the build puts back from a package (trial 44): the build reads other settings than this run.
+        if (Migration.PackageCopy(RepositoryRoot(root) ?? root) is { } packageCopy)
+        {
+            gaps.Add(Migration.PackageCopyGap(packageCopy));
+        }
+
         // Without StyleBro's analyzers 'dotnet format' fixes whitespace and the built-in rules and says clean.
         var checkedProjects = projects.Values
             .Select(p => (p.FullPath, p.AssetsFile, Relative: Path.GetRelativePath(root, p.FullPath).Replace('\\', '/')))
