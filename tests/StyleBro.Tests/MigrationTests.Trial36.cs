@@ -10,11 +10,12 @@ public sealed partial class MigrationTests
     {
         // SharpZipLib: format held IDE0049 back (SDK 10.0.113 ignores the multi-target guard) and said "Not verified" with
         // exit code 3, but the preview of the same steps said "clean after 1 run" and exited with 0.
+        // (Since 2026-10-22 a held-back SDK rule is only a note; a project that didn't load still counts.)
         Write("App.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
         Write("C.cs", "class C { int b; int a; }\n");
         PreviewCommand.MakeRepository(root);
         var patch = Path.Combine(Directory.CreateTempSubdirectory("stylebro-preview-test-").FullName, "out.patch");
-        var gap = FormatCommand.Gap("IDE0049", "this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked");
+        var gap = FormatCommand.Gap("Tests (net8.0)", "'dotnet format' couldn't load it (references didn't load)");
         var runs = 0;
         int Format(string[] args, Action<string> log)
         {
@@ -47,6 +48,40 @@ public sealed partial class MigrationTests
         Assert.DoesNotContain("Not checked: Lib", output, StringComparison.Ordinal);
         Assert.Contains(FormatCommand.NotVerifiedLine(1), output, StringComparison.Ordinal);
         Assert.DoesNotContain("clean after", output, StringComparison.Ordinal);
+        DeleteFolder(Path.GetDirectoryName(patch)!);
+    }
+
+    [Fact]
+    public void Preview_WithOnlyAHeldBackSdkRule_ListsIt_AndIsClean()
+    {
+        // Owner 2026-10-22 ("Note it, don't fail"): the preview ends like format, the held-back IDE0049 listed, clean, exit 0.
+        Write("App.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
+        Write("C.cs", "class C { int b; int a; }\n");
+        PreviewCommand.MakeRepository(root);
+        var patch = Path.Combine(Directory.CreateTempSubdirectory("stylebro-preview-test-").FullName, "out.patch");
+        var heldBack = FormatCommand.HeldBackGap(["IDE0049"]);
+        int Format(string[] args, Action<string> log)
+        {
+            var report = Array.IndexOf(args, "--report");
+            if (report >= 0)
+            {
+                Directory.CreateDirectory(args[report + 1]);
+                var c = Path.Combine(args[0], "C.cs").Replace("\\", "\\\\");
+                File.WriteAllText(Path.Combine(args[report + 1], "format-report.json"), $$"""
+                    [ { "FilePath": "{{c}}", "FileChanges": [ { "LineNumber": 1, "CharNumber": 11, "DiagnosticId": "BRO1001" } ] } ]
+                    """);
+            }
+
+            log(heldBack);
+            File.WriteAllText(Path.Combine(args[0], "C.cs"), "class C { int a; int b; }\n");
+            return 0;
+        }
+
+        var output = Capture(() => Assert.Equal(0, PreviewCommand.Run("init", new[] { root, "--diff=" + patch }, Format)));
+
+        Assert.Contains("clean after 1 run", output, StringComparison.Ordinal);
+        Assert.Contains(heldBack, output, StringComparison.Ordinal);
+        Assert.DoesNotContain(FormatCommand.NotVerifiedMarker, output, StringComparison.Ordinal);
         DeleteFolder(Path.GetDirectoryName(patch)!);
     }
 

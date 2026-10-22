@@ -3542,9 +3542,9 @@ internal static partial class FormatCommand
         if (code == 0)
         {
             lines.ForEach(log);
-            if (gaps.Count > 0)
+            GapVerdict(gaps).ForEach(log);
+            if (Unverified(gaps).Count > 0)
             {
-                GapVerdict(gaps).ForEach(log);
                 return NotVerifiedExitCode;
             }
 
@@ -3740,7 +3740,7 @@ internal static partial class FormatCommand
             // Findings no fix changes and no fix keeps on purpose: the build still reports them (AngleSharp's IDE0049 in a
             // using alias, which the SDK's fix can't rewrite: "Clean" with three errors above it).
             var unfixed = lines.Where(l => IsFindingLine(l) && !IsKeptLine(l, keys) && !IsFormattingLine(l)).Select(l => l.Trim()).Distinct(StringComparer.Ordinal).Count();
-            KeptSummary(kept, root, clean: unfixed == 0 && copyFailures.Count == 0 && gaps.Count == 0).ForEach(log);
+            KeptSummary(kept, root, clean: unfixed == 0 && copyFailures.Count == 0 && Unverified(gaps).Count == 0).ForEach(log);
             if (BaselineOffLine(root, kept.Count) is { } off)
             {
                 log(off);
@@ -3761,9 +3761,9 @@ internal static partial class FormatCommand
                 return NotCleanExitCode;
             }
 
-            if (gaps.Count > 0)
+            if (Unverified(gaps) is { Count: > 0 } counted)
             {
-                log(NotVerifiedLine(gaps.Count));
+                log(NotVerifiedLine(counted.Count));
                 return NotVerifiedExitCode;
             }
 
@@ -4627,7 +4627,7 @@ internal static partial class FormatCommand
             var unfixed = changed.Count == 0 ? checkFindings.Where(l => AsKept(l, ReadKept(keptFile, root, root)) is null).ToList() : [];
 
             // Not "clean" when CSharpier put back what the fixes changed (trial 26: "Run 1: 0 files changed, clean." then "Not clean").
-            log($"Run {run}: {changed.Count} file{(changed.Count == 1 ? string.Empty : "s")} changed{(endingsOnly ? ", line endings or byte order marks only (no run needed after it), clean:" : changed.Count > 0 ? ":" : failures.Count > 0 ? ", but code fixes failed (below)." : putBack.Count > 0 ? ", but CSharpier put back what the fixes changed (below)." : unfixed.Count > 0 ? ", but its check found what no fix changes (below)." : gaps.Count > 0 ? ", but not everything was checked (below)." : ", clean.")}");
+            log($"Run {run}: {changed.Count} file{(changed.Count == 1 ? string.Empty : "s")} changed{(endingsOnly ? ", line endings or byte order marks only (no run needed after it), clean:" : changed.Count > 0 ? ":" : failures.Count > 0 ? ", but code fixes failed (below)." : putBack.Count > 0 ? ", but CSharpier put back what the fixes changed (below)." : unfixed.Count > 0 ? ", but its check found what no fix changes (below)." : Unverified(gaps).Count > 0 ? ", but not everything was checked (below)." : ", clean.")}");
             ListFiles(shown, changed, 10).ForEach(log);
             allChanged.UnionWith(changed);
             if (changed.Count == 0 || endingsOnly || maxRuns == 1)
@@ -4644,7 +4644,7 @@ internal static partial class FormatCommand
                 }
 
                 JsonReport.AddKept(keptFindings);
-                KeptSummary(keptFindings, shown, clean: settled && unfixed.Count == 0 && gaps.Count == 0).ForEach(log);
+                KeptSummary(keptFindings, shown, clean: settled && unfixed.Count == 0 && Unverified(gaps).Count == 0).ForEach(log);
                 if (baselined is not null)
                 {
                     log(baselined);
@@ -4679,9 +4679,9 @@ internal static partial class FormatCommand
                     return NotCleanExitCode;
                 }
 
-                if (gaps.Count > 0)
+                if (Unverified(gaps) is { Count: > 0 } counted)
                 {
-                    log(NotVerifiedLine(gaps.Count));
+                    log(NotVerifiedLine(counted.Count));
                 }
 
                 return WithGaps(0, gaps);
@@ -5375,7 +5375,7 @@ internal static partial class FormatCommand
         if (HeldBackIds(passThrough, guarded, () => FormatHonorsIdeSuppressions(log)) is { Count: > 0 } heldBack)
         {
             log(HeldBackLine(heldBack));
-            gaps.Add(Gap(string.Join(", ", heldBack), "this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked"));
+            gaps.Add(HeldBackGap(heldBack));
             passThrough.RemoveAll(heldBack.Contains);
         }
 

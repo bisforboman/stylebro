@@ -14,7 +14,8 @@ Two checks keep a repository clean. They overlap on purpose: the build catches w
 Exit codes of `bro check`: **0** clean (nothing to change; kept findings are listed
 with their reasons), **2** formatting would change a file (the output says which findings), **3** not verified: nothing
 to change in what it checked, but part of the build wasn't checked (a project that didn't load, a missing workload, ...;
-each is named, see [Not verified](kept-findings.md#not-verified)), anything else: `dotnet format` itself failed. A script or an AI agent can loop "run `bro format`, then check" and stop on 0; with
+each is named, see [Not verified](kept-findings.md#not-verified); IDE fixes held back on an older .NET SDK are listed
+but don't count), anything else: `dotnet format` itself failed. A script or an AI agent can loop "run `bro format`, then check" and stop on 0; with
 plain `dotnet format --verify-no-changes` such a loop never ends while kept findings exist.
 
 To catch problems before they're committed: [Pre-commit hook](pre-commit.md).

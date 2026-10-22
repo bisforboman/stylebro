@@ -82,8 +82,11 @@ it. Each part they couldn't check gets a `Not checked: <what>: <why>` line befor
 - the configurations of projects with an in-solution source generator, which only a build checks (`format` only:
   `--verify-no-changes` builds them);
 - files a pass leaves out (a CR alone in a string), and rules whose fixes can't run: xunit.analyzers 1.24 and later
-  (no Fix All), IDE fixes held back where this SDK's `dotnet format` ignores the multi-target guard, IDE0005 while
-  files the projects compile are missing.
+  (no Fix All), IDE0005 while files the projects compile are missing.
+
+IDE fixes held back where this SDK's `dotnet format` ignores the multi-target guard (see
+[Modernizing](modernizing.md)) are listed with a `Not checked:` line too, but only as a note: on their own they leave
+the verdict clean and the exit code 0. Each part listed above still makes it "Not verified".
 
 Skips the build also makes aren't gaps: git submodules, Visual Basic projects, generated files, files outside the
 repository, projects no solution configuration builds, whitespace where IDE0055 is off. `--json` lists the gaps as

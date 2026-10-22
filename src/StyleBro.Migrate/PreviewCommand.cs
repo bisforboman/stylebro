@@ -378,8 +378,10 @@ internal static class PreviewCommand
             var (attribution, changes) = Attribute(File.ReadAllText(reportFile), Path.GetRelativePath(Path.GetDirectoryName(temp)!, copy).Replace('\\', '/'), files.Keys, f => WhitespaceOnly(copy, configured, f));
             JsonReport.Set("filesPerRule", new JsonObject(attribution.OrderBy(a => a.Key, StringComparer.Ordinal).Select(a => KeyValuePair.Create(a.Key, (JsonNode?)new JsonArray(a.Value.Keys.Select(f => (JsonNode?)f).ToArray())))));
             JsonReport.Set("changesPerRule", new JsonObject(JsonReport.ChangesPerRule(File.ReadAllText(reportFile)).Select(p => KeyValuePair.Create(p.Key, (JsonNode?)p.Value))));
-            var notVerified = !changed[^1] && putBack.Count == 0 && gaps.Count > 0;
-            JsonReport.Set("clean", !changed[^1] && putBack.Count == 0 && gaps.Count == 0);
+
+            // A held-back SDK rule is listed, but doesn't make it "not verified" (FormatCommand.Unverified).
+            var notVerified = !changed[^1] && putBack.Count == 0 && FormatCommand.Unverified(gaps).Count > 0;
+            JsonReport.Set("clean", !changed[^1] && putBack.Count == 0 && FormatCommand.Unverified(gaps).Count == 0);
             Console.WriteLine(FormatSummary(files.Count, changes, attribution, changed, putBack.Count, notVerified));
             foreach (var line in SampleLines(Samples(attribution, 3), (file, line) => Hunk(GitChecked(copy, "diff", "--cached", "-U0", configured, "--", file), line, 12)))
             {
@@ -412,7 +414,7 @@ internal static class PreviewCommand
             }
 
             // As format: the parts no run checked, then "Not verified" (exit code 3) instead of clean.
-            if (notVerified)
+            if (!changed[^1] && putBack.Count == 0 && gaps.Count > 0)
             {
                 FormatCommand.ReportGaps(gaps);
                 FormatCommand.GapVerdict(gaps).ForEach(Console.WriteLine);
