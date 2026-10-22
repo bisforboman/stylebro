@@ -1995,7 +1995,7 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
 branch, not committed to main). StyleCop parity is complete (every rule is StyleBro, SDK, or dropped by design with a reason in
 `docs/skipped-rules.md`). Work in progress and decisions go through PRs and `docs/decisions/`.
 
-## Trial 44 (2026-10-22)
+## Trial 44 (2026-10-22, not clean: owner "Not clean", tally 0)
 
 - Repos: team-charls/charls-dotnet (StyleCop 1.2, migrate; root `.globalconfig` `dotnet_analyzer_diagnostic.severity = error`,
   AnalysisLevel latest-All, TWAE), RicoSuter/NJsonSchema (init; XmlDocsTests read doc text at run time, Verify snapshots,
