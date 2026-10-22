@@ -51,6 +51,13 @@ Used for the performance audit (docs/proposals/performance-audit-2026-10.md); ea
 - `time-format.py`: runs `dotnet format ... -v diag` and splits the time into load, first analysis, and per id the
   analysis and the Fix All.
 - `speedscope-top.py`: the frames with the most time in a `dotnet-trace --format speedscope` file.
+- `Measure-FixLoop.ps1` + `FormatProbe/`: dotnet format's fix loop per id (docs/proposals/fix-loop-costs-2026-10.md).
+  `FormatProbe` is a startup hook (`DOTNET_STARTUP_HOOKS`, Lib.Harmony) that logs each analysis and each Fix All with
+  its id, time and changed documents, which dotnet format's own log doesn't name; the script runs plain
+  `dotnet format analyzers` with every BRO id on a clean clone, repeated, and keeps each run's diff.
+  `summarize-fixloop.py` makes the per-id tables, `fixloop-rounds.py` estimates merged fix rounds from them and
+  FixOrderTests' id groups. To trace one id, attach `dotnet-trace collect -p` once the probe logs `phase fixing`: under
+  `dotnet-trace collect --` the workspace's BuildHost child waits for a tracer forever.
 - `Measure-Format.ps1`: `bro format`, `bro check`, `bro check --build` with `--timings` on a fresh clone, next to plain
   `dotnet format` and `dotnet build`.
 
