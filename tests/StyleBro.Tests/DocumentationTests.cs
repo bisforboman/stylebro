@@ -1100,6 +1100,70 @@ public class DocumentationTests
         """,
         "stylebro_summary_wording = stylesharp\n");
 
+    // Trial 43, NSwag: '#if AspNetOwin' / '#else' declared the class generic in one project and not in the other (a linked
+    // file); each run wrote the other cref. A header with '#if' branches isn't checked; a type that is conditional as a
+    // whole still is.
+    [Fact]
+    public Task ConstructorSummaries_SkipTypesWhoseHeaderHasIfBranches() => VerifyFixAsync(
+        """
+        namespace N
+        {
+        #if OWIN
+            /// <summary>Settings.</summary>
+            public class Settings<T>
+        #else
+            /// <summary>Settings.</summary>
+            public class Settings
+        #endif
+            {
+                /// <summary>Initializes a new instance of the <see cref="Settings{T}"/> class.</summary>
+                public Settings()
+                {
+                }
+            }
+
+        #if !OWIN
+            /// <summary>Other.</summary>
+            public class Other
+            {
+                /// {|BRO1606:<summary>|}Default constructor.</summary>
+                public Other()
+                {
+                }
+            }
+        #endif
+        }
+        """,
+        """
+        namespace N
+        {
+        #if OWIN
+            /// <summary>Settings.</summary>
+            public class Settings<T>
+        #else
+            /// <summary>Settings.</summary>
+            public class Settings
+        #endif
+            {
+                /// <summary>Initializes a new instance of the <see cref="Settings{T}"/> class.</summary>
+                public Settings()
+                {
+                }
+            }
+
+        #if !OWIN
+            /// <summary>Other.</summary>
+            public class Other
+            {
+                /// <summary>Initializes a new instance of the <see cref="Other"/> class.</summary>
+                public Other()
+                {
+                }
+            }
+        #endif
+        }
+        """);
+
     [Fact]
     public Task RightPropertySummaries_AreNotReported() => VerifyNoDiagnosticsAsync("""
         /// <summary>Words.</summary>
