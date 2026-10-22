@@ -2,8 +2,8 @@
 # The parity harness of docs/proposals/format-speed.md: runs 'bro check', 'bro format' and 'bro check' again with the
 # default engine ('dotnet format' processes) and with --engine host on two fresh clones of the same commit, and compares
 # what users see: the exit codes, the output (the clone's path written as <root>, the --timings block left out, finding
-# lines and "Checked" progress lines compared as sets within each block: both engines analyze concurrently, so their order
-# isn't stable between two runs of the same engine either), the working trees after 'format' (stylebro.baseline included)
+# lines and "Checked" progress lines compared as sorted sets: both engines analyze concurrently, so their order isn't
+# stable between two runs of the same engine either), the working trees after 'format' (stylebro.baseline included)
 # and the --json reports. Any difference fails. Prints both engines' times.
 #
 #   pwsh scripts/format-speed/Compare-Format.ps1 -Repository <clone at the commit to compare> [-Work <folder>] [-Bro <command>]
@@ -16,37 +16,39 @@ param(
     [string] $Work = (Join-Path ([IO.Path]::GetTempPath()) "stylebro-parity-$([Guid]::NewGuid().ToString('N').Substring(0, 8))"),
     [string] $Bro = "dotnet $(Join-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) 'src/StyleBro.Migrate/bin/Debug/net8.0/StyleBro.Migrate.dll')",
     [ValidateSet('check', 'all')] [string] $Only = 'all',
-    [string[]] $Option = @()
+    [string[]] $Option = @(),
+    # Compares the logs and trees an earlier run left in -Work again, without running anything.
+    [switch] $Reuse
 )
 $ErrorActionPreference = 'Stop'
 $Repository = (Resolve-Path $Repository).Path
+$Work = [IO.Path]::GetFullPath($Work)
 $name = Split-Path $Repository -Leaf
 New-Item -ItemType Directory -Force $Work | Out-Null
 $failures = [Collections.Generic.List[string]]::new()
 $times = [ordered]@{}
 
-# What the comparison reads of a command's output: <root> for the clone, no timings, sets where the order isn't stable.
+# What the comparison reads of a command's output: <root> for the clone, no timings; the finding lines and the "Checked"
+# progress lines as sorted sets after the rest (both engines analyze at once, and when a line arrives between other output
+# varies between two runs of the same engine), every other line in its order.
 function Normalize([string[]] $lines, [string] $root) {
-    $result = [Collections.Generic.List[string]]::new()
-    $block = [Collections.Generic.List[string]]::new()
+    $ordered = [Collections.Generic.List[string]]::new()
+    $unordered = [Collections.Generic.List[string]]::new()
     $timings = $false
-    function Flush { if ($block.Count -gt 0) { $block | Sort-Object | ForEach-Object { $result.Add($_) }; $block.Clear() } }
     foreach ($raw in $lines) {
         $line = $raw.Replace($root, '<root>').TrimEnd()
         if ($line.StartsWith('Timings (')) { $timings = $true; continue }
         if ($timings -and $line.StartsWith('  ')) { continue }
         $timings = $false
         if ($line -match '^\s*.+?\(\d+,\d+\): (?:error|warning) \w+:' -or $line -match '^Checked .+ \(run \d+ of \d+\)$') {
-            $block.Add(($line -replace ' \(run \d+ of \d+\)$', ''))
-            continue
+            $unordered.Add(($line -replace ' \(run \d+ of \d+\)$', ''))
         }
-
-        Flush
-        $result.Add($line)
+        else {
+            $ordered.Add($line)
+        }
     }
 
-    Flush
-    return $result
+    return @($ordered) + @('--- unordered ---') + @($unordered | Sort-Object -CaseSensitive)
 }
 
 function Run([string] $engine, [string] $clone, [string] $step, [string[]] $arguments) {
@@ -54,32 +56,42 @@ function Run([string] $engine, [string] $clone, [string] $step, [string[]] $argu
     $json = Join-Path $Work "$name-$engine-$step.json"
     $engineOption = if ($engine -eq 'host') { @('--engine', 'host') } else { @() }
     $command = "$Bro $($arguments -join ' ') $clone --timings $($engineOption -join ' ') $($Option -join ' ') --json"
+    if ($Reuse -and (Test-Path $log)) {
+        $code = if (Test-Path "$log.exit") { [int](Get-Content "$log.exit") } else { $null }
+        return [pscustomobject]@{ Code = $code; Log = $log; Json = $json }
+    }
+
     $watch = [Diagnostics.Stopwatch]::StartNew()
     # --json: the report on stdout, the text on stderr.
     & bash -c "$command > '$json' 2> '$log'"
     $code = $LASTEXITCODE
+    Set-Content "$log.exit" $code
     $times["$engine $step"] = '{0:0.0} s' -f $watch.Elapsed.TotalSeconds
     return [pscustomobject]@{ Code = $code; Log = $log; Json = $json }
+}
+
+# A --json report as text with sorted keys and without its timings, for comparing.
+function Canonical([string] $json) {
+    $json | python3 -c "import json, sys; r = json.load(sys.stdin); [r.pop(k, None) for k in ('timings', 'output')]; print(json.dumps(r, sort_keys=True, indent=1))"
 }
 
 function Compare-Step([string] $step, $old, $new, [string] $oldClone, [string] $newClone) {
     if ($old.Code -ne $new.Code) { $failures.Add("$step exit code: dotnet-format $($old.Code), host $($new.Code)") }
     $a = Normalize (Get-Content $old.Log) $oldClone
     $b = Normalize (Get-Content $new.Log) $newClone
-    $diff = Compare-Object $a $b -SyncWindow 0
+    $diff = Compare-Object $a $b -SyncWindow 0 -CaseSensitive
     if ($diff) {
         $failures.Add("$step output differs ($($old.Log) vs $($new.Log)):`n" + (($diff | Select-Object -First 20 | ForEach-Object { "  $($_.SideIndicator) $($_.InputObject)" }) -join "`n"))
     }
 
-    $ja = (Get-Content -Raw $old.Json).Replace($oldClone, '<root>')
-    $jb = (Get-Content -Raw $new.Json).Replace($newClone, '<root>')
-    if ($ja -and $jb) {
-        $sa = ($ja | ConvertFrom-Json -AsHashtable)
-        $sb = ($jb | ConvertFrom-Json -AsHashtable)
-        foreach ($drop in 'timings', 'output') { $sa.Remove($drop); $sb.Remove($drop) }
-        $ka = $sa | ConvertTo-Json -Depth 20
-        $kb = $sb | ConvertTo-Json -Depth 20
-        if ($ka -ne $kb) { $failures.Add("$step --json report differs ($($old.Json) vs $($new.Json))") }
+    if ((Test-Path $old.Json) -and (Test-Path $new.Json)) {
+        $ja = (Get-Content -Raw $old.Json) + ''
+        $jb = (Get-Content -Raw $new.Json) + ''
+        if ($ja.Trim() -and $jb.Trim()) {
+            $ca = (Canonical $ja.Replace($oldClone, '<root>')) -join "`n"
+            $cb = (Canonical $jb.Replace($newClone, '<root>')) -join "`n"
+            if ($ca -ne $cb) { $failures.Add("$step --json report differs ($($old.Json) vs $($new.Json))") }
+        }
     }
 }
 
@@ -94,8 +106,11 @@ function TreeState([string] $clone) {
 $clones = @{}
 foreach ($engine in 'dotnet-format', 'host') {
     $clone = Join-Path $Work "$name-$engine"
-    if (Test-Path $clone) { Remove-Item -Recurse -Force $clone }
-    git clone -q --no-hardlinks $Repository $clone
+    if (-not $Reuse) {
+        if (Test-Path $clone) { Remove-Item -Recurse -Force $clone }
+        git clone -q --no-hardlinks $Repository $clone
+    }
+
     $clones[$engine] = $clone
 }
 

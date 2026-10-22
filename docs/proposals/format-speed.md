@@ -1,7 +1,9 @@
 # Proposal: a faster `bro format`
 
 Status: **proposal, for the owner's review** (owner's decision 2026-10-17: "Yes, after this fix round": a design doc
-first, measured on the trial repositories; implementation later, in separate PRs). Nothing here is implemented.
+first, measured on the trial repositories; implementation later, in separate PRs). Phase 0 is implemented; phase 1 (the
+host for checks) is implemented behind `--engine host` (`src/StyleBro.FormatHost`, `src/StyleBro.Migrate/FormatHost.cs`,
+docs/format-engine.md), with the parity harness `scripts/format-speed/Compare-Format.ps1`.
 `format --verify-no-changes` and `--diff` (preview) share format's run plan, so everything below applies to them too.
 
 ## Summary
@@ -289,8 +291,10 @@ Roslyn in the tool is ruled out too: the SDK's code-style analyzers are built ag
   own context and crosses the boundary with plain types only (paths, texts, finding lines: the seam above), or the whole
   tool resolves Roslyn from the SDK at startup (a bigger change);
 - **the runtime**: the SDK's dotnet-format assemblies target the SDK's framework (net10.0 for 10.0.x); the tool is net8.0
-  with `RollForward=Major`, so it runs on the newest installed runtime, which is that SDK's own when it is installed (the
-  normal case). The host checks it before loading and falls back to the child processes (or says why) otherwise.
+  with `RollForward=Major`, which moves to a newer runtime only when .NET 8 is missing (found in phase 1: with .NET 8
+  installed the tool ran on it). With `--engine host` the tool runs itself again once on the newest installed runtime
+  (`DOTNET_ROLL_FORWARD=LatestMajor`), and the host checks the runtime before loading and falls back to the child
+  processes (saying why) otherwise.
 
 To verify before building: dotnet format's source (dotnet/sdk `src/BuiltInTools/dotnet-format`) for how it discovers
 fixers, builds its Fix All contexts and orders ids, and which of its pieces are public enough to reuse.

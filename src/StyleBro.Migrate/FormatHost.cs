@@ -18,8 +18,11 @@ namespace StyleBro.Migrate;
 /// </summary>
 internal sealed class FormatHost : IDisposable
 {
-    // Set in the command run again on the newest runtime (RollForward): it doesn't do it again.
+    // Set in the command run again on the newest runtime (RollForward), to DOTNET_ROLL_FORWARD's value before: it doesn't do
+    // it again, and puts that value back.
     private const string RolledVariable = "STYLEBRO_ROLLED_FORWARD";
+
+    private const string RollForwardVariable = "DOTNET_ROLL_FORWARD";
 
     private readonly MethodInfo run;
     private readonly MethodInfo close;
@@ -81,8 +84,16 @@ internal sealed class FormatHost : IDisposable
     /// </summary>
     public static int? RollForward(string[] args)
     {
+        // The command run again: the runtime is chosen, the 'dotnet' processes it starts get the variable as it was.
+        if (Environment.GetEnvironmentVariable(RolledVariable) is { } before)
+        {
+            Environment.SetEnvironmentVariable(RollForwardVariable, before.Length == 0 ? null : before);
+            Environment.SetEnvironmentVariable(RolledVariable, null);
+            return null;
+        }
+
         var at = Array.IndexOf(args, FormatCommand.EngineOption);
-        if (at < 0 || at + 1 >= args.Length || args[at + 1] != FormatCommand.HostEngine || Environment.GetEnvironmentVariable(RolledVariable) is not null
+        if (at < 0 || at + 1 >= args.Length || args[at + 1] != FormatCommand.HostEngine
             || NewestRuntime(Path.GetDirectoryName(typeof(object).Assembly.Location)) is not { } newest || newest <= Environment.Version.Major
             || Environment.ProcessPath is not { } process)
         {
@@ -96,8 +107,8 @@ internal sealed class FormatHost : IDisposable
         }
 
         args.ToList().ForEach(start.ArgumentList.Add);
-        start.Environment["DOTNET_ROLL_FORWARD"] = "LatestMajor";
-        start.Environment[RolledVariable] = "1";
+        start.Environment[RolledVariable] = Environment.GetEnvironmentVariable(RollForwardVariable) ?? string.Empty;
+        start.Environment[RollForwardVariable] = "LatestMajor";
         using var child = System.Diagnostics.Process.Start(start)!;
         child.WaitForExit();
         return child.ExitCode;

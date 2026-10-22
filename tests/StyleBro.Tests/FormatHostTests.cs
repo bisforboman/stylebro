@@ -163,6 +163,25 @@ public sealed class FormatHostTests : IDisposable
     }
 
     [Fact]
+    public void TheCommandRunAgain_PutsTheRollForwardVariableBack()
+    {
+        Environment.SetEnvironmentVariable("STYLEBRO_ROLLED_FORWARD", "Minor");
+        Environment.SetEnvironmentVariable("DOTNET_ROLL_FORWARD", "LatestMajor");
+        try
+        {
+            Assert.Null(FormatHost.RollForward(["format", ".", "--engine", "host"]));
+            Assert.Equal("Minor", Environment.GetEnvironmentVariable("DOTNET_ROLL_FORWARD"));
+            Assert.Null(Environment.GetEnvironmentVariable("STYLEBRO_ROLLED_FORWARD"));
+            Assert.Null(FormatHost.RollForward(["format", "."]));
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("STYLEBRO_ROLLED_FORWARD", null);
+            Environment.SetEnvironmentVariable("DOTNET_ROLL_FORWARD", null);
+        }
+    }
+
+    [Fact]
     public void TheSdkContext_RefusesTheToolsOwnAssemblies()
     {
         var root = this.NewFolder();
