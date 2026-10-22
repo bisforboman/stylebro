@@ -269,6 +269,7 @@ internal static class PreviewCommand
             JsonReport.Set("write", false);
 
             var package = AddPackage(File.Exists(target) ? Path.GetDirectoryName(target)! : target);
+            AddIgnoredSettings(copy);
             Commit(copy, "settings");
             var configured = Head(copy);
             if (command != "format" || package is not null)
@@ -1076,6 +1077,8 @@ internal static class PreviewCommand
             GitChecked(folder, ["add", "-f", "--", .. chunk]);
         }
 
+        AddIgnoredSettings(folder);
+
         // The format runs restore and build into bin/obj: not changes to show, also where no .gitignore says so. Nor the
         // packages folder, where a nuget.config puts it inside the repository.
         var packages = PackagesFolderInside(folder) is { } inside ? $"/{inside}/\n" : string.Empty;
@@ -1445,6 +1448,24 @@ internal static class PreviewCommand
     {
         GitChecked(copy, "add", "-A");
         return GitChecked(copy, "write-tree").Trim();
+    }
+
+    /// <summary>
+    /// Adds the .editorconfig files git ignores (bin/obj aside) to the copy's index: NSwag's .gitignore lists '.editorconfig',
+    /// so the settings init wrote there were missing from the patch (trial 43). Before the baseline commit (the files as they
+    /// were) and before the settings commit (the ones the settings step wrote); once added, 'git add -A' keeps them.
+    /// </summary>
+    public static void AddIgnoredSettings(string folder)
+    {
+        var ignored = GitChecked(folder, "ls-files", "--others", "--ignored", "--exclude-standard", "--", ":(glob)**/.editorconfig")
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries)
+            .Select(f => f.Trim())
+            .Where(f => !Regex.IsMatch(f, @"(^|/)(bin|obj)/"))
+            .ToList();
+        foreach (var chunk in ignored.Chunk(100))
+        {
+            GitChecked(folder, ["add", "-f", "--", .. chunk]);
+        }
     }
 
     private static void Commit(string folder, string message)

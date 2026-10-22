@@ -568,29 +568,71 @@ internal static partial class Migration
     /// </summary>
     public static Dictionary<string, string> WithGlobalConfig(string root, IReadOnlyDictionary<string, string> own)
     {
-        var merged = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        var path = Path.Combine(root, ".globalconfig");
-        if (File.Exists(path))
-        {
-            var lines = File.ReadAllLines(path).Select(l => l.Trim()).TakeWhile(l => !l.StartsWith('[')).ToList();
-            if (lines.Any(l => Regex.IsMatch(l, @"^is_global\s*=\s*true\b", RegexOptions.IgnoreCase)))
-            {
-                foreach (var line in lines)
-                {
-                    if (KeyOf(line) is { } key && !key.Equals("is_global", StringComparison.OrdinalIgnoreCase) && !key.Equals("global_level", StringComparison.OrdinalIgnoreCase))
-                    {
-                        merged[key] = line.Substring(line.IndexOf('=') + 1).Split('#', ';')[0].Trim();
-                    }
-                }
-            }
-        }
-
+        var merged = GlobalConfigSettings(Path.Combine(root, ".globalconfig"));
         foreach (var (key, value) in own)
         {
             merged[key] = value;
         }
 
         return merged;
+    }
+
+    /// <summary>The keys a global config at <paramref name="path"/> sets outside a section (none unless it says is_global = true).</summary>
+    public static Dictionary<string, string> GlobalConfigSettings(string path)
+    {
+        var settings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var lines = File.Exists(path) ? File.ReadAllLines(path).Select(l => l.Trim()).TakeWhile(l => !l.StartsWith('[')).ToList() : [];
+        if (lines.Any(l => Regex.IsMatch(l, @"^is_global\s*=\s*true\b", RegexOptions.IgnoreCase)))
+        {
+            foreach (var line in lines)
+            {
+                if (KeyOf(line) is { } key && !key.Equals("is_global", StringComparison.OrdinalIgnoreCase) && !key.Equals("global_level", StringComparison.OrdinalIgnoreCase))
+                {
+                    settings[key] = line.Substring(line.IndexOf('=') + 1).Split('#', ';')[0].Trim();
+                }
+            }
+        }
+
+        return settings;
+    }
+
+    /// <summary>
+    /// <paramref name="own"/> (.editorconfig settings for all C# files) over the bulk and category severities ('dotnet_analyzer
+    /// _diagnostic.severity', '...category-X.severity') of every .globalconfig in <paramref name="root"/> and below it (the SDK
+    /// gives a project every .globalconfig in the folders above its files), the lowest of each key. Trial 43: NServiceBus.Gateway's
+    /// src/.globalconfig said 'none'; 'dotnet format' then skipped StyleBro's rules while the build reported them (the preset's
+    /// own entries win there). An .editorconfig 'default' doesn't override a global one in 'dotnet format', so it doesn't here.
+    /// </summary>
+    public static Dictionary<string, string> WithGlobalBulk(string root, IReadOnlyDictionary<string, string> own)
+    {
+        var merged = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var file in StyleCopSetup.EnumerateFiles(root).Where(f => Path.GetFileName(f) == ".globalconfig"))
+        {
+            foreach (var (key, value) in GlobalConfigSettings(file).Where(p => p.Key.StartsWith("dotnet_analyzer_diagnostic.", StringComparison.OrdinalIgnoreCase)))
+            {
+                if (!merged.TryGetValue(key, out var other) || SeverityRank(value) < SeverityRank(other))
+                {
+                    merged[key] = value;
+                }
+            }
+        }
+
+        foreach (var (key, value) in own.Where(p => !p.Value.Trim().Equals("default", StringComparison.OrdinalIgnoreCase) || !merged.ContainsKey(p.Key)))
+        {
+            merged[key] = value;
+        }
+
+        return merged;
+
+        static int SeverityRank(string severity) => severity.Trim().ToLowerInvariant() switch
+        {
+            "none" => 0,
+            "silent" or "hidden" => 1,
+            "suggestion" or "info" => 2,
+            "warning" => 3,
+            "error" => 4,
+            _ => 5,
+        };
     }
 
     /// <summary>The keys the root .editorconfig sets for all C# files, outside the generated blocks (init/--write and --modernize).</summary>

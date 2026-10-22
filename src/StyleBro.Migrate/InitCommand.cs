@@ -293,6 +293,10 @@ internal static class InitCommand
             {
                 text = Migration.Apply(target.Begin == WhitespaceBegin ? RemoveWhitespaceBlock(text, legacyOnly: true) : text, target.Block, target.Begin, target.End);
                 Console.WriteLine(WroteLine(target.Name, target.Block, target.Begin == WhitespaceBegin));
+                if (IgnoredLine(target.Path, target.Name) is { } ignored)
+                {
+                    Console.WriteLine(ignored);
+                }
             }
 
             if (!target.HasModernize)
@@ -852,6 +856,22 @@ internal static class InitCommand
     /// <summary>The .editorconfig text without its folder block (and the blank line above it); <paramref name="legacyOnly"/>: only an old 'stylebro-whitespace' one.</summary>
     public static string RemoveWhitespaceBlock(string text, bool legacyOnly = false) =>
         Regex.Replace(text.Replace("\r\n", "\n"), $@"\n*# BEGIN stylebro-({(legacyOnly ? string.Empty : "folder|")}whitespace)\b.*?# END stylebro-\1[^\n]*\n?", "\n", RegexOptions.Singleline);
+
+    /// <summary>
+    /// What init and migrate say when git ignores a settings file they wrote, else null (also outside a git repository).
+    /// Trial 43: NSwag's .gitignore lists '.editorconfig', so the settings would never reach teammates or CI (owner's choice:
+    /// say so; the preview's patch includes the file, PreviewCommand.AddIgnoredSettings).
+    /// </summary>
+    public static string? IgnoredLine(string path, string name)
+    {
+        var (code, output) = PreviewCommand.Git(Path.GetDirectoryName(Path.GetFullPath(path))!, "check-ignore", "-v", "--", Path.GetFileName(path));
+        if (code != 0 || output.Split('\t')[0].Trim().Split(':', 3) is not [var source, var line, var pattern])
+        {
+            return null;
+        }
+
+        return $"Note: git ignores {name} ({source} line {line}: '{pattern}'): commit it with 'git add -f {name}', or remove that line, so teammates and CI get these settings.";
+    }
 
     /// <summary>
     /// What init says after writing a block (<paramref name="nested"/>: a folder block): it holds whitespace settings, rule
@@ -1689,8 +1709,8 @@ internal static class InitCommand
         var migrated = existing?.Contains(Migration.BeginMarker) == true && !existing.Contains("stylebro-migrate init");
         var ownSettings = Migration.OwnSettings(root);
 
-        // The root's .globalconfig counts like its .editorconfig for what the team set and enforces (not for the bulk severities
-        // 'dotnet format' would skip: it reads none from a global config anyway).
+        // The root's .globalconfig counts like its .editorconfig for what the team set and enforces (its bulk severities, and
+        // those of the .globalconfig files below, count for the rules 'dotnet format' would skip: Migration.WithGlobalBulk).
         var settings = folder.Length == 0 ? Migration.WithGlobalConfig(repository, ownSettings) : ownSettings;
         string Source(params string[] keys) => keys.Any(ownSettings.ContainsKey) ? prefix + ".editorconfig" : ".globalconfig";
         var plain = existing?.Replace("\r\n", "\n");
@@ -1748,10 +1768,12 @@ internal static class InitCommand
         }
 
         // A bulk 'silent' hides StyleBro from 'dotnet format' but not from the build: set by id, they agree (docs/decisions).
-        var byId = migrated ? [] : HiddenFromFormat(ownSettings, styleSettings).Where(l => !detected.Concat(sonarLines).Any(d => KeyOf(d) == KeyOf(l))).ToList();
+        // A .globalconfig's too (trial 43): 'dotnet format' reads its bulk severity, the build lets the preset's entries win.
+        var byId = migrated ? [] : HiddenFromFormat(Migration.WithGlobalBulk(repository, ownSettings), styleSettings).Where(l => !detected.Concat(sonarLines).Any(d => KeyOf(d) == KeyOf(l))).ToList();
         if (byId.Count > 0)
         {
-            Console.WriteLine($"{prefix}.editorconfig sets a bulk severity below warning: 'dotnet format' would skip {byId.Count} StyleBro rules the build reports. The block sets them by id, so both agree.");
+            var source = HiddenFromFormat(ownSettings, styleSettings).Count > 0 ? prefix + ".editorconfig" : "a .globalconfig";
+            Console.WriteLine($"{source} sets a bulk severity below warning: 'dotnet format' would skip {byId.Count} StyleBro rules the build reports. The block sets them by id, so both agree.");
         }
 
         // The same for a nested .editorconfig's bulk severity (trial 19: tests/.editorconfig with 'none'), in its own block.
