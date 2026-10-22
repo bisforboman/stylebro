@@ -124,7 +124,7 @@ Every field is always there (empty or `null` where it doesn't apply). Paths in t
 `AddsErrors`, `DisabledCode`, `NamespaceFromOutside`, `DerivedTypeInAnotherProject`,
 `UsedInProjectNotLoaded`, `NothingToRename`, `MembersReadByPosition`, `AddsDeconstruction`, `KeptWithOtherElement`,
 `UsedThroughDynamic`, `NameInSnapshotFile`, `UsedFromVisualBasic`, `NameInXamlFile`, `NameInXamlMarkup`,
-`HiddenByNewMember`, `NameIsLogKey`, `RegistrationField`, `NameInShouldlyMessage`
+`HiddenByNewMember`, `NameIsLogKey`, `RegistrationField`, `NameInShouldlyMessage`, `DocumentationTextInString`
 (what each means: `reasonText`).
 
 ## AGENTS.md

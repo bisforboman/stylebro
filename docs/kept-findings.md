@@ -22,7 +22,10 @@ and it's on purpose. The reasons, per finding:
 - another member would hide the new name, or the new name already means something else where the name is used;
 - a use is in generated code (a source generator, a Razor page, a designer file), which a tool writes again;
 - a related override or implementation is public API, or also implements a member that isn't renamed;
-- the rename would add compile errors (tuple element names), or the namespace is also defined outside the solution.
+- the rename would add compile errors (tuple element names), or the namespace is also defined outside the solution;
+- a documentation fix (BRO1603's period, BRO1604-BRO1607's standard words) would change text that is a string, or is in a
+  snapshot file, in the solution: code that reads XML docs at run time (NSwag's or Swashbuckle's OpenAPI descriptions) and
+  a test comparing the text. Texts of one word, and elements holding more than text (`<see cref="..."/>`), don't count.
 
 `bro format` lists them after its last run:
 

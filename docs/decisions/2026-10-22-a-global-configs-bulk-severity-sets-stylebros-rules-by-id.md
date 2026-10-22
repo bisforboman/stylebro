@@ -20,5 +20,5 @@ severity below warning?
 
 ## Decision
 
-Set by id. A `.globalconfig` the SDK gives a project (the nearest one above it) counts with its bulk and category severities
-under the .editorconfig files' own (an .editorconfig `default` doesn't override it, as in `dotnet format`).
+Set by id. Every `.globalconfig` in the repository counts (the SDK gives a project each one in the folders above its files),
+its bulk and category severities under the .editorconfig files' own (an .editorconfig `default` doesn't override it, as in `dotnet format`).
