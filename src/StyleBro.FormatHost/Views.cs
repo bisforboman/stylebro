@@ -73,33 +73,6 @@ public static class Views
         return view;
     }
 
-    /// <summary>
-    /// The projects <paramref name="selections"/> name whose instance for the named framework the workspace doesn't have
-    /// (it didn't load: Serilog's net462 on Linux, where its reference assemblies are missing).
-    /// </summary>
-    public static HashSet<string> Missing(Solution solution, IReadOnlyList<string> selections)
-    {
-        var missing = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var selection in selections)
-        {
-            var bar = selection.LastIndexOf('|');
-            if (bar < 0 || bar == selection.Length - 1)
-            {
-                continue;
-            }
-
-            var (path, framework) = (selection.Substring(0, bar), selection.Substring(bar + 1));
-            var instances = solution.Projects.Where(p => string.Equals(p.FilePath, path, StringComparison.OrdinalIgnoreCase)).ToList();
-            if (instances.Count > 0 && !(instances.Count == 1 && FrameworkOf(instances[0].Name) is null)
-                && !instances.Any(p => string.Equals(FrameworkOf(p.Name), framework, StringComparison.OrdinalIgnoreCase)))
-            {
-                missing.Add(path);
-            }
-        }
-
-        return missing;
-    }
-
     /// <summary>The framework of a project MSBuildWorkspace loaded once per framework ('Lib(net8.0)'), else null.</summary>
     public static string? FrameworkOf(string name) =>
         name.EndsWith(")", StringComparison.Ordinal) && name.LastIndexOf('(') is var open and > 0 ? name.Substring(open + 1, name.Length - open - 2) : null;
@@ -109,18 +82,27 @@ public static class Views
     /// otherwise those whose text names one of the view's projects, and those that name none of the workspace's (a project
     /// that didn't load at all), which every view has. "Found project reference without a matching metadata reference: X"
     /// names the project referenced, not the one it is about: by text, it went to every view that has X (System.IO.Abstractions:
-    /// the net10.0 run instead of the net472 one). A failure naming a project that did load is about one of its instances that
-    /// didn't ("Msbuild failed when processing the file '.../Serilog.csproj'": its net462 instance on Linux): it goes to the views
-    /// whose run asks for an instance that isn't there (<paramref name="missing"/>, <see cref="Missing"/>), as a 'dotnet format'
-    /// run of that framework alone reports it.
+    /// the net10.0 run instead of the net472 one). A failure about one framework's instance of a multi-targeted project
+    /// ("Msbuild failed when processing the file '.../Serilog.csproj'": its net462 instance on Linux) leaves that instance in
+    /// the workspace without a framework in its name ('Serilog' next to 'Serilog(net10.0)'): it goes to the views that have
+    /// that instance (Serilog's net462 run, through TestDummies(net462)), as a 'dotnet format' run of that framework alone
+    /// reports it, not to every view with another instance of the project.
     /// </summary>
-    public static List<WorkspaceDiagnostic> WarningsOf(IEnumerable<WorkspaceDiagnostic> diagnostics, Solution workspace, Solution view, IReadOnlyCollection<string>? missing = null)
+    public static List<WorkspaceDiagnostic> WarningsOf(IEnumerable<WorkspaceDiagnostic> diagnostics, Solution workspace, Solution view)
     {
-        missing ??= [];
         var all = workspace.Projects.Select(p => p.FilePath).OfType<string>().Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         var own = view.Projects.Select(p => p.FilePath).OfType<string>().Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        var failed = Failed(workspace);
+        var ownFailed = failed.Where(p => view.Projects.Any(v => FrameworkOf(v.Name) is null && string.Equals(v.FilePath, p, StringComparison.OrdinalIgnoreCase))).ToList();
         bool Names(WorkspaceDiagnostic d, IEnumerable<string> paths) => paths.Any(p => d.Message.Contains(p, StringComparison.OrdinalIgnoreCase));
         return diagnostics.Where(d => d is ProjectDiagnostic project ? view.ContainsProject(project.ProjectId)
-            : !Names(d, all) || Names(d, missing) || (d.Kind != WorkspaceDiagnosticKind.Failure && Names(d, own))).ToList();
+            : !Names(d, all) || Names(d, ownFailed) || (!(d.Kind == WorkspaceDiagnosticKind.Failure && Names(d, failed)) && Names(d, own))).ToList();
     }
+
+    // The projects with an instance named without a framework next to instances named with one: a framework's that didn't load.
+    private static List<string> Failed(Solution workspace) =>
+        workspace.Projects.Where(p => p.FilePath is not null).GroupBy(p => p.FilePath!, StringComparer.OrdinalIgnoreCase)
+            .Where(g => g.Any(p => FrameworkOf(p.Name) is null) && g.Any(p => FrameworkOf(p.Name) is not null))
+            .Select(g => g.Key)
+            .ToList();
 }
