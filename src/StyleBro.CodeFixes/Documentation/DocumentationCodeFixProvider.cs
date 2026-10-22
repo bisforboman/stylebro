@@ -21,6 +21,14 @@ namespace StyleBro.CodeFixes.Documentation;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(DocumentationCodeFixProvider))]
 public sealed class DocumentationCodeFixProvider : CodeFixProvider
 {
+    /// <summary>The rules whose fixes change documentation text, which <see cref="QuotedDocumentation"/> keeps where the solution quotes it.</summary>
+    private static readonly ImmutableHashSet<string> QuotedIds = ImmutableHashSet.Create(
+        DiagnosticIds.DocumentationEndsWithPeriod,
+        DiagnosticIds.PropertySummaryWording,
+        DiagnosticIds.PropertySummaryRestrictedSetter,
+        DiagnosticIds.ConstructorSummary,
+        DiagnosticIds.DestructorSummary);
+
     /// <inheritdoc/>
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
         ImmutableArray.Create(
@@ -44,10 +52,18 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
         LinkedFileFixAllProvider.Create(FixDocumentAsync);
 
     /// <inheritdoc/>
-    public override Task RegisterCodeFixesAsync(CodeFixContext context)
+    public override async Task RegisterCodeFixesAsync(CodeFixContext context)
     {
+        var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
         foreach (var diagnostic in context.Diagnostics)
         {
+            // Text the solution quotes is kept (QuotedDocumentation): no action for it.
+            if (root is not null && QuotedIds.Contains(diagnostic.Id)
+                && await QuotedDocumentation.FindAsync(context.Document.Project.Solution, root, diagnostic.Location.SourceSpan.Start).ConfigureAwait(false) is not null)
+            {
+                continue;
+            }
+
             var title = diagnostic.Id switch
             {
                 DiagnosticIds.InheritDocumentation => "Add <inheritdoc/>",
@@ -70,8 +86,6 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
                     equivalenceKey: nameof(DocumentationCodeFixProvider) + diagnostic.Id),
                 diagnostic);
         }
-
-        return Task.CompletedTask;
     }
 
     private static async Task<Document> FixDocumentAsync(
@@ -126,7 +140,8 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
             else if (diagnostic.Id is DiagnosticIds.PropertySummaryWording or DiagnosticIds.PropertySummaryRestrictedSetter)
             {
                 if (root.FindToken(span.Start).Parent is PropertyDeclarationSyntax property
-                    && PropertySummaries.GetFinding(property, text, await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false), PropertySummaries.FollowsStyleSharp(options)) is { } finding)
+                    && PropertySummaries.GetFinding(property, text, await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false), PropertySummaries.FollowsStyleSharp(options)) is { } finding
+                    && !await IsQuotedAsync(document, root, finding.Replace.Start, diagnostic).ConfigureAwait(false))
                 {
                     changes.Add(new TextChange(finding.Replace, finding.NewText));
                 }
@@ -134,7 +149,8 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
             else if (diagnostic.Id is DiagnosticIds.ConstructorSummary or DiagnosticIds.DestructorSummary)
             {
                 if (root.FindToken(span.Start).Parent?.AncestorsAndSelf().OfType<BaseMethodDeclarationSyntax>().FirstOrDefault() is { } member
-                    && ConstructorSummaries.GetFinding(member, text, PropertySummaries.FollowsStyleSharp(options)) is { } finding)
+                    && ConstructorSummaries.GetFinding(member, text, PropertySummaries.FollowsStyleSharp(options)) is { } finding
+                    && !await IsQuotedAsync(document, root, finding.Replace.Start, diagnostic).ConfigureAwait(false))
                 {
                     changes.Add(new TextChange(finding.Replace, finding.NewText));
                 }
@@ -183,7 +199,7 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
             }
             else if (diagnostic.Id == DiagnosticIds.DocumentationEndsWithPeriod)
             {
-                if (missingPeriods.Contains(span.Start))
+                if (missingPeriods.Contains(span.Start) && !await IsQuotedAsync(document, root, span.Start, diagnostic).ConfigureAwait(false))
                 {
                     changes.Add(DocumentationPeriods.GetPeriodChange(span.Start, text));
                 }
@@ -201,6 +217,21 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
         }
 
         return document.WithText(text.WithChanges(LinkedFileFixAllProvider.Merge(changes)));
+    }
+
+    /// <summary>
+    /// Whether the solution quotes the documentation text a fix would change (<see cref="QuotedDocumentation"/>): then the
+    /// finding is kept, with where.
+    /// </summary>
+    private static async Task<bool> IsQuotedAsync(Document document, SyntaxNode root, int position, Diagnostic diagnostic)
+    {
+        if (await QuotedDocumentation.FindAsync(document.Project.Solution, root, position).ConfigureAwait(false) is not { } where)
+        {
+            return false;
+        }
+
+        KeptFindings.Record(diagnostic, KeptReason.DocumentationTextInString, where);
+        return true;
     }
 
     /// <summary>

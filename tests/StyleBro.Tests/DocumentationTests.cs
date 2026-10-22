@@ -1100,6 +1100,143 @@ public class DocumentationTests
         """,
         "stylebro_summary_wording = stylesharp\n");
 
+    // Trial 43, NSwag: a test compared what NSwag read from a controller's summary at run time with "Test summary"; the
+    // period BRO1603 added failed it. Text the solution quotes stays (a word or two doesn't count: too common).
+    [Fact]
+    public Task DocumentationText_TheSolutionQuotes_IsKept() => VerifyFixAsync(
+        [
+            """
+            /// <summary>Test summary{|BRO1603:|}</summary>
+            public class Tagged
+            {
+                /// {|BRO1606:<summary>|}Default constructor.</summary>
+                public Tagged()
+                {
+                }
+            }
+
+            /// <summary>Another summary{|BRO1603:|}</summary>
+            public class Other
+            {
+                /// <summary>Name{|BRO1603:|}</summary>
+                public string Name() => "Name";
+
+                /// <summary>Uses <see cref="Other"/> here{|BRO1603:|}</summary>
+                public int Uses() => 1;
+
+                /// <summary>Shown in the approved file{|BRO1603:|}</summary>
+                public int Shown() => 2;
+            }
+            """,
+            """
+            /// <summary>Checks.</summary>
+            public static class Checks
+            {
+                /// <summary>Gets the texts.</summary>
+                public static string[] Texts { get; } = { "Test summary", "Default constructor.", "Uses here" };
+            }
+            """,
+        ],
+        [
+            """
+            /// <summary>Test summary{|BRO1603:|}</summary>
+            public class Tagged
+            {
+                /// {|BRO1606:<summary>|}Default constructor.</summary>
+                public Tagged()
+                {
+                }
+            }
+
+            /// <summary>Another summary.</summary>
+            public class Other
+            {
+                /// <summary>Name.</summary>
+                public string Name() => "Name";
+
+                /// <summary>Uses <see cref="Other"/> here.</summary>
+                public int Uses() => 1;
+
+                /// <summary>Shown in the approved file{|BRO1603:|}</summary>
+                public int Shown() => 2;
+            }
+            """,
+            """
+            /// <summary>Checks.</summary>
+            public static class Checks
+            {
+                /// <summary>Gets the texts.</summary>
+                public static string[] Texts { get; } = { "Test summary", "Default constructor.", "Uses here" };
+            }
+            """,
+        ],
+        keepsSome: true,
+        additionalFiles: [("/0/Docs.approved.txt", "Shown in the approved file\n")]);
+
+    // Trial 43, NSwag: '#if AspNetOwin' / '#else' declared the class generic in one project and not in the other (a linked
+    // file); each run wrote the other cref. A header with '#if' branches isn't checked; a type that is conditional as a
+    // whole still is.
+    [Fact]
+    public Task ConstructorSummaries_SkipTypesWhoseHeaderHasIfBranches() => VerifyFixAsync(
+        """
+        namespace N
+        {
+        #if OWIN
+            /// <summary>Settings.</summary>
+            public class Settings<T>
+        #else
+            /// <summary>Settings.</summary>
+            public class Settings
+        #endif
+            {
+                /// <summary>Initializes a new instance of the <see cref="Settings{T}"/> class.</summary>
+                public Settings()
+                {
+                }
+            }
+
+        #if !OWIN
+            /// <summary>Other.</summary>
+            public class Other
+            {
+                /// {|BRO1606:<summary>|}Default constructor.</summary>
+                public Other()
+                {
+                }
+            }
+        #endif
+        }
+        """,
+        """
+        namespace N
+        {
+        #if OWIN
+            /// <summary>Settings.</summary>
+            public class Settings<T>
+        #else
+            /// <summary>Settings.</summary>
+            public class Settings
+        #endif
+            {
+                /// <summary>Initializes a new instance of the <see cref="Settings{T}"/> class.</summary>
+                public Settings()
+                {
+                }
+            }
+
+        #if !OWIN
+            /// <summary>Other.</summary>
+            public class Other
+            {
+                /// <summary>Initializes a new instance of the <see cref="Other"/> class.</summary>
+                public Other()
+                {
+                }
+            }
+        #endif
+        }
+        """);
+
     [Fact]
     public Task RightPropertySummaries_AreNotReported() => VerifyNoDiagnosticsAsync("""
         /// <summary>Words.</summary>

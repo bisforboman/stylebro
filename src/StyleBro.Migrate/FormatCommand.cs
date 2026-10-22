@@ -291,7 +291,7 @@ internal static partial class FormatCommand
     }
 
     /// <summary>
-    /// What to say when the root .editorconfig's bulk severity hides StyleBro rules the build reports from 'dotnet format'
+    /// What to say when the root .editorconfig's (or a .globalconfig's) bulk severity hides StyleBro rules the build reports from 'dotnet format'
     /// (<see cref="InitCommand.HiddenFromFormat"/>), or null: then a clean run isn't clean (sharpcompress: "clean", then
     /// ~40,000 BRO errors in the build). Not with the preset off: a migration's block sets every rule by id.
     /// </summary>
@@ -326,7 +326,10 @@ internal static partial class FormatCommand
         var written = settings.Keys.Where(k => !plain.TryGetValue(k, out var value) || value != settings[k]).ToList();
         var top = Path.GetFullPath(root);
         var ownRoots = StyleCopSetup.EditorConfigRoots(top).Select(f => Path.Combine(top, f)).ToList();
-        var ids = InitCommand.HiddenFromFormat(settings)
+
+        // A .globalconfig's bulk severity too (trial 43): 'dotnet format' reads it; the build lets the preset's own entries win.
+        var bulk = Migration.WithGlobalBulk(top, settings, folders);
+        var ids = InitCommand.HiddenFromFormat(bulk)
             .Concat(InitCommand.NestedHiddenFromFormat(top, settings, withBlocks: true, written).Values.SelectMany(l => l))
             .Concat(ownRoots.SelectMany(f => Migration.OwnSettings(f, withBlocks: true) is var own && InitCommand.OptsOut(Migration.OwnSettings(f))
                 ? InitCommand.OptOutLines([], own)
@@ -339,7 +342,8 @@ internal static partial class FormatCommand
             return null;
         }
 
-        return $"Not clean: .editorconfig's bulk severity (dotnet_analyzer_diagnostic.severity or a category's) hides {ids.Count} StyleBro rules from 'dotnet format' "
+        var source = InitCommand.HiddenFromFormat(bulk).Count > InitCommand.HiddenFromFormat(settings).Count ? "A .globalconfig's" : ".editorconfig's";
+        return $"Not clean: {source} bulk severity (dotnet_analyzer_diagnostic.severity or a category's) hides {ids.Count} StyleBro rules from 'dotnet format' "
             + $"({string.Join(", ", ids.Take(3))}{(ids.Count > 3 ? ", ..." : string.Empty)}), which the build reports. Run 'bro init --write': it sets them by id.";
     }
 

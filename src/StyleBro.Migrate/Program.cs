@@ -336,6 +336,10 @@ internal static class Program
                 {
                     PreviewCommand.EditFile(path, existing => Migration.Apply(existing, block));
                     Console.WriteLine($"Wrote the settings to {target}.");
+                    if (InitCommand.IgnoredLine(path, target) is { } ignored)
+                    {
+                        Console.WriteLine(ignored);
+                    }
                 }
                 else
                 {

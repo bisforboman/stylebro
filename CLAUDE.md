@@ -1932,6 +1932,39 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
   verify-format fail (Messy renames kept: SnapshotFiles scans the git root on disk, `.trials/` included); delete unused clones.
   Two background jobs on one worktree collided after a worker restart: check `ps` before rerunning.
 
+## Trial 43 (2026-10-22, not clean: owner "Not clean", tally 0)
+
+- Repos: RicoSuter/NSwag (random, seed 43: yarp, git-credential-manager, N_m3u8DL-RE used or rejected, DnsServer has no
+  tests), martincostello/xunit-logging (StyleCop 1.3 beta, migrate; C# 14 extension block), Particular/NServiceBus.Gateway
+  (EnforceCodeStyleInBuild with 52 IDE rules at warning/error), Tyrrrz/Gress (CSharpier.MsBuild runs csharpier in the build,
+  C# 14 extension blocks). Lens 1 spot: BRO1151 leaves a params array passed to an extension member alone, fixes a plain one.
+- Gateway (owner: "Set by id"): `src/.globalconfig` says `dotnet_analyzer_diagnostic.severity = none`; `dotnet format`'s
+  analyzer pass reads a global config's bulk severity (the comment in init said it doesn't), the build lets the preset's ids
+  win: format fixed nothing, check said Clean, check --build found 186. `Migration.WithGlobalBulk` (every .globalconfig in the
+  repository, lowest per key, under the .editorconfig's own; an .editorconfig `default` doesn't override it in format) feeds
+  init's `HiddenFromFormat` and `FormatCommand.HiddenLine` ("Not clean: A .globalconfig's bulk severity ...").
+- NSwag (owner: "Warn, and patch includes it"): `.editorconfig` is in its .gitignore. `InitCommand.IgnoredLine` (init and
+  migrate, after each written file: `git check-ignore -v`) names the line; `PreviewCommand.AddIgnoredSettings` force-adds
+  ignored .editorconfig files (bin/obj aside) before the preview's baseline and settings commits, so the patch has them.
+- NSwag: BRO1606 flipped a cref every run in `SwaggerSettings.cs` (`#if AspNetOwin` `class SwaggerSettings<T>` `#else`
+  `class SwaggerSettings`, a file two projects compile). `ConstructorSummaries.HasConditionalHeader` skips a type whose
+  header (to its `{`) has `#if` branches; an `#if` above the whole type doesn't count.
+- NSwag (owner: "Keep quoted doc text"): BRO1603's period on a test controller's `<summary>Test summary</summary>` failed a
+  test comparing what NSwag reads into the OpenAPI document. `QuotedDocumentation` (CodeFixes) keeps BRO1603-BRO1607 where
+  the element's text (plain text only, white space collapsed, two words or more) is a string of the solution
+  (`CamelCaseRenamer.GetNamesInCodeAsync`) or in a snapshot file (`SnapshotFiles.Words.Texts`); `KeptReason
+  .DocumentationTextInString`, no code action. `Verifier.VerifyFixAsync(..., keepsSome: true)` lets the fixed sources' markup
+  name kept findings (the framework ignores fixable ones there by default).
+- Held up: preview = format on all four (patch applied to the base commit, CR ignored: `.trials/trial43/cmp3.sh`); NSwag's six
+  CRLF blobs under `* text=auto` are converted by format but not shown by the preview (its fresh copy normalizes them on add:
+  git's own renormalization). check --build's Release|x86 "Not verified" on NSwag is honest (the untouched code fails there).
+- Environment: SDK 10.0.113 + 8.0.132 and pwsh were there (`bro` needs `ln -s ~/.dotnet/tools/bro /usr/local/bin/bro`).
+  Gateway: feedz.io removed, Particular.Analyzers 2.1.4 -> 1.8.0, Particular.Packaging removed, Particular.Approvals 2.0.1
+  packed locally from its repository (packageSourceMapping per source). xunit-logging: global.json 10.0.402 lowered, the
+  trial feed needs a `StyleBro.*` mapping. NSwag: the WiX installer fails on Linux (use NSwag.NoInstaller.slnf); 52 tests fail
+  untouched (network, npm/tsc, sample builds). GOTCHA: `--filter ...Snapshot...` runs tests that scan the git root on disk,
+  which spin for many minutes with trial clones in `.trials/` (delete them first or narrow the filter).
+
 ## xUnit fixes in format (backlog 073/074, 2026-10-18)
 
 - Owner's choices (docs/decisions/2026-10-18-which-xunit-fixes-bro-format-applies.md): `bro format` adds an allowlist of

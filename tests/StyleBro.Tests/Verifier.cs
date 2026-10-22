@@ -52,9 +52,20 @@ internal static class Verifier<TAnalyzer, TCodeFix>
     }
 
     /// <summary>Like <see cref="VerifyFixAsync(string, string, string?, string?)"/>, for several files.</summary>
-    public static Task VerifyFixAsync(string[] sources, string[] fixedSources, string? editorConfig = null)
+    public static Task VerifyFixAsync(string[] sources, string[] fixedSources, string? editorConfig = null, bool keepsSome = false, (string Name, string Text)[]? additionalFiles = null)
     {
+        // keepsSome: the fixed sources' markup names the findings the fix keeps (by default the framework ignores a fixable one there).
         var test = new Test();
+        if (keepsSome)
+        {
+            test.FixedState.MarkupHandling = MarkupMode.Allow;
+        }
+
+        foreach (var file in additionalFiles ?? [])
+        {
+            test.TestState.AdditionalFiles.Add(file);
+        }
+
         if (editorConfig is not null)
         {
             test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", "root = true\n\n[*]\n" + editorConfig));

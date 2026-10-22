@@ -28,8 +28,32 @@ internal static class ConstructorSummaries
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     /// <summary>
+    /// Whether the type's header (up to its '{') has '#if' branches: the name the sentence's cref writes then depends on the
+    /// build (trial 43, NSwag: '#if AspNetOwin' 'class SwaggerSettings&lt;T&gt;' '#else' 'class SwaggerSettings', a file two
+    /// projects compile; each run wrote the other cref). An '#if' only above the type (the whole type is conditional) doesn't count.
+    /// </summary>
+    public static bool HasConditionalHeader(TypeDeclarationSyntax type)
+    {
+        for (var token = type.GetFirstToken(); ; token = token.GetNextToken())
+        {
+            var leading = token.LeadingTrivia.Where(t => t.IsKind(SyntaxKind.ElseDirectiveTrivia) || t.IsKind(SyntaxKind.ElifDirectiveTrivia)
+                || (token != type.GetFirstToken() && (t.IsKind(SyntaxKind.IfDirectiveTrivia) || t.IsKind(SyntaxKind.EndIfDirectiveTrivia))));
+            if (leading.Any())
+            {
+                return true;
+            }
+
+            if (token == type.OpenBraceToken || token.IsKind(SyntaxKind.None))
+            {
+                return false;
+            }
+        }
+    }
+
+    /// <summary>
     /// The finding for a constructor or destructor whose summary doesn't begin with the standard text, or null. Not
-    /// reported: members without a summary (missing documentation isn't reported; '&lt;inheritdoc/&gt;' has none), records.
+    /// reported: members without a summary (missing documentation isn't reported; '&lt;inheritdoc/&gt;' has none), records, types
+    /// whose header has '#if' branches (<see cref="HasConditionalHeader"/>).
     /// </summary>
     /// <remarks>
     /// With <paramref name="styleSharp"/> (<c>stylebro_summary_wording = stylesharp</c>, StyleSharp's SST1642/SST1643) only
@@ -39,7 +63,8 @@ internal static class ConstructorSummaries
     public static Finding? GetFinding(BaseMethodDeclarationSyntax member, SourceText text, bool styleSharp = false)
     {
         if (member.Parent is not TypeDeclarationSyntax type || type is RecordDeclarationSyntax || GetSummary(member) is not { } summary
-            || (styleSharp && member is ConstructorDeclarationSyntax && member.Modifiers.Any(SyntaxKind.StaticKeyword)))
+            || (styleSharp && member is ConstructorDeclarationSyntax && member.Modifiers.Any(SyntaxKind.StaticKeyword))
+            || HasConditionalHeader(type))
         {
             return null;
         }
