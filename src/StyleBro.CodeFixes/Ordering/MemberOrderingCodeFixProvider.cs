@@ -61,8 +61,9 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
     /// Where code reads the container's members by position through reflection ('path(line)'), when sorting would change
     /// what it reads; else null. Looked for in the whole solution and, under 'bro format', in the repository's
     /// other projects (<see cref="RepositoryNames"/>): Stateless's tests read 'GetFields(...)[0]' of a library type.
+    /// The names come from <paramref name="namesFrom"/> when given (see <see cref="GetSortChangesAsync"/>).
     /// </summary>
-    internal static async Task<string?> GetReadByPositionAsync(Document document, SyntaxNode container, MemberAccess?[]? partialAccess, CancellationToken cancellationToken)
+    internal static async Task<string?> GetReadByPositionAsync(Document document, SyntaxNode container, MemberAccess?[]? partialAccess, CancellationToken cancellationToken, Solution? namesFrom = null)
     {
         if (container is not TypeDeclarationSyntax type
             || await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false) is not { } root)
@@ -70,7 +71,7 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
             return null;
         }
 
-        var names = await StyleBro.CodeFixes.Naming.CamelCaseRenamer.GetNamesInCodeAsync(document.Project.Solution).ConfigureAwait(false);
+        var names = await StyleBro.CodeFixes.Naming.CamelCaseRenamer.GetNamesInCodeAsync(namesFrom ?? document.Project.Solution).ConfigureAwait(false);
         var reads = names.Positional.Where(p => p.Key.Substring(0, p.Key.IndexOf(' ')) == type.Identifier.ValueText).ToList();
         if (reads.Count == 0)
         {
@@ -90,9 +91,12 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
     /// The edits that sort every container of the document that BRO1001 reports: one per outermost container, replacing
     /// its span. For fixes that change what BRO1001 sees, so it doesn't need another 'dotnet format' run (BRO1112:
     /// removing '#region's lets it sort across them). Edits of a span rather than the whole text, so they still merge
-    /// with the other copies' edits of a multi-targeted file.
+    /// with the other copies' edits of a multi-targeted file. <paramref name="namesFrom"/> is the solution the fix started
+    /// from: the names in code are cached per solution, and a document the fix has just changed is in a new one, so asking
+    /// with it scanned the whole solution again for every fixed file (Newtonsoft.Json's BRO1112 Fix All: 387 s, 15.5 s
+    /// with the original). The fixes only remove region lines or change 'public' to 'internal', which no name depends on.
     /// </summary>
-    internal static async Task<List<TextChange>> GetSortChangesAsync(Document document, CancellationToken cancellationToken)
+    internal static async Task<List<TextChange>> GetSortChangesAsync(Document document, Solution namesFrom, CancellationToken cancellationToken)
     {
         var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
         var model = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
@@ -114,7 +118,7 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
 
             var access = MemberOrdering.GetPartialAccess(container, model, cancellationToken);
             if (MemberOrdering.FindFirstViolation(container, options, access, MemberOrdering.HasGeneratedPart(container, model, cancellationToken)) is not null
-                && await GetReadByPositionAsync(document, container, access, cancellationToken).ConfigureAwait(false) is null)
+                && await GetReadByPositionAsync(document, container, access, cancellationToken, namesFrom).ConfigureAwait(false) is null)
             {
                 partialAccess[container] = access;
             }

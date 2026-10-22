@@ -29,6 +29,12 @@ internal static class CamelCaseRenamer
 {
     private static readonly ConditionalWeakTable<Solution, Task<NamesInCode>> NamesCache = new();
 
+    /// <summary>
+    /// Tests only: counts the solution scans of <see cref="GetNamesInCodeAsync"/> made in this async flow while set (a fix
+    /// that asks with a changed document's solution scans once per file instead of once per Fix All).
+    /// </summary>
+    internal static readonly AsyncLocal<StrongBox<int>?> NameScans = new();
+
     private static readonly ConditionalWeakTable<Solution, Solution> StrippedCache = new();
 
     private static readonly object RepositoryNamesGate = new();
@@ -146,7 +152,15 @@ internal static class CamelCaseRenamer
         // Locked: the table may run the factory once per thread that asks at the same time (parallel renames).
         lock (NamesCache)
         {
-            return NamesCache.GetValue(WithoutUnresolvedAnalyzers(solution), s => CollectNamesAsync(s, CancellationToken.None));
+            return NamesCache.GetValue(WithoutUnresolvedAnalyzers(solution), s =>
+            {
+                if (NameScans.Value is { } scans)
+                {
+                    Interlocked.Increment(ref scans.Value);
+                }
+
+                return CollectNamesAsync(s, CancellationToken.None);
+            });
         }
     }
 

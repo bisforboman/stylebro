@@ -203,6 +203,67 @@ public class LinkedFileFixAllTests
         Assert.Equal(text, (await fixedSolution.GetDocument(ids[1])!.GetTextAsync()).ToString());
     }
 
+    // The performance audit (2026-10): BRO1112's and BRO1409's fixes sort with BRO1001 on the document they have just
+    // changed, a new solution each, and the names in code (cached per solution) were collected again for every fixed file:
+    // Newtonsoft.Json's BRO1112 Fix All took 387 s instead of 15.5 s. One Fix All scans the solution once.
+    [Theory]
+    [InlineData("BRO1112")]
+    [InlineData("BRO1409")]
+    public async Task FixAllThatSorts_ScansTheSolutionOnce(string id)
+    {
+        var corlib = Microsoft.CodeAnalysis.MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
+        var project = Microsoft.CodeAnalysis.ProjectId.CreateNewId();
+        var options = new Microsoft.CodeAnalysis.CSharp.CSharpCompilationOptions(Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary)
+            .WithSpecificDiagnosticOptions(new Dictionary<string, Microsoft.CodeAnalysis.ReportDiagnostic> { [id] = Microsoft.CodeAnalysis.ReportDiagnostic.Warn });
+        var solution = new Microsoft.CodeAnalysis.AdhocWorkspace().CurrentSolution
+            .AddProject(project, "p", "p", Microsoft.CodeAnalysis.LanguageNames.CSharp)
+            .WithProjectCompilationOptions(project, options)
+            .AddMetadataReference(project, corlib);
+        var ids = new List<Microsoft.CodeAnalysis.DocumentId>();
+        for (var i = 0; i < 3; i++)
+        {
+            var text = id == "BRO1112"
+                ? $"public class C{i}\n{{\n    #region Methods\n    public void M()\n    {{\n    }}\n    #endregion\n\n    #region Fields\n    private int x;\n    #endregion\n}}\n"
+                : $"internal class C{i}\n{{\n    public void B()\n    {{\n    }}\n\n    public int P => 0;\n}}\n";
+            var document = Microsoft.CodeAnalysis.DocumentId.CreateNewId(project);
+            solution = solution.AddDocument(document, $"C{i}.cs", SourceText.From(text), filePath: Path.Combine(Path.GetTempPath(), $"C{i}.cs"));
+            ids.Add(document);
+        }
+
+        Microsoft.CodeAnalysis.Diagnostics.DiagnosticAnalyzer analyzer = id == "BRO1112"
+            ? new StyleBro.Analyzers.Readability.RegionsAnalyzer()
+            : new StyleBro.Analyzers.Maintainability.InternalTypeMethodAnalyzer();
+        Microsoft.CodeAnalysis.CodeFixes.CodeFixProvider fixer = id == "BRO1112"
+            ? new StyleBro.CodeFixes.Readability.RegionsCodeFixProvider()
+            : new StyleBro.CodeFixes.Maintainability.InternalTypeMethodCodeFixProvider();
+        var first = solution.GetDocument(ids[0])!;
+        var diagnostics = await GetDiagnosticsAsync(first, analyzer);
+
+        // From before the first fix asks: BRO1409's single fix already reads the names (of the same solution).
+        var scans = new System.Runtime.CompilerServices.StrongBox<int>();
+        StyleBro.CodeFixes.Naming.CamelCaseRenamer.NameScans.Value = scans;
+        Microsoft.CodeAnalysis.CodeActions.CodeAction? action = null;
+        await fixer.RegisterCodeFixesAsync(new Microsoft.CodeAnalysis.CodeFixes.CodeFixContext(first, diagnostics.First(d => d.Id == id), (a, _) => action ??= a, CancellationToken.None));
+
+        var context = new Microsoft.CodeAnalysis.CodeFixes.FixAllContext(
+            first, fixer, Microsoft.CodeAnalysis.CodeFixes.FixAllScope.Solution, action!.EquivalenceKey, new[] { id }, new Provider(analyzer), CancellationToken.None);
+        var operations = await (await fixer.GetFixAllProvider()!.GetFixAsync(context))!.GetOperationsAsync(CancellationToken.None);
+        var fixedSolution = operations.OfType<Microsoft.CodeAnalysis.CodeActions.ApplyChangesOperation>().Single().ChangedSolution;
+        StyleBro.CodeFixes.Naming.CamelCaseRenamer.NameScans.Value = null;
+
+        // Every file was fixed and sorted (the sort is what asks for the names).
+        foreach (var document in ids)
+        {
+            var text = (await fixedSolution.GetDocument(document)!.GetTextAsync()).ToString();
+            var sorted = id == "BRO1112"
+                ? text.IndexOf("private int x", StringComparison.Ordinal) < text.IndexOf("void M", StringComparison.Ordinal) && !text.Contains("#region", StringComparison.Ordinal)
+                : text.IndexOf("public int P", StringComparison.Ordinal) < text.IndexOf("internal void B", StringComparison.Ordinal);
+            Assert.True(sorted, text);
+        }
+
+        Assert.Equal(1, scans.Value);
+    }
+
     private static async Task<System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.Diagnostic>> GetDiagnosticsAsync(
         Microsoft.CodeAnalysis.Document document, Microsoft.CodeAnalysis.Diagnostics.DiagnosticAnalyzer analyzer)
     {
