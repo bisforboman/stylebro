@@ -822,6 +822,80 @@ public class CamelCaseNamingTests
         }
         """);
 
+    // Owner's choice 2026-10-23 (trial 49, Cocona): where ReSharper's InconsistentNaming inspection is suppressed, the name
+    // is on purpose: 'disable once' above the declaration (a method's covers its parameters), 'disable' up to 'restore'.
+    [Fact]
+    public Task NamesWhereReSharpersInconsistentNamingIsSuppressed_KeepTheirNames() => VerifyFixAsync(
+        """
+        public class C
+        {
+            // ReSharper disable once InconsistentNaming
+            public void M(bool dryRun, string ArgName0)
+            {
+            }
+
+            public void N(string {|BRO1302:ArgName1|})
+            {
+            }
+
+            // ReSharper disable UnusedMember.Local, InconsistentNaming
+            public void O(string ArgName2)
+            {
+                var Local = ArgName2;
+            }
+            // ReSharper restore InconsistentNaming
+
+            public void P(string {|BRO1302:ArgName3|})
+            {
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            // ReSharper disable once InconsistentNaming
+            public void M(bool dryRun, string ArgName0)
+            {
+            }
+
+            public void N(string argName1)
+            {
+            }
+
+            // ReSharper disable UnusedMember.Local, InconsistentNaming
+            public void O(string ArgName2)
+            {
+                var Local = ArgName2;
+            }
+            // ReSharper restore InconsistentNaming
+
+            public void P(string argName3)
+            {
+            }
+        }
+        """);
+
+    // Cocona's file: 'disable once' alone (no 'disable'/'restore' pair in the file), above a nested type's method.
+    [Fact]
+    public Task ANameBelowReSharpersDisableOnce_InAFileWithoutRanges_KeepsItsName() => VerifyNoDiagnosticsAsync(
+        """
+        [System.AttributeUsage(System.AttributeTargets.Parameter)]
+        class ArgumentAttribute : System.Attribute
+        {
+        }
+
+        public class ToCommandCaseTest
+        {
+            class CommandTest
+            {
+                // ReSharper disable once InconsistentNaming
+                public void CommandName(bool dryRun, [Argument] string ArgName0)
+                {
+                }
+            }
+        }
+        """);
+
     // A naming rule for parameters that asks for another style keeps the parameter's name.
     [Fact]
     public Task ParametersAnEnforcedNamingRuleCovers_KeepTheirNames() => VerifyNoDiagnosticsAsync(

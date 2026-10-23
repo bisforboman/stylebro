@@ -2,7 +2,7 @@
 # no whitespace pass with IDE0055 off, old Mac line endings, verify's own errors, kept findings marked as kept
 @{
     File = 'src/StyleBro.Migrate/FormatCommand.cs'
-    Find = 'lines.Select(l => MarkKept(l, keys)).ToList().ForEach(log);'
+    Find = 'lines.Select(l => MarkKept(l, kept)).ToList().ForEach(log);'
     Replace = 'lines.ForEach(log);'
     Tests = 'KeptFindingsTests'
 }

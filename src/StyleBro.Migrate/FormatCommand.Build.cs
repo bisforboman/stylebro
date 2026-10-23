@@ -23,6 +23,12 @@ internal static partial class FormatCommand
 
     private static readonly Regex BuildLine = new(@"^\s*(?<path>.+?)(?:\((?<line>\d+),(?<column>\d+)\))? ?: (?<kind>warning|error) (?<id>[A-Za-z]+\d+): (?<message>.*?)(?: \[(?<project>[^\]]*)\])?\s*$");
 
+    // Compiler errors without a place in the code that the compiler reports when it emits, after the analyzers ran (trial 49,
+    // superpower: CS8002, a strong-named assembly referencing an unsigned one, with warnings as errors; a planted finding in
+    // that project was reported). Every other error without a place stops the build before the compiler (restore, MSBuild,
+    // command line: CS0006, CS2001).
+    private static readonly HashSet<string> EmitErrors = new(StringComparer.Ordinal) { "CS8002" };
+
     private static readonly Regex OutputLine = new(@"^\s*(?<name>\S.*?) -> (?:/|[A-Za-z]:\\)");
 
     /// <summary>The errors and warnings of a build's <paramref name="output"/> (each once: the summary repeats them), paths relative to <paramref name="root"/>.</summary>
@@ -193,13 +199,13 @@ internal static partial class FormatCommand
                 {
                     failed.Add(configuration);
                 }
-                else if (exitCode != 0 && found.Count == 0 && (current.Any(m => m.Error && !m.InSource) || !current.Any(m => m.Error)))
+                else if (exitCode != 0 && found.Count == 0 && (current.Any(StopsCompiling) || !current.Any(m => m.Error)))
                 {
                     // Failed like the untouched code's at the restore or in MSBuild (an error without a place in the code): nothing
                     // compiled (sqlite-net: NETSDK1147). An error in the code is the compiler's, which ran the analyzers there
                     // (Ulid's obsolete calls in its benchmarks, warnings as errors).
                     bothFailed.Add(configuration);
-                    current.Where(m => m.Error && !m.InSource).Select(m => m.Shown).Distinct(StringComparer.Ordinal).Take(5).ToList().ForEach(log);
+                    current.Where(StopsCompiling).Select(m => m.Shown).Distinct(StringComparer.Ordinal).Take(5).ToList().ForEach(log);
                 }
                 else if (exitCode != 0 && found.Count == 0 && Uncompiled(output, current, (expectedProjects ??= [.. expected?.Invoke() ?? BuiltProjects(workspacePath, root)]).Except(NotBuiltIn(workspacePath, configuration), StringComparer.OrdinalIgnoreCase)) is { Count: > 0 } skipped)
                 {
@@ -327,6 +333,13 @@ internal static partial class FormatCommand
         }
     }
 
+    /// <summary>One error or warning of a build: its key (path relative to the build's root, framework, id, message: no line, which a fix moves) and how it's shown.</summary>
+    /// <summary>
+    /// Whether a build error came before the compiler ran the analyzers: no place in the code (restore, MSBuild, the
+    /// compiler's command line), except the errors the compiler reports when it emits (<see cref="EmitErrors"/>).
+    /// </summary>
+    public static bool StopsCompiling(BuildMessage message) => message.Error && !message.InSource && !EmitErrors.Contains(message.Id);
+
     /// <summary>Runs <paramref name="action"/> with <see cref="HookVariable"/> set to <paramref name="hook"/> (every MSBuild node inherits it).</summary>
     private static T WithHook<T>(string hook, Func<T> action)
     {
@@ -366,6 +379,5 @@ internal static partial class FormatCommand
         }
     }
 
-    /// <summary>One error or warning of a build: its key (path relative to the build's root, framework, id, message: no line, which a fix moves) and how it's shown.</summary>
     public sealed record BuildMessage(string Key, string Id, bool Error, string Shown, bool InSource = true, string Project = "");
 }

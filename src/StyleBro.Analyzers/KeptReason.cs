@@ -115,6 +115,12 @@ public enum KeptReason
     /// at run time (NSwag's and Swashbuckle's OpenAPI descriptions) and a test compares the text.
     /// </summary>
     DocumentationTextInString,
+
+    /// <summary>
+    /// The parameter has an attribute of its own (<c>[Argument]</c>, <c>[Option]</c>, <c>[FromQuery]</c>): frameworks that
+    /// attribute parameters bind them by name at run time (Cocona's command line names, trial 49).
+    /// </summary>
+    ParameterHasAttribute,
 }
 
 /// <summary>
@@ -169,6 +175,7 @@ public sealed class KeptFinding
         KeptReason.NameInSnapshotFile => "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
         KeptReason.NameInShouldlyMessage => "the project uses Shouldly, whose failure messages quote the code, and a string in the file has the name (an expected message): renaming would fail that test",
         KeptReason.DocumentationTextInString => "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+        KeptReason.ParameterHasAttribute => "the parameter has an attribute ([Argument], [Option], [FromQuery], ...), and frameworks that attribute parameters read their names at run time (command line or query names): renaming would compile but change what callers use",
         KeptReason.UsedFromVisualBasic => "Visual Basic code uses the name, and StyleBro doesn't edit VB code",
         KeptReason.NameInXamlFile => "a XAML file uses the name (a binding path, x:Name, an event handler), which binds it by name at run time: renaming would break the binding silently",
         KeptReason.NameInXamlMarkup => "a XAML file names it as an element or attribute (a type or property of the project's own namespace): renaming would break the XAML build (MC3074, MC3072)",

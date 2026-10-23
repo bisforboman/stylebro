@@ -21,6 +21,9 @@ and it's on purpose. The reasons, per finding:
 - a derived type hides the member with a `new` member of the same name, which would then hide nothing (CS0109);
 - another member would hide the new name, or the new name already means something else where the name is used;
 - a use is in generated code (a source generator, a Razor page, a designer file), which a tool writes again;
+- a parameter has an attribute of its own (`[Argument]`, `[Option]`, `[FromQuery]`): frameworks that attribute parameters
+  bind them by name at run time (a command line's or a query's names). Caller-info, nullability and interop attributes
+  don't count;
 - a related override or implementation is public API, or also implements a member that isn't renamed;
 - the rename would add compile errors (tuple element names), or the namespace is also defined outside the solution;
 - a documentation fix (BRO1603's period, BRO1604-BRO1607's standard words) would change text that is a string, or is in a

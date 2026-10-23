@@ -132,11 +132,20 @@ internal sealed class FormatHost : IDisposable
         var version = FormatCommand.Capture(root, "--version").Trim();
         var sdks = FormatCommand.Capture(root, "--list-sdks");
         var folder = SdkFolder(version, sdks) is { } sdk ? Path.Combine(sdk, "DotnetTools", "dotnet-format") : null;
-        reason = folder is null ? $"no SDK folder for '{version}' in 'dotnet --list-sdks'"
-            : !File.Exists(Path.Combine(folder, "dotnet-format.dll")) ? $"the SDK {version} has no {folder}/dotnet-format.dll"
-            : string.Empty;
+        reason = folder is null ? $"no SDK folder for '{version}' in 'dotnet --list-sdks'" : FolderProblem(folder, version) ?? string.Empty;
         return reason.Length == 0 ? folder : null;
     }
+
+    /// <summary>
+    /// Why the host can't run the dotnet-format in <paramref name="folder"/> (SDK <paramref name="version"/>), or null. The
+    /// host loads the projects with that folder's MSBuild workspace and its own Microsoft.Build; SDK 8's dotnet-format has
+    /// none (it finds the SDK's MSBuild through MSBuildLocator), and every host run crashed there (trial 49, Cocona's
+    /// global.json selects SDK 8).
+    /// </summary>
+    public static string? FolderProblem(string folder, string version) =>
+        !File.Exists(Path.Combine(folder, "dotnet-format.dll")) ? $"the SDK {version} has no {folder}/dotnet-format.dll"
+        : !File.Exists(Path.Combine(folder, "Microsoft.Build.dll")) ? $"the SDK {version}'s dotnet-format loads MSBuild through MSBuildLocator, which the host doesn't support"
+        : null;
 
     /// <summary>The folder of SDK <paramref name="version"/> in 'dotnet --list-sdks' output ('10.0.113 [/usr/lib/dotnet/sdk]'), or null.</summary>
     public static string? SdkFolder(string version, string listSdks) =>
@@ -171,6 +180,21 @@ internal sealed class FormatHost : IDisposable
         !File.Exists(Path.Combine(formatFolder, name + ".dll")) && File.Exists(Path.Combine(toolFolder, name + ".dll"));
 
     /// <summary>
+    /// Whether the shared framework in <paramref name="frameworkFolder"/> has <paramref name="name"/> at the version of the
+    /// copy in <paramref name="formatFolder"/> or newer, as the .NET host decides between an app's copy and the framework's.
+    /// The default context then hands out the framework's, the one the framework's other assemblies use: SDK 8's
+    /// dotnet-format ships System.Collections.Immutable 8.0, and on .NET 10 the host loaded it next to the framework's
+    /// System.Reflection.Metadata 10.0, whose ImmutableArray is the framework's, so Roslyn's MEF parts failed to load (trial 49,
+    /// Cocona's global.json selects SDK 8).
+    /// </summary>
+    public static bool FromFramework(string name, string formatFolder, string frameworkFolder)
+    {
+        var framework = Path.Combine(frameworkFolder, name + ".dll");
+        var own = Path.Combine(formatFolder, name + ".dll");
+        return File.Exists(framework) && File.Exists(own) && AssemblyName.GetAssemblyName(framework).Version >= AssemblyName.GetAssemblyName(own).Version;
+    }
+
+    /// <summary>
     /// Runs 'dotnet <paramref name="arguments"/>' (a 'format' check or fix run) in the host, or returns null for a command it
     /// doesn't run (bro then starts it). <paramref name="environment"/>: what the child process would get that changes how
     /// MSBuild loads the projects; <paramref name="variables"/>: what else it would get, which the fixers read;
@@ -194,13 +218,17 @@ internal sealed class FormatHost : IDisposable
     /// <summary>
     /// Resolves the SDK's dotnet-format folder first (its Roslyn, MSBuild, Microsoft.Extensions.*, System.CommandLine), then the
     /// shared framework, never the tool's own assemblies (<see cref="Refuses"/>): each project's analyzers load from its packages.
+    /// A folder copy of a framework assembly that isn't newer than the framework's gives way to it (<see cref="FromFramework"/>).
     /// </summary>
-    private sealed class SdkLoadContext(string folder) : AssemblyLoadContext("StyleBro.FormatHost", isCollectible: false)
+    internal sealed class SdkLoadContext(string folder) : AssemblyLoadContext("StyleBro.FormatHost", isCollectible: false)
     {
+        private static readonly string FrameworkFolder = Path.GetDirectoryName(typeof(object).Assembly.Location)!;
+
         protected override Assembly? Load(AssemblyName assemblyName)
         {
             var path = Path.Combine(folder, assemblyName.Name + ".dll");
-            return File.Exists(path) ? this.LoadFromAssemblyPath(path)
+            return FromFramework(assemblyName.Name!, folder, FrameworkFolder) ? null
+                : File.Exists(path) ? this.LoadFromAssemblyPath(path)
                 : Refuses(assemblyName.Name!, folder, AppContext.BaseDirectory) ? throw new FileNotFoundException($"{assemblyName.Name} isn't the SDK's: not loaded in the format host.", assemblyName.Name)
                 : null;
         }

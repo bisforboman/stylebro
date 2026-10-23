@@ -261,3 +261,7 @@ benjamin-hodgson/Pidgin	trial 48 (random, seed 48)	127 files, StyleCop 1.1.118 w
 xoofx/Tomlyn	trial 48	181 files, a tab-indented file in an indent_style = space repository, in-solution generator, netstandard2.0;net8.0;net10.0, the toml-test submodule its tests read
 VerifyTests/Verify	rejected trial 48	random list: needs the .NET 11 SDK (pool: fails)
 FastEndpoints/FastEndpoints	rejected trial 48	random list: needs the .NET 11 SDK (pool: fails)
+Cysharp/ConsoleAppFramework	trial 49 (random, seed 49)	53 files, in-solution source generator (netstandard2.0), net8.0;net10.0, net10.0 MTP tests (124), LangVersion 14/preview, no analyzers; init, clean; seed 49's draw 4 walked to entry 37
+datalust/superpower	trial 49 (random, seed 49)	95 files, netstandard2.0;net6.0;net8.0, TWAE, strong-named; untouched TWAE build fails on CS8002 (benchmarks reference unsigned Sprache); global.json 10.0.201 lowered; draw 22 walked to entry 38
+mayuki/Cocona	trial 49 (random, seed 49)	300 files, net8.0;net6.0;netstandard2.0;netstandard2.1, global.json SDK 8.0.100 (host engine crashed), [Argument] parameters bound by name, charset=utf-8 (BOMs removed); untouched TWAE build fails on CS0618 in a benchmark; draw 26 walked to entry 39
+benjamin-hodgson/Sawmill	trial 49	96 files, StyleCop.Analyzers 1.2.0-beta.556 + Benjamin.Pizza.BuildScripts 2.4.0 (GlobalPackageReference, its globalconfig sets the StyleCop rules), migrate; nothing to format; global.json lowered, dotnet tool restore (docfx)

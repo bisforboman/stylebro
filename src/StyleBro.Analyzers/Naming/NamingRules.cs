@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,6 +17,9 @@ namespace StyleBro.Analyzers.Naming;
 /// <item>where IDE1006 is suppressed ('#pragma warning disable IDE1006' up to its restore, or [SuppressMessage] for
 /// IDE1006 on the symbol, a containing member or type, or a global one targeting them), names stay (owner's choice
 /// 2026-10-14: MoreLINQ's Lookup.cs, copied from dotnet/runtime, starts with the pragma);</item>
+/// <item>so do names where ReSharper's InconsistentNaming inspection is suppressed ('// ReSharper disable once
+/// InconsistentNaming' above the declaration, or 'disable' up to its 'restore'): the author said the name is on purpose
+/// (owner's choice 2026-10-23, trial 49: Cocona's '[Argument] string ArgName0', which it binds by name);</item>
 /// <item>the first SDK naming rule that covers the symbol (Roslyn's order), when enforced, must accept the new name:
 /// Altinn's rule for private properties asked for '_camelCase' and BRO1309's '_format' -> 'Format' broke the build with
 /// IDE1006 at error (trial 20).</item>
@@ -26,6 +30,8 @@ internal static class NamingRules
     private static readonly ConditionalWeakTable<AnalyzerConfigOptions, List<Rule>> RuleCache = new();
     private static readonly ConditionalWeakTable<SyntaxTree, List<(int Position, bool Disabled)>> PragmaCache = new();
     private static readonly ConditionalWeakTable<Compilation, List<(string? Scope, string? Target)>> GlobalCache = new();
+    private static readonly ConditionalWeakTable<SyntaxTree, List<(int Position, bool Disabled)>> ReSharperCache = new();
+    private static readonly Regex ReSharperComment = new(@"^//\s*ReSharper\s+(?<verb>disable|restore)(?<once>\s+once)?\s+(?<ids>.+?)\s*$", RegexOptions.CultureInvariant);
 
     /// <summary>
     /// Whether a naming rule may rename <paramref name="symbol"/> (declared at <paramref name="location"/>) to
@@ -35,6 +41,7 @@ internal static class NamingRules
     {
         if (location.SourceTree is not { } tree
             || IsDisabledByPragma(tree, location.SourceSpan.Start, cancellationToken)
+            || IsDisabledByReSharper(tree, location.SourceSpan.Start, cancellationToken)
             || IsSuppressedByAttribute(compilation, symbol))
         {
             return false;
@@ -67,6 +74,72 @@ internal static class NamingRules
         }
 
         return disabled;
+    }
+
+    /// <summary>
+    /// Whether ReSharper's InconsistentNaming inspection is suppressed at the position: '// ReSharper disable once
+    /// InconsistentNaming' right above the declaration, statement or member the name is in (the nearest one), or a
+    /// '// ReSharper disable InconsistentNaming' before it that no 'restore' ended.
+    /// </summary>
+    internal static bool IsDisabledByReSharper(SyntaxTree tree, int position, CancellationToken cancellationToken)
+    {
+        var comments = ReSharperCache.GetValue(tree, t => ReadReSharperComments(t, cancellationToken));
+        var disabled = false;
+        foreach (var (start, isDisabled) in comments)
+        {
+            if (start >= position)
+            {
+                break;
+            }
+
+            disabled = isDisabled;
+        }
+
+        if (disabled)
+        {
+            return true;
+        }
+
+        for (var node = tree.GetRoot(cancellationToken).FindToken(position).Parent; node is not null; node = node.Parent)
+        {
+            if (node.GetLeadingTrivia().Any(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia) && IsInconsistentNaming(t.ToString(), once: true) == true))
+            {
+                return true;
+            }
+
+            if (node is MemberDeclarationSyntax or StatementSyntax)
+            {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    // The 'disable'/'restore' comments without 'once', in order.
+    private static List<(int Position, bool Disabled)> ReadReSharperComments(SyntaxTree tree, CancellationToken cancellationToken)
+    {
+        var result = new List<(int, bool)>();
+        foreach (var trivia in TreeWalk.Trivia(tree.GetRoot(cancellationToken)))
+        {
+            if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia) && IsInconsistentNaming(trivia.ToString(), once: false) is { } disabled)
+            {
+                result.Add((trivia.SpanStart, disabled));
+            }
+        }
+
+        return result;
+    }
+
+    // For a ReSharper comment naming InconsistentNaming ('disable once A, InconsistentNaming'), with or without 'once' as
+    // asked: true for 'disable', false for 'restore'; null for any other comment.
+    private static bool? IsInconsistentNaming(string comment, bool once)
+    {
+        var match = ReSharperComment.Match(comment);
+        return match.Success && match.Groups["once"].Success == once
+            && match.Groups["ids"].Value.Split(',').Any(id => id.Trim() == "InconsistentNaming")
+            ? match.Groups["verb"].Value == "disable"
+            : null;
     }
 
     private static List<(int Position, bool Disabled)> ReadPragmas(SyntaxTree tree, CancellationToken cancellationToken)

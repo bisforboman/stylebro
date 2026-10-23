@@ -799,6 +799,10 @@ internal static class CamelCaseRenamer
         if (symbol is IParameterSymbol parameter)
         {
             await AddRelatedAsync(solution, parameter, parameter.ContainingSymbol, parameter.Ordinal, GetParameters, symbols, cancellationToken).ConfigureAwait(false);
+            if (symbols.OfType<IParameterSymbol>().Any(HasBindingAttribute))
+            {
+                return (result, KeptReason.ParameterHasAttribute, null);
+            }
         }
         else if (symbol is ITypeParameterSymbol { DeclaringMethod: { } method } typeParameter)
         {
@@ -1010,6 +1014,15 @@ internal static class CamelCaseRenamer
     /// symbol would hide at that spot, the qualified name ('this.count', or 'Type.count' for a static field). Null for
     /// a type or type parameter whose new name already means something at that spot (the whole rename is skipped).
     /// </summary>
+    /// <summary>
+    /// Whether a parameter has an attribute a framework may bind it by (owner's choice 2026-10-23, trial 49: Cocona's
+    /// <c>[Argument] string ArgName0</c>): any attribute of its own except the compiler's and the analyzers' annotations
+    /// (caller info, nullability, interop, JetBrains.Annotations), which say nothing about its name.
+    /// </summary>
+    internal static bool HasBindingAttribute(IParameterSymbol parameter) =>
+        parameter.GetAttributes().Any(a => a.AttributeClass?.ContainingNamespace?.ToDisplayString() is not (
+            "System.Runtime.CompilerServices" or "System.Diagnostics.CodeAnalysis" or "System.Runtime.InteropServices" or "JetBrains.Annotations"));
+
     internal static async Task<string?> GetReplacementAsync(
         ISymbol symbol,
         Document document,
