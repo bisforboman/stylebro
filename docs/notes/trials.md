@@ -641,3 +641,41 @@ One section per trial (repositories, what broke, what was fixed, the owner's ver
   no submodule files: 360 instead of 1,040 tests). GOTCHA: an environment variable set for a `bash -c` chain (`REUSE=-Reuse`)
   reaches every step; a wait loop's `pgrep -f soak.sh` matched other wait loops' command lines (deadlock); a stale log with the
   awaited marker fired a wait at once. Name logs per run and clear them first.
+
+## Trial 49 (2026-10-23, not clean: owner "Not clean", tally 0; host soak: not clean, 0 clean soaks)
+
+- Repos (three random plus one targeted): Cysharp/ConsoleAppFramework, datalust/superpower, mayuki/Cocona (random, seed 49:
+  draws 4, 22, 26 of 40 entries; every walk passed only used or rejected entries and ended on the unused tail, entries 37-39;
+  nothing appended; `.trials/trial49/logs/picks.md`), benjamin-hodgson/Sawmill (targeted at trial 48's migrate fix: StyleCop
+  1.2.0-beta.556 whose settings come from Benjamin.Pizza.BuildScripts' globalconfig; no pool entry fitted). Sawmill: migrate
+  read the package config, wrote no BRO1603 enum option (1.2), carried 24 suppressions over, and format changed nothing.
+- Cocona (owner: "Both signals"): BRO1302 renamed `[Argument] string ArgName0` below `// ReSharper disable once
+  InconsistentNaming`; Cocona binds parameter names (the command line's), and 5 tests failed on both frameworks.
+  `NamingRules.IsDisabledByReSharper` (in `AllowsRename`: every naming rule) leaves names where ReSharper's InconsistentNaming
+  is suppressed (`disable once` above the nearest declaration/statement/member, or `disable` up to `restore`); the renamer keeps
+  a parameter with an attribute of its own (`KeptReason.ParameterHasAttribute`; caller-info, nullability, interop and
+  JetBrains attributes don't count). After: 200 + 565 x2 tests pass, 5 kept findings baselined.
+- superpower (owner: "Emit-step list"): the untouched TWAE build fails on `CSC : error CS8002` (strong-named benchmarks reference
+  unsigned Sprache); check --build read the place-less error as "compiled nothing" (false Not verified). CS8002 comes from emit,
+  after the analyzers (a finding planted there was reported): `FormatCommand.EmitErrors`/`StopsCompiling`. Now Clean.
+- Cocona, check of the unformatted code: two kept findings were `kept` in one run and `warning` in the next (the copy's fixer
+  records a finding where it is when its Fix All runs). `MarkKept`/`IsKeptLine` match by file, rule and message (`AsKept`).
+- Format host soak (owner: "Not a clean soak"): Cocona's global.json selects SDK 8.0.132, and every host run crashed
+  ("GetGenericInstantiation ... does not have an implementation"): SDK 8's dotnet-format ships System.Collections.Immutable 8.0,
+  which the load context preferred over the framework's 10.0 that System.Reflection.Metadata binds to. `FormatHost.FromFramework`
+  (the .NET host's rule: the framework's copy wins when it isn't older) got past MEF, then MSBuild failed: SDK 8's dotnet-format
+  has no Microsoft.Build.dll (MSBuildLocator). `FormatHost.FolderProblem`: such an SDK falls back to dotnet format with an
+  `Engine:` line. CAF, superpower, Sawmill identical on both engines (check --build's "Checked" lines differ only in order).
+  Host vs default (s): check 102/202, 91/159, 28/27; format 74/173, 67/135, 26/26; recheck 26/36, 27/30, 26/26 (superpower,
+  CAF, Sawmill); check --build 67/79, 83/85, 89/88.
+- Preview matched format file by file on all four (Cocona again after the fixes). TWAE builds match the untouched code: superpower
+  only CS8002, Cocona only CS0618 (a benchmark), CAF and Sawmill green; tests as untouched (superpower 283 x2, CAF 124, Sawmill 99).
+  An incremental TWAE build right after check --build passed where a clean one fails (check --build's outputs): compare with
+  `--no-incremental`.
+- Kept as is: Cocona's `charset = utf-8` removes 44 files' BOMs (the repository's setting); init's summary names BRO1404 twice
+  when two conventions turn it off (each with its reason).
+- Environment: SDK 10.0.113 + 8.0.132 and pwsh were there (`ln -s ~/.dotnet/tools/bro /usr/local/bin/bro`); trial feed as a
+  global NuGet source (no repository had a nuget.config). superpower and Sawmill: global.json 10.0.201 lowered; Sawmill:
+  `dotnet tool restore` (docfx). GOTCHA: `git checkout -p` with piped answers reverted a second hunk of a fix (the host's
+  load context) while undoing a hand-made mutation: the helper and its test were committed without the call, and the rerun
+  crashed the same way. Undo hand mutations from a copy of the file, and test the call site, not only the helper.
