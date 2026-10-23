@@ -1,0 +1,20 @@
+Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Unhandled exception: System.InvalidOperationException: The solution does not contain the specified document.
+   at Microsoft.CodeAnalysis.Shared.Extensions.ISolutionExtensions.GetRequiredDocument(Solution solution, DocumentId documentId)
+   at Microsoft.CodeAnalysis.Workspace.<SetCurrentSolutionAsync>g__UpdateAddedDocumentToExistingContentsInSolution|29_1(Solution solution, ArrayBuilder`1 addedDocumentIds)
+   at Microsoft.CodeAnalysis.Workspace.<SetCurrentSolutionAsync>g__UnifyLinkedDocumentContents|29_0(Solution oldSolution, Solution newSolution)
+   at Microsoft.CodeAnalysis.Workspace.<>c.<SetCurrentSolutionAsync>b__29_3(Solution oldSolution, ValueTuple`5 data)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolutionAsync[TData](Boolean useAsync, TData data, Func`3 transformation, Boolean mayRaiseEvents, Action`3 onBeforeUpdate, Action`3 onAfterUpdate, CancellationToken cancellationToken)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolutionAsync(Boolean useAsync, Func`2 transformation, Func`3 changeKind, Action`2 onBeforeUpdate, Action`2 onAfterUpdate, CancellationToken cancellationToken)
+   at Roslyn.Utilities.ValueTaskExtensions.VerifyCompleted[T](ValueTask`1 task, String message)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolution(Func`2 transformation, Func`3 changeKind, Action`2 onBeforeUpdate, Action`2 onAfterUpdate)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolution(Func`2 transformation, WorkspaceChangeKind changeKind, ProjectId projectId, DocumentId documentId, Action`2 onBeforeUpdate, Action`2 onAfterUpdate)
+   at Microsoft.CodeAnalysis.Workspace.OnSolutionAdded(SolutionInfo solutionInfo)
+   at Microsoft.CodeAnalysis.MSBuild.MSBuildWorkspace.OpenSolutionAsync(String solutionFilePath, ILogger msbuildLogger, IProgress`1 progress, CancellationToken cancellationToken)
+   at Microsoft.CodeAnalysis.Tools.Workspaces.MSBuildWorkspaceLoader.LoadAsync(String solutionOrProjectPath, WorkspaceType workspaceType, String binaryLogPath, Boolean logWorkspaceWarnings, ILogger logger, CancellationToken cancellationToken)
+   at Microsoft.CodeAnalysis.Tools.CodeFormatter.OpenMSBuildWorkspaceAsync(String solutionOrProjectPath, WorkspaceType workspaceType, Boolean noRestore, Boolean requiresSemantics, String binaryLogPath, Boolean logWorkspaceWarnings, ILogger logger, CancellationToken cancellationToken)
+   at Microsoft.CodeAnalysis.Tools.CodeFormatter.FormatWorkspaceAsync(FormatOptions formatOptions, ILogger logger, CancellationToken cancellationToken, String binaryLogPath)
+   at Microsoft.CodeAnalysis.Tools.FormatCommandCommon.FormatAsync(FormatOptions formatOptions, ILogger`1 logger, CancellationToken cancellationToken)
+   at Microsoft.CodeAnalysis.Tools.Commands.RootFormatCommand.FormatCommandDefaultHandler.InvokeAsync(ParseResult parseResult, CancellationToken cancellationToken)
+   at System.CommandLine.Invocation.InvocationPipeline.InvokeAsync(ParseResult parseResult, CancellationToken cancellationToken)
+'dotnet format' crashed in the run for App, Lib, possibly after writing part of its changes (listed below). If the error says "Changes must be within bounds of SourceText", it's Roslyn's linked-file merge (https://github.com/dotnet/roslyn/issues/86001): two projects of that run compile the same file. Please report it with the projects named here.

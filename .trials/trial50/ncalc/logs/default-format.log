@@ -1,0 +1,102 @@
+Fixing StyleBro's rules and the built-in rules init and migrate turn on (141 ids); --all applies every analyzer's and compiler fix.
+Generators: building NCalc.SourceGenerators first (in the default configuration, the one 'dotnet format' loads): the code uses it as a source generator, and without its output the generated code would be missing from the checks.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net462, net8.0, netstandard2.0). net8.0: only the projects whose code compiles differently there.
+Configurations: runs for Release (NCalc.Parser) too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.
+Shared files: these projects compile the same files with other '#if' symbols or settings, so each group gets a run of its own (loaded together, 'dotnet format' crashes: https://github.com/dotnet/roslyn/issues/86001): NCalc.Core | NCalc.Benchmarks.
+Checked netstandard2.0, Release (run 1 of 6)
+Checked net8.0, part 1 of 2 (run 2 of 6)
+Checked netstandard2.0 (run 3 of 6)
+Checked net8.0, part 2 of 2 (run 4 of 6)
+Checked net10.0 (run 5 of 6)
+Checked net462 (run 6 of 6)
+== net10.0 (12 project(s), 59 files with findings)
+== net462 (9 project(s), 26 files with findings)
+'dotnet format' had warnings loading the workspace in its net462 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+'dotnet format' skipped NCalc.Core: MSBuild couldn't load it or a project it references for this run (often reference assemblies missing for its target framework). The restore isn't the cause; add '--verbosity diagnostic' to this 'bro format' command to see MSBuild's message ("Msbuild failed when processing the file ...") in its net462 run.
+'dotnet format' skipped NCalc.DependencyInjection: MSBuild couldn't load it or a project it references for this run (often reference assemblies missing for its target framework). The restore isn't the cause; add '--verbosity diagnostic' to this 'bro format' command to see MSBuild's message ("Msbuild failed when processing the file ...") in its net462 run.
+'dotnet format' skipped NCalc.LambdaCompilation: MSBuild couldn't load it or a project it references for this run (often reference assemblies missing for its target framework). The restore isn't the cause; add '--verbosity diagnostic' to this 'bro format' command to see MSBuild's message ("Msbuild failed when processing the file ...") in its net462 run.
+== net8.0, part 1 of 2 (1 project(s), 18 files with findings)
+== net8.0, part 2 of 2 (1 project(s))
+Unhandled exception: System.InvalidOperationException: The solution does not contain the specified document.
+   at Microsoft.CodeAnalysis.Shared.Extensions.ISolutionExtensions.GetRequiredDocument(Solution solution, DocumentId documentId)
+   at Microsoft.CodeAnalysis.Workspace.<SetCurrentSolutionAsync>g__UpdateAddedDocumentToExistingContentsInSolution|29_1(Solution solution, ArrayBuilder`1 addedDocumentIds)
+   at Microsoft.CodeAnalysis.Workspace.<SetCurrentSolutionAsync>g__UnifyLinkedDocumentContents|29_0(Solution oldSolution, Solution newSolution)
+   at Microsoft.CodeAnalysis.Workspace.<>c.<SetCurrentSolutionAsync>b__29_3(Solution oldSolution, ValueTuple`5 data)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolutionAsync[TData](Boolean useAsync, TData data, Func`3 transformation, Boolean mayRaiseEvents, Action`3 onBeforeUpdate, Action`3 onAfterUpdate, CancellationToken cancellationToken)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolutionAsync(Boolean useAsync, Func`2 transformation, Func`3 changeKind, Action`2 onBeforeUpdate, Action`2 onAfterUpdate, CancellationToken cancellationToken)
+   at Roslyn.Utilities.ValueTaskExtensions.VerifyCompleted[T](ValueTask`1 task, String message)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolution(Func`2 transformation, Func`3 changeKind, Action`2 onBeforeUpdate, Action`2 onAfterUpdate)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolution(Func`2 transformation, WorkspaceChangeKind changeKind, ProjectId projectId, DocumentId documentId, Action`2 onBeforeUpdate, Action`2 onAfterUpdate)
+   at Microsoft.CodeAnalysis.Workspace.OnSolutionAdded(SolutionInfo solutionInfo)
+   at Microsoft.CodeAnalysis.MSBuild.MSBuildWorkspace.OpenSolutionAsync(String solutionFilePath, ILogger msbuildLogger, IProgress`1 progress, CancellationToken cancellationToken)
+   at Microsoft.CodeAnalysis.Tools.Workspaces.MSBuildWorkspaceLoader.LoadAsync(String solutionOrProjectPath, WorkspaceType workspaceType, String binaryLogPath, Boolean logWorkspaceWarnings, ILogger logger, CancellationToken cancellationToken)
+   at Microsoft.CodeAnalysis.Tools.CodeFormatter.OpenMSBuildWorkspaceAsync(String solutionOrProjectPath, WorkspaceType workspaceType, Boolean noRestore, Boolean requiresSemantics, String binaryLogPath, Boolean logWorkspaceWarnings, ILogger logger, CancellationToken cancellationToken)
+   at Microsoft.CodeAnalysis.Tools.CodeFormatter.FormatWorkspaceAsync(FormatOptions formatOptions, ILogger logger, CancellationToken cancellationToken, String binaryLogPath)
+   at Microsoft.CodeAnalysis.Tools.FormatCommandCommon.FormatAsync(FormatOptions formatOptions, ILogger`1 logger, CancellationToken cancellationToken)
+   at Microsoft.CodeAnalysis.Tools.Commands.RootFormatCommand.FormatCommandDefaultHandler.InvokeAsync(ParseResult parseResult, CancellationToken cancellationToken)
+   at System.CommandLine.Invocation.InvocationPipeline.InvokeAsync(ParseResult parseResult, CancellationToken cancellationToken)
+'dotnet format' crashed in the run for NCalc.Benchmarks, possibly after writing part of its changes (listed below). If the error says "Changes must be within bounds of SourceText", it's Roslyn's linked-file merge (https://github.com/dotnet/roslyn/issues/86001): two projects of that run compile the same file. Please report it with the projects named here.
+== netstandard2.0 (11 project(s), 29 files with findings)
+== netstandard2.0, Release (1 project(s), 3 files with findings)
+Partly incomplete: 'dotnet format' skipped NCalc.Core, NCalc.DependencyInjection, NCalc.LambdaCompilation for net462 (references didn't load): code only that framework compiles (inside #if) wasn't formatted.
+Run 1 failed after changing 59 files:
+  example/NCalc.Playground/Helpers/EvaluationHelper.cs
+  example/NCalc.Playground/Models/EvaluationResult.cs
+  example/NCalc.Playground/Pages/Home.razor.cs
+  src/NCalc.Core/Cache/ILogicalExpressionCache.cs
+  src/NCalc.Core/Cache/LogicalExpressionCache.cs
+  src/NCalc.Core/Exceptions/NCalcCastException.cs
+  src/NCalc.Core/Expression.cs
+  src/NCalc.Core/Factories/ExpressionFactory.cs
+  src/NCalc.Core/Factories/IEvaluationVisitorFactory.cs
+  src/NCalc.Core/Handlers/BinaryEventArgs.cs
+  src/NCalc.Core/Handlers/EvaluateBinaryHandler.cs
+  src/NCalc.Core/Handlers/FunctionData.cs
+  src/NCalc.Core/Helpers/BuiltInFunctionHelper.cs
+  src/NCalc.Core/Helpers/EvaluationHelper.cs
+  src/NCalc.Core/Helpers/LikeOperatorHelper.cs
+  src/NCalc.Core/Helpers/MathHelper.cs
+  src/NCalc.Core/Visitors/AsyncEvaluationVisitor.cs
+  src/NCalc.Core/Visitors/EvaluationVisitor.cs
+  src/NCalc.Core/Visitors/FunctionExtractionVisitor.cs
+  src/NCalc.Core/Visitors/ParameterExtractionVisitor.cs
+  src/NCalc.Core/Visitors/SerializationVisitor.cs
+  src/NCalc.DependencyInjection/NCalcServiceBuilder.cs
+  src/NCalc.DependencyInjection/ServiceCollectionExtensions.cs
+  src/NCalc.Domain/LogicalExpressionList.cs
+  src/NCalc.Domain/ValueExpression.cs
+  src/NCalc.Domain/Visitors/ILogicalExpressionVisitor.cs
+  src/NCalc.Parser/ArgumentSeparator.cs
+  src/NCalc.Parser/Exceptions/NCalcParserException.cs
+  src/NCalc.Parser/LogicalExpressionParser.Helpers.cs
+  src/Plugins/NCalc.LambdaCompilation/LambdaCompilationExtensions.cs
+  src/Plugins/NCalc.LambdaCompilation/Reflection/MathFunctionHelper.cs
+  src/Plugins/NCalc.LambdaCompilation/Visitors/LambdaExpressionVisitor.cs
+  test/NCalc.Tests/ArgumentSeparatorTests.cs
+  test/NCalc.Tests/AsyncTests.cs
+  test/NCalc.Tests/ComparerTests.cs
+  test/NCalc.Tests/Contexts/NCalcTestJsonContext.cs
+  test/NCalc.Tests/CustomCultureTests.cs
+  test/NCalc.Tests/DateTimeTests.cs
+  test/NCalc.Tests/DecimalsTests.cs
+  test/NCalc.Tests/EvaluationTests.cs
+  test/NCalc.Tests/EventHandlersTests.cs
+  test/NCalc.Tests/ExceptionsTests.cs
+  test/NCalc.Tests/ExpressionContextTests.cs
+  test/NCalc.Tests/Extensions/AssertExtensions.cs
+  test/NCalc.Tests/ExtractionTests.cs
+  test/NCalc.Tests/FactoriesTests.cs
+  test/NCalc.Tests/GeneratedParserTests.cs
+  test/NCalc.Tests/InOperatorTests.cs
+  test/NCalc.Tests/LambdaTests.cs
+  test/NCalc.Tests/LikeOperatorTests.cs
+  test/NCalc.Tests/MathTests.cs
+  test/NCalc.Tests/MemoryCacheTests.cs
+  test/NCalc.Tests/NoStringTypeCoercionTests.cs
+  test/NCalc.Tests/OperatorsTests.cs
+  test/NCalc.Tests/ParametersAndFunctions.cs
+  test/NCalc.Tests/ParserTests.cs
+  test/NCalc.Tests/ReuseExpressionTest.cs
+  test/NCalc.Tests/SerializationTests.cs
+  test/NCalc.Tests/ServiceCollectionExtensionsTests.cs

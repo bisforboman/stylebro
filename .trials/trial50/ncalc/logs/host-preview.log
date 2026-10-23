@@ -1,0 +1,73 @@
+Unknown option: --engine
+bro: move a repository to StyleBro (https://bisforboman.github.io/stylebro/).
+  Getting started: https://bisforboman.github.io/stylebro/getting-started/
+  From StyleCop:   https://bisforboman.github.io/stylebro/migrating/
+  Settings:        https://bisforboman.github.io/stylebro/configuration/
+
+Usage:
+  bro migrate [path] [--write] [--agents-md] [--sonar-profile <file>]
+      Coming from StyleCop: reads the StyleCop setup at 'path' (default: the current folder) and prints the
+      StyleBro and .NET settings that enforce the same things. --write puts them into the .editorconfig files,
+      turns StyleBro's preset off and carries StyleCop suppressions over.
+
+  bro init [path] [--write] [--modernize] [--style microsoft|stylecop] [--agents-md] [--sonar-profile <file>] [--project <solution or project>]
+      Without StyleCop: the built-in .NET rules StyleBro's preset relies on, for the root .editorconfig.
+      --modernize adds the SDK's rules for newer C# and APIs. --style microsoft sets the Microsoft style
+      (dotnet/runtime's; <StyleBroStyle>) and the built-in rules it needs; your code's own conventions still win.
+      --style stylecop names the default (the preset is StyleCop's defaults). A repository with a StyleCop setup is told to
+      use 'bro migrate --write' instead. --project names what 'format' will run on (relative to 'path').
+
+      --agents-md (both): also write a StyleBro section into AGENTS.md (instructions for AI agents, between
+      markers, updated on every run). Opt-in.
+
+      Both follow a SonarQube setup too (SonarAnalyzer.CSharp, Sonar rule severities in rulesets and configs):
+      the Sonar rules that are on turn on the StyleBro and .NET rules that fix what they report. --sonar-profile
+      takes a quality profile exported from the server (api/qualityprofiles/backup) instead of the defaults.
+
+  bro format [folder, solution or project] [--files <a.cs> <b.cs> ...] [--all] [--once] [--restore] [--timings] [dotnet format options]
+      'dotnet format' that fixes StyleBro's rules and the built-in rules init/migrate turn on (plus whitespace),
+      once per target framework in multi-targeted repositories, never inside git submodules. Runs again until a
+      run changes nothing (at most 3 runs) and prints the files each run changed (the first 10); --once runs once. --all also
+      applies every other analyzer's and compiler fix. Other options pass through (--severity warn, --report). A
+      folder with several solutions or projects needs one named.
+      Then it lists the findings StyleBro's fixes keep on purpose, with the reason (a name read by reflection,
+      used in generated code, ...): don't change those by hand without checking; suppress or baseline them.
+      --verify-no-changes changes nothing and checks whether formatting would change a file; kept findings
+      don't fail it (plain 'dotnet format --verify-no-changes' fails on them). For CI and agents.
+      Exit codes: 0 clean (only kept findings left, if any); 2 a run still changed files after 3 runs, or with
+      --verify-no-changes, formatting would change a file; 3 not verified: nothing left in what it checked, but
+      part of the build wasn't (the 'Not checked:' lines say what and why); other: 'dotnet format' failed.
+      --files formats only those files (paths relative to the current folder or the repository root), loading
+      just the projects they belong to: a fraction of a whole run. With --verify-no-changes too.
+      The restore is skipped when its output is current; --restore restores anyway, --no-restore never.
+      --timings prints how long each phase took.
+
+  bro check [folder, solution or project] [--files <a.cs> ...] [--build] [options]
+      The same as 'bro format --verify-no-changes'. --build then builds every configuration of the solution with
+      warnings as errors: findings of format's rules fail it, other errors only when a copy of git HEAD builds
+      without them.
+
+  bro preview <init|migrate|format> [path] [--keep] [--all] [--no-restore] [options]
+      The same as the command with --diff (below).
+
+  bro migrate [path] --diff[=<file>] [--keep] [--all] [--no-restore] [--project <solution or project>] [--sonar-profile <file>]
+  bro init [path] --diff[=<file>] [--keep] [--all] [--no-restore] [--project <solution or project>] [--modernize] [--style microsoft|stylecop] [--sonar-profile <file>]
+  bro format [folder, solution or project] --diff[=<file>] [--keep] [--project <solution or project>] [options]
+      Preview: runs the command (--write for the first two) and then format until a run changes nothing on a
+      temporary copy of the repository, which is never touched. Prints a summary (settings, files changed per
+      rule, sample changes) and writes the full diff to .git/stylebro-preview.patch (or <file>). Adds the
+      StyleBro.Analyzers reference in the copy when the repository has none. --keep keeps the copy; --project
+      names what format runs on when the folder has several solutions or projects; --no-restore uses the
+      repository's own restore (run 'dotnet restore' first).
+
+  bro baseline [path or solution or project] [--project <solution or project>]
+      Writes stylebro.baseline with today's violations, so only new code has to follow the rules.
+
+  --json (any command): one JSON object on stdout (settings, conventions, runs, changes per rule, kept
+      findings, clean, exit code; https://bisforboman.github.io/stylebro/agents/); the text goes to stderr.
+
+  bro help | --help | -h
+      This text.
+
+  bro --version
+      The tool's version.

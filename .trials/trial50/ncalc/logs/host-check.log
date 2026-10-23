@@ -1,0 +1,65 @@
+Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net462, net8.0, netstandard2.0). net8.0: only the projects whose code compiles differently there.
+Shared files: these projects compile the same files with other '#if' symbols or settings, so each group gets a run of its own (loaded together, 'dotnet format' crashes: https://github.com/dotnet/roslyn/issues/86001): NCalc.Core | NCalc.Benchmarks.
+Checked net8.0, part 1 of 2 (run 1 of 5)
+Checked net10.0 (run 2 of 5)
+Checked net8.0, part 2 of 2 (run 3 of 5)
+Checked netstandard2.0 (run 4 of 5)
+Checked net462 (run 5 of 5)
+Unhandled exception: System.InvalidOperationException: The solution does not contain the specified document.
+   at Microsoft.CodeAnalysis.Shared.Extensions.ISolutionExtensions.GetRequiredDocument(Solution solution, DocumentId documentId)
+   at Microsoft.CodeAnalysis.Workspace.<SetCurrentSolutionAsync>g__UpdateAddedDocumentToExistingContentsInSolution|29_1(Solution solution, ArrayBuilder`1 addedDocumentIds)
+   at Microsoft.CodeAnalysis.Workspace.<SetCurrentSolutionAsync>g__UnifyLinkedDocumentContents|29_0(Solution oldSolution, Solution newSolution)
+   at Microsoft.CodeAnalysis.Workspace.<>c.<SetCurrentSolutionAsync>b__29_3(Solution oldSolution, ValueTuple`5 data)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolutionAsync[TData](Boolean useAsync, TData data, Func`3 transformation, Boolean mayRaiseEvents, Action`3 onBeforeUpdate, Action`3 onAfterUpdate, CancellationToken cancellationToken)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolutionAsync(Boolean useAsync, Func`2 transformation, Func`3 changeKind, Action`2 onBeforeUpdate, Action`2 onAfterUpdate, CancellationToken cancellationToken)
+   at Roslyn.Utilities.ValueTaskExtensions.VerifyCompleted[T](ValueTask`1 task, String message)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolution(Func`2 transformation, Func`3 changeKind, Action`2 onBeforeUpdate, Action`2 onAfterUpdate)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolution(Func`2 transformation, WorkspaceChangeKind changeKind, ProjectId projectId, DocumentId documentId, Action`2 onBeforeUpdate, Action`2 onAfterUpdate)
+   at Microsoft.CodeAnalysis.Workspace.OnSolutionAdded(SolutionInfo solutionInfo)
+   at Microsoft.CodeAnalysis.MSBuild.MSBuildWorkspace.OpenSolutionAsync(String solutionFilePath, ILogger msbuildLogger, IProgress`1 progress, CancellationToken cancellationToken)
+   at StyleBro.Host.Session.OpenAsync(String workspace, IReadOnlyList`1 environment, Boolean solution) in /home/user/stylebro/src/StyleBro.FormatHost/Session.cs:line 207
+   at StyleBro.Host.Session.RunAsync(String workspace, String folder, IReadOnlyList`1 environment, IReadOnlyList`1 variables, IReadOnlyList`1 selections, FormatArguments arguments, Action`1 output) in /home/user/stylebro/src/StyleBro.FormatHost/Session.cs:line 81
+   at StyleBro.Host.Session.Run(String workspace, String folder, IReadOnlyList`1 environment, IReadOnlyList`1 variables, IReadOnlyList`1 selections, IReadOnlyList`1 arguments, Action`1 output) in /home/user/stylebro/src/StyleBro.FormatHost/Session.cs:line 54
+   at StyleBro.Host.Session.Run(String workspace, String folder, IReadOnlyList`1 environment, IReadOnlyList`1 variables, IReadOnlyList`1 selections, IReadOnlyList`1 arguments, Action`1 output) in /home/user/stylebro/src/StyleBro.FormatHost/Session.cs:line 54
+--- End of stack trace from previous location ---
+   at StyleBro.Host.Session.Run(String workspace, String folder, IReadOnlyList`1 environment, IReadOnlyList`1 variables, IReadOnlyList`1 selections, IReadOnlyList`1 arguments, Action`1 output) in /home/user/stylebro/src/StyleBro.FormatHost/Session.cs:line 54
+'dotnet format' crashed in the run for NCalc, NCalc.Async, NCalc.Core, NCalc.DependencyInjection, NCalc.Domain, NCalc.LambdaCompilation, NCalc.MemoryCache, NCalc.Parser, NCalc.Playground, NCalc.SourceGenerators, NCalc.Sync, NCalc.Tests, possibly after writing part of its changes (listed below). If the error says "Changes must be within bounds of SourceText", it's Roslyn's linked-file merge (https://github.com/dotnet/roslyn/issues/86001): two projects of that run compile the same file. Please report it with the projects named here.
+Unhandled exception: System.InvalidOperationException: The solution does not contain the specified document.
+   at Microsoft.CodeAnalysis.Shared.Extensions.ISolutionExtensions.GetRequiredDocument(Solution solution, DocumentId documentId)
+   at Microsoft.CodeAnalysis.Workspace.<SetCurrentSolutionAsync>g__UpdateAddedDocumentToExistingContentsInSolution|29_1(Solution solution, ArrayBuilder`1 addedDocumentIds)
+   at Microsoft.CodeAnalysis.Workspace.<SetCurrentSolutionAsync>g__UnifyLinkedDocumentContents|29_0(Solution oldSolution, Solution newSolution)
+   at Microsoft.CodeAnalysis.Workspace.<>c.<SetCurrentSolutionAsync>b__29_3(Solution oldSolution, ValueTuple`5 data)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolutionAsync[TData](Boolean useAsync, TData data, Func`3 transformation, Boolean mayRaiseEvents, Action`3 onBeforeUpdate, Action`3 onAfterUpdate, CancellationToken cancellationToken)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolutionAsync(Boolean useAsync, Func`2 transformation, Func`3 changeKind, Action`2 onBeforeUpdate, Action`2 onAfterUpdate, CancellationToken cancellationToken)
+   at Roslyn.Utilities.ValueTaskExtensions.VerifyCompleted[T](ValueTask`1 task, String message)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolution(Func`2 transformation, Func`3 changeKind, Action`2 onBeforeUpdate, Action`2 onAfterUpdate)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolution(Func`2 transformation, WorkspaceChangeKind changeKind, ProjectId projectId, DocumentId documentId, Action`2 onBeforeUpdate, Action`2 onAfterUpdate)
+   at Microsoft.CodeAnalysis.Workspace.OnSolutionAdded(SolutionInfo solutionInfo)
+   at Microsoft.CodeAnalysis.MSBuild.MSBuildWorkspace.OpenSolutionAsync(String solutionFilePath, ILogger msbuildLogger, IProgress`1 progress, CancellationToken cancellationToken)
+   at StyleBro.Host.Session.OpenAsync(String workspace, IReadOnlyList`1 environment, Boolean solution) in /home/user/stylebro/src/StyleBro.FormatHost/Session.cs:line 207
+   at StyleBro.Host.Session.RunAsync(String workspace, String folder, IReadOnlyList`1 environment, IReadOnlyList`1 variables, IReadOnlyList`1 selections, FormatArguments arguments, Action`1 output) in /home/user/stylebro/src/StyleBro.FormatHost/Session.cs:line 81
+   at StyleBro.Host.Session.Run(String workspace, String folder, IReadOnlyList`1 environment, IReadOnlyList`1 variables, IReadOnlyList`1 selections, IReadOnlyList`1 arguments, Action`1 output) in /home/user/stylebro/src/StyleBro.FormatHost/Session.cs:line 54
+'dotnet format' crashed in the run for NCalc, NCalc.Async, NCalc.Core, NCalc.DependencyInjection, NCalc.Domain, NCalc.LambdaCompilation, NCalc.MemoryCache, NCalc.SourceGenerators, NCalc.Sync, possibly after writing part of its changes (listed below). If the error says "Changes must be within bounds of SourceText", it's Roslyn's linked-file merge (https://github.com/dotnet/roslyn/issues/86001): two projects of that run compile the same file. Please report it with the projects named here.
+'dotnet format' crashed in the run for NCalc.Core, possibly after writing part of its changes (listed below). If the error says "Changes must be within bounds of SourceText", it's Roslyn's linked-file merge (https://github.com/dotnet/roslyn/issues/86001): two projects of that run compile the same file. Please report it with the projects named here.
+'dotnet format' crashed in the run for NCalc.Benchmarks, possibly after writing part of its changes (listed below). If the error says "Changes must be within bounds of SourceText", it's Roslyn's linked-file merge (https://github.com/dotnet/roslyn/issues/86001): two projects of that run compile the same file. Please report it with the projects named here.
+Unhandled exception: System.InvalidOperationException: The solution does not contain the specified document.
+   at Microsoft.CodeAnalysis.Shared.Extensions.ISolutionExtensions.GetRequiredDocument(Solution solution, DocumentId documentId)
+   at Microsoft.CodeAnalysis.Workspace.<SetCurrentSolutionAsync>g__UpdateAddedDocumentToExistingContentsInSolution|29_1(Solution solution, ArrayBuilder`1 addedDocumentIds)
+   at Microsoft.CodeAnalysis.Workspace.<SetCurrentSolutionAsync>g__UnifyLinkedDocumentContents|29_0(Solution oldSolution, Solution newSolution)
+   at Microsoft.CodeAnalysis.Workspace.<>c.<SetCurrentSolutionAsync>b__29_3(Solution oldSolution, ValueTuple`5 data)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolutionAsync[TData](Boolean useAsync, TData data, Func`3 transformation, Boolean mayRaiseEvents, Action`3 onBeforeUpdate, Action`3 onAfterUpdate, CancellationToken cancellationToken)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolutionAsync(Boolean useAsync, Func`2 transformation, Func`3 changeKind, Action`2 onBeforeUpdate, Action`2 onAfterUpdate, CancellationToken cancellationToken)
+   at Roslyn.Utilities.ValueTaskExtensions.VerifyCompleted[T](ValueTask`1 task, String message)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolution(Func`2 transformation, Func`3 changeKind, Action`2 onBeforeUpdate, Action`2 onAfterUpdate)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolution(Func`2 transformation, WorkspaceChangeKind changeKind, ProjectId projectId, DocumentId documentId, Action`2 onBeforeUpdate, Action`2 onAfterUpdate)
+   at Microsoft.CodeAnalysis.Workspace.OnSolutionAdded(SolutionInfo solutionInfo)
+   at Microsoft.CodeAnalysis.MSBuild.MSBuildWorkspace.OpenSolutionAsync(String solutionFilePath, ILogger msbuildLogger, IProgress`1 progress, CancellationToken cancellationToken)
+   at StyleBro.Host.Session.OpenAsync(String workspace, IReadOnlyList`1 environment, Boolean solution) in /home/user/stylebro/src/StyleBro.FormatHost/Session.cs:line 207
+   at StyleBro.Host.Session.RunAsync(String workspace, String folder, IReadOnlyList`1 environment, IReadOnlyList`1 variables, IReadOnlyList`1 selections, FormatArguments arguments, Action`1 output) in /home/user/stylebro/src/StyleBro.FormatHost/Session.cs:line 81
+   at StyleBro.Host.Session.RunAsync(String workspace, String folder, IReadOnlyList`1 environment, IReadOnlyList`1 variables, IReadOnlyList`1 selections, FormatArguments arguments, Action`1 output) in /home/user/stylebro/src/StyleBro.FormatHost/Session.cs:line 81
+   at StyleBro.Host.Session.RunAsync(String workspace, String folder, IReadOnlyList`1 environment, IReadOnlyList`1 variables, IReadOnlyList`1 selections, FormatArguments arguments, Action`1 output) in /home/user/stylebro/src/StyleBro.FormatHost/Session.cs:line 81
+   at StyleBro.Host.Session.Run(String workspace, String folder, IReadOnlyList`1 environment, IReadOnlyList`1 variables, IReadOnlyList`1 selections, IReadOnlyList`1 arguments, Action`1 output) in /home/user/stylebro/src/StyleBro.FormatHost/Session.cs:line 54
+'dotnet format' crashed in the run for NCalc, NCalc.Async, NCalc.Core, NCalc.DependencyInjection, NCalc.Docs, NCalc.Domain, NCalc.LambdaCompilation, NCalc.MemoryCache, NCalc.Parser, NCalc.SourceGenerators, NCalc.Sync, possibly after writing part of its changes (listed below). If the error says "Changes must be within bounds of SourceText", it's Roslyn's linked-file merge (https://github.com/dotnet/roslyn/issues/86001): two projects of that run compile the same file. Please report it with the projects named here.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
