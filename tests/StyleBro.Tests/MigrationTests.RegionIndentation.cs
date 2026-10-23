@@ -13,15 +13,15 @@ public sealed partial class MigrationTests
     [Fact]
     public void IfBodies_AlsoAreTheRegionLinesOnlySomeBuildsCompile()
     {
+        // '#endregion' below '#endif'; '#region Add' is below code, which the formatter leaves alone in the left-out branch.
         Assert.True(IfBodies.IsCandidate(RegionInLeftOutCode));
-        Assert.Equal([5, 10], IfBodies.Lines(RegionInLeftOutCode, [["NET20"], ["NET6_0_OR_GREATER"], []]));
+        Assert.Equal([10], IfBodies.Lines(RegionInLeftOutCode, [["NET20"], ["NET6_0_OR_GREATER"], []]));
 
         // Compiled by every build (or left out by every one): each indents them the same way.
         Assert.Empty(IfBodies.Lines(RegionInLeftOutCode, [["NET6_0_OR_GREATER"], []]));
-        Assert.False(IfBodies.IsCandidate("class C\n{\n    void M()\n    {\n        #region Add\n        x();\n        #endregion\n    }\n}\n"));
 
         // A run that moved '#endregion' gets its indentation back.
         var moved = RegionInLeftOutCode.Replace("        #endregion", "#endregion", StringComparison.Ordinal);
-        Assert.Equal(RegionInLeftOutCode, IfBodies.Keep(RegionInLeftOutCode, [5, 10], moved));
+        Assert.Equal(RegionInLeftOutCode, IfBodies.Keep(RegionInLeftOutCode, [10], moved));
     }
 }

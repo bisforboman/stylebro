@@ -30,9 +30,6 @@ internal static class IfBodies
         @"(?:\)|^[ \t]*(?:\}[ \t]*)?(?:else|do))[ \t]*(?://[^\r\n]*)?\r?\n[ \t]*#[ \t]*(?:if|elif|else|endif)\b",
         RegexOptions.Multiline | RegexOptions.Compiled);
 
-    // A '#region' or '#endregion' line: the directives the formatter indents (it puts the others in column 0 in every build).
-    private static readonly Regex RegionDirective = new(@"^[ \t]*#[ \t]*(?:region|endregion)\b", RegexOptions.Multiline | RegexOptions.Compiled);
-
     // A whitespace finding that only rewrites a line break ("Replace 1 characters with '\r\n'"), which the whitespace pass
     // writes on the line above such a body when it re-indents the body.
     private static readonly Regex LineBreakOnly = new(@" WHITESPACE: Fix whitespace formatting\. Replace \d+ characters with '(?:(?:\\r)?\\n)+'\.", RegexOptions.Compiled);
@@ -41,14 +38,16 @@ internal static class IfBodies
     private static readonly Regex WritesLineBreak = new(@" WHITESPACE: Fix whitespace formatting\. (?:Replace \d+ characters with|Insert) '[^']*\\n", RegexOptions.Compiled);
 
     /// <summary>Whether a C# text may have such lines (<see cref="Lines"/> decides).</summary>
-    public static bool IsCandidate(string text) =>
-        text.Contains("#if", StringComparison.Ordinal) && (Candidate.IsMatch(text) || OpensBlock(text) || RegionDirective.IsMatch(text));
+    public static bool IsCandidate(string text) => text.Contains("#if", StringComparison.Ordinal) && (Candidate.IsMatch(text) || OpensBlock(text));
 
     /// <summary>
     /// The lines (0-based) of <paramref name="text"/> whose statement nesting differs between the parses with
     /// <paramref name="symbolSets"/> (each the defined symbols of one run that compiles the file): a line counts when its first
     /// token is code in two parses (not text of a branch left out) and is a body of a different number of statements in them,
-    /// or when it is a '#region' or '#endregion' that one parse compiles and another leaves out.
+    /// or when it is a '#region' or '#endregion' right below another directive line that one parse compiles and another leaves
+    /// out (the formatter puts the other directives in column 0 in every parse, and leaves a line below left-out text alone).
+    /// Such a region line only moves where the left-out branch spans a block boundary, which makes the file a candidate
+    /// already (<see cref="OpensBlock"/>).
     /// </summary>
     public static List<int> Lines(string text, IEnumerable<IReadOnlyCollection<string>> symbolSets)
     {
@@ -68,6 +67,11 @@ internal static class IfBodies
             foreach (var directive in root.DescendantTrivia(descendIntoTrivia: true).Where(t => t.IsKind(SyntaxKind.RegionDirectiveTrivia) || t.IsKind(SyntaxKind.EndRegionDirectiveTrivia)))
             {
                 var line = source.Lines.GetLineFromPosition(directive.SpanStart).LineNumber;
+                if (line == 0 || !source.Lines[line - 1].ToString().TrimStart().StartsWith('#'))
+                {
+                    continue;
+                }
+
                 var active = ((DirectiveTriviaSyntax)directive.GetStructure()!).IsActive;
                 if (!regions.TryAdd(line, active) && regions[line] != active)
                 {
