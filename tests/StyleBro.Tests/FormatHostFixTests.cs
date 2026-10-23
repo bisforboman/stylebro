@@ -38,7 +38,7 @@ public sealed class FormatHostFixTests : IDisposable
     }
 
     [Fact]
-    public async Task TheCache_RunsAnAnalyzer_OnlyOnACompilationItHasntSeen()
+    public async Task TheCache_RunsAnAnalyzer_OnlyOnContentItHasntSeen()
     {
         using var workspace = new AdhocWorkspace();
         var lib = ProjectId.CreateNewId();
@@ -55,7 +55,7 @@ public sealed class FormatHostFixTests : IDisposable
         var other = new ClassAnalyzer("T2");
 
         async Task<ImmutableArray<Diagnostic>> Get(Solution s, ProjectId id, params DiagnosticAnalyzer[] analyzers) =>
-            await cache.GetAsync((await s.GetProject(id)!.GetCompilationAsync())!, s.GetProject(id)!.AnalyzerOptions, [.. analyzers], null, CancellationToken.None);
+            await cache.GetAsync(s.GetProject(id)!, [.. analyzers], [], null, CancellationToken.None);
 
         var first = await Get(solution, app, classes);
         Assert.Equal(["C", "D"], first.Select(d => d.GetMessage()));
@@ -79,6 +79,35 @@ public sealed class FormatHostFixTests : IDisposable
         Assert.Equal(["A2", "B"], (await Get(fixedLib, lib, classes)).Select(d => d.GetMessage()));
         await Get(fixedLib, app, classes);
         Assert.Equal(6, cache.Runs);
+
+        // Another solution with the same content (a check's view, then the fix run's): the results carry over.
+        var view = fixedLib.RemoveProject(app);
+        Assert.Equal(["A2", "B"], (await Get(view, lib, classes)).Select(d => d.GetMessage()));
+        Assert.Equal(6, cache.Runs);
+
+        // The same text written again is a change (a new version): analyzed again.
+        var rewritten = fixedLib.WithDocumentText(fixedLib.GetProject(lib)!.Documents.First().Id, SourceText.From("class A2 { }"));
+        await Get(rewritten, lib, classes);
+        Assert.Equal(7, cache.Runs);
+    }
+
+    [Fact]
+    public async Task TheCache_KeepsTheCompilersDiagnostics_ByTheirIds()
+    {
+        using var workspace = new AdhocWorkspace();
+        var id = ProjectId.CreateNewId();
+        var solution = workspace.CurrentSolution
+            .AddProject(ProjectInfo.Create(id, VersionStamp.Default, "Lib", "Lib", LanguageNames.CSharp))
+            .AddDocument(DocumentId.CreateNewId(id), "A.cs", "class A { void M() { int unused; } }", filePath: "/r/Lib/A.cs");
+        var cache = new AnalysisCache();
+
+        async Task<ImmutableArray<Diagnostic>> Get(params string[] ids) =>
+            await cache.GetAsync(solution.GetProject(id)!, [], [.. ids], null, CancellationToken.None);
+
+        Assert.Equal(["CS0168"], (await Get("CS0168")).Select(d => d.Id));
+        Assert.Empty(await Get("CS0219"));
+        await Get("CS0168");
+        Assert.Equal(2, cache.Runs);
     }
 
     [Fact]

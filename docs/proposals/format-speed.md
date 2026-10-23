@@ -5,7 +5,10 @@ first, measured on the trial repositories; implementation later, in separate PRs
 host for checks) and 2 (the host for fixes: fixed order, each fixer once per id, re-analysis only of what a fix changed;
 `FixLoop.cs`, `AnalysisCache.cs`, `DiskState.cs`) are implemented behind `--engine host` (`src/StyleBro.FormatHost`,
 `src/StyleBro.Migrate/FormatHost.cs`, docs/format-engine.md, with phase 2's measurements), with the parity harness
-`scripts/format-speed/Compare-Format.ps1`.
+`scripts/format-speed/Compare-Format.ps1`. Phase 3 waits (owner's decision 2026-10-23,
+[checks before merged fix rounds](https://github.com/bisforboman/stylebro/blob/main/docs/decisions/2026-10-23-the-format-host-works-on-its-checks-before-merged-fix-rounds.md)):
+measured after phase 2, the checks were the largest cost, so the host's checks now share its analysis cache (keyed by a
+project's content), and a command's runs keep their workspaces loaded.
 `format --verify-no-changes` and `--diff` (preview) share format's run plan, so everything below applies to them too.
 
 ## Summary

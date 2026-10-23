@@ -41,9 +41,20 @@ none of them in what a fix writes:
 - **Each fixer is called once per id.** `dotnet format` calls it once per project that references the analyzers (17 times
   per id on a library with 8 target frameworks); only the first call changes anything.
 - **Only what changed is analyzed again.** Before each id `dotnet format` runs that id's analyzers again over every project
-  that had it. The host keeps each analyzer's results per compilation and runs it again only on the projects a fix
-  changed, and on the projects that reference them; the others keep their compilation and their results. The check of the
-  run after a run that changed files analyzes everything again, so the verdict never rests on a kept result.
+  that had it. The host keeps each analyzer's results per project, for as long as the project's content (its documents and
+  those of the projects it references) stays as it was, and runs it again only on the projects a fix changed and on the
+  projects that reference them.
+
+## What it reuses
+
+The checks run the same way: a check in the host runs `dotnet format`'s formatters and the analysis it reports, from the same
+results as the fixes. So:
+
+- the fix run after a framework's check analyzes again only what that run's earlier formatters changed;
+- two runs that share a project (a library every framework's run references) analyze it once;
+- the check after a run that changed files analyzes again only the projects a fix reached and the ones referencing them,
+  as `dotnet format` would find them: a result is reused only for the same content it was computed on;
+- a command's runs keep each configuration's workspace loaded, so run 2 loads nothing again.
 
 Between two runs, and between the runs of a command's frameworks and configurations, the host reads back the files that
 changed on disk (a run's own fixes, CSharpier, the indentation `format` keeps, a lone CR it converts), so every run sees

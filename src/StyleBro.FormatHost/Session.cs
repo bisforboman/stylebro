@@ -126,20 +126,19 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
         var filesMs = watch.ElapsedMilliseconds - loadMs;
         logger.LogTrace(this.format.Text("Complete_in_0_ms"), filesMs);
         logger.LogTrace(this.format.Text("Running_formatters"));
-        List<DocumentId> changed;
-        object files;
+        var files = this.format.NewFiles();
+        var loop = new FixLoop(this.format, this.cache, this.measure);
         if (arguments.Verify)
         {
-            (changed, files) = await this.format.FormatAsync(loaded.Workspace, view, formattable.Documents, options, logger, CancellationToken.None).ConfigureAwait(false);
+            await loop.RunAsync(loaded.Workspace, view, formattable.Documents, options, logger, files, CancellationToken.None).ConfigureAwait(false);
         }
         else
         {
-            files = this.format.NewFiles();
             await FixGate.WaitAsync().ConfigureAwait(false);
             var previous = Set(variables);
             try
             {
-                var formatted = await new FixLoop(this.format, this.cache, this.measure).RunAsync(loaded.Workspace, view, formattable.Documents, options, logger, files, CancellationToken.None).ConfigureAwait(false);
+                var formatted = await loop.RunAsync(loaded.Workspace, view, formattable.Documents, options, logger, files, CancellationToken.None).ConfigureAwait(false);
                 await loaded.SaveAsync(view, formatted).ConfigureAwait(false);
             }
             finally
@@ -147,10 +146,9 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
                 Set(previous);
                 FixGate.Release();
             }
-
-            changed = this.format.Documents(files);
         }
 
+        var changed = this.format.Documents(files);
         logger.LogTrace(this.format.Text("Complete_in_0_ms"), watch.ElapsedMilliseconds - loadMs - filesMs);
         foreach (var id in changed)
         {

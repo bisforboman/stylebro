@@ -31,7 +31,6 @@ internal sealed class DotnetFormat
     private readonly Type fixCategory;
     private readonly MethodInfo createMatcher;
     private readonly MethodInfo determineFiles;
-    private readonly MethodInfo runFormatters;
     private readonly MethodInfo writeReport;
     private readonly Type formattedFile;
     private readonly PropertyInfo formattedDocument;
@@ -58,7 +57,6 @@ internal sealed class DotnetFormat
         this.createMatcher = Method(Find("Microsoft.CodeAnalysis.Tools.Utilities.SourceFileMatcher"), "CreateMatcher");
         var formatter = Find("Microsoft.CodeAnalysis.Tools.CodeFormatter");
         this.determineFiles = Method(formatter, "DetermineFormattableFilesAsync");
-        this.runFormatters = Method(formatter, "RunCodeFormattersAsync");
         this.writeReport = Method(Find("Microsoft.CodeAnalysis.Tools.ReportWriter"), "Write");
         this.formattedFile = Find("Microsoft.CodeAnalysis.Tools.FormattedFile");
         this.formattedDocument = this.formattedFile.GetProperty("DocumentId") ?? throw new MissingMemberException(this.formattedFile.FullName, "DocumentId");
@@ -159,19 +157,6 @@ internal sealed class DotnetFormat
     }
 
     /// <summary>
-    /// Runs dotnet-format's formatters on <paramref name="documents"/> (CodeFormatter.RunCodeFormattersAsync): a check logs
-    /// what it would change. Returns the changed documents, in the order it found them, and the list its report writes.
-    /// </summary>
-    public async Task<(List<DocumentId> Changed, object Files)> FormatAsync(Workspace workspace, Solution solution, ImmutableArray<DocumentId> documents, object options, ILogger logger, CancellationToken cancellation)
-    {
-        var files = Activator.CreateInstance(typeof(List<>).MakeGenericType(this.formattedFile))!;
-        var task = (Task)this.runFormatters.Invoke(null, [workspace, solution, documents, options, logger, files, cancellation])!;
-        await task.ConfigureAwait(false);
-        var changed = ((IEnumerable)files).Cast<object>().Select(f => (DocumentId)this.formattedDocument.GetValue(f)!).Distinct().ToList();
-        return (changed, files);
-    }
-
-    /// <summary>
     /// dotnet-format's formatters in its order (CodeFormatter.s_codeFormatters): each one's fix categories (1 whitespace, 2 code
     /// style, 4 analyzers) and, for its two analyzer formatters (code style, then the projects' analyzer references), their parts.
     /// </summary>
@@ -235,7 +220,7 @@ internal sealed class DotnetFormat
     public void LogDiagnostic(ILogger logger, Document document, LinePosition position, Diagnostic diagnostic, bool changesAreErrors) =>
         this.logDiagnosticIssue.Invoke(null, [logger, document, position, diagnostic, changesAreErrors]);
 
-    /// <summary>A new list for <see cref="FormatAsync"/>'s and the formatters' FormattedFile entries.</summary>
+    /// <summary>A new list for the formatters' FormattedFile entries.</summary>
     public object NewFiles() => Activator.CreateInstance(typeof(List<>).MakeGenericType(this.formattedFile))!;
 
     /// <summary>The documents a list of FormattedFile entries names, in order, once each.</summary>
