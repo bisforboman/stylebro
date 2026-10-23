@@ -1,0 +1,21 @@
+Test run for /home/user/stylebro/.trials/trial50/Dahomey.Json/rdefault/src/Dahomey.Json.Tests/bin/Release/net5.0/Dahomey.Json.Tests.dll (.NETCoreApp,Version=v5.0)
+Test run for /home/user/stylebro/.trials/trial50/Dahomey.Json/rdefault/src/Dahomey.Json.Tests/bin/Release/netcoreapp3.1/Dahomey.Json.Tests.dll (.NETCoreApp,Version=v3.1)
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+Test run for /home/user/stylebro/.trials/trial50/Dahomey.Json/rdefault/src/Dahomey.Json.Tests/bin/Release/net6.0/Dahomey.Json.Tests.dll (.NETCoreApp,Version=v6.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+Starting test execution, please wait...
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:   374, Skipped:     0, Total:   374, Duration: 1 s - Dahomey.Json.Tests.dll (net6.0)
+
+Passed!  - Failed:     0, Passed:   360, Skipped:     0, Total:   360, Duration: 1 s - Dahomey.Json.Tests.dll (netcoreapp3.1)
+
+Passed!  - Failed:     0, Passed:   372, Skipped:     0, Total:   372, Duration: 1 s - Dahomey.Json.Tests.dll (net5.0)

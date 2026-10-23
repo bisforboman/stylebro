@@ -130,3 +130,68 @@ Logs: `.trials/trial50/Dahomey.Json/logs/host-preview-format.log`, `host-format-
 
 - init's note that `.trials/Directory.Build.props` is hidden by the new Directory.Build.props is the trial stub, not the repo.
 - Host engine was faster for format (56 s vs 104 s); check and check --build took the same time on this small repository.
+
+## Re-check (fixer's commit 1a25ead, PR #294)
+
+Repacked from `claude/trial-50` at `1a25ead` as `0.8.0-trial50.2` (`dotnet tool update -g StyleBro.Tool --version
+0.8.0-trial50.2`). Fresh clones of the untouched commit: `rdefault/`, `rhost/` (full runs), `p-host/`, `p-dotnet/`,
+`d-host/` (previews on an unformatted tree after `init --write` + the package reference), `rpv/` (the preview init patch
+applied). Logs: `.trials/trial50/Dahomey.Json/logs/recheck/`.
+
+| Command | Default: verdict | exit | time | Host: verdict | exit | time |
+|---|---|---|---|---|---|---|
+| `bro preview init` | 92 files, 338 changes, clean after 1 run | 0 | 96 s | `--engine host`: "Unknown option" (unchanged; preview init has no engine) | 1 | 0 s |
+| `bro init --write` | as before | 0 | 4 s | identical | 0 | 3 s |
+| `bro format` | run 1: 92 files; run 2: 0, clean | 0 | 97 s | run 1: 92 files; run 2: 0, clean | 0 | 53 s |
+| `bro check` (+ `--json`) | Clean | 0 | 21 s | Clean | 0 | 19 s |
+| `bro check --build` (+ `--json`) | Clean (15 untouched errors not counted) | 0 | 52 s | Clean, same lines | 0 | 52 s |
+| `bro preview format --engine dotnet-format` | 92 files, 338 changes, clean after 1 run | 0 | 84 s | | | |
+| `bro preview format --engine host` | | | | 92 files, 338 changes, clean after 1 run | 0 | 50 s |
+| `bro format --diff --engine host` | | | | 92 files, 338 changes, clean after 1 run | 0 | 48 s |
+
+- **Finding 1 is fixed.** All three previews exit 0. Their patches (3,153 lines each) are byte-identical, and each one, applied
+  to its clone, gives exactly the `rdefault` format tree (`diff -rq`). The spot repro (`bro preview format Lib --engine
+  host`) now exits 0 too.
+- Trees: `rdefault` == `rhost`, and both equal the first run's tree (apart from the package version in Directory.Build.props).
+  The preview init patch differs from the first run's only in that version, and applied it gives the format tree.
+- `--json` of check and check --build: equal apart from `path`; clean true, exit 0, one `notChecked` (IDE0049). No host
+  load note.
+- TWAE builds (both clones, Debug and Release): 0 warnings, the same 15 netstandard2.0 CS0122 as the untouched code. Tests:
+  360 / 372 / 374 passed, 0 failed, as on the untouched code.
+- Verdicts match: no false Clean or Not verified, one changing format run, no test regressions.
+
+### New (pre-existing, not from the fix): 2. A preview of a subfolder adds a second Directory.Build.props
+
+Seen in the spot repro, where the root `Directory.Build.props` already references StyleBro.Analyzers and the project is
+in `Lib/`. `bro preview format Lib` (with or without `--engine`, so it predates PR #294; the first run never got that far
+with `--engine`) prints "StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial50.2 to
+Directory.Build.props for the preview", and the patch creates `Lib/Directory.Build.props`:
+
+```diff
++++ b/Lib/Directory.Build.props
+@@ -0,0 +1,5 @@
++<Project>
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial50.2" PrivateAssets="all" />
++  </ItemGroup>
++</Project>
+```
+
+If someone applies the patch, that file is the nearest Directory.Build.props for `Lib/` and hides the root one: its
+`<StyleBroPreset>` and anything else in the root file stop applying to that project.
+
+Smallest reproduction (`.trials/trial50/spot-dahomey-engine`):
+
+```bash
+git init -q && dotnet new classlib -n Lib -o Lib
+printf '<Project>\n  <ItemGroup>\n    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial50.2" PrivateAssets="all" />\n  </ItemGroup>\n</Project>\n' > Directory.Build.props
+git add -A && git commit -qm init
+bro preview format Lib     # exit 0; "wasn't referenced"; the patch adds Lib/Directory.Build.props
+```
+
+Why (from reading the code): `PreviewCommand.Run` calls `AddPackage(target folder)` (src/StyleBro.Migrate/PreviewCommand.cs, around line 281), which
+checks `ReferencesStyleBro` on the files under `Lib/` only. It doesn't look at the Directory.Build.props/.targets files
+above the target, up to the repository root, that MSBuild imports. It didn't affect Dahomey.Json: its only solution is
+found from the root, and the package goes into the root Directory.Build.props as in the getting-started guide.
+
+Logs: `logs/recheck/spot-preview-noengine.log`, `spot-preview-engine.log`, `spot-preview.patch`.

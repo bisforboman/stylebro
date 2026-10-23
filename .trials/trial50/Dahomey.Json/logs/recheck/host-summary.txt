@@ -1,0 +1,9 @@
+host preview-init exit=1 0s :: bro preview init --engine host
+host init exit=0 3s :: bro init --write
+host format exit=0 53s :: bro format --engine host
+host check exit=0 19s :: bro check --engine host
+host check-json exit=0 19s :: bash -c bro check --engine host --json > /home/user/stylebro/.trials/trial50/Dahomey.Json/logs/recheck/host-check.json
+host check-build exit=0 52s :: bro check --build --engine host
+host check-build-json exit=0 51s :: bash -c bro check --build --engine host --json > /home/user/stylebro/.trials/trial50/Dahomey.Json/logs/recheck/host-check-build.json
+host preview-format exit=0 50s :: bro preview format --engine host
+host format-diff exit=0 48s :: bro format --diff --engine host
