@@ -67,4 +67,29 @@ Options `bro` passes to `dotnet format` work the same way. A run with an option 
 
 ## Measured
 
-TIMINGS
+On a 4-core Linux machine with SDK 10.0.113, nothing else running, on the trial repositories after `bro init` (or
+`bro migrate`) and the package, before their first `bro format`. "Plain" is one `dotnet format` of the whole solution, which
+`bro format` can't use on multi-targeted code (it merges the frameworks' copies of a file); the targets are a first run
+within ~3x a plain `dotnet format` and a run on formatted code within ~1.5x a plain `dotnet format --verify-no-changes`.
+
+| Repository | Plain `dotnet format` | `bro format --engine host`, first run | Plain verify of the result | `bro format --engine host` again | `bro check --engine host` |
+|---|---:|---:|---:|---:|---:|
+| CliFx (CSharpier, 3 frameworks) | 49 s | 57 s (1.2x) | 41 s | 25 s (0.6x) | 26 s (0.6x) |
+| error-or (migrated from StyleCop) | 27 s | 31 s (1.2x) | 26 s | 16 s (0.6x) | 16 s (0.6x) |
+| Serilog (5 frameworks) | 124 s | 106 s (0.9x) | 55 s | 35 s (0.6x) | 34 s (0.6x) |
+| System.IO.Abstractions (7 frameworks, Release) | 207 s | 261 s (1.3x) | 107 s | 98 s (0.9x) | 97 s (0.9x) |
+| PalCalc (WPF, 3 configurations) | 140 s | 266 s (1.9x) | 62 s | 135 s (2.2x) | 110 s (1.8x) |
+
+Against the default engine, from the parity runs (same machine, the two engines one after the other): `bro format` took
+45 s instead of 126 s on CliFx, 36 s instead of 78 s on error-or, 97 s instead of 143-151 s on Serilog, 195 s instead of
+346 s on System.IO.Abstractions, 255 s instead of 358 s on PalCalc and 569-640 s instead of 1,270-1,433 s on
+Newtonsoft.Json (8 frameworks).
+
+PalCalc's runs on formatted code miss the target: each of its three configurations is a workspace of its own (load and
+compile, ~20-25 s each), and `bro check` formats a copy to tell kept findings apart, which loads them again.
+
+The parity harness (`scripts/format-speed/Compare-Format.ps1`, `check`, `format`, `check` with both engines) gave the same
+working trees, kept findings, exit codes and `--json` reports on all six, twice each, and the host the same trees in both
+rounds. One note differs on Newtonsoft.Json: the default engine's net20 run warns about a project reference it can't
+match, an effect of forcing one framework on the projects, which the host, loading every framework at once, doesn't have
+([decision](https://github.com/bisforboman/stylebro/blob/main/docs/decisions/2026-10-23-the-format-host-keeps-its-own-workspace-load-warnings.md)).

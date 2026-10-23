@@ -1,9 +1,11 @@
 # Proposal: a faster `bro format`
 
 Status: **proposal, for the owner's review** (owner's decision 2026-10-17: "Yes, after this fix round": a design doc
-first, measured on the trial repositories; implementation later, in separate PRs). Phase 0 is implemented; phase 1 (the
-host for checks) is implemented behind `--engine host` (`src/StyleBro.FormatHost`, `src/StyleBro.Migrate/FormatHost.cs`,
-docs/format-engine.md), with the parity harness `scripts/format-speed/Compare-Format.ps1`.
+first, measured on the trial repositories; implementation later, in separate PRs). Phase 0 is implemented; phases 1 (the
+host for checks) and 2 (the host for fixes: fixed order, each fixer once per id, re-analysis only of what a fix changed;
+`FixLoop.cs`, `AnalysisCache.cs`, `DiskState.cs`) are implemented behind `--engine host` (`src/StyleBro.FormatHost`,
+`src/StyleBro.Migrate/FormatHost.cs`, docs/format-engine.md, with phase 2's measurements), with the parity harness
+`scripts/format-speed/Compare-Format.ps1`.
 `format --verify-no-changes` and `--diff` (preview) share format's run plan, so everything below applies to them too.
 
 ## Summary
