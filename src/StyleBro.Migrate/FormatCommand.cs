@@ -6131,14 +6131,14 @@ internal static partial class FormatCommand
     /// <summary>Full paths as the hook matches them: '|A|B|', upper-case; empty for none.</summary>
     private static string PathList(IReadOnlyCollection<string> paths) => paths.Count == 0 ? string.Empty : "|" + string.Join("|", paths.Select(k => k.ToUpperInvariant())) + "|";
 
-    /// <summary>How a project compiles for one framework (<see cref="ReadView"/>): defined symbols, language version, nullable context, files, doc generation.</summary>
+    /// <summary>How a project compiles for one framework (<see cref="ReadView"/>): defined symbols, language version, nullable context, files, docs.</summary>
     public sealed record CompileView(HashSet<string> Defines, string LangVersion, string Nullable, string[] Compile, bool Documentation = false)
     {
         /// <summary>
         /// What decides how <paramref name="files"/> parse: each file with the symbols its '#if's test that are defined, the
-        /// language version, nullable context and doc generation (BRO1601 reports only with it). Two views with the same key parse
-    /// those files the same and get the same findings. The symbols come
-        /// from the file's own path: upper-cased, it doesn't exist on Linux, and every file tested nothing there.
+        /// language version, nullable context and doc generation (BRO1601 reports only with it). Two views with the same key
+        /// parse those files the same and get the same findings. The symbols come from the file's own path: upper-cased, it
+        /// doesn't exist on Linux, and every file tested nothing there.
         /// </summary>
         public string Key(IEnumerable<string> files) =>
             string.Join(";", files.Select(Path.GetFullPath).DistinctBy(f => f.ToUpperInvariant(), StringComparer.Ordinal).OrderBy(f => f.ToUpperInvariant(), StringComparer.Ordinal)
