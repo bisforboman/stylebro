@@ -198,6 +198,8 @@ public sealed class FormatHostFixTests : IDisposable
     {
         public override ImmutableArray<string> FixableDiagnosticIds => [.. ids];
 
+        public override FixAllProvider? GetFixAllProvider() => null;
+
         public override Task RegisterCodeFixesAsync(CodeFixContext context) => Task.CompletedTask;
     }
 
@@ -205,10 +207,12 @@ public sealed class FormatHostFixTests : IDisposable
     {
         public override ImmutableArray<string> FixableDiagnosticIds => [.. ids];
 
+        public override FixAllProvider? GetFixAllProvider() => null;
+
         public override Task RegisterCodeFixesAsync(CodeFixContext context) => Task.CompletedTask;
     }
 
-#pragma warning disable RS1001, RS1036 // A test analyzer.
+#pragma warning disable RS1001, RS1017, RS1036 // A test analyzer.
     private sealed class ClassAnalyzer(string id) : DiagnosticAnalyzer
     {
         private readonly DiagnosticDescriptor descriptor = new(id, "t", "{0}", "c", DiagnosticSeverity.Warning, true);
@@ -222,5 +226,5 @@ public sealed class FormatHostFixTests : IDisposable
             context.RegisterSyntaxNodeAction(c => c.ReportDiagnostic(Diagnostic.Create(this.descriptor, ((ClassDeclarationSyntax)c.Node).Identifier.GetLocation(), ((ClassDeclarationSyntax)c.Node).Identifier.Text)), SyntaxKind.ClassDeclaration);
         }
     }
-#pragma warning restore RS1001, RS1036
+#pragma warning restore RS1001, RS1017, RS1036
 }

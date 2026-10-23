@@ -22,6 +22,23 @@ public sealed class DiskState
 {
     private readonly Dictionary<string, (long Length, DateTime Written)> stamps = new(StringComparer.Ordinal);
 
+    /// <summary>
+    /// Writes <paramref name="text"/> as MSBuildWorkspace saves a document: in the text's encoding, else the file's own, else
+    /// UTF-8 without a byte order mark.
+    /// </summary>
+    public static void Write(string path, SourceText text)
+    {
+        var encoding = text.Encoding;
+        if (encoding is null && File.Exists(path))
+        {
+            using var stream = File.OpenRead(path);
+            encoding = SourceText.From(stream).Encoding;
+        }
+
+        using var writer = new StreamWriter(path, append: false, encoding ?? new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+        text.Write(writer);
+    }
+
     /// <summary>Remembers the files of <paramref name="solution"/>'s documents as they are now (right after loading it).</summary>
     public void Remember(Solution solution)
     {
@@ -102,23 +119,6 @@ public sealed class DiskState
         }
 
         return (current, written);
-    }
-
-    /// <summary>
-    /// Writes <paramref name="text"/> as MSBuildWorkspace saves a document: in the text's encoding, else the file's own, else
-    /// UTF-8 without a byte order mark.
-    /// </summary>
-    public static void Write(string path, SourceText text)
-    {
-        var encoding = text.Encoding;
-        if (encoding is null && File.Exists(path))
-        {
-            using var stream = File.OpenRead(path);
-            encoding = SourceText.From(stream).Encoding;
-        }
-
-        using var writer = new StreamWriter(path, append: false, encoding ?? new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-        text.Write(writer);
     }
 
     private static IEnumerable<string> Paths(Solution solution) =>

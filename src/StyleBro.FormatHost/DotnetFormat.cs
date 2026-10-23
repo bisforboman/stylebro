@@ -83,12 +83,39 @@ internal sealed class DotnetFormat
                 _ = this.Parts(formatterObject);
             }
         }
+
         _ = this.Text("Warnings_were_encountered_while_loading_the_workspace_Set_the_verbosity_option_to_the_diagnostic_level_to_log_warnings");
     }
 
     /// <summary>The bridge to the dotnet-format next to the host's Roslyn (its load context resolves it from the SDK).</summary>
     public static DotnetFormat Load() =>
         new(AssemblyLoadContext.GetLoadContext(typeof(DotnetFormat).Assembly)!.LoadFromAssemblyName(new AssemblyName("dotnet-format")));
+
+    /// <summary>A FormatOptions value by its name (Diagnostics, LogLevel, SaveFormattedFiles, ...).</summary>
+    public static T Option<T>(object options, string name) => (T)options.GetType().GetProperty(name)!.GetValue(options)!;
+
+    /// <summary>The minimum severity the formatter fixes (IAnalyzerInformationProvider.GetSeverity).</summary>
+    public static DiagnosticSeverity Severity(AnalyzerParts parts, object options) =>
+        (DiagnosticSeverity)parts.Provider.GetType().GetMethod("GetSeverity")!.Invoke(parts.Provider, [options])!;
+
+    /// <summary>Whether CodeAnalysisResult.AddDiagnostic keeps <paramref name="id"/> (--diagnostics, --exclude-diagnostics).</summary>
+    public static bool Accepts(object options, string id)
+    {
+        var diagnostics = Option<ImmutableHashSet<string>>(options, "Diagnostics");
+        var excluded = Option<ImmutableHashSet<string>>(options, "ExcludeDiagnostics");
+        return (excluded.IsEmpty || !excluded.Contains(id)) && (diagnostics.IsEmpty || diagnostics.Contains(id));
+    }
+
+    /// <summary>Whether a CodeAnalysisResult has a diagnostic.</summary>
+    public static bool HasDiagnostics(object result) =>
+        ((IEnumerable)result.GetType().GetProperty("Diagnostics")!.GetValue(result)!).Cast<object>().Any(p => ((ICollection)p.GetType().GetProperty("Value")!.GetValue(p)!).Count > 0);
+
+    /// <summary>One Fix All of <paramref name="fixer"/> for <paramref name="id"/> (SolutionCodeFixApplier.ApplyCodeFixesAsync).</summary>
+    public static async Task<Solution> ApplyAsync(AnalyzerParts parts, Solution solution, object result, CodeFixProvider fixer, string id, ILogger logger, CancellationToken cancellation)
+    {
+        var task = (Task<Solution>)parts.Applier.GetType().GetMethod("ApplyCodeFixesAsync")!.Invoke(parts.Applier, [solution, result, fixer, id, logger, cancellation])!;
+        return await task.ConfigureAwait(false);
+    }
 
     /// <summary>One of dotnet-format's messages ("Complete in {0}ms.").</summary>
     public string Text(string name) =>
@@ -158,9 +185,6 @@ internal sealed class DotnetFormat
         return await task.ConfigureAwait(false);
     }
 
-    /// <summary>A FormatOptions value by its name (Diagnostics, LogLevel, SaveFormattedFiles, ...).</summary>
-    public static T Option<T>(object options, string name) => (T)options.GetType().GetProperty(name)!.GetValue(options)!;
-
     /// <summary>
     /// The analyzers and fixers of each project, as the formatter's IAnalyzerInformationProvider finds them, and the raw value
     /// <see cref="FilterAnalyzersAsync"/> takes.
@@ -178,10 +202,6 @@ internal sealed class DotnetFormat
 
         return (projects, raw);
     }
-
-    /// <summary>The minimum severity the formatter fixes (IAnalyzerInformationProvider.GetSeverity).</summary>
-    public static DiagnosticSeverity Severity(AnalyzerParts parts, object options) =>
-        (DiagnosticSeverity)parts.Provider.GetType().GetMethod("GetSeverity")!.Invoke(parts.Provider, [options])!;
 
     /// <summary>The analyzers each project runs (AnalyzerFormatter.FilterAnalyzersAsync: language, ids, severity).</summary>
     public async Task<ImmutableDictionary<ProjectId, ImmutableArray<DiagnosticAnalyzer>>> FilterAnalyzersAsync(Solution solution, object raw, ImmutableHashSet<string> paths, DiagnosticSeverity severity, object options, CancellationToken cancellation)
@@ -201,25 +221,6 @@ internal sealed class DotnetFormat
         }
 
         return result;
-    }
-
-    /// <summary>Whether CodeAnalysisResult.AddDiagnostic keeps <paramref name="id"/> (--diagnostics, --exclude-diagnostics).</summary>
-    public static bool Accepts(object options, string id)
-    {
-        var diagnostics = Option<ImmutableHashSet<string>>(options, "Diagnostics");
-        var excluded = Option<ImmutableHashSet<string>>(options, "ExcludeDiagnostics");
-        return (excluded.IsEmpty || !excluded.Contains(id)) && (diagnostics.IsEmpty || diagnostics.Contains(id));
-    }
-
-    /// <summary>Whether a CodeAnalysisResult has a diagnostic.</summary>
-    public static bool HasDiagnostics(object result) =>
-        ((IEnumerable)result.GetType().GetProperty("Diagnostics")!.GetValue(result)!).Cast<object>().Any(p => ((ICollection)p.GetType().GetProperty("Value")!.GetValue(p)!).Count > 0);
-
-    /// <summary>One Fix All of <paramref name="fixer"/> for <paramref name="id"/> (SolutionCodeFixApplier.ApplyCodeFixesAsync).</summary>
-    public static async Task<Solution> ApplyAsync(AnalyzerParts parts, Solution solution, object result, CodeFixProvider fixer, string id, ILogger logger, CancellationToken cancellation)
-    {
-        var task = (Task<Solution>)parts.Applier.GetType().GetMethod("ApplyCodeFixesAsync")!.Invoke(parts.Applier, [solution, result, fixer, id, logger, cancellation])!;
-        return await task.ConfigureAwait(false);
     }
 
     /// <summary>Adds a diagnostic to the report's list (a FormattedFile with one FileChange), as AnalyzerFormatter does.</summary>

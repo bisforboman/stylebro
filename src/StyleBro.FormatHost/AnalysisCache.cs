@@ -25,6 +25,14 @@ public sealed class AnalysisCache
     /// <summary>How many times an analyzer ran on a compilation (tests: what the cache saved).</summary>
     public int Runs { get; private set; }
 
+    /// <summary>Diagnostics in a fixed order: by file, position, id and message.</summary>
+    public static ImmutableArray<Diagnostic> Ordered(IEnumerable<Diagnostic> diagnostics) =>
+        [.. diagnostics.OrderBy(d => d.Location.SourceTree?.FilePath ?? string.Empty, StringComparer.Ordinal)
+            .ThenBy(d => d.Location.SourceSpan.Start)
+            .ThenBy(d => d.Location.SourceSpan.End)
+            .ThenBy(d => d.Id, StringComparer.Ordinal)
+            .ThenBy(d => d.GetMessage(), StringComparer.Ordinal)];
+
     /// <summary>
     /// The diagnostics <paramref name="analyzers"/> report on <paramref name="compilation"/> with <paramref name="options"/>
     /// (pragma-suppressed ones left out, like CompilationWithAnalyzers.GetAnalyzerDiagnosticsAsync), in a fixed order: by
@@ -66,14 +74,6 @@ public sealed class AnalysisCache
             return Ordered(analyzers.Distinct().SelectMany(a => cached.ByAnalyzer[a]));
         }
     }
-
-    /// <summary>Diagnostics in a fixed order: by file, position, id and message.</summary>
-    public static ImmutableArray<Diagnostic> Ordered(IEnumerable<Diagnostic> diagnostics) =>
-        [.. diagnostics.OrderBy(d => d.Location.SourceTree?.FilePath ?? string.Empty, StringComparer.Ordinal)
-            .ThenBy(d => d.Location.SourceSpan.Start)
-            .ThenBy(d => d.Location.SourceSpan.End)
-            .ThenBy(d => d.Id, StringComparer.Ordinal)
-            .ThenBy(d => d.GetMessage(), StringComparer.Ordinal)];
 
     private sealed class Results
     {

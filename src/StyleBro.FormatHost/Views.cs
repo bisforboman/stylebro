@@ -98,7 +98,8 @@ public static class Views
         var notLoaded = failed.Where(p => own.Contains(p, StringComparer.OrdinalIgnoreCase) && frameworks.Count > 0
             && !workspace.Projects.Any(x => string.Equals(x.FilePath, p, StringComparison.OrdinalIgnoreCase) && FrameworkOf(x.Name) is { } f && frameworks.Contains(f, StringComparer.OrdinalIgnoreCase))).ToList();
         bool Names(WorkspaceDiagnostic d, IEnumerable<string> paths) => paths.Any(p => d.Message.Contains(p, StringComparison.OrdinalIgnoreCase));
-        return diagnostics.Where(d => d is ProjectDiagnostic project ? view.ContainsProject(project.ProjectId)
+        return diagnostics.Where(d => d is ProjectDiagnostic project
+            ? view.ContainsProject(project.ProjectId)
             : !Names(d, all) || Names(d, notLoaded) || (!(d.Kind == WorkspaceDiagnosticKind.Failure && Names(d, failed)) && Names(d, own))).ToList();
     }
 
