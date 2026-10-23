@@ -11,7 +11,7 @@ namespace StyleBro.Migrate;
 /// </summary>
 internal static partial class FormatCommand
 {
-    /// <summary>Picks what runs the checks: <see cref="HostEngine"/> or <see cref="DotnetFormatEngine"/> (the default).</summary>
+    /// <summary>Picks what runs the checks and fixes: <see cref="HostEngine"/> or <see cref="DotnetFormatEngine"/> (the default).</summary>
     public const string EngineOption = "--engine";
 
     /// <summary>The in-process host (experimental).</summary>
@@ -21,6 +21,10 @@ internal static partial class FormatCommand
     public const string DotnetFormatEngine = "dotnet-format";
 
     private static readonly System.Threading.AsyncLocal<string?> Engine = new();
+
+    // The command's hosts, one per folder it formats (the repository, a preview's copy): each keeps its workspaces for every
+    // run of the command.
+    private static readonly System.Threading.AsyncLocal<Dictionary<string, HostScope>?> Hosts = new();
 
     /// <summary>
     /// Takes --engine out of <paramref name="args"/>: the engine it names, else <see cref="DotnetFormatEngine"/>; null and
@@ -38,7 +42,7 @@ internal static partial class FormatCommand
         var value = at + 1 < args.Length ? args[at + 1] : null;
         if (value is not (HostEngine or DotnetFormatEngine))
         {
-            error = $"{EngineOption} takes '{HostEngine}' (experimental: the checks run in this process) or '{DotnetFormatEngine}' (the default).";
+            error = $"{EngineOption} takes '{HostEngine}' (experimental: checks and fixes run in this process) or '{DotnetFormatEngine}' (the default).";
             return null;
         }
 
@@ -50,8 +54,20 @@ internal static partial class FormatCommand
     public static IDisposable UseEngine(string engine)
     {
         var before = Engine.Value;
+        var hostsBefore = Hosts.Value;
+        var hosts = new Dictionary<string, HostScope>(StringComparer.Ordinal);
         Engine.Value = engine;
-        return new EngineScope(() => Engine.Value = before);
+        Hosts.Value = hosts;
+        return new EngineScope(() =>
+        {
+            foreach (var host in hosts.Values)
+            {
+                host.Close();
+            }
+
+            Engine.Value = before;
+            Hosts.Value = hostsBefore;
+        });
     }
 
     /// <summary>
@@ -85,8 +101,15 @@ internal static partial class FormatCommand
     }
 
     /// <summary>
-    /// The host of a 'format' or 'check' command with --engine host, opened at the first check and closed with the command run;
-    /// null with the default engine. A host that can't run here says why once and runs nothing.
+    /// What else a run's 'dotnet format' process gets that its fixers read: the file of the repository's names (a run that
+    /// loads only some projects). The host sets it while it applies that run's fixes.
+    /// </summary>
+    private static List<string> HostVariables(RunEnvironment? run) => run?.Names is { } names ? [$"{StyleBro.Analyzers.RepositoryNames.Variable}={names}"] : [];
+
+    /// <summary>
+    /// The host of a 'format' or 'check' command with --engine host for one folder, opened at its first run and closed with the
+    /// command (every run of the command uses it: its workspaces stay loaded); null with the default engine. A host that can't
+    /// run here says why once and runs nothing.
     /// </summary>
     private sealed class HostScope(string root, Action<string> log) : IDisposable
     {
@@ -94,7 +117,24 @@ internal static partial class FormatCommand
         private bool opened;
         private FormatHost? host;
 
-        public static HostScope? For(string root, Action<string> log) => Engine.Value == HostEngine ? new HostScope(root, log) : null;
+        public static HostScope? For(string root, Action<string> log)
+        {
+            if (Engine.Value != HostEngine)
+            {
+                return null;
+            }
+
+            var hosts = Hosts.Value ??= new Dictionary<string, HostScope>(StringComparer.Ordinal);
+            lock (hosts)
+            {
+                if (!hosts.TryGetValue(root, out var scope))
+                {
+                    hosts[root] = scope = new HostScope(root, log);
+                }
+
+                return scope;
+            }
+        }
 
         /// <summary>
         /// Runs a check in the host (<see cref="FormatHost.Run"/>), or 'dotnet format' (<paramref name="otherwise"/>) when the
@@ -114,10 +154,22 @@ internal static partial class FormatCommand
                 open = this.host;
             }
 
-            return open?.Run(workspace, root, HostEnvironment(run), selections, arguments, output) ?? otherwise();
+            return open?.Run(workspace, root, HostEnvironment(run), HostVariables(run), selections, arguments, output) ?? otherwise();
         }
 
-        public void Dispose() => this.host?.Dispose();
+        /// <summary>Nothing: the command closes its hosts (<see cref="Close"/>), so the next run finds its workspaces loaded.</summary>
+        public void Dispose()
+        {
+        }
+
+        public void Close()
+        {
+            lock (this.gate)
+            {
+                this.host?.Dispose();
+                this.host = null;
+            }
+        }
     }
 
     private sealed class EngineScope(Action end) : IDisposable

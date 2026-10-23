@@ -281,7 +281,7 @@ internal static partial class FormatCommand
         // --timings: how long each phase took, after everything else (docs/proposals/format-speed.md, "Also seen").
         using var timings = args.Contains(TimingsOption) ? PhaseTimes.Start() : null;
 
-        // --engine host: the checks run in this process (FormatHost); fixes still run in 'dotnet format'.
+        // --engine host: the checks and fixes run in this process (FormatHost).
         if (TakeEngine(ref args, out var engineError) is not { } engineName)
         {
             (output ?? Console.Error.WriteLine)(engineError!);
@@ -5013,7 +5013,7 @@ internal static partial class FormatCommand
 
         using var directiveMask = new DirectiveMask(root, directiveFiles);
 
-        // --engine host: the checks of this run in this process, each configuration's workspace loaded once.
+        // --engine host: the checks and fixes of this run in this process, each configuration's workspace loaded once per command.
         using var hostScope = HostScope.For(root, log);
 
         int Format(string target, List<string> options, Func<IEnumerable<string>, int> run, string[]? runPasses = null)
@@ -5456,7 +5456,7 @@ internal static partial class FormatCommand
                 int single;
                 using (PhaseTimes.Measure(passThrough.Contains("--verify-no-changes") ? "check: all projects" : "fix: all projects"))
                 {
-                    single = Format(workspacePath, passThrough, a => hostScope is not null && passThrough.Contains("--verify-no-changes")
+                    single = Format(workspacePath, passThrough, a => hostScope is not null
                         ? hostScope.Run(workspacePath, plain, [], a.ToList(), Watch, () => Dotnet(root, plain, a, Watch))
                         : Dotnet(root, plain, a, Watch));
                 }
@@ -5609,7 +5609,7 @@ internal static partial class FormatCommand
                 var (alias, aliases) = framework.Length == 0 ? (string.Empty, string.Empty) : Aliases(byPath, keep, framework);
                 var other = framework.Length == 0 ? new HashSet<string>() : Other(byPath, keep, framework);
                 var environment = new RunEnvironment(alias, select, PathList(keep), PathList(other), aliases, names, notAsErrors.Count > 0, configuration, oldCSharp);
-                if (verify && hostScope is not null)
+                if (hostScope is not null)
                 {
                     // The host loads every framework: the run's projects as the instances of its framework.
                     var selections = selected.Select(x => $"{projects[x].FullPath}|{(framework.Length == 0 ? string.Empty : Spelling(projects[x].FullPath, framework))}").ToList();

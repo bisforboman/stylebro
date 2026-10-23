@@ -28,23 +28,30 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
     // dotnet-format matches --include against the current folder: a check sets it for that step only.
     private static readonly SemaphoreSlim FolderGate = new(1, 1);
 
+    // Fix runs one at a time: each must see the one before it, and they set the fixers' variables in this process.
+    private static readonly SemaphoreSlim FixGate = new(1, 1);
+
     private readonly ConcurrentDictionary<string, Lazy<Task<Loaded>>> workspaces = new(StringComparer.Ordinal);
     private readonly DotnetFormat format = DotnetFormat.Load();
+    private readonly AnalysisCache cache = new();
+    private readonly Func<string, IDisposable> measure = measure;
 
     /// <summary>
-    /// Runs one 'dotnet format' check (<paramref name="arguments"/> without 'format') and returns its exit code, or
-    /// <see cref="Entry.Declined"/> for a command the host doesn't run.
+    /// Runs one 'dotnet format' command (<paramref name="arguments"/> without 'format'), a check or a fix run, and returns its exit
+    /// code, or <see cref="Entry.Declined"/> for a command the host doesn't run. <paramref name="variables"/> ('Name=value') are
+    /// set in this process while a fix run applies its fixes: what bro gives a 'dotnet format' process that the fixers read
+    /// (the repository's names), not what changes how the projects load.
     /// </summary>
-    public int Run(string workspace, string folder, IReadOnlyList<string> environment, IReadOnlyList<string> selections, IReadOnlyList<string> arguments, Action<string> output)
+    public int Run(string workspace, string folder, IReadOnlyList<string> environment, IReadOnlyList<string> variables, IReadOnlyList<string> selections, IReadOnlyList<string> arguments, Action<string> output)
     {
-        if (FormatArguments.Parse(arguments) is not { Verify: true } parsed)
+        if (FormatArguments.Parse(arguments) is not { } parsed)
         {
             return Entry.Declined;
         }
 
         try
         {
-            return this.RunAsync(workspace, folder, environment, selections, parsed, output).GetAwaiter().GetResult();
+            return this.RunAsync(workspace, folder, environment, variables, selections, parsed, output).GetAwaiter().GetResult();
         }
         catch (Exception exception)
         {
@@ -63,7 +70,7 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
         }
     }
 
-    private async Task<int> RunAsync(string workspace, string folder, IReadOnlyList<string> environment, IReadOnlyList<string> selections, FormatArguments arguments, Action<string> output)
+    private async Task<int> RunAsync(string workspace, string folder, IReadOnlyList<string> environment, IReadOnlyList<string> variables, IReadOnlyList<string> selections, FormatArguments arguments, Action<string> output)
     {
         var level = (LogLevel)FormatArguments.LogLevelOf(arguments.Verbosity);
         var names = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -78,11 +85,13 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
             return 1;
         }
 
-        var view = Views.Of(loaded.Solution, selections, names);
+        // The files as they are now: what bro and the runs before this one changed on disk.
+        var current = await loaded.SyncAsync(this.measure).ConfigureAwait(false);
+        var view = Views.Of(current, selections, names);
         var logger = new HostLogger(level, output, names);
 
         // Like MSBuildWorkspaceLoader: one line about the load's warnings, or each of them at the diagnostic level.
-        var warnings = Views.WarningsOf(loaded.Diagnostics, loaded.Solution, view);
+        var warnings = Views.WarningsOf(loaded.Diagnostics, loaded.Solution, view, Views.FrameworksOf(selections));
         if (level == LogLevel.Trace)
         {
             foreach (var warning in warnings)
@@ -117,7 +126,31 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
         var filesMs = watch.ElapsedMilliseconds - loadMs;
         logger.LogTrace(this.format.Text("Complete_in_0_ms"), filesMs);
         logger.LogTrace(this.format.Text("Running_formatters"));
-        var (changed, files) = await this.format.FormatAsync(loaded.Workspace, view, formattable.Documents, options, logger, CancellationToken.None).ConfigureAwait(false);
+        List<DocumentId> changed;
+        object files;
+        if (arguments.Verify)
+        {
+            (changed, files) = await this.format.FormatAsync(loaded.Workspace, view, formattable.Documents, options, logger, CancellationToken.None).ConfigureAwait(false);
+        }
+        else
+        {
+            files = this.format.NewFiles();
+            await FixGate.WaitAsync().ConfigureAwait(false);
+            var previous = Set(variables);
+            try
+            {
+                var formatted = await new FixLoop(this.format, this.cache, this.measure).RunAsync(loaded.Workspace, view, formattable.Documents, options, logger, files, CancellationToken.None).ConfigureAwait(false);
+                await loaded.SaveAsync(view, formatted).ConfigureAwait(false);
+            }
+            finally
+            {
+                Set(previous);
+                FixGate.Release();
+            }
+
+            changed = this.format.Documents(files);
+        }
+
         logger.LogTrace(this.format.Text("Complete_in_0_ms"), watch.ElapsedMilliseconds - loadMs - filesMs);
         foreach (var id in changed)
         {
@@ -131,7 +164,22 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
 
         logger.LogDebug(this.format.Text("Formatted_0_of_1_files"), changed.Count, formattable.Count);
         logger.LogInformation(this.format.Text("Format_complete_in_0_ms"), watch.ElapsedMilliseconds);
-        return changed.Count == 0 ? 0 : 2;
+        return !arguments.Verify || changed.Count == 0 ? 0 : 2;
+    }
+
+    // Sets 'Name=value' variables in this process; returns what they were.
+    private static List<string> Set(IReadOnlyList<string> variables)
+    {
+        var previous = new List<string>();
+        foreach (var pair in variables)
+        {
+            var name = pair.Substring(0, pair.IndexOf('='));
+            previous.Add($"{name}={Environment.GetEnvironmentVariable(name)}");
+            var value = pair.Substring(name.Length + 1);
+            Environment.SetEnvironmentVariable(name, value.Length == 0 ? null : value);
+        }
+
+        return previous;
     }
 
     private Task<Loaded> LoadAsync(string workspace, IReadOnlyList<string> environment, bool solution)
@@ -146,7 +194,7 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
         var previous = new List<(string Name, string? Value)>();
         try
         {
-            using var phase = measure($"host: load workspace{(environment.FirstOrDefault(e => e.StartsWith("Configuration=", StringComparison.Ordinal)) is { } c ? $" ({c.Substring("Configuration=".Length)})" : string.Empty)}");
+            using var phase = this.measure($"host: load workspace{(environment.FirstOrDefault(e => e.StartsWith("Configuration=", StringComparison.Ordinal)) is { } c ? $" ({c.Substring("Configuration=".Length)})" : string.Empty)}");
             foreach (var pair in environment)
             {
                 var name = pair.Substring(0, pair.IndexOf('='));
@@ -169,11 +217,13 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
                 catch (InvalidOperationException)
                 {
                     opened.Dispose();
-                    return new Loaded(opened, opened.CurrentSolution, ImmutableList<WorkspaceDiagnostic>.Empty, Unsupported: true);
+                    return new Loaded(opened, opened.CurrentSolution, ImmutableList<WorkspaceDiagnostic>.Empty, unsupported: true);
                 }
             }
 
-            return new Loaded(opened, opened.CurrentSolution, opened.Diagnostics, Unsupported: false);
+            var loaded = new Loaded(opened, opened.CurrentSolution, opened.Diagnostics, unsupported: false);
+            loaded.Disk.Remember(opened.CurrentSolution);
+            return loaded;
         }
         finally
         {
@@ -186,5 +236,59 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
         }
     }
 
-    private sealed record Loaded(MSBuildWorkspace Workspace, Solution Solution, ImmutableList<WorkspaceDiagnostic> Diagnostics, bool Unsupported);
+    /// <summary>A configuration's workspace: the solution as loaded, and as the files are now (<see cref="DiskState"/>).</summary>
+    private sealed class Loaded
+    {
+        private readonly SemaphoreSlim gate = new(1, 1);
+        private Solution current;
+
+        public Loaded(MSBuildWorkspace workspace, Solution solution, ImmutableList<WorkspaceDiagnostic> diagnostics, bool unsupported)
+        {
+            this.Workspace = workspace;
+            this.Solution = solution;
+            this.current = solution;
+            this.Diagnostics = diagnostics;
+            this.Unsupported = unsupported;
+        }
+
+        public MSBuildWorkspace Workspace { get; }
+
+        public Solution Solution { get; }
+
+        public ImmutableList<WorkspaceDiagnostic> Diagnostics { get; }
+
+        public bool Unsupported { get; }
+
+        public DiskState Disk { get; } = new();
+
+        /// <summary>The solution with the files as they are on disk now.</summary>
+        public async Task<Solution> SyncAsync(Func<string, IDisposable> measure)
+        {
+            await this.gate.WaitAsync().ConfigureAwait(false);
+            try
+            {
+                using var phase = measure("host: read changed files");
+                (this.current, _) = await this.Disk.SyncAsync(this.current, CancellationToken.None).ConfigureAwait(false);
+                return this.current;
+            }
+            finally
+            {
+                this.gate.Release();
+            }
+        }
+
+        /// <summary>Writes what a fix run changed in its view and keeps it in every copy of those files.</summary>
+        public async Task SaveAsync(Solution view, Solution formatted)
+        {
+            await this.gate.WaitAsync().ConfigureAwait(false);
+            try
+            {
+                (this.current, _) = await this.Disk.SaveAsync(this.current, view, formatted, CancellationToken.None).ConfigureAwait(false);
+            }
+            finally
+            {
+                this.gate.Release();
+            }
+        }
+    }
 }
