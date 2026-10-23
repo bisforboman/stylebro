@@ -504,7 +504,10 @@ internal static class PreviewCommand
     /// (not a repository) everything outside bin, obj and .git. A submodule (or another repository inside) is copied the
     /// same way and made a repository of its own, so 'bro format' leaves it alone in the copy too. Returns the
     /// tracked files a .gitignore ignores, for <see cref="MakeRepository"/>: MoreLINQ tracks bld/ExtensionsGenerator under an
-    /// ignored bld/, and the copy's repository left them out, so the preview showed none of their changes.
+    /// ignored bld/, and the copy's repository left them out, so the preview showed none of their changes. Untracked files in
+    /// an extracted NuGet package (<see cref="InPackage"/>) stay behind: Cronos' packages folder is inside the repository and
+    /// its .gitignore ignores '*.nupkg' and 'build/', so the copy got each package's '.nupkg.sha512' alone, NuGet took the
+    /// packages as installed, and without their reference assemblies the preview couldn't load net40 (trial 48).
     /// </summary>
     public static List<string> Copy(string source, string target)
     {
@@ -515,7 +518,12 @@ internal static class PreviewCommand
             return [];
         }
 
-        foreach (var entry in list.Split('\0', StringSplitOptions.RemoveEmptyEntries).Select(e => e.TrimEnd('/')).Distinct(StringComparer.Ordinal))
+        var untracked = Git(source, "ls-files", "-o", "--exclude-standard", "-z") is (0, var others)
+            ? others.Split('\0', StringSplitOptions.RemoveEmptyEntries).Select(e => e.TrimEnd('/')).ToHashSet(StringComparer.Ordinal)
+            : [];
+        var packageFolders = new Dictionary<string, bool>(StringComparer.Ordinal);
+        foreach (var entry in list.Split('\0', StringSplitOptions.RemoveEmptyEntries).Select(e => e.TrimEnd('/')).Distinct(StringComparer.Ordinal)
+            .Where(e => !untracked.Contains(e) || !InPackage(source, e, packageFolders)))
         {
             var from = Path.Combine(source, entry);
             var to = Path.Combine(target, entry);
@@ -1353,20 +1361,37 @@ internal static class PreviewCommand
     /// <summary>
     /// Whether a file (relative to <paramref name="folder"/>) is inside an extracted NuGet package: a folder between it and
     /// <paramref name="folder"/> holds the package's .nupkg or NuGet's '.nupkg.metadata' (a global packages folder or
-    /// packages.config's packages/ inside the repository).
+    /// packages.config's packages/ inside the repository). <paramref name="packageFolders"/> remembers each folder's answer.
     /// </summary>
-    internal static bool InPackage(string folder, string relative)
+    internal static bool InPackage(string folder, string relative, Dictionary<string, bool>? packageFolders = null)
     {
         var top = Path.GetFullPath(folder).TrimEnd('/', '\\');
         for (var directory = Path.GetDirectoryName(Path.GetFullPath(Path.Combine(folder, relative))); directory is not null && directory.Length > top.Length; directory = Path.GetDirectoryName(directory))
         {
-            if (Directory.Exists(directory) && Directory.EnumerateFiles(directory).Any(f => f.EndsWith(".nupkg", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".nupkg.metadata", StringComparison.OrdinalIgnoreCase)))
+            if (IsPackageFolder(directory))
             {
                 return true;
             }
         }
 
         return false;
+
+        // Per folder, remembered in packageFolders when given (Copy asks for every file of a packages folder).
+        bool IsPackageFolder(string directory)
+        {
+            if (packageFolders is not null && packageFolders.TryGetValue(directory, out var known))
+            {
+                return known;
+            }
+
+            var package = Directory.Exists(directory) && Directory.EnumerateFiles(directory).Any(f => f.EndsWith(".nupkg", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".nupkg.metadata", StringComparison.OrdinalIgnoreCase));
+            if (packageFolders is not null)
+            {
+                packageFolders[directory] = package;
+            }
+
+            return package;
+        }
     }
 
     private static (int Code, string Output, string Error) RunGit(string directory, string[] arguments)

@@ -126,4 +126,33 @@ public sealed partial class MigrationTests
             Directory.Delete(Path.GetDirectoryName(patch)!, recursive: true);
         }
     }
+
+    [Fact]
+    public void Copy_LeavesUntrackedFilesOfExtractedPackagesBehind()
+    {
+        // Trial 48, Cronos: its packages folder is inside the repository and '*.nupkg' and 'build/' are ignored, so the copy got
+        // each package's '.nupkg.sha512' alone; NuGet took them as installed and net40's reference assemblies were missing.
+        Write(".gitignore", "*.nupkg\nbuild/\n");
+        Write("App/C.cs", "class C\n{\n}\n");
+        Write("packages/net40/1.0.3/net40.1.0.3.nupkg", string.Empty);
+        Write("packages/net40/1.0.3/net40.1.0.3.nupkg.sha512", "x");
+        Write("packages/net40/1.0.3/build/net40.targets", "<Project />");
+        Write("lib/old/1.0.0/old.1.0.0.nupkg", string.Empty);
+        Write("lib/old/1.0.0/lib/Old.dll", "x");
+        PreviewCommand.Git(root, "init", "-q");
+        PreviewCommand.Git(root, "add", "App", ".gitignore", "lib/old/1.0.0/lib/Old.dll");
+        var copy = Directory.CreateTempSubdirectory("bro-copy-").FullName;
+        try
+        {
+            PreviewCommand.Copy(root, copy);
+
+            Assert.True(File.Exists(Path.Combine(copy, "App", "C.cs")));
+            Assert.False(File.Exists(Path.Combine(copy, "packages", "net40", "1.0.3", "net40.1.0.3.nupkg.sha512")));
+            Assert.True(File.Exists(Path.Combine(copy, "lib", "old", "1.0.0", "lib", "Old.dll")));
+        }
+        finally
+        {
+            DeleteFolder(copy);
+        }
+    }
 }
