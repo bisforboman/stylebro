@@ -90,6 +90,7 @@ compile, ~20-25 s each), and `bro check` formats a copy to tell kept findings ap
 
 The parity harness (`scripts/format-speed/Compare-Format.ps1`, `check`, `format`, `check` with both engines) gave the same
 working trees, kept findings, exit codes and `--json` reports on all six, twice each, and the host the same trees in both
-rounds. One note differs on Newtonsoft.Json: the default engine's net20 run warns about a project reference it can't
-match, an effect of forcing one framework on the projects, which the host, loading every framework at once, doesn't have
+rounds. One note differs on Newtonsoft.Json and error-or: the default engine's net20 (net462) run warns about a project reference
+it can't match, an effect of forcing one framework on the projects, which the host, loading every framework at once,
+doesn't have
 ([decision](https://github.com/bisforboman/stylebro/blob/main/docs/decisions/2026-10-23-the-format-host-keeps-its-own-workspace-load-warnings.md)).

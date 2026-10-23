@@ -16,4 +16,5 @@ workspace" note names the net46 run instead of net20. Should the host mimic the 
 
 ## Decision
 
-**Choice 1** (owner's choice 2026-10-23).
+**Choice 1** (owner's choice 2026-10-23). error-or's net462 run (its tests target net462, the library doesn't) has the same
+note with the default engine and none with the host.
