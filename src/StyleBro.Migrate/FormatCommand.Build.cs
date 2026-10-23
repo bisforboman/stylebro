@@ -333,6 +333,13 @@ internal static partial class FormatCommand
         }
     }
 
+    /// <summary>One error or warning of a build: its key (path relative to the build's root, framework, id, message: no line, which a fix moves) and how it's shown.</summary>
+    /// <summary>
+    /// Whether a build error came before the compiler ran the analyzers: no place in the code (restore, MSBuild, the
+    /// compiler's command line), except the errors the compiler reports when it emits (<see cref="EmitErrors"/>).
+    /// </summary>
+    public static bool StopsCompiling(BuildMessage message) => message.Error && !message.InSource && !EmitErrors.Contains(message.Id);
+
     /// <summary>Runs <paramref name="action"/> with <see cref="HookVariable"/> set to <paramref name="hook"/> (every MSBuild node inherits it).</summary>
     private static T WithHook<T>(string hook, Func<T> action)
     {
@@ -371,13 +378,6 @@ internal static partial class FormatCommand
             return [];
         }
     }
-
-    /// <summary>One error or warning of a build: its key (path relative to the build's root, framework, id, message: no line, which a fix moves) and how it's shown.</summary>
-    /// <summary>
-    /// Whether a build error came before the compiler ran the analyzers: no place in the code (restore, MSBuild, the
-    /// compiler's command line), except the errors the compiler reports when it emits (<see cref="EmitErrors"/>).
-    /// </summary>
-    public static bool StopsCompiling(BuildMessage message) => message.Error && !message.InSource && !EmitErrors.Contains(message.Id);
 
     public sealed record BuildMessage(string Key, string Id, bool Error, string Shown, bool InSource = true, string Project = "");
 }
