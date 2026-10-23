@@ -16,7 +16,11 @@ namespace StyleBro.Migrate;
 /// lines alone"): '#if NETFRAMEWORK' + 'if (x) a(); else' + '#endif' + 'b();' is indented as the else body where the
 /// symbol is defined and as a statement of its own where it isn't, so format's per-framework and per-configuration runs
 /// undid each other's indentation forever (NLog never converged). The same for a block '#if' opens in one build only
-/// ('#if DEBUG' + 'try {' + '#endif' around a statement, trial 34: netmq). format leaves the indentation of these lines as it is.
+/// ('#if DEBUG' + 'try {' + '#endif' around a statement, trial 34: netmq), and for a '#region' or '#endregion' that one build
+/// compiles and another leaves out: the SDK's formatter indents it with the code where it is active, and where it is inside
+/// a left-out branch re-indents it from the next compiled token when a directive is right above it (Newtonsoft.Json's
+/// DynamicTests.cs, all '#if !(NET35 || NET20)': its net20 and net35 runs put '#endregion' after '#endif' in column 0, the
+/// others indented it back, and 'bro format' never settled). format leaves the indentation of these lines as it is.
 /// </summary>
 internal static class IfBodies
 {
@@ -26,6 +30,9 @@ internal static class IfBodies
         @"(?:\)|^[ \t]*(?:\}[ \t]*)?(?:else|do))[ \t]*(?://[^\r\n]*)?\r?\n[ \t]*#[ \t]*(?:if|elif|else|endif)\b",
         RegexOptions.Multiline | RegexOptions.Compiled);
 
+    // A '#region' or '#endregion' line: the directives the formatter indents (it puts the others in column 0 in every build).
+    private static readonly Regex RegionDirective = new(@"^[ \t]*#[ \t]*(?:region|endregion)\b", RegexOptions.Multiline | RegexOptions.Compiled);
+
     // A whitespace finding that only rewrites a line break ("Replace 1 characters with '\r\n'"), which the whitespace pass
     // writes on the line above such a body when it re-indents the body.
     private static readonly Regex LineBreakOnly = new(@" WHITESPACE: Fix whitespace formatting\. Replace \d+ characters with '(?:(?:\\r)?\\n)+'\.", RegexOptions.Compiled);
@@ -34,12 +41,14 @@ internal static class IfBodies
     private static readonly Regex WritesLineBreak = new(@" WHITESPACE: Fix whitespace formatting\. (?:Replace \d+ characters with|Insert) '[^']*\\n", RegexOptions.Compiled);
 
     /// <summary>Whether a C# text may have such lines (<see cref="Lines"/> decides).</summary>
-    public static bool IsCandidate(string text) => text.Contains("#if", StringComparison.Ordinal) && (Candidate.IsMatch(text) || OpensBlock(text));
+    public static bool IsCandidate(string text) =>
+        text.Contains("#if", StringComparison.Ordinal) && (Candidate.IsMatch(text) || OpensBlock(text) || RegionDirective.IsMatch(text));
 
     /// <summary>
     /// The lines (0-based) of <paramref name="text"/> whose statement nesting differs between the parses with
     /// <paramref name="symbolSets"/> (each the defined symbols of one run that compiles the file): a line counts when its first
-    /// token is code in two parses (not text of a branch left out) and is a body of a different number of statements in them.
+    /// token is code in two parses (not text of a branch left out) and is a body of a different number of statements in them,
+    /// or when it is a '#region' or '#endregion' that one parse compiles and another leaves out.
     /// </summary>
     public static List<int> Lines(string text, IEnumerable<IReadOnlyCollection<string>> symbolSets)
     {
@@ -51,10 +60,21 @@ internal static class IfBodies
 
         var source = SourceText.From(text);
         var seen = new Dictionary<(int Line, int Offset), int>();
+        var regions = new Dictionary<int, bool>();
         var protectedLines = new SortedSet<int>();
         foreach (var symbols in sets)
         {
             var root = CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.Preview, preprocessorSymbols: symbols)).GetRoot();
+            foreach (var directive in root.DescendantTrivia(descendIntoTrivia: true).Where(t => t.IsKind(SyntaxKind.RegionDirectiveTrivia) || t.IsKind(SyntaxKind.EndRegionDirectiveTrivia)))
+            {
+                var line = source.Lines.GetLineFromPosition(directive.SpanStart).LineNumber;
+                var active = ((DirectiveTriviaSyntax)directive.GetStructure()!).IsActive;
+                if (!regions.TryAdd(line, active) && regions[line] != active)
+                {
+                    protectedLines.Add(line);
+                }
+            }
+
             var lastLine = -1;
             foreach (var token in root.DescendantTokens())
             {
@@ -288,7 +308,7 @@ internal static class IfBodies
             .Select(f => $"{Path.GetRelativePath(root, f.Key).Replace('\\', '/')}:{Ranges(f.Value.Lines)}")
             .ToList();
         return $"{header} {string.Join(", ", places.Take(5))}{(places.Count > 5 ? $" and {places.Count - 5} more files" : string.Empty)}: "
-            + "'#if' decides whether these lines are an if/else (or loop) body or inside a block, so each framework or configuration would indent them its own way. "
+            + "'#if' decides whether these lines are an if/else (or loop) body, inside a block, or (a '#region' line) compiled at all, so each framework or configuration would indent them its own way. "
             + "Their indentation is left as it is.";
     }
 

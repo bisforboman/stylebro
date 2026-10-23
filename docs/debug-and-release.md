@@ -59,6 +59,26 @@ The same goes for a block that `#if` opens in one build only:
 Debug indents the statement as the `try` block's content, Release as a statement of the method. `format` keeps its
 indentation as it is (`Indentation kept: ...`).
 
+And for a `#region` or `#endregion` line that one build compiles and another leaves out:
+
+```csharp
+#if !NET20
+        public void Add()
+        {
+            #region Add
+            r = d.Integer + 1;
+#if NET6_0_OR_GREATER
+            r = d.BigInteger + 1;
+#endif
+            #endregion
+        }
+#endif
+```
+
+Where the outer `#if` is compiled, the formatter indents `#endregion` with the code; in net20 everything in it is left
+out, and the formatter puts a `#endregion` right below another directive in the column of the next compiled code.
+`format` keeps its indentation as it is (`Indentation kept: ...`).
+
 ## Documentation comments indented with tabs and spaces
 
 `dotnet format` leaves a documentation comment's other `///` lines, and the line of the code below it, when they're
