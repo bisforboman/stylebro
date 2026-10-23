@@ -89,6 +89,43 @@ public sealed class FormatCoverageTests : IDisposable
     }
 
     [Fact]
+    public void Format_NamesTheFilesEachRunUndoes()
+    {
+        // Trial 48, Pidgin: the SDK's style pass flipped two 'using static' lines in 5 files on every run, also without
+        // StyleBro; format said "please report it" (owner's choice 2026-10-23: name the files, stay Not clean).
+        var root = NewFolder();
+        var flips = Path.Combine(root, "Flips.cs");
+        var settles = Path.Combine(root, "Settles.cs");
+        File.WriteAllText(flips, "using static P;\nusing static P<char>;\n");
+        File.WriteAllText(settles, "class S { }\n");
+        var lines = new List<string>();
+        var runs = 0;
+
+        var code = FormatCommand.Run([root], lines.Add, (_, _) =>
+        {
+            runs++;
+            var text = File.ReadAllText(flips);
+            File.WriteAllText(flips, text.StartsWith("using static P;", StringComparison.Ordinal) ? "using static P<char>;\nusing static P;\n" : "using static P;\nusing static P<char>;\n");
+            File.WriteAllText(settles, $"class S {{ int x{runs}; }}\n");
+            return 0;
+        });
+
+        Assert.Equal(FormatCommand.NotCleanExitCode, code);
+        Assert.Equal(FormatCommand.UndoneLine(["Flips.cs"]), lines[^1]);
+        Assert.DoesNotContain(lines, l => l.Contains("please report it.", StringComparison.Ordinal) && l.Contains("still changing", StringComparison.Ordinal));
+
+        // A file that keeps changing to new text isn't undone: the old line stays.
+        File.WriteAllText(flips, "using static P;\n");
+        lines.Clear();
+        Assert.Equal(FormatCommand.NotCleanExitCode, FormatCommand.Run([root], lines.Add, (_, _) =>
+        {
+            File.AppendAllText(flips, "// more\n");
+            return 0;
+        }));
+        Assert.StartsWith("Not clean: still changing after 3 runs.", lines[^1], StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void HeldBackSdkRules_AreListed_ButLeaveTheVerdictClean()
     {
         // Owner 2026-10-22 ("Note it, don't fail"): SDK 10.0.1xx's 'dotnet format' ignores the multi-target guard, so IDE0049 was

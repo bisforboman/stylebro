@@ -4611,6 +4611,8 @@ internal static partial class FormatCommand
         // Not for named files (--files): a few files named cost less than the check.
         var unformatted = csharpier is null || args.Contains("--include") ? null : CSharpierStep.Unformatted(csharpier, root);
         var formatted = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, string>? beforePrevious = null;
+        var undone = new List<string>();
         for (var run = 1; ; run++)
         {
             File.Delete(keptFile);
@@ -4721,6 +4723,10 @@ internal static partial class FormatCommand
                 changed = ChangedFiles(before, after);
             }
 
+            // The files this run put back as they were before the previous run: each run undoes the one before (trial 48, Pidgin:
+            // the SDK's style pass flips 'using static Pidgin.Parser;' and 'using static Pidgin.Parser<char>;' every run).
+            undone = beforePrevious is null ? [] : UndoneFiles(beforePrevious, Directory.Exists(root) ? Snapshot(root) : [], changed);
+            beforePrevious = before;
             if (report is not null)
             {
                 JsonReport.AddRun(run, changed, Path.Combine(report, "format-report.json"));
@@ -4822,13 +4828,27 @@ internal static partial class FormatCommand
                     log(FixFailuresLine(allFailures));
                 }
 
-                log($"Not clean: still changing after {MaxRuns} runs. Run 'bro format' again, and if it keeps changing the same lines, please report it.");
+                log(undone.Count > 0 ? UndoneLine(undone.Select(f => Path.GetRelativePath(shown, f).Replace('\\', '/')).ToList()) : $"Not clean: still changing after {MaxRuns} runs. Run 'bro format' again, and if it keeps changing the same lines, please report it.");
                 return NotCleanExitCode;
             }
 
             args = NextRun(args);
         }
     }
+
+    /// <summary>
+    /// The files a run changed back to what they were before the previous run (<paramref name="beforePrevious"/>): something
+    /// in formatting undoes what the run before did, so running again never settles them (owner's choice 2026-10-23).
+    /// </summary>
+    public static List<string> UndoneFiles(IReadOnlyDictionary<string, string> beforePrevious, IReadOnlyDictionary<string, string> after, IEnumerable<string> changed) =>
+        changed.Where(f => beforePrevious.TryGetValue(f, out var was) && after.TryGetValue(f, out var now) && was == now).ToList();
+
+    /// <summary>The verdict when every run undoes the one before in some files (<see cref="UndoneFiles"/>, relative paths).</summary>
+    public static string UndoneLine(IReadOnlyList<string> files) =>
+        $"Not clean: each run undoes the one before in {files.Count} file{(files.Count == 1 ? string.Empty : "s")} ({string.Join(", ", files.Take(5))}{(files.Count > 5 ? $" and {files.Count - 5} more" : string.Empty)}), "
+        + "so running again won't settle them. Two formatting steps want those lines in different orders or layouts: 'dotnet format' "
+        + "alone can do it (its using sort flips 'using static X;' and 'using static X<T>;' when dotnet_sort_system_directives_first is set). "
+        + "Compare the files after two runs, settle the lines by hand or turn off the setting one side follows, and please report it if a StyleBro rule is one side.";
 
     /// <summary>The severity word of a line that reports a kept finding (its position in the line), or null.</summary>
     private static Group? KeptLine(string line, ISet<(string Path, int Line, string Id)> kept)
