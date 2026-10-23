@@ -1,0 +1,33 @@
+  Determining projects to restore...
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0-windows' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/stylebro/.trials/trial50/ObservableCollections/base/sandbox/WpfApp/WpfApp.csproj]
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/stylebro/.trials/trial50/ObservableCollections/base/sandbox/BlazorApp/BlazorApp.csproj]
+  Restored /home/user/stylebro/.trials/trial50/ObservableCollections/base/sandbox/AvaloniaApp/AvaloniaApp.csproj (in 422 ms).
+  7 of 8 projects are up-to-date for restore.
+  ObservableCollections -> /home/user/stylebro/.trials/trial50/ObservableCollections/base/src/ObservableCollections/bin/Release/netstandard2.0/ObservableCollections.dll
+  ObservableCollections -> /home/user/stylebro/.trials/trial50/ObservableCollections/base/src/ObservableCollections/bin/Release/net8.0/ObservableCollections.dll
+  ObservableCollections -> /home/user/stylebro/.trials/trial50/ObservableCollections/base/src/ObservableCollections/bin/Release/net6.0/ObservableCollections.dll
+  ObservableCollections -> /home/user/stylebro/.trials/trial50/ObservableCollections/base/src/ObservableCollections/bin/Release/netstandard2.1/ObservableCollections.dll
+  ObservableCollections.R3 -> /home/user/stylebro/.trials/trial50/ObservableCollections/base/src/ObservableCollections.R3/bin/Release/net8.0/ObservableCollections.R3.dll
+  ObservableCollections.R3 -> /home/user/stylebro/.trials/trial50/ObservableCollections/base/src/ObservableCollections.R3/bin/Release/netstandard2.1/ObservableCollections.R3.dll
+  ObservableCollections.R3 -> /home/user/stylebro/.trials/trial50/ObservableCollections/base/src/ObservableCollections.R3/bin/Release/net6.0/ObservableCollections.R3.dll
+  ObservableCollections.Tests -> /home/user/stylebro/.trials/trial50/ObservableCollections/base/tests/ObservableCollections.Tests/bin/Release/net6.0/ObservableCollections.Tests.dll
+  ObservableCollections.R3 -> /home/user/stylebro/.trials/trial50/ObservableCollections/base/src/ObservableCollections.R3/bin/Release/netstandard2.0/ObservableCollections.R3.dll
+Test run for /home/user/stylebro/.trials/trial50/ObservableCollections/base/tests/ObservableCollections.Tests/bin/Release/net6.0/ObservableCollections.Tests.dll (.NETCoreApp,Version=v6.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    24, Skipped:     0, Total:    24, Duration: 264 ms - ObservableCollections.Tests.dll (net6.0)
+  ObservableCollections.R3.Tests -> /home/user/stylebro/.trials/trial50/ObservableCollections/base/tests/ObservableCollections.R3.Tests/bin/Release/net8.0/ObservableCollections.R3.Tests.dll
+Test run for /home/user/stylebro/.trials/trial50/ObservableCollections/base/tests/ObservableCollections.R3.Tests/bin/Release/net8.0/ObservableCollections.R3.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    10, Skipped:     0, Total:    10, Duration: 116 ms - ObservableCollections.R3.Tests.dll (net8.0)
+
+real	0m8.465s
+user	0m6.761s
+sys	0m0.834s
