@@ -875,6 +875,27 @@ public class CamelCaseNamingTests
         }
         """);
 
+    // Cocona's file: 'disable once' alone (no 'disable'/'restore' pair in the file), above a nested type's method.
+    [Fact]
+    public Task ANameBelowReSharpersDisableOnce_InAFileWithoutRanges_KeepsItsName() => VerifyNoDiagnosticsAsync(
+        """
+        [System.AttributeUsage(System.AttributeTargets.Parameter)]
+        class ArgumentAttribute : System.Attribute
+        {
+        }
+
+        public class ToCommandCaseTest
+        {
+            class CommandTest
+            {
+                // ReSharper disable once InconsistentNaming
+                public void CommandName(bool dryRun, [Argument] string ArgName0)
+                {
+                }
+            }
+        }
+        """);
+
     // A naming rule for parameters that asks for another style keeps the parameter's name.
     [Fact]
     public Task ParametersAnEnforcedNamingRuleCovers_KeepTheirNames() => VerifyNoDiagnosticsAsync(

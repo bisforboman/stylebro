@@ -84,11 +84,6 @@ internal static class NamingRules
     internal static bool IsDisabledByReSharper(SyntaxTree tree, int position, CancellationToken cancellationToken)
     {
         var comments = ReSharperCache.GetValue(tree, t => ReadReSharperComments(t, cancellationToken));
-        if (comments.Count == 0)
-        {
-            return false;
-        }
-
         var disabled = false;
         foreach (var (start, isDisabled) in comments)
         {
