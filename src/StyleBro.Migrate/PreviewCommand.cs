@@ -1268,6 +1268,14 @@ internal static class PreviewCommand
 
     internal static void Delete(string folder)
     {
+        // Never made: 'dotnet format' stopped before writing its --report folder (zio, trial 47: a failed restore said
+        // "Couldn't delete the copy (Could not find a part of the path ...)").
+        if (!Directory.Exists(folder))
+        {
+            File.Delete(MarkerOf(folder));
+            return;
+        }
+
         try
         {
             ClearAttributes(folder);
