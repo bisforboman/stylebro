@@ -68,7 +68,7 @@ public sealed partial class MigrationTests
         Assert.Single(FormatCommand.ConfigurationRuns(runs, p => p == "A" ? new[] { "Release" } : Array.Empty<string>(), Merged));
 
         Assert.Equal(
-            "Configurations: runs for Release (A) too: their '#if' code (DEBUG, RELEASE, ...) compiles differently there, and the build of every configuration gets the same fixes and checks.",
+            "Configurations: runs for Release (A) too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.",
             FormatCommand.ConfigurationsLine(added));
         Assert.Null(FormatCommand.ConfigurationsLine([]));
     }

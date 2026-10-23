@@ -96,6 +96,13 @@ public class ConstraintPlacementTests
         }
         """);
 
+    // Trial 47: a tab-indented line in a file with indent_style = space; the new line gets spaces, as the formatter writes it.
+    [Fact]
+    public Task TabIndentedLine_WithSpaceIndentation_GetsSpaces() => VerifyFixAsync(
+        "class C\n{\n\tclass Box<T> {|BRO1111:where T : class|}\n\t{\n\t}\n}\n",
+        "class C\n{\n\tclass Box<T>\n        where T : class\n\t{\n\t}\n}\n",
+        editorConfig: "indent_style = space\nstylebro_constraint_placement = own_line");
+
     [Fact]
     public Task Tabs_AreRead() => VerifyFixAsync(
         "class Box<T> {|BRO1111:where T : class|}\n{\n}\n",

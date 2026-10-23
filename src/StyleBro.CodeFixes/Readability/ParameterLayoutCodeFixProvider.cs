@@ -96,7 +96,7 @@ public sealed class ParameterLayoutCodeFixProvider : CodeFixProvider
                         ? ParameterLayout.GetFirstMisplacedItem(node, currentText, JoinsEmptyLists, options) ?? ParameterLayout.GetFirstItemToMove(node, currentText, options, JoinsEmptyLists)
                         : ParameterLayout.GetFirstItemToMove(node, currentText, options, JoinsEmptyLists)) is not null)
                 {
-                    foreach (var change in ParameterLayout.GetChanges(node, currentText, indentUnit, firstOnly: !list.All, sameLine))
+                    foreach (var change in ParameterLayout.GetChanges(node, currentText, indentUnit, firstOnly: !list.All, sameLine, Indentation.GetTabWidth(options)))
                     {
                         changes[change.Span.Start] = change;
                     }

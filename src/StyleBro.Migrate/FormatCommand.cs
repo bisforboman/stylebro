@@ -2098,8 +2098,8 @@ internal static partial class FormatCommand
     /// <summary>
     /// Whether a project's file, or a Directory.Build.props/.targets above it in its repository, picks Compile items by
     /// configuration (a Compile item, or an ItemGroup/When around one, with a '$(Configuration)' condition): its files then
-    /// differ between configurations even without an '#if' (trial 28: a Release-only file was never formatted or checked).
-    /// Up to the repository root (to the drive's without one). ponytail: the text of those files only, not other imports.
+    /// differ between configurations even without an '#if' (trial 28: a Release-only file was never formatted or checked), or
+    /// generates docs by configuration (<see cref="DocumentsByConfiguration"/>): its findings differ then. Up to the repository root (to the drive's without one). ponytail: the text of those files only, not other imports.
     /// </summary>
     public static bool CompileByConfiguration(string projectPath)
     {
@@ -2115,8 +2115,15 @@ internal static partial class FormatCommand
             }
         }
 
-        return files.Any(f => File.Exists(f) && PicksCompileByConfiguration(File.ReadAllText(f)));
+        return files.Any(f => File.Exists(f) && (PicksCompileByConfiguration(File.ReadAllText(f)) || DocumentsByConfiguration(File.ReadAllText(f))));
     }
+
+    /// <summary>
+    /// Whether MSBuild text sets GenerateDocumentationFile (or DocumentationFile) under a '$(Configuration)' condition: zio
+    /// (trial 47) generates docs in Release only, where BRO1601 reports, and format's Debug run never saw those findings.
+    /// </summary>
+    public static bool DocumentsByConfiguration(string text) =>
+        Regex.IsMatch(text, @"<(?:Generate)?DocumentationFile\b[^>]*\bCondition\s*=\s*""[^""]*\$\(Configuration\)|<(?<tag>PropertyGroup|When)\b[^>]*\bCondition\s*=\s*""[^""]*\$\(Configuration\)[^""]*""[^>]*>(?:(?!</\k<tag>>).)*?<(?:Generate)?DocumentationFile\b", RegexOptions.Singleline | RegexOptions.IgnoreCase);
 
     /// <summary>Whether MSBuild text has a Compile item, or an ItemGroup/When around one, with a '$(Configuration)' condition.</summary>
     public static bool PicksCompileByConfiguration(string text) =>
@@ -2239,7 +2246,7 @@ internal static partial class FormatCommand
             .Select(g => g.SelectMany(r => r.Projects).Select(p => Path.GetFileNameWithoutExtension(p)).Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList() is var names
                 ? $"{g.Key} ({string.Join(", ", names.Take(4))}{(names.Count > 4 ? $" and {names.Count - 4} more" : string.Empty)})"
                 : string.Empty);
-        return $"{ConfigurationsHeader} runs for {string.Join(", ", parts)} too: their '#if' code (DEBUG, RELEASE, ...) compiles differently there, and the build of every configuration gets the same fixes and checks.";
+        return $"{ConfigurationsHeader} runs for {string.Join(", ", parts)} too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.";
     }
 
     /// <summary>
@@ -2520,7 +2527,8 @@ internal static partial class FormatCommand
                 Property("DefineConstants").Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToHashSet(StringComparer.Ordinal),
                 EffectiveLangVersion(Property("LangVersion"), Property("NETCoreSdkVersion")),
                 Property("Nullable").Trim().ToLowerInvariant(),
-                compile);
+                compile,
+                Property("GenerateDocumentationFile").Trim().Equals("true", StringComparison.OrdinalIgnoreCase));
         }
         catch (JsonException)
         {
@@ -3971,6 +3979,7 @@ internal static partial class FormatCommand
                     "-getProperty:DefineConstants",
                     "-getProperty:LangVersion",
                     "-getProperty:Nullable",
+                    "-getProperty:GenerateDocumentationFile",
                     "-getProperty:NETCoreSdkVersion",
                     "-getItem:Compile",
                     "-nologo",
@@ -5966,7 +5975,7 @@ internal static partial class FormatCommand
     /// <summary>
     /// The runs for other configurations of a workspace's projects (<see cref="ConfigurationRuns"/>): only projects whose files
     /// test a symbol that isn't a framework's (<see cref="IsFrameworkSymbol"/>) are evaluated, for each framework and
-    /// configuration at once, and projects whose project file picks Compile items by configuration (<see cref="CompileByConfiguration"/>).
+    /// configuration at once, and projects whose project file picks Compile items or doc generation by configuration (<see cref="CompileByConfiguration"/>).
     /// <paramref name="view"/>: how a project (full path) compiles for a framework and configuration. A project that takes an
     /// in-solution source generator gets those runs too (owner's decision 2026-10-17, "Fix it in a Release run"): format builds
     /// the generator in each configuration first (<paramref name="withGenerator"/> names them, for verify's build check).
@@ -6122,18 +6131,19 @@ internal static partial class FormatCommand
     /// <summary>Full paths as the hook matches them: '|A|B|', upper-case; empty for none.</summary>
     private static string PathList(IReadOnlyCollection<string> paths) => paths.Count == 0 ? string.Empty : "|" + string.Join("|", paths.Select(k => k.ToUpperInvariant())) + "|";
 
-    /// <summary>How a project compiles for one framework (<see cref="ReadView"/>): defined symbols, language version, nullable context, files.</summary>
-    public sealed record CompileView(HashSet<string> Defines, string LangVersion, string Nullable, string[] Compile)
+    /// <summary>How a project compiles for one framework (<see cref="ReadView"/>): defined symbols, language version, nullable context, files, docs.</summary>
+    public sealed record CompileView(HashSet<string> Defines, string LangVersion, string Nullable, string[] Compile, bool Documentation = false)
     {
         /// <summary>
         /// What decides how <paramref name="files"/> parse: each file with the symbols its '#if's test that are defined, the
-        /// language version and nullable context. Two views with the same key parse those files the same. The symbols come
-        /// from the file's own path: upper-cased, it doesn't exist on Linux, and every file tested nothing there.
+        /// language version, nullable context and doc generation (BRO1601 reports only with it). Two views with the same key
+        /// parse those files the same and get the same findings. The symbols come from the file's own path: upper-cased, it
+        /// doesn't exist on Linux, and every file tested nothing there.
         /// </summary>
         public string Key(IEnumerable<string> files) =>
             string.Join(";", files.Select(Path.GetFullPath).DistinctBy(f => f.ToUpperInvariant(), StringComparer.Ordinal).OrderBy(f => f.ToUpperInvariant(), StringComparer.Ordinal)
                 .Select(f => f.ToUpperInvariant() + ":" + string.Join(",", TestedSymbols(f).Where(Defines.Contains))))
-            + "|" + LangVersion + "|" + Nullable;
+            + "|" + LangVersion + "|" + Nullable + (Documentation ? "|documentation" : string.Empty);
     }
 
     /// <summary>

@@ -14,7 +14,12 @@ public static class Views
     /// <summary>
     /// The view of <paramref name="solution"/> a run checks: the instances <paramref name="selections"/> name ('path|framework',
     /// the framework as that project spells it, '' for all its instances) and every project they reference, transitively.
-    /// <paramref name="names"/> gets the instance names to write as a single-framework load names them.
+    /// <paramref name="names"/> gets the instance names to write as a single-framework load names them. A reference of one of
+    /// the run's framework instances to another instance of a project the run names goes to the named one, as in a
+    /// 'dotnet format' run of that framework, which loads one instance per project: MSBuildWorkspace sends a reference it can't
+    /// match by output to the project's first instance (SmartFormat, trial 47: its net462 projects referenced the libraries'
+    /// netstandard2.0 instances, and the analyzers reported those instances' copies of the files, which the whitespace
+    /// formatter had left alone: findings at the positions before formatting).
     /// </summary>
     public static Solution Of(Solution solution, IReadOnlyList<string> selections, Dictionary<string, string> names)
     {
@@ -23,24 +28,11 @@ public static class Views
             return solution;
         }
 
-        var byPath = solution.Projects.Where(p => p.FilePath is not null).ToLookup(p => p.FilePath!, StringComparer.OrdinalIgnoreCase);
-        var roots = new List<Project>();
-        var frameworks = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var selection in selections)
-        {
-            var bar = selection.LastIndexOf('|');
-            var (path, framework) = bar < 0 ? (selection, string.Empty) : (selection.Substring(0, bar), selection.Substring(bar + 1));
-            var instances = byPath[path].ToList();
-            var chosen = framework.Length == 0 || (instances.Count == 1 && FrameworkOf(instances[0].Name) is null)
-                ? instances
-                : instances.Where(p => string.Equals(FrameworkOf(p.Name), framework, StringComparison.OrdinalIgnoreCase)).ToList();
-            roots.AddRange(chosen);
-            if (framework.Length > 0)
-            {
-                frameworks.Add(framework);
-            }
-        }
-
+        var roots = RootsOf(solution, selections);
+        var frameworks = FrameworksOf(selections);
+        var named = roots.Where(p => p.FilePath is not null).GroupBy(p => p.FilePath!, StringComparer.OrdinalIgnoreCase).Where(g => g.Count() == 1).ToDictionary(g => g.Key, g => g.Single().Id, StringComparer.OrdinalIgnoreCase);
+        var rootIds = roots.Select(p => p.Id).ToHashSet();
+        var retargeted = new List<(ProjectId Project, ProjectReference From, ProjectId To)>();
         var keep = new HashSet<ProjectId>();
         var stack = new Stack<Project>(roots);
         while (stack.Count > 0)
@@ -48,12 +40,21 @@ public static class Views
             var project = stack.Pop();
             if (keep.Add(project.Id))
             {
+                var ofTheRun = rootIds.Contains(project.Id) || (FrameworkOf(project.Name) is { } own && frameworks.Contains(own));
                 foreach (var reference in project.ProjectReferences)
                 {
-                    if (solution.GetProject(reference.ProjectId) is { } referenced)
+                    if (solution.GetProject(reference.ProjectId) is not { } referenced)
                     {
-                        stack.Push(referenced);
+                        continue;
                     }
+
+                    if (ofTheRun && referenced.FilePath is { } path && named.TryGetValue(path, out var instance) && instance != referenced.Id)
+                    {
+                        retargeted.Add((project.Id, reference, instance));
+                        referenced = solution.GetProject(instance)!;
+                    }
+
+                    stack.Push(referenced);
                 }
             }
         }
@@ -65,6 +66,15 @@ public static class Views
         }
 
         var view = solution;
+        foreach (var (project, from, to) in retargeted)
+        {
+            view = view.RemoveProjectReference(project, from);
+            if (!view.GetProject(project)!.ProjectReferences.Any(r => r.ProjectId == to))
+            {
+                view = view.AddProjectReference(project, new ProjectReference(to, from.Aliases, from.EmbedInteropTypes));
+            }
+        }
+
         foreach (var project in solution.ProjectIds.Where(id => !keep.Contains(id)))
         {
             view = view.RemoveProject(project);
@@ -106,6 +116,24 @@ public static class Views
     /// <summary>The frameworks <paramref name="selections"/> ('path|framework') name.</summary>
     public static HashSet<string> FrameworksOf(IEnumerable<string> selections) =>
         new(selections.Select(s => s.Substring(s.LastIndexOf('|') + 1)).Where(f => f.Length > 0 && !f.Contains('/') && !f.Contains('\\')), StringComparer.OrdinalIgnoreCase);
+
+    // The instances the selections ('path|framework') name.
+    private static List<Project> RootsOf(Solution solution, IReadOnlyList<string> selections)
+    {
+        var byPath = solution.Projects.Where(p => p.FilePath is not null).ToLookup(p => p.FilePath!, StringComparer.OrdinalIgnoreCase);
+        var roots = new List<Project>();
+        foreach (var selection in selections)
+        {
+            var bar = selection.LastIndexOf('|');
+            var (path, framework) = bar < 0 ? (selection, string.Empty) : (selection.Substring(0, bar), selection.Substring(bar + 1));
+            var instances = byPath[path].ToList();
+            roots.AddRange(framework.Length == 0 || (instances.Count == 1 && FrameworkOf(instances[0].Name) is null)
+                ? instances
+                : instances.Where(p => string.Equals(FrameworkOf(p.Name), framework, StringComparison.OrdinalIgnoreCase)));
+        }
+
+        return roots;
+    }
 
     // The projects with an instance named without a framework next to instances named with one: a framework's that didn't load.
     private static List<string> Failed(Solution workspace) =>

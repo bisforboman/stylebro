@@ -73,7 +73,7 @@ public sealed class ConstraintPlacementCodeFixProvider : CodeFixProvider
             }
             else if (ConstraintPlacement.GetMisplacedClauses(declaration, text).Contains(clause))
             {
-                changes.AddRange(ConstraintPlacement.GetChanges(clause, text, indentUnit));
+                changes.AddRange(ConstraintPlacement.GetChanges(clause, text, indentUnit, Indentation.GetTabWidth(options)));
             }
         }
 

@@ -51,6 +51,28 @@ internal static class Indentation
         return column;
     }
 
+    /// <summary>
+    /// The leading whitespace of another line as a fix writes it on a new line: with spaces as the unit
+    /// (<paramref name="unit"/> from <see cref="GetUnit"/>), tabs become the spaces they show as. The SDK's formatter
+    /// rewrites a new line's tabs with indent_style = space, though it leaves the tab-indented line they came from
+    /// (CSharpFunctionalExtensions, trial 47: '\t\t    int a' after BRO1108's split changed again on the next run).
+    /// </summary>
+    public static string InStyle(string whitespace, string unit, int tabWidth)
+    {
+        if (unit.IndexOf('\t') >= 0 || whitespace.IndexOf('\t') < 0)
+        {
+            return whitespace;
+        }
+
+        var column = 0;
+        foreach (var c in whitespace)
+        {
+            column = c == '\t' ? ((column / tabWidth) + 1) * tabWidth : column + 1;
+        }
+
+        return new string(' ', column);
+    }
+
     /// <summary>One level of indentation.</summary>
     public static string GetUnit(AnalyzerConfigOptions options)
     {

@@ -12,7 +12,9 @@ names them; their runs show up as `== Release` (or `== net8.0, Release`). A repo
 symbols (`NET8_0_OR_GREATER`) gets no extra run, and neither do the files of a NuGet package a project compiles (a
 source package's `#if DEBUG`): `format` never changes them. A project whose project file (or a
 `Directory.Build.props`/`.targets` above it) picks its `Compile` items by `$(Configuration)` gets those runs too, `#if`
-or not: a file only Release compiles is formatted in the Release run. A project that runs an in-solution source
+or not: a file only Release compiles is formatted in the Release run. So does one that generates its documentation file
+(`GenerateDocumentationFile`, `DocumentationFile`) only in some configurations: BRO1601 reports only where docs are
+generated, and a Release-only setting left its findings to the Release build. A project that runs an in-solution source
 generator gets them as well: `format` builds the generator in that configuration first (`Generators: building Gen
 first (in Release, ...)`). `--verify-no-changes` also builds such a project in its other configurations at the end
 (`Building UsesGen in Release to check it ...`) and is not clean when that build reports one of the rules `format`

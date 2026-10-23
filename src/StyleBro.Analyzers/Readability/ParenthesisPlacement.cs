@@ -104,7 +104,7 @@ internal static class ParenthesisPlacement
             }
 
             var lineBreak = text.ToString(TextSpan.FromBounds(openLine.End, openLine.EndIncludingLineBreak));
-            return (close, new TextChange(TextSpan.FromBounds(last.Span.End, close.SpanStart), (lineBreak.Length == 0 ? "\n" : lineBreak) + GetIndentation(list, openLine, text, openMoves, options, isOn)));
+            return (close, new TextChange(TextSpan.FromBounds(last.Span.End, close.SpanStart), (lineBreak.Length == 0 ? "\n" : lineBreak) + InStyle(GetIndentation(list, openLine, text, openMoves, options, isOn), options)));
         }
 
         return GetMisplacedClose(list, text) is { } misplaced ? (misplaced, GetCloseChange(misplaced, text)) : null;
@@ -215,6 +215,10 @@ internal static class ParenthesisPlacement
 
         return openingLine == Line(text, last.SpanStart) ? (true, openLine) : (false, null);
     }
+
+    /// <summary>A closing token's new indentation as the formatter keeps it (<see cref="Indentation.InStyle"/>).</summary>
+    private static string InStyle(string indentation, AnalyzerConfigOptions? options) =>
+        options is null ? indentation : Indentation.InStyle(indentation, Indentation.GetUnit(options), Indentation.GetTabWidth(options));
 
     /// <summary>
     /// The indentation of the line with the opening token (or the name, when BRO1109 moves the token up there) once the

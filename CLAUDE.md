@@ -2060,3 +2060,42 @@ branch, not committed to main). StyleCop parity is complete (every rule is Style
   nuget.config `<clear/>`s: the trial feed + a `StyleBro.*` mapping go in there; its tests run with `dotnet test --solution
   CodeBuilder.slnx` (MTP). FluentResults' net48 tests need mono, querybuilder's MySQL tests a server (both fail untouched). The
   worker restarted twice: background jobs died, check their logs before rerunning.
+
+## Trial 47 (2026-10-23, not clean: owner "Not clean", tally 0; host soak: not clean, 0 clean soaks)
+
+- Repos: vkhorikov/CSharpFunctionalExtensions, xoofx/zio, axuno/SmartFormat (random, seed 47: draws 22, 4, 27 all used;
+  random.json had 32 entries, 4 appended as entries 33-36, picks at indices 31, 32, 33; `.trials/trial47/logs/picks.md`),
+  dailydevops/fluentvalue (targeted: NetEvolve.Defaults 2.10.0, copying turned off with DisableSupportAdditionalFiles as init
+  advises; check --build proved it and remembered it, later checks didn't name the package: trial 46's fix held).
+- zio (false Clean): GenerateDocumentationFile only in Release, BRO1601 reports only with doc generation, and format/check ran
+  Release only for `#if`/Compile differences. `FormatCommand.DocumentsByConfiguration` (GenerateDocumentationFile or
+  DocumentationFile under a `$(Configuration)` condition) joins `CompileByConfiguration`; `CompileView.Documentation`
+  (`-getProperty:GenerateDocumentationFile`) is part of the compile key. The Configurations line no longer says "'#if' code".
+- CSharpFunctionalExtensions (second run): a tab-indented header line in an `indent_style = space` file; BRO1107/BRO1108,
+  BRO1110 own_line and BRO1111 copied its tabs onto the new lines, which the whitespace pass rewrote next run (it leaves the
+  tab-indented line itself). `Indentation.InStyle(whitespace, unit, tabWidth)`: tabs become the spaces they show as when the
+  unit is spaces. Other fixes that build `leading whitespace + unit` (BRO1105, BRO1132/BRO1134, BRO1008) don't use it yet.
+- `PreviewCommand.Delete` on a folder that was never made says nothing (zio's broken restore: format --json's report folder).
+- Format host soak (owner, 2026-10-23: `--engine host` on a second clone of every repository; harness
+  `scripts/format-speed/Compare-Format.ps1` + check --build with both): SmartFormat's net462 view also had the libraries'
+  netstandard2.0 instances, because MSBuildWorkspace sends a project reference it can't match by output ("Found project
+  reference without a matching metadata reference") to a project's first instance; the analyzers reported their unformatted
+  copies (23 extra findings). `Views.Of` retargets a reference of the run's framework instances to the instance the run
+  names. A first try filtered the formattable documents: wrong, dotnet-format picks one copy per file (the netstandard2.0
+  one), so the libraries weren't checked in net462 at all (only the "files with findings" counts showed it), and it
+  analyzes every project with a copy of a formattable file. After the fix all four identical (trees, verdicts, exit codes,
+  output, --json, check --build). Owner: a host-only difference makes the soak not clean (0 clean soaks); the harness keeps
+  comparing changesPerRule exactly although the default engine's counts vary by one between runs (fix order).
+- Timings (default vs host, final round): CSharpFunctionalExtensions check 220/230 s, format 196/171 s, recheck 137/121 s;
+  zio 207/125, 227/95, 47/34; SmartFormat 313/179, 272/127, 73/55; fluentvalue 68/46, 112/30, 25/19; check --build 5-15 % faster.
+- Kept as designed: the first check --build that proves a package's copying off prints the IDE0049 "Not checked" note
+  instead of "The builds above check IDE0049" (the package gap is still in the gap list there); the copy-off record is keyed by
+  relative paths and contents, so an identical second clone finds it.
+- Environment: SDK 10.0.113 + 8.0.132 and pwsh were there (`ln -s ~/.dotnet/tools/bro /usr/local/bin/bro`). zio's TWAE
+  restore fails on NU1510 untouched (check --build honestly Not verified; compare with `-p:WarningsNotAsErrors=NU1510`),
+  its Release build fails on CS1591 untouched; CSharpFunctionalExtensions' untouched TWAE build fails on 36 nullable errors;
+  SmartFormat needs EnableWindowsTargeting (Demo is net8.0-windows), net462 tests need mono; fluentvalue: trial feed + a
+  `StyleBro.*` mapping in its nuget.config, `WarningsNotAsErrors` CS9057 in its props (NetEvolve.Arguments' analyzer needs
+  Roslyn 5.6; dropping a package makes NetEvolve.Defaults fail with NED0010), net9.0 tests with DOTNET_ROLL_FORWARD=Major.
+  A CPM repository needs the trial reference in its Directory.Packages.props (zio's is in src/). Long reruns: start them with
+  `setsid nohup` (a background command dies at its time limit); `pkill -f` matched its own shell again.

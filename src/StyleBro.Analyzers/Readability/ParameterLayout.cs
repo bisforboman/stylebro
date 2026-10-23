@@ -97,11 +97,11 @@ internal static class ParameterLayout
     /// and moved items are indented like the first item that already starts a line (aligned under the first item, or
     /// one level deeper: whatever the list does), else one level deeper than the line with the parenthesis.
     /// </summary>
-    public static IEnumerable<TextChange> GetChanges(SyntaxNode list, SourceText text, string indentUnit, bool firstOnly = false, bool sameLine = false)
+    public static IEnumerable<TextChange> GetChanges(SyntaxNode list, SourceText text, string indentUnit, bool firstOnly = false, bool sameLine = false, int tabWidth = 4)
     {
         var (open, items) = GetList(list);
         var openLine = text.Lines.GetLineFromPosition(open.SpanStart);
-        var indentation = new string(text.ToString(openLine.Span).TakeWhile(c => c is ' ' or '\t').ToArray()) + indentUnit;
+        var indentation = Indentation.InStyle(new string(text.ToString(openLine.Span).TakeWhile(c => c is ' ' or '\t').ToArray()), indentUnit, tabWidth) + indentUnit;
         if (sameLine && items.FirstOrDefault(i => Line(text, i.SpanStart) > Line(text, i.GetFirstToken().GetPreviousToken().Span.End)) is { } lineStart)
         {
             indentation = LeadingWhitespace(text, text.Lines.GetLineFromPosition(lineStart.SpanStart));

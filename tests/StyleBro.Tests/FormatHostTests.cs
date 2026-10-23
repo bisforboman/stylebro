@@ -94,6 +94,36 @@ public sealed class FormatHostTests : IDisposable
     }
 
     [Fact]
+    public void AView_ReferencesTheInstancesTheRunNames()
+    {
+        // SmartFormat (trial 47): MSBuildWorkspace sent Net(net462)'s reference to Time's first instance, Time(netstandard2.0),
+        // and the analyzers reported that instance's copies of the files, which the whitespace formatter had left alone:
+        // findings a 'dotnet format' run of net462, with one instance per project, doesn't have.
+        using var workspace = new AdhocWorkspace();
+        var solution = workspace.CurrentSolution;
+        ProjectId Add(string name, string path, params ProjectId[] references)
+        {
+            var id = ProjectId.CreateNewId(name);
+            solution = solution.AddProject(ProjectInfo.Create(id, VersionStamp.Default, name, name, LanguageNames.CSharp, filePath: path, projectReferences: references.Select(r => new ProjectReference(r))));
+            return id;
+        }
+
+        var time20 = Add("Time(netstandard2.0)", "/r/Time/Time.csproj");
+        var time462 = Add("Time(net462)", "/r/Time/Time.csproj");
+        var core20 = Add("Core(netstandard2.0)", "/r/Core/Core.csproj");
+        var net462 = Add("Net(net462)", "/r/Net/Net.csproj", time20, core20);
+        var view = Views.Of(solution, ["/r/Time/Time.csproj|net462", "/r/Net/Net.csproj|net462"], []);
+
+        // Core, which the run doesn't name, stays as it was referenced.
+        Assert.Equal(new HashSet<ProjectId> { time462, core20, net462 }, view.ProjectIds.ToHashSet());
+        Assert.Equal(new HashSet<ProjectId> { time462, core20 }, view.GetProject(net462)!.ProjectReferences.Select(r => r.ProjectId).ToHashSet());
+
+        // All of a project's instances named (''): nothing to pick, the reference stays.
+        var all = Views.Of(solution, ["/r/Time/Time.csproj|", "/r/Net/Net.csproj|net462"], []);
+        Assert.Contains(time20, all.GetProject(net462)!.ProjectReferences.Select(r => r.ProjectId));
+    }
+
+    [Fact]
     public void AView_HasTheLoadWarnings_OfItsProjects_AndOfProjectsThatDidntLoad()
     {
         using var workspace = new AdhocWorkspace();

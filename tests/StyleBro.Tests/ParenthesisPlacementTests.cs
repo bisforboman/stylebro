@@ -435,6 +435,13 @@ public class ParenthesisPlacementTests
         """,
         editorConfig: "stylebro_closing_parenthesis_placement = own_line\ndotnet_diagnostic.BRO1109.severity = none");
 
+    // Trial 47: a tab-indented line in a file with indent_style = space; the new line gets spaces, as the formatter writes it.
+    [Fact]
+    public Task OwnLine_TabIndentedLine_WithSpaceIndentation_GetsSpaces() => VerifyFixAsync(
+        "class C\n{\n\tvoid M(\n        int a,\n        int b{|BRO1110:)|}\n\t{\n\t}\n}\n",
+        "class C\n{\n\tvoid M(\n        int a,\n        int b\n    )\n\t{\n\t}\n}\n",
+        editorConfig: "indent_style = space\nstylebro_closing_parenthesis_placement = own_line");
+
     [Fact]
     public Task OwnLine_WithBro1109_IndentsLikeTheNameLine() => VerifyFixAsync(
         """
