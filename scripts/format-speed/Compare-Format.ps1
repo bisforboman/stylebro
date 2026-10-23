@@ -40,7 +40,9 @@ function Normalize([string[]] $lines, [string] $root) {
         if ($line.StartsWith('Timings (')) { $timings = $true; continue }
         if ($timings -and $line.StartsWith('  ')) { continue }
         $timings = $false
-        if ($line -match '^\s*.+?\(\d+,\d+\): (?:error|warning|kept) \w+:' -or $line -match '^Checked .+ \(run \d+ of \d+\)$') {
+        # Also the findings a build of another configuration lists ('  path(l,c): BRO1108: ...', trial 48, Tomlyn's Release
+        # build): in MSBuild's output order, which a parallel build changes between two runs of the same engine.
+        if ($line -match '^\s*.+?\(\d+,\d+\): (?:error|warning|kept) \w+:' -or $line -match '^\s+.+?\(\d+,\d+\): [A-Z]+\d+: ' -or $line -match '^Checked .+ \(run \d+ of \d+\)$') {
             $unordered.Add(($line -replace ' \(run \d+ of \d+\)$', ''))
         }
         else {
