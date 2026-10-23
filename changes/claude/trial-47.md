@@ -4,3 +4,5 @@
   `.editorconfig` says `indent_style = space`, even when the line they copy the indentation from starts with tabs. A
   second `bro format` run no longer re-indents those lines.
 - `bro format --json` no longer prints "Couldn't delete the copy" after a run whose restore failed.
+- `bro format` and `bro check` also run the Release configuration (or another one) of a project that generates its
+  documentation file only there: BRO1601's findings in it were left for the Release build, and `bro check` said clean.
