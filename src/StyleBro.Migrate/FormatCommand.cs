@@ -3743,7 +3743,7 @@ internal static partial class FormatCommand
 
                 gaps.ForEach(log);
                 log(changed > 0
-                    ? $"Not clean: formatting would change {changed} file{(changed == 1 ? string.Empty : "s")}. Run 'bro format'."
+                    ? RecordedUndone(root, changedFiles) is { } undone ? UndoneLine(undone) : $"Not clean: formatting would change {changed} file{(changed == 1 ? string.Empty : "s")}. Run 'bro format'."
                     : "Not clean: formatting a copy of the repository failed (see above).");
                 return code;
             }
@@ -4828,6 +4828,7 @@ internal static partial class FormatCommand
                     log(FixFailuresLine(allFailures));
                 }
 
+                RememberUndone(root, undone);
                 log(undone.Count > 0 ? UndoneLine(undone.Select(f => Path.GetRelativePath(shown, f).Replace('\\', '/')).ToList()) : $"Not clean: still changing after {MaxRuns} runs. Run 'bro format' again, and if it keeps changing the same lines, please report it.");
                 return NotCleanExitCode;
             }
@@ -4842,6 +4843,52 @@ internal static partial class FormatCommand
     /// </summary>
     public static List<string> UndoneFiles(IReadOnlyDictionary<string, string> beforePrevious, IReadOnlyDictionary<string, string> after, IEnumerable<string> changed) =>
         changed.Where(f => beforePrevious.TryGetValue(f, out var was) && after.TryGetValue(f, out var now) && was == now).ToList();
+
+    /// <summary>
+    /// Records the files the last 'format' run found undoing the run before (<see cref="UndoneFiles"/>, full paths), with their
+    /// content now, for <see cref="RecordedUndone"/>; none clears the record. In the temp folder, named by the root's path.
+    /// </summary>
+    public static void RememberUndone(string root, IReadOnlyCollection<string> files)
+    {
+        var record = UndoneRecord(root);
+        try
+        {
+            if (files.Count == 0)
+            {
+                File.Delete(record);
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(record)!);
+            File.WriteAllLines(record, files.Where(File.Exists).Select(f => $"{Path.GetFullPath(f)}\t{Hash(File.ReadAllBytes(f))}"));
+        }
+        catch (IOException)
+        {
+            // Only a better message is lost.
+        }
+    }
+
+    /// <summary>
+    /// The files (relative to <paramref name="root"/>) when every file <paramref name="changed"/> lists (full paths) is one the
+    /// last 'format' found undoing the run before (<see cref="RememberUndone"/>) and still has the content it left; else null.
+    /// 'bro check' then says so instead of "Run 'bro format'", which can't settle them (owner's choice 2026-10-23).
+    /// </summary>
+    public static List<string>? RecordedUndone(string root, IReadOnlyCollection<string> changed)
+    {
+        var record = UndoneRecord(root);
+        if (changed.Count == 0 || !File.Exists(record))
+        {
+            return null;
+        }
+
+        var known = File.ReadAllLines(record).Select(l => l.Split('\t')).Where(p => p.Length == 2).ToDictionary(p => p[0], p => p[1], StringComparer.OrdinalIgnoreCase);
+        return changed.All(f => File.Exists(f) && known.TryGetValue(Path.GetFullPath(f), out var hash) && hash == Hash(File.ReadAllBytes(f)))
+            ? changed.Select(f => Path.GetRelativePath(root, f).Replace('\\', '/')).Order(StringComparer.Ordinal).ToList()
+            : null;
+    }
+
+    private static string UndoneRecord(string root) =>
+        Path.Combine(Path.GetTempPath(), "stylebro-undone", Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(Path.GetFullPath(root).TrimEnd('/', '\\').ToUpperInvariant())))[..16] + ".tsv");
 
     /// <summary>The verdict when every run undoes the one before in some files (<see cref="UndoneFiles"/>, relative paths).</summary>
     public static string UndoneLine(IReadOnlyList<string> files) =>

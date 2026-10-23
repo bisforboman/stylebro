@@ -114,6 +114,12 @@ public sealed class FormatCoverageTests : IDisposable
         Assert.Equal(FormatCommand.UndoneLine(["Flips.cs"]), lines[^1]);
         Assert.DoesNotContain(lines, l => l.Contains("please report it.", StringComparison.Ordinal) && l.Contains("still changing", StringComparison.Ordinal));
 
+        // 'bro check' says the same where those files are all it would change, with the content 'format' left them in.
+        Assert.Equal(["Flips.cs"], FormatCommand.RecordedUndone(root, [flips]));
+        Assert.Null(FormatCommand.RecordedUndone(root, [flips, settles]));
+        File.AppendAllText(flips, "// edited\n");
+        Assert.Null(FormatCommand.RecordedUndone(root, [flips]));
+
         // A file that keeps changing to new text isn't undone: the old line stays.
         File.WriteAllText(flips, "using static P;\n");
         lines.Clear();
