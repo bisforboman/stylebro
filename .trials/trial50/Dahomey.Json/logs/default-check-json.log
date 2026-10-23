@@ -1,0 +1,10 @@
+Using src/Dahomey.Json.sln: no solution or project at the root, and it's the only solution one folder down.
+Checking StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net5.0, net6.0, netcoreapp3.1, netstandard2.0).
+Checked netstandard2.0 (run 1 of 4)
+Checked netcoreapp3.1 (run 2 of 4)
+Checked net6.0 (run 3 of 4)
+Checked net5.0 (run 4 of 4)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Clean.
