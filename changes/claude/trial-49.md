@@ -9,3 +9,5 @@
   (`// ReSharper disable once InconsistentNaming` above it, or `disable` up to `restore`), and the renaming fix keeps a
   parameter that has an attribute of its own (`[Argument]`, `[Option]`, `[FromQuery]`, ...), which frameworks bind by
   name: Cocona's command line argument names changed and its tests failed.
+- `bro check` marks findings StyleBro's fixes keep on purpose as `kept` in every run: one moved by another fix in the same
+  run was sometimes listed as a `warning` instead.

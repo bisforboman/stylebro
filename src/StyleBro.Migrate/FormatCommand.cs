@@ -623,18 +623,22 @@ internal static partial class FormatCommand
         return lines;
     }
 
-    /// <summary>Whether a 'dotnet format' output line reports one of the kept findings ('path(line,column): warning ID: ...').</summary>
-    public static bool IsKeptLine(string line, ISet<(string Path, int Line, string Id)> kept) => KeptLine(line, kept) is not null;
-
     /// <summary>Whether a 'dotnet format' output line is a finding at warning or error ('path(1,2): error IDE0049: ...').</summary>
     public static bool IsFindingLine(string line) => Regex.IsMatch(line, @"^\s*.+?\(\d+,\d+\): (?:error|warning) \w+:");
 
     /// <summary>
     /// A 'dotnet format' output line, with a kept finding's severity replaced by 'kept' ('path(1,2): kept BRO1303: ...'), so
-    /// it doesn't read (or count in CI) as one to fix.
+    /// it doesn't read (or count in CI) as one to fix. Matched by file, rule and message (<see cref="AsKept"/>), not by line:
+    /// the copy's fixer records a finding where it is when its Fix All runs, before or after other fixes move it (trial 49,
+    /// Cocona: the same check marked two findings 'kept' in one run and 'warning' in the next).
     /// </summary>
-    public static string MarkKept(string line, ISet<(string Path, int Line, string Id)> kept) =>
-        KeptLine(line, kept) is { } severity ? line.Remove(severity.Index, severity.Length).Insert(severity.Index, "kept") : line;
+    public static string MarkKept(string line, IReadOnlyCollection<KeptFinding> kept) =>
+        IsKeptLine(line, kept) && Regex.Match(line, @"^\s*.+?\(\d+,\d+\): (?<severity>\w+) \w+:").Groups["severity"] is { Success: true } severity
+            ? line.Remove(severity.Index, severity.Length).Insert(severity.Index, "kept")
+            : line;
+
+    /// <summary>Whether a 'dotnet format' output line reports one of the kept findings ('path(line,column): warning ID: ...').</summary>
+    public static bool IsKeptLine(string line, IReadOnlyCollection<KeptFinding> kept) => IsFindingLine(line) && AsKept(line, kept) is not null;
 
     /// <summary>
     /// The C# files under the root (not bin/obj, not submodules) with a hash of their content, to tell which a run changed: by
@@ -3731,12 +3735,11 @@ internal static partial class FormatCommand
                 return NotCleanExitCode;
             }
 
-            var keys = new HashSet<(string, int, string)>(kept.Select(k => (k.Path.ToUpperInvariant(), k.Line, k.Id)));
             if (copyCode != 0 || changed > 0)
             {
                 // The kept findings among them are marked: they aren't what makes it fail.
-                lines.Select(l => MarkKept(l, keys)).ToList().ForEach(log);
-                if (lines.Count(l => IsKeptLine(l, keys)) is var marked and > 0)
+                lines.Select(l => MarkKept(l, kept)).ToList().ForEach(log);
+                if (lines.Count(l => IsKeptLine(l, kept)) is var marked and > 0)
                 {
                     log($"{marked} of these {(marked == 1 ? "is" : "are")} kept on purpose (marked 'kept'): StyleBro's fixes leave them, they don't make this fail ({KeptFindingsHelp}).");
                 }
@@ -3752,7 +3755,7 @@ internal static partial class FormatCommand
 
             // Whitespace findings in a copy that formats clean only swapped line endings (KeepingLineEndings).
             var endingsOnly = lines.Count(IsFormattingLine);
-            lines.Where(l => !IsKeptLine(l, keys) && !IsFormattingLine(l)).ToList().ForEach(log);
+            lines.Where(l => !IsKeptLine(l, kept) && !IsFormattingLine(l)).ToList().ForEach(log);
             if (endingsOnly > 0)
             {
                 log($"{endingsOnly} whitespace finding{(endingsOnly == 1 ? " is" : "s are")} only this OS's line ending where a file uses the other one: ignored, 'format' keeps each file's own ending (set end_of_line to choose one).");
@@ -3760,7 +3763,7 @@ internal static partial class FormatCommand
 
             // Findings no fix changes and no fix keeps on purpose: the build still reports them (AngleSharp's IDE0049 in a
             // using alias, which the SDK's fix can't rewrite: "Clean" with three errors above it).
-            var unfixed = lines.Where(l => IsFindingLine(l) && !IsKeptLine(l, keys) && !IsFormattingLine(l)).Select(l => l.Trim()).Distinct(StringComparer.Ordinal).Count();
+            var unfixed = lines.Where(l => IsFindingLine(l) && !IsKeptLine(l, kept) && !IsFormattingLine(l)).Select(l => l.Trim()).Distinct(StringComparer.Ordinal).Count();
             KeptSummary(kept, root, clean: unfixed == 0 && copyFailures.Count == 0 && Unverified(gaps).Count == 0).ForEach(log);
             if (BaselineOffLine(root, kept.Count) is { } off)
             {
@@ -4896,16 +4899,6 @@ internal static partial class FormatCommand
         + "so running again won't settle them. Two formatting steps want those lines in different orders or layouts: 'dotnet format' "
         + "alone can do it (its using sort flips 'using static X;' and 'using static X<T>;' when dotnet_sort_system_directives_first is set). "
         + "Compare the files after two runs, settle the lines by hand or turn off the setting one side follows, and please report it if a StyleBro rule is one side.";
-
-    /// <summary>The severity word of a line that reports a kept finding (its position in the line), or null.</summary>
-    private static Group? KeptLine(string line, ISet<(string Path, int Line, string Id)> kept)
-    {
-        var match = Regex.Match(line, @"^\s*(?<path>.+?)\((?<line>\d+),\d+\): (?<severity>\w+) (?<id>\w+):");
-        return match.Success
-            && kept.Contains((match.Groups["path"].Value.ToUpperInvariant(), int.Parse(match.Groups["line"].Value, System.Globalization.CultureInfo.InvariantCulture), match.Groups["id"].Value))
-                ? match.Groups["severity"]
-                : null;
-    }
 
     /// <summary>A 'path(line)' relative to the root when it's under it.</summary>
     private static string Relative(string root, string where)

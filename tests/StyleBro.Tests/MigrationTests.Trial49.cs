@@ -1,3 +1,4 @@
+using StyleBro.Analyzers;
 using StyleBro.Migrate;
 
 namespace StyleBro.Tests;
@@ -25,5 +26,19 @@ public sealed partial class MigrationTests
         (int, IReadOnlyList<string>) Missing(string folder, string workspace, string configuration) =>
             (1, [$"CSC : error CS0006: Metadata file '/tmp/out/Gone.dll' could not be found [{bench}::TargetFramework=net8.0]", "  Lib -> /tmp/out/Lib.dll"]);
         Assert.StartsWith(FormatCommand.NotVerifiedMarker, FormatCommand.BuildCheckLine(root, solution, _ => { }, Missing, () => string.Empty, () => ["Lib", "Bench"]), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void MarkKept_AKeptFindingAnotherFixMoved_IsStillMarked()
+    {
+        // Cocona: the check of the untouched code marked BRO1302 on 'BooleanFlag' (line 157) 'kept' in one run and 'warning' in
+        // the next: the copy's fixer records a kept finding where it is when its Fix All runs, after other fixes moved it or not.
+        var file = Path.Combine(root, "Test.cs");
+        List<KeptFinding> kept = [new KeptFinding(file, 163, 69, "BRO1302", KeptReason.ParameterHasAttribute, "Rename 'BooleanFlag' to 'booleanFlag'")];
+        var line = $"{file}(157,69): warning BRO1302: Rename 'BooleanFlag' to 'booleanFlag' [{Path.Combine(root, "Test.csproj")}]";
+
+        Assert.True(FormatCommand.IsKeptLine(line, kept));
+        Assert.Equal($"{file}(157,69): kept BRO1302: Rename 'BooleanFlag' to 'booleanFlag' [{Path.Combine(root, "Test.csproj")}]", FormatCommand.MarkKept(line, kept));
+        Assert.False(FormatCommand.IsKeptLine(line.Replace("BooleanFlag", "Other", StringComparison.Ordinal), kept));
     }
 }
