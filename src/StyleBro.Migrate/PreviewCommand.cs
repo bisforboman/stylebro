@@ -310,6 +310,7 @@ internal static class PreviewCommand
             var changed = new List<bool>();
             var putBack = new List<string>();
             var tree = Tree(copy);
+            var trees = new List<string> { tree };
 
             // CSharpier where the repository uses it, as 'bro format' runs it (whole folders where it changes nothing else).
             var formatRoot = File.Exists(target) ? FormatCommand.WorkingRoot(target) : target;
@@ -357,6 +358,7 @@ internal static class PreviewCommand
                 }
 
                 changed.Add(next != tree);
+                trees.Add(next);
                 JsonReport.AddRun(run, GitChecked(copy, "diff", "--name-only", tree, next).Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(f => Path.Combine(source, f.Trim())), null);
                 tree = next;
                 if (!changed[^1])
@@ -417,6 +419,17 @@ internal static class PreviewCommand
                 var check = new List<string>();
                 format([.. FormatCommand.WithInclude(FormatCommand.NoRestore(formatArgs.ToArray()), putBack.Select(f => Path.GetRelativePath(formatRoot, Path.Combine(copy, f)).Replace('\\', '/'))), "--verify-no-changes"], check.Add);
                 Console.WriteLine(CSharpierStep.PutBackLine(putBack, FormatCommand.FindingIds(check.Where(l => FormatCommand.FindingPath(l) is { } path && putBack.Contains(Path.GetRelativePath(copy, path).Replace('\\', '/'), StringComparer.OrdinalIgnoreCase)))));
+            }
+
+            // As format: the files each run undoes the one before in (FormatCommand.UndoneLine; trial 48, Pidgin's using sort).
+            if (changed[^1] && putBack.Count == 0 && trees.Count >= 3)
+            {
+                var lastRun = GitChecked(copy, "diff", "--name-only", trees[^2], trees[^1]).Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(f => f.Trim()).ToList();
+                var stillDifferent = GitChecked(copy, "diff", "--name-only", trees[^3], trees[^1]).Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(f => f.Trim()).ToHashSet(StringComparer.Ordinal);
+                if (lastRun.Where(f => !stillDifferent.Contains(f)).Select(f => Path.GetRelativePath(formatRoot, Path.Combine(copy, f)).Replace('\\', '/')).ToList() is { Count: > 0 } undone)
+                {
+                    Console.WriteLine(FormatCommand.UndoneLine(undone));
+                }
             }
 
             // As format: the parts no run checked, then "Not verified" (exit code 3) instead of clean.

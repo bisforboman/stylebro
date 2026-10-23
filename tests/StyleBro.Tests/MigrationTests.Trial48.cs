@@ -155,4 +155,38 @@ public sealed partial class MigrationTests
             DeleteFolder(copy);
         }
     }
+
+    [Fact]
+    public void Preview_NamesTheFilesEachRunUndoes()
+    {
+        // Trial 48, Pidgin: as format, the preview names the files whose runs flip back and forth (owner's choice 2026-10-23).
+        Write("App/App.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
+        Write("App/Flips.cs", "using static P;\nusing static P<char>;\n");
+        PreviewCommand.MakeRepository(root);
+        var patch = Path.Combine(Directory.CreateTempSubdirectory("stylebro-preview-test-").FullName, "out.patch");
+        int Format(string[] args, Action<string> log)
+        {
+            var report = Array.IndexOf(args, "--report");
+            if (report >= 0)
+            {
+                Directory.CreateDirectory(args[report + 1]);
+                File.WriteAllText(Path.Combine(args[report + 1], "format-report.json"), "[]");
+            }
+
+            var flips = Directory.EnumerateFiles(Path.GetDirectoryName(args[0])!, "Flips.cs", SearchOption.AllDirectories).Single();
+            var text = File.ReadAllText(flips);
+            File.WriteAllText(flips, text.StartsWith("using static P;", StringComparison.Ordinal) ? "using static P<char>;\nusing static P;\n" : "using static P;\nusing static P<char>;\n");
+            return 0;
+        }
+
+        try
+        {
+            var output = Capture(() => Assert.Equal(FormatCommand.NotCleanExitCode, PreviewCommand.Run("format", new[] { Path.Combine(root, "App", "App.csproj"), "--diff=" + patch }, Format)));
+            Assert.Contains(FormatCommand.UndoneLine(["Flips.cs"]), output, StringComparison.Ordinal);
+        }
+        finally
+        {
+            Directory.Delete(Path.GetDirectoryName(patch)!, recursive: true);
+        }
+    }
 }
