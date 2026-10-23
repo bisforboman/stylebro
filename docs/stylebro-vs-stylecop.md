@@ -89,7 +89,7 @@ CommentSpacingAnalyzer (59 ms) (run 1).
 Not the same work: StyleCop's number includes spacing and indentation rules that StyleBro leaves to the SDK (IDE0055 and
 the other rules `init` turns on), whose cost isn't in StyleBro's number. In a real build analyzers run concurrently with
 the compiler, so the wall-clock difference is smaller: a private app built in the same time with and without StyleBro
-(9-12 s either way), Newtonsoft.Json 8.4 -> ~11.8 s with every StyleBro rule (CLAUDE.md, 2026-10-02, alpha.8). An
+(9-12 s either way), Newtonsoft.Json 8.4 -> ~11.8 s with every StyleBro rule ([performance notes](https://github.com/bisforboman/stylebro/blob/main/docs/notes/performance.md), 2026-10-02, alpha.8). An
 earlier figure of 1,671 ms for StyleCop came from the benchmark before it parsed fresh sources per run and isn't
 comparable.
 
@@ -125,7 +125,7 @@ comparable.
 `#pragma warning disable SA...`, `[SuppressMessage]` and `<NoWarn>` suppressions over to the replacing rules, and
 reports the StyleCop rules nothing enforces any more.
 
-Files `dotnet format` changes after `bro migrate --write` on repositories that were StyleCop-clean (CLAUDE.md,
+Files `dotnet format` changes after `bro migrate --write` on repositories that were StyleCop-clean ([real-world log](https://github.com/bisforboman/stylebro/blob/main/docs/notes/real-world-log.md),
 "Migration re-measured with the SDK replacements", 2026-10-03; `scripts/stylecop-survey/Measure-MigrationDelta.ps1`):
 
 | Repository | Files changed | What |
