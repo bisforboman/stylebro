@@ -66,6 +66,26 @@ The `bro format` investigation (per-framework runs, convergence, speed on large 
   too. These showed up in 1 Newtonsoft.Json run of 5: a single clean real-world run proves little, repeat it.
   `FixOrderTests` runs every order of a case's ids, one Fix All each (single copy: multi-copy cases need a real repo).
   Result: every reference repo needs 2 runs (one that changes, one clean), so Invoke-RealWorld now fails above 2.
+- **`#region` lines some frameworks leave out** (2026-10-23, owner's choice after PR #291 saw it). `bro format --engine host`
+  on Newtonsoft.Json (init --write + package, as a trial's step 4) ended "Not clean: each run undoes the one before in 1
+  file": `Src/Newtonsoft.Json.Tests/Linq/DynamicTests.cs` is `#if !(NET35 || NET20 || PORTABLE40)` throughout, and its
+  `#endregion` lines right below an inner `#endif` (464, 538, 612, 686) went to column 0 in the net20/net35 runs and back to
+  their indentation in the others. Roslyn's formatter re-indents a `#region`/`#endregion` below another directive inside
+  a left-out branch from the next compiled token (column 0 there; a region below left-out text stays, `#pragma`,
+  `#nullable`, `#error` are column 0 in every parse); this only differs from the active copy where the left-out branch
+  spans a block boundary (a probe with the `#if` inside one method gave the same indentation both ways). Found with a
+  watcher copying the file on every change during one `bro format` (12 versions, flipping with each framework's run) and
+  a Roslyn probe parsing it with NET20 and NET8_0 symbols. The default engine flips it the same way (`bro format --once
+  --files` on it: the net20/net35 runs moved the three lines); its full runs happened to converge here (2 of 2, and in
+  PR #291's runs), not investigated why. Fix: `IfBodies.Lines` also protects such a region line (active in one run's
+  parse, inactive in another's, below a directive line); `Indentation kept:` names it, its whitespace findings don't count.
+  The files were already candidates (`OpensBlock`). After: both engines one changing run then clean, twice each, identical
+  trees (the pre-fix run 1's), and only DynamicTests.cs joined Newtonsoft's `Indentation kept:` list. Serilog (init) and
+  Polly (migrate): the same trees and output before and after (122 and 2 files, then clean).
+  Why CI missed it: `Invoke-RealWorld.ps1` runs `dotnet format analyzers <sln> --diagnostics <BRO ids>` with every
+  framework in one workspace: no whitespace pass, no per-framework runs, no IDE rules, so this class can't show there.
+  `BroFormat = $true` (Newtonsoft only, default engine; owner's choice) adds `bro init --write` + `bro format` on the
+  untouched code after the checks; exit 2 fails the job.
 
 - **Tracker bugs** (2026-10-04, docs/beyond-stylecop.md "Possible bugs to check", all fixed): BRO1504 treats a
   collection expression's `[` like `{` (StyleCop #3766); BRO1603 accepts a period before closing `)`/`]`/`"`/`'`
