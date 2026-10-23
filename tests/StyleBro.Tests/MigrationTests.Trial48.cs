@@ -79,4 +79,51 @@ public sealed partial class MigrationTests
         Write("src/App/obj/App.csproj.nuget.g.props", "<Project />\n");
         Assert.True(StyleCopSetup.Restored(project, root));
     }
+
+    [Fact]
+    public void PreviewOfMigrate_ReadsThePackageGlobalConfigFromTheRepositorysRestore()
+    {
+        // Trial 48, Pidgin: the settings step ran in a copy without restore output, so even in a restored repository the
+        // preview couldn't see the package's global config (SA1101 off there) and showed 71 files with 'this.' added.
+        var package = Directory.CreateTempSubdirectory("bro-package-").FullName;
+        var patch = Path.Combine(Directory.CreateTempSubdirectory("stylebro-preview-test-").FullName, "out.patch");
+        try
+        {
+            var config = Path.Combine(package, "Build.globalconfig");
+            File.WriteAllText(config, "is_global = true\ndotnet_diagnostic.SA1101.severity = none\n");
+            Write("Directory.Packages.props", "<Project>\n  <ItemGroup>\n    <GlobalPackageReference Include=\"StyleCop.Analyzers\" Version=\"1.1.118\" />\n    <GlobalPackageReference Include=\"BuildScripts\" Version=\"2.4.0\" />\n  </ItemGroup>\n</Project>\n");
+            Write("App/App.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFramework>net8.0</TargetFramework>\n  </PropertyGroup>\n</Project>\n");
+            Write("App/C.cs", "class C\n{\n}\n");
+            Write(".gitignore", "obj/\n");
+            Write("App/obj/project.assets.json", "{}");
+            Write("App/obj/App.csproj.nuget.g.props", $"<Project>\n  <ItemGroup>\n    <GlobalAnalyzerConfigFiles Include=\"{config}\" />\n  </ItemGroup>\n</Project>\n");
+            PreviewCommand.MakeRepository(root);
+            int Format(string[] args, Action<string> log)
+            {
+                var report = Array.IndexOf(args, "--report");
+                if (report >= 0)
+                {
+                    Directory.CreateDirectory(args[report + 1]);
+                    File.WriteAllText(Path.Combine(args[report + 1], "format-report.json"), "[]");
+                }
+
+                return 0;
+            }
+
+            var output = Capture(() => Assert.Equal(0, PreviewCommand.Run("migrate", new[] { root, "--project", "App/App.csproj", "--diff=" + patch }, Format)));
+            Assert.DoesNotContain(StyleCopSetup.NotRestoredWarning, output, StringComparison.Ordinal);
+            Assert.Contains("+dotnet_diagnostic.IDE0009.severity = none", File.ReadAllText(patch), StringComparison.Ordinal);
+            Assert.DoesNotContain("nuget.g.props", File.ReadAllText(patch), StringComparison.Ordinal);
+
+            // Without the restore output the preview says what migrate says.
+            DeleteFolder(Path.Combine(root, "App", "obj"));
+            output = Capture(() => Assert.Equal(0, PreviewCommand.Run("migrate", new[] { root, "--project", "App/App.csproj", "--diff=" + patch }, Format)));
+            Assert.Contains($"{StyleCopSetup.NotRestoredWarning} App/App.csproj.", output, StringComparison.Ordinal);
+        }
+        finally
+        {
+            Directory.Delete(package, recursive: true);
+            Directory.Delete(Path.GetDirectoryName(patch)!, recursive: true);
+        }
+    }
 }

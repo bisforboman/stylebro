@@ -1220,6 +1220,12 @@ internal sealed class StyleCopSetup
         && items.EnumerateObject().Where(i => i.Name is "PackageReference" or "GlobalPackageReference" or "Analyzer").SelectMany(i => i.Value.EnumerateArray())
             .Any(i => i.TryGetProperty("Identity", out var identity) && IsStyleCopItem(identity.GetString() ?? string.Empty));
 
+    /// <summary>The start of the warning for StyleCop projects without restore output (<see cref="PackageGlobalConfigs"/>).</summary>
+    internal const string NotRestored = "Not restored:";
+
+    /// <summary>How the report prints that warning (<see cref="NotRestored"/>), which the preview passes on.</summary>
+    internal const string NotRestoredWarning = "Warning: " + NotRestored;
+
     /// <summary>
     /// The global configs packages add to the projects (<paramref name="read"/>: a project's, null without its restore output),
     /// in order, without the repository's own files (read with the others). A project without restore output whose MSBuild
@@ -1246,7 +1252,7 @@ internal sealed class StyleCopSetup
 
         if (unrestored.Count > 0)
         {
-            warnings.Add($"Not restored: {string.Join(", ", unrestored.Take(5))}{(unrestored.Count > 5 ? $" and {unrestored.Count - 5} more" : string.Empty)}. A package can bring a global config that sets StyleCop's rules (GlobalAnalyzerConfigFiles), and it is read from the restore: run 'dotnet restore', then this again.");
+            warnings.Add($"{NotRestored} {string.Join(", ", unrestored.Take(5))}{(unrestored.Count > 5 ? $" and {unrestored.Count - 5} more" : string.Empty)}. A package can bring a global config that sets StyleCop's rules (GlobalAnalyzerConfigFiles), and it is read from the restore: run 'dotnet restore', then this again.");
         }
 
         return result;

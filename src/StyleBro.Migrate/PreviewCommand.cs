@@ -250,7 +250,10 @@ internal static class PreviewCommand
             var noRestore = rest.Contains("--no-restore");
             var restored = noRestore && CopyRestoreOutput(source, copy) > 0;
 
-            MakeRepository(copy, ignoredTracked);
+            // migrate reads the global configs packages add from the restore output (trial 48, Pidgin): the copy gets the
+            // repository's, so the settings step sees what 'bro migrate --write' in the repository would.
+            var restoreOutput = command is not ("init" or "format") && !restored ? CopiedRestoreFolders(source, copy) : [];
+            MakeRepository(copy, ignoredTracked, restoreOutput);
             var baseline = Head(copy);
 
             if (command != "format")
@@ -1071,7 +1074,7 @@ internal static class PreviewCommand
     }
 
     /// <summary>Makes the folder a git repository with everything in it committed.</summary>
-    public static void MakeRepository(string folder, IReadOnlyCollection<string>? ignoredTracked = null)
+    public static void MakeRepository(string folder, IReadOnlyCollection<string>? ignoredTracked = null, IReadOnlyCollection<string>? excluded = null)
     {
         GitChecked(folder, "init", "-q");
         foreach (var chunk in (ignoredTracked ?? []).Chunk(100))
@@ -1084,7 +1087,8 @@ internal static class PreviewCommand
         // The format runs restore and build into bin/obj: not changes to show, also where no .gitignore says so. Nor the
         // packages folder, where a nuget.config puts it inside the repository.
         var packages = PackagesFolderInside(folder) is { } inside ? $"/{inside}/\n" : string.Empty;
-        File.AppendAllText(Path.Combine(folder, ".git", "info", "exclude"), "\nbin/\nobj/\n" + packages);
+        var copied = string.Concat((excluded ?? []).Select(f => $"/{f}/\n"));
+        File.AppendAllText(Path.Combine(folder, ".git", "info", "exclude"), "\nbin/\nobj/\n" + packages + copied);
         Commit(folder, "baseline");
     }
 
@@ -1295,6 +1299,19 @@ internal static class PreviewCommand
     /// For '--no-restore': the restore's output (project.assets.json and the files next to it) copied into the copy, so
     /// 'dotnet format --no-restore' finds the packages restored in the repository. Returns how many projects' it found.
     /// </summary>
+    /// <summary>
+    /// Copies the repository's restore output (<see cref="CopyRestoreOutput"/>) and returns the folders it went to (relative,
+    /// '/'-separated): the copy's git leaves them out, also where no .gitignore does.
+    /// </summary>
+    internal static List<string> CopiedRestoreFolders(string source, string copy)
+    {
+        CopyRestoreOutput(source, copy);
+        return Directory.EnumerateFiles(copy, "project.assets.json", new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true })
+            .Select(f => Path.GetRelativePath(copy, Path.GetDirectoryName(f)!).Replace('\\', '/'))
+            .Order(StringComparer.Ordinal)
+            .ToList();
+    }
+
     internal static int CopyRestoreOutput(string source, string copy)
     {
         var count = 0;
@@ -1437,7 +1454,7 @@ internal static class PreviewCommand
         {
             Console.Write(SonarPart(writer.ToString()));
             Console.Write(DetectedPart(writer.ToString()));
-            foreach (var line in writer.ToString().Replace("\r\n", "\n").Split('\n').Where(l => l.StartsWith("EF Core migrations", StringComparison.Ordinal) || l.StartsWith("Vendored code", StringComparison.Ordinal)))
+            foreach (var line in writer.ToString().Replace("\r\n", "\n").Split('\n').Where(l => l.StartsWith("EF Core migrations", StringComparison.Ordinal) || l.StartsWith("Vendored code", StringComparison.Ordinal) || l.StartsWith(StyleCopSetup.NotRestoredWarning, StringComparison.Ordinal)))
             {
                 Console.WriteLine(line);
             }
