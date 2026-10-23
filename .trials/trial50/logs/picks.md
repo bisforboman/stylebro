@@ -14,13 +14,20 @@
   `EnableWindowsTargeting=true`): `dotnet test` on each solution passes untouched: commandline 684 (netcoreapp3.1),
   ObservableCollections 24 (net6.0) + 10 (R3, net8.0), Dahomey.Json 360/372/374 (netcoreapp3.1/net5.0/net6.0).
 
-## Targeted (pool)
+## Targeted
 
-- **icsharpcode/SharpZipLib** (pool, trial 36): re-checks trial 49's ReSharper fix (`NamingRules.IsDisabledByReSharper`):
-  file-wide `// ReSharper disable InconsistentNaming` in src/ICSharpCode.SharpZipLib/Core/ByteOrderUtils.cs and
-  test/.../Core/ByteOrderUtilsTests.cs; no global.json. No pool entry has a global.json pinning SDK 8 or a known
-  pre-existing CS8002 (probed: nodatime, castle Core, ClosedXML, shouldly, NJsonSchema, Havit.Blazor, WireMock.Net,
-  SharpZipLib; WireMock.Net has 7 such files but 777 .cs files).
+- First choice icsharpcode/SharpZipLib (pool) was withdrawn: it is in `used.tsv` (trial 36), and trials use only
+  repositories never used before (parent's note).
+- Every usable pool entry is used; no pool entry has a global.json pinning SDK 8 or a known pre-existing CS8002. New
+  candidates probed for `// ReSharper disable ... InconsistentNaming` (shallow clones, grep): DotNetAnalyzers/IDisposableAnalyzers
+  (15 files) rejected: its tests are net6.0-windows with WPF (NETSDK1100 off Windows); ststeiger/PdfSharpCore (36 files,
+  674 .cs) rejected: only 32 tests, 5 fail untouched (no ghostscript); NetTopologySuite, PdfPig, NAudio, WireMock.Net
+  have suppressions but 780-1,400 .cs files.
+- **ncalc/ncalc** (random.json entry 47, taken as the targeted pick, so later draws walk past it): re-checks trial 49's
+  ReSharper fix (`NamingRules.IsDisabledByReSharper`): `// ReSharper disable once InconsistentNaming` above the public
+  `MathHelper.IEEERemainder` (src/NCalc.Core/Helpers/MathHelper.cs:265). 150 .cs, netstandard2.0;net8.0;net10.0, TUnit
+  (MTP) on net10.0. Smoke check: needs a full clone (Nerdbank.GitVersioning); global.json 10.0.101 lowered to 10.0.100;
+  `dotnet test --solution NCalc.slnx`: 901 passed.
 
 ## Commits
 
@@ -29,4 +36,4 @@
 | commandlineparser/commandline | master | 1e3607b97af6141743edb3c434c06d5b492f6fb3 |
 | Cysharp/ObservableCollections | master | 8ed7ad87b35885b2540158d9188d710b1cf32763 |
 | dahomey-technologies/Dahomey.Json | master | 43ddbf14d282eccb9802a040fc5d85e7a1422166 |
-| icsharpcode/SharpZipLib | master | ff2d7c30bdb2474d507f001bc555405e9f02a0bb |
+| ncalc/ncalc | master | 9e875d92aaf7110d66374a98a628662698d55908 |
