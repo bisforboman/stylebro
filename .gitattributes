@@ -11,3 +11,4 @@ mkdocs.yml merge=union
 scripts/stylecop-survey/*.psd1 merge=union
 scripts/stylecop-survey/data/*.csv merge=union
 CLAUDE.md merge=union
+docs/notes/*.md merge=union

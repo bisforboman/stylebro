@@ -44,6 +44,8 @@ used or rejected), `pool/` (checked candidates, tagged) and `random.json` (the f
    fourth repository is targeted at the last trial's fixes (a pool entry if one fits).
 3. Record each repository's commit, and why it was chosen, in the trial's logs; in the trial's PR add the four to
    `used.tsv` (and set `usedIn` on their pool entries).
+4. When the owner has given the verdict, the trial's PR adds its `## Trial NN` section (repositories, fixes, verdict and
+   tally, environment notes) at the end of `docs/notes/trials.md` (not CLAUDE.md, since 2026-10-23).
 
 ## Where trials run (owner's decision, 2026-10-17)
 
