@@ -189,4 +189,16 @@ public sealed partial class MigrationTests
             Directory.Delete(Path.GetDirectoryName(patch)!, recursive: true);
         }
     }
+
+    [Fact]
+    public void Migrate_LeavesEnumMembersOutOfThePeriodCheck_ForStyleCop11()
+    {
+        // Trial 48, Pidgin: StyleCop 1.1.118's SA1629 doesn't check enum members (probed; 1.2 does).
+        Write("Directory.Packages.props", "<Project>\n  <ItemGroup>\n    <GlobalPackageReference Include=\"StyleCop.Analyzers\" Version=\"1.1.118\" />\n  </ItemGroup>\n</Project>\n");
+        Write("App/App.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
+        Assert.Contains("stylebro_punctuation_check_enum_members = false", Migration.Generate(StyleCopSetup.Read(root, packageConfigs: _ => []), root).Lines);
+
+        Write("Directory.Packages.props", "<Project>\n  <ItemGroup>\n    <GlobalPackageReference Include=\"StyleCop.Analyzers\" Version=\"1.2.0-beta.556\" />\n  </ItemGroup>\n</Project>\n");
+        Assert.DoesNotContain("stylebro_punctuation_check_enum_members = false", Migration.Generate(StyleCopSetup.Read(root, packageConfigs: _ => []), root).Lines);
+    }
 }

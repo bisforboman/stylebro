@@ -77,6 +77,7 @@ stylebro_null_check_style = equality_operator
 | `stylebro_document_exposed_elements` | `true`, `false` | `true` | [BRO1601](rules/BRO1601.md) |
 | `stylebro_document_internal_elements` | `true`, `false` | `true` | [BRO1601](rules/BRO1601.md) |
 | `stylebro_document_private_elements` | `true`, `false` | `false` | [BRO1601](rules/BRO1601.md) |
+| `stylebro_punctuation_check_enum_members` | `true`, `false` (enum members' documentation not checked) | `true` | [BRO1603](rules/BRO1603.md) |
 | `stylebro_summary_wording` | `stylecop`, `stylesharp` | `stylecop` | [BRO1604](rules/BRO1604.md), [BRO1605](rules/BRO1605.md), [BRO1606](rules/BRO1606.md), [BRO1607](rules/BRO1607.md) |
 | `stylebro_inheritdoc_style` | `compact`, `spaced` | `compact` | [BRO1601](rules/BRO1601.md) |
 | `stylebro_exclude_from_punctuation_check` | tag names, comma-separated | `seealso` | [BRO1603](rules/BRO1603.md) |

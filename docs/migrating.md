@@ -164,7 +164,9 @@ real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro
   `<Analyzer>` hint path into a `packages` folder (old-style projects). Rules the version's DLL doesn't have count as
   off: with 1.1.x the rules added in 1.2 (SA1141, SA1142, SA1316, SA1414), with 1.0.x also SA1135, SA1136, SA1137,
   SA1139, SA1314 and SA1413. 1.1.x's SA1413 doesn't check switch expressions yet: the migration writes
-  `stylebro_trailing_comma_switch_expressions = false`, so [BRO1401](rules/BRO1401.md) leaves them alone too.
+  `stylebro_trailing_comma_switch_expressions = false`, so [BRO1401](rules/BRO1401.md) leaves them alone too. 1.1.x's
+  SA1629 doesn't check enum members' documentation: the migration writes `stylebro_punctuation_check_enum_members = false`
+  for [BRO1603](rules/BRO1603.md).
 - StyleCop spacing rules that are off while others are on (kafkaflow: SA1000, SA1003, SA1009): IDE0055 enforces every
   SDK spacing option, so the code decides, as in `init`. A clear other form gets the option that keeps it
   (`csharp_space_after_keywords_in_control_flow_statements = false` for `if(x)`, `csharp_space_around_binary_operators`

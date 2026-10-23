@@ -296,6 +296,12 @@ internal static partial class Migration
             lines.Add($"{StyleBro.Analyzers.Maintainability.TrailingCommas.WithExpressionsKey} = false");
         }
 
+        // StyleCop 1.1.x's SA1629 doesn't check enum members' documentation (trial 48: Pidgin got periods in 2 StyleCop-clean files).
+        if (setup.Version?.StartsWith("1.1.", StringComparison.Ordinal) == true)
+        {
+            lines.Add($"{StyleBro.Analyzers.Documentation.DocumentationPeriods.EnumMembersKey} = false");
+        }
+
         // Where StyleSharp's SST rule means something else than the StyleCop rule at its number, its meaning (owner's decision
         // 2026-10-16): SST1623/SST1624 count a protected setter as restricted and any getter as usable, SST1642/SST1643 only
         // the standard words before the type, SST1501/SST1502 accept empty braces on one line (trial 24: Refit's

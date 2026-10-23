@@ -1,3 +1,9 @@
+### New
+
+- `stylebro_punctuation_check_enum_members` ([BRO1603](https://bisforboman.github.io/stylebro/rules/BRO1603/)): `false`
+  leaves enum members' documentation out of the period check, as StyleCop 1.1.x does. `bro migrate` writes it for
+  repositories on StyleCop 1.1.x.
+
 ### Fixed
 
 - `bro migrate` reads the global config a NuGet package adds to the build (`GlobalAnalyzerConfigFiles` in its build
