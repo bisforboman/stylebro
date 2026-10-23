@@ -4361,10 +4361,10 @@ internal static partial class FormatCommand
 
         Migration.RememberCopyOff(root, copy);
         log($"The builds left the root .editorconfig as it was: {copy.Package}'s copying is off, so the build reads the settings format checked with (remembered until a project or build file changes).");
-        var gaps = Gaps(held).Where(g => g != packageGap).ToList();
-        ReportGaps(gaps);
-        GapVerdict(gaps).ForEach(log);
-        if (exit == NotVerifiedExitCode && Unverified(gaps).Count == 0)
+        var remaining = Gaps(held).Where(g => g != packageGap).ToList();
+        ReportGaps(remaining);
+        GapVerdict(remaining).ForEach(log);
+        if (exit == NotVerifiedExitCode && Unverified(remaining).Count == 0)
         {
             log("Clean.");
             return 0;
