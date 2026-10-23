@@ -350,6 +350,14 @@ public class ParameterLayoutTests
         "class C\n{\n\tvoid M(\n\t\tint a,\n\t\tint b,\n\t\tint c)\n\t{\n\t}\n}\n",
         editorConfig: "indent_style = tab");
 
+    // CSharpFunctionalExtensions (trial 47): a tab-indented line in a file with indent_style = space. The new lines get spaces,
+    // as the formatter writes them on the next run (it leaves the tab-indented line itself as it is).
+    [Fact]
+    public Task TabIndentedLine_WithSpaceIndentation_GetsSpaces() => VerifyFixAsync(
+        "class C\n{\n\tvoid M(int a, int b,\n\t\t{|BRO1108:int c|})\n\t{\n\t}\n}\n",
+        "class C\n{\n\tvoid M(\n        int a,\n        int b,\n        int c)\n\t{\n\t}\n}\n",
+        editorConfig: "indent_style = space\nindent_size = 4\ntab_width = 4");
+
     [Fact]
     public Task GoodLayouts_AreNotReported() => VerifyNoDiagnosticsAsync("""
         using System.Linq;

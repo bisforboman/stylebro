@@ -117,11 +117,11 @@ internal static class ConstraintPlacement
     /// line. For the last clause of an expression-bodied member, the '=>' that follows it on the same line gets its own
     /// line too, so the body doesn't read as part of the constraint (like StyleCop's fix).
     /// </summary>
-    public static IEnumerable<TextChange> GetChanges(TypeParameterConstraintClauseSyntax clause, SourceText text, string indentUnit)
+    public static IEnumerable<TextChange> GetChanges(TypeParameterConstraintClauseSyntax clause, SourceText text, string indentUnit, int tabWidth = 4)
     {
         var declaration = clause.Parent!;
         var identifierLine = text.Lines.GetLineFromPosition(GetIdentifier(declaration).SpanStart);
-        var indentation = new string(text.ToString(identifierLine.Span).TakeWhile(c => c is ' ' or '\t').ToArray()) + indentUnit;
+        var indentation = Indentation.InStyle(new string(text.ToString(identifierLine.Span).TakeWhile(c => c is ' ' or '\t').ToArray()), indentUnit, tabWidth) + indentUnit;
         var lineBreak = text.ToString(TextSpan.FromBounds(identifierLine.End, identifierLine.EndIncludingLineBreak));
         if (lineBreak.Length == 0)
         {
