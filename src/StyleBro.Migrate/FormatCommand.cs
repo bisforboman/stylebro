@@ -255,7 +255,7 @@ internal static partial class FormatCommand
     [
         "-getProperty:TargetFrameworks", "-getProperty:TargetFramework", "-getProperty:ProjectAssetsFile", "-getProperty:MSBuildProjectExtensionsPath", "-getProperty:WarningsNotAsErrors",
         "-getProperty:Configuration", "-getProperty:Configurations", "-getProperty:Platforms", "-getProperty:StyleBroBaseline", "-getProperty:GenerateDocumentationFile",
-        "-getItem:ProjectReference", "-getItem:Compile", "-getItem:PackageReference", "-getItem:GlobalPackageReference", "-getItem:Analyzer", "-getItem:MissingWorkloadPack", "-nologo",
+        "-getItem:ProjectReference", "-getItem:Compile", "-getItem:PackageReference", "-getItem:GlobalPackageReference", "-getItem:Analyzer", "-getItem:MissingWorkloadPack", "-getItem:GlobalAnalyzerConfigFiles", "-nologo",
     ];
 
     /// <summary>What <see cref="TestedSymbols"/> found, per file (full path).</summary>

@@ -140,6 +140,9 @@ internal sealed class StyleCopSetup
     /// A reference that runs StyleCop in a project: a (global) package reference or an analyzer DLL, of StyleCop.Analyzers or
     /// StyleSharp.Analyzers (a StyleCop successor, read the same way: <see cref="StyleSharpUse"/>).
     /// </summary>
+    /// <summary>A package reference that isn't StyleCop's, StyleSharp's or StyleBro's: one that could bring a global config.</summary>
+    private static readonly Regex OtherPackage = new(@"<(?:Global)?PackageReference\b[^>]*?\bInclude\s*=\s*""(?!(?:StyleCop|StyleSharp|StyleBro)\.Analyzers)[^""]+""", RegexOptions.IgnoreCase);
+
     private static readonly Regex StyleCopReference = new(@"<(?:Global)?PackageReference\b[^>]*?\bInclude\s*=\s*""(?:StyleCop\.Analyzers(?:\.Unstable)?|StyleSharp\.Analyzers)""|<Analyzer\b[^>]*?\bInclude\s*=\s*""[^""]*(?:StyleCop|StyleSharp)\.Analyzers", RegexOptions.IgnoreCase);
 
     /// <summary>A project that opts out of the StyleCop reference it inherits ('&lt;PackageReference Remove="StyleCop.Analyzers" /&gt;').</summary>
@@ -254,7 +257,7 @@ internal sealed class StyleCopSetup
     /// Reads the setup. <paramref name="evaluate"/> tells whether StyleCop.Analyzers is among a project's evaluated items
     /// (null: MSBuild failed); by default 'dotnet msbuild' (<see cref="EvaluateStyleCop"/>).
     /// </summary>
-    public static StyleCopSetup Read(string root, Func<string, bool?>? evaluate = null)
+    public static StyleCopSetup Read(string root, Func<string, bool?>? evaluate = null, Func<string, IReadOnlyList<string>?>? packageConfigs = null)
     {
         var files = EnumerateFiles(root).ToList();
         var references = FollowReferences(root, files);
@@ -334,14 +337,20 @@ internal sealed class StyleCopSetup
             sources.Add(Path.GetRelativePath(root, file));
         }
 
+        // Global configs a package adds (GlobalAnalyzerConfigFiles from its build props) count like the repository's own:
+        // Pidgin's StyleCop settings are Benjamin.Pizza.BuildScripts' globalconfig, which turns SA1200, SA1101 and the
+        // ordering rules off, and read as StyleCop's defaults they moved 100 files' usings and added 'this.' to 71 (trial 48).
+        var packageFiles = PackageGlobalConfigs(root, configs.Select(c => c.Project), packageConfigs ?? (project => ReadPackageGlobalConfigs(project, root)), warnings);
         var globalConfigs = new List<(Dictionary<string, Severity> Severities, HashSet<string> Bulk)>();
-        foreach (var file in files.Where(f => Kind(f) == "globalconfig"))
+        var packageConfigsRead = new List<(Dictionary<string, Severity> Severities, HashSet<string> Bulk)>();
+        foreach (var file in files.Where(f => Kind(f) == "globalconfig").Concat(packageFiles))
         {
             var found = ReadConfig(file, global: true).Where(s => s.Severities.Count > 0).ToList();
             if (found.Count > 0)
             {
-                globalConfigs.Add((found[0].Severities, found[0].Bulk));
-                sources.Add(Path.GetRelativePath(root, file));
+                var package = packageFiles.Contains(file);
+                (package ? packageConfigsRead : globalConfigs).Add((found[0].Severities, found[0].Bulk));
+                sources.Add(package ? $"{file} (a package's)" : Path.GetRelativePath(root, file));
             }
         }
 
@@ -383,16 +392,21 @@ internal sealed class StyleCopSetup
         // turn SA1413 off, the .editorconfig sets 'dotnet_analyzer_diagnostic.severity = warning').
         var specific = new HashSet<string>(
             read.SelectMany(r => r.Rules.Keys)
-                .Concat(globalConfigs.Concat(rootSections).SelectMany(c => c.Severities.Keys.Where(id => !c.Bulk.Contains(id)))),
+                .Concat(packageConfigsRead.Concat(globalConfigs).Concat(rootSections).SelectMany(c => c.Severities.Keys.Where(id => !c.Bulk.Contains(id)))),
             StringComparer.Ordinal);
         Dictionary<string, Severity> WithoutBulkOverrides((Dictionary<string, Severity> Severities, HashSet<string> Bulk) config) =>
             config.Severities.Where(p => !config.Bulk.Contains(p.Key) || !specific.Contains(p.Key)).ToDictionary(p => p.Key, p => p.Value);
+        var packageInEffect = packageConfigsRead.Select(WithoutBulkOverrides).ToList();
         var globalInEffect = globalConfigs.Select(WithoutBulkOverrides).ToList();
         var rootInEffect = rootSections.Select(WithoutBulkOverrides).ToList();
         Dictionary<string, Severity> Effective(IReadOnlyList<Dictionary<string, Severity>> inEffect)
         {
             var result = ReadRules.ToDictionary(r => r.Id, r => r.Default);
             OverlayStrictest(result, inEffect);
+
+            // A package's global config applies to the same projects as the repository's own (not one per project type):
+            // a layer under them, so a repository file that doesn't set a rule keeps the package's value.
+            packageInEffect.ForEach(config => Overlay(result, config));
             OverlayStrictest(result, globalInEffect);
             rootInEffect.ForEach(section => Overlay(result, section));
             foreach (var id in old is null ? [] : result.Keys.Where(id => !old.Contains(id) && !IsStyleSharpId(id)).ToList())
@@ -1205,6 +1219,99 @@ internal sealed class StyleCopSetup
         evaluation.TryGetProperty("Items", out var items)
         && items.EnumerateObject().Where(i => i.Name is "PackageReference" or "GlobalPackageReference" or "Analyzer").SelectMany(i => i.Value.EnumerateArray())
             .Any(i => i.TryGetProperty("Identity", out var identity) && IsStyleCopItem(identity.GetString() ?? string.Empty));
+
+    /// <summary>
+    /// The global configs packages add to the projects (<paramref name="read"/>: a project's, null without its restore output),
+    /// in order, without the repository's own files (read with the others). A project without restore output whose MSBuild
+    /// files reference other packages gets a warning: a package's global config can only be seen once it is restored.
+    /// </summary>
+    internal static List<string> PackageGlobalConfigs(string root, IEnumerable<string> projects, Func<string, IReadOnlyList<string>?> read, List<string> warnings)
+    {
+        var result = new List<string>();
+        var unrestored = new List<string>();
+        foreach (var project in projects.Order(StringComparer.OrdinalIgnoreCase))
+        {
+            if (read(project) is not { } found)
+            {
+                if (Chain(project, root).Any(f => OtherPackage.IsMatch(WithoutComments(Migration.ReadOrNull(f) ?? string.Empty))))
+                {
+                    unrestored.Add(Path.GetRelativePath(root, project).Replace('\\', '/'));
+                }
+
+                continue;
+            }
+
+            result.AddRange(found.Where(f => !InRepository(root, f) && !result.Contains(f, StringComparer.OrdinalIgnoreCase)));
+        }
+
+        if (unrestored.Count > 0)
+        {
+            warnings.Add($"Not restored: {string.Join(", ", unrestored.Take(5))}{(unrestored.Count > 5 ? $" and {unrestored.Count - 5} more" : string.Empty)}. A package can bring a global config that sets StyleCop's rules (GlobalAnalyzerConfigFiles), and it is read from the restore: run 'dotnet restore', then this again.");
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// The global configs a project's evaluation lists (<c>GlobalAnalyzerConfigFiles</c>, full paths that exist), or null when
+    /// it has no restore output yet (a package's build props, which add them, are imported from there) or MSBuild fails.
+    /// </summary>
+    internal static IReadOnlyList<string>? ReadPackageGlobalConfigs(string project, string root)
+    {
+        if (!Restored(project, root))
+        {
+            return null;
+        }
+
+        try
+        {
+            using var json = JsonDocument.Parse(FormatCommand.EvaluateProject(Path.GetFullPath(project)));
+            return json.RootElement.TryGetProperty("Items", out var items) && items.TryGetProperty("GlobalAnalyzerConfigFiles", out var configs)
+                ? configs.EnumerateArray()
+                    .Select(c => c.TryGetProperty("FullPath", out var full) ? full.GetString() : c.GetProperty("Identity").GetString())
+                    .OfType<string>()
+                    .Select(Path.GetFullPath)
+                    .Where(File.Exists)
+                    .ToList()
+                : [];
+        }
+        catch (Exception e) when (e is ToolException or JsonException or System.ComponentModel.Win32Exception)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Whether a project has restore output: its <c>&lt;name&gt;.nuget.g.props</c> in obj/ next to it, or in an artifacts
+    /// folder's obj/&lt;project&gt;/ (UseArtifactsOutput, Pidgin) at or above it under the root.
+    /// </summary>
+    internal static bool Restored(string project, string root)
+    {
+        var name = Path.GetFileName(project) + ".nuget.g.props";
+        var folder = Path.GetDirectoryName(Path.GetFullPath(project))!;
+        if (File.Exists(Path.Combine(folder, "obj", name)))
+        {
+            return true;
+        }
+
+        var top = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        for (var above = folder; above is not null && above.Length >= top.Length; above = Path.GetDirectoryName(above))
+        {
+            if (File.Exists(Path.Combine(above, "artifacts", "obj", Path.GetFileNameWithoutExtension(project), name)))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>Whether a file is the repository's own (under the root, not in an extracted package there).</summary>
+    private static bool InRepository(string root, string file)
+    {
+        var relative = Path.GetRelativePath(Path.GetFullPath(root), Path.GetFullPath(file));
+        return !relative.StartsWith("..", StringComparison.Ordinal) && !Path.IsPathRooted(relative) && !FormatCommand.IsPackageFile(file);
+    }
 
     /// <summary>
     /// A project's MSBuild files as the text reads them: the project, the Directory.Build.props/.targets and
