@@ -209,13 +209,17 @@ internal sealed class FormatHost : IDisposable
     /// <summary>
     /// Resolves the SDK's dotnet-format folder first (its Roslyn, MSBuild, Microsoft.Extensions.*, System.CommandLine), then the
     /// shared framework, never the tool's own assemblies (<see cref="Refuses"/>): each project's analyzers load from its packages.
+    /// A folder copy of a framework assembly that isn't newer than the framework's gives way to it (<see cref="FromFramework"/>).
     /// </summary>
-    private sealed class SdkLoadContext(string folder) : AssemblyLoadContext("StyleBro.FormatHost", isCollectible: false)
+    internal sealed class SdkLoadContext(string folder) : AssemblyLoadContext("StyleBro.FormatHost", isCollectible: false)
     {
+        private static readonly string FrameworkFolder = Path.GetDirectoryName(typeof(object).Assembly.Location)!;
+
         protected override Assembly? Load(AssemblyName assemblyName)
         {
             var path = Path.Combine(folder, assemblyName.Name + ".dll");
-            return File.Exists(path) ? this.LoadFromAssemblyPath(path)
+            return FromFramework(assemblyName.Name!, folder, FrameworkFolder) ? null
+                : File.Exists(path) ? this.LoadFromAssemblyPath(path)
                 : Refuses(assemblyName.Name!, folder, AppContext.BaseDirectory) ? throw new FileNotFoundException($"{assemblyName.Name} isn't the SDK's: not loaded in the format host.", assemblyName.Name)
                 : null;
         }

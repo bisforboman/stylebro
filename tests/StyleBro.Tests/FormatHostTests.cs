@@ -278,6 +278,19 @@ public sealed class FormatHostTests : IDisposable
         Assert.False(FormatHost.FromFramework("FrameworkOnly", sdk, framework));
     }
 
+    // The load context itself: an SDK folder's older copy of a framework assembly gives way to the framework's.
+    [Fact]
+    public void TheSdkContext_LoadsTheFrameworksCopy_OfAnOlderFrameworkAssembly()
+    {
+        var sdk = Directory.CreateDirectory(Path.Combine(this.NewFolder(), "sdk")).FullName;
+        EmitAssembly(sdk, "System.Collections.Immutable", "1.0.0.0");
+        EmitAssembly(sdk, "SdkOnly", "1.0.0.0");
+        var context = new FormatHost.SdkLoadContext(sdk);
+
+        Assert.Same(typeof(System.Collections.Immutable.ImmutableArray).Assembly, context.LoadFromAssemblyName(new System.Reflection.AssemblyName("System.Collections.Immutable")));
+        Assert.Equal(Path.Combine(sdk, "SdkOnly.dll"), context.LoadFromAssemblyName(new System.Reflection.AssemblyName("SdkOnly")).Location);
+    }
+
     // Against the SDK on this machine: the host's check of a multi-targeted solution says what 'dotnet format' says, and a
     // framework's view sees that framework's '#if' code only.
     [Fact]
