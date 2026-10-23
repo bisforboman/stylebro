@@ -6,5 +6,6 @@
 - `bro format --json` no longer prints "Couldn't delete the copy" after a run whose restore failed.
 - `bro format` and `bro check` also run the Release configuration (or another one) of a project that generates its
   documentation file only there: BRO1601's findings in it were left for the Release build, and `bro check` said clean.
-- `bro format --engine host` and `bro check --engine host` no longer report findings of a project's second target framework,
-  which a reference brings into a run, on the text before whitespace formatting: they report what the default engine does.
+- `bro format --engine host` and `bro check --engine host` no longer report findings twice, the second time at the
+  positions before whitespace formatting, in a framework's run whose projects referenced another framework of a project
+  that run checks: they report what the default engine does.

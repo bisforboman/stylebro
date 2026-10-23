@@ -1,0 +1,24 @@
+{
+  "repo": "dailydevops/fluentvalue",
+  "branch": "main",
+  "commit": "71c58900c72363446571fd144ce198a4edae12ad",
+  "csFiles": 24,
+  "tags": [
+    "multi-target",
+    "library",
+    "csharpier",
+    "sonar",
+    "generated-editorconfig"
+  ],
+  "setups": "NetEvolve.Defaults 2.10.0: its build copies configurations/template.editorconfig over the root .editorconfig before every build (DisableSupportAdditionalFiles turns that off); CSharpier, SonarAnalyzer, NetEvolve.Analyzer, TUnit, net8.0-net10.0.",
+  "build": "ok with workaround",
+  "workaround": "nuget.config <clear/>: add the trial feed with a StyleBro.* pattern; <WarningsNotAsErrors>$(WarningsNotAsErrors);CS9057</WarningsNotAsErrors> in Directory.Build.props (NetEvolve.Arguments' analyzer needs Roslyn 5.6, SDK 10.0.113 has 5.0)",
+  "tests": "dotnet test --solution FluentValue.slnx (MTP, DOTNET_ROLL_FORWARD=Major for net9.0): 531 passed",
+  "usedIn": "trial 47",
+  "verified": {
+    "by": "trial 47 session",
+    "date": "2026-10-23",
+    "sdks": "10.0.113, 8.0.132 (no 9.0 runtime; DOTNET_ROLL_FORWARD=Major)"
+  },
+  "notes": "Other dailydevops repositories use the same package."
+}

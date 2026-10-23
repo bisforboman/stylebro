@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 
@@ -15,7 +14,12 @@ public static class Views
     /// <summary>
     /// The view of <paramref name="solution"/> a run checks: the instances <paramref name="selections"/> name ('path|framework',
     /// the framework as that project spells it, '' for all its instances) and every project they reference, transitively.
-    /// <paramref name="names"/> gets the instance names to write as a single-framework load names them.
+    /// <paramref name="names"/> gets the instance names to write as a single-framework load names them. A reference of one of
+    /// the run's framework instances to another instance of a project the run names goes to the named one, as in a
+    /// 'dotnet format' run of that framework, which loads one instance per project: MSBuildWorkspace sends a reference it can't
+    /// match by output to the project's first instance (SmartFormat, trial 47: its net462 projects referenced the libraries'
+    /// netstandard2.0 instances, and the analyzers reported those instances' copies of the files, which the whitespace
+    /// formatter had left alone: findings at the positions before formatting).
     /// </summary>
     public static Solution Of(Solution solution, IReadOnlyList<string> selections, Dictionary<string, string> names)
     {
@@ -26,6 +30,9 @@ public static class Views
 
         var roots = RootsOf(solution, selections);
         var frameworks = FrameworksOf(selections);
+        var named = roots.Where(p => p.FilePath is not null).GroupBy(p => p.FilePath!, StringComparer.OrdinalIgnoreCase).Where(g => g.Count() == 1).ToDictionary(g => g.Key, g => g.Single().Id, StringComparer.OrdinalIgnoreCase);
+        var rootIds = roots.Select(p => p.Id).ToHashSet();
+        var retargeted = new List<(ProjectId Project, ProjectReference From, ProjectId To)>();
         var keep = new HashSet<ProjectId>();
         var stack = new Stack<Project>(roots);
         while (stack.Count > 0)
@@ -33,12 +40,21 @@ public static class Views
             var project = stack.Pop();
             if (keep.Add(project.Id))
             {
+                var ofTheRun = rootIds.Contains(project.Id) || (FrameworkOf(project.Name) is { } own && frameworks.Contains(own));
                 foreach (var reference in project.ProjectReferences)
                 {
-                    if (solution.GetProject(reference.ProjectId) is { } referenced)
+                    if (solution.GetProject(reference.ProjectId) is not { } referenced)
                     {
-                        stack.Push(referenced);
+                        continue;
                     }
+
+                    if (ofTheRun && referenced.FilePath is { } path && named.TryGetValue(path, out var instance) && instance != referenced.Id)
+                    {
+                        retargeted.Add((project.Id, reference, instance));
+                        referenced = solution.GetProject(instance)!;
+                    }
+
+                    stack.Push(referenced);
                 }
             }
         }
@@ -50,31 +66,21 @@ public static class Views
         }
 
         var view = solution;
+        foreach (var (project, from, to) in retargeted)
+        {
+            view = view.RemoveProjectReference(project, from);
+            if (!view.GetProject(project)!.ProjectReferences.Any(r => r.ProjectId == to))
+            {
+                view = view.AddProjectReference(project, new ProjectReference(to, from.Aliases, from.EmbedInteropTypes));
+            }
+        }
+
         foreach (var project in solution.ProjectIds.Where(id => !keep.Contains(id)))
         {
             view = view.RemoveProject(project);
         }
 
         return view;
-    }
-
-    /// <summary>
-    /// The documents of <paramref name="documents"/> (what dotnet-format would format in <paramref name="view"/>) a run checks
-    /// and fixes: not those of an instance only a reference brought in when the view has an instance of the same project the
-    /// run names. A 'dotnet format' run of one framework loads one instance per project; with SmartFormat's net462 run the
-    /// view also had SmartFormat.Extensions.Time(netstandard2.0), whose copy of a file the whitespace formatter left as it
-    /// was, and the analyzers reported that copy's findings too, at the positions before formatting (trial 47).
-    /// </summary>
-    public static ImmutableArray<DocumentId> Formatted(Solution view, ImmutableArray<DocumentId> documents, IReadOnlyList<string> selections)
-    {
-        if (selections.Count == 0)
-        {
-            return documents;
-        }
-
-        var roots = RootsOf(view, selections).Select(p => p.Id).ToHashSet();
-        var named = view.Projects.Where(p => roots.Contains(p.Id) && p.FilePath is not null).Select(p => p.FilePath!).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        return documents.Where(d => roots.Contains(d.ProjectId) || view.GetProject(d.ProjectId)?.FilePath is not { } path || !named.Contains(path)).ToImmutableArray();
     }
 
     /// <summary>The framework of a project MSBuildWorkspace loaded once per framework ('Lib(net8.0)'), else null.</summary>

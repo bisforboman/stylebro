@@ -248,3 +248,10 @@ sqlkata/querybuilder	trial 46 (random, seed 46)	89 files, net8.0; 1 rename kept 
 mini-software/MiniExcel	rejected trial 46	net11.0 targets, SDK 11 not installed
 dailydevops/codebuilder	trial 46	NetEvolve.Defaults 2.10.0 copies its template .editorconfig over the root one (committed file an exact copy), CSharpier.MSBuild, Sonar, TUnit/Verify, netstandard2.0-net10.0, 43 files; with DisableSupportAdditionalFiles the builds keep init's settings
 dailydevops/healthchecks	rejected trial 46	875 files, integration tests need services (same NetEvolve.Defaults setup as codebuilder)
+vkhorikov/CSharpFunctionalExtensions	trial 47 (random, seed 47)	641 files, netstandard2.0;net6.0;net8.0, a tab-indented file with indent_style = space (BRO1108 needed a second run), untouched TWAE build fails on 36 nullable errors; seed 47 drew 22, 4, 27 (all used or rejected); draw 22 walked down to index 31
+xoofx/zio	trial 47 (random, seed 47)	90 files, netstandard2.0-net10.0, GenerateDocumentationFile only in Release (BRO1601 findings format left for the Release build); untouched TWAE restore fails on NU1510; appended to random.json (entry 33), draw 4 walked past the end of the list to it
+axuno/SmartFormat	trial 47 (random, seed 47)	218 files, netstandard2.0-net8.0 + net462, Release|x86 configurations, a net8.0-windows demo (EnableWindowsTargeting); net462 tests need mono; appended to random.json (entry 34), draw 27 walked to it
+dailydevops/fluentvalue	trial 47	NetEvolve.Defaults 2.10.0 copies its template .editorconfig over the root one; init, the copying turned off (DisableSupportAdditionalFiles) as init advises; CS9057 (NetEvolve.Arguments' analyzer needs Roslyn 5.6) not as an error locally; TUnit, net8.0-net10.0
+dailydevops/frameshift	rejected trial 47	its analyzer variants need Roslyn 5.6 (CS9057 stops compilation on SDK 10.0.113)
+dailydevops/extensions.strings	rejected trial 47	2 .cs files (same NetEvolve.Defaults setup as fluentvalue)
+dailydevops/logging.measurement	rejected trial 47	5 .cs files (same NetEvolve.Defaults setup as fluentvalue)
