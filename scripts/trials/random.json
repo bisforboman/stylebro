@@ -1,7 +1,7 @@
 {
   "fixed": "2026-10-19",
   "rule": "random.Random(<trial number>).randrange(len(repos)); if the pick is used or fails the practical criteria, take the next entry down (wrapping around) and log why. Never re-sort or remove entries; append new ones at the end.",
-  "source": "Entries 1-17: GitHub search \"language:C# stars:3000..12000\" sorted by stars (2026-10-17, .trials/trial29), without the ones used or rejected since and without huge, Windows-only, Unity/game, sample and course repositories. The rest appended 2026-10-19 by hand, alphabetically. Entries 28-32 appended 2026-10-23 by hand, alphabetically (trial 46: every earlier entry was used or needs SDK 11). Entries 33-36 appended 2026-10-23 by hand (trial 47: the walks from all three draws passed only used entries; smoke-built first).",
+  "source": "Entries 1-17: GitHub search \"language:C# stars:3000..12000\" sorted by stars (2026-10-17, .trials/trial29), without the ones used or rejected since and without huge, Windows-only, Unity/game, sample and course repositories. The rest appended 2026-10-19 by hand, alphabetically. Entries 28-32 appended 2026-10-23 by hand, alphabetically (trial 46: every earlier entry was used or needs SDK 11). Entries 33-36 appended 2026-10-23 by hand (trial 47: the walks from all three draws passed only used entries; smoke-built first). Entries 37-40 appended 2026-10-23 by hand, alphabetically (trial 48: the walk from draw 8 passed only used or rejected entries; smoke-built first).",
   "repos": [
     "MudBlazor/MudBlazor",
     "dotnet/yarp",
@@ -38,6 +38,10 @@
     "xoofx/zio",
     "axuno/SmartFormat",
     "HangfireIO/Cronos",
-    "mganss/HtmlSanitizer"
+    "mganss/HtmlSanitizer",
+    "benjamin-hodgson/Pidgin",
+    "Cysharp/ConsoleAppFramework",
+    "datalust/superpower",
+    "mayuki/Cocona"
   ]
 }

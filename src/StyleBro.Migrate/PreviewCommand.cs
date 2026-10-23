@@ -1315,19 +1315,41 @@ internal static class PreviewCommand
     /// <summary>
     /// Adds the .editorconfig files git ignores (bin/obj aside) to the copy's index: NSwag's .gitignore lists '.editorconfig',
     /// so the settings init wrote there were missing from the patch (trial 43). Before the baseline commit (the files as they
-    /// were) and before the settings commit (the ones the settings step wrote); once added, 'git add -A' keeps them.
+    /// were) and before the settings commit (the ones the settings step wrote); once added, 'git add -A' keeps them. Not the
+    /// ones in an extracted NuGet package (<see cref="InPackage"/>): Cronos' packages folder inside the repository is ignored
+    /// through the copy's exclude (<see cref="PackagesFolderInside"/>), and its analyzer packages' 52 .editorconfig files were
+    /// added back, listed as settings and put into the patch (trial 48).
     /// </summary>
     internal static void AddIgnoredSettings(string folder)
     {
         var ignored = GitChecked(folder, "ls-files", "--others", "--ignored", "--exclude-standard", "--", ":(glob)**/.editorconfig")
             .Split('\n', StringSplitOptions.RemoveEmptyEntries)
             .Select(f => f.Trim())
-            .Where(f => !Regex.IsMatch(f, "(^|/)(bin|obj)/"))
+            .Where(f => !Regex.IsMatch(f, "(^|/)(bin|obj)/") && !InPackage(folder, f))
             .ToList();
         foreach (var chunk in ignored.Chunk(100))
         {
             GitChecked(folder, ["add", "-f", "--", .. chunk]);
         }
+    }
+
+    /// <summary>
+    /// Whether a file (relative to <paramref name="folder"/>) is inside an extracted NuGet package: a folder between it and
+    /// <paramref name="folder"/> holds the package's .nupkg or NuGet's '.nupkg.metadata' (a global packages folder or
+    /// packages.config's packages/ inside the repository).
+    /// </summary>
+    internal static bool InPackage(string folder, string relative)
+    {
+        var top = Path.GetFullPath(folder).TrimEnd('/', '\\');
+        for (var directory = Path.GetDirectoryName(Path.GetFullPath(Path.Combine(folder, relative))); directory is not null && directory.Length > top.Length; directory = Path.GetDirectoryName(directory))
+        {
+            if (Directory.Exists(directory) && Directory.EnumerateFiles(directory).Any(f => f.EndsWith(".nupkg", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".nupkg.metadata", StringComparison.OrdinalIgnoreCase)))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static (int Code, string Output, string Error) RunGit(string directory, string[] arguments)
