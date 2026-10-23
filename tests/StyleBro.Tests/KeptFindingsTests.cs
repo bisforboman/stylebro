@@ -21,6 +21,21 @@ public sealed class KeptFindingsTests : IDisposable
 {
     private readonly List<string> folders = [];
 
+    // Owner's choice 2026-10-23 (trial 49): Cocona binds '[Argument] string ArgName0' by its name (the command line's).
+    [Theory]
+    [InlineData("[Argument] string ArgName0", KeptReason.ParameterHasAttribute)]
+    [InlineData("[System.Runtime.CompilerServices.CallerMemberName] string ArgName0 = \"\"", null)]
+    [InlineData("[System.Diagnostics.CodeAnalysis.NotNull] string ArgName0", null)]
+    [InlineData("string ArgName0", null)]
+    public async Task AParameterWithAnAttribute_IsKept(string parameter, KeptReason? expected)
+    {
+        var reason = await GetReasonAsync(
+            DiagnosticIds.ParameterCasing,
+            ("C.cs", $"[System.AttributeUsage(System.AttributeTargets.Parameter)]\nclass ArgumentAttribute : System.Attribute\n{{\n}}\n\nclass C\n{{\n    public void Run(bool dryRun, {parameter})\n    {{\n    }}\n}}\n"));
+
+        Assert.Equal(expected, reason);
+    }
+
     [Fact]
     public async Task AFieldReadByReflection_IsKept_TheNameIsInAString()
     {
