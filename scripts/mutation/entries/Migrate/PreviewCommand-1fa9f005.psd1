@@ -2,6 +2,6 @@
 @{
     File = 'src/StyleBro.Migrate/PreviewCommand.cs'
     Find = '!restored ? CopiedRestoreFolders(source, copy) : [];'
-    Replace = '!restored ? [] : [];'
+    Replace = '!restored && false ? CopiedRestoreFolders(source, copy) : [];'
     Tests = 'MigrationTests.PreviewOfMigrate_ReadsThePackageGlobalConfigFromTheRepositorysRestore'
 }
