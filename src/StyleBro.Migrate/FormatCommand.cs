@@ -4285,7 +4285,30 @@ internal static partial class FormatCommand
             }
         };
         var gapLines = new List<string>();
-        var exit = verify ? Verify(args, root, line => { if (IsGapLine(line)) { gapLines.Add(line); } runLog(line); }, runOnce) : Repeat(args, root, runLog, output, runOnce, once ? 1 : MaxRuns);
+
+        // A package that copies its .editorconfig over the root one (Migration.PackageCopy): the builds of --build show whether
+        // it still does, so the gaps and the verdict wait for them (owner's decision 2026-10-23, trial 46).
+        var copyRoot = RepositoryRoot(root) ?? root;
+        var packageCopy = buildAll && verify ? Migration.PackageCopy(copyRoot) : null;
+        var configBefore = packageCopy is not null && File.Exists(Path.Combine(copyRoot, ".editorconfig")) ? File.ReadAllText(Path.Combine(copyRoot, ".editorconfig")) : null;
+        var packageGap = packageCopy is not null && Migration.CanProveCopyOff(configBefore) ? Migration.PackageCopyGap(packageCopy) : null;
+        var heldGaps = new List<string>();
+        Action<string> verifyLog = line =>
+        {
+            if (IsGapLine(line))
+            {
+                gapLines.Add(line);
+            }
+
+            if (packageGap is not null && (IsGapLine(line) || line.StartsWith(NotVerifiedMarker, StringComparison.Ordinal)))
+            {
+                heldGaps.Add(line);
+                return;
+            }
+
+            runLog(line);
+        };
+        var exit = verify ? Verify(args, root, verifyLog, runOnce) : Repeat(args, root, runLog, output, runOnce, once ? 1 : MaxRuns);
 
         // --build builds every configuration, the generator projects' too.
         var workspaceForBuild = buildAll ? File.Exists(path) ? path : BaselineCommand.FindWorkspace(root) is { } found ? Path.Combine(root, found) : null : null;
@@ -4294,7 +4317,13 @@ internal static partial class FormatCommand
             Unchecked.TryRemove(Key(root), out _);
         }
 
-        var buts = new[] { hidden, verify ? UncheckedLine(root, log) : null, verify ? CSharpierStep.CheckLine(root, log: log) : null, workspaceForBuild is null ? null : BuildCheckLine(root, workspaceForBuild, log) }.OfType<string>().ToList();
+        var buildLine = workspaceForBuild is null ? null : BuildCheckLine(root, workspaceForBuild, log);
+        if (packageGap is not null)
+        {
+            exit = CopyOffVerdict(copyRoot, packageCopy!, packageGap, configBefore!, buildLine, workspaceForBuild is not null, heldGaps, exit, line => runLog(line));
+        }
+
+        var buts = new[] { hidden, verify ? UncheckedLine(root, log) : null, verify ? CSharpierStep.CheckLine(root, log: log) : null, buildLine }.OfType<string>().ToList();
         verdicts.Select((line, i) => i == 0 && buts.Count > 0 ? "Formatting is clean" + line.Substring("Clean".Length) + " But:" : hidden is null ? line : line.Replace(" changed, clean.", " changed.", StringComparison.Ordinal)).ToList().ForEach(log);
         foreach (var line in buts)
         {
@@ -4312,6 +4341,35 @@ internal static partial class FormatCommand
         }
 
         JsonReport.Set("clean", exit == 0);
+        return exit;
+    }
+
+    /// <summary>
+    /// The gaps and verdict 'bro check --build' held back for a package that copies its .editorconfig over the root one
+    /// (<paramref name="held"/>, <see cref="Migration.PackageCopy"/>): when the builds ran clean and left the root .editorconfig
+    /// as it was (<paramref name="before"/>), the copying is off; that is remembered (<see cref="Migration.RememberCopyOff"/>)
+    /// and the package's gap leaves the verdict. Otherwise the held lines come as they were. Returns the exit code.
+    /// </summary>
+    internal static int CopyOffVerdict(string root, Migration.PackageConfig copy, string packageGap, string before, string? buildLine, bool built, IReadOnlyList<string> held, int exit, Action<string> log)
+    {
+        var path = Path.Combine(root, ".editorconfig");
+        if (!built || buildLine is not null || !File.Exists(path) || File.ReadAllText(path) != before)
+        {
+            held.ToList().ForEach(log);
+            return exit;
+        }
+
+        Migration.RememberCopyOff(root, copy);
+        log($"The builds left the root .editorconfig as it was: {copy.Package}'s copying is off, so the build reads the settings format checked with (remembered until a project or build file changes).");
+        var gaps = Gaps(held).Where(g => g != packageGap).ToList();
+        ReportGaps(gaps);
+        GapVerdict(gaps).ForEach(log);
+        if (exit == NotVerifiedExitCode && Unverified(gaps).Count == 0)
+        {
+            log("Clean.");
+            return 0;
+        }
+
         return exit;
     }
 
