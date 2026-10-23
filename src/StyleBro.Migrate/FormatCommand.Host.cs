@@ -26,6 +26,9 @@ internal static partial class FormatCommand
     // run of the command.
     private static readonly System.Threading.AsyncLocal<Dictionary<string, HostScope>?> Hosts = new();
 
+    /// <summary>Gets the engine this command uses (<see cref="UseEngine"/>).</summary>
+    public static string CurrentEngine => Engine.Value ?? DotnetFormatEngine;
+
     /// <summary>
     /// Takes --engine out of <paramref name="args"/>: the engine it names, else <see cref="DotnetFormatEngine"/>; null and
     /// <paramref name="error"/> for a value that is neither.
@@ -49,9 +52,6 @@ internal static partial class FormatCommand
         args = args.Take(at).Concat(args.Skip(at + 2)).ToArray();
         return value;
     }
-
-    /// <summary>The engine this command uses (<see cref="UseEngine"/>).</summary>
-    public static string CurrentEngine => Engine.Value ?? DotnetFormatEngine;
 
     /// <summary>Uses <paramref name="engine"/> for this command (an async-local, like <see cref="PhaseTimes"/>) until disposed.</summary>
     public static IDisposable UseEngine(string engine)
