@@ -242,6 +242,40 @@ public class LinkedFileFixAllTests
         Assert.Equal(expected, (await fixedSolution.GetDocument(ids[1])!.GetTextAsync()).ToString());
     }
 
+    // The test above sees the qualifier only when the other copy's reference comes first, which depends on timing: the
+    // nightly mutation run (2026-10-23) saw it pass with the guard removed. This one asks each copy directly.
+    [Fact]
+    public async Task StaticFieldQualifier_IsSpelledInTheReferencesOwnCompilation()
+    {
+        var text = "namespace Serilog;\n\npublic static class Log\n{\n    static object _logger = new object();\n\n    public static void CloseAndFlush()\n    {\n        var logger = System.Threading.Interlocked.Exchange(ref _logger, new object());\n    }\n}\n";
+        var corlib = Microsoft.CodeAnalysis.MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
+        var solution = new Microsoft.CodeAnalysis.AdhocWorkspace().CurrentSolution;
+        var ids = new List<Microsoft.CodeAnalysis.DocumentId>();
+        foreach (var name in new[] { "net8", "net10" })
+        {
+            var project = Microsoft.CodeAnalysis.ProjectId.CreateNewId();
+            var document = Microsoft.CodeAnalysis.DocumentId.CreateNewId(project);
+            solution = solution
+                .AddProject(project, name, name, Microsoft.CodeAnalysis.LanguageNames.CSharp)
+                .WithProjectCompilationOptions(project, new Microsoft.CodeAnalysis.CSharp.CSharpCompilationOptions(Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary))
+                .AddMetadataReference(project, corlib)
+                .AddDocument(document, "Log.cs", SourceText.From(text), filePath: Path.Combine(Path.GetTempPath(), "Log.cs"));
+            ids.Add(document);
+        }
+
+        var span = new TextSpan(text.IndexOf("ref _logger", StringComparison.Ordinal) + "ref ".Length, "_logger".Length);
+        foreach (var from in new[] { 0, 1 })
+        {
+            var compilation = (await solution.GetDocument(ids[from])!.Project.GetCompilationAsync())!;
+            var field = compilation.GetTypeByMetadataName("Serilog.Log")!.GetMembers("_logger").Single();
+            foreach (var at in new[] { 0, 1 })
+            {
+                var replacement = await StyleBro.CodeFixes.Naming.CamelCaseRenamer.GetReplacementAsync(field, solution.GetDocument(ids[at])!, span, "logger", CancellationToken.None);
+                Assert.Equal("Log.logger", replacement);
+            }
+        }
+    }
+
     // The performance audit (2026-10): BRO1112's and BRO1409's fixes sort with BRO1001 on the document they have just
     // changed, a new solution each, and the names in code (cached per solution) were collected again for every fixed file:
     // Newtonsoft.Json's BRO1112 Fix All took 387 s instead of 15.5 s. One Fix All scans the solution once.
