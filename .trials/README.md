@@ -35,6 +35,13 @@ used or rejected), `pool/` (checked candidates, tagged) and `random.json` (the f
 2. Random: pick from `scripts/trials/random.json` with Python's `random.Random(<trial number>).randrange(len(repos))`.
    If the pick is in `used.tsv` or fails the practical criteria above, take the next entry down the list (wrapping
    around) and write down why. Log the seed and the pick in `.trials/trialNN/logs/`.
+   **Variant: three random plus one targeted** (owner's choice, 2026-10-23, "Mostly random": closer to what a new user
+   meets than re-probing the last trial's edge cases), allowed instead of the three-targeted-one-random split: draw three
+   with ONE generator, `rng = random.Random(<trial number>)` and `rng.randrange(len(repos))` three times. A draw that is in
+   `used.tsv`, already picked in this trial or fails the criteria moves down the list (wrapping). If the list runs out of
+   usable entries, append new candidates at the end (popular C# repositories, not huge, not Windows-only, not in
+   `used.tsv`) and keep walking from the draws made with the old length; log the length, the indices and the picks. The
+   fourth repository is targeted at the last trial's fixes (a pool entry if one fits).
 3. Record each repository's commit, and why it was chosen, in the trial's logs; in the trial's PR add the four to
    `used.tsv` (and set `usedIn` on their pool entries).
 

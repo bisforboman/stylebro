@@ -116,9 +116,37 @@ internal static partial class Migration
     /// block aside), or null. Trial 44, dailydevops/arguments: NetEvolve.Defaults' build copies its template.editorconfig over
     /// the root file before every build, so init's block was gone after the first build, which then reported 610 findings
     /// 'format' and 'check' didn't see. Its template .gitignore ignores nested .editorconfig files, so <see cref="Synced"/>'s
-    /// folder files aren't a way out. Owner's decision 2026-10-22: say so, and the verdict is Not verified.
+    /// folder files aren't a way out. Owner's decision 2026-10-22: say so, and the verdict is Not verified. Null too once
+    /// 'bro check --build' saw the copying is off (<see cref="CopyIsOff"/>).
     /// </summary>
-    public static PackageConfig? PackageCopy(string root)
+    public static PackageConfig? PackageCopy(string root) =>
+        FindPackageCopy(root) is { } copy && !CopyIsOff(root, copy) ? copy : null;
+
+    /// <summary>
+    /// Whether 'bro check --build' saw its builds leave the root .editorconfig of <paramref name="root"/> as it was, with these
+    /// build files (<see cref="RememberCopyOff"/>). Trial 46, dailydevops/codebuilder: with NetEvolve.Defaults' copying turned
+    /// off (DisableSupportAdditionalFiles) the builds kept init's block and were clean, and init, format and check still named
+    /// the package. Owner's decision 2026-10-23: the builds prove it, and the proof is remembered.
+    /// </summary>
+    public static bool CopyIsOff(string root, PackageConfig copy) =>
+        File.Exists(CopyOffRecord(root, copy));
+
+    /// <summary>Records that the builds left the root .editorconfig as it was (<see cref="CopyIsOff"/>).</summary>
+    public static void RememberCopyOff(string root, PackageConfig copy)
+    {
+        var record = CopyOffRecord(root, copy);
+        Directory.CreateDirectory(Path.GetDirectoryName(record)!);
+        File.WriteAllText(record, $"{copy.Package} {copy.File}\n");
+    }
+
+    /// <summary>
+    /// Whether the builds of 'bro check --build' can show the copying is off: init's block is in the root .editorconfig, so the
+    /// package's file differs from it and a copy would have changed it.
+    /// </summary>
+    public static bool CanProveCopyOff(string? before) => before is not null && before.Contains(BeginMarker, StringComparison.Ordinal);
+
+    /// <summary>The package <see cref="PackageCopy"/> finds, whether or not the builds showed its copying is off.</summary>
+    public static PackageConfig? FindPackageCopy(string root)
     {
         var path = Path.Combine(root, ".editorconfig");
         if (!File.Exists(path))
@@ -178,11 +206,32 @@ internal static partial class Migration
     public static string PackageCopyLine(PackageConfig copy) =>
         $"Note: the root .editorconfig is a copy of {copy.Package}'s {copy.File}, and that package's build copies it back over the file before "
         + "every build: these settings are gone after the next build, which then reports what 'bro format' and 'bro check' don't. Turn "
-        + "the package's copying off (or remove the package), then run this again; until then format and check say Not verified.";
+        + "the package's copying off (or remove the package), then run 'bro check --build': once its builds leave the file as it is, format and "
+        + "check count it; until then they say Not verified.";
 
     /// <summary>The gap format and check name for a <see cref="PackageCopy"/> (<see cref="FormatCommand.Gap"/>).</summary>
     public static string PackageCopyGap(PackageConfig copy) =>
         FormatCommand.Gap("the build's settings", $"the root .editorconfig is a copy of {copy.Package}'s {copy.File}, which the build copies back over it, so the build doesn't read the settings format checked with");
+
+    /// <summary>
+    /// The record of <see cref="RememberCopyOff"/>: named by the package, its file and every project and build file's path and
+    /// text under <paramref name="root"/>, so a changed property (the copying turned on again) or package version needs new
+    /// builds; in the temp folder, so the preview's copy of the repository finds it too.
+    /// </summary>
+    private static string CopyOffRecord(string root, PackageConfig copy)
+    {
+        var text = new StringBuilder(copy.Package).Append('\n').Append(copy.File).Append('\n');
+        foreach (var file in StyleCopSetup.EnumerateFiles(root)
+            .Where(f => Path.GetExtension(f).ToLowerInvariant() is ".props" or ".targets" or ".csproj" or ".rsp")
+            .Select(f => (Path: f, Relative: Path.GetRelativePath(root, f).Replace('\\', '/')))
+            .OrderBy(f => f.Relative, StringComparer.Ordinal))
+        {
+            text.Append(file.Relative).Append('\n').Append(File.ReadAllText(file.Path).Replace("\r\n", "\n")).Append('\n');
+        }
+
+        var hash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(text.ToString())))[..16];
+        return Path.Combine(Path.GetTempPath(), "stylebro-copy-off", hash + ".txt");
+    }
 
     /// <summary>
     /// Whether one of the package's build files (.props/.targets under build/, buildTransitive/, buildMultiTargeting/) names
