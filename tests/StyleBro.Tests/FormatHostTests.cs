@@ -115,21 +115,25 @@ public sealed class FormatHostTests : IDisposable
     }
 
     // Serilog on Linux: its net462 instance doesn't load ('Serilog', no framework in the name), and the failure names the
-    // project, whose other instances did. The net462 run, whose TestDummies(net462) references that instance, reports it, as a
-    // 'dotnet format' run of net462 alone does; the net10.0 run, which has Serilog(net10.0), doesn't.
+    // project, whose other instances did. The net462 run, whose TestDummies(net462) gets Serilog(netstandard2.0), reports it,
+    // as a 'dotnet format' run of net462 alone does; the net10.0 run, which has Serilog(net10.0), doesn't.
     [Fact]
-    public void ALoadFailure_OfAnInstance_GoesToTheRunThatHasIt()
+    public void ALoadFailure_OfAnInstance_GoesToTheRunOfItsFramework()
     {
         using var workspace = new AdhocWorkspace();
-        var failedId = ProjectId.CreateNewId();
+        var standard = ProjectId.CreateNewId();
         var solution = workspace.CurrentSolution
             .AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Lib(net10.0)", "Lib", LanguageNames.CSharp, filePath: "/r/Lib/Lib.csproj"))
-            .AddProject(ProjectInfo.Create(failedId, VersionStamp.Default, "Lib", "Lib", LanguageNames.CSharp, filePath: "/r/Lib/Lib.csproj"))
-            .AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Dummies(net462)", "Dummies", LanguageNames.CSharp, filePath: "/r/Dummies/Dummies.csproj", projectReferences: [new ProjectReference(failedId)]));
+            .AddProject(ProjectInfo.Create(standard, VersionStamp.Default, "Lib(netstandard2.0)", "Lib", LanguageNames.CSharp, filePath: "/r/Lib/Lib.csproj"))
+            .AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Lib", "Lib", LanguageNames.CSharp, filePath: "/r/Lib/Lib.csproj"))
+            .AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Dummies(net462)", "Dummies", LanguageNames.CSharp, filePath: "/r/Dummies/Dummies.csproj", projectReferences: [new ProjectReference(standard)]));
         var failure = new WorkspaceDiagnostic(WorkspaceDiagnosticKind.Failure, "Msbuild failed when processing the file '/r/Lib/Lib.csproj' with message: Project does not contain 'Compile' target.");
+        string[] net10 = ["/r/Lib/Lib.csproj|net10.0"];
+        string[] net462 = ["/r/Dummies/Dummies.csproj|net462"];
 
-        Assert.Empty(Views.WarningsOf([failure], solution, Views.Of(solution, ["/r/Lib/Lib.csproj|net10.0"], [])));
-        Assert.Single(Views.WarningsOf([failure], solution, Views.Of(solution, ["/r/Dummies/Dummies.csproj|net462"], [])));
+        Assert.Equal(["net462"], Views.FrameworksOf(net462));
+        Assert.Empty(Views.WarningsOf([failure], solution, Views.Of(solution, net10, []), Views.FrameworksOf(net10)));
+        Assert.Single(Views.WarningsOf([failure], solution, Views.Of(solution, net462, []), Views.FrameworksOf(net462)));
     }
 
     [Fact]

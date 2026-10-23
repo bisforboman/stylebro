@@ -91,7 +91,7 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
         var logger = new HostLogger(level, output, names);
 
         // Like MSBuildWorkspaceLoader: one line about the load's warnings, or each of them at the diagnostic level.
-        var warnings = Views.WarningsOf(loaded.Diagnostics, loaded.Solution, view);
+        var warnings = Views.WarningsOf(loaded.Diagnostics, loaded.Solution, view, Views.FrameworksOf(selections));
         if (level == LogLevel.Trace)
         {
             foreach (var warning in warnings)
