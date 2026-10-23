@@ -135,6 +135,11 @@ real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro
   its own entries. When several rulesets or global configs disagree (one per project type), the strictest wins, a file
   that doesn't mention a rule counting with StyleCop's default, so production code keeps everything StyleCop enforced
   there.
+- **Global configs packages add.** A package's build props can add a global config to every project
+  (`GlobalAnalyzerConfigFiles`; Benjamin.Pizza.BuildScripts holds Pidgin's StyleCop settings this way). Migrate reads the
+  ones the StyleCop projects' evaluation lists, as a layer between the rulesets and the repository's own global configs.
+  The package's props are imported from the restore output: a project without it (and with other package references)
+  gets a "Not restored" warning; run `dotnet restore`, then migrate again.
 - **Each project's own ruleset and `stylecop.json`.** A project's ruleset is the `<CodeAnalysisRuleSet>` its project
   file, its `Directory.Build.props`/`.targets` or what they import select (the last one counts), its `stylecop.json` the
   one it adds as `<AdditionalFiles>`. Only projects that run StyleCop count: a sample project without StyleCop (and so
@@ -159,7 +164,9 @@ real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro
   `<Analyzer>` hint path into a `packages` folder (old-style projects). Rules the version's DLL doesn't have count as
   off: with 1.1.x the rules added in 1.2 (SA1141, SA1142, SA1316, SA1414), with 1.0.x also SA1135, SA1136, SA1137,
   SA1139, SA1314 and SA1413. 1.1.x's SA1413 doesn't check switch expressions yet: the migration writes
-  `stylebro_trailing_comma_switch_expressions = false`, so [BRO1401](rules/BRO1401.md) leaves them alone too.
+  `stylebro_trailing_comma_switch_expressions = false`, so [BRO1401](rules/BRO1401.md) leaves them alone too. 1.1.x's
+  SA1629 doesn't check enum members' documentation: the migration writes `stylebro_punctuation_check_enum_members = false`
+  for [BRO1603](rules/BRO1603.md).
 - StyleCop spacing rules that are off while others are on (kafkaflow: SA1000, SA1003, SA1009): IDE0055 enforces every
   SDK spacing option, so the code decides, as in `init`. A clear other form gets the option that keeps it
   (`csharp_space_after_keywords_in_control_flow_statements = false` for `if(x)`, `csharp_space_around_binary_operators`

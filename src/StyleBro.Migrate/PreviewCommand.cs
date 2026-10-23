@@ -250,7 +250,10 @@ internal static class PreviewCommand
             var noRestore = rest.Contains("--no-restore");
             var restored = noRestore && CopyRestoreOutput(source, copy) > 0;
 
-            MakeRepository(copy, ignoredTracked);
+            // migrate reads the global configs packages add from the restore output (trial 48, Pidgin): the copy gets the
+            // repository's, so the settings step sees what 'bro migrate --write' in the repository would.
+            var restoreOutput = command is not ("init" or "format") && !restored ? CopiedRestoreFolders(source, copy) : [];
+            MakeRepository(copy, ignoredTracked, restoreOutput);
             var baseline = Head(copy);
 
             if (command != "format")
@@ -307,6 +310,7 @@ internal static class PreviewCommand
             var changed = new List<bool>();
             var putBack = new List<string>();
             var tree = Tree(copy);
+            var trees = new List<string> { tree };
 
             // CSharpier where the repository uses it, as 'bro format' runs it (whole folders where it changes nothing else).
             var formatRoot = File.Exists(target) ? FormatCommand.WorkingRoot(target) : target;
@@ -354,6 +358,7 @@ internal static class PreviewCommand
                 }
 
                 changed.Add(next != tree);
+                trees.Add(next);
                 JsonReport.AddRun(run, GitChecked(copy, "diff", "--name-only", tree, next).Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(f => Path.Combine(source, f.Trim())), null);
                 tree = next;
                 if (!changed[^1])
@@ -414,6 +419,17 @@ internal static class PreviewCommand
                 var check = new List<string>();
                 format([.. FormatCommand.WithInclude(FormatCommand.NoRestore(formatArgs.ToArray()), putBack.Select(f => Path.GetRelativePath(formatRoot, Path.Combine(copy, f)).Replace('\\', '/'))), "--verify-no-changes"], check.Add);
                 Console.WriteLine(CSharpierStep.PutBackLine(putBack, FormatCommand.FindingIds(check.Where(l => FormatCommand.FindingPath(l) is { } path && putBack.Contains(Path.GetRelativePath(copy, path).Replace('\\', '/'), StringComparer.OrdinalIgnoreCase)))));
+            }
+
+            // As format: the files each run undoes the one before in (FormatCommand.UndoneLine; trial 48, Pidgin's using sort).
+            if (changed[^1] && putBack.Count == 0 && trees.Count >= 3)
+            {
+                var lastRun = GitChecked(copy, "diff", "--name-only", trees[^2], trees[^1]).Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(f => f.Trim()).ToList();
+                var stillDifferent = GitChecked(copy, "diff", "--name-only", trees[^3], trees[^1]).Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(f => f.Trim()).ToHashSet(StringComparer.Ordinal);
+                if (lastRun.Where(f => !stillDifferent.Contains(f)).Select(f => Path.GetRelativePath(formatRoot, Path.Combine(copy, f)).Replace('\\', '/')).ToList() is { Count: > 0 } undone)
+                {
+                    Console.WriteLine(FormatCommand.UndoneLine(undone));
+                }
             }
 
             // As format: the parts no run checked, then "Not verified" (exit code 3) instead of clean.
@@ -501,7 +517,10 @@ internal static class PreviewCommand
     /// (not a repository) everything outside bin, obj and .git. A submodule (or another repository inside) is copied the
     /// same way and made a repository of its own, so 'bro format' leaves it alone in the copy too. Returns the
     /// tracked files a .gitignore ignores, for <see cref="MakeRepository"/>: MoreLINQ tracks bld/ExtensionsGenerator under an
-    /// ignored bld/, and the copy's repository left them out, so the preview showed none of their changes.
+    /// ignored bld/, and the copy's repository left them out, so the preview showed none of their changes. Untracked files in
+    /// an extracted NuGet package (<see cref="InPackage"/>) stay behind: Cronos' packages folder is inside the repository and
+    /// its .gitignore ignores '*.nupkg' and 'build/', so the copy got each package's '.nupkg.sha512' alone, NuGet took the
+    /// packages as installed, and without their reference assemblies the preview couldn't load net40 (trial 48).
     /// </summary>
     public static List<string> Copy(string source, string target)
     {
@@ -512,7 +531,12 @@ internal static class PreviewCommand
             return [];
         }
 
-        foreach (var entry in list.Split('\0', StringSplitOptions.RemoveEmptyEntries).Select(e => e.TrimEnd('/')).Distinct(StringComparer.Ordinal))
+        var untracked = Git(source, "ls-files", "-o", "--exclude-standard", "-z") is (0, var others)
+            ? others.Split('\0', StringSplitOptions.RemoveEmptyEntries).Select(e => e.TrimEnd('/')).ToHashSet(StringComparer.Ordinal)
+            : [];
+        var packageFolders = new Dictionary<string, bool>(StringComparer.Ordinal);
+        foreach (var entry in list.Split('\0', StringSplitOptions.RemoveEmptyEntries).Select(e => e.TrimEnd('/')).Distinct(StringComparer.Ordinal)
+            .Where(e => !untracked.Contains(e) || !InPackage(source, e, packageFolders)))
         {
             var from = Path.Combine(source, entry);
             var to = Path.Combine(target, entry);
@@ -1071,7 +1095,7 @@ internal static class PreviewCommand
     }
 
     /// <summary>Makes the folder a git repository with everything in it committed.</summary>
-    public static void MakeRepository(string folder, IReadOnlyCollection<string>? ignoredTracked = null)
+    public static void MakeRepository(string folder, IReadOnlyCollection<string>? ignoredTracked = null, IReadOnlyCollection<string>? excluded = null)
     {
         GitChecked(folder, "init", "-q");
         foreach (var chunk in (ignoredTracked ?? []).Chunk(100))
@@ -1084,7 +1108,8 @@ internal static class PreviewCommand
         // The format runs restore and build into bin/obj: not changes to show, also where no .gitignore says so. Nor the
         // packages folder, where a nuget.config puts it inside the repository.
         var packages = PackagesFolderInside(folder) is { } inside ? $"/{inside}/\n" : string.Empty;
-        File.AppendAllText(Path.Combine(folder, ".git", "info", "exclude"), "\nbin/\nobj/\n" + packages);
+        var copied = string.Concat((excluded ?? []).Select(f => $"/{f}/\n"));
+        File.AppendAllText(Path.Combine(folder, ".git", "info", "exclude"), "\nbin/\nobj/\n" + packages + copied);
         Commit(folder, "baseline");
     }
 
@@ -1295,6 +1320,19 @@ internal static class PreviewCommand
     /// For '--no-restore': the restore's output (project.assets.json and the files next to it) copied into the copy, so
     /// 'dotnet format --no-restore' finds the packages restored in the repository. Returns how many projects' it found.
     /// </summary>
+    /// <summary>
+    /// Copies the repository's restore output (<see cref="CopyRestoreOutput"/>) and returns the folders it went to (relative,
+    /// '/'-separated): the copy's git leaves them out, also where no .gitignore does.
+    /// </summary>
+    internal static List<string> CopiedRestoreFolders(string source, string copy)
+    {
+        CopyRestoreOutput(source, copy);
+        return Directory.EnumerateFiles(copy, "project.assets.json", new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true })
+            .Select(f => Path.GetRelativePath(copy, Path.GetDirectoryName(f)!).Replace('\\', '/'))
+            .Order(StringComparer.Ordinal)
+            .ToList();
+    }
+
     internal static int CopyRestoreOutput(string source, string copy)
     {
         var count = 0;
@@ -1315,18 +1353,57 @@ internal static class PreviewCommand
     /// <summary>
     /// Adds the .editorconfig files git ignores (bin/obj aside) to the copy's index: NSwag's .gitignore lists '.editorconfig',
     /// so the settings init wrote there were missing from the patch (trial 43). Before the baseline commit (the files as they
-    /// were) and before the settings commit (the ones the settings step wrote); once added, 'git add -A' keeps them.
+    /// were) and before the settings commit (the ones the settings step wrote); once added, 'git add -A' keeps them. Not the
+    /// ones in an extracted NuGet package (<see cref="InPackage"/>): Cronos' packages folder inside the repository is ignored
+    /// through the copy's exclude (<see cref="PackagesFolderInside"/>), and its analyzer packages' 52 .editorconfig files were
+    /// added back, listed as settings and put into the patch (trial 48).
     /// </summary>
     internal static void AddIgnoredSettings(string folder)
     {
         var ignored = GitChecked(folder, "ls-files", "--others", "--ignored", "--exclude-standard", "--", ":(glob)**/.editorconfig")
             .Split('\n', StringSplitOptions.RemoveEmptyEntries)
             .Select(f => f.Trim())
-            .Where(f => !Regex.IsMatch(f, "(^|/)(bin|obj)/"))
+            .Where(f => !Regex.IsMatch(f, "(^|/)(bin|obj)/") && !InPackage(folder, f))
             .ToList();
         foreach (var chunk in ignored.Chunk(100))
         {
             GitChecked(folder, ["add", "-f", "--", .. chunk]);
+        }
+    }
+
+    /// <summary>
+    /// Whether a file (relative to <paramref name="folder"/>) is inside an extracted NuGet package: a folder between it and
+    /// <paramref name="folder"/> holds the package's .nupkg or NuGet's '.nupkg.metadata' (a global packages folder or
+    /// packages.config's packages/ inside the repository). <paramref name="packageFolders"/> remembers each folder's answer.
+    /// </summary>
+    internal static bool InPackage(string folder, string relative, Dictionary<string, bool>? packageFolders = null)
+    {
+        var top = Path.GetFullPath(folder).TrimEnd('/', '\\');
+        for (var directory = Path.GetDirectoryName(Path.GetFullPath(Path.Combine(folder, relative))); directory is not null && directory.Length > top.Length; directory = Path.GetDirectoryName(directory))
+        {
+            if (IsPackageFolder(directory))
+            {
+                return true;
+            }
+        }
+
+        return false;
+
+        // Per folder, remembered in packageFolders when given (Copy asks for every file of a packages folder).
+        bool IsPackageFolder(string directory)
+        {
+            if (packageFolders is not null && packageFolders.TryGetValue(directory, out var known))
+            {
+                return known;
+            }
+
+            var package = Directory.Exists(directory) && Directory.EnumerateFiles(directory).Any(f => f.EndsWith(".nupkg", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".nupkg.metadata", StringComparison.OrdinalIgnoreCase));
+            if (packageFolders is not null)
+            {
+                packageFolders[directory] = package;
+            }
+
+            return package;
         }
     }
 
@@ -1415,7 +1492,7 @@ internal static class PreviewCommand
         {
             Console.Write(SonarPart(writer.ToString()));
             Console.Write(DetectedPart(writer.ToString()));
-            foreach (var line in writer.ToString().Replace("\r\n", "\n").Split('\n').Where(l => l.StartsWith("EF Core migrations", StringComparison.Ordinal) || l.StartsWith("Vendored code", StringComparison.Ordinal)))
+            foreach (var line in writer.ToString().Replace("\r\n", "\n").Split('\n').Where(l => l.StartsWith("EF Core migrations", StringComparison.Ordinal) || l.StartsWith("Vendored code", StringComparison.Ordinal) || l.StartsWith(StyleCopSetup.NotRestoredWarning, StringComparison.Ordinal)))
             {
                 Console.WriteLine(line);
             }

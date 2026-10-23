@@ -18,6 +18,12 @@ internal static class DocumentationPeriods
     /// <summary>Tags whose text isn't checked, comma-separated: StyleCop's excludeFromPunctuationCheck.</summary>
     public const string ExcludeKey = "stylebro_exclude_from_punctuation_check";
 
+    /// <summary>
+    /// Whether enum members' documentation is checked (default true, like StyleCop 1.2). StyleCop 1.1.x's SA1629 doesn't
+    /// check them (probed with 1.1.118), so migrate writes false for it (trial 48, Pidgin; owner's choice 2026-10-23).
+    /// </summary>
+    public const string EnumMembersKey = "stylebro_punctuation_check_enum_members";
+
     /// <summary>StyleCop's default for excludeFromPunctuationCheck.</summary>
     public const string DefaultExcluded = "seealso";
 
@@ -83,9 +89,10 @@ internal static class DocumentationPeriods
     public static IEnumerable<int> GetMissingPeriods(IEnumerable<SyntaxTrivia> trivia, AnalyzerConfigOptions options)
     {
         var excluded = GetExcluded(options);
+        var enumMembers = !(options.TryGetValue(EnumMembersKey, out var checkEnumMembers) && checkEnumMembers.Trim().Equals("false", StringComparison.OrdinalIgnoreCase));
         foreach (var comment in trivia)
         {
-            if (comment.GetStructure() is not DocumentationCommentTriviaSyntax documentation || IsUnchecked(comment))
+            if (comment.GetStructure() is not DocumentationCommentTriviaSyntax documentation || IsUnchecked(comment) || (!enumMembers && Documents<EnumMemberDeclarationSyntax>(comment)))
             {
                 continue;
             }
@@ -143,6 +150,11 @@ internal static class DocumentationPeriods
         return member is EventFieldDeclarationSyntax or EventDeclarationSyntax or DestructorDeclarationSyntax
             && member.GetFirstToken() == comment.Token;
     }
+
+    /// <summary>Whether the comment documents a member of the given kind (it leads the member's first token).</summary>
+    private static bool Documents<T>(SyntaxTrivia comment)
+        where T : MemberDeclarationSyntax =>
+        comment.Token.Parent?.FirstAncestorOrSelf<MemberDeclarationSyntax>() is T member && member.GetFirstToken() == comment.Token;
 
     /// <summary>
     /// An inline element whose own text ends a sentence: <c>&lt;paramref name="name"&gt;The name of the request.&lt;/paramref&gt;</c>

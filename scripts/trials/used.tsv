@@ -255,3 +255,9 @@ dailydevops/fluentvalue	trial 47	NetEvolve.Defaults 2.10.0 copies its template .
 dailydevops/frameshift	rejected trial 47	its analyzer variants need Roslyn 5.6 (CS9057 stops compilation on SDK 10.0.113)
 dailydevops/extensions.strings	rejected trial 47	2 .cs files (same NetEvolve.Defaults setup as fluentvalue)
 dailydevops/logging.measurement	rejected trial 47	5 .cs files (same NetEvolve.Defaults setup as fluentvalue)
+mganss/HtmlSanitizer	trial 48 (random, seed 48)	12 files (8,540 lines), net462;net47;netstandard2.0;net8.0, xunit.v3 MTP (402 tests); init, converged in one run, clean
+HangfireIO/Cronos	trial 48 (random, seed 48)	17 files, net40-net6.0 + netstandard1.0, TWAE, lock files, NuGet.config's globalPackagesFolder '%USERPROFILE%/...' (inside the repository off Windows); 12 DST tests fail untouched; seed 48's draw 20 walked down to it
+benjamin-hodgson/Pidgin	trial 48 (random, seed 48)	127 files, StyleCop 1.1.118 whose settings come from the Benjamin.Pizza.BuildScripts package's globalconfig; migrate; global.json lowered, 'dotnet tool restore' (docfx); appended to random.json (entry 37), draw 8 walked past the end of the list to it
+xoofx/Tomlyn	trial 48	181 files, a tab-indented file in an indent_style = space repository, in-solution generator, netstandard2.0;net8.0;net10.0, the toml-test submodule its tests read
+VerifyTests/Verify	rejected trial 48	random list: needs the .NET 11 SDK (pool: fails)
+FastEndpoints/FastEndpoints	rejected trial 48	random list: needs the .NET 11 SDK (pool: fails)

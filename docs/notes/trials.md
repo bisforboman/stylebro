@@ -601,3 +601,43 @@ One section per trial (repositories, what broke, what was fixed, the owner's ver
   Roslyn 5.6; dropping a package makes NetEvolve.Defaults fail with NED0010), net9.0 tests with DOTNET_ROLL_FORWARD=Major.
   A CPM repository needs the trial reference in its Directory.Packages.props (zio's is in src/). Long reruns: start them with
   `setsid nohup` (a background command dies at its time limit); `pkill -f` matched its own shell again.
+
+## Trial 48 (2026-10-23, not clean: owner "Not clean", tally 0; host soak: clean, 1 clean soak)
+
+- Repos (three random plus one targeted): mganss/HtmlSanitizer, HangfireIO/Cronos, benjamin-hodgson/Pidgin (random, seed 48:
+  draws 35, 20, 8 of 36 entries; draw 20 walked to Cronos, draw 8 past the end of the list, so entries 37-40 were appended and it
+  took Pidgin; `.trials/trial48/logs/picks.md`), xoofx/Tomlyn (targeted: a tab-indented file in an `indent_style = space`
+  repository, an in-solution generator; no pool entry fitted). Tomlyn needed one run (trial 47's tab fix held).
+- Pidgin (owner: "Read it"): its StyleCop settings are Benjamin.Pizza.BuildScripts' globalconfig, added through
+  `GlobalAnalyzerConfigFiles` (SA1200, SA1101, SA1201-SA1204, SA1309 off). Migrate read only repository files, and the first
+  format changed 115 StyleCop-clean files. `StyleCopSetup.PackageGlobalConfigs`/`ReadPackageGlobalConfigs` take the StyleCop
+  projects' evaluated `GlobalAnalyzerConfigFiles` (`ProjectQuery` lists them) where the restore output exists (`Restored`:
+  obj/ or artifacts/obj/<project>/), as a layer between the rulesets and the repository's global configs (strictest-wins would
+  let a repository .globalconfig that doesn't set a rule bring StyleCop's default back); without it, a "Not restored" warning
+  when the project references other packages. The preview copies the repository's restore output before its settings step
+  (`CopiedRestoreFolders`, excluded from the patch) and passes the warning on. Pidgin: 115 -> 7 files.
+- Pidgin (owner: "Name it, stay Not clean"): the package config also sets `dotnet_sort_system_directives_first = true`, and the
+  SDK's style pass flips `using static Pidgin.Parser;` / `using static Pidgin.Parser<char>;` in 5 files every run, untouched and
+  without StyleBro too (a 2-line repro doesn't do it). `FormatCommand.UndoneFiles`/`UndoneLine` name a file a run leaves as it
+  was before the previous run; `RememberUndone`/`RecordedUndone` let `bro check` say the same; the preview compares its trees.
+- Pidgin (owner: "Option, migrate sets it"): StyleCop 1.1.118's SA1629 skips enum members (probed; 1.2.0-beta.556 reports them):
+  `stylebro_punctuation_check_enum_members` (BRO1603, default true), `false` written by migrate for 1.1.x. Left as is: IDE0055's
+  range spacing (`i .. (i + 2)`, 1 file; StyleCop 1.1.118 predates ranges), BRO1104 on a target-typed `new()` (documented).
+- Cronos: NuGet.config's `globalPackagesFolder = %USERPROFILE%/...` puts the packages inside the repository off Windows. The
+  preview's copy took each package's files git doesn't ignore (`.nupkg.sha512`, `.nuspec`, not `*.nupkg`/`build/`), NuGet took them
+  as installed, and the preview couldn't load net40/net45/net462/netstandard2.0 where format could; `AddIgnoredSettings` also put
+  the analyzer packages' 52 `.editorconfig` files back (trial 43's force-add undid trial 31's exclude). `PreviewCommand.Copy` and
+  `AddIgnoredSettings` leave untracked files of an extracted package behind (`InPackage`: a `.nupkg` or `.nupkg.metadata` above).
+  Cronos' netstandard1.0 doesn't load in `dotnet format` (honest "Not verified", check --build too: no EnforceCodeStyleInBuild).
+- Format host soak (owner: "Clean soak"): trees, exit codes, `Not checked` lines and --json identical on all four; only PR
+  #287's load note (HtmlSanitizer, Cronos). Tomlyn's "Release build of Tomlyn: 983 findings" list comes in MSBuild's output order:
+  `Compare-Format.ps1` now compares such lines as a set. Host vs default (s): check 47/71, 69/142, 130/162, 37/36; format 34/63,
+  44/120, 93/146, 32/52; check --build 54/71, 131/136, 91/96, 82/88 (HtmlSanitizer, Cronos, Tomlyn, Pidgin).
+- Preview matched format file by file on all four; TWAE Debug/Release builds and tests matched the untouched code (HtmlSanitizer
+  402/402, Pidgin 149/149, Tomlyn 1040/1040, Cronos 1865/1877 with the same 12 DST failures).
+- Environment: SDK 10.0.113 + 8.0.132 and pwsh were there (`ln -s ~/.dotnet/tools/bro /usr/local/bin/bro`). Pidgin: global.json
+  10.0.201 lowered, `dotnet tool restore` (its docs project runs docfx); Cronos: trial feed in its NuGet.config (`<clear/>`) and
+  `signatureValidationMode` accept; Tomlyn: `git submodule update --init` (its tests read ext/toml-test; a clone of the clone has
+  no submodule files: 360 instead of 1,040 tests). GOTCHA: an environment variable set for a `bash -c` chain (`REUSE=-Reuse`)
+  reaches every step; a wait loop's `pgrep -f soak.sh` matched other wait loops' command lines (deadlock); a stale log with the
+  awaited marker fired a wait at once. Name logs per run and clear them first.

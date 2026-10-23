@@ -255,7 +255,7 @@ internal static partial class FormatCommand
     [
         "-getProperty:TargetFrameworks", "-getProperty:TargetFramework", "-getProperty:ProjectAssetsFile", "-getProperty:MSBuildProjectExtensionsPath", "-getProperty:WarningsNotAsErrors",
         "-getProperty:Configuration", "-getProperty:Configurations", "-getProperty:Platforms", "-getProperty:StyleBroBaseline", "-getProperty:GenerateDocumentationFile",
-        "-getItem:ProjectReference", "-getItem:Compile", "-getItem:PackageReference", "-getItem:GlobalPackageReference", "-getItem:Analyzer", "-getItem:MissingWorkloadPack", "-nologo",
+        "-getItem:ProjectReference", "-getItem:Compile", "-getItem:PackageReference", "-getItem:GlobalPackageReference", "-getItem:Analyzer", "-getItem:MissingWorkloadPack", "-getItem:GlobalAnalyzerConfigFiles", "-nologo",
     ];
 
     /// <summary>What <see cref="TestedSymbols"/> found, per file (full path).</summary>
@@ -3743,7 +3743,7 @@ internal static partial class FormatCommand
 
                 gaps.ForEach(log);
                 log(changed > 0
-                    ? $"Not clean: formatting would change {changed} file{(changed == 1 ? string.Empty : "s")}. Run 'bro format'."
+                    ? RecordedUndone(root, changedFiles) is { } undone ? UndoneLine(undone) : $"Not clean: formatting would change {changed} file{(changed == 1 ? string.Empty : "s")}. Run 'bro format'."
                     : "Not clean: formatting a copy of the repository failed (see above).");
                 return code;
             }
@@ -4611,6 +4611,8 @@ internal static partial class FormatCommand
         // Not for named files (--files): a few files named cost less than the check.
         var unformatted = csharpier is null || args.Contains("--include") ? null : CSharpierStep.Unformatted(csharpier, root);
         var formatted = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, string>? beforePrevious = null;
+        var undone = new List<string>();
         for (var run = 1; ; run++)
         {
             File.Delete(keptFile);
@@ -4721,6 +4723,10 @@ internal static partial class FormatCommand
                 changed = ChangedFiles(before, after);
             }
 
+            // The files this run put back as they were before the previous run: each run undoes the one before (trial 48, Pidgin:
+            // the SDK's style pass flips 'using static Pidgin.Parser;' and 'using static Pidgin.Parser<char>;' every run).
+            undone = beforePrevious is null ? [] : UndoneFiles(beforePrevious, Directory.Exists(root) ? Snapshot(root) : [], changed);
+            beforePrevious = before;
             if (report is not null)
             {
                 JsonReport.AddRun(run, changed, Path.Combine(report, "format-report.json"));
@@ -4822,13 +4828,74 @@ internal static partial class FormatCommand
                     log(FixFailuresLine(allFailures));
                 }
 
-                log($"Not clean: still changing after {MaxRuns} runs. Run 'bro format' again, and if it keeps changing the same lines, please report it.");
+                RememberUndone(root, undone);
+                log(undone.Count > 0 ? UndoneLine(undone.Select(f => Path.GetRelativePath(shown, f).Replace('\\', '/')).ToList()) : $"Not clean: still changing after {MaxRuns} runs. Run 'bro format' again, and if it keeps changing the same lines, please report it.");
                 return NotCleanExitCode;
             }
 
             args = NextRun(args);
         }
     }
+
+    /// <summary>
+    /// The files a run changed back to what they were before the previous run (<paramref name="beforePrevious"/>): something
+    /// in formatting undoes what the run before did, so running again never settles them (owner's choice 2026-10-23).
+    /// </summary>
+    public static List<string> UndoneFiles(IReadOnlyDictionary<string, string> beforePrevious, IReadOnlyDictionary<string, string> after, IEnumerable<string> changed) =>
+        changed.Where(f => beforePrevious.TryGetValue(f, out var was) && after.TryGetValue(f, out var now) && was == now).ToList();
+
+    /// <summary>
+    /// Records the files the last 'format' run found undoing the run before (<see cref="UndoneFiles"/>, full paths), with their
+    /// content now, for <see cref="RecordedUndone"/>; none clears the record. In the temp folder, named by the root's path.
+    /// </summary>
+    public static void RememberUndone(string root, IReadOnlyCollection<string> files)
+    {
+        var record = UndoneRecord(root);
+        try
+        {
+            if (files.Count == 0)
+            {
+                File.Delete(record);
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(record)!);
+            File.WriteAllLines(record, files.Where(File.Exists).Select(f => $"{Path.GetFullPath(f)}\t{Hash(File.ReadAllBytes(f))}"));
+        }
+        catch (IOException)
+        {
+            // Only a better message is lost.
+        }
+    }
+
+    /// <summary>
+    /// The files (relative to <paramref name="root"/>) when every file <paramref name="changed"/> lists (full paths) is one the
+    /// last 'format' found undoing the run before (<see cref="RememberUndone"/>) and still has the content it left; else null.
+    /// 'bro check' then says so instead of "Run 'bro format'", which can't settle them (owner's choice 2026-10-23).
+    /// </summary>
+    public static List<string>? RecordedUndone(string root, IReadOnlyCollection<string> changed)
+    {
+        var record = UndoneRecord(root);
+        if (changed.Count == 0 || !File.Exists(record))
+        {
+            return null;
+        }
+
+        var known = File.ReadAllLines(record).Select(l => l.Split('\t')).Where(p => p.Length == 2).ToDictionary(p => p[0], p => p[1], StringComparer.OrdinalIgnoreCase);
+        return changed.All(f => File.Exists(f) && known.TryGetValue(Path.GetFullPath(f), out var hash) && hash == Hash(File.ReadAllBytes(f)))
+            ? changed.Select(f => Path.GetRelativePath(root, f).Replace('\\', '/')).Order(StringComparer.Ordinal).ToList()
+            : null;
+    }
+
+    private static string UndoneRecord(string root) =>
+        Path.Combine(Path.GetTempPath(), "stylebro-undone", Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(Path.GetFullPath(root).TrimEnd('/', '\\').ToUpperInvariant())))[..16] + ".tsv");
+
+    /// <summary>The verdict when every run undoes the one before in some files (<see cref="UndoneFiles"/>, relative paths).</summary>
+    public static string UndoneLine(IReadOnlyList<string> files) =>
+        $"Not clean: each run undoes the one before in {files.Count} file{(files.Count == 1 ? string.Empty : "s")} ({string.Join(", ", files.Take(5))}{(files.Count > 5 ? $" and {files.Count - 5} more" : string.Empty)}), "
+        + "so running again won't settle them. Two formatting steps want those lines in different orders or layouts: 'dotnet format' "
+        + "alone can do it (its using sort flips 'using static X;' and 'using static X<T>;' when dotnet_sort_system_directives_first is set). "
+        + "Compare the files after two runs, settle the lines by hand or turn off the setting one side follows, and please report it if a StyleBro rule is one side.";
 
     /// <summary>The severity word of a line that reports a kept finding (its position in the line), or null.</summary>
     private static Group? KeptLine(string line, ISet<(string Path, int Line, string Id)> kept)

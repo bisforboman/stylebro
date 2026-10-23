@@ -774,6 +774,50 @@ public class DocumentationTests
         """,
         "stylebro_exclude_from_punctuation_check = summary, para\n");
 
+    // StyleCop 1.1.x's SA1629 doesn't check enum members; migrate turns them off for it (trial 48, Pidgin).
+    [Fact]
+    public Task EnumMembers_AreNotCheckedForPeriods_WhenTurnedOff() => VerifyFixAsync(
+        """
+        /// <summary>The kinds{|BRO1603:|}</summary>
+        public enum Kind
+        {
+            /// <summary>Not checked</summary>
+            Prefix,
+
+            /// <summary>Not checked either</summary>
+            Postfix,
+        }
+        """,
+        """
+        /// <summary>The kinds.</summary>
+        public enum Kind
+        {
+            /// <summary>Not checked</summary>
+            Prefix,
+
+            /// <summary>Not checked either</summary>
+            Postfix,
+        }
+        """,
+        "stylebro_punctuation_check_enum_members = false\n");
+
+    [Fact]
+    public Task EnumMembers_AreCheckedForPeriods_ByDefault() => VerifyFixAsync(
+        """
+        public enum Kind
+        {
+            /// <summary>Checked{|BRO1603:|}</summary>
+            Prefix,
+        }
+        """,
+        """
+        public enum Kind
+        {
+            /// <summary>Checked.</summary>
+            Prefix,
+        }
+        """);
+
     // StyleSharp's SST1629 doesn't check text that ends with an element: migrate excludes the inline ones (trial 24, Refit).
     [Fact]
     public Task ExcludedEmptyElements_AtTheEnd_AreNotCheckedForPeriods() => VerifyFixAsync(
