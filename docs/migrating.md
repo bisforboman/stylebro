@@ -135,6 +135,11 @@ real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro
   its own entries. When several rulesets or global configs disagree (one per project type), the strictest wins, a file
   that doesn't mention a rule counting with StyleCop's default, so production code keeps everything StyleCop enforced
   there.
+- **Global configs packages add.** A package's build props can add a global config to every project
+  (`GlobalAnalyzerConfigFiles`; Benjamin.Pizza.BuildScripts holds Pidgin's StyleCop settings this way). Migrate reads the
+  ones the StyleCop projects' evaluation lists, as a layer between the rulesets and the repository's own global configs.
+  The package's props are imported from the restore output: a project without it (and with other package references)
+  gets a "Not restored" warning; run `dotnet restore`, then migrate again.
 - **Each project's own ruleset and `stylecop.json`.** A project's ruleset is the `<CodeAnalysisRuleSet>` its project
   file, its `Directory.Build.props`/`.targets` or what they import select (the last one counts), its `stylecop.json` the
   one it adds as `<AdditionalFiles>`. Only projects that run StyleCop count: a sample project without StyleCop (and so
