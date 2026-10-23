@@ -5,6 +5,7 @@
   had the rules that package turns off migrated as on, and the first `bro format` moved usings, added `this.` and sorted
   members in code StyleCop accepted. Without restore output, migrate says to run `dotnet restore` first.
 - `bro format` names the files when each run undoes the one before (for example `dotnet format`'s own using sort, which
-  flips `using static X;` and `using static X<T>;` on every run), instead of only saying it is still changing.
+  flips `using static X;` and `using static X<T>;` on every run), instead of only saying it is still changing, and
+  `bro check` says the same instead of "Run 'bro format'" when those files are all it would change.
 - `bro init --diff` / `bro preview` no longer lists the `.editorconfig` files of NuGet packages restored into a folder
   inside the repository as settings, or puts them into the patch.

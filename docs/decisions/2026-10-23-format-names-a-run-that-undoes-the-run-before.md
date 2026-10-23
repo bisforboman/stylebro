@@ -18,3 +18,7 @@ an undo loop?
 ## Decision
 
 Name it, stay Not clean.
+
+Applied as: `FormatCommand.UndoneFiles`/`UndoneLine` (a file a run leaves as it was before the previous run) and
+`RememberUndone`/`RecordedUndone` (a record in the temp folder, with each file's content, that `bro check` uses when those
+files are all it would change, at that content).
