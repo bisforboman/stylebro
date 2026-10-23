@@ -109,6 +109,12 @@ internal sealed record ProjectStyleCop(string? Ruleset, string? Json);
 /// </summary>
 internal sealed class StyleCopSetup
 {
+    /// <summary>The start of the warning for StyleCop projects without restore output (<see cref="PackageGlobalConfigs"/>).</summary>
+    internal const string NotRestored = "Not restored:";
+
+    /// <summary>How the report prints that warning (<see cref="NotRestored"/>), which the preview passes on.</summary>
+    internal const string NotRestoredWarning = "Warning: " + NotRestored;
+
     /// <summary>The key ReadConfig files a 'dotnet_analyzer_diagnostic.severity' (every rule) under, next to the categories.</summary>
     private const string AllRules = "*";
 
@@ -1215,17 +1221,6 @@ internal sealed class StyleCopSetup
         : version.StartsWith("1.1.", StringComparison.Ordinal) ? LoadIds("StyleCopRules-1.1.118.csv")
         : null;
 
-    private static bool HasStyleCopItem(JsonElement evaluation) =>
-        evaluation.TryGetProperty("Items", out var items)
-        && items.EnumerateObject().Where(i => i.Name is "PackageReference" or "GlobalPackageReference" or "Analyzer").SelectMany(i => i.Value.EnumerateArray())
-            .Any(i => i.TryGetProperty("Identity", out var identity) && IsStyleCopItem(identity.GetString() ?? string.Empty));
-
-    /// <summary>The start of the warning for StyleCop projects without restore output (<see cref="PackageGlobalConfigs"/>).</summary>
-    internal const string NotRestored = "Not restored:";
-
-    /// <summary>How the report prints that warning (<see cref="NotRestored"/>), which the preview passes on.</summary>
-    internal const string NotRestoredWarning = "Warning: " + NotRestored;
-
     /// <summary>
     /// The global configs packages add to the projects (<paramref name="read"/>: a project's, null without its restore output),
     /// in order, without the repository's own files (read with the others). A project without restore output whose MSBuild
@@ -1311,6 +1306,11 @@ internal sealed class StyleCopSetup
 
         return false;
     }
+
+    private static bool HasStyleCopItem(JsonElement evaluation) =>
+        evaluation.TryGetProperty("Items", out var items)
+        && items.EnumerateObject().Where(i => i.Name is "PackageReference" or "GlobalPackageReference" or "Analyzer").SelectMany(i => i.Value.EnumerateArray())
+            .Any(i => i.TryGetProperty("Identity", out var identity) && IsStyleCopItem(identity.GetString() ?? string.Empty));
 
     /// <summary>Whether a file is the repository's own (under the root, not in an extracted package there).</summary>
     private static bool InRepository(string root, string file)
