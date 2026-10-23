@@ -3,5 +3,5 @@
     File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'
     Find = '|| (model.GetSymbolInfo(name, cancellationToken).Symbol ?? symbol) is not IFieldSymbol field'
     Replace = '|| symbol is not IFieldSymbol field'
-    Tests = 'LinkedFileFixAllTests.StaticFieldQualifier_IsTheSameWhicheverCopyIsFixed'
+    Tests = 'LinkedFileFixAllTests.StaticFieldQualifier'
 }

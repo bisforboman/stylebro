@@ -1010,7 +1010,7 @@ internal static class CamelCaseRenamer
     /// symbol would hide at that spot, the qualified name ('this.count', or 'Type.count' for a static field). Null for
     /// a type or type parameter whose new name already means something at that spot (the whole rename is skipped).
     /// </summary>
-    private static async Task<string?> GetReplacementAsync(
+    internal static async Task<string?> GetReplacementAsync(
         ISymbol symbol,
         Document document,
         TextSpan span,
