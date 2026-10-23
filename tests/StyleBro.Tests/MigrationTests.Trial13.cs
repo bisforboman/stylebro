@@ -24,7 +24,7 @@ public sealed partial class MigrationTests
         Write("src/Lib.Tests/Lib.Tests.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
         Write("src/Lib/A.cs", "class A { }\n");
 
-        var setup = StyleCopSetup.Read(root, project => !project.Contains("Tests", StringComparison.Ordinal));
+        var setup = StyleCopSetup.Read(root, project => !project.Contains("Tests", StringComparison.Ordinal), packageConfigs: _ => []);
         Assert.Equal(["src/Lib"], setup.Folders);
         Assert.Equal(["src/Lib.Tests"], setup.FoldersWithout);
         Assert.False(setup.NotInstalled);
