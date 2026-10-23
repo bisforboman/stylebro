@@ -1,0 +1,11 @@
+preview	1	0s	bro preview init --engine host
+init	0	4s	bro init --write
+format	0	48s	bro format --engine host
+check	0	19s	bro check --engine host
+check-json	0
+checkbuild	2	55s	bro check --build --engine host
+checkbuild-json	2
+twae-Debug	1	8s	dotnet build CommandLine.sln -c Debug --no-incremental -p:NuGetAudit=false -p:TreatWarningsAsErrors=true
+test-Debug	1	4s	dotnet test tests/CommandLine.Tests -c Debug -f netcoreapp3.1
+twae-Release	1	8s	dotnet build CommandLine.sln -c Release --no-incremental -p:NuGetAudit=false -p:TreatWarningsAsErrors=true
+test-Release	1	4s	dotnet test tests/CommandLine.Tests -c Release -f netcoreapp3.1

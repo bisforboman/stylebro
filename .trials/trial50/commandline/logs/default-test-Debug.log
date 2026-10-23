@@ -1,0 +1,5 @@
+  Determining projects to restore...
+  Restored /home/user/stylebro/.trials/trial50/commandline/default/src/CommandLine/CommandLine.csproj (in 385 ms).
+  Restored /home/user/stylebro/.trials/trial50/commandline/default/tests/CommandLine.Tests/CommandLine.Tests.csproj (in 438 ms).
+  CommandLine -> /home/user/stylebro/.trials/trial50/commandline/default/src/CommandLine/bin/Debug/netstandard2.0/CommandLine.dll
+/home/user/stylebro/.trials/trial50/commandline/default/tests/CommandLine.Tests/Unit/Issue389Tests.cs(25,33): error CS0017: Program has more than one entry point defined. Compile with /main to specify the type that contains the entry point. [/home/user/stylebro/.trials/trial50/commandline/default/tests/CommandLine.Tests/CommandLine.Tests.csproj::TargetFramework=netcoreapp3.1]

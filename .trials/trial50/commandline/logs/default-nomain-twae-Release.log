@@ -1,0 +1,21 @@
+  Determining projects to restore...
+  Restored /home/user/stylebro/.trials/trial50/commandline/default-nomain/src/CommandLine/CommandLine.csproj (in 332 ms).
+  Restored /home/user/stylebro/.trials/trial50/commandline/default-nomain/tests/CommandLine.Tests/CommandLine.Tests.csproj (in 411 ms).
+  CommandLine -> /home/user/stylebro/.trials/trial50/commandline/default-nomain/src/CommandLine/bin/Release/net40/CommandLine.dll
+  CommandLine -> /home/user/stylebro/.trials/trial50/commandline/default-nomain/src/CommandLine/bin/Release/net45/CommandLine.dll
+  CommandLine -> /home/user/stylebro/.trials/trial50/commandline/default-nomain/src/CommandLine/bin/Release/netstandard2.0/CommandLine.dll
+  CommandLine -> /home/user/stylebro/.trials/trial50/commandline/default-nomain/src/CommandLine/bin/Release/net461/CommandLine.dll
+  The package CommandLineParser.0.0.0 is missing a readme. Go to https://aka.ms/nuget/authoring-best-practices/readme to learn why package readmes are important.
+  Successfully created package '/home/user/stylebro/.trials/trial50/commandline/default-nomain/src/CommandLine/bin/Release/CommandLineParser.0.0.0.nupkg'.
+  Successfully created package '/home/user/stylebro/.trials/trial50/commandline/default-nomain/src/CommandLine/bin/Release/CommandLineParser.0.0.0.snupkg'.
+/home/user/stylebro/.trials/trial50/commandline/default-nomain/tests/CommandLine.Tests/Unit/Issue389Tests.cs(25,33): error BRO1309: Rename '__Main' to 'Main' (https://bisforboman.github.io/stylebro/rules/BRO1309/) [/home/user/stylebro/.trials/trial50/commandline/default-nomain/tests/CommandLine.Tests/CommandLine.Tests.csproj::TargetFramework=net461]
+/home/user/stylebro/.trials/trial50/commandline/default-nomain/tests/CommandLine.Tests/Unit/Issue389Tests.cs(25,33): error BRO1309: Rename '__Main' to 'Main' (https://bisforboman.github.io/stylebro/rules/BRO1309/) [/home/user/stylebro/.trials/trial50/commandline/default-nomain/tests/CommandLine.Tests/CommandLine.Tests.csproj::TargetFramework=netcoreapp3.1]
+
+Build FAILED.
+
+/home/user/stylebro/.trials/trial50/commandline/default-nomain/tests/CommandLine.Tests/Unit/Issue389Tests.cs(25,33): error BRO1309: Rename '__Main' to 'Main' (https://bisforboman.github.io/stylebro/rules/BRO1309/) [/home/user/stylebro/.trials/trial50/commandline/default-nomain/tests/CommandLine.Tests/CommandLine.Tests.csproj::TargetFramework=net461]
+/home/user/stylebro/.trials/trial50/commandline/default-nomain/tests/CommandLine.Tests/Unit/Issue389Tests.cs(25,33): error BRO1309: Rename '__Main' to 'Main' (https://bisforboman.github.io/stylebro/rules/BRO1309/) [/home/user/stylebro/.trials/trial50/commandline/default-nomain/tests/CommandLine.Tests/CommandLine.Tests.csproj::TargetFramework=netcoreapp3.1]
+    0 Warning(s)
+    2 Error(s)
+
+Time Elapsed 00:00:07.33
