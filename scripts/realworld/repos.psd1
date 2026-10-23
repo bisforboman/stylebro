@@ -9,6 +9,8 @@
 # The repos left on Windows also keep the CRLF checkouts (git on the Windows runners converts line endings).
 # Formatter: 'csharpier' for a repository CSharpier formats: the init flow, then CSharpier, then both must be clean
 # (Invoke-RealWorld.ps1). Its CSharpier version is the one in the repository's tool manifest.
+# BroFormat: after the checks, 'bro init --write' + 'bro format' on the untouched code, which must settle (exit 2 fails;
+# owner's choice 2026-10-23: Newtonsoft.Json only, the default engine).
 # MaxFixSeconds: the fix-time budget, the 'dotnet format' runs together (until no changes). Over it, the job prints a
 # GitHub Actions warning and the report (job summary) says so; it doesn't fail yet. The values are PROVISIONAL: twice
 # the slower of the nightlies of 2026-10-21 and -22 on each repo's own runner (Newtonsoft's still include BRO1112's
@@ -20,7 +22,7 @@
     FFMpegCore    = @{ MaxFixSeconds = 120; Url = 'https://github.com/rosenbjerg/FFMpegCore'; Commit = '1fd8c88c45bc683c0c2cd0fe7e9a2f74642e9646'; Solution = 'FFMpegCore.sln'; Tests = 'dotnet' }
     Polly         = @{ MaxFixSeconds = 600; Url = 'https://github.com/App-vNext/Polly'; Commit = '0275bc22a5a8defb77415313112454a558d0f43a'; Solution = 'Polly.slnx'; Tests = 'mtp' }
     OpenTelemetry = @{ MaxFixSeconds = 960; Url = 'https://github.com/open-telemetry/opentelemetry-dotnet'; Commit = 'ea1e3f36105ecfeac0595b7807ad73983bab1f75'; Solution = 'OpenTelemetry.slnx'; Tests = $null }
-    Newtonsoft    = @{ MaxFixSeconds = 2700; Url = 'https://github.com/JamesNK/Newtonsoft.Json'; Commit = '52fa3aef1f2cadcd3a3f874251eddc98d3efbbaa'; Solution = 'Src/Newtonsoft.Json.slnx'; Tests = 'dotnet'
+    Newtonsoft    = @{ MaxFixSeconds = 2700; BroFormat = $true; Url = 'https://github.com/JamesNK/Newtonsoft.Json'; Commit = '52fa3aef1f2cadcd3a3f874251eddc98d3efbbaa'; Solution = 'Src/Newtonsoft.Json.slnx'; Tests = 'dotnet'
         # BRO1001 sorts PrivateMembersClass's fields; the test serializes them by reflection (BindingFlags.NonPublic), with no
         # attribute that would show the order matters (docs/rules/BRO1001.md, Not reported).
         KnownFailures = @('Newtonsoft.Json.Tests.Serialization.CamelCasePropertyNamesContractResolverTests.MemberSearchFlags') }

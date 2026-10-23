@@ -10,6 +10,9 @@
 #     init --write' (which detects CSharpier and turns the layout rules off) and 'bro format' instead of every
 #     rule; then the repository's own CSharpier ('dotnet tool restore', 'dotnet csharpier format .'), after which
 #     'bro format --verify-no-changes' and 'dotnet csharpier check .' must be clean: the two settle
+#   - BroFormat = $true (repos.psd1): after the checks above, the untouched code once more through 'bro init --write' and
+#     'bro format' (its per-framework runs, whitespace pass and built-in rules, none of which the 'dotnet format analyzers'
+#     runs above have), which must settle: exit 2 ("still changing after 3 runs") fails
 #
 #   ./scripts/realworld/Invoke-RealWorld.ps1 -Repo Serilog [-Tests] [-Work <dir>] [-Enable BRO1313,BRO1314] [-TestCache <file>]
 # -Enable turns on rules that are off by default (they don't run otherwise).
@@ -44,7 +47,8 @@ $env:StyleBroSelf = 'none'
 dotnet build (Join-Path $root 'src/StyleBro.CodeFixes') -c $Configuration -nologo -v q | Out-Host
 if ($LASTEXITCODE -ne 0) { throw 'Building StyleBro failed.' }
 $csharpier = $r.Formatter -eq 'csharpier'
-if ($csharpier) {
+$broFormat = [bool]$r.BroFormat
+if ($csharpier -or $broFormat) {
     dotnet build (Join-Path $root 'src/StyleBro.Migrate') -c $Configuration -nologo -v q | Out-Host
     if ($LASTEXITCODE -ne 0) { throw 'Building bro failed.' }
     # A copy, like the analyzers: a run in progress doesn't lock this repository's build output.
@@ -117,9 +121,10 @@ Set-Content $hook @"
   </ItemGroup>
 </Project>
 "@
-# The init flow (Formatter = 'csharpier'): the package itself, as a team has it (analyzers, preset, build targets).
-if ($csharpier) {
-    Set-Content $hook @"
+# The init flow (Formatter = 'csharpier', BroFormat): the package itself, as a team has it (analyzers, preset, build targets).
+$packageHook = Join-Path $Work 'stylebro-package.targets'
+if ($csharpier -or $broFormat) {
+    Set-Content $packageHook @"
 <Project>
   <ItemGroup Condition="'`$(ManagePackageVersionsCentrally)' == 'true'">
     <PackageReference Include="StyleBro.Analyzers" VersionOverride="$packageVersion" PrivateAssets="all" />
@@ -130,6 +135,7 @@ if ($csharpier) {
 </Project>
 "@
 }
+if ($csharpier) { $hook = $packageHook }
 
 # The repository at its pinned commit.
 $path = Join-Path $Work $Repo
@@ -312,6 +318,27 @@ if ($null -ne $failedBefore) {
     $newFailures = @($failedAfter | Where-Object { -not $failedBefore.Contains($_) -and $_ -notin $known })
     $report.Add("- tests failing after the fixes: $($failedAfter.Count) (new: $($newFailures.Count))")
     $newFailures | ForEach-Object { $problems.Add("test fails after the fixes: $_") }
+}
+
+# 'bro format' as a team runs it (BroFormat): the analyzers-only runs above can't see a whitespace pass that each target
+# framework's run does its own way (Newtonsoft.Json, 2026-10-23: '#endregion' in code net20 and net35 leave out flipped
+# between their runs and the others', and 'bro format' never settled while this job passed).
+if ($broFormat) {
+    git -C $path checkout -q --force $r.Commit
+    git -C $path clean -fdxq
+    $env:CustomAfterMicrosoftCommonTargets = $packageHook
+    try {
+        Measure-Phase 'bro init --write (for bro format)' {
+            dotnet $migrate init $path --write 2>&1 | Out-Host
+            if ($LASTEXITCODE -ne 0) { throw "bro init --write failed (exit $LASTEXITCODE)." }
+        }
+        $broCode = 0
+        [void](Measure-Phase 'bro format' { dotnet $migrate format $sln 2>&1 | Out-Host; $script:broCode = $LASTEXITCODE })
+    }
+    finally { Remove-Item Env:\CustomAfterMicrosoftCommonTargets -ErrorAction SilentlyContinue }
+    $report.Add("- bro format after 'bro init --write': exit $broCode")
+    # 3 is "Not verified" (a part no run could load or check), which says what it left out; 2 is "Not clean".
+    if ($broCode -notin 0, 3) { $problems.Add("'bro format' after 'bro init --write' ended with exit $broCode (2: still changing after 3 runs)") }
 }
 
 $report.Add("- timings: $($timings -join '; ')")
