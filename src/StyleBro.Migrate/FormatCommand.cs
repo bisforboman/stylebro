@@ -2476,10 +2476,20 @@ internal static partial class FormatCommand
             return null;
         }
 
-        var path = Path.Combine(Path.GetTempPath(), $"stylebro-{Guid.NewGuid():N}{StyleBro.Analyzers.Modernize.MultiTargetSuppressor.OldCSharpExtension}");
-        File.WriteAllLines(path, files.Select(f => $"{f.Lowest}\t{f.File}"));
+        var lines = files.Select(f => $"{f.Lowest}\t{f.File}").ToList();
+        var path = RunFile("stylebro-", StyleBro.Analyzers.Modernize.MultiTargetSuppressor.OldCSharpExtension, string.Join("\n", lines));
+        File.WriteAllLines(path, lines);
         return path;
     }
+
+    /// <summary>
+    /// The path of a file a run hands its 'dotnet format' runs (the hook, the old C# list), named by this process and the
+    /// content: the next run of the command with the same content gets the same path, which the host's workspaces are keyed
+    /// by (--engine host keeps a configuration's workspace, and what it analyzed, for every run of the command), while
+    /// another bro process never shares or deletes it.
+    /// </summary>
+    public static string RunFile(string prefix, string extension, string content) =>
+        Path.Combine(Path.GetTempPath(), $"{prefix}{Environment.ProcessId}-{Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(content)))[..16]}{extension}");
 
     private static void DeleteOldCSharpFiles(string? path)
     {
@@ -5563,7 +5573,7 @@ internal static partial class FormatCommand
         }
 
         var whole = plan.Count <= 1 && allFrameworks.Count == 0 && visualBasic.Count == 0 && needWorkloads.Count == 0;
-        var select = Path.Combine(Path.GetTempPath(), $"stylebro-format-{Guid.NewGuid():N}.targets");
+        var select = RunFile("stylebro-format-", ".targets", SelectFrameworkTargets);
         File.WriteAllText(select, SelectFrameworkTargets);
 
         // Files projects share that another build compiles with an older C# (trial 35, sqlite-net: SQLite.Tests, net8.0, got

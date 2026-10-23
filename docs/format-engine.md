@@ -41,9 +41,20 @@ none of them in what a fix writes:
 - **Each fixer is called once per id.** `dotnet format` calls it once per project that references the analyzers (17 times
   per id on a library with 8 target frameworks); only the first call changes anything.
 - **Only what changed is analyzed again.** Before each id `dotnet format` runs that id's analyzers again over every project
-  that had it. The host keeps each analyzer's results per compilation and runs it again only on the projects a fix
-  changed, and on the projects that reference them; the others keep their compilation and their results. The check of the
-  run after a run that changed files analyzes everything again, so the verdict never rests on a kept result.
+  that had it. The host keeps each analyzer's results per project, for as long as the project's content (its documents and
+  those of the projects it references) stays as it was, and runs it again only on the projects a fix changed and on the
+  projects that reference them.
+
+## What it reuses
+
+The checks run the same way: a check in the host runs `dotnet format`'s formatters and the analysis it reports, from the same
+results as the fixes. So:
+
+- the fix run after a framework's check analyzes again only what that run's earlier formatters changed;
+- two runs that share a project (a library every framework's run references) analyze it once;
+- the check after a run that changed files analyzes again only the projects a fix reached and the ones referencing them,
+  as `dotnet format` would find them: a result is reused only for the same content it was computed on;
+- a command's runs keep each configuration's workspace loaded, so run 2 loads nothing again.
 
 Between two runs, and between the runs of a command's frameworks and configurations, the host reads back the files that
 changed on disk (a run's own fixes, CSharpier, the indentation `format` keeps, a lone CR it converts), so every run sees
@@ -80,10 +91,12 @@ within ~3x a plain `dotnet format` and a run on formatted code within ~1.5x a pl
 | System.IO.Abstractions (7 frameworks, Release) | 207 s | 261 s (1.3x) | 107 s | 98 s (0.9x) | 97 s (0.9x) |
 | PalCalc (WPF, 3 configurations) | 140 s | 266 s (1.9x) | 62 s | 135 s (2.2x) | 110 s (1.8x) |
 
-Against the default engine, from the parity runs (same machine, the two engines one after the other): `bro format` took
-45 s instead of 126 s on CliFx, 36 s instead of 78 s on error-or, 97 s instead of 143-151 s on Serilog, 195 s instead of
-346 s on System.IO.Abstractions, 255 s instead of 358 s on PalCalc and 569-640 s instead of 1,270-1,433 s on
-Newtonsoft.Json (8 frameworks).
+The table was measured when the host started fixing (phase 2). Against the default engine, from the parity runs (same
+machine, the two engines one after the other), `bro format` took 35-36 s instead of 116-118 s on CliFx, 22-29 s instead of
+60-71 s on error-or, 78-83 s instead of 130-136 s on Serilog, 141-158 s instead of 283-334 s on System.IO.Abstractions,
+221-255 s instead of 367-434 s on PalCalc and 489-629 s instead of 1,214-1,443 s on Newtonsoft.Json (8 frameworks). In phase 2's
+parity runs the host took 45, 36, 97, 195, 255 and 569-640 s; the checks now share the fixes' analysis and a command's
+runs keep their workspaces.
 
 PalCalc's runs on formatted code miss the target: each of its three configurations is a workspace of its own (load and
 compile, ~20-25 s each), and `bro check` formats a copy to tell kept findings apart, which loads them again.

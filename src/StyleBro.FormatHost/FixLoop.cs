@@ -13,16 +13,22 @@ using Microsoft.Extensions.Logging;
 namespace StyleBro.Host;
 
 /// <summary>
-/// The host's fix run (docs/proposals/format-speed.md, phase 2): dotnet format's formatters in its order, its own whitespace,
+/// The host's check and fix runs (docs/proposals/format-speed.md, phase 2): dotnet format's formatters in its order, its own whitespace,
 /// line ending, charset and import formatters as they are, and in place of its two analyzer formatters (code style, analyzer
 /// references) the same steps with three changes: the ids in a fixed order (<see cref="FixOrder"/>), each fixer called once
 /// per id, and the analysis before each id from <see cref="AnalysisCache"/>, so only the projects a fix changed (and the ones
 /// referencing them) are analyzed again. What it reports, which analyzers run, which diagnostics count and how a Fix All is
 /// applied stay dotnet format's (its FilterAnalyzersAsync, CodeAnalysisResult and SolutionCodeFixApplier, by reflection).
+/// A check (--verify-no-changes) runs the same formatters and the analyzer formatters' first analysis, as dotnet format does,
+/// from the same cache: the fix run after it, and the check after a run that changed files, analyze again only the projects
+/// whose content changed since.
 /// </summary>
 internal sealed class FixLoop(DotnetFormat format, AnalysisCache cache, Func<string, IDisposable> measure)
 {
-    /// <summary>Runs every formatter of <paramref name="options"/>' categories on <paramref name="documents"/> and returns the fixed solution.</summary>
+    /// <summary>
+    /// Runs every formatter of <paramref name="options"/>' categories on <paramref name="documents"/> and returns the fixed solution
+    /// (CodeFormatter.RunCodeFormattersAsync); a check's formatters only add what they would change to <paramref name="files"/>.
+    /// </summary>
     public async Task<Solution> RunAsync(Workspace workspace, Solution solution, ImmutableArray<DocumentId> documents, object options, ILogger logger, object files, CancellationToken cancellation)
     {
         var categories = Convert.ToInt32(DotnetFormat.Option<object>(options, "FixCategory"));
@@ -33,7 +39,7 @@ internal sealed class FixLoop(DotnetFormat format, AnalysisCache cache, Func<str
                 continue;
             }
 
-            using var phase = measure($"host: fix {(analyzers?.Name ?? formatter.GetType().Name).ToLowerInvariant()}");
+            using var phase = measure($"host: {(DotnetFormat.Option<bool>(options, "SaveFormattedFiles") ? "fix" : "check")} {(analyzers?.Name ?? formatter.GetType().Name).ToLowerInvariant()}");
             solution = analyzers is null
                 ? await format.RunFormatterAsync(formatter, workspace, solution, documents, options, logger, files, cancellation).ConfigureAwait(false)
                 : await this.AnalyzersAsync(analyzers, workspace, solution, documents, options, logger, files, cancellation).ConfigureAwait(false);
@@ -42,7 +48,7 @@ internal sealed class FixLoop(DotnetFormat format, AnalysisCache cache, Func<str
         return solution;
     }
 
-    // AnalyzerFormatter.FormatAsync, saving (the host checks with dotnet-format's own code).
+    // AnalyzerFormatter.FormatAsync: a check reports the first analysis, a fix run then fixes id by id.
     private async Task<Solution> AnalyzersAsync(DotnetFormat.AnalyzerParts parts, Workspace workspace, Solution solution, ImmutableArray<DocumentId> documents, object options, ILogger logger, object files, CancellationToken cancellation)
     {
         var (projectAnalyzersAndFixers, raw) = format.AnalyzersAndFixers(parts, workspace, solution, options, logger);
@@ -81,12 +87,13 @@ internal sealed class FixLoop(DotnetFormat format, AnalysisCache cache, Func<str
 
         var kept = found.Where(f => DotnetFormat.Accepts(options, f.Diagnostic.Id)).ToList();
         var level = DotnetFormat.Option<LogLevel>(options, "LogLevel");
+        var save = DotnetFormat.Option<bool>(options, "SaveFormattedFiles");
         foreach (var (_, diagnostic) in kept)
         {
             if (solution.GetDocument(diagnostic.Location.SourceTree) is { } document)
             {
                 var position = diagnostic.Location.GetMappedLineSpan().StartLinePosition;
-                if (level == LogLevel.Debug)
+                if (!save || level == LogLevel.Debug)
                 {
                     format.LogDiagnostic(logger, document, position, diagnostic, DotnetFormat.Option<bool>(options, "ChangesAreErrors"));
                 }
@@ -97,6 +104,13 @@ internal sealed class FixLoop(DotnetFormat format, AnalysisCache cache, Func<str
 
         var firstMs = watch.ElapsedMilliseconds;
         logger.LogTrace(format.Text("Complete_in_0_ms"), firstMs);
+        if (!save)
+        {
+            // A check reports what it found and fixes nothing.
+            logger.LogTrace(format.Text("Analysis_complete_in_0ms_"), watch.ElapsedMilliseconds);
+            return solution;
+        }
+
         logger.LogTrace(format.Text("Fixing_diagnostics"));
         var withIds = kept.GroupBy(k => k.Project.Id).ToDictionary(g => g.Key, g => g.Select(k => k.Diagnostic.Id).ToHashSet(StringComparer.Ordinal));
         foreach (var id in FixOrder.Of(kept.Select(k => k.Diagnostic.Id)))
@@ -156,17 +170,7 @@ internal sealed class FixLoop(DotnetFormat format, AnalysisCache cache, Func<str
             return [];
         }
 
-        if (await project.GetCompilationAsync(cancellation).ConfigureAwait(false) is not { } compilation)
-        {
-            return [];
-        }
-
-        var diagnostics = compilerIds.IsEmpty ? [] : compilation.GetDiagnostics(cancellation).Where(d => compilerIds.Contains(d.Id)).ToImmutableArray();
-        if (!analyzers.IsEmpty)
-        {
-            diagnostics = (await cache.GetAsync(compilation, project.AnalyzerOptions, analyzers, n => logger.LogDebug(format.Text("Running_0_analyzers_on_1"), n, project.Name), cancellation).ConfigureAwait(false)).AddRange(diagnostics);
-        }
-
+        var diagnostics = await cache.GetAsync(project, analyzers, compilerIds, n => logger.LogDebug(format.Text("Running_0_analyzers_on_1"), n, project.Name), cancellation).ConfigureAwait(false);
         return [.. diagnostics.Where(d => !d.IsSuppressed && d.Severity >= severity && d.Location.IsInSource && d.Location.SourceTree is { } tree && paths.Contains(tree.FilePath))];
     }
 

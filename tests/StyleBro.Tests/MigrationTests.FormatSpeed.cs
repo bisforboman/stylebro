@@ -7,6 +7,17 @@ namespace StyleBro.Tests;
 public sealed partial class MigrationTests
 {
     [Fact]
+    public void ARunsFiles_AreNamedByTheProcessAndTheirContent()
+    {
+        // --engine host keys a configuration's workspace by them: run 2 of a command found a new path and loaded it again.
+        var first = FormatCommand.RunFile("stylebro-format-", ".targets", "<Project />");
+        Assert.Equal(first, FormatCommand.RunFile("stylebro-format-", ".targets", "<Project />"));
+        Assert.NotEqual(first, FormatCommand.RunFile("stylebro-format-", ".targets", "<Project></Project>"));
+        Assert.StartsWith(Path.Combine(Path.GetTempPath(), $"stylebro-format-{Environment.ProcessId}-"), first, StringComparison.Ordinal);
+        Assert.EndsWith(".targets", first, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Format_SkipsTheRestore_OnlyWhenItsOutputIsCurrent()
     {
         // PalCalc: 'dotnet restore' of an already restored solution took 17.5 s before every format and verify.
