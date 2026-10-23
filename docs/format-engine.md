@@ -8,6 +8,7 @@ framework of a multi-targeted project in it, and every check and fix of the comm
 ```
 bro check --engine host
 bro format --engine host
+bro preview format --engine host
 ```
 
 It is experimental: the default stays `dotnet format` (`--engine dotnet-format`) until the host has given the same results

@@ -50,6 +50,9 @@ internal static partial class FormatCommand
         return value;
     }
 
+    /// <summary>The engine this command uses (<see cref="UseEngine"/>).</summary>
+    public static string CurrentEngine => Engine.Value ?? DotnetFormatEngine;
+
     /// <summary>Uses <paramref name="engine"/> for this command (an async-local, like <see cref="PhaseTimes"/>) until disposed.</summary>
     public static IDisposable UseEngine(string engine)
     {
