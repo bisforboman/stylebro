@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 
@@ -23,24 +24,8 @@ public static class Views
             return solution;
         }
 
-        var byPath = solution.Projects.Where(p => p.FilePath is not null).ToLookup(p => p.FilePath!, StringComparer.OrdinalIgnoreCase);
-        var roots = new List<Project>();
-        var frameworks = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var selection in selections)
-        {
-            var bar = selection.LastIndexOf('|');
-            var (path, framework) = bar < 0 ? (selection, string.Empty) : (selection.Substring(0, bar), selection.Substring(bar + 1));
-            var instances = byPath[path].ToList();
-            var chosen = framework.Length == 0 || (instances.Count == 1 && FrameworkOf(instances[0].Name) is null)
-                ? instances
-                : instances.Where(p => string.Equals(FrameworkOf(p.Name), framework, StringComparison.OrdinalIgnoreCase)).ToList();
-            roots.AddRange(chosen);
-            if (framework.Length > 0)
-            {
-                frameworks.Add(framework);
-            }
-        }
-
+        var roots = RootsOf(solution, selections);
+        var frameworks = FrameworksOf(selections);
         var keep = new HashSet<ProjectId>();
         var stack = new Stack<Project>(roots);
         while (stack.Count > 0)
@@ -71,6 +56,25 @@ public static class Views
         }
 
         return view;
+    }
+
+    /// <summary>
+    /// The documents of <paramref name="documents"/> (what dotnet-format would format in <paramref name="view"/>) a run checks
+    /// and fixes: not those of an instance only a reference brought in when the view has an instance of the same project the
+    /// run names. A 'dotnet format' run of one framework loads one instance per project; with SmartFormat's net462 run the
+    /// view also had SmartFormat.Extensions.Time(netstandard2.0), whose copy of a file the whitespace formatter left as it
+    /// was, and the analyzers reported that copy's findings too, at the positions before formatting (trial 47).
+    /// </summary>
+    public static ImmutableArray<DocumentId> Formatted(Solution view, ImmutableArray<DocumentId> documents, IReadOnlyList<string> selections)
+    {
+        if (selections.Count == 0)
+        {
+            return documents;
+        }
+
+        var roots = RootsOf(view, selections).Select(p => p.Id).ToHashSet();
+        var named = view.Projects.Where(p => roots.Contains(p.Id) && p.FilePath is not null).Select(p => p.FilePath!).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        return documents.Where(d => roots.Contains(d.ProjectId) || view.GetProject(d.ProjectId)?.FilePath is not { } path || !named.Contains(path)).ToImmutableArray();
     }
 
     /// <summary>The framework of a project MSBuildWorkspace loaded once per framework ('Lib(net8.0)'), else null.</summary>
@@ -106,6 +110,24 @@ public static class Views
     /// <summary>The frameworks <paramref name="selections"/> ('path|framework') name.</summary>
     public static HashSet<string> FrameworksOf(IEnumerable<string> selections) =>
         new(selections.Select(s => s.Substring(s.LastIndexOf('|') + 1)).Where(f => f.Length > 0 && !f.Contains('/') && !f.Contains('\\')), StringComparer.OrdinalIgnoreCase);
+
+    // The instances the selections ('path|framework') name.
+    private static List<Project> RootsOf(Solution solution, IReadOnlyList<string> selections)
+    {
+        var byPath = solution.Projects.Where(p => p.FilePath is not null).ToLookup(p => p.FilePath!, StringComparer.OrdinalIgnoreCase);
+        var roots = new List<Project>();
+        foreach (var selection in selections)
+        {
+            var bar = selection.LastIndexOf('|');
+            var (path, framework) = bar < 0 ? (selection, string.Empty) : (selection.Substring(0, bar), selection.Substring(bar + 1));
+            var instances = byPath[path].ToList();
+            roots.AddRange(framework.Length == 0 || (instances.Count == 1 && FrameworkOf(instances[0].Name) is null)
+                ? instances
+                : instances.Where(p => string.Equals(FrameworkOf(p.Name), framework, StringComparison.OrdinalIgnoreCase)));
+        }
+
+        return roots;
+    }
 
     // The projects with an instance named without a framework next to instances named with one: a framework's that didn't load.
     private static List<string> Failed(Solution workspace) =>

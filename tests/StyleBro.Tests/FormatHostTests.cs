@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
@@ -91,6 +92,36 @@ public sealed class FormatHostTests : IDisposable
         Assert.Equal([lib8], net8.ProjectIds);
         Assert.Same(solution, Views.Of(solution, [], names));
         Assert.Contains(other, solution.ProjectIds);
+    }
+
+    [Fact]
+    public void AView_FormatsOneInstancePerProject_TheOneTheRunNames()
+    {
+        // SmartFormat (trial 47): the net462 run's view also had Time(netstandard2.0), through a reference, and the analyzers
+        // reported its copy of a file the whitespace formatter had left unformatted: findings a 'dotnet format' run doesn't have.
+        using var workspace = new AdhocWorkspace();
+        var solution = workspace.CurrentSolution;
+        (ProjectId Project, DocumentId Document) Add(string name, string path, params ProjectId[] references)
+        {
+            var id = ProjectId.CreateNewId(name);
+            solution = solution.AddProject(ProjectInfo.Create(id, VersionStamp.Default, name, name, LanguageNames.CSharp, filePath: path, projectReferences: references.Select(r => new ProjectReference(r))));
+            var document = DocumentId.CreateNewId(id);
+            solution = solution.AddDocument(document, "A.cs", SourceText.From("class A { }"), filePath: Path.Combine(Path.GetDirectoryName(path)!, "A.cs"));
+            return (id, document);
+        }
+
+        var time462 = Add("Time(net462)", "/r/Time/Time.csproj");
+        var time20 = Add("Time(netstandard2.0)", "/r/Time/Time.csproj");
+        var core20 = Add("Core(netstandard2.0)", "/r/Core/Core.csproj");
+        var net462 = Add("Net(net462)", "/r/Net/Net.csproj", time20.Project, core20.Project);
+        string[] selections = ["/r/Time/Time.csproj|net462", "/r/Net/Net.csproj|net462"];
+        var view = Views.Of(solution, selections, []);
+        ImmutableArray<DocumentId> all = [.. view.Projects.SelectMany(p => p.DocumentIds)];
+
+        // Time's netstandard2.0 instance stays for Net's compilation, unformatted; Core, which no run names here, is formatted.
+        Assert.Contains(time20.Project, view.ProjectIds);
+        Assert.Equal(new HashSet<DocumentId> { time462.Document, core20.Document, net462.Document }, Views.Formatted(view, all, selections).ToHashSet());
+        Assert.Equal(all, Views.Formatted(view, all, []));
     }
 
     [Fact]

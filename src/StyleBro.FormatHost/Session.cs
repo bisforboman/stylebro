@@ -116,6 +116,7 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
         {
             Environment.CurrentDirectory = folder;
             formattable = await this.format.FormattableAsync(view, projectPath, options, logger, CancellationToken.None).ConfigureAwait(false);
+            formattable = (formattable.Count, Views.Formatted(view, formattable.Documents, selections));
         }
         finally
         {
