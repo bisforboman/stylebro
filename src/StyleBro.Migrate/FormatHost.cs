@@ -171,6 +171,21 @@ internal sealed class FormatHost : IDisposable
         !File.Exists(Path.Combine(formatFolder, name + ".dll")) && File.Exists(Path.Combine(toolFolder, name + ".dll"));
 
     /// <summary>
+    /// Whether the shared framework in <paramref name="frameworkFolder"/> has <paramref name="name"/> at the version of the
+    /// copy in <paramref name="formatFolder"/> or newer, as the .NET host decides between an app's copy and the framework's.
+    /// The default context then hands out the framework's, the one the framework's other assemblies use: SDK 8's
+    /// dotnet-format ships System.Collections.Immutable 8.0, and on .NET 10 the host loaded it next to the framework's
+    /// System.Reflection.Metadata 10.0, whose ImmutableArray is the framework's, so Roslyn's MEF parts failed to load (trial 49,
+    /// Cocona's global.json selects SDK 8).
+    /// </summary>
+    public static bool FromFramework(string name, string formatFolder, string frameworkFolder)
+    {
+        var framework = Path.Combine(frameworkFolder, name + ".dll");
+        var own = Path.Combine(formatFolder, name + ".dll");
+        return File.Exists(framework) && File.Exists(own) && AssemblyName.GetAssemblyName(framework).Version >= AssemblyName.GetAssemblyName(own).Version;
+    }
+
+    /// <summary>
     /// Runs 'dotnet <paramref name="arguments"/>' (a 'format' check or fix run) in the host, or returns null for a command it
     /// doesn't run (bro then starts it). <paramref name="environment"/>: what the child process would get that changes how
     /// MSBuild loads the projects; <paramref name="variables"/>: what else it would get, which the fixers read;

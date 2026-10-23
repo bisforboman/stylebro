@@ -255,6 +255,29 @@ public sealed class FormatHostTests : IDisposable
         Assert.False(FormatHost.Refuses("System.Runtime", sdk, tool));
     }
 
+    // Trial 49 (Cocona, SDK 8 on .NET 10): SDK 8's dotnet-format ships System.Collections.Immutable 8.0, the framework has 10.0.
+    [Fact]
+    public void TheSdkContext_TakesTheFrameworksCopy_UnlessTheSdksIsNewer()
+    {
+        var root = this.NewFolder();
+        var sdk = Directory.CreateDirectory(Path.Combine(root, "sdk")).FullName;
+        var framework = Directory.CreateDirectory(Path.Combine(root, "framework")).FullName;
+        EmitAssembly(sdk, "Shared.Old", "8.0.0.0");
+        EmitAssembly(framework, "Shared.Old", "10.0.0.0");
+        EmitAssembly(sdk, "Shared.Same", "9.0.0.0");
+        EmitAssembly(framework, "Shared.Same", "9.0.0.0");
+        EmitAssembly(sdk, "Shared.New", "10.0.0.0");
+        EmitAssembly(framework, "Shared.New", "8.0.0.0");
+        EmitAssembly(sdk, "SdkOnly", "1.0.0.0");
+        EmitAssembly(framework, "FrameworkOnly", "1.0.0.0");
+
+        Assert.True(FormatHost.FromFramework("Shared.Old", sdk, framework));
+        Assert.True(FormatHost.FromFramework("Shared.Same", sdk, framework));
+        Assert.False(FormatHost.FromFramework("Shared.New", sdk, framework));
+        Assert.False(FormatHost.FromFramework("SdkOnly", sdk, framework));
+        Assert.False(FormatHost.FromFramework("FrameworkOnly", sdk, framework));
+    }
+
     // Against the SDK on this machine: the host's check of a multi-targeted solution says what 'dotnet format' says, and a
     // framework's view sees that framework's '#if' code only.
     [Fact]
@@ -352,6 +375,19 @@ public sealed class FormatHostTests : IDisposable
             {
             }
         }
+    }
+
+    // An empty assembly <name>.dll with that assembly version.
+    private static void EmitAssembly(string folder, string name, string version)
+    {
+        var tree = Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText($"[assembly: System.Reflection.AssemblyVersion(\"{version}\")]");
+        var compilation = Microsoft.CodeAnalysis.CSharp.CSharpCompilation.Create(
+            name,
+            [tree],
+            [MetadataReference.CreateFromFile(typeof(object).Assembly.Location)],
+            new Microsoft.CodeAnalysis.CSharp.CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+        var result = compilation.Emit(Path.Combine(folder, name + ".dll"));
+        Assert.True(result.Success, string.Join("\n", result.Diagnostics));
     }
 
     private static void Write(string root, string path, string text)
