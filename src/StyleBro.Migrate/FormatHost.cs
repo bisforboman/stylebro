@@ -132,11 +132,20 @@ internal sealed class FormatHost : IDisposable
         var version = FormatCommand.Capture(root, "--version").Trim();
         var sdks = FormatCommand.Capture(root, "--list-sdks");
         var folder = SdkFolder(version, sdks) is { } sdk ? Path.Combine(sdk, "DotnetTools", "dotnet-format") : null;
-        reason = folder is null ? $"no SDK folder for '{version}' in 'dotnet --list-sdks'"
-            : !File.Exists(Path.Combine(folder, "dotnet-format.dll")) ? $"the SDK {version} has no {folder}/dotnet-format.dll"
-            : string.Empty;
+        reason = folder is null ? $"no SDK folder for '{version}' in 'dotnet --list-sdks'" : FolderProblem(folder, version) ?? string.Empty;
         return reason.Length == 0 ? folder : null;
     }
+
+    /// <summary>
+    /// Why the host can't run the dotnet-format in <paramref name="folder"/> (SDK <paramref name="version"/>), or null. The
+    /// host loads the projects with that folder's MSBuild workspace and its own Microsoft.Build; SDK 8's dotnet-format has
+    /// none (it finds the SDK's MSBuild through MSBuildLocator), and every host run crashed there (trial 49, Cocona's
+    /// global.json selects SDK 8).
+    /// </summary>
+    public static string? FolderProblem(string folder, string version) =>
+        !File.Exists(Path.Combine(folder, "dotnet-format.dll")) ? $"the SDK {version} has no {folder}/dotnet-format.dll"
+        : !File.Exists(Path.Combine(folder, "Microsoft.Build.dll")) ? $"the SDK {version}'s dotnet-format loads MSBuild through MSBuildLocator, which the host doesn't support"
+        : null;
 
     /// <summary>The folder of SDK <paramref name="version"/> in 'dotnet --list-sdks' output ('10.0.113 [/usr/lib/dotnet/sdk]'), or null.</summary>
     public static string? SdkFolder(string version, string listSdks) =>

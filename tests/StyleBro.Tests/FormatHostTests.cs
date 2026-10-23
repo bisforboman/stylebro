@@ -278,6 +278,19 @@ public sealed class FormatHostTests : IDisposable
         Assert.False(FormatHost.FromFramework("FrameworkOnly", sdk, framework));
     }
 
+    // Trial 49 (Cocona): SDK 8's dotnet-format has no Microsoft.Build.dll of its own (MSBuildLocator): the host falls back.
+    [Fact]
+    public void AnSdkWhoseDotnetFormatUsesMSBuildLocator_IsNotForTheHost()
+    {
+        var folder = this.NewFolder();
+        Assert.Contains("has no", FormatHost.FolderProblem(folder, "8.0.132"), StringComparison.Ordinal);
+        File.WriteAllText(Path.Combine(folder, "dotnet-format.dll"), string.Empty);
+        File.WriteAllText(Path.Combine(folder, "Microsoft.Build.Locator.dll"), string.Empty);
+        Assert.Equal("the SDK 8.0.132's dotnet-format loads MSBuild through MSBuildLocator, which the host doesn't support", FormatHost.FolderProblem(folder, "8.0.132"));
+        File.WriteAllText(Path.Combine(folder, "Microsoft.Build.dll"), string.Empty);
+        Assert.Null(FormatHost.FolderProblem(folder, "10.0.113"));
+    }
+
     // The load context itself: an SDK folder's older copy of a framework assembly gives way to the framework's.
     [Fact]
     public void TheSdkContext_LoadsTheFrameworksCopy_OfAnOlderFrameworkAssembly()

@@ -23,7 +23,8 @@ own copy of Roslyn, so nothing in the tool decides which C# version or analyzers
 
 That SDK's `dotnet format` needs that SDK's .NET runtime. When the command starts on an older runtime (`bro` targets
 .NET 8, which it prefers when it is installed), it runs itself again once on the newest installed runtime. When the host
-can't run (no runtime new enough, an SDK without `dotnet format`), the command says so and uses `dotnet format`:
+can't run (no runtime new enough, an SDK without `dotnet format`, or a .NET 8 SDK, whose `dotnet format` finds MSBuild
+through MSBuildLocator), the command says so and uses `dotnet format`:
 
 ```
 Engine: the host can't run here (the SDK's dotnet-format needs .NET 10, and 'bro' runs on .NET 8), so 'dotnet format' runs the checks and fixes.
