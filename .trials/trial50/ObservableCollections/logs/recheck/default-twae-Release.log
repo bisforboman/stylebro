@@ -1,0 +1,39 @@
+  Determining projects to restore...
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/stylebro/.trials/trial50/ObservableCollections/r-default/sandbox/BlazorApp/BlazorApp.csproj]
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0-windows' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/stylebro/.trials/trial50/ObservableCollections/r-default/sandbox/WpfApp/WpfApp.csproj]
+  Restored /home/user/stylebro/.trials/trial50/ObservableCollections/r-default/sandbox/BlazorApp/BlazorApp.csproj (in 390 ms).
+  Restored /home/user/stylebro/.trials/trial50/ObservableCollections/r-default/sandbox/AvaloniaApp/AvaloniaApp.csproj (in 394 ms).
+  Restored /home/user/stylebro/.trials/trial50/ObservableCollections/r-default/src/ObservableCollections/ObservableCollections.csproj (in 9 ms).
+  Restored /home/user/stylebro/.trials/trial50/ObservableCollections/r-default/tests/ObservableCollections.R3.Tests/ObservableCollections.R3.Tests.csproj (in 426 ms).
+  Restored /home/user/stylebro/.trials/trial50/ObservableCollections/r-default/src/ObservableCollections.R3/ObservableCollections.R3.csproj (in 15 ms).
+  Restored /home/user/stylebro/.trials/trial50/ObservableCollections/r-default/sandbox/WpfApp/WpfApp.csproj (in 5 ms).
+  Restored /home/user/stylebro/.trials/trial50/ObservableCollections/r-default/sandbox/ConsoleApp/ConsoleApp.csproj (in 3 ms).
+  Restored /home/user/stylebro/.trials/trial50/ObservableCollections/r-default/tests/ObservableCollections.Tests/ObservableCollections.Tests.csproj (in 435 ms).
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/stylebro/.trials/trial50/ObservableCollections/r-default/sandbox/BlazorApp/BlazorApp.csproj]
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0-windows' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/stylebro/.trials/trial50/ObservableCollections/r-default/sandbox/WpfApp/WpfApp.csproj]
+  ObservableCollections -> /home/user/stylebro/.trials/trial50/ObservableCollections/r-default/src/ObservableCollections/bin/Release/net8.0/ObservableCollections.dll
+  ObservableCollections -> /home/user/stylebro/.trials/trial50/ObservableCollections/r-default/src/ObservableCollections/bin/Release/netstandard2.0/ObservableCollections.dll
+  ObservableCollections -> /home/user/stylebro/.trials/trial50/ObservableCollections/r-default/src/ObservableCollections/bin/Release/net6.0/ObservableCollections.dll
+  ObservableCollections.Tests -> /home/user/stylebro/.trials/trial50/ObservableCollections/r-default/tests/ObservableCollections.Tests/bin/Release/net6.0/ObservableCollections.Tests.dll
+  ObservableCollections -> /home/user/stylebro/.trials/trial50/ObservableCollections/r-default/src/ObservableCollections/bin/Release/netstandard2.1/ObservableCollections.dll
+  ObservableCollections.R3 -> /home/user/stylebro/.trials/trial50/ObservableCollections/r-default/src/ObservableCollections.R3/bin/Release/net6.0/ObservableCollections.R3.dll
+  BlazorApp -> /home/user/stylebro/.trials/trial50/ObservableCollections/r-default/sandbox/BlazorApp/bin/Release/net6.0/BlazorApp.dll
+  WpfApp -> /home/user/stylebro/.trials/trial50/ObservableCollections/r-default/sandbox/WpfApp/bin/Release/net6.0-windows/WpfApp.dll
+  ObservableCollections.R3 -> /home/user/stylebro/.trials/trial50/ObservableCollections/r-default/src/ObservableCollections.R3/bin/Release/net8.0/ObservableCollections.R3.dll
+  ObservableCollections.R3 -> /home/user/stylebro/.trials/trial50/ObservableCollections/r-default/src/ObservableCollections.R3/bin/Release/netstandard2.1/ObservableCollections.R3.dll
+  ObservableCollections.R3 -> /home/user/stylebro/.trials/trial50/ObservableCollections/r-default/src/ObservableCollections.R3/bin/Release/netstandard2.0/ObservableCollections.R3.dll
+  ObservableCollections.R3.Tests -> /home/user/stylebro/.trials/trial50/ObservableCollections/r-default/tests/ObservableCollections.R3.Tests/bin/Release/net8.0/ObservableCollections.R3.Tests.dll
+  ConsoleApp -> /home/user/stylebro/.trials/trial50/ObservableCollections/r-default/sandbox/ConsoleApp/bin/Release/net8.0/ConsoleApp.dll
+  AvaloniaApp -> /home/user/stylebro/.trials/trial50/ObservableCollections/r-default/sandbox/AvaloniaApp/bin/Release/net8.0/AvaloniaApp.dll
+
+Build succeeded.
+
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/stylebro/.trials/trial50/ObservableCollections/r-default/sandbox/BlazorApp/BlazorApp.csproj]
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0-windows' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/stylebro/.trials/trial50/ObservableCollections/r-default/sandbox/WpfApp/WpfApp.csproj]
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/stylebro/.trials/trial50/ObservableCollections/r-default/sandbox/BlazorApp/BlazorApp.csproj]
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0-windows' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/stylebro/.trials/trial50/ObservableCollections/r-default/sandbox/WpfApp/WpfApp.csproj]
+    4 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:07.32
+exit 0 time 7.551188286

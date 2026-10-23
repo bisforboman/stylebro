@@ -141,3 +141,35 @@ Logs: `ObservableCollections/logs/host-1b-preview-format.log`, `host-preview-dif
   (47 of 63), both explained in its notes.
 
 Logs: `.trials/trial50/ObservableCollections/logs/` (`base-*`, `default-*`, `host-*`, `default-format.diff`).
+
+## Re-check (fixer's 1a25ead, PR #294)
+
+- StyleBro `claude/trial-50` at `1a25ead`, packed as `0.8.0-trial50.2`, `dotnet tool update -g StyleBro.Tool --version 0.8.0-trial50.2`.
+- Fresh clones `r-default` and `r-host` of `base` at 8ed7ad87, one engine after the other, scripted in
+  `ObservableCollections/recheck.sh <default|host>` (host passes `--engine host` to every format/check/preview format command).
+  Logs: `ObservableCollections/logs/recheck/`.
+
+| Step | Default: exit, time | Host: exit, time |
+|---|---|---|
+| `bro preview init` | 0, 118 s (45 files, clean after 1 run) | 0, 90 s (same) |
+| `bro init --write` (+ package reference 0.8.0-trial50.2, commit) | 0, 5 s | 0, 5 s |
+| `bro preview format [--engine host] --diff=<file>` (init'd tree) | 0, 92 s, 2,299-line patch | 0, 44 s, the same patch (`cmp`) |
+| `bro format [--engine host] --diff=<file>` (init'd tree) | 0, 88 s, the same patch | 0, 44 s, the same patch |
+| `bro format [--engine host]` | 0, 113 s: run 1 45 files, run 2 clean | 0, 47 s: the same |
+| `bro format --once` again | 0: 0 files changed | 0: 0 files changed |
+| `bro check` | 0, Clean | 0, Clean |
+| `bro check --json` | 0, `clean: true, exitCode: 0` | 0, identical JSON |
+| `bro check --build` | 0, Clean (Debug, Release: no findings, no new errors) | 0, the same |
+| `bro check --build --json` | 0 | 0, identical JSON |
+| `bro preview format` / `bro format --diff` (formatted tree) | 0 / 0, empty patches | 0 / 0, empty patches |
+| TWAE Debug / Release | 0 errors, 4 NETSDK1138 | 0 errors, 4 NETSDK1138 |
+| Tests Debug / Release | 24 + 10 passed | 24 + 10 passed |
+
+- **Finding 1 fixed:** `bro preview format --engine host` and `bro format --engine host --diff` now exit 0. They take half the
+  default's time (44 s vs 88-92 s), so the copy is formatted by the host. Their patch is identical to the default engine's.
+  Applied to the init'd tree (`git apply` on HEAD~1), the patch gives exactly the formatted tree, in both clones. On the
+  formatted tree it is empty.
+- The trees after format are identical between the engines, and identical to round 1 apart from the package version in
+  Directory.Build.props. Format's output is the same apart from the order of the `Checked` lines. The `Not checked:` lines are
+  the same single IDE0049 line in all 18 logs. The `--json` output is identical, and every exit code is 0.
+- The builds and tests match the untouched code. Format converges in one changing run. No new findings.

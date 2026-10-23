@@ -1,0 +1,2299 @@
+diff --git a/sandbox/AvaloniaApp/MainWindow.axaml.cs b/sandbox/AvaloniaApp/MainWindow.axaml.cs
+index 92d9326..8c9338d 100644
+--- a/sandbox/AvaloniaApp/MainWindow.axaml.cs
++++ b/sandbox/AvaloniaApp/MainWindow.axaml.cs
+@@ -17,7 +17,6 @@ namespace AvaloniaApp
+             InitializeComponent();
+ 
+             this.DataContext = new ViewModel();
+-
+         }
+     }
+ 
+@@ -43,11 +42,9 @@ namespace AvaloniaApp
+             var view = observableList.CreateView(x => x);
+             ItemsView = view.ToNotifyCollectionChanged(SynchronizationContextCollectionEventDispatcher.Current);
+ 
+-
+             // check for optimize list
+             // ItemsView = observableList.ToNotifyCollectionChanged(SynchronizationContextCollectionEventDispatcher.Current);
+ 
+-
+             AddCommand.Subscribe(_ =>
+             {
+                 ThreadPool.QueueUserWorkItem(_ =>
+@@ -79,7 +76,6 @@ namespace AvaloniaApp
+                 observableList.Clear();
+             });
+ 
+-
+             ReverseCommand.Subscribe(_ =>
+             {
+                 observableList.Reverse();
+diff --git a/sandbox/AvaloniaApp/Program.cs b/sandbox/AvaloniaApp/Program.cs
+index 146540a..1733893 100644
+--- a/sandbox/AvaloniaApp/Program.cs
++++ b/sandbox/AvaloniaApp/Program.cs
+@@ -13,8 +13,8 @@ namespace AvaloniaApp
+             .StartWithClassicDesktopLifetime(args);
+ 
+         // Avalonia configuration, don't remove; also used by visual designer.
+-        public static AppBuilder BuildAvaloniaApp()
+-            => AppBuilder.Configure<App>()
++        public static AppBuilder BuildAvaloniaApp() =>
++            AppBuilder.Configure<App>()
+                 .UsePlatformDetect()
+                 .WithInterFont()
+                 .LogToTrace()
+diff --git a/sandbox/BlazorApp/Data/WeatherForecastService.cs b/sandbox/BlazorApp/Data/WeatherForecastService.cs
+index 922ff28..334f35b 100644
+--- a/sandbox/BlazorApp/Data/WeatherForecastService.cs
++++ b/sandbox/BlazorApp/Data/WeatherForecastService.cs
+@@ -13,7 +13,7 @@ namespace BlazorApp.Data
+ 
+         public Task<WeatherForecast[]> GetForecastAsync(DateTime startDate)
+         {
+-            return Task.FromResult(Enumerable.Range(1, 5).Select(index => new WeatherForecast
++            return Task.FromResult(Enumerable.Range(1, 5).Select(index => new WeatherForecast()
+             {
+                 Date = startDate.AddDays(index),
+                 TemperatureC = Random.Shared.Next(-20, 55),
+diff --git a/sandbox/BlazorApp/Pages/Error.cshtml.cs b/sandbox/BlazorApp/Pages/Error.cshtml.cs
+index 46765b3..ead936d 100644
+--- a/sandbox/BlazorApp/Pages/Error.cshtml.cs
++++ b/sandbox/BlazorApp/Pages/Error.cshtml.cs
+@@ -17,11 +17,11 @@ namespace BlazorApp.Pages
+ 
+         public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+ 
+-        private readonly ILogger<ErrorModel> _logger;
++        private readonly ILogger<ErrorModel> logger;
+ 
+         public ErrorModel(ILogger<ErrorModel> logger)
+         {
+-            _logger = logger;
++            this.logger = logger;
+         }
+ 
+         public void OnGet()
+diff --git a/sandbox/BlazorApp/Pages/Index.razor.cs b/sandbox/BlazorApp/Pages/Index.razor.cs
+index 29188e2..ee3e31e 100644
+--- a/sandbox/BlazorApp/Pages/Index.razor.cs
++++ b/sandbox/BlazorApp/Pages/Index.razor.cs
+@@ -6,7 +6,9 @@ namespace BlazorApp.Pages;
+ public partial class Index : IDisposable
+ {
+     ObservableList<int> list;
++
+     public ISynchronizedView<int, int> ItemsView { get; set; }
++
+     int count = 99;
+ 
+     protected override void OnInitialized()
+diff --git a/sandbox/ConsoleApp/Program.cs b/sandbox/ConsoleApp/Program.cs
+index d506925..9ac9f29 100644
+--- a/sandbox/ConsoleApp/Program.cs
++++ b/sandbox/ConsoleApp/Program.cs
+@@ -1,18 +1,18 @@
+-using System;
+-using System.Collections.Specialized;
+-using R3;
+-using System.Linq;
+ using ObservableCollections;
++using R3;
++using System;
+ using System.Collections;
+ using System.Collections.Generic;
+-using System.Threading.Tasks.Sources;
++using System.Collections.Specialized;
++using System.Linq;
+ using System.Reflection.Emit;
++using System.Threading.Tasks.Sources;
+ 
+ var list = new ObservableList<Person>()
+ {
+     new (){ Age = 10, Name = "John" },
+     new (){ Age = 22, Name = "Jeyne" },
+-    new (){ Age = 30, Name = "Mike" },
++    new (){ Age = 30, Name = "Mike" }
+ };
+ var view = list.CreateWritableView(x => x.Name);
+ view.AttachFilter(x => x.Age >= 20);
+@@ -35,11 +35,10 @@ var bindable = view.ToWritableNotifyCollectionChanged((string? newView, Person o
+     else
+     {
+         // default setValue == false is Add operation
+-        return new Person { Age = null, Name = newView };
++        return new Person() { Age = null, Name = newView };
+     }
+ });
+ 
+-
+ list.Clear();
+ 
+ list.Add(new() { Age = 99, Name = "tako" });
+@@ -65,41 +64,41 @@ public class Person
+ }
+ 
+ 
+-//var buffer = new ObservableFixedSizeRingBuffer<int>(5);
++// var buffer = new ObservableFixedSizeRingBuffer<int>(5);
+ 
+-//var view = buffer.CreateView(value => value);
+-//view.AttachFilter(value => value % 2 == 1); // when filtered, mismatch...!
++// var view = buffer.CreateView(value => value);
++// view.AttachFilter(value => value % 2 == 1); // when filtered, mismatch...!
+ 
+ ////{
+ //// INotifyCollectionChangedSynchronizedViewList created from ISynchronizedView with a filter.
+-//var collection = view.ToNotifyCollectionChanged();
++// var collection = view.ToNotifyCollectionChanged();
+ 
+ //// Not disposed here.
+ ////}
+ 
+-//buffer.AddFirst(1);
+-//buffer.AddFirst(1);
+-//buffer.AddFirst(2);
+-//buffer.AddFirst(3);
+-//buffer.AddFirst(5);
+-//buffer.AddFirst(8); // Argument out of range
+-//buffer.AddFirst(13);
++// buffer.AddFirst(1);
++// buffer.AddFirst(1);
++// buffer.AddFirst(2);
++// buffer.AddFirst(3);
++// buffer.AddFirst(5);
++// buffer.AddFirst(8); // Argument out of range
++// buffer.AddFirst(13);
+ 
+-//foreach (var item in collection)
+-//{
++// foreach (var item in collection)
++// {
+ //    Console.WriteLine(item);
+-//}
++// }
+ 
+-//Console.WriteLine("---");
++// Console.WriteLine("---");
+ 
+-//foreach (var item in view)
+-//{
++// foreach (var item in view)
++// {
+ //    Console.WriteLine(item);
+-//}
++// }
+ 
+-//Console.WriteLine("---");
++// Console.WriteLine("---");
+ 
+-//foreach (var item in buffer)
+-//{
++// foreach (var item in buffer)
++// {
+ //    Console.WriteLine(item);
+-//}
+\ No newline at end of file
++// }
+\ No newline at end of file
+diff --git a/sandbox/WpfApp/AssemblyInfo.cs b/sandbox/WpfApp/AssemblyInfo.cs
+index 8b5504e..86a5ac4 100644
+--- a/sandbox/WpfApp/AssemblyInfo.cs
++++ b/sandbox/WpfApp/AssemblyInfo.cs
+@@ -1,10 +1,10 @@
+ using System.Windows;
+ 
+ [assembly: ThemeInfo(
+-    ResourceDictionaryLocation.None, //where theme specific resource dictionaries are located
+-                                     //(used if a resource is not found in the page,
++    ResourceDictionaryLocation.None, // where theme specific resource dictionaries are located
++                                     // (used if a resource is not found in the page,
+                                      // or application resource dictionaries)
+-    ResourceDictionaryLocation.SourceAssembly //where the generic resource dictionary is located
+-                                              //(used if a resource is not found in the page,
++    ResourceDictionaryLocation.SourceAssembly // where the generic resource dictionary is located
++                                              // (used if a resource is not found in the page,
+                                               // app, or any theme specific resource dictionaries)
+ )]
+diff --git a/sandbox/WpfApp/MainWindow.xaml.cs b/sandbox/WpfApp/MainWindow.xaml.cs
+index 519cdd4..b8b544d 100644
+--- a/sandbox/WpfApp/MainWindow.xaml.cs
++++ b/sandbox/WpfApp/MainWindow.xaml.cs
+@@ -27,17 +27,13 @@ namespace WpfApp
+     /// </summary>
+     public partial class MainWindow : Window
+     {
+-        //ObservableList<int> list;
+-        //public INotifyCollectionChangedSynchronizedView<int> ItemsView { get; set; }
+-
+-
+-
++        // ObservableList<int> list;
++        // public INotifyCollectionChangedSynchronizedView<int> ItemsView { get; set; }
+ 
+         public MainWindow()
+         {
+             InitializeComponent();
+ 
+-
+             R3.WpfProviderInitializer.SetDefaultObservableSystem(x =>
+             {
+                 Trace.WriteLine(x);
+@@ -47,29 +43,27 @@ namespace WpfApp
+ 
+             // Dispatcher.BeginInvoke(
+ 
++            // list = new ObservableList<int>();
++            // list.AddRange(new[] { 1, 10, 188 });
++            // ItemsView = list.CreateSortedView(x => x, x => x, comparer: Comparer<int>.Default).ToNotifyCollectionChanged();
+ 
+-            //list = new ObservableList<int>();
+-            //list.AddRange(new[] { 1, 10, 188 });
+-            //ItemsView = list.CreateSortedView(x => x, x => x, comparer: Comparer<int>.Default).ToNotifyCollectionChanged();
+-
+-
+-            //BindingOperations.EnableCollectionSynchronization(ItemsView, new object());
++            // BindingOperations.EnableCollectionSynchronization(ItemsView, new object());
+         }
+ 
+-        //int adder = 99;
++        // int adder = 99;
+ 
+-        //private void Button_Click(object sender, RoutedEventArgs e)
+-        //{
++        // private void Button_Click(object sender, RoutedEventArgs e)
++        // {
+         //    ThreadPool.QueueUserWorkItem(_ =>
+         //    {
+         //        list.Add(adder++);
+         //    });
+-        //}
++        // }
+ 
+-        //protected override void OnClosed(EventArgs e)
+-        //{
++        // protected override void OnClosed(EventArgs e)
++        // {
+         //    ItemsView.Dispose();
+-        //}
++        // }
+     }
+ 
+     public class ViewModel
+@@ -88,8 +82,10 @@ namespace WpfApp
+         public ReactiveCommand<Unit> ResetFilterCommand { get; } = new ReactiveCommand<Unit>();
+ 
+         private ObservableList<Person> SourceList { get; } = [];
++
+         private IWritableSynchronizedView<Person, Person> writableFilter;
+         private ISynchronizedView<Person, Person> notWritableFilter;
++
+         public NotifyCollectionChangedSynchronizedViewList<Person> NotWritableNonFilterView { get; }
+         public NotifyCollectionChangedSynchronizedViewList<Person> NotWritableFilterView { get; }
+         public NotifyCollectionChangedSynchronizedViewList<Person> WritableNonFilterPersonView { get; }
+@@ -105,13 +101,13 @@ namespace WpfApp
+             observableList.Add(2);
+ 
+             var view = observableList.CreateView(x => x);
+-            //ItemsView = view.ToNotifyCollectionChanged();
++
++            // ItemsView = view.ToNotifyCollectionChanged();
+             ItemsView = observableList.ToNotifyCollectionChanged();
+ 
+             // check for optimize list
+             // ItemsView = observableList.ToNotifyCollectionChanged(SynchronizationContextCollectionEventDispatcher.Current);
+ 
+-
+             AddCommand.Subscribe(_ =>
+             {
+                 // ThreadPool.QueueUserWorkItem(_ =>
+@@ -148,7 +144,6 @@ namespace WpfApp
+                 observableList.Clear();
+             });
+ 
+-
+             ReverseCommand.Subscribe(_ =>
+             {
+                 observableList.Reverse();
+@@ -173,18 +168,19 @@ namespace WpfApp
+             SourceList.Add(new() { Name = "b", Age = 2 });
+             SourceList.Add(new() { Name = "c", Age = 3 });
+             SourceList.Add(new() { Name = "d", Age = 4 });
+-            //NotWritable, NonFilter
++
++            // NotWritable, NonFilter
+             NotWritableNonFilterView = SourceList.ToNotifyCollectionChanged();
+ 
+-            //NotWritable, Filter
++            // NotWritable, Filter
+             notWritableFilter = SourceList.CreateView(x => x);
+             NotWritableFilterView = notWritableFilter.ToNotifyCollectionChanged();
+ 
+-            //Writable, NonFilter
++            // Writable, NonFilter
+             WritableNonFilterPersonView = SourceList.ToWritableNotifyCollectionChanged();
+ 
+-            //WritableNonFilterPersonView = SourceList.ToWritableNotifyCollectionChanged(x => x, (Person newView, Person original, ref bool setValue) =>
+-            //{
++            // WritableNonFilterPersonView = SourceList.ToWritableNotifyCollectionChanged(x => x, (Person newView, Person original, ref bool setValue) =>
++            // {
+             //    if (setValue)
+             //    {
+             //        // default setValue == true is Set operation
+@@ -204,14 +200,14 @@ namespace WpfApp
+             //        // default setValue == false is Add operation
+             //        return new Person { Age = newView.Age, Name = newView.Name };
+             //    }
+-            //}, null);
++            // }, null);
+ 
+-            //Writable, Filter
++            // Writable, Filter
+             writableFilter = SourceList.CreateWritableView(x => x);
+             WritableFilterPersonView = writableFilter.ToWritableNotifyCollectionChanged();
+ 
+-            //WritableFilterPersonView = writableFilter.ToWritableNotifyCollectionChanged((Person newView, Person original, ref bool setValue) =>
+-            //{
++            // WritableFilterPersonView = writableFilter.ToWritableNotifyCollectionChanged((Person newView, Person original, ref bool setValue) =>
++            // {
+             //    if (setValue)
+             //    {
+             //        // default setValue == true is Set operation
+@@ -231,7 +227,7 @@ namespace WpfApp
+             //        // default setValue == false is Add operation
+             //        return new Person { Age = newView.Age, Name = newView.Name };
+             //    }
+-            //});
++            // });
+ 
+             AttachFilterCommand2.Subscribe(_ =>
+             {
+@@ -254,6 +250,7 @@ namespace WpfApp
+             });
+         }
+     }
++
+     public class Person
+     {
+         public int? Age { get; set; }
+diff --git a/src/ObservableCollections.R3/ObservableCollectionR3Extensions.View.cs b/src/ObservableCollections.R3/ObservableCollectionR3Extensions.View.cs
+index 3bc84d2..b8e2c0e 100644
+--- a/src/ObservableCollections.R3/ObservableCollectionR3Extensions.View.cs
++++ b/src/ObservableCollections.R3/ObservableCollectionR3Extensions.View.cs
+@@ -1,10 +1,10 @@
+-﻿using System;
++﻿using R3;
++using System;
+ using System.Collections.Generic;
+ using System.Collections.Specialized;
+ using System.Diagnostics.Tracing;
+ using System.Runtime.InteropServices;
+ using System.Threading;
+-using R3;
+ 
+ namespace ObservableCollections;
+ 
+@@ -130,41 +130,37 @@ sealed class SynchronizedViewChanged<T, TView>(ISynchronizedView<T, TView> sourc
+ 
+                 observer.OnNext(newArgs);
+             }
+-            else
++            else if (eventArgs.Action == NotifyCollectionChangedAction.Add)
+             {
+-                if (eventArgs.Action == NotifyCollectionChangedAction.Add)
++                var index = eventArgs.NewStartingIndex;
++                for (int i = 0; i < eventArgs.NewValues.Length; i++)
+                 {
+-                    var index = eventArgs.NewStartingIndex;
+-                    for (int i = 0; i < eventArgs.NewValues.Length; i++)
+-                    {
+-                        var newItem = (eventArgs.NewValues[i], eventArgs.NewViews[i]);
+-                        var newArgs = new ViewChangedEvent<T, TView>(
+-                            eventArgs.Action,
+-                            newItem,
+-                            default,
+-                            index++,
+-                            eventArgs.OldStartingIndex,
+-                            eventArgs.SortOperation);
+-
+-                        observer.OnNext(newArgs);
+-                    }
++                    var newItem = (eventArgs.NewValues[i], eventArgs.NewViews[i]);
++                    var newArgs = new ViewChangedEvent<T, TView>(
++                        eventArgs.Action,
++                        newItem,
++                        default,
++                        index++,
++                        eventArgs.OldStartingIndex,
++                        eventArgs.SortOperation);
++
++                    observer.OnNext(newArgs);
+                 }
+-                else if (eventArgs.Action == NotifyCollectionChangedAction.Remove)
++            }
++            else if (eventArgs.Action == NotifyCollectionChangedAction.Remove)
++            {
++                for (int i = 0; i < eventArgs.OldValues.Length; i++)
+                 {
+-
+-                    for (int i = 0; i < eventArgs.OldValues.Length; i++)
+-                    {
+-                        var oldItem = (eventArgs.OldValues[i], eventArgs.OldViews[i]);
+-                        var newArgs = new ViewChangedEvent<T, TView>(
+-                            eventArgs.Action,
+-                            default,
+-                            oldItem,
+-                            eventArgs.NewStartingIndex,
+-                            eventArgs.OldStartingIndex, // removed, uses same index
+-                            eventArgs.SortOperation);
+-
+-                        observer.OnNext(newArgs);
+-                    }
++                    var oldItem = (eventArgs.OldValues[i], eventArgs.OldViews[i]);
++                    var newArgs = new ViewChangedEvent<T, TView>(
++                        eventArgs.Action,
++                        default,
++                        oldItem,
++                        eventArgs.NewStartingIndex,
++                        eventArgs.OldStartingIndex, // removed, uses same index
++                        eventArgs.SortOperation);
++
++                    observer.OnNext(newArgs);
+                 }
+             }
+         }
+@@ -424,8 +420,6 @@ sealed class SynchronizedViewCountChanged<T, TView>(ISynchronizedView<T, TView>
+     }
+ }
+ 
+-
+-
+ sealed class SynchronizedViewRejected<T, TView>(ISynchronizedView<T, TView> source, CancellationToken cancellationToken)
+     : Observable<RejectedViewChangedEvent>
+ {
+diff --git a/src/ObservableCollections.R3/ObservableCollectionR3Extensions.cs b/src/ObservableCollections.R3/ObservableCollectionR3Extensions.cs
+index 16d681b..7af13c4 100644
+--- a/src/ObservableCollections.R3/ObservableCollectionR3Extensions.cs
++++ b/src/ObservableCollections.R3/ObservableCollectionR3Extensions.cs
+@@ -1,16 +1,20 @@
+-﻿using System;
++﻿using R3;
++using System;
+ using System.Collections.Generic;
+ using System.Collections.Specialized;
+ using System.Runtime.InteropServices;
+ using System.Threading;
+-using R3;
+ 
+ namespace ObservableCollections;
+ 
+ public readonly record struct CollectionAddEvent<T>(int Index, T Value);
++
+ public readonly record struct CollectionRemoveEvent<T>(int Index, T Value);
++
+ public readonly record struct CollectionReplaceEvent<T>(int Index, T OldValue, T NewValue);
++
+ public readonly record struct CollectionMoveEvent<T>(int OldIndex, int NewIndex, T Value);
++
+ public readonly record struct CollectionResetEvent<T>
+ {
+     readonly SortOperation<T> sortOperation;
+@@ -110,18 +114,22 @@ public static partial class ObservableCollectionR3Extensions
+ 
+ public static class ObservableDictionaryR3Extensions
+ {
+-    public static Observable<DictionaryAddEvent<TKey, TValue>> ObserveDictionaryAdd<TKey, TValue>(this IReadOnlyObservableDictionary<TKey, TValue> source,
++    public static Observable<DictionaryAddEvent<TKey, TValue>> ObserveDictionaryAdd<TKey, TValue>(
++        this IReadOnlyObservableDictionary<TKey, TValue> source,
+         CancellationToken cancellationToken = default)
+     {
+         return new ObservableDictionaryAdd<TKey, TValue>(source, cancellationToken);
+     }
+ 
+-    public static Observable<DictionaryRemoveEvent<TKey, TValue>> ObserveDictionaryRemove<TKey, TValue>(this IReadOnlyObservableDictionary<TKey, TValue> source,
++    public static Observable<DictionaryRemoveEvent<TKey, TValue>> ObserveDictionaryRemove<TKey, TValue>(
++        this IReadOnlyObservableDictionary<TKey, TValue> source,
+         CancellationToken cancellationToken = default)
+     {
+         return new ObservableDictionaryRemove<TKey, TValue>(source, cancellationToken);
+     }
+-    public static Observable<DictionaryReplaceEvent<TKey, TValue>> ObserveDictionaryReplace<TKey, TValue>(this IReadOnlyObservableDictionary<TKey, TValue> source,
++
++    public static Observable<DictionaryReplaceEvent<TKey, TValue>> ObserveDictionaryReplace<TKey, TValue>(
++        this IReadOnlyObservableDictionary<TKey, TValue> source,
+         CancellationToken cancellationToken = default)
+     {
+         return new ObservableDictionaryReplace<TKey, TValue>(source, cancellationToken);
+@@ -156,40 +164,40 @@ sealed class ObservableCollectionChanged<T>(IObservableCollection<T> collection,
+ 
+                 observer.OnNext(newArgs);
+             }
+-            else
++            else if (eventArgs.Action == NotifyCollectionChangedAction.Add)
+             {
+-                if (eventArgs.Action == NotifyCollectionChangedAction.Add)
++                var i = eventArgs.NewStartingIndex;
++                foreach (var item in eventArgs.NewItems)
+                 {
+-                    var i = eventArgs.NewStartingIndex;
+-                    foreach (var item in eventArgs.NewItems)
++                    var newArgs = new CollectionChangedEvent<T>(
++                        eventArgs.Action,
++                        item,
++                        eventArgs.OldItem,
++                        newStartingIndex: i,
++                        eventArgs.OldStartingIndex,
++                        eventArgs.SortOperation);
++
++                    if (eventArgs.NewStartingIndex != -1)
+                     {
+-                        var newArgs = new CollectionChangedEvent<T>(
+-                            eventArgs.Action,
+-                            item,
+-                            eventArgs.OldItem,
+-                            newStartingIndex: i,
+-                            eventArgs.OldStartingIndex,
+-                            eventArgs.SortOperation);
+-
+-                        if (eventArgs.NewStartingIndex != -1) i++;
+-
+-                        observer.OnNext(newArgs);
++                        i++;
+                     }
++
++                    observer.OnNext(newArgs);
+                 }
+-                else if (eventArgs.Action == NotifyCollectionChangedAction.Remove)
++            }
++            else if (eventArgs.Action == NotifyCollectionChangedAction.Remove)
++            {
++                foreach (var item in eventArgs.OldItems)
+                 {
+-                    foreach (var item in eventArgs.OldItems)
+-                    {
+-                        var newArgs = new CollectionChangedEvent<T>(
+-                            eventArgs.Action,
+-                            eventArgs.NewItem,
+-                            item,
+-                            eventArgs.NewStartingIndex,
+-                            eventArgs.OldStartingIndex, // removed, uses same index
+-                            eventArgs.SortOperation);
+-
+-                        observer.OnNext(newArgs);
+-                    }
++                    var newArgs = new CollectionChangedEvent<T>(
++                        eventArgs.Action,
++                        eventArgs.NewItem,
++                        item,
++                        eventArgs.NewStartingIndex,
++                        eventArgs.OldStartingIndex, // removed, uses same index
++                        eventArgs.SortOperation);
++
++                    observer.OnNext(newArgs);
+                 }
+             }
+         }
+@@ -312,6 +320,7 @@ sealed class ObservableCollectionMove<T>(IObservableCollection<T> collection, Ca
+         }
+     }
+ }
++
+ sealed class ObservableCollectionReset<T>(IObservableCollection<T> collection, CancellationToken cancellationToken)
+     : Observable<CollectionResetEvent<T>>
+ {
+@@ -452,15 +461,17 @@ sealed class ObservableDictionaryAdd<TKey, TValue>(
+ {
+     protected override IDisposable SubscribeCore(Observer<DictionaryAddEvent<TKey, TValue>> observer)
+     {
+-        return new _DictionaryCollectionAdd(dictionary, observer, cancellationToken);
++        return new DictionaryCollectionAdd(dictionary, observer, cancellationToken);
+     }
+ 
+-    sealed class _DictionaryCollectionAdd(
++    sealed class DictionaryCollectionAdd(
+         IObservableCollection<KeyValuePair<TKey, TValue>> collection,
+         Observer<DictionaryAddEvent<TKey, TValue>> observer,
+         CancellationToken cancellationToken) :
+-        ObservableCollectionObserverBase<KeyValuePair<TKey, TValue>, DictionaryAddEvent<TKey, TValue>>(collection,
+-            observer, cancellationToken)
++        ObservableCollectionObserverBase<KeyValuePair<TKey, TValue>, DictionaryAddEvent<TKey, TValue>>(
++            collection,
++            observer,
++            cancellationToken)
+     {
+         protected override void Handler(in NotifyCollectionChangedEventArgs<KeyValuePair<TKey, TValue>> eventArgs)
+         {
+@@ -490,15 +501,17 @@ sealed class ObservableDictionaryRemove<TKey, TValue>(
+ {
+     protected override IDisposable SubscribeCore(Observer<DictionaryRemoveEvent<TKey, TValue>> observer)
+     {
+-        return new _DictionaryCollectionRemove(dictionary, observer, cancellationToken);
++        return new DictionaryCollectionRemove(dictionary, observer, cancellationToken);
+     }
+ 
+-    sealed class _DictionaryCollectionRemove(
++    sealed class DictionaryCollectionRemove(
+         IObservableCollection<KeyValuePair<TKey, TValue>> collection,
+         Observer<DictionaryRemoveEvent<TKey, TValue>> observer,
+         CancellationToken cancellationToken) :
+-        ObservableCollectionObserverBase<KeyValuePair<TKey, TValue>, DictionaryRemoveEvent<TKey, TValue>>(collection,
+-            observer, cancellationToken)
++        ObservableCollectionObserverBase<KeyValuePair<TKey, TValue>, DictionaryRemoveEvent<TKey, TValue>>(
++            collection,
++            observer,
++            cancellationToken)
+     {
+         protected override void Handler(in NotifyCollectionChangedEventArgs<KeyValuePair<TKey, TValue>> eventArgs)
+         {
+@@ -528,15 +541,17 @@ sealed class ObservableDictionaryReplace<TKey, TValue>(
+ {
+     protected override IDisposable SubscribeCore(Observer<DictionaryReplaceEvent<TKey, TValue>> observer)
+     {
+-        return new _DictionaryCollectionReplace(dictionary, observer, cancellationToken);
++        return new DictionaryCollectionReplace(dictionary, observer, cancellationToken);
+     }
+ 
+-    sealed class _DictionaryCollectionReplace(
++    sealed class DictionaryCollectionReplace(
+         IObservableCollection<KeyValuePair<TKey, TValue>> collection,
+         Observer<DictionaryReplaceEvent<TKey, TValue>> observer,
+         CancellationToken cancellationToken) :
+-        ObservableCollectionObserverBase<KeyValuePair<TKey, TValue>, DictionaryReplaceEvent<TKey, TValue>>(collection,
+-            observer, cancellationToken)
++        ObservableCollectionObserverBase<KeyValuePair<TKey, TValue>, DictionaryReplaceEvent<TKey, TValue>>(
++            collection,
++            observer,
++            cancellationToken)
+     {
+         protected override void Handler(in NotifyCollectionChangedEventArgs<KeyValuePair<TKey, TValue>> eventArgs)
+         {
+diff --git a/src/ObservableCollections/AlternateIndexList.cs b/src/ObservableCollections/AlternateIndexList.cs
+index ec3db35..da97b19 100644
+--- a/src/ObservableCollections/AlternateIndexList.cs
++++ b/src/ObservableCollections/AlternateIndexList.cs
+@@ -212,7 +212,9 @@ public class AlternateIndexList<T> : IEnumerable<T>
+             return false;
+         }
+ 
+-        public void Reset() { }
++        public void Reset()
++        {
++        }
+ 
+         public IEnumerator<IndexedValue> GetEnumerator() => this;
+ 
+diff --git a/src/ObservableCollections/IObservableCollection.cs b/src/ObservableCollections/IObservableCollection.cs
+index 757c1d4..6ec871e 100644
+--- a/src/ObservableCollections/IObservableCollection.cs
++++ b/src/ObservableCollections/IObservableCollection.cs
+@@ -7,13 +7,17 @@ using System.ComponentModel;
+ namespace ObservableCollections
+ {
+     public delegate void NotifyCollectionChangedEventHandler<T>(in NotifyCollectionChangedEventArgs<T> e);
++
+     public delegate void NotifyViewChangedEventHandler<T, TView>(in SynchronizedViewChangedEventArgs<T, TView> e);
++
+     public delegate T WritableViewChangedEventHandler<T, TView>(TView newView, T originalValue, ref bool setValue);
+ 
+     public interface IObservableCollection<T> : IReadOnlyCollection<T>
+     {
+         event NotifyCollectionChangedEventHandler<T>? CollectionChanged;
++
+         object SyncRoot { get; }
++
+         ISynchronizedView<T, TView> CreateView<TView>(Func<T, TView> transform);
+     }
+ 
+@@ -29,7 +33,9 @@ namespace ObservableCollections
+ 
+     public enum RejectedViewChangedAction
+     {
+-        Add, Remove, Move
++        Add,
++        Remove,
++        Move
+     }
+ 
+     public interface ISynchronizedView<T, TView> : IReadOnlyCollection<TView>, IDisposable
+@@ -41,30 +47,48 @@ namespace ObservableCollections
+         int UnfilteredCount { get; }
+ 
+         event NotifyViewChangedEventHandler<T, TView>? ViewChanged;
++
+         event Action<RejectedViewChangedAction, int, int>? RejectedViewChanged;
++
+         event Action<NotifyCollectionChangedAction>? CollectionStateChanged;
+ 
+         void AttachFilter(ISynchronizedViewFilter<T, TView> filter);
++
+         void ResetFilter();
++
+         ISynchronizedViewList<TView> ToViewList();
++
+         NotifyCollectionChangedSynchronizedViewList<TView> ToNotifyCollectionChanged();
++
+         NotifyCollectionChangedSynchronizedViewList<TView> ToNotifyCollectionChanged(ICollectionEventDispatcher? collectionEventDispatcher);
+     }
+ 
+     public interface IWritableSynchronizedView<T, TView> : ISynchronizedView<T, TView>
+     {
+         (T Value, TView View) GetAt(int index);
++
+         void SetViewAt(int index, TView view);
++
+         void SetToSourceCollection(int index, T value);
++
+         void AddToSourceCollection(T value);
++
+         void InsertIntoSourceCollection(int index, T value);
++
+         bool RemoveFromSourceCollection(T value);
++
+         void RemoveAtSourceCollection(int index);
++
+         void ClearSourceCollection();
++
+         IWritableSynchronizedViewList<TView> ToWritableViewList(WritableViewChangedEventHandler<T, TView> converter);
++
+         NotifyCollectionChangedSynchronizedViewList<TView> ToWritableNotifyCollectionChanged();
++
+         NotifyCollectionChangedSynchronizedViewList<TView> ToWritableNotifyCollectionChanged(WritableViewChangedEventHandler<T, TView> converter);
++
+         NotifyCollectionChangedSynchronizedViewList<TView> ToWritableNotifyCollectionChanged(ICollectionEventDispatcher? collectionEventDispatcher);
++
+         NotifyCollectionChangedSynchronizedViewList<TView> ToWritableNotifyCollectionChanged(WritableViewChangedEventHandler<T, TView> converter, ICollectionEventDispatcher? collectionEventDispatcher);
+     }
+ 
+@@ -110,6 +134,7 @@ namespace ObservableCollections
+         public object SyncRoot => gate;
+ 
+         public abstract event NotifyCollectionChangedEventHandler? CollectionChanged;
++
+         public abstract event PropertyChangedEventHandler? PropertyChanged;
+ 
+         public abstract void Add(TView item);
+@@ -121,8 +146,11 @@ namespace ObservableCollections
+         }
+ 
+         public abstract void Insert(int index, TView item);
++
+         public abstract bool Remove(TView item);
++
+         public abstract void RemoveAt(int index);
++
+         public abstract void Clear();
+ 
+         public abstract bool Contains(TView item);
+@@ -137,7 +165,9 @@ namespace ObservableCollections
+         }
+ 
+         public abstract void Dispose();
++
+         public abstract IEnumerator<TView> GetEnumerator();
++
+         public abstract int IndexOf(TView item);
+ 
+         int IList.IndexOf(object? item)
+@@ -156,19 +186,21 @@ namespace ObservableCollections
+ 
+         static bool IsCompatibleObject(object? value)
+         {
+-            return value is TView || value == null && default(TView) == null;
++            return value is TView || (value == null && default(TView) == null);
+         }
+ 
+         void ICollection<TView>.Clear()
+         {
+             Clear();
+         }
++
+         void IList.Clear()
+         {
+             Clear();
+         }
+ 
+         void ICollection<TView>.CopyTo(TView[] array, int arrayIndex) => throw new NotSupportedException();
++
+         void ICollection.CopyTo(Array array, int index) => throw new NotSupportedException();
+ 
+         void IList<TView>.Insert(int index, TView item)
+diff --git a/src/ObservableCollections/Internal/CloneCollection.cs b/src/ObservableCollections/Internal/CloneCollection.cs
+index b7082a8..367bbb4 100644
+--- a/src/ObservableCollections/Internal/CloneCollection.cs
++++ b/src/ObservableCollections/Internal/CloneCollection.cs
+@@ -2,8 +2,8 @@
+ using System.Buffers;
+ using System.Collections;
+ using System.Collections.Generic;
+-using System.Runtime.CompilerServices;
+ using System.Linq;
++using System.Runtime.CompilerServices;
+ 
+ namespace ObservableCollections.Internal
+ {
+@@ -115,9 +115,12 @@ namespace ObservableCollections.Internal
+             public bool IsReadOnly => true;
+ 
+             public void Add(T item) => throw new NotSupportedException();
++
+             public void Clear() => throw new NotSupportedException();
++
+             public bool Contains(T item) => throw new NotSupportedException();
+-            public void CopyTo(T[] dest, int destIndex) =>  Array.Copy(array, 0, dest, destIndex, count);
++
++            public void CopyTo(T[] dest, int destIndex) => Array.Copy(array, 0, dest, destIndex, count);
+ 
+             public IEnumerator<T> GetEnumerator()
+             {
+@@ -128,6 +131,7 @@ namespace ObservableCollections.Internal
+             }
+ 
+             public bool Remove(T item) => throw new NotSupportedException();
++
+             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+         }
+     }
+diff --git a/src/ObservableCollections/Internal/ResizableArray.cs b/src/ObservableCollections/Internal/ResizableArray.cs
+index 7474ddc..b27c045 100644
+--- a/src/ObservableCollections/Internal/ResizableArray.cs
++++ b/src/ObservableCollections/Internal/ResizableArray.cs
+@@ -1,58 +1,61 @@
+-﻿using System;
+-using System.Buffers;
+-using System.Diagnostics.CodeAnalysis;
+-using System.Runtime.CompilerServices;
+-
+-namespace ObservableCollections.Internal
+-{
+-    // internal ref struct ResizableArray<T>
+-    internal struct ResizableArray<T> : IDisposable
+-    {
+-        T[]? array;
+-        int count;
+-
+-        public ReadOnlySpan<T> Span => array.AsSpan(0, count);
+-
+-        public ResizableArray(int initialCapacity)
+-        {
+-            array = ArrayPool<T>.Shared.Rent(initialCapacity);
+-            count = 0;
+-        }
+-
+-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+-        public void Add(T item)
+-        {
+-            if (array == null) Throw();
+-            if (array.Length == count)
+-            {
+-                EnsureCapacity();
+-            }
+-            array[count++] = item;
+-        }
+-
+-        [MethodImpl(MethodImplOptions.NoInlining)]
+-        void EnsureCapacity()
+-        {
+-            var oldArray = array!;
+-            var newArray = ArrayPool<T>.Shared.Rent(oldArray.Length * 2);
+-            Array.Copy(oldArray, newArray, oldArray.Length);
+-            ArrayPool<T>.Shared.Return(oldArray, RuntimeHelpersEx.IsReferenceOrContainsReferences<T>());
+-            array = newArray;
+-        }
+-
+-        public void Dispose()
+-        {
+-            if (array != null)
+-            {
+-                ArrayPool<T>.Shared.Return(array, RuntimeHelpersEx.IsReferenceOrContainsReferences<T>());
+-                array = null;
+-            }
+-        }
+-
+-        [DoesNotReturn]
+-        void Throw()
+-        {
+-            throw new ObjectDisposedException("ResizableArray");
+-        }
+-    }
+-}
++﻿using System;
++using System.Buffers;
++using System.Diagnostics.CodeAnalysis;
++using System.Runtime.CompilerServices;
++
++namespace ObservableCollections.Internal
++{
++    // internal ref struct ResizableArray<T>
++    internal struct ResizableArray<T> : IDisposable
++    {
++        T[]? array;
++        int count;
++
++        public ReadOnlySpan<T> Span => array.AsSpan(0, count);
++
++        public ResizableArray(int initialCapacity)
++        {
++            array = ArrayPool<T>.Shared.Rent(initialCapacity);
++            count = 0;
++        }
++
++        [MethodImpl(MethodImplOptions.AggressiveInlining)]
++        public void Add(T item)
++        {
++            if (array == null)
++            {
++                Throw();
++            }
++            if (array.Length == count)
++            {
++                EnsureCapacity();
++            }
++            array[count++] = item;
++        }
++
++        [MethodImpl(MethodImplOptions.NoInlining)]
++        void EnsureCapacity()
++        {
++            var oldArray = array!;
++            var newArray = ArrayPool<T>.Shared.Rent(oldArray.Length * 2);
++            Array.Copy(oldArray, newArray, oldArray.Length);
++            ArrayPool<T>.Shared.Return(oldArray, RuntimeHelpersEx.IsReferenceOrContainsReferences<T>());
++            array = newArray;
++        }
++
++        public void Dispose()
++        {
++            if (array != null)
++            {
++                ArrayPool<T>.Shared.Return(array, RuntimeHelpersEx.IsReferenceOrContainsReferences<T>());
++                array = null;
++            }
++        }
++
++        [DoesNotReturn]
++        void Throw()
++        {
++            throw new ObjectDisposedException("ResizableArray");
++        }
++    }
++}
+diff --git a/src/ObservableCollections/ObservableDictionary.Views.cs b/src/ObservableCollections/ObservableDictionary.Views.cs
+index 4c0d450..56841d5 100644
+--- a/src/ObservableCollections/ObservableDictionary.Views.cs
++++ b/src/ObservableCollections/ObservableDictionary.Views.cs
+@@ -38,8 +38,11 @@ namespace ObservableCollections
+             }
+ 
+             public object SyncRoot { get; }
++
+             public event NotifyViewChangedEventHandler<KeyValuePair<TKey, TValue>, TView>? ViewChanged;
++
+             public event Action<RejectedViewChangedAction, int, int>? RejectedViewChanged;
++
+             public event Action<NotifyCollectionChangedAction>? CollectionStateChanged;
+ 
+             public ISynchronizedViewFilter<KeyValuePair<TKey, TValue>, TView> Filter
+diff --git a/src/ObservableCollections/ObservableDictionary.cs b/src/ObservableCollections/ObservableDictionary.cs
+index 9d8b77a..0baa287 100644
+--- a/src/ObservableCollections/ObservableDictionary.cs
++++ b/src/ObservableCollections/ObservableDictionary.cs
+@@ -11,6 +11,7 @@ namespace ObservableCollections
+         where TKey : notnull
+     {
+         readonly Dictionary<TKey, TValue> dictionary;
++
+         public object SyncRoot { get; } = new object();
+ 
+         public ObservableDictionary()
+@@ -28,8 +29,7 @@ namespace ObservableCollections
+             this.dictionary = new Dictionary<TKey, TValue>(capacity, comparer: comparer);
+         }
+ 
+-        public ObservableDictionary(IEnumerable<KeyValuePair<TKey, TValue>> collection)
+-            : this(collection, null)
++        public ObservableDictionary(IEnumerable<KeyValuePair<TKey, TValue>> collection) : this(collection, null)
+         {
+         }
+ 
+@@ -57,6 +57,7 @@ namespace ObservableCollections
+                     return dictionary[key];
+                 }
+             }
++
+             set
+             {
+                 lock (SyncRoot)
+@@ -67,7 +68,8 @@ namespace ObservableCollections
+                         CollectionChanged?.Invoke(NotifyCollectionChangedEventArgs<KeyValuePair<TKey, TValue>>.Replace(
+                             new KeyValuePair<TKey, TValue>(key, value),
+                             new KeyValuePair<TKey, TValue>(key, oldValue!),
+-                            -1, -1));
++                            -1,
++                            -1));
+                     }
+                     else
+                     {
+@@ -199,16 +201,10 @@ namespace ObservableCollections
+         {
+             lock (SyncRoot)
+             {
+-                if (dictionary.TryGetValue(item.Key, out var value))
++                if (dictionary.TryGetValue(item.Key, out var value) && EqualityComparer<TValue>.Default.Equals(value, item.Value) && dictionary.Remove(item.Key, out var value2))
+                 {
+-                    if (EqualityComparer<TValue>.Default.Equals(value, item.Value))
+-                    {
+-                        if (dictionary.Remove(item.Key, out var value2))
+-                        {
+-                            CollectionChanged?.Invoke(NotifyCollectionChangedEventArgs<KeyValuePair<TKey, TValue>>.Remove(new KeyValuePair<TKey, TValue>(item.Key, value2), -1));
+-                            return true;
+-                        }
+-                    }
++                    CollectionChanged?.Invoke(NotifyCollectionChangedEventArgs<KeyValuePair<TKey, TValue>>.Remove(new KeyValuePair<TKey, TValue>(item.Key, value2), -1));
++                    return true;
+                 }
+                 return false;
+             }
+diff --git a/src/ObservableCollections/ObservableFixedSizeRingBuffer.cs b/src/ObservableCollections/ObservableFixedSizeRingBuffer.cs
+index 0dc73ce..d6a8aaf 100644
+--- a/src/ObservableCollections/ObservableFixedSizeRingBuffer.cs
++++ b/src/ObservableCollections/ObservableFixedSizeRingBuffer.cs
+@@ -45,6 +45,7 @@ namespace ObservableCollections
+                     return this.buffer[index];
+                 }
+             }
++
+             set
+             {
+                 lock (SyncRoot)
+diff --git a/src/ObservableCollections/ObservableHashSet.Views.cs b/src/ObservableCollections/ObservableHashSet.Views.cs
+index 42b0500..1aa9656 100644
+--- a/src/ObservableCollections/ObservableHashSet.Views.cs
++++ b/src/ObservableCollections/ObservableHashSet.Views.cs
+@@ -1,8 +1,8 @@
+ ﻿using ObservableCollections.Internal;
++using System;
+ using System.Collections;
+ using System.Collections.Generic;
+ using System.Collections.Specialized;
+-using System;
+ using System.Linq;
+ using System.Threading.Tasks;
+ 
+@@ -30,7 +30,9 @@ namespace ObservableCollections
+             ISynchronizedViewFilter<T, TView> filter;
+ 
+             public event NotifyViewChangedEventHandler<T, TView>? ViewChanged;
++
+             public event Action<RejectedViewChangedAction, int, int>? RejectedViewChanged;
++
+             public event Action<NotifyCollectionChangedAction>? CollectionStateChanged;
+ 
+             public object SyncRoot { get; }
+diff --git a/src/ObservableCollections/ObservableHashSet.cs b/src/ObservableCollections/ObservableHashSet.cs
+index 2534741..5fe115e 100644
+--- a/src/ObservableCollections/ObservableHashSet.cs
++++ b/src/ObservableCollections/ObservableHashSet.cs
+@@ -12,6 +12,7 @@ namespace ObservableCollections
+         where T : notnull
+     {
+         readonly HashSet<T> set;
++
+         public object SyncRoot { get; } = new object();
+ 
+         public ObservableHashSet()
+diff --git a/src/ObservableCollections/ObservableList.OptimizeView.cs b/src/ObservableCollections/ObservableList.OptimizeView.cs
+index af48818..62f9082 100644
+--- a/src/ObservableCollections/ObservableList.OptimizeView.cs
++++ b/src/ObservableCollections/ObservableList.OptimizeView.cs
+@@ -11,15 +11,15 @@ public partial class ObservableList<T> : IList<T>, IReadOnlyObservableList<T>
+ {
+     // override extension methods(IObservableCollection.cs ObservableCollectionExtensions)
+ 
+-    //public ISynchronizedViewList<T> ToViewList<T>(this IObservableCollection<T> collection)
+-    //{
++    // public ISynchronizedViewList<T> ToViewList<T>(this IObservableCollection<T> collection)
++    // {
+     //    return ToViewList(collection, static x => x);
+-    //}
++    // }
+ 
+-    //public static ISynchronizedViewList<TView> ToViewList<T, TView>(this IObservableCollection<T> collection, Func<T, TView> transform)
+-    //{
++    // public static ISynchronizedViewList<TView> ToViewList<T, TView>(this IObservableCollection<T> collection, Func<T, TView> transform)
++    // {
+     //    return new NonFilteredSynchronizedViewList<T, TView>(collection.CreateView(transform));
+-    //}
++    // }
+ 
+     /// <summary>
+     /// Create faster, compact INotifyCollectionChanged view, however it does not support ***Range.
+@@ -37,15 +37,15 @@ public partial class ObservableList<T> : IList<T>, IReadOnlyObservableList<T>
+         return new ObservableListSynchronizedViewList<T>(this, collectionEventDispatcher);
+     }
+ 
+-    //public static INotifyCollectionChangedSynchronizedViewList<TView> ToNotifyCollectionChanged<T, TView>(this IObservableCollection<T> collection, Func<T, TView> transform)
+-    //{
++    // public static INotifyCollectionChangedSynchronizedViewList<TView> ToNotifyCollectionChanged<T, TView>(this IObservableCollection<T> collection, Func<T, TView> transform)
++    // {
+     //    return ToNotifyCollectionChanged(collection, transform, null!);
+-    //}
++    // }
+ 
+-    //public static INotifyCollectionChangedSynchronizedViewList<TView> ToNotifyCollectionChanged<T, TView>(this IObservableCollection<T> collection, Func<T, TView> transform, ICollectionEventDispatcher? collectionEventDispatcher)
+-    //{
++    // public static INotifyCollectionChangedSynchronizedViewList<TView> ToNotifyCollectionChanged<T, TView>(this IObservableCollection<T> collection, Func<T, TView> transform, ICollectionEventDispatcher? collectionEventDispatcher)
++    // {
+     //    return new NonFilteredNotifyCollectionChangedSynchronizedViewList<T, TView>(collection.CreateView(transform), collectionEventDispatcher);
+-    //}
++    // }
+ }
+ 
+ internal sealed class ObservableListSynchronizedViewList<T> : NotifyCollectionChangedSynchronizedViewList<T>
+@@ -57,6 +57,7 @@ internal sealed class ObservableListSynchronizedViewList<T> : NotifyCollectionCh
+     readonly ICollectionEventDispatcher eventDispatcher;
+ 
+     public override event NotifyCollectionChangedEventHandler? CollectionChanged;
++
+     public override event PropertyChangedEventHandler? PropertyChanged;
+ 
+     public ObservableListSynchronizedViewList(ObservableList<T> parent, ICollectionEventDispatcher? eventDispatcher)
+@@ -167,6 +168,7 @@ internal sealed class ObservableListSynchronizedViewList<T> : NotifyCollectionCh
+         {
+             return parent[index];
+         }
++
+         set
+         {
+             parent[index] = value;
+@@ -189,6 +191,7 @@ internal sealed class ObservableListSynchronizedViewList<T> : NotifyCollectionCh
+     {
+         parent.Add(item);
+     }
++
+     public override void Insert(int index, T item)
+     {
+         parent.Insert(index, item);
+diff --git a/src/ObservableCollections/ObservableList.Views.cs b/src/ObservableCollections/ObservableList.Views.cs
+index c63f074..555e9df 100644
+--- a/src/ObservableCollections/ObservableList.Views.cs
++++ b/src/ObservableCollections/ObservableList.Views.cs
+@@ -52,7 +52,10 @@ namespace ObservableCollections
+             {
+                 get
+                 {
+-                    lock (SyncRoot) { return filter; }
++                    lock (SyncRoot)
++                    {
++                        return filter;
++                    }
+                 }
+             }
+ 
+@@ -64,7 +67,9 @@ namespace ObservableCollections
+             ISynchronizedViewFilter<T, TView> filter;
+ 
+             public event NotifyViewChangedEventHandler<T, TView>? ViewChanged;
++
+             public event Action<RejectedViewChangedAction, int, int>? RejectedViewChanged;
++
+             public event Action<NotifyCollectionChangedAction>? CollectionStateChanged;
+ 
+             public object SyncRoot { get; }
+@@ -367,6 +372,7 @@ namespace ObservableCollections
+                     source.Add(value);
+                 }
+             }
++
+             public void InsertIntoSourceCollection(int index, T value)
+             {
+                 lock (SyncRoot)
+@@ -406,7 +412,8 @@ namespace ObservableCollections
+ 
+             public NotifyCollectionChangedSynchronizedViewList<TView> ToWritableNotifyCollectionChanged()
+             {
+-                return new FiltableSynchronizedViewList<T, TView>(this,
++                return new FiltableSynchronizedViewList<T, TView>(
++                    this,
+                     isSupportRangeFeature: false,
+                     converter: static (TView newView, T originalValue, ref bool setValue) =>
+                                 {
+@@ -422,7 +429,8 @@ namespace ObservableCollections
+ 
+             public NotifyCollectionChangedSynchronizedViewList<TView> ToWritableNotifyCollectionChanged(ICollectionEventDispatcher? collectionEventDispatcher)
+             {
+-                return new FiltableSynchronizedViewList<T, TView>(this,
++                return new FiltableSynchronizedViewList<T, TView>(
++                    this,
+                     isSupportRangeFeature: false,
+                     eventDispatcher: collectionEventDispatcher,
+                     converter: static (TView newView, T originalValue, ref bool setValue) =>
+diff --git a/src/ObservableCollections/ObservableList.cs b/src/ObservableCollections/ObservableList.cs
+index 31c9294..a01ad94 100644
+--- a/src/ObservableCollections/ObservableList.cs
++++ b/src/ObservableCollections/ObservableList.cs
+@@ -10,6 +10,7 @@ namespace ObservableCollections
+     public partial class ObservableList<T> : IList<T>, IReadOnlyObservableList<T>
+     {
+         readonly List<T> list;
++
+         public object SyncRoot { get; } = new();
+ 
+         public ObservableList()
+@@ -36,6 +37,7 @@ namespace ObservableCollections
+                     return list[index];
+                 }
+             }
++
+             set
+             {
+                 lock (SyncRoot)
+diff --git a/src/ObservableCollections/ObservableQueue.Views.cs b/src/ObservableCollections/ObservableQueue.Views.cs
+index 55d0184..9cb577f 100644
+--- a/src/ObservableCollections/ObservableQueue.Views.cs
++++ b/src/ObservableCollections/ObservableQueue.Views.cs
+@@ -1,8 +1,8 @@
+ ﻿using ObservableCollections.Internal;
+-using System.Collections;
+-using System.Collections.Specialized;
+ using System;
++using System.Collections;
+ using System.Collections.Generic;
++using System.Collections.Specialized;
+ using System.Linq;
+ using System.Threading.Tasks;
+ 
+@@ -25,7 +25,9 @@ namespace ObservableCollections
+             ISynchronizedViewFilter<T, TView> filter;
+ 
+             public event NotifyViewChangedEventHandler<T, TView>? ViewChanged;
++
+             public event Action<RejectedViewChangedAction, int, int>? RejectedViewChanged;
++
+             public event Action<NotifyCollectionChangedAction>? CollectionStateChanged;
+ 
+             public object SyncRoot { get; }
+diff --git a/src/ObservableCollections/ObservableQueue.cs b/src/ObservableCollections/ObservableQueue.cs
+index fde7707..bcafb74 100644
+--- a/src/ObservableCollections/ObservableQueue.cs
++++ b/src/ObservableCollections/ObservableQueue.cs
+@@ -1,18 +1,19 @@
+ ﻿using ObservableCollections.Internal;
++using System;
+ using System.Buffers;
+ using System.Collections;
+-using System.Diagnostics.CodeAnalysis;
+-using System.Runtime.CompilerServices;
+-using System;
+ using System.Collections.Generic;
+ using System.Collections.Specialized;
++using System.Diagnostics.CodeAnalysis;
+ using System.Linq;
++using System.Runtime.CompilerServices;
+ 
+ namespace ObservableCollections
+ {
+     public partial class ObservableQueue<T> : IReadOnlyCollection<T>, IObservableCollection<T>
+     {
+         readonly Queue<T> queue;
++
+         public object SyncRoot { get; } = new object();
+ 
+         public ObservableQueue()
+diff --git a/src/ObservableCollections/ObservableRingBuffer.Views.cs b/src/ObservableCollections/ObservableRingBuffer.Views.cs
+index 269c849..140d829 100644
+--- a/src/ObservableCollections/ObservableRingBuffer.Views.cs
++++ b/src/ObservableCollections/ObservableRingBuffer.Views.cs
+@@ -31,7 +31,9 @@ namespace ObservableCollections
+             ISynchronizedViewFilter<T, TView> filter;
+ 
+             public event NotifyViewChangedEventHandler<T, TView>? ViewChanged;
++
+             public event Action<RejectedViewChangedAction, int, int>? RejectedViewChanged;
++
+             public event Action<NotifyCollectionChangedAction>? CollectionStateChanged;
+ 
+             public object SyncRoot { get; }
+diff --git a/src/ObservableCollections/ObservableRingBuffer.cs b/src/ObservableCollections/ObservableRingBuffer.cs
+index c1b1825..7a788a0 100644
+--- a/src/ObservableCollections/ObservableRingBuffer.cs
++++ b/src/ObservableCollections/ObservableRingBuffer.cs
+@@ -1,8 +1,8 @@
+ ﻿using ObservableCollections.Internal;
+ using System;
+-using System.Linq;
+-using System.Collections.Generic;
+ using System.Collections;
++using System.Collections.Generic;
++using System.Linq;
+ 
+ namespace ObservableCollections
+ {
+@@ -35,6 +35,7 @@ namespace ObservableCollections
+                     return this.buffer[index];
+                 }
+             }
++
+             set
+             {
+                 lock (SyncRoot)
+diff --git a/src/ObservableCollections/ObservableStack.Views.cs b/src/ObservableCollections/ObservableStack.Views.cs
+index ad826c2..7aadbc9 100644
+--- a/src/ObservableCollections/ObservableStack.Views.cs
++++ b/src/ObservableCollections/ObservableStack.Views.cs
+@@ -24,7 +24,9 @@ namespace ObservableCollections
+             ISynchronizedViewFilter<T, TView> filter;
+ 
+             public event NotifyViewChangedEventHandler<T, TView>? ViewChanged;
++
+             public event Action<RejectedViewChangedAction, int, int>? RejectedViewChanged;
++
+             public event Action<NotifyCollectionChangedAction>? CollectionStateChanged;
+ 
+             public object SyncRoot { get; }
+diff --git a/src/ObservableCollections/ObservableStack.cs b/src/ObservableCollections/ObservableStack.cs
+index 49814b9..3be4b65 100644
+--- a/src/ObservableCollections/ObservableStack.cs
++++ b/src/ObservableCollections/ObservableStack.cs
+@@ -11,6 +11,7 @@ namespace ObservableCollections
+     public partial class ObservableStack<T> : IReadOnlyCollection<T>, IObservableCollection<T>
+     {
+         readonly Stack<T> stack;
++
+         public object SyncRoot { get; } = new object();
+ 
+         public ObservableStack()
+diff --git a/src/ObservableCollections/RingBuffer.cs b/src/ObservableCollections/RingBuffer.cs
+index 9212e45..3a55172 100644
+--- a/src/ObservableCollections/RingBuffer.cs
++++ b/src/ObservableCollections/RingBuffer.cs
+@@ -74,6 +74,7 @@ namespace ObservableCollections
+                 var i = (head + index) & mask;
+                 return buffer[i];
+             }
++
+             set
+             {
+                 var i = (head + index) & mask;
+@@ -87,7 +88,10 @@ namespace ObservableCollections
+ 
+         public void AddLast(T item)
+         {
+-            if (count == buffer.Length) EnsureCapacity();
++            if (count == buffer.Length)
++            {
++                EnsureCapacity();
++            }
+ 
+             var index = (head + count) & mask;
+             buffer[index] = item;
+@@ -96,7 +100,10 @@ namespace ObservableCollections
+ 
+         public void AddFirst(T item)
+         {
+-            if (count == buffer.Length) EnsureCapacity();
++            if (count == buffer.Length)
++            {
++                EnsureCapacity();
++            }
+ 
+             head = (head - 1) & mask;
+             buffer[head] = item;
+@@ -105,7 +112,10 @@ namespace ObservableCollections
+ 
+         public T RemoveLast()
+         {
+-            if (count == 0) ThrowForEmpty();
++            if (count == 0)
++            {
++                ThrowForEmpty();
++            }
+ 
+             var index = (head + count - 1) & mask;
+             var v = buffer[index];
+@@ -116,7 +126,10 @@ namespace ObservableCollections
+ 
+         public T RemoveFirst()
+         {
+-            if (count == 0) ThrowForEmpty();
++            if (count == 0)
++            {
++                ThrowForEmpty();
++            }
+ 
+             var index = head & mask;
+             var v = buffer[index];
+@@ -201,6 +214,7 @@ namespace ObservableCollections
+                 {
+                     yield return buffer[i];
+                 }
++
+                 // 0...end
+                 for (int i = 0; i < end; i++)
+                 {
+diff --git a/src/ObservableCollections/Shims/Collections.cs b/src/ObservableCollections/Shims/Collections.cs
+index 7add725..293ea6d 100644
+--- a/src/ObservableCollections/Shims/Collections.cs
++++ b/src/ObservableCollections/Shims/Collections.cs
+@@ -4,8 +4,8 @@ using System;
+ using System.Collections.Generic;
+ using System.Diagnostics;
+ using System.Runtime.CompilerServices;
+-using System.Text;
+ using System.Runtime.InteropServices;
++using System.Text;
+ 
+ namespace System.Collections.Generic
+ {
+@@ -45,31 +45,31 @@ namespace System.Collections.Generic
+         {
+             if (!source.IsEmpty)
+             {
+-                if (!CollectionsMarshal.IsLegacyList)
+-                {
+-                    ref var view = ref Unsafe.As<List<T>, CollectionsMarshal.ListView<T>>(ref list!);
+-
+-                    if (view._items.Length - view._size < source.Length)
+-                    {
+-                        Grow(ref view._items, view._size, checked(view._size + source.Length));
+-                    }
+-
+-                    source.CopyTo(view._items.AsSpan(view._size));
+-                    view._size += source.Length;
+-                    view._version++;
++                if (!CollectionsMarshal.IsLegacyList)
++                {
++                    ref var view = ref Unsafe.As<List<T>, CollectionsMarshal.ListView<T>>(ref list!);
++
++                    if (view._items.Length - view._size < source.Length)
++                    {
++                        Grow(ref view._items, view._size, checked(view._size + source.Length));
++                    }
++
++                    source.CopyTo(view._items.AsSpan(view._size));
++                    view._size += source.Length;
++                    view._version++;
+                 }
+-                else
+-                {
+-                    ref var view = ref Unsafe.As<List<T>, CollectionsMarshal.LegacyListView<T>>(ref list!);
+-
+-                    if (view._items.Length - view._size < source.Length)
+-                    {
+-                        Grow(ref view._items, view._size, checked(view._size + source.Length));
+-                    }
+-
+-                    source.CopyTo(view._items.AsSpan(view._size));
+-                    view._size += source.Length;
+-                    view._version++;
++                else
++                {
++                    ref var view = ref Unsafe.As<List<T>, CollectionsMarshal.LegacyListView<T>>(ref list!);
++
++                    if (view._items.Length - view._size < source.Length)
++                    {
++                        Grow(ref view._items, view._size, checked(view._size + source.Length));
++                    }
++
++                    source.CopyTo(view._items.AsSpan(view._size));
++                    view._size += source.Length;
++                    view._version++;
+                 }
+             }
+         }
+@@ -78,51 +78,51 @@ namespace System.Collections.Generic
+         public static void InsertRange<T>(this List<T> list, int index, ReadOnlySpan<T> source)
+         {
+             if (!source.IsEmpty)
+-            {
+-                if (!CollectionsMarshal.IsLegacyList)
+-                {
+-                    ref var view = ref Unsafe.As<List<T>, CollectionsMarshal.ListView<T>>(ref list!);
+-
+-                    if (view._items.Length - view._size < source.Length)
+-                    {
+-                        Grow(ref view._items, view._size, checked(view._size + source.Length));
+-                    }
+-
+-                    if (index < view._size)
+-                    {
+-                        Array.Copy(view._items, index, view._items, index + source.Length, view._size - index);
+-                    }
+-
+-                    source.CopyTo(view._items.AsSpan(index));
+-                    view._size += source.Length;
+-                    view._version++;
+-                }
+-                else
+-                {
+-                    ref var view = ref Unsafe.As<List<T>, CollectionsMarshal.LegacyListView<T>>(ref list!);
+-
+-                    if (view._items.Length - view._size < source.Length)
+-                    {
+-                        Grow(ref view._items, view._size, checked(view._size + source.Length));
+-                    }
+-
+-                    if (index < view._size)
+-                    {
+-                        Array.Copy(view._items, index, view._items, index + source.Length, view._size - index);
+-                    }
+-
+-                    source.CopyTo(view._items.AsSpan(index));
+-                    view._size += source.Length;
+-                    view._version++;
++            {
++                if (!CollectionsMarshal.IsLegacyList)
++                {
++                    ref var view = ref Unsafe.As<List<T>, CollectionsMarshal.ListView<T>>(ref list!);
++
++                    if (view._items.Length - view._size < source.Length)
++                    {
++                        Grow(ref view._items, view._size, checked(view._size + source.Length));
++                    }
++
++                    if (index < view._size)
++                    {
++                        Array.Copy(view._items, index, view._items, index + source.Length, view._size - index);
++                    }
++
++                    source.CopyTo(view._items.AsSpan(index));
++                    view._size += source.Length;
++                    view._version++;
++                }
++                else
++                {
++                    ref var view = ref Unsafe.As<List<T>, CollectionsMarshal.LegacyListView<T>>(ref list!);
++
++                    if (view._items.Length - view._size < source.Length)
++                    {
++                        Grow(ref view._items, view._size, checked(view._size + source.Length));
++                    }
++
++                    if (index < view._size)
++                    {
++                        Array.Copy(view._items, index, view._items, index + source.Length, view._size - index);
++                    }
++
++                    source.CopyTo(view._items.AsSpan(index));
++                    view._size += source.Length;
++                    view._version++;
+                 }
+             }
+-        }
+-
++        }
++
+         static void Grow<T>(ref T[] items, int size, int capacity)
+         {
+             SetCapacity(ref items, size, GetNewCapacity(items.Length, capacity));
+-        }
+-
++        }
++
+         static void SetCapacity<T>(ref T[] items, int size, int capacity)
+         {
+             if (capacity != items.Length)
+@@ -141,15 +141,21 @@ namespace System.Collections.Generic
+                     items = Array.Empty<T>();
+                 }
+             }
+-        }
+-
++        }
++
+         static int GetNewCapacity(int length, int capacity)
+         {
+             int newCapacity = length == 0 ? 4 : 2 * length;
+ 
+-            if ((uint)newCapacity > ArrayMaxLength) newCapacity = ArrayMaxLength;
++            if ((uint)newCapacity > ArrayMaxLength)
++            {
++                newCapacity = ArrayMaxLength;
++            }
+ 
+-            if (newCapacity < capacity) newCapacity = capacity;
++            if (newCapacity < capacity)
++            {
++                newCapacity = capacity;
++            }
+ 
+             return newCapacity;
+         }
+@@ -186,4 +192,3 @@ namespace System.Collections.Generic
+ 
+ #endif
+ }
+-
+diff --git a/src/ObservableCollections/Shims/CollectionsMarshalEx.cs b/src/ObservableCollections/Shims/CollectionsMarshalEx.cs
+index f58fb71..372f9e7 100644
+--- a/src/ObservableCollections/Shims/CollectionsMarshalEx.cs
++++ b/src/ObservableCollections/Shims/CollectionsMarshalEx.cs
+@@ -37,26 +37,26 @@ internal static class CollectionsMarshal
+     /// </summary>
+     public static Span<T> AsSpan<T>(List<T>? list)
+     {
+-        if (list is null) return default;
+-
+-        if (IsLegacyList)
+-        {
+-            ref var view = ref Unsafe.As<List<T>, LegacyListView<T>>(ref list!);
+-            return view._items.AsSpan(0, list.Count);
++        if (list == null) return default;
++
++        if (IsLegacyList)
++        {
++            ref var view = ref Unsafe.As<List<T>, LegacyListView<T>>(ref list!);
++            return view._items.AsSpan(0, list.Count);
+         }
+-        else
+-        {
+-            ref var view = ref Unsafe.As<List<T>, ListView<T>>(ref list!);
+-            return view._items.AsSpan(0, list.Count);
++        else
++        {
++            ref var view = ref Unsafe.As<List<T>, ListView<T>>(ref list!);
++            return view._items.AsSpan(0, list.Count);
+         }
+-    }
+-
++    }
++
+     internal sealed class ListView<T>
+     {
+         public T[] _items;
+         public int _size;
+         public int _version;
+-    }
++    }
+ 
+     internal sealed class LegacyListView<T>
+     {
+diff --git a/src/ObservableCollections/SynchronizedViewChangedEventArgs.cs b/src/ObservableCollections/SynchronizedViewChangedEventArgs.cs
+index 0eb7cef..61133bd 100644
+--- a/src/ObservableCollections/SynchronizedViewChangedEventArgs.cs
++++ b/src/ObservableCollections/SynchronizedViewChangedEventArgs.cs
+@@ -104,9 +104,9 @@ namespace ObservableCollections
+             return filter.IsMatch(item.Item1, item.Item2);
+         }
+ 
+-        internal static void InvokeOnAdd<T, TView>(this ISynchronizedView<T, TView> collection, ref int filteredCount, NotifyViewChangedEventHandler<T, TView>? ev, Action<RejectedViewChangedAction, int, int>? ev2, (T value, TView view) value, int index)
++        internal static void InvokeOnAdd<T, TView>(this ISynchronizedView<T, TView> collection, ref int filteredCount, NotifyViewChangedEventHandler<T, TView>? ev, Action<RejectedViewChangedAction, int, int>? ev2, (T Value, TView View) value, int index)
+         {
+-            InvokeOnAdd(collection, ref filteredCount, ev, ev2, value.value, value.view, index);
++            InvokeOnAdd(collection, ref filteredCount, ev, ev2, value.Value, value.View, index);
+         }
+ 
+         internal static void InvokeOnAdd<T, TView>(this ISynchronizedView<T, TView> collection, ref int filteredCount, NotifyViewChangedEventHandler<T, TView>? ev, Action<RejectedViewChangedAction, int, int>? ev2, T value, TView view, int index)
+@@ -147,9 +147,9 @@ namespace ObservableCollections
+             }
+         }
+ 
+-        internal static void InvokeOnRemove<T, TView>(this ISynchronizedView<T, TView> collection, ref int filteredCount, NotifyViewChangedEventHandler<T, TView>? ev, Action<RejectedViewChangedAction, int, int>? ev2, (T value, TView view) value, int oldIndex)
++        internal static void InvokeOnRemove<T, TView>(this ISynchronizedView<T, TView> collection, ref int filteredCount, NotifyViewChangedEventHandler<T, TView>? ev, Action<RejectedViewChangedAction, int, int>? ev2, (T Value, TView View) value, int oldIndex)
+         {
+-            InvokeOnRemove(collection, ref filteredCount, ev, ev2, value.value, value.view, oldIndex);
++            InvokeOnRemove(collection, ref filteredCount, ev, ev2, value.Value, value.View, oldIndex);
+         }
+ 
+         internal static void InvokeOnRemove<T, TView>(this ISynchronizedView<T, TView> collection, ref int filteredCount, NotifyViewChangedEventHandler<T, TView>? ev, Action<RejectedViewChangedAction, int, int>? ev2, T value, TView view, int oldIndex)
+@@ -180,7 +180,7 @@ namespace ObservableCollections
+                     if (matches[i])
+                     {
+                         var item = (values[i], views[i]);
+-                        ev?.Invoke(new SynchronizedViewChangedEventArgs<T, TView>(NotifyCollectionChangedAction.Remove, isSingleItem: true, oldItem: item, oldStartingIndex: index)); //remove for list, always same index
++                        ev?.Invoke(new SynchronizedViewChangedEventArgs<T, TView>(NotifyCollectionChangedAction.Remove, isSingleItem: true, oldItem: item, oldStartingIndex: index)); // remove for list, always same index
+                     }
+                     else
+                     {
+@@ -190,9 +190,9 @@ namespace ObservableCollections
+             }
+         }
+ 
+-        internal static void InvokeOnMove<T, TView>(this ISynchronizedView<T, TView> collection, ref int filteredCount, NotifyViewChangedEventHandler<T, TView>? ev, Action<RejectedViewChangedAction, int, int>? ev2, (T value, TView view) value, int index, int oldIndex)
++        internal static void InvokeOnMove<T, TView>(this ISynchronizedView<T, TView> collection, ref int filteredCount, NotifyViewChangedEventHandler<T, TView>? ev, Action<RejectedViewChangedAction, int, int>? ev2, (T Value, TView View) value, int index, int oldIndex)
+         {
+-            InvokeOnMove(collection, ref filteredCount, ev, ev2, value.value, value.view, index, oldIndex);
++            InvokeOnMove(collection, ref filteredCount, ev, ev2, value.Value, value.View, index, oldIndex);
+         }
+ 
+         internal static void InvokeOnMove<T, TView>(this ISynchronizedView<T, TView> collection, ref int filteredCount, NotifyViewChangedEventHandler<T, TView>? ev, Action<RejectedViewChangedAction, int, int>? ev2, T value, TView view, int index, int oldIndex)
+@@ -209,9 +209,9 @@ namespace ObservableCollections
+             }
+         }
+ 
+-        internal static void InvokeOnReplace<T, TView>(this ISynchronizedView<T, TView> collection, ref int filteredCount, NotifyViewChangedEventHandler<T, TView>? ev, (T value, TView view) value, (T value, TView view) oldValue, int index, int oldIndex = -1)
++        internal static void InvokeOnReplace<T, TView>(this ISynchronizedView<T, TView> collection, ref int filteredCount, NotifyViewChangedEventHandler<T, TView>? ev, (T Value, TView View) value, (T Value, TView View) oldValue, int index, int oldIndex = -1)
+         {
+-            InvokeOnReplace(collection, ref filteredCount, ev, value.value, value.view, oldValue.value, oldValue.view, index, oldIndex);
++            InvokeOnReplace(collection, ref filteredCount, ev, value.Value, value.View, oldValue.Value, oldValue.View, index, oldIndex);
+         }
+ 
+         internal static void InvokeOnReplace<T, TView>(this ISynchronizedView<T, TView> collection, ref int filteredCount, NotifyViewChangedEventHandler<T, TView>? ev, T value, TView view, T oldValue, TView oldView, int index, int oldIndex = -1)
+diff --git a/src/ObservableCollections/SynchronizedViewList.cs b/src/ObservableCollections/SynchronizedViewList.cs
+index 73f5f41..b69d2ad 100644
+--- a/src/ObservableCollections/SynchronizedViewList.cs
++++ b/src/ObservableCollections/SynchronizedViewList.cs
+@@ -22,6 +22,7 @@ internal sealed class FiltableSynchronizedViewList<T, TView> : NotifyCollectionC
+     readonly WritableViewChangedEventHandler<T, TView>? converter; // null = readonly
+ 
+     public override event NotifyCollectionChangedEventHandler? CollectionChanged;
++
+     public override event PropertyChangedEventHandler? PropertyChanged;
+ 
+     public FiltableSynchronizedViewList(ISynchronizedView<T, TView> parent, bool isSupportRangeFeature, ICollectionEventDispatcher? eventDispatcher = null, WritableViewChangedEventHandler<T, TView>? converter = null)
+@@ -44,16 +45,18 @@ internal sealed class FiltableSynchronizedViewList<T, TView> : NotifyCollectionC
+         var index = 0;
+         if (filter.IsNullFilter())
+         {
+-            foreach (var item in parent.Unfiltered) // use Unfiltered
++            foreach (var item in parent.Unfiltered)
+             {
++                // use Unfiltered
+                 yield return (index, item.View);
+                 index++;
+             }
+         }
+         else
+         {
+-            foreach (var item in parent.Unfiltered) // use Unfiltered
++            foreach (var item in parent.Unfiltered)
+             {
++                // use Unfiltered
+                 if (filter.IsMatch(item))
+                 {
+                     yield return (index, item.View);
+@@ -113,8 +116,9 @@ internal sealed class FiltableSynchronizedViewList<T, TView> : NotifyCollectionC
+                         int index = e.OldStartingIndex;
+                         if (e.IsSingleItem)
+                         {
+-                            if (e.OldStartingIndex == -1) // can't gurantee correct remove if index is not provided
++                            if (e.OldStartingIndex == -1)
+                             {
++                                // can't gurantee correct remove if index is not provided
+                                 index = listView.Remove(e.OldItem.View);
+                             }
+                             else
+@@ -122,35 +126,30 @@ internal sealed class FiltableSynchronizedViewList<T, TView> : NotifyCollectionC
+                                 index = listView.RemoveAt(e.OldStartingIndex);
+                             }
+                         }
+-                        else
++                        else if (e.OldStartingIndex == -1)
+                         {
+-                            if (e.OldStartingIndex == -1)
++                            foreach (var view in e.OldViews)
+                             {
+-                                foreach (var view in e.OldViews) // index is unknown, can't do batching
+-                                {
+-                                    listView.Remove(view);
+-                                    OnCollectionChanged(e.WithOldStartingIndex(index));
+-                                }
+-                                return;
++                                // index is unknown, can't do batching
++                                listView.Remove(view);
++                                OnCollectionChanged(e.WithOldStartingIndex(index));
+                             }
+-                            else
++                            return;
++                        }
++                        else if (isSupportRangeFeature)
++                        {
++                            index = listView.RemoveRange(e.OldStartingIndex, e.OldViews.Length);
++                        }
++                        else
++                        {
++                            var span = e.OldViews;
++                            for (int i = 0; i < span.Length; i++)
+                             {
+-                                if (isSupportRangeFeature)
+-                                {
+-                                    index = listView.RemoveRange(e.OldStartingIndex, e.OldViews.Length);
+-                                }
+-                                else
+-                                {
+-                                    var span = e.OldViews;
+-                                    for (int i = 0; i < span.Length; i++)
+-                                    {
+-                                        index = listView.RemoveAt(e.OldStartingIndex); // when removed, next remove index is same.
+-                                        var ev = new SynchronizedViewChangedEventArgs<T, TView>(e.Action, true, oldItem: (e.OldValues[i], span[i]), oldStartingIndex: index);
+-                                        OnCollectionChanged(ev);
+-                                    }
+-                                    return;
+-                                }
++                                index = listView.RemoveAt(e.OldStartingIndex); // when removed, next remove index is same.
++                                var ev = new SynchronizedViewChangedEventArgs<T, TView>(e.Action, true, oldItem: (e.OldValues[i], span[i]), oldStartingIndex: index);
++                                OnCollectionChanged(ev);
+                             }
++                            return;
+                         }
+                         OnCollectionChanged(e.WithOldStartingIndex(index));
+                         return;
+@@ -168,19 +167,16 @@ internal sealed class FiltableSynchronizedViewList<T, TView> : NotifyCollectionC
+                             return;
+                         }
+                     }
++                    else if (listView.TrySetAtAlternateIndex(e.NewStartingIndex, e.NewItem.View, out var setIndex))
++                    {
++                        OnCollectionChanged(e.WithNewAndOldStartingIndex(setIndex, setIndex));
++                        return;
++                    }
+                     else
+                     {
+-                        if (listView.TrySetAtAlternateIndex(e.NewStartingIndex, e.NewItem.View, out var setIndex))
+-                        {
+-                            OnCollectionChanged(e.WithNewAndOldStartingIndex(setIndex, setIndex));
+-                            return;
+-                        }
+-                        else
+-                        {
+-                            return;
+-                        }
++                        return;
+                     }
+-                case NotifyCollectionChangedAction.Move: //Remove and Insert
++                case NotifyCollectionChangedAction.Move: // Remove and Insert
+                     if (e.NewStartingIndex == -1)
+                     {
+                         return; // do nothing
+@@ -335,6 +331,7 @@ internal sealed class FiltableSynchronizedViewList<T, TView> : NotifyCollectionC
+                 return listView[index];
+             }
+         }
++
+         set
+         {
+             if (IsReadOnly)
+@@ -528,8 +525,8 @@ internal sealed class NonFilteredSynchronizedViewList<T, TView> : NotifyCollecti
+     readonly WritableViewChangedEventHandler<T, TView>? converter; // null = readonly
+ 
+     public override event NotifyCollectionChangedEventHandler? CollectionChanged;
+-    public override event PropertyChangedEventHandler? PropertyChanged;
+ 
++    public override event PropertyChangedEventHandler? PropertyChanged;
+ 
+     public NonFilteredSynchronizedViewList(ISynchronizedView<T, TView> parent, bool isSupportRangeFeature, ICollectionEventDispatcher? eventDispatcher, WritableViewChangedEventHandler<T, TView>? converter)
+     {
+@@ -541,6 +538,7 @@ internal sealed class NonFilteredSynchronizedViewList<T, TView> : NotifyCollecti
+         {
+             listView = parent.ToList(); // guranteed non-filtered
+             parent.ViewChanged += Parent_ViewChanged;
++
+             // no register RejectedViewChanged(beacuse non filtered)
+         }
+     }
+@@ -596,8 +594,9 @@ internal sealed class NonFilteredSynchronizedViewList<T, TView> : NotifyCollecti
+                     {
+                         if (e.IsSingleItem)
+                         {
+-                            if (e.OldStartingIndex == -1) // can't gurantee correct remove if index is not provided
++                            if (e.OldStartingIndex == -1)
+                             {
++                                // can't gurantee correct remove if index is not provided
+                                 var index = listView.IndexOf(e.OldItem.View);
+                                 listView.RemoveAt(index);
+                                 OnCollectionChanged(e.WithOldStartingIndex(index));
+@@ -608,36 +607,31 @@ internal sealed class NonFilteredSynchronizedViewList<T, TView> : NotifyCollecti
+                                 listView.RemoveAt(e.OldStartingIndex);
+                             }
+                         }
+-                        else
++                        else if (e.OldStartingIndex == -1)
+                         {
+-                            if (e.OldStartingIndex == -1)
++                            foreach (var view in e.OldViews)
+                             {
+-                                foreach (var view in e.OldViews) // index is unknown, can't do batching
+-                                {
+-                                    var index = listView.IndexOf(view);
+-                                    listView.RemoveAt(index);
+-                                    OnCollectionChanged(e.WithOldStartingIndex(index));
+-                                }
+-                                return;
++                                // index is unknown, can't do batching
++                                var index = listView.IndexOf(view);
++                                listView.RemoveAt(index);
++                                OnCollectionChanged(e.WithOldStartingIndex(index));
+                             }
+-                            else
++                            return;
++                        }
++                        else if (isSupportRangeFeature)
++                        {
++                            listView.RemoveRange(e.OldStartingIndex, e.OldViews.Length);
++                        }
++                        else
++                        {
++                            var span = e.OldViews;
++                            for (int i = 0; i < span.Length; i++)
+                             {
+-                                if (isSupportRangeFeature)
+-                                {
+-                                    listView.RemoveRange(e.OldStartingIndex, e.OldViews.Length);
+-                                }
+-                                else
+-                                {
+-                                    var span = e.OldViews;
+-                                    for (int i = 0; i < span.Length; i++)
+-                                    {
+-                                        listView.RemoveAt(e.OldStartingIndex); // when removed, next remove index is same.
+-                                        var ev = new SynchronizedViewChangedEventArgs<T, TView>(e.Action, true, oldItem: (e.OldValues[i], span[i]), oldStartingIndex: e.OldStartingIndex);
+-                                        OnCollectionChanged(ev);
+-                                    }
+-                                    return;
+-                                }
++                                listView.RemoveAt(e.OldStartingIndex); // when removed, next remove index is same.
++                                var ev = new SynchronizedViewChangedEventArgs<T, TView>(e.Action, true, oldItem: (e.OldValues[i], span[i]), oldStartingIndex: e.OldStartingIndex);
++                                OnCollectionChanged(ev);
+                             }
++                            return;
+                         }
+                         break;
+                     }
+@@ -661,7 +655,7 @@ internal sealed class NonFilteredSynchronizedViewList<T, TView> : NotifyCollecti
+                         listView[e.NewStartingIndex] = e.NewItem.View;
+                     }
+                     break;
+-                case NotifyCollectionChangedAction.Move: //Remove and Insert
++                case NotifyCollectionChangedAction.Move: // Remove and Insert
+                     if (e.NewStartingIndex == -1)
+                     {
+                         return; // do nothing
+@@ -676,8 +670,9 @@ internal sealed class NonFilteredSynchronizedViewList<T, TView> : NotifyCollecti
+                     if (e.SortOperation.IsClear)
+                     {
+                         listView.Clear();
+-                        foreach (var item in parent.Unfiltered) // refresh
++                        foreach (var item in parent.Unfiltered)
+                         {
++                            // refresh
+                             listView.Add(item.View);
+                         }
+                     }
+@@ -837,6 +832,7 @@ internal sealed class NonFilteredSynchronizedViewList<T, TView> : NotifyCollecti
+                 return listView[index];
+             }
+         }
++
+         set
+         {
+             if (IsReadOnly)
+diff --git a/tests/ObservableCollections.R3.Tests/ObservableCollectionExtensionsTest.cs b/tests/ObservableCollections.R3.Tests/ObservableCollectionExtensionsTest.cs
+index 85f9355..a8042d9 100644
+--- a/tests/ObservableCollections.R3.Tests/ObservableCollectionExtensionsTest.cs
++++ b/tests/ObservableCollections.R3.Tests/ObservableCollectionExtensionsTest.cs
+@@ -1,6 +1,6 @@
++using R3;
+ using System.Collections.Generic;
+ using System.Threading;
+-using R3;
+ 
+ namespace ObservableCollections.R3.Tests;
+ 
+@@ -112,7 +112,7 @@ public class ObservableCollectionExtensionsTest
+     public void ObserveDictionaryRemove()
+     {
+         var events = new List<DictionaryRemoveEvent<int, string>>();
+-        var dictionary = new ObservableDictionary<int,string>
++        var dictionary = new ObservableDictionary<int, string>()
+         {
+             { 0, "zero" },
+             { 1, "one" },
+@@ -121,7 +121,7 @@ public class ObservableCollectionExtensionsTest
+         var cts = new CancellationTokenSource();
+         var result = default(Result?);
+ 
+-        var subscription = dictionary.ObserveDictionaryRemove((cts.Token)).Subscribe(ev => events.Add(ev), x => result = x);
++        var subscription = dictionary.ObserveDictionaryRemove(cts.Token).Subscribe(ev => events.Add(ev), x => result = x);
+         dictionary.Remove(0);
+ 
+         events.Count.Should().Be(1);
+@@ -161,11 +161,11 @@ public class ObservableCollectionExtensionsTest
+         collection[1] = 444;
+         events.Count.Should().Be(1);
+     }
+-    
++
+     [Fact]
+     public void ObserveDictionaryReplace()
+     {
+-        var events = new List<DictionaryReplaceEvent<int,string>>();
++        var events = new List<DictionaryReplaceEvent<int, string>>();
+         var dictionary = new ObservableDictionary<int, string>()
+         {
+             { 0, "zero" },
+diff --git a/tests/ObservableCollections.R3.Tests/_GlobalUsings.cs b/tests/ObservableCollections.R3.Tests/_GlobalUsings.cs
+index 7fef4b0..7b25ddd 100644
+--- a/tests/ObservableCollections.R3.Tests/_GlobalUsings.cs
++++ b/tests/ObservableCollections.R3.Tests/_GlobalUsings.cs
+@@ -1,2 +1,2 @@
++global using FluentAssertions;
+ global using Xunit;
+-global using FluentAssertions;
+\ No newline at end of file
+diff --git a/tests/ObservableCollections.Tests/AlternateIndexListTest.cs b/tests/ObservableCollections.Tests/AlternateIndexListTest.cs
+index 185a1f0..c81df74 100644
+--- a/tests/ObservableCollections.Tests/AlternateIndexListTest.cs
++++ b/tests/ObservableCollections.Tests/AlternateIndexListTest.cs
+@@ -17,7 +17,6 @@ public class AlternateIndexListTest
+         list.Insert(1, "new-bar");
+         list.GetIndexedValues().Should().Equal((0, "foo"), (1, "new-bar"), (2, "bar"), (3, "baz"));
+ 
+-
+         list.Insert(6, "zoo");
+         list.GetIndexedValues().Should().Equal((0, "foo"), (1, "new-bar"), (2, "bar"), (3, "baz"), (6, "zoo"));
+     }
+diff --git a/tests/ObservableCollections.Tests/ObservableDictionaryTest.cs b/tests/ObservableCollections.Tests/ObservableDictionaryTest.cs
+index 0bca54c..12c651e 100644
+--- a/tests/ObservableCollections.Tests/ObservableDictionaryTest.cs
++++ b/tests/ObservableCollections.Tests/ObservableDictionaryTest.cs
+@@ -40,7 +40,5 @@ namespace ObservableCollections.Tests
+             dict.Clear();
+             Equal(new int[0]);
+         }
+-
+-        
+     }
+ }
+diff --git a/tests/ObservableCollections.Tests/ObservableHashSetTest.cs b/tests/ObservableCollections.Tests/ObservableHashSetTest.cs
+index 65b6ff4..37b77fd 100644
+--- a/tests/ObservableCollections.Tests/ObservableHashSetTest.cs
++++ b/tests/ObservableCollections.Tests/ObservableHashSetTest.cs
+@@ -45,7 +45,6 @@ namespace ObservableCollections.Tests
+             Equal();
+         }
+ 
+-        
+         [Fact]
+         public void IndexOutOfRange()
+         {
+diff --git a/tests/ObservableCollections.Tests/ObservableListTest.cs b/tests/ObservableCollections.Tests/ObservableListTest.cs
+index f6b867b..36fb584 100644
+--- a/tests/ObservableCollections.Tests/ObservableListTest.cs
++++ b/tests/ObservableCollections.Tests/ObservableListTest.cs
+@@ -69,9 +69,9 @@ namespace ObservableCollections.Tests
+             Equal2(100, 400, 200, 300);
+         }
+ 
+-        //[Fact]
+-        //public void FilterTest()
+-        //{
++        // [Fact]
++        // public void FilterTest()
++        // {
+         //    var list = new ObservableList<int>();
+         //    var view1 = list.CreateView(x => new ViewContainer<int>(x));
+         //    list.AddRange(new[] { 10, 21, 30, 44, 45, 66, 90 });
+@@ -147,11 +147,11 @@ namespace ObservableCollections.Tests
+         //    filter1.CalledOnCollectionChanged.Select(x => x.Action).Should().Equal(NotifyCollectionChangedAction.Reset);
+         //    filter2.CalledOnCollectionChanged.Select(x => x.Action).Should().Equal(NotifyCollectionChangedAction.Reset);
+         //    filter3.CalledOnCollectionChanged.Select(x => x.Action).Should().Equal(NotifyCollectionChangedAction.Reset);
+-        //}
++        // }
+ 
+-        //[Fact]
+-        //public void FilterAndInvokeAddEvent()
+-        //{
++        // [Fact]
++        // public void FilterAndInvokeAddEvent()
++        // {
+         //    var list = new ObservableList<int>();
+         //    var view1 = list.CreateView(x => new ViewContainer<int>(x));
+         //    list.AddRange(new[] { 10, 21, 30, 44 });
+@@ -170,6 +170,6 @@ namespace ObservableCollections.Tests
+ 
+         //    filter1.CalledWhenTrue.Count.Should().Be(3);
+         //    filter1.CalledWhenFalse.Count.Should().Be(1);
+-        //}
++        // }
+     }
+ }
+\ No newline at end of file
+diff --git a/tests/ObservableCollections.Tests/ObservableQueueTest.cs b/tests/ObservableCollections.Tests/ObservableQueueTest.cs
+index 6ed0ff3..c1acfae 100644
+--- a/tests/ObservableCollections.Tests/ObservableQueueTest.cs
++++ b/tests/ObservableCollections.Tests/ObservableQueueTest.cs
+@@ -49,9 +49,9 @@ namespace ObservableCollections.Tests
+             Equal();
+         }
+ 
+-        //[Fact]
+-        //public void Filter()
+-        //{
++        // [Fact]
++        // public void Filter()
++        // {
+         //    var queue = new ObservableQueue<int>();
+         //    var view = queue.CreateView(x => new ViewContainer<int>(x));
+         //    var filter = new TestFilter<int>((x, v) => x % 3 == 0);
+@@ -79,11 +79,11 @@ namespace ObservableCollections.Tests
+         //    queue.Dequeue();
+         //    queue.DequeueRange(2);
+         //    filter.CalledOnCollectionChanged.Select(x => (x.Action, x.OldValue, x.OldViewIndex)).Should().Equal((NotifyCollectionChangedAction.Remove, 10, 0), (NotifyCollectionChangedAction.Remove, 50, 0), (NotifyCollectionChangedAction.Remove, 30, 0));
+-        //}
+-        
+-        //[Fact]
+-        //public void FilterAndInvokeAddEvent()
+-        //{
++        // }
++
++        // [Fact]
++        // public void FilterAndInvokeAddEvent()
++        // {
+         //    var queue = new ObservableQueue<int>();
+         //    var view = queue.CreateView(x => new ViewContainer<int>(x));
+         //    var filter = new TestFilter<int>((x, v) => x % 3 == 0);
+@@ -95,7 +95,7 @@ namespace ObservableCollections.Tests
+         //    queue.Enqueue(40);
+ 
+         //    view.AttachFilter(filter, true);
+-            
++
+         //    filter.CalledOnCollectionChanged.Count.Should().Be(5);
+         //    filter.CalledOnCollectionChanged[0].Action.Should().Be(NotifyCollectionChangedAction.Add);
+         //    filter.CalledOnCollectionChanged[0].NewValue.Should().Be(10);
+@@ -115,6 +115,6 @@ namespace ObservableCollections.Tests
+ 
+         //    filter.CalledWhenTrue.Count.Should().Be(1);
+         //    filter.CalledWhenFalse.Count.Should().Be(4);
+-        //}   
++        // }   
+     }
+ }
+diff --git a/tests/ObservableCollections.Tests/ObservableRingBufferTest.cs b/tests/ObservableCollections.Tests/ObservableRingBufferTest.cs
+index f3dad10..fce594a 100644
+--- a/tests/ObservableCollections.Tests/ObservableRingBufferTest.cs
++++ b/tests/ObservableCollections.Tests/ObservableRingBufferTest.cs
+@@ -53,7 +53,6 @@ namespace ObservableCollections.Tests
+             Equal(9999);
+         }
+ 
+-
+         [Fact]
+         public void FixedSize()
+         {
+diff --git a/tests/ObservableCollections.Tests/RingBufferTest.cs b/tests/ObservableCollections.Tests/RingBufferTest.cs
+index 1d5991a..353c1a1 100644
+--- a/tests/ObservableCollections.Tests/RingBufferTest.cs
++++ b/tests/ObservableCollections.Tests/RingBufferTest.cs
+@@ -44,7 +44,6 @@ namespace ObservableCollections.Tests
+             list.Should().Equal(99, 3, 4, 88, 5, 6, 7, 8);
+             list.Reverse().Should().Equal(8, 7, 6, 5, 88, 4, 3, 99);
+ 
+-
+             // copy
+             {
+                 var newArray = new int[10];
+@@ -123,7 +122,6 @@ namespace ObservableCollections.Tests
+                 list.CopyTo(newArray, 2);
+                 newArray.Should().Equal(0, 0, 199, 9, 999, 7, 6, 5, 1099, 4, 3, 888, 299, 0, 0);
+             }
+-
+         }
+ 
+         [Fact]
+@@ -132,7 +130,6 @@ namespace ObservableCollections.Tests
+             var empty = new RingBuffer<int>();
+             empty.ToArray().Should().BeEmpty();
+ 
+-
+             for (int i = 0; i < 10; i++)
+             {
+                 var buffer = new RingBuffer<int>();
+@@ -203,11 +200,6 @@ namespace ObservableCollections.Tests
+                     buffer.BinarySearch(i).Should().Be(multiL.BinarySearch(i));
+                 }
+             }
+-
+-
+-
+-
+-
+         }
+     }
+ }
+diff --git a/tests/ObservableCollections.Tests/ToNotifyCollectionChangedTest.cs b/tests/ObservableCollections.Tests/ToNotifyCollectionChangedTest.cs
+index ed3e7a3..cd2a3eb 100644
+--- a/tests/ObservableCollections.Tests/ToNotifyCollectionChangedTest.cs
++++ b/tests/ObservableCollections.Tests/ToNotifyCollectionChangedTest.cs
+@@ -1,6 +1,6 @@
++using ObservableCollections;
+ using System.Collections.Specialized;
+ using System.Diagnostics;
+-using ObservableCollections;
+ 
+ namespace ObservableCollections.Tests;
+ 
+@@ -47,7 +47,7 @@ public class ToNotifyCollectionChangedTest
+         var view = list.CreateView(x => $"${x}");
+         var notify = view.ToNotifyCollectionChanged();
+ 
+-        view.AttachFilter((value) => value % 2 == 0);
++        view.AttachFilter(value => value % 2 == 0);
+ 
+         list.Add(4);
+ 
+@@ -62,7 +62,7 @@ public class ToNotifyCollectionChangedTest
+     [Fact]
+     public void ToNotifyCollectionChanged_Move()
+     {
+-        var list = new ObservableList<int> { 0, 1, 2, 3 };
++        var list = new ObservableList<int>() { 0, 1, 2, 3 };
+ 
+         var view = list.CreateView(i => i)
+             .ToNotifyCollectionChanged();
+@@ -72,7 +72,9 @@ public class ToNotifyCollectionChangedTest
+         view.CollectionChanged += (_, e) =>
+         {
+             if (e.Action == NotifyCollectionChangedAction.Move)
++            {
+                 moveEventCount++;
++            }
+         };
+ 
+         list.Move(0, 1);
+diff --git a/tests/ObservableCollections.Tests/ViewContainer.cs b/tests/ObservableCollections.Tests/ViewContainer.cs
+index 4a02766..c1388e1 100644
+--- a/tests/ObservableCollections.Tests/ViewContainer.cs
++++ b/tests/ObservableCollections.Tests/ViewContainer.cs
+@@ -31,8 +31,8 @@ namespace ObservableCollections.Tests
+         }
+     }
+ 
+-    //public class TestFilter<T> : ISynchronizedViewFilter<T>
+-    //{
++    // public class TestFilter<T> : ISynchronizedViewFilter<T>
++    // {
+     //    readonly Func<T, bool> filter;
+     //    public List<SynchronizedViewChangedEventArgs<T, ViewContainer<T>>> CalledOnCollectionChanged = new();
+ 
+@@ -67,10 +67,10 @@ namespace ObservableCollections.Tests
+     //    {
+     //        CalledWhenFalse.Add((value, view));
+     //    }
+-    //}
++    // }
+ 
+-    //public class TestFilter2<T> : ISynchronizedViewFilter<KeyValuePair<T, T>, ViewContainer<T>>
+-    //{
++    // public class TestFilter2<T> : ISynchronizedViewFilter<KeyValuePair<T, T>, ViewContainer<T>>
++    // {
+     //    readonly Func<KeyValuePair<T, T>, ViewContainer<T>, bool> filter;
+     //    public List<(KeyValuePair<T, T>, ViewContainer<T>)> CalledWhenTrue = new();
+     //    public List<(KeyValuePair<T, T>, ViewContainer<T>)> CalledWhenFalse = new();
+@@ -107,5 +107,5 @@ namespace ObservableCollections.Tests
+     //    {
+     //        CalledWhenFalse.Add((value, view));
+     //    }
+-    //}
++    // }
+ }
+diff --git a/tests/ObservableCollections.Tests/_GlobalUsings.cs b/tests/ObservableCollections.Tests/_GlobalUsings.cs
+index 30b9735..5a482fe 100644
+--- a/tests/ObservableCollections.Tests/_GlobalUsings.cs
++++ b/tests/ObservableCollections.Tests/_GlobalUsings.cs
+@@ -1,2 +1,2 @@
+-﻿global using Xunit;
+-global using FluentAssertions;
++﻿global using FluentAssertions;
++global using Xunit;
