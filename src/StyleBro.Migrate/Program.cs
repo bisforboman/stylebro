@@ -880,6 +880,17 @@ internal static class Program
             _ => (null, new[] { "--write", AgentsFile.Option, SonarProfileOption }.Concat(PreviewCommand.Options).ToArray()),
         };
         var options = args.Skip(command is null ? 0 : 1).ToArray();
+
+        // A preview's format runs take --engine like 'bro format' (trial 50: 'preview init --engine host' was an unknown option).
+        string? engineError = null;
+        var previewEngine = command != "baseline" && PreviewCommand.Wants(options) ? FormatCommand.TakeEngine(ref options, out engineError) : FormatCommand.DotnetFormatEngine;
+        if (previewEngine is null)
+        {
+            Console.Error.WriteLine(engineError);
+            return 1;
+        }
+
+        using var engine = FormatCommand.UseEngine(previewEngine);
         if (command is null && options.Any(a => a.Split('=')[0] == InitCommand.StyleOption))
         {
             // A migrated repository follows its own StyleCop settings (docs/proposals/microsoft-style.md).

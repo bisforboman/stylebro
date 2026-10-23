@@ -93,14 +93,16 @@ internal static class PreviewCommand
     {
         // Each file keeps its own line ending, as in FormatCommand.Run (trial 28: every changed file of an LF repository was
         // CRLF in the patch, the whitespace pass writing the OS's ending without end_of_line).
-        // --engine picks what formats the copy, as in 'bro format' (trial 50: passed on, 'dotnet format' printed its usage text).
+        // --engine picks what formats the copy, as in 'bro format' (trial 50: passed on, 'dotnet format' printed its usage text);
+        // without it, the engine the command already uses (Program takes the option first).
+        var engineNamed = options.Contains(FormatCommand.EngineOption);
         if (FormatCommand.TakeEngine(ref options, out var engineError) is not { } engineName)
         {
             Console.Error.WriteLine(engineError);
             return 1;
         }
 
-        using var engine = FormatCommand.UseEngine(engineName);
+        using var engine = engineNamed ? FormatCommand.UseEngine(engineName) : null;
         var formatOnce = format ?? FormatCommand.RunPlain;
         var keepingEndings = FormatCommand.KeepingLineEndings((a, o) => formatOnce(a, o!));
         format = (a, o) => keepingEndings(a, o);

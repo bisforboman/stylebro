@@ -31,4 +31,17 @@ public sealed partial class MigrationTests
         var error = CaptureError(() => Capture(() => Assert.Equal(1, PreviewCommand.Run("format", new[] { project, "--diff", "--engine", "fast" }, (_, _) => throw new InvalidOperationException("format ran")))));
         Assert.Contains("--engine takes 'host'", error, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void Preview_Init_TakesTheEngineOption()
+    {
+        // commandline: 'bro preview init --engine host' stopped at "Unknown option: --engine". Program takes it for every
+        // preview (and its value isn't read as the path).
+        var error = CaptureError(() => Capture(() => Program.Main(["preview", "init", root, "--engine", "host"])));
+        Assert.Contains($"No solution or project in {root};", error, StringComparison.Ordinal);
+        Assert.DoesNotContain("Unknown option", error, StringComparison.Ordinal);
+
+        error = CaptureError(() => Capture(() => Assert.Equal(1, Program.Main(["preview", "init", root, "--engine", "fast"]))));
+        Assert.Contains("--engine takes 'host'", error, StringComparison.Ordinal);
+    }
 }

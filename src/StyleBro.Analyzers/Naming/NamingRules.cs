@@ -20,6 +20,9 @@ namespace StyleBro.Analyzers.Naming;
 /// <item>so do names where ReSharper's InconsistentNaming inspection is suppressed ('// ReSharper disable once
 /// InconsistentNaming' above the declaration, or 'disable' up to its 'restore'): the author said the name is on purpose
 /// (owner's choice 2026-10-23, trial 49: Cocona's '[Argument] string ArgName0', which it binds by name);</item>
+/// <item>no static method is renamed to 'Main': every static 'Main' is an entry point candidate, a second entry point
+/// (CS0017) where the project has one, its own or a generated one (trial 50, commandline: '__Main' in a test project that
+/// Microsoft.NET.Test.Sdk gives an entry point on .NET Core), or CS0028 for another signature;</item>
 /// <item>the first SDK naming rule that covers the symbol (Roslyn's order), when enforced, must accept the new name:
 /// Altinn's rule for private properties asked for '_camelCase' and BRO1309's '_format' -> 'Format' broke the build with
 /// IDE1006 at error (trial 20).</item>
@@ -43,6 +46,11 @@ internal static class NamingRules
             || IsDisabledByPragma(tree, location.SourceSpan.Start, cancellationToken)
             || IsDisabledByReSharper(tree, location.SourceSpan.Start, cancellationToken)
             || IsSuppressedByAttribute(compilation, symbol))
+        {
+            return false;
+        }
+
+        if (newName == "Main" && symbol is IMethodSymbol { IsStatic: true })
         {
             return false;
         }
