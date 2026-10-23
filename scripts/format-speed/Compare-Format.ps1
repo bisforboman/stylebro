@@ -2,8 +2,8 @@
 # The parity harness of docs/proposals/format-speed.md: runs 'bro check', 'bro format' and 'bro check' again with the
 # default engine ('dotnet format' processes) and with --engine host on two fresh clones of the same commit, and compares
 # what users see: the exit codes, the output (the clone's path written as <root>, the --timings block left out, finding
-# lines and "Checked" progress lines compared as sorted sets: both engines analyze concurrently, so their order isn't
-# stable between two runs of the same engine either), the working trees after 'format' (stylebro.baseline included)
+# lines, kept-finding lines and "Checked" progress lines compared as sorted sets: both engines analyze and fix
+# concurrently, so their order isn't stable between two runs of the same engine either), the working trees after 'format' (stylebro.baseline included)
 # and the --json reports. Any difference fails. Prints both engines' times.
 #
 #   pwsh scripts/format-speed/Compare-Format.ps1 -Repository <clone at the commit to compare> [-Work <folder>] [-Bro <command>]
@@ -40,7 +40,7 @@ function Normalize([string[]] $lines, [string] $root) {
         if ($line.StartsWith('Timings (')) { $timings = $true; continue }
         if ($timings -and $line.StartsWith('  ')) { continue }
         $timings = $false
-        if ($line -match '^\s*.+?\(\d+,\d+\): (?:error|warning) \w+:' -or $line -match '^Checked .+ \(run \d+ of \d+\)$') {
+        if ($line -match '^\s*.+?\(\d+,\d+\): (?:error|warning|kept) \w+:' -or $line -match '^Checked .+ \(run \d+ of \d+\)$') {
             $unordered.Add(($line -replace ' \(run \d+ of \d+\)$', ''))
         }
         else {
