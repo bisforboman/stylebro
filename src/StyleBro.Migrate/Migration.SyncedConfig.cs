@@ -145,26 +145,6 @@ internal static partial class Migration
     /// </summary>
     public static bool CanProveCopyOff(string? before) => before is not null && before.Contains(BeginMarker, StringComparison.Ordinal);
 
-    /// <summary>
-    /// The record of <see cref="RememberCopyOff"/>: named by the package, its file and every project and build file's path and
-    /// text under <paramref name="root"/>, so a changed property (the copying turned on again) or package version needs new
-    /// builds; in the temp folder, so the preview's copy of the repository finds it too.
-    /// </summary>
-    private static string CopyOffRecord(string root, PackageConfig copy)
-    {
-        var text = new StringBuilder(copy.Package).Append('\n').Append(copy.File).Append('\n');
-        foreach (var file in StyleCopSetup.EnumerateFiles(root)
-            .Where(f => Path.GetExtension(f).ToLowerInvariant() is ".props" or ".targets" or ".csproj" or ".rsp")
-            .Select(f => (Path: f, Relative: Path.GetRelativePath(root, f).Replace('\\', '/')))
-            .OrderBy(f => f.Relative, StringComparer.Ordinal))
-        {
-            text.Append(file.Relative).Append('\n').Append(File.ReadAllText(file.Path).Replace("\r\n", "\n")).Append('\n');
-        }
-
-        var hash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(text.ToString())))[..16];
-        return Path.Combine(Path.GetTempPath(), "stylebro-copy-off", hash + ".txt");
-    }
-
     /// <summary>The package <see cref="PackageCopy"/> finds, whether or not the builds showed its copying is off.</summary>
     public static PackageConfig? FindPackageCopy(string root)
     {
@@ -232,6 +212,26 @@ internal static partial class Migration
     /// <summary>The gap format and check name for a <see cref="PackageCopy"/> (<see cref="FormatCommand.Gap"/>).</summary>
     public static string PackageCopyGap(PackageConfig copy) =>
         FormatCommand.Gap("the build's settings", $"the root .editorconfig is a copy of {copy.Package}'s {copy.File}, which the build copies back over it, so the build doesn't read the settings format checked with");
+
+    /// <summary>
+    /// The record of <see cref="RememberCopyOff"/>: named by the package, its file and every project and build file's path and
+    /// text under <paramref name="root"/>, so a changed property (the copying turned on again) or package version needs new
+    /// builds; in the temp folder, so the preview's copy of the repository finds it too.
+    /// </summary>
+    private static string CopyOffRecord(string root, PackageConfig copy)
+    {
+        var text = new StringBuilder(copy.Package).Append('\n').Append(copy.File).Append('\n');
+        foreach (var file in StyleCopSetup.EnumerateFiles(root)
+            .Where(f => Path.GetExtension(f).ToLowerInvariant() is ".props" or ".targets" or ".csproj" or ".rsp")
+            .Select(f => (Path: f, Relative: Path.GetRelativePath(root, f).Replace('\\', '/')))
+            .OrderBy(f => f.Relative, StringComparer.Ordinal))
+        {
+            text.Append(file.Relative).Append('\n').Append(File.ReadAllText(file.Path).Replace("\r\n", "\n")).Append('\n');
+        }
+
+        var hash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(text.ToString())))[..16];
+        return Path.Combine(Path.GetTempPath(), "stylebro-copy-off", hash + ".txt");
+    }
 
     /// <summary>
     /// Whether one of the package's build files (.props/.targets under build/, buildTransitive/, buildMultiTargeting/) names

@@ -229,8 +229,10 @@ tool again replaces the block, so put your own settings outside it.
 - **The StyleCop version** is recorded in the block (`# StyleCop.Analyzers version: ...`), so running `--write` again
   after removing the package still leaves the rules that version didn't have off.
 - **A build that copies `.editorconfig`.** Some shared build setups copy an `.editorconfig` over the root one on every
-  build (SixLabors' shared infrastructure does). The report notes such a file: the block would be lost on the next
-  build, so put it into the copied file (or stop the copy).
+  build (SixLabors' shared infrastructure does, and NuGet packages like NetEvolve.Defaults). The report notes such a file:
+  the block would be lost on the next build, so put it into the copied file (or stop the copy). For a package's copy,
+  `bro format` and `bro check` say "Not verified" until `bro check --build` has seen its builds leave the root
+  `.editorconfig` as it is (after you turn the copying off); that is remembered until a project or build file changes.
 
 - **Documentation scope.** `documentExposedElements`, `documentInternalElements` and `documentPrivateElements`
   become [BRO1601](rules/BRO1601.md)'s `stylebro_document_*` settings.

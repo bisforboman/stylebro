@@ -2039,3 +2039,24 @@ branch, not committed to main). StyleCop parity is complete (every rule is Style
   is honestly Not verified there), a net9.0 apphost MSB3030 untouched; its tests are TUnit executables (net8.0/net10.0).
   lambda-test-server: global.json 10.0.402 lowered, outputs in artifacts/bin. FASTER: `-p:NuGetAudit=false`, net7.0 tests with
   `DOTNET_ROLL_FORWARD=Major`. The stop hook flags trial clones' commits and dirty trees (third-party repos): never push them.
+
+## Trial 46 (2026-10-23, clean: owner "Count it clean", tally 1 in a row)
+
+- First trial of the variant "three random plus one targeted" (owner, 2026-10-23: "Mostly random"; `.trials/README.md`). Seed 46
+  drew 2, 12, 1 from random.json's 27 entries, all used or needing SDK 11 (FastEndpoints, Verify), so five candidates were appended
+  (entries 28-32) and the draws walked into them: altmann/FluentResults, jamesmh/coravel, sqlkata/querybuilder (MiniExcel: net11.0).
+  Targeted: dailydevops/codebuilder (NetEvolve.Defaults 2.10.0, committed root .editorconfig an exact copy of its template,
+  CSharpier.MSBuild, Sonar, TUnit). The three random ones converged in one run, preview = format file by file, check and check
+  --build Clean, TWAE builds and tests as untouched. coravel: init turns IDE0055 off (mixed cast spacing), so a later plain
+  `dotnet format --verify-no-changes` reports WHITESPACE that `bro format` skips by design.
+- codebuilder (owner: "Builds prove it"): with `<DisableSupportAdditionalFiles>true</DisableSupportAdditionalFiles>` (the package's
+  switch) init still warned and format/check/check --build said Not verified, though the builds kept init's block and were clean.
+  `FormatCommand.CopyOffVerdict`: check --build holds the gap lines while a `PackageCopy` is named, and when its builds are clean and
+  left the root .editorconfig (with init's block, `CanProveCopyOff`) as it was, `Migration.RememberCopyOff` writes a record in
+  %TEMP%/stylebro-copy-off (hash of the package, its file and every .props/.targets/.csproj/.rsp path + text: the preview's copy
+  finds it, a changed property needs new builds); `PackageCopy` returns null then (`FindPackageCopy` is the raw search). Copying
+  turned back on: Not verified / Not clean again (checked).
+- Environment: SDK 10.0.113 + 8.0.132 and pwsh were there (`ln -s ~/.dotnet/tools/bro /usr/local/bin/bro`). codebuilder's
+  nuget.config `<clear/>`s: the trial feed + a `StyleBro.*` mapping go in there; its tests run with `dotnet test --solution
+  CodeBuilder.slnx` (MTP). FluentResults' net48 tests need mono, querybuilder's MySQL tests a server (both fail untouched). The
+  worker restarted twice: background jobs died, check their logs before rerunning.
