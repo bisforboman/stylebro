@@ -94,3 +94,13 @@ rounds. One note differs on Newtonsoft.Json and error-or: the default engine's n
 it can't match, an effect of forcing one framework on the projects, which the host, loading every framework at once,
 doesn't have
 ([decision](https://github.com/bisforboman/stylebro/blob/main/docs/decisions/2026-10-23-the-format-host-keeps-its-own-workspace-load-warnings.md)).
+
+Trial 47 ran the harness and `bro check --build` with both engines on four more repositories (CSharpFunctionalExtensions,
+zio, SmartFormat, fluentvalue). It found one difference, now fixed: in SmartFormat's net462 run the host's view also had the
+libraries' netstandard2.0 instances (MSBuildWorkspace sends a project reference it can't match by output to a project's
+first instance), and the analyzers reported their copies of the files, which the whitespace formatter had left alone, as
+findings at the positions before formatting. A run's references now go to the instances the run names, as in a
+`dotnet format` run of that framework. The `changesPerRule` counts of `--json` can differ by one or two between two runs of
+the default engine on the same code (CSharpFunctionalExtensions: 104 and 105 BRO1505 changes), because `dotnet format` fixes
+the ids in an order that changes from one run to the next, and another fix sometimes adds a blank line BRO1505 would have;
+the host's order is fixed.
