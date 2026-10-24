@@ -4,3 +4,7 @@ format	0	58s	bro format
 check	0	44s	bro check
 check-json	0
 checkbuild	0	408s	bro check --build
+checkbuild-json	0
+twae-Debug	0	33s	twae Debug
+test-Debug	0	40s	env CFG=Debug bash -c for p in test/*.Test/*.Test.csproj; do dotnet test $p -c $CFG || r=1; done; exit ${r:-0}
+twae-Release	0	23s	twae Release

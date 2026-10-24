@@ -4,3 +4,9 @@ format	0	152s	bro format
 check	0	49s	bro check
 check-json	0
 checkbuild	0	173s	bro check --build
+checkbuild-json	0
+twae-Debug	0	19s	twae Debug
+test-Debug	0	38s	env CFG=Debug bash -c dotnet test --solution Sharprompt.slnx -c $CFG
+twae-Release	0	21s	twae Release
+test-Release	0	32s	env CFG=Release bash -c dotnet test --solution Sharprompt.slnx -c $CFG
+DONE
