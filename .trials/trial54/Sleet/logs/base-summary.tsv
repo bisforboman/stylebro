@@ -1,0 +1,1 @@
+build	0	64s	dotnet build Sleet.slnx -c Debug
