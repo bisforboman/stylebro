@@ -740,6 +740,10 @@ internal static class InitCommand
                 endings.Add($"# init: {fileNote}");
                 endings.Add(fileLine);
             }
+            else if (formatsWhitespace && Conventions.ConvertedMinorityFileNote(group.Counts, settings, key) is { } minorityFileNote)
+            {
+                report.Add($"  {"note",-8} {minorityFileNote}");
+            }
         }
 
         if (formatsWhitespace && RootGroup(Conventions.TrailingWhitespaceKey) is { } trailing && Conventions.TrailingWhitespaceNote(trailing.Counts, settings) is { } whitespaceNote)
