@@ -195,3 +195,34 @@ above the target, up to the repository root, that MSBuild imports. It didn't aff
 found from the root, and the package goes into the root Directory.Build.props as in the getting-started guide.
 
 Logs: `logs/recheck/spot-preview-noengine.log`, `spot-preview-engine.log`, `spot-preview.patch`.
+
+### Final pass (fixer's commit 990c775)
+
+Repacked from `claude/trial-50` at `990c775` as `0.8.0-trial50.3`. Fresh clones of the untouched commit: `r2default/` and
+`r2host/` for the full runs; `p2-host/`, `p2-dotnet/` and `d2-host/` for the previews on an unformatted tree after
+`init --write` and the package reference. Script: `.trials/trial50/Dahomey.Json/r2.sh`; logs: `logs/recheck2/`
+(`summary.txt` has every command, exit code and time).
+
+| Command | Default: verdict | exit | time | Host: verdict | exit | time |
+|---|---|---|---|---|---|---|
+| `bro preview init` (`--engine host`) | 92 files, 338 changes, clean after 1 run | 0 | 92 s | same; patch byte-identical | 0 | 48 s |
+| `bro init --write` | as before | 0 | 3 s | identical | 0 | 3 s |
+| `bro format` | run 1: 92 files; run 2: 0, clean | 0 | 92 s | the same | 0 | 51 s |
+| `bro check` (+ `--json`) | Clean | 0 | 20 s | Clean | 0 | 19 s |
+| `bro check --build` (+ `--json`) | Clean (15 untouched errors not counted) | 0 | 51 s | Clean, same lines | 0 | 49 s |
+| `bro preview format --engine dotnet-format` | 92 files, 338 changes | 0 | 80 s | | | |
+| `bro preview format --engine host` | | | | 92 files, 338 changes | 0 | 47 s |
+| `bro format --diff --engine host` | | | | 92 files, 338 changes | 0 | 47 s |
+
+- **Finding 2 is fixed.** The spot repro `bro preview format Lib` (with and without `--engine host`) exits 0. It doesn't
+  mention adding the reference, and its patch is empty (no `Lib/Directory.Build.props`). Logs:
+  `logs/recheck2/spot-preview*.log` and `.patch`.
+- **Finding 1 is still fixed.** `bro preview init --engine host` is now accepted too, and its patch is byte-identical to the
+  default engine's.
+- Trees: `r2default` == `r2host` == the first re-check's tree (`diff -rq`). The preview init patch and the three
+  format previews (3,153 lines, byte-identical), each applied to its clone, give exactly the format tree.
+- `--json` of check and check --build: equal apart from `path`; clean true, exit 0, one `notChecked` (IDE0049). No host
+  load note and no fallback to dotnet format.
+- TWAE builds (both engines, Debug and Release): 0 warnings, the same 15 netstandard2.0 CS0122 errors as the untouched code. Tests
+  360 / 372 / 374 passed, 0 failed.
+- Verdicts match the builds and tests. **No findings left.**
