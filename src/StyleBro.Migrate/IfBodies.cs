@@ -47,7 +47,7 @@ internal static class IfBodies
     /// or when it is a '#region' or '#endregion' right below another directive line that one parse compiles and another leaves
     /// out (the formatter puts the other directives in column 0 in every parse, and leaves a line below left-out text alone).
     /// Such a region line only moves where the left-out branch spans a block boundary, which makes the file a candidate
-    /// already (<see cref="OpensBlock"/>).
+    /// already (<see cref="OpensBlock"/>). The '//' comment lines right above a protected line count too.
     /// </summary>
     public static List<int> Lines(string text, IEnumerable<IReadOnlyCollection<string>> symbolSets)
     {
@@ -98,6 +98,17 @@ internal static class IfBodies
                 {
                     protectedLines.Add(line);
                 }
+            }
+        }
+
+        // The '//' lines right above a protected line: the formatter indents them like the code below, each build its own way
+        // (Newtonsoft.Json's TraceJsonWriter.cs: '// base.WriteValue(value) will error' in an else body '#if' nests, which
+        // went 8 columns deeper and back on every run while its statement kept its indentation).
+        foreach (var line in protectedLines.ToList())
+        {
+            for (var above = line - 1; above >= 0 && !protectedLines.Contains(above) && source.Lines[above].ToString().TrimStart().StartsWith("//", StringComparison.Ordinal); above--)
+            {
+                protectedLines.Add(above);
             }
         }
 

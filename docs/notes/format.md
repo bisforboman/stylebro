@@ -86,6 +86,12 @@ The `bro format` investigation (per-framework runs, convergence, speed on large 
   framework in one workspace: no whitespace pass, no per-framework runs, no IDE rules, so this class can't show there.
   `BroFormat = $true` (Newtonsoft only, default engine; owner's choice) adds `bro init --write` + `bro format` on the
   untouched code after the checks; exit 2 fails the job.
+  Its first CI run (Windows, newest SDK 10) failed: `Serialization/TraceJsonWriter.cs` flipped `// base.WriteValue(value)
+  will error` 8 columns deeper and back. The line sits in the last else body of an if/else chain split by `#if
+  HAVE_BIG_INTEGER`/`HAVE_INT128`/`HAVE_HALF`; `IfBodies.Lines` protected the statements there (by their first token) but
+  not the comment line, which the formatter indents like the statement below it. Converged locally (SDK 10.0.113, LF and
+  CRLF checkouts: 312 files, then clean), so the job now prints the diff of one more run when format isn't clean
+  (that's how the line was found). Fix: the `//` lines right above a protected line are protected too.
 
 - **Tracker bugs** (2026-10-04, docs/beyond-stylecop.md "Possible bugs to check", all fixed): BRO1504 treats a
   collection expression's `[` like `{` (StyleCop #3766); BRO1603 accepts a period before closing `)`/`]`/`"`/`'`
