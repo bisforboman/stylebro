@@ -222,8 +222,8 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
         var key = workspace + "\n" + string.Join("\n", environment) + "\n" + copy.Copy;
         return this.copies.GetOrAdd(key, _ => new Lazy<Task<Loaded>>(async () =>
         {
-            var current = await loaded.SyncAsync(this.measure).ConfigureAwait(false);
-            return new Loaded(loaded.Workspace, loaded.Solution, loaded.Diagnostics, unsupported: false, disk: new DiskState(copy.OnDisk), current: current) { Missing = copy.Lacks(current) };
+            var repository = await loaded.SyncAsync(this.measure).ConfigureAwait(false);
+            return new Loaded(loaded.Workspace, loaded.Solution, loaded.Diagnostics, unsupported: false, disk: new DiskState(copy.OnDisk), current: repository) { Missing = copy.Lacks(repository) };
         })).Value;
     }
 
