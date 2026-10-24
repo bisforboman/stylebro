@@ -10,6 +10,10 @@ public sealed partial class MigrationTests
     // runs undid each other and 'bro format' ended "still changing after 3 runs".
     private const string RegionInLeftOutCode = "class C\n{\n#if !NET20\n    void M()\n    {\n        #region Add\n        x();\n#if NET6_0_OR_GREATER\n        y();\n#endif\n        #endregion\n    }\n#endif\n}\n";
 
+    // TraceJsonWriter.cs: an if/else chain split by '#if', its last else body a block whose lines each build nests its own
+    // way; the '//' line above a statement there went 8 columns deeper and back on every run (Windows, the newest SDK).
+    private const string CommentInIfBody = "class C\n{\n    void M(object value)\n    {\n#if A\n        if (value is int)\n        {\n            X();\n        }\n        else\n#endif\n#if B\n        if (value is long)\n        {\n            X();\n        }\n        else\n#endif\n        {\n            // Y would throw here\n            Z();\n        }\n    }\n}\n";
+
     [Fact]
     public void IfBodies_AlsoAreTheRegionLinesOnlySomeBuildsCompile()
     {
@@ -24,10 +28,6 @@ public sealed partial class MigrationTests
         var moved = RegionInLeftOutCode.Replace("        #endregion", "#endregion", StringComparison.Ordinal);
         Assert.Equal(RegionInLeftOutCode, IfBodies.Keep(RegionInLeftOutCode, [10], moved));
     }
-
-    // TraceJsonWriter.cs: an if/else chain split by '#if', its last else body a block whose lines each build nests its own
-    // way; the '//' line above a statement there went 8 columns deeper and back on every run (Windows, the newest SDK).
-    private const string CommentInIfBody = "class C\n{\n    void M(object value)\n    {\n#if A\n        if (value is int)\n        {\n            X();\n        }\n        else\n#endif\n#if B\n        if (value is long)\n        {\n            X();\n        }\n        else\n#endif\n        {\n            // Y would throw here\n            Z();\n        }\n    }\n}\n";
 
     [Fact]
     public void IfBodies_AlsoAreTheCommentLinesAboveOne()
