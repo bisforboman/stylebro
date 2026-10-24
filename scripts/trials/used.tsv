@@ -280,3 +280,11 @@ Cysharp/MessagePipe	rejected trial 51	targeted candidate: 551 .cs files, above a
 JasperFx/lamar	rejected trial 51	targeted candidate: 691 .cs files
 silkfire/Pastel	rejected trial 51	targeted candidate: 6 .cs files
 Open-NET-Libraries/Open.ChannelExtensions	rejected trial 51	targeted candidate: its test project's Main is only under '#if NET472' in a net9.0-only project (never compiled, a weak lens)
+amantinband/error-or	trial 52 (random, seed 52)	48 files, StyleCop.Analyzers 1.2.0-beta.556 (migrate), TWAE, central package management, netstandard2.0;net8.0;net10.0 library with net462;net8.0;net10.0 tests (net462 needs Mono); end_of_line = crlf with 36 CRLF and 12 LF C# files (format converted the 12 silently, now said); entry 51, draw 17 walked to it
+DbUp/DbUp	trial 52 (random, seed 52)	120 files, src/DbUp.sln with src/Directory.Build.props (TWAE) and a committed src/dbup.1.2.3.nupkg, which hid src/ from init and the preview (fixed); net8.0 Verify tests (100); entry 52, draw 3 walked to it
+drewnoakes/figgle	trial 52 (random, seed 52)	33 files, src/ and tests/Directory.Build.props (none at the root), central package management, in-solution font generator, three test projects, Blazor site and samples without props; no findings; entry 53, draw 46 walked to it
+EasyNetQ/EasyNetQ	trial 52	432 files, Source/Directory.Build.props and Directory.Packages.props, five test projects (IntegrationTests need RabbitMQ, Hosepipe.Tests flaky untouched), netstandard2.0-net10.0 library (targeted; random.json entry 54); no findings
+Tyrrrz/Onova	rejected trial 52	random.json entry 49 (draw 17's walk): tests and updater are net10.0-windows / net35 (Windows-only tests)
+devlooped/moq	rejected trial 52	random.json candidate: restore needs the kzu.blob.core.windows.net feed (403 through the proxy)
+khalidabuhakmeh/ConsoleTables	rejected trial 52	random.json candidate: 3 .cs files
+domaindrivendev/Swashbuckle.AspNetCore	rejected trial 52	random.json candidate: 715 .cs files

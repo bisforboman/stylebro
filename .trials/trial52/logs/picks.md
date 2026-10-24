@@ -5,10 +5,10 @@
 - Rule: `.trials/README.md`'s "three random plus one targeted" variant, ONE generator: `rng = random.Random(52)`,
   `rng.randrange(50)` three times (50 entries before appending): **17, 3, 46** (0-based). (The brief also offered
   `random.Random(52 + i)`; the README's rule was followed, as in trial 51.)
-- Only entry 48 (Tyrrrz/Onova) was unused; everything else in 0-49 is in `used.tsv`.
-  - **Tyrrrz/Onova** (entry 48) fails the practical criteria: its tests (`Onova.Tests`) and updater target
+- Only index 48 (Tyrrrz/Onova) was unused; everything else in 0-49 is in `used.tsv`.
+  - **Tyrrrz/Onova** (index 48) fails the practical criteria: its tests (`Onova.Tests`) and updater target
     `net10.0-windows` / `net35` (Windows-only tests). Rejected, added to `used.tsv`.
-- The list ran out, so five candidates were appended at the end (entries 50-54, alphabetical, each smoke-built and tested
+- The list ran out, so five candidates were appended at the end (indices 50-54 = entries 51-55, alphabetical, each smoke-built and tested
   first on SDK 10.0.113 with `NuGetAudit=false`, `NUGET_CERT_REVOCATION_MODE=offline`, `DOTNET_ROLL_FORWARD=Major`):
   50 amantinband/error-or, 51 DbUp/DbUp, 52 drewnoakes/figgle, 53 EasyNetQ/EasyNetQ, 54 shibayan/Sharprompt.
   Checked and not appended: devlooped/moq (restore needs the kzu.blob.core.windows.net feed, 403 through the proxy),
@@ -34,7 +34,7 @@ Lenses (trial 51's fixes): a multi-targeted project whose tests target a framewo
 projects (the per-run solution filter); CRLF-committed files in an LF repository; a src/ Directory.Build.props a project
 preview could shadow. No unused pool entry builds (all are `fails` or used).
 
-- **EasyNetQ/EasyNetQ** (random.json entry 53, appended this trial, not drawn): `Source/Directory.Build.props` and
+- **EasyNetQ/EasyNetQ** (index 53 = random.json entry 54, appended this trial, not drawn): `Source/Directory.Build.props` and
   `Source/Directory.Packages.props` (none at the root), five test projects (Tests 443, Hosepipe.Tests 7/17 pass untouched,
   Serialization.Tests 14, ApprovalTests 3; IntegrationTests need RabbitMQ in Docker, left out), EasyNetQ multi-targets
   netstandard2.0;net8.0;net9.0;net10.0 and the tests are net8.0, examples and benchmarks; 432 .cs. Added to the pool.
