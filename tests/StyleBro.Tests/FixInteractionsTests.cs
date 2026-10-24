@@ -49,7 +49,7 @@ public sealed class FixInteractionsTests
     [Fact]
     public void Ids_InteractWithinACase_AndUnknownOnesWithAll()
     {
-        var list = FixInteractions.Parse(["# a comment", "A1 B1", "B1 A1", "C1", "R1 rename"]);
+        var list = FixInteractions.Parse(["# a comment", "A1 B1", "B1", "C1", "R1 rename"]);
         Assert.True(list.Interact("A1", "B1"));
         Assert.True(list.Interact("B1", "A1"));
         Assert.False(list.Interact("A1", "C1"));
