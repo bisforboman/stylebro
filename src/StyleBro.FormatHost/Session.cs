@@ -156,7 +156,7 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
         logger.LogTrace(this.format.Text("Complete_in_0_ms"), filesMs);
         logger.LogTrace(this.format.Text("Running_formatters"));
         var files = this.format.NewFiles();
-        var loop = new FixLoop(this.format, this.cache, this.measure);
+        var loop = new FixLoop(this.format, this.cache, this.measure, FixInteractions.Default);
         if (arguments.Verify)
         {
             await loop.RunAsync(loaded.Workspace, view, formattable.Documents, options, logger, files, CancellationToken.None).ConfigureAwait(false);
