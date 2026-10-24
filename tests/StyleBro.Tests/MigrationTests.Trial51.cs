@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text.Json.Nodes;
 using StyleBro.Migrate;
 
 namespace StyleBro.Tests;
@@ -61,5 +62,46 @@ public sealed partial class MigrationTests
 
         Dotnet(false, "restore", "Tests/Tests.csproj");
         Assert.Equal(0, Dotnet(true, "build", "Tests/Tests.csproj", "--no-restore"));
+    }
+
+    [Fact]
+    public void Format_ATestProjectWhoseLibrariesReferenceEachOther_Loads()
+    {
+        // AsyncEx: the tests (netcoreapp3.1) reference Nito.AsyncEx.Context (netstandard1.3;netstandard2.0;net461), which
+        // references Nito.AsyncEx.Tasks. The tests' run listed only the tests in its solution filter; the libraries loaded as
+        // references, and MSBuildWorkspace gave Context's reference the netstandard1.3 Tasks (no mscorlib): 'dotnet format'
+        // skipped the tests ("Required references did not load"), and the build then reported the findings left in them.
+        Write("Lib1/Lib1.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup><TargetFrameworks>netstandard1.3;netstandard2.0</TargetFrameworks></PropertyGroup>\n</Project>\n");
+        Write("Lib1/A.cs", "namespace Lib1\n{\n    public class A\n    {\n    }\n}\n");
+        Write("Lib2/Lib2.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup><TargetFrameworks>netstandard1.3;netstandard2.0</TargetFrameworks></PropertyGroup>\n  <ItemGroup><ProjectReference Include=\"../Lib1/Lib1.csproj\" /></ItemGroup>\n</Project>\n");
+        Write("Lib2/B.cs", "namespace Lib2\n{\n    public class B : Lib1.A\n    {\n    }\n}\n");
+        Write("Tests/Tests.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup>\n  <ItemGroup><ProjectReference Include=\"../Lib2/Lib2.csproj\" /></ItemGroup>\n</Project>\n");
+        Write("Tests/C.cs", "namespace Tests\n{\n    public class C : Lib2.B\n    {\n        public int  M() => 1;\n    }\n}\n");
+        Write(".editorconfig", "root = true\n\n[*.cs]\nindent_style = space\nindent_size = 4\n");
+
+        // StyleBro's analyzers (dotnet format checks the references of projects it runs analyzers on), and the package in the
+        // restore output, as format asks.
+        Write("Directory.Build.props", $"<Project>\n  <ItemGroup>\n    <Analyzer Include=\"{typeof(StyleBro.Analyzers.RepositoryNames).Assembly.Location}\" />\n  </ItemGroup>\n</Project>\n");
+        foreach (var arguments in new[] { new[] { "new", "sln", "-n", "Chain", "--format", "sln" }, new[] { "sln", "Chain.sln", "add", "Lib1/Lib1.csproj", "Lib2/Lib2.csproj", "Tests/Tests.csproj" }, new[] { "restore", "Chain.sln", "-nodeReuse:false" } })
+        {
+            var step = new ProcessStartInfo("dotnet") { WorkingDirectory = root };
+            arguments.ToList().ForEach(step.ArgumentList.Add);
+            using var process = Process.Start(step)!;
+            process.WaitForExit();
+            Assert.Equal(0, process.ExitCode);
+        }
+
+        foreach (var assets in Directory.GetFiles(root, "project.assets.json", SearchOption.AllDirectories))
+        {
+            var json = JsonNode.Parse(File.ReadAllText(assets))!;
+            json["libraries"]!["StyleBro.Analyzers/0.0.0"] = new JsonObject { ["type"] = "package" };
+            File.WriteAllText(assets, json.ToJsonString());
+        }
+
+        var lines = new List<string>();
+        FormatCommand.Run([Path.Combine(root, "Chain.sln"), "--verify-no-changes", "--no-restore"], lines.Add);
+
+        Assert.DoesNotContain(lines, l => l.Contains("skipped Tests", StringComparison.Ordinal));
+        Assert.Contains(lines, l => l.Contains("C.cs(5,20)", StringComparison.Ordinal));
     }
 }

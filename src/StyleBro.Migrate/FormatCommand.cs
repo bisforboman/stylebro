@@ -2880,6 +2880,34 @@ internal static partial class FormatCommand
     }
 
     /// <summary>
+    /// The projects a run's solution filter lists: the run's own (<paramref name="selected"/>, keys of <paramref name="fullPaths"/>)
+    /// and the workspace's projects they reference, directly or not (<paramref name="references"/>: by full path). A project
+    /// the filter leaves out still loads, as a reference, but MSBuildWorkspace then resolves its own references to the first
+    /// framework of a multi-targeted one (trial 51, AsyncEx: the tests (netcoreapp3.1) reference Nito.AsyncEx.Context, which
+    /// references Nito.AsyncEx.Tasks, netstandard1.3 first; 'dotnet format' found no mscorlib there and skipped four of the
+    /// five test projects, "Required references did not load", which the build and the whole solution load fine).
+    /// '--include' still limits the run to its own projects' files (<see cref="Include"/>).
+    /// </summary>
+    public static List<string> FilterProjects(IReadOnlyList<string> selected, IReadOnlyDictionary<string, string> fullPaths, Func<string, IEnumerable<string>> references)
+    {
+        var keyOf = fullPaths.ToDictionary(p => p.Value, p => p.Key, StringComparer.OrdinalIgnoreCase);
+        var listed = new List<string>(selected);
+        var seen = new HashSet<string>(selected, StringComparer.OrdinalIgnoreCase);
+        for (var i = 0; i < listed.Count; i++)
+        {
+            foreach (var reference in fullPaths.TryGetValue(listed[i], out var fullPath) ? references(fullPath) : [])
+            {
+                if (keyOf.TryGetValue(reference, out var key) && seen.Add(key))
+                {
+                    listed.Add(key);
+                }
+            }
+        }
+
+        return listed;
+    }
+
+    /// <summary>
     /// A project's target frameworks ('TargetFrameworks' split, else 'TargetFramework'), project references (full paths) and,
     /// with <paramref name="projectDirectory"/>, the C# files it compiles from outside its folder (full paths): Orleans links
     /// '..\Orleans.CodeGenerator.Shared\*.cs' into three projects. Also its restore output (project.assets.json, "" when not asked)
@@ -5809,7 +5837,7 @@ internal static partial class FormatCommand
             {
                 if (filter is not null)
                 {
-                    File.WriteAllText(filter, SolutionFilter(Path.GetFileName(solutionPath), selected));
+                    File.WriteAllText(filter, SolutionFilter(Path.GetFileName(solutionPath), FilterProjects(selected, projects.ToDictionary(p => p.Key, p => p.Value.FullPath), ReferencesOf)));
                 }
 
                 var options = passThrough.ToList();
