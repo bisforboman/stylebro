@@ -963,10 +963,6 @@ internal static class PreviewCommand
         }
     }
 
-    /// <summary>Whether <paramref name="root"/> is a folder below <paramref name="top"/> (not the same folder).</summary>
-    private static bool IsBelow(string root, string top) =>
-        Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)).StartsWith(Path.TrimEndingDirectorySeparator(Path.GetFullPath(top)) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
-
     /// <summary>Whether an MSBuild file under the root mentions StyleBro.Analyzers (a reference to it).</summary>
     public static bool ReferencesStyleBro(string root) => ReferencesStyleBro(StyleCopSetup.EnumerateFiles(root));
 
@@ -1182,7 +1178,7 @@ internal static class PreviewCommand
     /// where init and format in the repository keep them CRLF.
     /// </summary>
     public static IEnumerable<string> CommittedWithCrLf(string output) =>
-        output.Split('\0').Where(entry => entry.IndexOf('\t') is var tab and > 0 && entry.Substring(0, tab).Split(' ', StringSplitOptions.RemoveEmptyEntries) is [("i/crlf" or "i/mixed"), ..])
+        output.Split('\0').Where(entry => entry.IndexOf('\t') is var tab and > 0 && entry.Substring(0, tab).Split(' ', StringSplitOptions.RemoveEmptyEntries) is ["i/crlf" or "i/mixed", ..])
             .Select(entry => entry.Substring(entry.IndexOf('\t') + 1))
 
             // ponytail: a path with whitespace, quotes or glob characters is left out (gitattributes would need it quoted or escaped).
@@ -1481,6 +1477,10 @@ internal static class PreviewCommand
             return package;
         }
     }
+
+    /// <summary>Whether <paramref name="root"/> is a folder below <paramref name="top"/> (not the same folder).</summary>
+    private static bool IsBelow(string root, string top) =>
+        Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)).StartsWith(Path.TrimEndingDirectorySeparator(Path.GetFullPath(top)) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
 
     private static (int Code, string Output, string Error) RunGit(string directory, string[] arguments)
     {
