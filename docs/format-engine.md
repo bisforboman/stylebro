@@ -43,12 +43,18 @@ Engine: the host couldn't load the workspace (The solution does not contain the 
 ## How it fixes
 
 A fix run in the host does what a `dotnet format` run does, in the same order: the whitespace, line ending, charset and
-import formatters as they are, then the code-style fixes, then the fixes of your projects' analyzers. Three things differ,
+import formatters as they are, then the code-style fixes, then the fixes of your projects' analyzers. Four things differ,
 none of them in what a fix writes:
 
 - **The ids are fixed in a fixed order**, ordinal (`BRO1001`, ..., `BRO1619`, `CA...`, `IDE...`, `xUnit...`), where
   `dotnet format` takes them in an order that changes from one run to the next. StyleBro's tests require the same result in
   every order for the rules whose fixes meet, so the order only makes runs repeatable.
+- **StyleBro's rules whose fixes don't meet are fixed together.** `dotnet format` analyzes again before every id. The host
+  puts the ids into rounds: one analysis per round, each id's fix applied to the same code, and the edits put together file
+  by file. Which rules' fixes meet comes from StyleBro's fix-order tests (two rules one test fixes together meet); those
+  keep their order, each in a later round than the one before it. A fix whose edits touch another's in the same file goes
+  in a round of its own after it, and so does every rule of another analyzer or of the SDK. Renames (the Naming rules)
+  come last, one round each.
 - **Each fixer is called once per id.** `dotnet format` calls it once per project that references the analyzers (17 times
   per id on a library with 8 target frameworks); only the first call changes anything.
 - **Only what changed is analyzed again.** Before each id `dotnet format` runs that id's analyzers again over every project
