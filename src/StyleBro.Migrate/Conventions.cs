@@ -1275,6 +1275,27 @@ internal static class Conventions
     }
 
     /// <summary>
+    /// The report note when the repository's own end_of_line agrees with its C# files, or no ending has the majority, but
+    /// some files git leaves alone have the other ending: once IDE0055 is on, 'format' converts each of them, a whole-file
+    /// change nothing announced (trial 52, error-or: 'end_of_line = crlf', 36 of 48 files CRLF, 12 LF files rewritten by
+    /// the migration's format run). Null when there are none (<see cref="ContradictedEnding"/> covers the files outvoting it).
+    /// </summary>
+    public static string? ConvertedMinorityNote(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> own, string? file = null)
+    {
+        if (!own.TryGetValue(EndOfLineKey, out var setting) || !counts.TryGetValue(EndOfLineKey, out var endings))
+        {
+            return null;
+        }
+
+        var value = setting.Split(':')[0].Trim().ToLowerInvariant();
+        var others = value switch { "lf" => endings[1], "crlf" => endings[0], _ => 0 };
+        var other = value == "lf" ? "CRLF" : "LF";
+        return others == 0
+            ? null
+            : $"Line endings: {file ?? "your .editorconfig"} says end_of_line = {value}, and {Plural(others, "C# file")} of {endings.Sum()} {(others == 1 ? "is" : "are")} {other} as committed (git doesn't convert them): 'format' converts {(others == 1 ? "it" : "them")} to {value.ToUpperInvariant()} (a whole-file change each). To keep that out of the formatting changes, convert them in a commit of their own first, or add '*.cs text eol={value}' to .gitattributes and run 'git add --renormalize .'.";
+    }
+
+    /// <summary>
     /// The line and the note when the repository's own <paramref name="key"/> (<see cref="CharsetKey"/> or
     /// <see cref="FinalNewlineKey"/>, for C# files) doesn't have <see cref="Winner"/>'s share of the C# files, or null. Like an
     /// end_of_line the files contradict (owner's decision 2026-10-12, "Keep endings out of it, warn"): nothing enforced it, so
