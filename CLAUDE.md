@@ -244,7 +244,9 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   that changes a node's shape must also produce what other rules want for the new shape; options of different rules
   interact (ask the other rule's CONFIGURED decision). Add a `FixOrderTests` case (it asserts identical TEXT in every
   order) and run verify-format several times when adding a layout rule; compare preview and format output file by file.
-  FixOrderTests never sees the whitespace pass.
+  FixOrderTests never sees the whitespace pass. A new case or rule changes `src/StyleBro.FormatHost/FixInteractions.txt`
+  (the format host's merged fix rounds: ids one case fixes together interact): `STYLEBRO_WRITE_INTERACTIONS=1 dotnet test
+  --filter FixInteractionsTests` writes it, FixInteractionsTests fails until then.
 - Analyzers: whole-tree walks use `TreeWalk.Tokens/Trivia/Nodes(root)`; syntax-only analyzers use
   `context.RegisterNodeAction` (NodeActions.cs), not `RegisterSyntaxNodeAction` (node/symbol actions make the driver bind
   every method body); cheap syntax checks before semantic work. Severity keys (`dotnet_diagnostic.X.severity`) aren't in

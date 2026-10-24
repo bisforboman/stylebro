@@ -17,4 +17,9 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" PrivateAssets="all" ExcludeAssets="runtime" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Which ids' fixes meet (merged fix rounds): written and checked by FixInteractionsTests. -->
+    <EmbeddedResource Include="FixInteractions.txt" LogicalName="StyleBro.FormatHost.FixInteractions.txt" />
+  </ItemGroup>
+
 </Project>

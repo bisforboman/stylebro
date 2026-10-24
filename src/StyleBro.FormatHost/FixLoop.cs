@@ -23,7 +23,7 @@ namespace StyleBro.Host;
 /// from the same cache: the fix run after it, and the check after a run that changed files, analyze again only the projects
 /// whose content changed since.
 /// </summary>
-internal sealed class FixLoop(DotnetFormat format, AnalysisCache cache, Func<string, IDisposable> measure)
+internal sealed class FixLoop(DotnetFormat format, AnalysisCache cache, Func<string, IDisposable> measure, FixInteractions interactions)
 {
     /// <summary>
     /// Runs every formatter of <paramref name="options"/>' categories on <paramref name="documents"/> and returns the fixed solution
@@ -113,47 +113,105 @@ internal sealed class FixLoop(DotnetFormat format, AnalysisCache cache, Func<str
 
         logger.LogTrace(format.Text("Fixing_diagnostics"));
         var withIds = kept.GroupBy(k => k.Project.Id).ToDictionary(g => g.Key, g => g.Select(k => k.Diagnostic.Id).ToHashSet(StringComparer.Ordinal));
-        foreach (var id in FixOrder.Of(kept.Select(k => k.Diagnostic.Id)))
+        var step = new Step(parts, projectAnalyzers, withIds, allFixers, paths, severity, compilerIds, options, logger);
+        var rounds = new Queue<List<string>>(FixRounds.Of(kept.Select(k => k.Diagnostic.Id), interactions));
+        while (rounds.Count > 0)
         {
-            var fixers = FixOrder.FixersFor(id, allFixers);
-            if (fixers.Count == 0)
+            var round = rounds.Dequeue();
+            if (round.Count == 1)
             {
-                logger.LogWarning(format.Text("Unable_to_fix_0_No_associated_code_fix_found"), id);
+                solution = await this.FixAsync(step, round[0], solution, cancellation).ConfigureAwait(false);
                 continue;
             }
 
-            // The id's diagnostics in the projects that had it, on the solution as the fixes so far left it.
-            var now = new List<(Project Project, Diagnostic Diagnostic)>();
-            foreach (var project in solution.Projects)
+            // One analysis for the round's ids, each one's Fix All on the same solution, the edits merged; an id whose edits
+            // meet another's gets a round of its own next (fresh diagnostics, after the merged fixes).
+            var analyzed = await this.DiagnosticsAsync(step, round, solution, cancellation).ConfigureAwait(false);
+            var fixes = new List<(string Id, Solution Fixed)>();
+            foreach (var id in round)
             {
-                if (withIds.TryGetValue(project.Id, out var ids) && ids.Contains(id))
+                if (await this.ApplyAsync(step, id, analyzed[id], solution, cancellation).ConfigureAwait(false) is { } fixedSolution)
                 {
-                    var analyzers = projectAnalyzers[project.Id].Where(a => a.SupportedDiagnostics.Any(d => d.Id == id)).ToImmutableArray();
-                    now.AddRange((await this.AnalyzeAsync(analyzers, project, paths, severity, compilerIds, logger, cancellation).ConfigureAwait(false))
-                        .Where(d => d.Id == id)
-                        .Select(d => (project, d)));
+                    fixes.Add((id, fixedSolution));
                 }
             }
 
-            var idResult = format.AnalysisResult(options, now);
-            if (!DotnetFormat.HasDiagnostics(idResult))
+            var (merged, deferred) = await FixRounds.MergeAsync(solution, fixes, cancellation).ConfigureAwait(false);
+            solution = merged;
+            foreach (var id in deferred.AsEnumerable().Reverse())
             {
-                continue;
-            }
-
-            foreach (var fixer in fixers)
-            {
-                var fixedSolution = await DotnetFormat.ApplyAsync(parts, solution, idResult, fixer, id, logger, cancellation).ConfigureAwait(false);
-                if (fixedSolution.GetChanges(solution).GetProjectChanges().Any(p => p.GetChangedDocuments().Any() || p.GetChangedAdditionalDocuments().Any()))
-                {
-                    solution = fixedSolution;
-                }
+                rounds = new Queue<List<string>>(rounds.Prepend([id]));
             }
         }
 
         logger.LogTrace(format.Text("Complete_in_0_ms"), watch.ElapsedMilliseconds - firstMs);
         logger.LogTrace(format.Text("Analysis_complete_in_0ms_"), watch.ElapsedMilliseconds);
         return solution;
+    }
+
+    // One id's step, as dotnet format takes it: its diagnostics on the solution as the fixes so far left it, then its fixers.
+    private async Task<Solution> FixAsync(Step step, string id, Solution solution, CancellationToken cancellation)
+    {
+        if (FixOrder.FixersFor(id, step.Fixers).Count == 0)
+        {
+            step.Logger.LogWarning(format.Text("Unable_to_fix_0_No_associated_code_fix_found"), id);
+            return solution;
+        }
+
+        var analyzed = await this.DiagnosticsAsync(step, [id], solution, cancellation).ConfigureAwait(false);
+        return await this.ApplyAsync(step, id, analyzed[id], solution, cancellation).ConfigureAwait(false) ?? solution;
+    }
+
+    // The diagnostics of each of the ids in the projects that had it, on 'solution': one analysis of each project, with the
+    // analyzers of all the ids it had.
+    private async Task<Dictionary<string, List<(Project Project, Diagnostic Diagnostic)>>> DiagnosticsAsync(Step step, IReadOnlyList<string> ids, Solution solution, CancellationToken cancellation)
+    {
+        var found = ids.ToDictionary(id => id, _ => new List<(Project Project, Diagnostic Diagnostic)>(), StringComparer.Ordinal);
+        foreach (var project in solution.Projects)
+        {
+            if (step.WithIds.TryGetValue(project.Id, out var had) && ids.Where(had.Contains).ToHashSet(StringComparer.Ordinal) is { Count: > 0 } wanted)
+            {
+                var analyzers = step.ProjectAnalyzers[project.Id].Where(a => a.SupportedDiagnostics.Any(d => wanted.Contains(d.Id))).ToImmutableArray();
+                foreach (var diagnostic in await this.AnalyzeAsync(analyzers, project, step.Paths, step.Severity, step.CompilerIds, step.Logger, cancellation).ConfigureAwait(false))
+                {
+                    if (wanted.Contains(diagnostic.Id))
+                    {
+                        found[diagnostic.Id].Add((project, diagnostic));
+                    }
+                }
+            }
+        }
+
+        return found;
+    }
+
+    // The id's fixers on 'solution' (each type once, FixOrder), or null when nothing is left to fix or no fixer changed anything.
+    private async Task<Solution?> ApplyAsync(Step step, string id, List<(Project Project, Diagnostic Diagnostic)> diagnostics, Solution solution, CancellationToken cancellation)
+    {
+        var fixers = FixOrder.FixersFor(id, step.Fixers);
+        if (fixers.Count == 0)
+        {
+            step.Logger.LogWarning(format.Text("Unable_to_fix_0_No_associated_code_fix_found"), id);
+            return null;
+        }
+
+        var idResult = format.AnalysisResult(step.Options, diagnostics);
+        if (!DotnetFormat.HasDiagnostics(idResult))
+        {
+            return null;
+        }
+
+        var start = solution;
+        foreach (var fixer in fixers)
+        {
+            var fixedSolution = await DotnetFormat.ApplyAsync(step.Parts, solution, idResult, fixer, id, step.Logger, cancellation).ConfigureAwait(false);
+            if (fixedSolution.GetChanges(solution).GetProjectChanges().Any(p => p.GetChangedDocuments().Any() || p.GetChangedAdditionalDocuments().Any()))
+            {
+                solution = fixedSolution;
+            }
+        }
+
+        return ReferenceEquals(solution, start) ? null : solution;
     }
 
     // AnalyzerRunner.RunCodeAnalysisAsync, its analysis from the cache.
@@ -173,6 +231,18 @@ internal sealed class FixLoop(DotnetFormat format, AnalysisCache cache, Func<str
         var diagnostics = await cache.GetAsync(project, analyzers, compilerIds, n => logger.LogDebug(format.Text("Running_0_analyzers_on_1"), n, project.Name), cancellation).ConfigureAwait(false);
         return [.. diagnostics.Where(d => !d.IsSuppressed && d.Severity >= severity && d.Location.IsInSource && d.Location.SourceTree is { } tree && paths.Contains(tree.FilePath))];
     }
+
+    // What a fix run's steps share: the formatter's parts, each project's analyzers and the ids it had, the fixers and options.
+    private sealed record Step(
+        DotnetFormat.AnalyzerParts Parts,
+        ImmutableDictionary<ProjectId, ImmutableArray<DiagnosticAnalyzer>> ProjectAnalyzers,
+        Dictionary<ProjectId, HashSet<string>> WithIds,
+        ImmutableArray<CodeFixProvider> Fixers,
+        ImmutableHashSet<string> Paths,
+        DiagnosticSeverity Severity,
+        ImmutableHashSet<string> CompilerIds,
+        object Options,
+        ILogger Logger);
 
     private static bool AllReferencesLoaded(Project project) =>
         project.MetadataReferences.Any(r => r.Display?.EndsWith("mscorlib.dll", StringComparison.Ordinal) == true)
