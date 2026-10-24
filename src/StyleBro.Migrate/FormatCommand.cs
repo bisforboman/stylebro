@@ -40,8 +40,9 @@ internal static partial class FormatCommand
     /// </summary>
     public const string SelectFrameworkTargets = """
         <Project>
-          <!-- bro format: TargetFramework comes from the environment; projects not on the keep list load as usual. -->
-          <PropertyGroup Condition="'$(TargetFrameworks)' != '' and (('$(StyleBroFormatKeep)' != '' and !$(StyleBroFormatKeep.Contains('|$(MSBuildProjectFullPath.ToUpperInvariant())|'))) or '$(StyleBroFormatLoose)' == 'true')">
+          <!-- bro format: TargetFramework comes from the environment; projects not on the keep list load as usual, and so do
+               the projects without the run's framework (StyleBroFormatOther: kept only because they reference a kept one). -->
+          <PropertyGroup Condition="'$(TargetFrameworks)' != '' and (('$(StyleBroFormatKeep)' != '' and !$(StyleBroFormatKeep.Contains('|$(MSBuildProjectFullPath.ToUpperInvariant())|'))) or '$(StyleBroFormatLoose)' == 'true' or ('$(StyleBroFormatOther)' != '' and $(StyleBroFormatOther.Contains('|$(MSBuildProjectFullPath.ToUpperInvariant())|'))))">
             <TargetFramework></TargetFramework>
           </PropertyGroup>
           <!-- A project without the run's framework asks the projects it references for all of theirs (StyleBroFormatLoose). -->
