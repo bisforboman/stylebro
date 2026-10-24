@@ -1,6 +1,0 @@
-build	0	42s	dotnet build Autofac.Extensions.DependencyInjection.sln -c Debug
-twae-Debug	0	21s	twae Debug
-test-Debug	0	25s	env CFG=Debug bash -c dotnet test Autofac.Extensions.DependencyInjection.sln -c $CFG
-twae-Release	0	16s	twae Release
-test-Release	1	500s	env CFG=Release bash -c dotnet test Autofac.Extensions.DependencyInjection.sln -c $CFG
-DONE
