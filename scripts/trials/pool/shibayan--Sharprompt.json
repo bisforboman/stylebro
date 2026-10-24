@@ -13,7 +13,7 @@
   "build": "ok",
   "workaround": null,
   "tests": "dotnet test --solution Sharprompt.slnx (MTP): 1,352 passed",
-  "usedIn": null,
+  "usedIn": "trial 53 (random, seed 53)",
   "verified": {
     "by": "trial 52 session",
     "date": "2026-10-24",
