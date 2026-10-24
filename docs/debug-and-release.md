@@ -40,7 +40,7 @@ statement of its own, and the formatter un-indents it. Each framework's or confi
 the parses of the symbols its runs define), formats the rest of the file and of those lines (`v+1` becomes `v + 1`), and
 their indentation findings don't count in `--verify-no-changes`. A build with IDE0055 as an error still reports one of
 them in the configuration whose indentation the line doesn't have: braces (`else { ... }` around both branches' bodies)
-settle it for every build.
+settle it for every build. The `//` comment lines right above such a line keep their indentation too.
 
 The same goes for a block that `#if` opens in one build only:
 
@@ -58,6 +58,26 @@ The same goes for a block that `#if` opens in one build only:
 
 Debug indents the statement as the `try` block's content, Release as a statement of the method. `format` keeps its
 indentation as it is (`Indentation kept: ...`).
+
+And for a `#region` or `#endregion` line that one build compiles and another leaves out:
+
+```csharp
+#if !NET20
+        public void Add()
+        {
+            #region Add
+            r = d.Integer + 1;
+#if NET6_0_OR_GREATER
+            r = d.BigInteger + 1;
+#endif
+            #endregion
+        }
+#endif
+```
+
+Where the outer `#if` is compiled, the formatter indents `#endregion` with the code; in net20 everything in it is left
+out, and the formatter puts a `#endregion` right below another directive in the column of the next compiled code.
+`format` keeps its indentation as it is (`Indentation kept: ...`).
 
 ## Documentation comments indented with tabs and spaces
 
