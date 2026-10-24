@@ -54,7 +54,9 @@ none of them in what a fix writes:
   by file. Which rules' fixes meet comes from StyleBro's fix-order tests (two rules one test fixes together meet); those
   keep their order, each in a later round than the one before it. A fix whose edits touch another's in the same file goes
   in a round of its own after it, and so does every rule of another analyzer or of the SDK. Renames (the Naming rules)
-  come last, one round each.
+  come last, one round each. Measured with `bro format --engine host` (4 cores, SDK 10.0.113): Serilog's analyzer fixes
+  took 50-51 s one rule at a time and 36-40 s in rounds (47 rules in 15 steps), Newtonsoft.Json's 178 s and 107 s; the
+  whole command 92-93 s and 77-85 s, 476 s and 408 s, with the same files written.
 - **Each fixer is called once per id.** `dotnet format` calls it once per project that references the analyzers (17 times
   per id on a library with 8 target frameworks); only the first call changes anything.
 - **Only what changed is analyzed again.** Before each id `dotnet format` runs that id's analyzers again over every project
