@@ -136,4 +136,22 @@ public sealed partial class MigrationTests
         Assert.True(FormatCommand.IsHeaderLine(FormatHost.FallbackLine("no SDK folder")));
         Assert.False(FormatCommand.IsHeaderLine("Engine is not a header without the colon"));
     }
+
+    [Fact]
+    public void AFrameworksView_HasItsAdditionalFiles()
+    {
+        // ncalc: NCalc.Parser is multi-targeted, and Parlot's targets add '*.parlot.cs' as additional files in each framework's
+        // evaluation only: the outer one had none, so the runs weren't split.
+        var view = FormatCommand.ReadView("""
+            {
+              "Properties": { "DefineConstants": "NET8_0", "LangVersion": "", "Nullable": "enable" },
+              "Items": {
+                "Compile": [ { "FullPath": "/r/Parser.cs" } ],
+                "AdditionalFiles": [ { "FullPath": "/r/Grammar.parlot.cs" } ]
+              }
+            }
+            """);
+        Assert.Equal(["/r/Grammar.parlot.cs"], view!.Additional);
+        Assert.Equal(["/r/Parser.cs"], view.Compile);
+    }
 }

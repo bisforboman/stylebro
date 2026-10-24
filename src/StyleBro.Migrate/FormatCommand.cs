@@ -2569,15 +2569,18 @@ internal static partial class FormatCommand
         {
             using var document = JsonDocument.Parse(json);
             string Property(string name) => document.RootElement.TryGetProperty("Properties", out var properties) && properties.TryGetProperty(name, out var value) ? value.GetString() ?? string.Empty : string.Empty;
-            var compile = document.RootElement.TryGetProperty("Items", out var items) && items.TryGetProperty("Compile", out var found)
+            var hasItems = document.RootElement.TryGetProperty("Items", out var items);
+            string[] Item(string name) => hasItems && items.TryGetProperty(name, out var found)
                 ? found.EnumerateArray().Select(c => c.GetProperty("FullPath").GetString()!).ToArray()
                 : [];
+            var compile = Item("Compile");
             return new CompileView(
                 Property("DefineConstants").Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToHashSet(StringComparer.Ordinal),
                 EffectiveLangVersion(Property("LangVersion"), Property("NETCoreSdkVersion")),
                 Property("Nullable").Trim().ToLowerInvariant(),
                 compile,
-                Property("GenerateDocumentationFile").Trim().Equals("true", StringComparison.OrdinalIgnoreCase));
+                Property("GenerateDocumentationFile").Trim().Equals("true", StringComparison.OrdinalIgnoreCase),
+                Item("AdditionalFiles"));
         }
         catch (JsonException)
         {
@@ -4057,6 +4060,7 @@ internal static partial class FormatCommand
                     "-getProperty:GenerateDocumentationFile",
                     "-getProperty:NETCoreSdkVersion",
                     "-getItem:Compile",
+                    "-getItem:AdditionalFiles",
                     "-nologo",
                 ]))).Value;
         }
@@ -5556,6 +5560,12 @@ internal static partial class FormatCommand
             byFullPath.TryGetValue(fullPath, out var key)
                 ? FrameworkCompile(projects[key].Compile, projects[key].Frameworks.Length > 1 || configuration.Length > 0 ? View(fullPath, framework, configuration)?.Compile : null).Where(Planned).ToArray()
                 : [];
+        // A project's additional files for a run: the outer evaluation's, and a multi-targeted project's for that framework (trial
+        // 50, ncalc: NCalc.Parser gets Parlot's '*.parlot.cs' in its inner evaluations only).
+        IEnumerable<string> AdditionalFor(string fullPath, string framework, string configuration) =>
+            byFullPath.TryGetValue(fullPath, out var key) && (projects[key].Frameworks.Length > 1 || configuration.Length > 0)
+                ? AdditionalFilesOf(fullPath).Union(View(fullPath, framework, configuration)?.Additional ?? [], StringComparer.OrdinalIgnoreCase)
+                : AdditionalFilesOf(fullPath);
         IEnumerable<string> LinkedFor(string key, string framework, string configuration) => Linked(projects[key].FullPath, projects[key].Linked, CompileFor(projects[key].FullPath, framework, configuration));
 
         // "" for a run without a framework of its own (no project is multi-targeted).
@@ -5564,13 +5574,13 @@ internal static partial class FormatCommand
             .ToList();
         IEnumerable<string> ReferencesOf(string fullPath) => byFullPath.TryGetValue(fullPath, out var key) ? projects[key].References : Array.Empty<string>();
         bool Alone(string fullPath, string framework, string configuration) =>
-            LoadsAdditionalAsCompile(LoadedWith(fullPath, ReferencesOf), c => CompileFor(c, framework, configuration), AdditionalFilesOf);
+            LoadsAdditionalAsCompile(LoadedWith(fullPath, ReferencesOf), c => CompileFor(c, framework, configuration), a => AdditionalFor(a, framework, configuration));
         List<List<string>> Apart(string framework, string configuration, List<string> selected) => Separate(
                 selected.Select(p => projects[p].FullPath),
                 ReferencesOf,
                 c => CompileFor(c, framework, configuration),
                 (s, file) => View(s, framework, configuration)?.Key([file]),
-                AdditionalFilesOf)
+                a => AdditionalFor(a, framework, configuration))
             .Select(g => g.Select(f => byFullPath[f]).ToList())
             .ToList();
 
@@ -5698,7 +5708,7 @@ internal static partial class FormatCommand
             .ToList();
         var shared = plan.Where(p => p.Parts is not null).Select(p => p.Parts!.Select(Names).ToList()).ToList();
         var compiled = projects.Values.SelectMany(p => p.Compile).Select(Path.GetFullPath).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var additionalCompiled = projects.Values.SelectMany(p => AdditionalFilesOf(p.FullPath)).Select(Path.GetFullPath).Where(compiled.Contains)
+        var additionalCompiled = plan.SelectMany(p => p.Projects.SelectMany(x => AdditionalFor(projects[x].FullPath, p.Framework, p.Configuration))).Select(Path.GetFullPath).Where(compiled.Contains)
             .Select(f => Path.GetRelativePath(root, f).Replace('\\', '/')).Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList();
         if (SharedFilesLine(shared, additionalCompiled) is { } sharedLine)
         {
@@ -6273,8 +6283,11 @@ internal static partial class FormatCommand
     /// <summary>Full paths as the hook matches them: '|A|B|', upper-case; empty for none.</summary>
     private static string PathList(IReadOnlyCollection<string> paths) => paths.Count == 0 ? string.Empty : "|" + string.Join("|", paths.Select(k => k.ToUpperInvariant())) + "|";
 
-    /// <summary>How a project compiles for one framework (<see cref="ReadView"/>): defined symbols, language version, nullable context, files, docs.</summary>
-    public sealed record CompileView(HashSet<string> Defines, string LangVersion, string Nullable, string[] Compile, bool Documentation = false)
+    /// <summary>
+    /// How a project compiles for one framework (<see cref="ReadView"/>): defined symbols, language version, nullable context, files,
+    /// docs, and its additional files (a package's targets add some only in a framework's evaluation: Parlot's, trial 50).
+    /// </summary>
+    public sealed record CompileView(HashSet<string> Defines, string LangVersion, string Nullable, string[] Compile, bool Documentation = false, string[]? Additional = null)
     {
         /// <summary>
         /// What decides how <paramref name="files"/> parse: each file with the symbols its '#if's test that are defined, the
