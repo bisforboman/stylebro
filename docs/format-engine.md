@@ -65,7 +65,11 @@ results as the fixes. So:
 - two runs that share a project (a library every framework's run references) analyze it once;
 - the check after a run that changed files analyzes again only the projects a fix reached and the ones referencing them,
   as `dotnet format` would find them: a result is reused only for the same content it was computed on;
-- a command's runs keep each configuration's workspace loaded, so run 2 loads nothing again.
+- a command's runs keep each configuration's workspace loaded, so run 2 loads nothing again;
+- `bro check` formats a copy of the repository to tell kept findings (the ones StyleBro's fixes leave on purpose) from the
+  rest. The copy's runs use the workspaces the check loaded, with the copy's files, so they load nothing and analyze again only
+  what the copy's fixes change. A copy without one of the workspace's files (one git ignores, which the copy leaves out) gets
+  workspaces of its own, as before.
 
 Between two runs, and between the runs of a command's frameworks and configurations, the host reads back the files that
 changed on disk (a run's own fixes, CSharpier, the indentation `format` keeps, a lone CR it converts), so every run sees
