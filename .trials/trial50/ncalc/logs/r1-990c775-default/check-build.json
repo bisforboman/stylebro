@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "command": "format",
+  "previewOf": null,
+  "path": "/home/user/stylebro/.trials/trial50/ncalc/r1-default",
+  "write": false,
+  "settings": [],
+  "conventions": [],
+  "sonar": null,
+  "agentsMd": null,
+  "runs": [],
+  "changesPerRule": {},
+  "filesPerRule": null,
+  "keptFindings": [],
+  "patch": null,
+  "clean": false,
+  "exitCode": 1,
+  "notChecked": [
+    "IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)",
+    "NCalc.Core (net462): 'dotnet format' couldn't load it (references didn't load), so the code only that framework compiles",
+    "NCalc.DependencyInjection (net462): 'dotnet format' couldn't load it (references didn't load), so the code only that framework compiles",
+    "NCalc.LambdaCompilation (net462): 'dotnet format' couldn't load it (references didn't load), so the code only that framework compiles",
+    "NCalc.MemoryCache (net462): 'dotnet format' couldn't load it (references didn't load), so the code only that framework compiles"
+  ]
+}

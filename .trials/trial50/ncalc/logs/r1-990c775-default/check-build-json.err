@@ -1,0 +1,109 @@
+Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net462, net8.0, netstandard2.0). net8.0: only the projects whose code compiles differently there.
+Shared files: these projects compile the same files with other '#if' symbols or settings, so each group gets a run of its own (loaded together, 'dotnet format' crashes: https://github.com/dotnet/roslyn/issues/86001): NCalc.Core | NCalc.Benchmarks.
+Checked net8.0, part 2 of 2 (run 1 of 5)
+Checked net8.0, part 1 of 2 (run 2 of 5)
+Checked netstandard2.0 (run 3 of 5)
+Checked net10.0 (run 4 of 5)
+Checked net462 (run 5 of 5)
+== net10.0 (12 project(s))
+/home/user/stylebro/.trials/trial50/ncalc/r1-default/test/NCalc.Tests/LambdaTests.cs(477,23): warning BRO1306: Rename 'x' to 'X' [/home/user/stylebro/.trials/trial50/ncalc/r1-default/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r1-default/test/NCalc.Tests/LambdaTests.cs(638,23): warning BRO1306: Rename 'y' to 'Y' [/home/user/stylebro/.trials/trial50/ncalc/r1-default/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r1-default/test/NCalc.Tests/LambdaTests.cs(637,23): warning BRO1306: Rename 'x' to 'X' [/home/user/stylebro/.trials/trial50/ncalc/r1-default/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r1-default/test/NCalc.Tests/LambdaTests.cs(478,23): warning BRO1306: Rename 'y' to 'Y' [/home/user/stylebro/.trials/trial50/ncalc/r1-default/test/NCalc.Tests/NCalc.Tests.csproj]
+'dotnet format' had warnings loading the workspace in its net462 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+'dotnet format' skipped NCalc.Core: MSBuild couldn't load it or a project it references for this run (often reference assemblies missing for its target framework). The restore isn't the cause; add '--verbosity diagnostic' to this 'bro format' command to see MSBuild's message ("Msbuild failed when processing the file ...") in its net462 run.
+'dotnet format' skipped NCalc.DependencyInjection: MSBuild couldn't load it or a project it references for this run (often reference assemblies missing for its target framework). The restore isn't the cause; add '--verbosity diagnostic' to this 'bro format' command to see MSBuild's message ("Msbuild failed when processing the file ...") in its net462 run.
+'dotnet format' skipped NCalc.LambdaCompilation: MSBuild couldn't load it or a project it references for this run (often reference assemblies missing for its target framework). The restore isn't the cause; add '--verbosity diagnostic' to this 'bro format' command to see MSBuild's message ("Msbuild failed when processing the file ...") in its net462 run.
+'dotnet format' skipped NCalc.MemoryCache: MSBuild couldn't load it or a project it references for this run (often reference assemblies missing for its target framework). The restore isn't the cause; add '--verbosity diagnostic' to this 'bro format' command to see MSBuild's message ("Msbuild failed when processing the file ...") in its net462 run.
+Unhandled exception: System.InvalidOperationException: The solution does not contain the specified document.
+   at Microsoft.CodeAnalysis.Shared.Extensions.ISolutionExtensions.GetRequiredDocument(Solution solution, DocumentId documentId)
+   at Microsoft.CodeAnalysis.Workspace.<SetCurrentSolutionAsync>g__UpdateAddedDocumentToExistingContentsInSolution|29_1(Solution solution, ArrayBuilder`1 addedDocumentIds)
+   at Microsoft.CodeAnalysis.Workspace.<SetCurrentSolutionAsync>g__UnifyLinkedDocumentContents|29_0(Solution oldSolution, Solution newSolution)
+   at Microsoft.CodeAnalysis.Workspace.<>c.<SetCurrentSolutionAsync>b__29_3(Solution oldSolution, ValueTuple`5 data)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolutionAsync[TData](Boolean useAsync, TData data, Func`3 transformation, Boolean mayRaiseEvents, Action`3 onBeforeUpdate, Action`3 onAfterUpdate, CancellationToken cancellationToken)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolutionAsync(Boolean useAsync, Func`2 transformation, Func`3 changeKind, Action`2 onBeforeUpdate, Action`2 onAfterUpdate, CancellationToken cancellationToken)
+   at Roslyn.Utilities.ValueTaskExtensions.VerifyCompleted[T](ValueTask`1 task, String message)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolution(Func`2 transformation, Func`3 changeKind, Action`2 onBeforeUpdate, Action`2 onAfterUpdate)
+   at Microsoft.CodeAnalysis.Workspace.SetCurrentSolution(Func`2 transformation, WorkspaceChangeKind changeKind, ProjectId projectId, DocumentId documentId, Action`2 onBeforeUpdate, Action`2 onAfterUpdate)
+   at Microsoft.CodeAnalysis.Workspace.OnSolutionAdded(SolutionInfo solutionInfo)
+   at Microsoft.CodeAnalysis.MSBuild.MSBuildWorkspace.OpenSolutionAsync(String solutionFilePath, ILogger msbuildLogger, IProgress`1 progress, CancellationToken cancellationToken)
+   at Microsoft.CodeAnalysis.Tools.Workspaces.MSBuildWorkspaceLoader.LoadAsync(String solutionOrProjectPath, WorkspaceType workspaceType, String binaryLogPath, Boolean logWorkspaceWarnings, ILogger logger, CancellationToken cancellationToken)
+   at Microsoft.CodeAnalysis.Tools.CodeFormatter.OpenMSBuildWorkspaceAsync(String solutionOrProjectPath, WorkspaceType workspaceType, Boolean noRestore, Boolean requiresSemantics, String binaryLogPath, Boolean logWorkspaceWarnings, ILogger logger, CancellationToken cancellationToken)
+   at Microsoft.CodeAnalysis.Tools.CodeFormatter.FormatWorkspaceAsync(FormatOptions formatOptions, ILogger logger, CancellationToken cancellationToken, String binaryLogPath)
+   at Microsoft.CodeAnalysis.Tools.FormatCommandCommon.FormatAsync(FormatOptions formatOptions, ILogger`1 logger, CancellationToken cancellationToken)
+   at Microsoft.CodeAnalysis.Tools.Commands.RootFormatCommand.FormatCommandDefaultHandler.InvokeAsync(ParseResult parseResult, CancellationToken cancellationToken)
+   at System.CommandLine.Invocation.InvocationPipeline.InvokeAsync(ParseResult parseResult, CancellationToken cancellationToken)
+'dotnet format' crashed in the run for NCalc.Benchmarks, possibly after writing part of its changes (listed below). If the error says "Changes must be within bounds of SourceText", it's Roslyn's linked-file merge (https://github.com/dotnet/roslyn/issues/86001): two projects of that run compile the same file. Please report it with the projects named here.
+Partly incomplete: 'dotnet format' skipped NCalc.Core, NCalc.DependencyInjection, NCalc.LambdaCompilation, NCalc.MemoryCache for net462 (references didn't load): code only that framework compiles (inside #if) wasn't formatted.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Not checked: NCalc.Core (net462): 'dotnet format' couldn't load it (references didn't load), so the code only that framework compiles
+Not checked: NCalc.DependencyInjection (net462): 'dotnet format' couldn't load it (references didn't load), so the code only that framework compiles
+Not checked: NCalc.LambdaCompilation (net462): 'dotnet format' couldn't load it (references didn't load), so the code only that framework compiles
+Not checked: NCalc.MemoryCache (net462): 'dotnet format' couldn't load it (references didn't load), so the code only that framework compiles
+Building NCalc.slnx in Debug, Release, SignedRelease with warnings as errors (the code is HEAD's: errors other than format's rules are the code's own)...
+Debug: 32 findings of format's rules (21 errors the untouched code has too, not counted):
+  test/NCalc.Benchmarks/SimpleEvaluationBenchmark.cs(31,41): BRO1125: Use a lambda instead of an anonymous method (https://bisforboman.github.io/stylebro/rules/BRO1125/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(472,9): BRO1504: Add a blank line before the comment (https://bisforboman.github.io/stylebro/rules/BRO1504/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(121,60): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(124,60): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(141,15): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(212,79): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(227,98): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(230,55): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(232,56): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(239,60): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(289,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(347,15): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(377,15): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(417,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(423,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(427,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(431,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(435,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(439,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(444,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+Release: 32 findings of format's rules (21 errors the untouched code has too, not counted):
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(472,9): BRO1504: Add a blank line before the comment (https://bisforboman.github.io/stylebro/rules/BRO1504/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(121,60): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(124,60): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(141,15): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(212,79): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(227,98): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(230,55): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(232,56): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(239,60): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(289,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(347,15): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(377,15): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(417,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(423,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(427,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(431,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(435,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(439,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(444,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(449,45): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+SignedRelease: 32 findings of format's rules (21 errors the untouched code has too, not counted):
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(472,9): BRO1504: Add a blank line before the comment (https://bisforboman.github.io/stylebro/rules/BRO1504/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(121,60): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(124,60): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(141,15): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(212,79): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(227,98): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(230,55): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(232,56): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(239,60): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(289,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(347,15): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(377,15): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(417,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(423,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(427,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(431,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(435,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(439,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(444,41): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+  src/NCalc.Parser/LogicalExpressionParser.parlot.cs(449,45): BRO1523: Start '.Named' on its own line: in a split chain, each call after the first line starts one (https://bisforboman.github.io/stylebro/rules/BRO1523/)
+Not clean: the builds report 96 findings of format's rules (above): fix them by hand, or suppress or baseline them.

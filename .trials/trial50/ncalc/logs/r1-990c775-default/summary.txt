@@ -1,0 +1,12 @@
+init exit=0 6s
+format exit=1 131s
+format2 exit=1 79s
+check exit=1 45s
+check-json exit=1 43s
+check-build exit=1 126s
+check-build-json exit=1 121s
+build-Debug exit=1 14s
+build-Release exit=1 11s
+test-Debug exit=0 10s
+test-Release exit=0 10s
+done

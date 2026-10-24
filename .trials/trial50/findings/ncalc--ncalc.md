@@ -227,3 +227,68 @@ whatever the other runs return, or becomes a Not checked gap for its projects.
 - Format converged on the default engine apart from the crash: the second `bro format` changed nothing.
 
 Logs: `.trials/trial50/ncalc/logs/` (committed). Repro: `.trials/trial50/findings/ncalc-repro/linked/` (copy of `spot/linked/`, which has its own .git and isn't committed); the check logs of the multi-run variant: `findings/ncalc-repro/check*.log`.
+
+## Re-check (fixer's PR #294, `claude/trial-50` at 4c60b3c)
+
+Packed as `0.8.0-trial50r2` (feed `/home/user/feed50r2`, tool updated with `dotnet tool update -g`). Fresh local clones of
+`base` (untouched code + the global.json commit): `r2-default`, `r2-host`. Same environment as above. Script:
+`.trials/trial50/ncalc/r1-run.sh <clone> [--engine host]`: `bro preview init`, `bro init --write`, StyleBro.Analyzers
+0.8.0-trial50r2 in Directory.Build.props/Directory.Packages.props (as the preview adds it), commit, `bro format`, commit,
+`bro format` again, `bro check`, `bro check --json`, `bro check --build`, `bro check --build --json`, TWAE
+`dotnet build -c Debug/Release`, `dotnet test --solution NCalc.slnx` (Debug, Release). Logs: `logs/r2-default/`,
+`logs/r2-host/`.
+
+First try at 990c775 (`0.8.0-trial50r1`, logs `logs/r1-990c775-*`, stopped when 4c60b3c came): fix 3 already held
+(check exit 1 on the crash instead of 3). Fix 1 didn't fire: `AdditionalFilesOf` evaluated multi-targeted NCalc.Parser
+without a TargetFramework, and Parlot's targets add the AdditionalFiles item only in the per-framework evaluations
+(`-getItem:AdditionalFiles` was [] in the outer evaluation, ['LogicalExpressionParser.parlot.cs'] with
+`-p:TargetFramework=net8.0`). The fixer fixed that in 4c60b3c.
+
+| Command | Default: exit, time | Host: exit, time |
+|---|---|---|
+| `bro preview init [--engine host]` | 3 (Clean apart from Not checked), 268 s | 3, 266 s (no "Engine:" line in the preview) |
+| `bro init --write` | 0, 7 s | 0, 6 s |
+| `bro format` | 3: run 1 changed 61 files, run 2 changed 0, "Not verified: 4 parts" | 3, same, 285 s |
+| `bro format` (again) | 3: 0 files changed, 83 s | 3, 85 s |
+| `bro check` | 3, 46 s | 3, 57 s |
+| `bro check --json` | `clean: false`, `exitCode: 3`, 47 s | the same, 57 s |
+| `bro check --build` | 3: Debug/Release/SignedRelease "no findings, no new errors (21 errors the untouched code has too)", 214 s | 3, same, 220 s |
+| `bro check --build --json` | `exitCode: 3`, 215 s | the same, 219 s |
+| TWAE `dotnet build` Debug / Release | **0 errors**, 21 warnings each (= baseline) | 0 errors, 21 warnings |
+| `dotnet test` Debug / Release | 901/901, 901/901 | 901/901, 901/901 |
+
+The Not checked lines are the same everywhere: IDE0049 (a note) + NCalc.Core/DependencyInjection/LambdaCompilation/
+MemoryCache (net462, "references didn't load"), in the text and in `--json` `notChecked`.
+
+- **Finding 1: fixed.** No run crashes on either engine (no "Unhandled exception" or "crashed in the run" in any log).
+  The "Shared files:" line now says: "Some projects have a file as an additional file (AdditionalFiles) that another
+  compiles (src/NCalc.Parser/LogicalExpressionParser.parlot.cs): loaded together, 'dotnet format' crashes ("The solution
+  does not contain the specified document"), so they run apart, and a project that loads both itself runs on its project
+  file. Others may compile the same files with other '#if' symbols or settings (roslyn#86001)." NCalc.Benchmarks gets
+  formatted: `LogicalExpressionParser.parlot.cs` (49+/32-) and `SimpleEvaluationBenchmark.cs` changed, and the 28 TWAE
+  errors are gone (0 errors in Debug and Release). Format settles: the second run and a second `bro format` change
+  nothing.
+- **Finding 2: fixed.** The host prints once per command "Engine: the host couldn't load the workspace (The solution does
+  not contain the specified document), so 'dotnet format' runs the checks and fixes." (format, format again, check,
+  check --build). The trees after format are **byte-identical** across engines (`diff -r`, excluding .git/obj/bin). Exit
+  codes match in every row. `--json` is the same apart from `path`. The text output matches line for line apart from the
+  Engine line and progress order, with one exception: in the first `bro format`'s kept list, BRO1306's "first:" reference
+  is `DecimalsTests.cs(142)` with the default engine and `(141)` with the host. That's cosmetic: the reference is taken at a
+  different point of the run, and the later check logs agree.
+- **Finding 3: fixed.** On the crash, check now exits 1 (seen at 990c775). With nothing crashing, "Not verified" (3) is
+  true: the 4 net462 projects aren't loaded by `dotnet format`, and the build doesn't prove their IDE rules because the
+  repo has no `EnforceCodeStyleInBuild` (FormatCommand.Build.cs:312 only counts the build as proof then).
+- **Targeted: holds.** `// ReSharper disable once InconsistentNaming` + `public static object IEEERemainder(...)`
+  (MathHelper.cs:262-263) are unchanged.
+- No test that passed on the untouched code fails, no false Clean, no false Not verified, no format needing more than one
+  changing run. **No new findings.**
+
+Observations (not verdict findings, for the fixer to weigh):
+
+- **More runs than needed.** net10.0 now runs in 11 parts (16 runs in all, 6 before), although no net10.0 project
+  compiles parlot.cs (NCalc.Benchmarks is net8.0 only). Format run 1 went from 162 s to ~273 s; check --build from 183 s to
+  214 s. The split looks broader than the AdditionalFiles conflict needs (only the net8.0 view has Parser + Benchmarks).
+- `bro check --build`'s verdict line still says "build it (bro check --build)" right after that command's builds. It
+  would help if it named `EnforceCodeStyleInBuild` as what lets the build prove the net462 parts.
+- `bro preview init --engine host` is now accepted, but prints no Engine line, so it's hard to tell which engine the
+  preview used.

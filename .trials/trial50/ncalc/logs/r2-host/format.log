@@ -1,0 +1,84 @@
+Fixing StyleBro's rules and the built-in rules init and migrate turn on (141 ids); --all applies every analyzer's and compiler fix.
+Generators: building NCalc.SourceGenerators first (in the default configuration, the one 'dotnet format' loads): the code uses it as a source generator, and without its output the generated code would be missing from the checks.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net462, net8.0, netstandard2.0). net8.0: only the projects whose code compiles differently there.
+Configurations: runs for Release (NCalc.Parser) too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.
+Shared files: each group gets a run of its own: NCalc.Playground | NCalc.Async | NCalc.Core | NCalc.DependencyInjection | NCalc.Domain, NCalc.SourceGenerators | NCalc.Parser | NCalc.Sync | NCalc | NCalc.LambdaCompilation | NCalc.MemoryCache | NCalc.Tests; NCalc.Core | NCalc.Benchmarks. Some projects have a file as an additional file (AdditionalFiles) that another compiles (src/NCalc.Parser/LogicalExpressionParser.parlot.cs): loaded together, 'dotnet format' crashes ("The solution does not contain the specified document"), so they run apart, and a project that loads both itself runs on its project file. Others may compile the same files with other '#if' symbols or settings (https://github.com/dotnet/roslyn/issues/86001).
+Engine: the host couldn't load the workspace (The solution does not contain the specified document), so 'dotnet format' runs the checks and fixes.
+Checked net10.0, part 5 of 11 (run 1 of 16)
+Checked net8.0, part 1 of 2 (run 2 of 16)
+Checked net10.0, part 9 of 11 (run 3 of 16)
+Checked net10.0, part 1 of 11 (run 4 of 16)
+Checked net10.0, part 6 of 11 (run 5 of 16)
+Checked net10.0, part 2 of 11 (run 6 of 16)
+Checked net8.0, part 2 of 2 (run 7 of 16)
+Checked net10.0, part 10 of 11 (run 8 of 16)
+Checked net10.0, part 7 of 11 (run 9 of 16)
+Checked net10.0, part 8 of 11 (run 10 of 16)
+Checked net10.0, part 3 of 11 (run 11 of 16)
+Checked netstandard2.0 (run 12 of 16)
+Checked net10.0, part 11 of 11 (run 13 of 16)
+Checked net10.0, part 4 of 11 (run 14 of 16)
+Checked netstandard2.0, Release (run 15 of 16)
+Checked net462 (run 16 of 16)
+== net10.0, part 1 of 11 (1 project(s), 3 files with findings)
+== net10.0, part 3 of 11 (1 project(s), 18 files with findings)
+== net10.0, part 4 of 11 (1 project(s), 2 files with findings)
+== net10.0, part 5 of 11 (2 project(s), 3 files with findings)
+== net10.0, part 6 of 11 (1 project(s), 3 files with findings)
+== net10.0, part 9 of 11 (1 project(s), 3 files with findings)
+== net10.0, part 11 of 11 (1 project(s), 27 files with findings)
+== net462 (9 project(s), 26 files with findings)
+'dotnet format' had warnings loading the workspace in its net462 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+'dotnet format' skipped NCalc.Core: MSBuild couldn't load it or a project it references for this run (often reference assemblies missing for its target framework). The restore isn't the cause; add '--verbosity diagnostic' to this 'bro format' command to see MSBuild's message ("Msbuild failed when processing the file ...") in its net462 run.
+'dotnet format' skipped NCalc.DependencyInjection: MSBuild couldn't load it or a project it references for this run (often reference assemblies missing for its target framework). The restore isn't the cause; add '--verbosity diagnostic' to this 'bro format' command to see MSBuild's message ("Msbuild failed when processing the file ...") in its net462 run.
+'dotnet format' skipped NCalc.LambdaCompilation: MSBuild couldn't load it or a project it references for this run (often reference assemblies missing for its target framework). The restore isn't the cause; add '--verbosity diagnostic' to this 'bro format' command to see MSBuild's message ("Msbuild failed when processing the file ...") in its net462 run.
+== net8.0, part 1 of 2 (1 project(s), 18 files with findings)
+== net8.0, part 2 of 2 (1 project(s), 3 files with findings)
+== netstandard2.0 (11 project(s), 30 files with findings)
+== netstandard2.0, Release (1 project(s), 4 files with findings)
+Partly incomplete: 'dotnet format' skipped NCalc.Core, NCalc.DependencyInjection, NCalc.LambdaCompilation for net462 (references didn't load): code only that framework compiles (inside #if) wasn't formatted.
+Run 1: 61 files changed:
+  example/NCalc.Playground/Helpers/EvaluationHelper.cs
+  example/NCalc.Playground/Models/EvaluationResult.cs
+  example/NCalc.Playground/Pages/Home.razor.cs
+  src/NCalc.Core/Cache/ILogicalExpressionCache.cs
+  src/NCalc.Core/Cache/LogicalExpressionCache.cs
+  src/NCalc.Core/Exceptions/NCalcCastException.cs
+  src/NCalc.Core/Expression.cs
+  src/NCalc.Core/Factories/ExpressionFactory.cs
+  src/NCalc.Core/Factories/IEvaluationVisitorFactory.cs
+  src/NCalc.Core/Handlers/BinaryEventArgs.cs
+  ... and 51 more
+Checked net10.0, part 5 of 11 (run 1 of 16)
+Checked net10.0, part 9 of 11 (run 2 of 16)
+Checked net8.0, part 1 of 2 (run 3 of 16)
+Checked net10.0, part 1 of 11 (run 4 of 16)
+Checked net10.0, part 6 of 11 (run 5 of 16)
+Checked net10.0, part 2 of 11 (run 6 of 16)
+Checked net10.0, part 10 of 11 (run 7 of 16)
+Checked net8.0, part 2 of 2 (run 8 of 16)
+Checked net10.0, part 7 of 11 (run 9 of 16)
+Checked net10.0, part 3 of 11 (run 10 of 16)
+Checked net10.0, part 8 of 11 (run 11 of 16)
+Checked net10.0, part 11 of 11 (run 12 of 16)
+Checked netstandard2.0 (run 13 of 16)
+Checked net10.0, part 4 of 11 (run 14 of 16)
+Checked netstandard2.0, Release (run 15 of 16)
+Checked net462 (run 16 of 16)
+== net462 (9 project(s))
+'dotnet format' skipped NCalc.MemoryCache: MSBuild couldn't load it or a project it references for this run (often reference assemblies missing for its target framework). The restore isn't the cause; add '--verbosity diagnostic' to this 'bro format' command to see MSBuild's message ("Msbuild failed when processing the file ...") in its net462 run.
+Partly incomplete: 'dotnet format' skipped NCalc.Core, NCalc.DependencyInjection, NCalc.LambdaCompilation, NCalc.MemoryCache for net462 (references didn't load): code only that framework compiles (inside #if) wasn't formatted.
+Run 2: 0 files changed, but not everything was checked (below).
+4 findings kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them (https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose).
+  test/NCalc.Tests/LambdaTests.cs(477,23): BRO1306 Rename 'x' to 'X'. Kept: the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time (first: test/NCalc.Tests/AsyncTests.cs(272)).
+  test/NCalc.Tests/LambdaTests.cs(478,23): BRO1306 Rename 'y' to 'Y'. Kept: the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time (first: test/NCalc.Tests/DecimalsTests.cs(141)).
+  test/NCalc.Tests/LambdaTests.cs(637,23): BRO1306 Rename 'x' to 'X'. Kept: the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time (first: test/NCalc.Tests/AsyncTests.cs(272)).
+  test/NCalc.Tests/LambdaTests.cs(638,23): BRO1306 Rename 'y' to 'Y'. Kept: the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time (first: test/NCalc.Tests/DecimalsTests.cs(141)).
+Baseline: stylebro.baseline: added 4 kept findings, so the build and 'format --verify-no-changes' skip them (new violations still fail; delete an entry to see it again) (https://bisforboman.github.io/stylebro/baseline/).
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Not checked: NCalc.Core (net462): 'dotnet format' couldn't load it (references didn't load), so the code only that framework compiles
+Not checked: NCalc.DependencyInjection (net462): 'dotnet format' couldn't load it (references didn't load), so the code only that framework compiles
+Not checked: NCalc.LambdaCompilation (net462): 'dotnet format' couldn't load it (references didn't load), so the code only that framework compiles
+Not checked: NCalc.MemoryCache (net462): 'dotnet format' couldn't load it (references didn't load), so the code only that framework compiles
+Not verified: 4 parts of the build weren't checked (the 'Not checked:' lines above); the rest is clean. The build may still report findings there: fix what's named, or build it (bro check --build).

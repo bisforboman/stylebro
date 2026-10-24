@@ -1,0 +1,14 @@
+Running tests from /home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/bin/Debug/net10.0/NCalc.Tests.dll (net10.0|x64)
+[+897/x0/?0] NCalc.Tests.dll (net10.0|x64)(2s)
+
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/bin/Debug/net10.0/NCalc.Tests.dll (net10.0|x64) passed (3s 474ms)
+
+  In process file artifacts produced:
+    - /home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/bin/Debug/net10.0/TestResults/NCalc.Tests-linux-net10.0-report.html
+
+Test run summary: Passed!
+  total: 901
+  failed: 0
+  succeeded: 901
+  skipped: 0
+  duration: 3s 703ms
