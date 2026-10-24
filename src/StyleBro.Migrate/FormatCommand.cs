@@ -255,7 +255,7 @@ internal static partial class FormatCommand
     [
         "-getProperty:TargetFrameworks", "-getProperty:TargetFramework", "-getProperty:ProjectAssetsFile", "-getProperty:MSBuildProjectExtensionsPath", "-getProperty:WarningsNotAsErrors",
         "-getProperty:Configuration", "-getProperty:Configurations", "-getProperty:Platforms", "-getProperty:StyleBroBaseline", "-getProperty:GenerateDocumentationFile",
-        "-getItem:ProjectReference", "-getItem:Compile", "-getItem:PackageReference", "-getItem:GlobalPackageReference", "-getItem:Analyzer", "-getItem:MissingWorkloadPack", "-getItem:GlobalAnalyzerConfigFiles", "-nologo",
+        "-getItem:ProjectReference", "-getItem:Compile", "-getItem:PackageReference", "-getItem:GlobalPackageReference", "-getItem:Analyzer", "-getItem:MissingWorkloadPack", "-getItem:GlobalAnalyzerConfigFiles", "-getItem:AdditionalFiles", "-nologo",
     ];
 
     /// <summary>What <see cref="TestedSymbols"/> found, per file (full path).</summary>
@@ -263,6 +263,9 @@ internal static partial class FormatCommand
 
     /// <summary>Whether a folder holds a NuGet package (<see cref="IsPackageFile"/>), per folder.</summary>
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, bool> PackageFolders = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>What <see cref="AdditionalFilesOf"/> read, per project (full path).</summary>
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, string[]> AdditionalFilesCache = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>The projects <see cref="EvaluateProject"/> evaluated (full path), once per process.</summary>
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, Lazy<string>> Evaluations = new(StringComparer.OrdinalIgnoreCase);
@@ -906,6 +909,38 @@ internal static partial class FormatCommand
     /// </summary>
     public static int Worse(int exit, int code) =>
         exit is 0 || (exit == NotCleanExitCode && code is not (0 or NotCleanExitCode)) ? code : exit;
+
+    /// <summary>
+    /// Whether the projects a run loads (<paramref name="loaded"/>) have a file that one compiles and one (the same or another)
+    /// has as an additional file: MSBuildWorkspace then crashes opening a solution or solution filter with them ("The solution
+    /// does not contain the specified document"), and opening a project file doesn't (owner's decision 2026-10-24, trial 50:
+    /// Parlot's generator makes NCalc.Parser's '*.parlot.cs' additional files, and NCalc.Benchmarks compiles one).
+    /// </summary>
+    public static bool LoadsAdditionalAsCompile(IReadOnlyCollection<string> loaded, Func<string, IEnumerable<string>> compile, Func<string, IEnumerable<string>> additional)
+    {
+        var additionalFiles = loaded.SelectMany(additional).Select(Path.GetFullPath).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        return additionalFiles.Count > 0 && loaded.SelectMany(compile).Any(f => additionalFiles.Contains(Path.GetFullPath(f)));
+    }
+
+    /// <summary>The projects opening <paramref name="project"/> loads: it and what it references, transitively.</summary>
+    public static HashSet<string> LoadedWith(string project, Func<string, IEnumerable<string>> references)
+    {
+        var loaded = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var next = new Stack<string>([project]);
+        while (next.Count > 0)
+        {
+            var current = next.Pop();
+            if (loaded.Add(current))
+            {
+                foreach (var reference in references(current))
+                {
+                    next.Push(reference);
+                }
+            }
+        }
+
+        return loaded;
+    }
 
     /// <summary>What to say after a run crashed: the run's projects, and the SDK bug when the crash is the linked-file merge's.</summary>
     public static string CrashMessage(IEnumerable<string> projects) =>
@@ -1976,38 +2011,24 @@ internal static partial class FormatCommand
     /// given order; one group when nothing is shared. With <paramref name="settings"/> (how a project parses a file for the
     /// run's framework, null when unknown), projects that compile a file the same way may share a run: they parse it the
     /// same, so the fixes make the same edits in both copies, which the merge takes (splat: every library links one polyfill
-    /// file, 33 runs for net10.0 before, each loading the shared file through the project's references anyway).
+    /// file, 33 runs for net10.0 before, each loading the shared file through the project's references anyway). With
+    /// <paramref name="additional"/> (a project's additional files), no group loads a file as both (<see cref="LoadsAdditionalAsCompile"/>):
+    /// a project that loads one so itself gets a group of its own.
     /// </summary>
-    public static List<List<string>> Separate(IEnumerable<string> projects, Func<string, IEnumerable<string>> references, Func<string, IEnumerable<string>> compile, Func<string, string, string?>? settings = null)
+    public static List<List<string>> Separate(IEnumerable<string> projects, Func<string, IEnumerable<string>> references, Func<string, IEnumerable<string>> compile, Func<string, string, string?>? settings = null, Func<string, IEnumerable<string>>? additional = null)
     {
         bool Same(string owner, string project, string file) =>
             owner.Equals(project, StringComparison.OrdinalIgnoreCase) || (settings?.Invoke(owner, file) is { } a && settings(project, file) is { } b && a == b);
 
-        HashSet<string> Loaded(string project)
-        {
-            var loaded = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            var next = new Stack<string>(new[] { project });
-            while (next.Count > 0)
-            {
-                var current = next.Pop();
-                if (loaded.Add(current))
-                {
-                    foreach (var reference in references(current))
-                    {
-                        next.Push(reference);
-                    }
-                }
-            }
-
-            return loaded;
-        }
+        HashSet<string> Loaded(string project) => LoadedWith(project, references);
 
         var groups = new List<(List<string> Projects, HashSet<string> Loaded, Dictionary<string, string> Owner)>();
         foreach (var project in projects)
         {
             var loaded = Loaded(project);
             var group = groups.FirstOrDefault(g => loaded.Where(p => !g.Loaded.Contains(p))
-                .All(p => compile(p).All(f => !g.Owner.TryGetValue(f, out var owner) || Same(owner, p, f))));
+                .All(p => compile(p).All(f => !g.Owner.TryGetValue(f, out var owner) || Same(owner, p, f)))
+                && (additional is null || !LoadsAdditionalAsCompile([.. g.Loaded.Union(loaded, StringComparer.OrdinalIgnoreCase)], compile, additional)));
             if (group.Projects is null)
             {
                 group = (new List<string>(), new HashSet<string>(StringComparer.OrdinalIgnoreCase), new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
@@ -2598,14 +2619,24 @@ internal static partial class FormatCommand
 
     /// <summary>
     /// What format says about the runs split because projects compile a file another project compiles with other '#if' symbols
-    /// or settings: each framework's parts, by project name (the same parts said once), or null when no run was split.
+    /// or settings: each framework's parts, by project name (the same parts said once), or null when no run was split. With
+    /// <paramref name="additional"/> (files one project has as additional files and another compiles, <see cref="LoadsAdditionalAsCompile"/>),
+    /// it says that reason instead.
     /// </summary>
-    public static string? SharedFilesLine(IReadOnlyList<List<List<string>>> partitions)
+    public static string? SharedFilesLine(IReadOnlyList<List<List<string>>> partitions, IReadOnlyList<string>? additional = null)
     {
         static string Names(List<string> part) => part.Count > 4 ? $"{string.Join(", ", part.Take(4))} and {part.Count - 4} more" : string.Join(", ", part);
         var described = partitions.Select(parts => string.Join(" | ", parts.Select(Names))).Distinct(StringComparer.Ordinal).ToList();
-        return described.Count == 0
-            ? null
+        if (described.Count == 0)
+        {
+            return null;
+        }
+
+        return additional is { Count: > 0 }
+            ? $"{SharedFilesHeader} each group gets a run of its own: {string.Join("; ", described)}. "
+                + $"Some projects have a file as an additional file (AdditionalFiles) that another compiles ({string.Join(", ", additional.Take(3))}{(additional.Count > 3 ? $" and {additional.Count - 3} more" : string.Empty)}): "
+                + "loaded together, 'dotnet format' crashes (\"The solution does not contain the specified document\"), so they run apart, and a project that loads both itself runs on its project file. "
+                + $"Others may compile the same files with other '#if' symbols or settings ({LinkedMergeIssue})."
             : $"{SharedFilesHeader} these projects compile the same files with other '#if' symbols or settings, so each group gets a run of its own (loaded together, 'dotnet format' crashes: {LinkedMergeIssue}): {string.Join("; ", described)}.";
     }
 
@@ -3974,6 +4005,23 @@ internal static partial class FormatCommand
     /// migration's check for StyleCop (<see cref="StyleCopSetup.EvaluateStyleCop"/>) and format's project list share it.
     /// Throws <see cref="ToolException"/> when MSBuild can't evaluate the project.
     /// </summary>
+    /// <summary>A project's AdditionalFiles items (full paths) from its evaluation (<see cref="LoadsAdditionalAsCompile"/>), once per process.</summary>
+    internal static string[] AdditionalFilesOf(string fullPath) =>
+        AdditionalFilesCache.GetOrAdd(fullPath, p =>
+        {
+            try
+            {
+                using var json = JsonDocument.Parse(EvaluateProject(p));
+                return json.RootElement.TryGetProperty("Items", out var items) && items.TryGetProperty("AdditionalFiles", out var found)
+                    ? found.EnumerateArray().Select(r => r.GetProperty("FullPath").GetString()!).ToArray()
+                    : [];
+            }
+            catch (Exception e) when (e is JsonException or ToolException)
+            {
+                return [];
+            }
+        });
+
     internal static string EvaluateProject(string fullPath) =>
         Evaluations.GetOrAdd(fullPath, p => new Lazy<string>(() => Capture(Path.GetDirectoryName(p)!, ["msbuild", p, .. ProjectQuery]))).Value;
 
@@ -5508,11 +5556,15 @@ internal static partial class FormatCommand
         var runs = (allFrameworks.Count == 0 ? frameworkRuns : frameworkPlan).Select(r => (r.Framework, Configuration: string.Empty, r.Projects))
             .Concat(configurationRuns)
             .ToList();
+        IEnumerable<string> ReferencesOf(string fullPath) => byFullPath.TryGetValue(fullPath, out var key) ? projects[key].References : Array.Empty<string>();
+        bool Alone(string fullPath, string framework, string configuration) =>
+            LoadsAdditionalAsCompile(LoadedWith(fullPath, ReferencesOf), c => CompileFor(c, framework, configuration), AdditionalFilesOf);
         List<List<string>> Apart(string framework, string configuration, List<string> selected) => Separate(
                 selected.Select(p => projects[p].FullPath),
-                r => byFullPath.TryGetValue(r, out var key) ? projects[key].References : Array.Empty<string>(),
+                ReferencesOf,
                 c => CompileFor(c, framework, configuration),
-                (s, file) => View(s, framework, configuration)?.Key([file]))
+                (s, file) => View(s, framework, configuration)?.Key([file]),
+                AdditionalFilesOf)
             .Select(g => g.Select(f => byFullPath[f]).ToList())
             .ToList();
 
@@ -5639,7 +5691,10 @@ internal static partial class FormatCommand
             .Order(StringComparer.OrdinalIgnoreCase)
             .ToList();
         var shared = plan.Where(p => p.Parts is not null).Select(p => p.Parts!.Select(Names).ToList()).ToList();
-        if (SharedFilesLine(shared) is { } sharedLine)
+        var compiled = projects.Values.SelectMany(p => p.Compile).Select(Path.GetFullPath).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var additionalCompiled = projects.Values.SelectMany(p => AdditionalFilesOf(p.FullPath)).Select(Path.GetFullPath).Where(compiled.Contains)
+            .Select(f => Path.GetRelativePath(root, f).Replace('\\', '/')).Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList();
+        if (SharedFilesLine(shared, additionalCompiled) is { } sharedLine)
         {
             log(sharedLine);
         }
@@ -5718,7 +5773,10 @@ internal static partial class FormatCommand
         int RunFramework(int index, bool verify, Action<string> output, IReadOnlyList<string>? only = null)
         {
             var (framework, configuration, selected, _, _) = plan[index];
-            var filter = isSolution ? Path.Combine(solutionDirectory, $".stylebro-format-{index}.slnf") : null;
+
+            // A run of its own (Alone) opens its project file: a solution filter with it crashes MSBuildWorkspace.
+            var byProject = isSolution && selected.Count == 1 && Alone(projects[selected[0]].FullPath, framework, configuration) ? projects[selected[0]].FullPath : null;
+            var filter = isSolution && byProject is null ? Path.Combine(solutionDirectory, $".stylebro-format-{index}.slnf") : null;
             try
             {
                 if (filter is not null)
@@ -5761,7 +5819,7 @@ internal static partial class FormatCommand
                     return Format(filter ?? workspacePath, options, a => hostScope.Run(workspacePath, environment, selections, a.ToList(), output, () => Dotnet(root, environment, a, output)), Passes(whitespaceExclusions, include));
                 }
 
-                return Format(filter ?? workspacePath, options, a => Dotnet(root, environment, a, output), Passes(whitespaceExclusions, include));
+                return Format(byProject ?? filter ?? workspacePath, options, a => Dotnet(root, environment, a, output), Passes(whitespaceExclusions, include));
             }
             finally
             {

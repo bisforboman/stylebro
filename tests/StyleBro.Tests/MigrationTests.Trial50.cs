@@ -83,4 +83,47 @@ public sealed partial class MigrationTests
         // verified: ... the rest is clean" (3) for code that run never checked.
         Assert.Equal(expected, FormatCommand.Worse(exit, code));
     }
+
+    [Fact]
+    public void Format_AFileOneProjectHasAsAnAdditionalFileAndAnotherCompiles_RunsApart()
+    {
+        // ncalc: Parlot's generator makes NCalc.Parser's '*.parlot.cs' additional files, NCalc.Benchmarks compiles one, and
+        // MSBuildWorkspace crashed loading any solution or solution filter with both ("The solution does not contain the
+        // specified document"); a project file loads. Benchmarks references Parser (through Core): a run of its own, which
+        // opens its project file; Other doesn't load Parser and runs with the rest.
+        var compile = new Dictionary<string, string[]>
+        {
+            ["Parser"] = ["parser.cs"],
+            ["Core"] = ["core.cs"],
+            ["Benchmarks"] = ["Grammar.parlot.cs", "bench.cs"],
+            ["Tests"] = ["tests.cs"],
+            ["Other"] = ["other.cs"],
+        };
+        var references = new Dictionary<string, string[]> { ["Core"] = ["Parser"], ["Benchmarks"] = ["Core"], ["Tests"] = ["Core"] };
+        IEnumerable<string> Refs(string p) => references.TryGetValue(p, out var r) ? r : [];
+        IEnumerable<string> Additional(string p) => p == "Parser" ? ["Grammar.parlot.cs"] : [];
+
+        Assert.True(FormatCommand.LoadsAdditionalAsCompile(FormatCommand.LoadedWith("Benchmarks", Refs), p => compile[p], Additional));
+        Assert.False(FormatCommand.LoadsAdditionalAsCompile(FormatCommand.LoadedWith("Tests", Refs), p => compile[p], Additional));
+        Assert.False(FormatCommand.LoadsAdditionalAsCompile(["Benchmarks"], p => compile[p], Additional));
+        Assert.Equal(
+            new List<List<string>> { new() { "Parser", "Core", "Tests", "Other" }, new() { "Benchmarks" } },
+            FormatCommand.Separate(["Parser", "Core", "Benchmarks", "Tests", "Other"], Refs, p => compile[p], additional: Additional));
+
+        // Without the reference, Benchmarks alone loads no additional file, but not in one run with Parser.
+        references.Remove("Benchmarks");
+        Assert.Equal(
+            new List<List<string>> { new() { "Parser", "Core", "Tests", "Other" }, new() { "Benchmarks" } },
+            FormatCommand.Separate(["Parser", "Core", "Benchmarks", "Tests", "Other"], Refs, p => compile[p], additional: Additional));
+        Assert.Equal(
+            new List<List<string>> { new() { "Benchmarks", "Other" }, new() { "Parser", "Core", "Tests" } },
+            FormatCommand.Separate(["Benchmarks", "Other", "Parser", "Core", "Tests"], Refs, p => compile[p], additional: Additional));
+
+        // Without additional files: one run, as before.
+        Assert.Single(FormatCommand.Separate(["Parser", "Core", "Benchmarks", "Tests", "Other"], Refs, p => compile[p]));
+
+        // The line says why (not roslyn#86001's '#if' reason).
+        var line = FormatCommand.SharedFilesLine([[["Parser", "Core"], ["Benchmarks"]]], ["src/Grammar.parlot.cs"]);
+        Assert.StartsWith("Shared files: each group gets a run of its own: Parser, Core | Benchmarks. Some projects have a file as an additional file (AdditionalFiles) that another compiles (src/Grammar.parlot.cs)", line, StringComparison.Ordinal);
+    }
 }
