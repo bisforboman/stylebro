@@ -389,6 +389,64 @@ public sealed class FormatHostTests : IDisposable
         Assert.Single(found, l => FormatCommand.IsFindingLine(l) && l.Contains("D.cs(7,", StringComparison.Ordinal));
     }
 
+    // Against the SDK on this machine: a run on a copy of the repository (check's kept-findings copy) uses the workspace the
+    // repository's check loaded: it fixes the copy's file as 'dotnet format' on the copy would, in the repository's paths, and
+    // leaves the repository alone; a copy without one of the files (git ignores it) is declined, for a load of its own.
+    [Fact]
+    public void AHostRunOnACopy_FixesTheCopy_InTheLoadedWorkspace()
+    {
+        var root = this.NewFolder();
+        Write(root, ".editorconfig", "root = true\n\n[*.cs]\ncsharp_prefer_braces = true\ndotnet_diagnostic.IDE0011.severity = warning\n");
+        Write(root, "App.slnx", "<Solution>\n  <Project Path=\"Lib/Lib.csproj\" />\n</Solution>\n");
+        Write(root, "Lib/Lib.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFramework>net8.0</TargetFramework>\n  </PropertyGroup>\n</Project>\n");
+        var before = "namespace Lib;\n\npublic static class C\n{\n    public static int M(int x)\n    {\n        if (x > 2) return 3;\n        return x;\n    }\n}\n";
+        Write(root, "Lib/C.cs", before);
+        Assert.Equal(0, Dotnet(root, out _, "restore", "App.slnx"));
+        var copy = this.NewFolder();
+        foreach (var file in Directory.GetFiles(root, "*", SearchOption.AllDirectories).Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal)))
+        {
+            Write(copy, Path.GetRelativePath(root, file), File.ReadAllText(file));
+        }
+
+        string[] Fix(string folder) => ["format", "style", Path.Combine(folder, "App.slnx"), "--no-restore", "--diagnostics", "IDE0011", "--severity", "warn"];
+        Assert.Equal(0, Dotnet(copy, out _, "restore", "App.slnx"));
+        Assert.Equal(0, Dotnet(copy, out _, Fix(copy)));
+        var fixedText = File.ReadAllText(Path.Combine(copy, "Lib", "C.cs"));
+        Assert.NotEqual(before, fixedText);
+        Write(copy, "Lib/C.cs", before);
+
+        var log = new List<string>();
+        using var host = FormatHost.Open(root, log.Add);
+        Assert.True(host is not null, string.Join("\n", log));
+        var solution = Path.Combine(root, "App.slnx");
+        var found = new List<string>();
+        Assert.Equal(2, host.Run(solution, root, [], [], [], [.. Fix(root), "--verify-no-changes"], found.Add));
+        Assert.Contains(found, l => FormatCommand.IsFindingLine(l) && l.StartsWith(Path.Combine(root, "Lib", "C.cs"), StringComparison.Ordinal));
+
+        var copied = (Copy: copy + Path.DirectorySeparatorChar, Source: root + Path.DirectorySeparatorChar);
+        var output = new List<string>();
+        Assert.Equal(0, host.Run(copied, solution, root, [], [], [], [.. Fix(root), "--verbosity", "normal"], output.Add, out var failure));
+        Assert.Null(failure);
+        Assert.Equal(fixedText, File.ReadAllText(Path.Combine(copy, "Lib", "C.cs")));
+        Assert.Equal(before, File.ReadAllText(Path.Combine(root, "Lib", "C.cs")));
+        Assert.Contains(output, l => l.Contains(Path.Combine(root, "Lib", "C.cs"), StringComparison.Ordinal));
+
+        // The copy's next run sees what its last one wrote; the repository's runs still see the repository.
+        Assert.Equal(0, host.Run(copied, solution, root, [], [], [], [.. Fix(root), "--verify-no-changes"], _ => { }, out _));
+        Assert.Equal(2, host.Run(solution, root, [], [], [], [.. Fix(root), "--verify-no-changes"], _ => { }));
+        host.Forget(copied.Copy);
+
+        // A file git leaves out of the copy: declined.
+        Write(root, "Lib/Ignored.cs", "namespace Lib;\n\npublic static class Ignored\n{\n}\n");
+        var other = this.NewFolder();
+        Write(other, "Lib/C.cs", before);
+        var host2 = FormatHost.Open(root, log.Add)!;
+        using (host2)
+        {
+            Assert.Null(host2.Run((other + Path.DirectorySeparatorChar, root + Path.DirectorySeparatorChar), solution, root, [], [], [], Fix(root), _ => { }, out _));
+        }
+    }
+
     // Against the SDK on this machine (trial 50, ncalc): when MSBuildWorkspace throws opening the solution, the host says why
     // and declines, so bro runs 'dotnet format' for the rest of the command. Any SDK throws on a solution file that isn't XML;
     // SDK 10.0.1xx (not 10.0.4xx) also on a file one project has as an additional file and another compiles, and there the

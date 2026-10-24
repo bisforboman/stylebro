@@ -189,6 +189,63 @@ public sealed class FormatHostFixTests : IDisposable
         Assert.Equal(0, (await disk.SyncAsync(saved, CancellationToken.None)).Changed);
     }
 
+    [Fact]
+    public async Task ACopysRuns_ReadAndWriteTheCopysFiles()
+    {
+        // check's kept-findings copy runs in the repository's workspace: the documents keep the repository's paths.
+        var path = this.Write("repo/A.cs", "class A { }");
+        var copied = this.Write("copy/A.cs", "class A { }");
+        var of = new CopyOf(Path.Combine(this.folder, "copy") + Path.DirectorySeparatorChar, Path.Combine(this.folder, "repo") + Path.DirectorySeparatorChar);
+        Assert.Equal(copied, of.OnDisk(path));
+        Assert.Equal("/elsewhere/B.cs", of.OnDisk("/elsewhere/B.cs"));
+
+        using var workspace = new AdhocWorkspace();
+        var current = Linked(workspace.CurrentSolution, path);
+        var disk = new DiskState(of.OnDisk);
+
+        // Nothing remembered: the first sync reads every file of the copy, and only what differs there is a change.
+        Assert.Equal(0, (await disk.SyncAsync(current, CancellationToken.None)).Changed);
+        File.WriteAllText(copied, "class A1 { }");
+        File.SetLastWriteTimeUtc(copied, DateTime.UtcNow.AddMinutes(1));
+        var (synced, changed) = await disk.SyncAsync(current, CancellationToken.None);
+        Assert.Equal(1, changed);
+        Assert.All(synced.GetDocumentIdsWithFilePath(path), id => Assert.Equal("class A1 { }", synced.GetDocument(id)!.GetTextAsync().Result.ToString()));
+
+        // A fix writes the copy's file, never the repository's.
+        var a = synced.GetDocumentIdsWithFilePath(path)[0];
+        var formatted = synced.WithDocumentText(a, SourceText.From("class A2 { }"));
+        var (saved, written) = await disk.SaveAsync(synced, synced, formatted, CancellationToken.None);
+        Assert.Equal([copied], written);
+        Assert.Equal("class A2 { }", File.ReadAllText(copied));
+        Assert.Equal("class A { }", File.ReadAllText(path));
+        Assert.All(saved.GetDocumentIdsWithFilePath(path), id => Assert.Equal("class A2 { }", saved.GetDocument(id)!.GetTextAsync().Result.ToString()));
+        Assert.Equal(0, (await disk.SyncAsync(saved, CancellationToken.None)).Changed);
+    }
+
+    [Fact]
+    public void ACopy_LacksTheFilesGitLeftOut_ButNotWhatTheBuildWrites()
+    {
+        var repo = Path.Combine(this.folder, "repo");
+        var copy = Path.Combine(this.folder, "copy");
+        var source = this.Write("repo/Lib/A.cs", "class A { }");
+        this.Write("copy/Lib/A.cs", "class A { }");
+        var generated = this.Write("repo/Lib/obj/Debug/net8.0/Lib.AssemblyInfo.cs", "// generated");
+        var ignored = this.Write("repo/Lib/Ignored.g.cs", "class G { }");
+        var of = new CopyOf(copy + Path.DirectorySeparatorChar, repo + Path.DirectorySeparatorChar);
+
+        using var workspace = new AdhocWorkspace();
+        var id = ProjectId.CreateNewId();
+        var solution = workspace.CurrentSolution.AddProject(ProjectInfo.Create(id, VersionStamp.Default, "Lib", "Lib", LanguageNames.CSharp, filePath: Path.Combine(repo, "Lib", "Lib.csproj"))
+            .WithCompilationOutputInfo(default(CompilationOutputInfo).WithAssemblyPath(Path.Combine(repo, "Lib", "obj", "Debug", "net8.0", "Lib.dll"))));
+        foreach (var path in new[] { source, generated })
+        {
+            solution = solution.AddDocument(DocumentInfo.Create(DocumentId.CreateNewId(id), Path.GetFileName(path), filePath: path));
+        }
+
+        Assert.False(of.Lacks(solution));
+        Assert.True(of.Lacks(solution.AddDocument(DocumentInfo.Create(DocumentId.CreateNewId(id), "Ignored.g.cs", filePath: ignored))));
+    }
+
     public void Dispose()
     {
         try
@@ -219,6 +276,7 @@ public sealed class FormatHostFixTests : IDisposable
     private string Write(string name, string text, Encoding? encoding = null)
     {
         var path = Path.Combine(this.folder, name);
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         File.WriteAllText(path, text, encoding ?? new UTF8Encoding(false));
         return path;
     }
