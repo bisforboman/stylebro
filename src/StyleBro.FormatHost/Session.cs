@@ -214,10 +214,11 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
                 {
                     await opened.OpenSolutionAsync(workspace).ConfigureAwait(false);
                 }
-                catch (Exception exception) when (exception is InvalidOperationException or ArgumentException)
+                catch (Exception exception) when (exception is not OperationCanceledException)
                 {
                     // Trial 50, ncalc: a file one project has as an additional file and another compiles ("The solution does
-                    // not contain the specified document"). bro runs 'dotnet format' instead, which it gives a project file then.
+                    // not contain the specified document", SDK 10.0.1xx). bro runs 'dotnet format' instead, which it gives a
+                    // project file then; a solution 'dotnet format' can't open either fails there as it would without the host.
                     opened.Dispose();
                     return new Loaded(opened, opened.CurrentSolution, ImmutableList<WorkspaceDiagnostic>.Empty, unsupported: false, failure: exception.Message);
                 }
