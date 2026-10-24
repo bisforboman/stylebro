@@ -234,3 +234,25 @@ dotnet test tests/CommandLine.Tests -c Debug|Release -f netcoreapp3.1
 - Verdicts match the builds and tests: no false Clean, no false Not verified, format converges after one changing run, no
   test that passed before fails. **No findings in the re-check.**
 - Logs: `commandline/logs/r-default-*`, `commandline/logs/r-host-*`.
+
+### Re-check at 4c60b3c (fixer's later commit, packed as 0.8.0-trial50.r3)
+
+Same script and steps on new clones `r3-default` / `r3-host` (4c60b3c adds f09f8c8: a multi-targeted project's additional
+files come from each framework's evaluation; commandline is multi-targeted).
+
+| Command | Default: exit | time | Host: exit | time |
+|---|---|---|---|---|
+| preview init / init / preview format / format --diff | 0 / 0 / 0 / 0 | 72 / 3 / 71 / 68 s | 0 / 0 / 0 / 0 | 43 / 4 / 40 / 39 s |
+| format (run 1: 142 files, run 2: clean) | 0 | 82 s | 0 | 47 s |
+| check / check --json | 0 / 0 (clean) | 19 s | 0 / 0 (clean) | 18 s |
+| check --build / --json | 0 / 0 (Clean) | 52 s | 0 / 0 (Clean) | 54 s |
+| TWAE Debug / Release | 0 / 0, 0 errors | 8 / 7 s | 0 / 0, 0 errors | 6 / 6 s |
+| Tests Debug / Release | 684 / 684 passed | 6 / 5 s | 684 / 684 passed | 5 / 6 s |
+
+- The trees are byte-identical between the engines AND to the 990c775 run. The only exception is Directory.Build.props,
+  which holds the package version (r2 vs r3).
+- Each patch applied to its starting state gives the format tree (preview init: only the ItemGroup placement in
+  Directory.Build.props, as before). The patches are byte-identical between the engines.
+- `--json` is identical apart from `path`. The logs differ only in the `Checked` order, the #287 load note and preview
+  init's 5,905 vs 5,903 reported changes (the documented count wobble).
+- **No findings.** Logs: `commandline/logs/r3-*`.

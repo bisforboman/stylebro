@@ -1,0 +1,12 @@
+  Determining projects to restore...
+  Restored /home/user/stylebro/.trials/trial50/commandline/r3-host/src/CommandLine/CommandLine.csproj (in 346 ms).
+  Restored /home/user/stylebro/.trials/trial50/commandline/r3-host/tests/CommandLine.Tests/CommandLine.Tests.csproj (in 381 ms).
+  CommandLine -> /home/user/stylebro/.trials/trial50/commandline/r3-host/src/CommandLine/bin/Release/netstandard2.0/CommandLine.dll
+  CommandLine.Tests -> /home/user/stylebro/.trials/trial50/commandline/r3-host/tests/CommandLine.Tests/bin/Release/netcoreapp3.1/CommandLine.Tests.dll
+Test run for /home/user/stylebro/.trials/trial50/commandline/r3-host/tests/CommandLine.Tests/bin/Release/netcoreapp3.1/CommandLine.Tests.dll (.NETCoreApp,Version=v3.1)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:   684, Skipped:     0, Total:   684, Duration: 674 ms - CommandLine.Tests.dll (netcoreapp3.1)
