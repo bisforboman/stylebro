@@ -679,3 +679,44 @@ One section per trial (repositories, what broke, what was fixed, the owner's ver
   `dotnet tool restore` (docfx). GOTCHA: `git checkout -p` with piped answers reverted a second hunk of a fix (the host's
   load context) while undoing a hand-made mutation: the helper and its test were committed without the call, and the rerun
   crashed the same way. Undo hand mutations from a copy of the file, and test the call site, not only the helper.
+
+## Trial 50 (2026-10-24, not clean: owner "Not clean", tally 0; host soak: not clean, 0 clean soaks)
+
+- Repos (three random plus one targeted): commandlineparser/commandline, Cysharp/ObservableCollections,
+  dahomey-technologies/Dahomey.Json (random, seed 50: draws 31, 17, 23 of 50 entries; every entry was used, so entries
+  41-50 were appended first and all three walks ended on 41-43; `.trials/trial50/logs/picks.md`), ncalc/ncalc (targeted at
+  trial 49's ReSharper fix: `// ReSharper disable once InconsistentNaming` on the public `IEEERemainder`; random.json entry
+  47; SharpZipLib was withdrawn, used in trial 36). The ReSharper fix held.
+- **Runner/fixer split** (owner: "Try it on trial 50", docs/decisions/2026-10-23-trial-50-tries-a-runnerfixer-split.md): one
+  cloud session per repository ran it (both engines, builds, tests) and wrote `.trials/trial50/findings/<owner>--<name>.md`
+  to the trial branch; the fixer reproduced each finding with a unit test or a two-project repro, without cloning the
+  repositories, and asked the runners to re-run on its commits. What worked: the findings files carried a minimal repro and
+  the cause (file and line) for every finding, so no finding had to be rediscovered; the runs went in parallel; a runner's
+  re-check caught two of the fixer's own mistakes (additional files read from the outer evaluation only; then an
+  over-split, net10.0 in 11 parts). What cost: every runner push to the branch cancelled the PR's CI (about 15 cancelled
+  mutation runs); a fix late in the round made every runner start over (multi-targeted projects everywhere); a wrong
+  commit id in one message; the fixer's host test assumed the SDK 10.0.1xx workspace bug, which CI's 10.0.402 doesn't have.
+  Rediscovered beyond the files: the `Engine:` line `bro check` hid (found while testing the host fix).
+- commandline: BRO1309 renamed `internal static int __Main(string[] args)` to `Main`; Microsoft.NET.Test.Sdk generates an
+  entry point on .NET Core, so CS0017 and none of the 684 tests built. `NamingRules.AllowsRename`: no static method becomes
+  `Main` (any static `Main` is an entry point candidate). After: 684/684.
+- Dahomey.Json, ObservableCollections, commandline: `bro preview format --engine host` and `bro format --diff --engine ...`
+  failed ("The preview failed": `--engine` reached `dotnet format`); `preview init --engine host` was "Unknown option".
+  Program takes `--engine` for every preview, PreviewCommand too (`FormatCommand.CurrentEngine`). Dahomey.Json's re-check:
+  `bro preview format Lib` with the reference in the root Directory.Build.props added Lib/Directory.Build.props, which would
+  hide the root one (`PreviewCommand.ImportedFromAbove`).
+- ncalc: Parlot.SourceGenerator makes `*.parlot.cs` AdditionalFiles in NCalc.Parser (inner evaluations only) and
+  NCalc.Benchmarks compiles one; MSBuildWorkspace (SDK 10.0.1xx; 10.0.402 opens it) crashes opening any solution or .slnf
+  with both ("The solution does not contain the specified document"), a project file opens. Owner's choices
+  (docs/decisions/2026-10-24-*): such projects run apart (`Separate`, `LoadsAdditionalAsCompile`: only another project's
+  additional file counts, a multi-targeted project's outer evaluation lists its own as Compile), a project whose references
+  load both runs on its project file, the "Shared files:" line says why; the host falls back to `dotnet format` when its
+  workspace doesn't load (`Entry.LoadFailed`, an `Engine:` line, shown in a check too: `IsHeaderLine`). `bro check` said
+  "Not verified ... the rest is clean" when the crashed run came after runs with findings: `FormatCommand.Worse`. After: 6 runs
+  (16 before the over-split fix), 61 files, Benchmarks' 28 TWAE errors gone, 901/901, Not verified for net462 only.
+- Format host soak (owner: "Not a clean soak"): commandline, ObservableCollections, Dahomey.Json identical on both engines
+  (trees, verdicts, exit codes, --json; preview patches byte-identical); format 47/82 s, 54/125 s, 53/104 s (host/default).
+  ncalc: every host run failed before the fallback, identical trees after.
+- Environment: SDK 10.0.113 + 8.0.132 and pwsh were there. Runners: `NUGET_CERT_REVOCATION_MODE=offline`,
+  `DOTNET_ROLL_FORWARD=Major` (netcoreapp3.1/net5.0 tests), `-p:NuGetAudit=false`, `-p:EnableWindowsTargeting=true`
+  (ObservableCollections' WPF sample); ncalc needs a full clone (Nerdbank.GitVersioning) and global.json lowered to 10.0.100.
