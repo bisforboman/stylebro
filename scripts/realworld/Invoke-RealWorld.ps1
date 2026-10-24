@@ -337,6 +337,16 @@ if ($broFormat) {
     }
     finally { Remove-Item Env:\CustomAfterMicrosoftCommonTargets -ErrorAction SilentlyContinue }
     $report.Add("- bro format after 'bro init --write': exit $broCode")
+    # Not clean: what one more run changes, so the job shows the lines that keep flipping (the newest SDK applies fixes a
+    # cloud container's SDK holds back, so they can't always be reproduced elsewhere).
+    if ($broCode -eq 2) {
+        git -C $path add -A
+        $env:CustomAfterMicrosoftCommonTargets = $packageHook
+        try { [void](Measure-Phase 'bro format --once (what keeps changing)' { dotnet $migrate format $sln --once 2>&1 | Out-Null }) }
+        finally { Remove-Item Env:\CustomAfterMicrosoftCommonTargets -ErrorAction SilentlyContinue }
+        Write-Host "What one more 'bro format' run changes:"
+        git -C $path diff | Select-Object -First 200 | Out-Host
+    }
     # 3 is "Not verified" (a part no run could load or check), which says what it left out; 2 is "Not clean".
     if ($broCode -notin 0, 3) { $problems.Add("'bro format' after 'bro init --write' ended with exit $broCode (2: still changing after 3 runs)") }
 }
