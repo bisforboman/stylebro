@@ -272,3 +272,11 @@ ncalc/ncalc	trial 50	150 files, netstandard2.0;net8.0;net10.0 + net462, TUnit (M
 icsharpcode/SharpZipLib	rejected trial 50	targeted pick withdrawn: used in trial 36
 DotNetAnalyzers/IDisposableAnalyzers	rejected trial 50	targeted candidate: its tests are net6.0-windows with WPF (NETSDK1100 off Windows)
 ststeiger/PdfSharpCore	rejected trial 50	targeted candidate: 32 tests, 5 fail untouched (no ghostscript)
+JasperFx/oakton	trial 51 (random, seed 51)	155 files, net6.0-net9.0 (DOTNET_ROLL_FORWARD=Major), no .editorconfig or Directory.Build.props; untouched TWAE build fails on 96 CS8632 (13 projects don't compile), 1 test fails untouched; init, clean; random.json entry 45, draw 15 walked to it
+mgravell/Pipelines.Sockets.Unofficial	trial 51 (random, seed 51)	77 files, net462-net10.0, Directory.build.props (lower-case b: not imported on Linux, renamed locally), Nerdbank.GitVersioning (full clone); Toys (net8.0;net462) without the tests' net472 was forced onto it in the net472 run (fixed); untouched TWAE fails on 4 CS0649; entry 46, draw 32 walked to it
+sebastienros/esprima-dotnet	trial 51 (random, seed 51)	249 files, net462-net8.0, TWAE, central package management, dense .editorconfig, in-solution source generator; Test262 project downloads its suite (fails the same before and after); two files committed with CRLF under text=auto (the preview made them LF, fixed); entry 48, draw 35 walked to it
+StephenCleary/AsyncEx	trial 51	59 files, netstandard1.3;netstandard2.0;net461 libraries referencing each other, netcoreapp3.1 tests, src/ and test/Directory.Build.props, none at the root (targeted); tests skipped by the per-framework runs' solution filter (fixed), a preview of one project hid src/Directory.Build.props (fixed)
+Cysharp/MessagePipe	rejected trial 51	targeted candidate: 551 .cs files, above a few hundred
+JasperFx/lamar	rejected trial 51	targeted candidate: 691 .cs files
+silkfire/Pastel	rejected trial 51	targeted candidate: 6 .cs files
+Open-NET-Libraries/Open.ChannelExtensions	rejected trial 51	targeted candidate: its test project's Main is only under '#if NET472' in a net9.0-only project (never compiled, a weak lens)

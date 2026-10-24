@@ -63,11 +63,12 @@ public sealed partial class MigrationTests
         var output = Capture(() => CaptureError(() => Assert.Throws<InvalidOperationException>(() => PreviewCommand.Run("format", new[] { Path.Combine(lib, "Lib.csproj"), "--diff=" + Path.Combine(root, "out.patch") }, (_, _) => throw new InvalidOperationException("format ran")))));
         Assert.DoesNotContain("wasn't referenced", output, StringComparison.Ordinal);
 
-        // Nothing above the top counts, and without a reference the subfolder still gets one.
+        // Nothing above the top counts, and without a reference the Directory.Build.props the subfolder imports gets one (trial 51).
         Assert.Empty(PreviewCommand.ImportedFromAbove(lib, lib));
         File.WriteAllText(Path.Combine(root, "Directory.Build.props"), "<Project />\n");
         Assert.NotNull(PreviewCommand.AddPackage(lib, root));
-        Assert.Contains("StyleBro.Analyzers", File.ReadAllText(Path.Combine(lib, "Directory.Build.props")), StringComparison.Ordinal);
+        Assert.Contains("StyleBro.Analyzers", File.ReadAllText(Path.Combine(root, "Directory.Build.props")), StringComparison.Ordinal);
+        Assert.False(File.Exists(Path.Combine(lib, "Directory.Build.props")));
     }
 
     [Theory]

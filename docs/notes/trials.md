@@ -720,3 +720,49 @@ One section per trial (repositories, what broke, what was fixed, the owner's ver
 - Environment: SDK 10.0.113 + 8.0.132 and pwsh were there. Runners: `NUGET_CERT_REVOCATION_MODE=offline`,
   `DOTNET_ROLL_FORWARD=Major` (netcoreapp3.1/net5.0 tests), `-p:NuGetAudit=false`, `-p:EnableWindowsTargeting=true`
   (ObservableCollections' WPF sample); ncalc needs a full clone (Nerdbank.GitVersioning) and global.json lowered to 10.0.100.
+
+## Trial 51 (2026-10-24, not clean: owner "Not clean", tally 0; host soak: clean, 1 clean soak)
+
+- Repos (three random plus one targeted): JasperFx/oakton, mgravell/Pipelines.Sockets.Unofficial, sebastienros/esprima-dotnet
+  (random, seed 51: draws 15, 32, 35 of 50 entries; every walk passed used entries and ended on entries 45, 46, 48; nothing
+  appended), StephenCleary/AsyncEx (targeted at trial 50's subfolder fix: src/ and test/Directory.Build.props, none at the
+  root; no pool entry fitted). Findings files: `.trials/trial51/findings/` (committed this time).
+- **One session again** (owner's choice after trial 50's split): the repositories ran in parallel as background jobs, each
+  with a findings file written before any fix, and one re-check of all four on the final commit. Wall clock: 08:04 start,
+  PR at 10:31 (2.5 h; trial 49: 6.9 h, trial 50: 8.5 h), verdict asked at 16:07; the session was archived at 11:38 in the
+  middle of the re-check and its container restarted, which lost the gitignored `.trials/trial51/` (findings files rebuilt
+  from the session's record, two repositories re-checked again). About 4.7 h of work in all.
+- Pipelines.Sockets.Unofficial (net462-net10.0): the net472 run kept Toys (net8.0;net462;net10.0) because it references the
+  library, and forced it onto net472, which it doesn't target ("reference assemblies for .NETFramework,Version=v4.7.2 were not
+  found"): the net472 tests didn't load, a false "Not verified" (the host was right). `SelectFrameworkTargets` clears the
+  framework for `StyleBroFormatOther` projects too.
+- AsyncEx (netstandard1.3;netstandard2.0;net461 libraries that reference each other, netcoreapp3.1 tests): a run's solution
+  filter listed only its own projects; the libraries loaded as references and MSBuildWorkspace wired their references to
+  each other's netstandard1.3 instance (no mscorlib), so `dotnet format` skipped 4 of 5 test projects ("Required references
+  did not load"), format said Not verified, and the TWAE builds that were green untouched failed on 3 findings left there.
+  `FormatCommand.FilterProjects`: a run's filter also lists the solution projects its projects reference (`--include` keeps
+  the run to its own files).
+- esprima-dotnet (`* text=auto`, two files committed with CRLF): the preview's copy repository stored them as LF, so init
+  counted them as converted by git (no `end_of_line = crlf` for the file whose multi-line strings would change) and the
+  patch made them LF; applied, `ToJavaScriptTest2` failed. The copy marks the source's CRLF-committed files `-text`
+  (`PreviewCommand.CommittedWithCrLf`).
+- AsyncEx (the lens): `bro preview format src/Nito.AsyncEx.Tasks/Nito.AsyncEx.Tasks.csproj` created a Directory.Build.props in
+  the project's folder that hid src/Directory.Build.props (TWAE, docs, FxCop). `AddPackage` takes the props files (and the
+  Directory.Packages.props lookup) from the copy's top for the projects under the previewed root; trial 50's test expected
+  the new file and now expects the one above.
+- oakton: no findings (check --build honestly Not verified: the untouched TWAE build fails on 96 CS8632).
+- Format host soak (owner: "Clean soak"): oakton and esprima-dotnet identical in both rounds; Pipelines and AsyncEx differed
+  in the first round only through the default engine's two bugs above (the host's trees and verdicts were the right ones).
+  After the fixes all four identical (trees, exit codes, verdicts, --json); left in the logs: PR #287's load note (on
+  Pipelines in another framework's run per engine) and Pipelines' net472 "files with findings" count (51/52: the engines
+  order the runs differently, and a run also formats what an earlier run of the round changed). Host vs default, re-check
+  on a quieter machine (s): format 116/327, 136/472, 72/327, 134/260; check 61/87, 61/100, 51/103, 83/82 (Pipelines,
+  esprima, AsyncEx, oakton).
+- Final re-check: TWAE builds and tests match the untouched code on all four (oakton 254/255 x 4 TFMs, Pipelines 287/292 with
+  the flaky `BufferWriterDoesNotLeak`, esprima 7,880 + 2, AsyncEx 266); preview matches format file by file.
+- Environment: SDK 10.0.113 + 8.0.132 and pwsh were there (`ln -s ~/.dotnet/tools/bro /usr/local/bin/bro`). Pipelines:
+  `Directory.build.props` (lower-case b) isn't imported on Linux, renamed locally; its NuGet.config `<clear/>`s, so the trial
+  package must be in the global packages folder or its feed in that file (a fresh container's first preview failed NU1102,
+  with the right message). esprima: Test262 downloads its suite before building (fails the same before and after).
+  GOTCHA: `pkill -f` with a pattern from its own command line killed the calling shell (as CLAUDE.md warns); a long loop of
+  one `pwsh` per mutation entry took over 10 minutes (check all entries in one pwsh process).
