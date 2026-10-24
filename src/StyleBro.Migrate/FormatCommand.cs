@@ -5560,6 +5560,7 @@ internal static partial class FormatCommand
             byFullPath.TryGetValue(fullPath, out var key)
                 ? FrameworkCompile(projects[key].Compile, projects[key].Frameworks.Length > 1 || configuration.Length > 0 ? View(fullPath, framework, configuration)?.Compile : null).Where(Planned).ToArray()
                 : [];
+
         // A project's additional files for a run: the outer evaluation's, and a multi-targeted project's for that framework (trial
         // 50, ncalc: NCalc.Parser gets Parlot's '*.parlot.cs' in its inner evaluations only).
         IEnumerable<string> AdditionalFor(string fullPath, string framework, string configuration) =>
