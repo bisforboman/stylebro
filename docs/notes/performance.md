@@ -26,3 +26,9 @@ Build-time measurements, the benchmark and the performance fixes. More performan
 - TrailingBlankLines calls `IsStandalone` last (it can only be true with a blank line below the comment).
 - Owner ("Note it, don't fail"): a held-back SDK rule (`HeldBackGap`, IDE0049 on SDK 10.0.1xx) is still a `Not checked:` line and
   in `notChecked`, but `Unverified(gaps)` leaves it out of the verdict and the exit code (format, check, preview).
+- Fix-time limits fail the real-world jobs (2026-10-24, owner's choice, docs/decisions/2026-10-24-real-world-fix-time-limits-fail-the-job.md):
+  `MaxFixSeconds` in scripts/realworld/repos.psd1 is about 2x the median of 13 runs per repo on its own runner after #280
+  (runners vary about 2x between runs; the slowest was at most 1.27x the median). Over it is a problem (`::error::`, the
+  job fails) naming the repo, the time and the limit; `FixTimeWarnOnly = $true` makes it a warning for one repo. The job
+  doesn't log per-id costs: `scripts/benchmark/Measure-FixLoop.ps1` finds the slowest ids. Newtonsoft's BroFormat step
+  has `MaxBroFormatSeconds = 3600`, warning only (2 timed runs: 1162 s, 2401 s) until nightlies show its median.

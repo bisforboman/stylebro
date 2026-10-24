@@ -81,7 +81,9 @@ site leaves out (`decisions.md`, `decisions/`, `backlog.md`, `beyond-stylecop.md
 - one `Real world` job per repository in `scripts/realworld/repos.psd1`. Each runs every rule, then checks for crashes,
   new compile errors, conflict markers, a second run that still changes files, and new test failures. A repo runs on
   Windows unless its `Os` in repos.psd1 says otherwise (only when the Linux run gives the same results). The tests that
-  fail on the untouched code are cached between runs; the job log prints how long each phase took.
+  fail on the untouched code are cached between runs; the job log prints how long each phase took. The `dotnet format`
+  runs together must stay under the repo's `MaxFixSeconds` (about twice its usual time on its runner), or the job fails;
+  `FixTimeWarnOnly = $true` in repos.psd1 makes that a warning for one repo.
 
 A merge to `main` doesn't run the real-world jobs or the full mutation set again: they run nightly on `main` (and on
 demand from the Actions tab), and a failed nightly run opens or comments on an issue named "Nightly real-world run

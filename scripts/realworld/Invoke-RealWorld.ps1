@@ -20,7 +20,8 @@
 # skipped), written otherwise. Those results depend only on the pinned commit, the SDK and FailedTests.ps1, not on
 # StyleBro; CI keys the file on exactly those (realworld.yml).
 # Every phase prints its duration, and the report lists them. The fix phase (the 'dotnet format' runs until no changes)
-# is compared with the repo's MaxFixSeconds (repos.psd1): over it, a GitHub Actions warning (not a failure yet).
+# is compared with the repo's MaxFixSeconds (repos.psd1): over it, the job fails (FixTimeWarnOnly: a warning instead);
+# the BroFormat step with MaxBroFormatSeconds, warning only.
 param(
     [Parameter(Mandatory)][string]$Repo,
     [string]$Work = (Join-Path ([IO.Path]::GetTempPath()) 'stylebro-realworld'),
@@ -264,19 +265,28 @@ $report.Add("- files changed: $changed; runs until no changes: $(if ($converged)
 if (-not $converged) { $problems.Add('the fixes did not converge in 3 runs') }
 elseif ($runs -gt $allowed) { $problems.Add("$runs runs until no changes, allowed $allowed (one that changes, one clean; MaxRuns in repos.psd1 for a documented exception)") }
 
-# Fix-time budget (the audit of 2026-10-22: a fix that re-scanned the solution per file went unnoticed, CI only timed the
-# analyzers). Warn only for now; the next step, once the nightlies have shown each repo's median, is to make it a problem.
+# Fix-time limit (the audit of 2026-10-22: a fix that re-scanned the solution per file went unnoticed, CI only timed the
+# analyzers). Over it is a problem (owner's choice 2026-10-24), or a warning for a repo with FixTimeWarnOnly.
+# The job doesn't log per-id fix costs: scripts/benchmark/Measure-FixLoop.ps1 finds the slowest ids.
+function Test-TimeLimit([string]$what, [int]$seconds, [int]$limit, [string]$key, [bool]$warnOnly) {
+    if ($seconds -le $limit) { return }
+    $over = "$Repo`: $what took $seconds s, over the limit of $limit s ($key in scripts/realworld/repos.psd1)"
+    if ($warnOnly) {
+        $report.Add("- **OVER THE LIMIT** (warning only): $over")
+        if ($env:GITHUB_ACTIONS) { Write-Host "::warning title=Time limit ($Repo)::$over" } else { Write-Warning $over }
+        return
+    }
+    $problems.Add("$over; scripts/benchmark/Measure-FixLoop.ps1 times each id")
+    if ($env:GITHUB_ACTIONS) { Write-Host "::error title=Time limit ($Repo)::$over" }
+}
+
 $fixSeconds = [int]$fixWatch.Elapsed.TotalSeconds
 if ($r.MaxFixSeconds) {
-    $report.Add("- fix time: $fixSeconds s in $runs runs (budget $($r.MaxFixSeconds) s, MaxFixSeconds)")
-    if ($fixSeconds -gt $r.MaxFixSeconds) {
-        $over = "the fixes took $fixSeconds s, over the budget of $($r.MaxFixSeconds) s (MaxFixSeconds in repos.psd1)"
-        $report.Add("- **OVER BUDGET** (warning only): $over")
-        if ($env:GITHUB_ACTIONS) { Write-Host "::warning title=Fix-time budget ($Repo)::$Repo`: $over" }
-        else { Write-Warning "$Repo`: $over" }
-    }
+    $mode = if ($r.FixTimeWarnOnly) { 'warning only' } else { 'fails over it' }
+    $report.Add("- fix time: $fixSeconds s in $runs runs (limit $($r.MaxFixSeconds) s, MaxFixSeconds, $mode)")
+    Test-TimeLimit 'the fixes' $fixSeconds $r.MaxFixSeconds 'MaxFixSeconds' ([bool]$r.FixTimeWarnOnly)
 }
-else { $report.Add("- fix time: $fixSeconds s in $runs runs (no budget set)") }
+else { $report.Add("- fix time: $fixSeconds s in $runs runs (no limit set)") }
 
 $markers = @(Get-Diff | Select-String '^\+(<<<<<<<|>>>>>>>) ')
 if ($markers.Count) { $problems.Add("conflict markers written: $($markers.Count) lines") }
@@ -333,10 +343,15 @@ if ($broFormat) {
             if ($LASTEXITCODE -ne 0) { throw "bro init --write failed (exit $LASTEXITCODE)." }
         }
         $broCode = 0
+        $broWatch = [Diagnostics.Stopwatch]::StartNew()
         [void](Measure-Phase 'bro format' { dotnet $migrate format $sln 2>&1 | Out-Host; $script:broCode = $LASTEXITCODE })
+        $broWatch.Stop()
     }
     finally { Remove-Item Env:\CustomAfterMicrosoftCommonTargets -ErrorAction SilentlyContinue }
-    $report.Add("- bro format after 'bro init --write': exit $broCode")
+    $broSeconds = [int]$broWatch.Elapsed.TotalSeconds
+    $report.Add("- bro format after 'bro init --write': exit $broCode, $broSeconds s$(if ($r.MaxBroFormatSeconds) { " (limit $($r.MaxBroFormatSeconds) s, MaxBroFormatSeconds, warning only)" })")
+    # Warning only until nightlies show the step's median (owner's choice 2026-10-24).
+    if ($r.MaxBroFormatSeconds) { Test-TimeLimit "'bro format'" $broSeconds $r.MaxBroFormatSeconds 'MaxBroFormatSeconds' $true }
     # Not clean: what one more run changes, so the job shows the lines that keep flipping (the newest SDK applies fixes a
     # cloud container's SDK holds back, so they can't always be reproduced elsewhere).
     if ($broCode -eq 2) {
