@@ -151,7 +151,7 @@ public sealed partial class MigrationTests
               }
             }
             """);
-        Assert.Equal(["/r/Grammar.parlot.cs"], view!.Additional);
+        Assert.Equal(["/r/Grammar.parlot.cs"], view!.Additional!);
         Assert.Equal(["/r/Parser.cs"], view.Compile);
     }
 }
