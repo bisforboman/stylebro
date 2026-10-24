@@ -30,6 +30,12 @@ public sealed partial class MigrationTests
         Assert.DoesNotContain("B.cs", files);
         Assert.DoesNotContain("C.cs", files);
         Assert.True(PreviewCommand.InPackage(root, "global/new.lib/2.0.0/content/C.cs"));
+
+        // A folder named like its .nupkg with a project in it is a project's (a package packed next to it), not a package.
+        Write("Lib/Lib.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
+        Write("Lib/Lib.nupkg", "zip");
+        Write("Lib/Code.cs", "class Code { }\n");
+        Assert.Contains("Code.cs", StyleCopSetup.EnumerateFiles(root).Select(Path.GetFileName));
     }
 
     [Fact]
@@ -40,7 +46,7 @@ public sealed partial class MigrationTests
         Write(".editorconfig", "root = true\n[*]\ncharset = utf-8\ninsert_final_newline = true\n");
         for (var i = 0; i < 12; i++)
         {
-            File.WriteAllText(Path.Combine(root, $"A{i}.cs"), $"{(i < 2 ? "﻿" : string.Empty)}class A{i}\n{{\n}}{(i == 5 ? string.Empty : "\n")}");
+            File.WriteAllText(Path.Combine(root, $"A{i}.cs"), $"{(i < 2 ? "\uFEFF" : string.Empty)}class A{i}\n{{\n}}{(i == 5 ? string.Empty : "\n")}");
         }
 
         var charset = "Charset: your .editorconfig says charset = utf-8, and 2 of 12 C# files start with a BOM: 'format' removes the BOM from them.";
@@ -48,6 +54,8 @@ public sealed partial class MigrationTests
         var output = Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root }))).Replace("\r\n", "\n");
         Assert.Contains("  note     " + charset, output, StringComparison.Ordinal);
         Assert.Contains("  note     " + newline, output, StringComparison.Ordinal);
+        var own = new Dictionary<string, string> { ["charset"] = "utf-8" };
+        Assert.Null(Conventions.ConvertedMinorityFileNote(new Dictionary<string, int[]> { ["charset"] = [12, 0] }, own, "charset"));
 
         // migrate, with StyleCop's settings; IDE0055 off: 'format' changes nothing, so nothing to say.
         Write(".editorconfig", "root = true\n[*]\ncharset = utf-8\ninsert_final_newline = true\n[*.cs]\ndotnet_diagnostic.SA1500.severity = warning\n");
