@@ -766,3 +766,35 @@ One section per trial (repositories, what broke, what was fixed, the owner's ver
   with the right message). esprima: Test262 downloads its suite before building (fails the same before and after).
   GOTCHA: `pkill -f` with a pattern from its own command line killed the calling shell (as CLAUDE.md warns); a long loop of
   one `pwsh` per mutation entry took over 10 minutes (check all entries in one pwsh process).
+
+## Trial 52 (2026-10-24, not clean: owner "Not clean", tally 0; host soak: clean, 1 clean soak on the new host code)
+
+- Repos (three random plus one targeted): amantinband/error-or, DbUp/DbUp, drewnoakes/figgle (random, seed 52: draws 17, 3,
+  46 of 50 entries; only entry 49, Tyrrrz/Onova, was unused and has Windows-only tests, so entries 51-55 were appended
+  first (error-or, DbUp, figgle, EasyNetQ, Sharprompt; smoke-built and tested) and the walks ended on 51-53;
+  `.trials/trial52/logs/picks.md`), EasyNetQ/EasyNetQ (targeted at trial 51's fixes: five test projects, Source/ props
+  with none at the root, a multi-targeted library; entry 54 taken from the appended ones, no pool entry builds).
+  Findings files: `.trials/trial52/findings/`.
+- One session, the repositories in parallel (two chains), each with a findings file before any fix, then a re-check of
+  all four on the fixed build. Wall clock: 16:26 start (after waiting for #297 to merge, from about 16:05), first round
+  16:45, re-check 17:48, soak round 18:48, verdict asked at 19:50 (about 3.5 h; two worker restarts on the way).
+- DbUp: `src/dbup.1.2.3.nupkg` is committed next to `src/DbUp.sln` and `src/Directory.Build.props` (none at the root).
+  `StyleCopSetup.EnumerateFiles` skipped every folder with a .nupkg as an extracted package (trial 31), so init read no code
+  ("too little code") and pinned the preset in a new root Directory.Build.props nothing imports, the preview put the
+  reference there and failed ("analyzers aren't loaded"), format changed nothing and `bro check` said "Clean" while the
+  TWAE build failed on 2 BRO1001 and the tests didn't build (`check --build` was honest, exit 2). A folder with a project,
+  solution or Directory.Build.* file isn't an extracted package (`StyleCopSetup.IsExtractedPackage`, also the preview
+  copy's `InPackage`). After: init reads src/ and src/.editorconfig, 42 files, all green, 100/100.
+- error-or (StyleCop, migrate): its `[*] end_of_line = crlf` with 36 CRLF and 12 LF C# files; the migration (and init) turns
+  IDE0055 on, and format rewrote the 12 LF files (about 1,000 of 1,800 changed lines) without a word. Owner: "Warn only"
+  (docs/decisions/2026-10-24-trial-52-a-minority-of-files-against-the-repositorys.md): `Conventions.ConvertedMinorityNote`.
+- figgle, EasyNetQ: no findings; trial 51's lenses held (all test projects loaded per run, the preview's reference in the
+  props the projects import).
+- Format host soak (owner: "Clean soak"): first round and re-check on main 8247120: engines identical on all four. #298 and
+  #299 merged meanwhile (the count restarted), so a third round ran on a local merge of main cb47c2d into the branch
+  (0.8.0-trial52.3): identical again (trees, exit codes, --json, logs). Format (s, default/host): 68/27, 49/36, 90/50,
+  148/61 (error-or, DbUp, figgle, EasyNetQ).
+- Environment: SDK 10.0.113 + 8.0.132 and pwsh were there; the trial feed went into the user-level NuGet.Config (no repo
+  `<clear/>`s). error-or's net462 tests need Mono (fail before and after); EasyNetQ's IntegrationTests need RabbitMQ (left
+  out) and Hosepipe.Tests fail 8-12 of 17 untouched. GOTCHA: a mutation script using `[IO.File]` with relative paths
+  mutated the main checkout, not the worktree (.NET's current directory isn't PowerShell's location): join with the root.

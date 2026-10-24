@@ -432,11 +432,15 @@ internal static partial class Migration
             }
         }
 
-        if (fileCounts is not null && gitEndings is null && Conventions.ContradictedEnding(fileCounts, ownSettings) is var (ending, endingNote))
+        var contradicted = fileCounts is not null && gitEndings is null ? Conventions.ContradictedEnding(fileCounts, ownSettings) : null;
+        if (contradicted is var (ending, endingNote))
         {
             result.Notes.Add(endingNote);
             lines.Add($"end_of_line = {ending}");
         }
+
+        // Else files of the other ending, which 'format' converts once IDE0055 is on (said below, when it is).
+        var minorityNote = fileCounts is not null && gitEndings is null && contradicted is null ? Conventions.ConvertedMinorityNote(fileCounts, ownSettings) : null;
 
         // A charset or insert_final_newline the files don't follow, as in init: IDE0055 on makes 'format' apply them to every
         // file (the starter kit's 'insert_final_newline = false' removed the last line break from 1,092 files).
@@ -527,6 +531,11 @@ internal static partial class Migration
         // IDE0055 on in a multi-targeted repository: plain 'dotnet format' crashes there, 'bro format' doesn't.
         var formattingOn = lines.Any(l => l.StartsWith("dotnet_diagnostic.IDE0055.severity = ", StringComparison.Ordinal)
             && !l.EndsWith("= none", StringComparison.Ordinal) && !l.EndsWith("= suggestion", StringComparison.Ordinal) && !l.EndsWith("= silent", StringComparison.Ordinal));
+        if (formattingOn && minorityNote is not null)
+        {
+            result.Notes.Add(minorityNote);
+        }
+
         if (formattingOn && InitCommand.MultiTargetedProjects(root).Any())
         {
             result.Notes.Add("This repository has multi-targeted projects. " + InitCommand.MultiTargetedHint.Replace("\n", " "));

@@ -747,6 +747,11 @@ internal static class InitCommand
             report.Add($"  {"note",-8} {whitespaceNote}");
         }
 
+        if (formatsWhitespace && gitEndings is null && contradictedEnding is null && rootEnding is not null && Conventions.ConvertedMinorityNote(rootEnding.Counts, settings) is { } minorityNote)
+        {
+            report.Add($"  {"note",-8} {minorityNote}");
+        }
+
         var nested = NestedWhitespace(root, fileSettings, report, formatsWhitespace && !settings.ContainsKey("dotnet_diagnostic.IDE0055.severity"), formatsWhitespace);
         var written = WithoutRepeats([.. csharpier.Lines ?? [], .. alignment?.Lines ?? [], .. kept, .. detected, .. endings]);
 

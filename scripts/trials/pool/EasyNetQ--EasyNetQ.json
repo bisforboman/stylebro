@@ -1,0 +1,23 @@
+{
+  "repo": "EasyNetQ/EasyNetQ",
+  "branch": "master",
+  "commit": "c1dd7f2e3d34ee3b06e67a7551f7d0a9d442ff27",
+  "csFiles": 432,
+  "tags": [
+    "multi-target",
+    "library",
+    "subfolder-props",
+    "several-test-projects"
+  ],
+  "setups": "Everything under Source/: Directory.Build.props (TreatWarningsAsErrors false, docs, strong naming) and Directory.Packages.props (central package management), none at the root; EasyNetQ netstandard2.0;net8.0;net9.0;net10.0, tests, examples and benchmarks net8.0; no analyzers, no .editorconfig.",
+  "build": "ok",
+  "workaround": null,
+  "tests": "dotnet test Source/<project> for EasyNetQ.Tests (443), EasyNetQ.Serialization.Tests (14), EasyNetQ.ApprovalTests (3), EasyNetQ.Hosepipe.Tests (17, 6-10 fail untouched, varying); EasyNetQ.IntegrationTests need RabbitMQ in Docker (left out)",
+  "usedIn": "trial 52",
+  "verified": {
+    "by": "trial 52 session",
+    "date": "2026-10-24",
+    "sdks": "10.0.113, 8.0.132 (no 9.0 runtime; DOTNET_ROLL_FORWARD=Major)"
+  },
+  "notes": "Taken as trial 52's targeted pick (several test projects, a Source/ Directory.Build.props a project preview could shadow). Also random.json entry 54."
+}
