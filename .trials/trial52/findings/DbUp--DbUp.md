@@ -24,3 +24,16 @@ DbUp commits `src/dbup.1.2.3.nupkg` next to `src/DbUp.sln` and `src/Directory.Bu
 Repro: a folder with `App.csproj`, `Own.cs`, `Directory.Build.props` and `old.1.0.0.nupkg`: `Migration.PropsFiles(root)`
 returns the root's file. Cause: StyleCopSetup.cs `EnumerateFiles` (`files.Any(f => f.EndsWith(".nupkg"))`).
 Fix idea: a folder with a project, solution or Directory.Build.* file isn't an extracted package.
+
+Consequences on both engines (first round, identical trees, exit codes and --json):
+- `bro format`: "Run 1: 0 files changed, clean" (the files under src/ weren't in its view either); `bro check`: "Clean"
+  (exit 0), a dishonest verdict; `bro check --build`: exit 2, honest ("Not clean: the builds report 2 findings",
+  BRO1001 in src/Tests.Common/RecordingDb/RecordingDbCommand.cs).
+- TWAE Debug/Release failed (2 x BRO1001 as errors: the repository's own TreatWarningsAsErrors), so `dotnet test`
+  didn't build: tests 0/100 against 100/100 untouched.
+
+## After the fix (dev build of 798fed3+fix, fresh clone, same steps, default engine)
+
+`bro init --write` read the code (and src/.editorconfig, where it now writes its whitespace settings), set the preset in
+src/Directory.Build.props; preview 0 (42 files, clean after 1 run), format 0 (42 files + settings), check 0 Clean,
+check --build 0 Clean (Debug, Release: no findings, no new errors), TWAE Debug/Release green, tests 100/100 x 2.
