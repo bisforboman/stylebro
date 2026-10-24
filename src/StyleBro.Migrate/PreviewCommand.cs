@@ -853,7 +853,13 @@ internal static class PreviewCommand
             PackagesConfig.Install(project, version);
         }
 
-        var targets = (styleCop.Count > 0 ? styleCop : Migration.PropsFiles(root)).Except(packagesConfig, StringComparer.OrdinalIgnoreCase).ToList();
+        // A preview of a folder or project below the copy's top: the Directory.Build.props and Directory.Packages.props above it
+        // count, as MSBuild reads them (trial 51, AsyncEx: 'bro preview format src/Nito.AsyncEx.Tasks/Nito.AsyncEx.Tasks.csproj'
+        // created src/Nito.AsyncEx.Tasks/Directory.Build.props, which hid src/Directory.Build.props: warnings as errors,
+        // documentation, FxCop and the version settings).
+        var scope = top is not null && IsBelow(root, top) ? Path.GetFullPath(top) : root;
+        var props = scope == root ? Migration.PropsFiles(root) : Migration.PropsFiles(scope, [Path.GetRelativePath(scope, root).Replace('\\', '/')]);
+        var targets = (styleCop.Count > 0 ? styleCop : props).Except(packagesConfig, StringComparer.OrdinalIgnoreCase).ToList();
         var versions = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
         var optedOut = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var file in targets)
@@ -883,11 +889,11 @@ internal static class PreviewCommand
             // Blazor.Diagrams: site/Site/Site.csproj turns central package management on in its own file, below a
             // Directory.Build.props that doesn't: a version there failed its restore (NU1008). Such projects get the
             // version-less reference (and the version in their Directory.Packages.props), the others one with a version.
-            var packages = CentralPackages(file, root);
+            var packages = CentralPackages(file, scope);
 
             // markdig: no Directory.Build.props, and src/Directory.Packages.props turns it on for the projects under src/ only.
-            var optIns = packages is null ? OptOuts(file, files, root, "true").Union(CentralProjects(file, files, root), StringComparer.OrdinalIgnoreCase).ToList() : [];
-            foreach (var central in optIns.Select(p => CentralPackages(p, root)).Prepend(packages).OfType<string>())
+            var optIns = packages is null ? OptOuts(file, files, scope, "true").Union(CentralProjects(file, files, scope), StringComparer.OrdinalIgnoreCase).ToList() : [];
+            foreach (var central in optIns.Select(p => CentralPackages(p, scope)).Prepend(packages).OfType<string>())
             {
                 if (versions.Add(central))
                 {
@@ -898,7 +904,7 @@ internal static class PreviewCommand
             // StabilityMatrix: its analyzer projects turn central package management off, and the version-less reference from
             // Directory.Build.props failed their restore (NU1015). Such projects get a reference with a version instead (those
             // that remove StyleCop's reference remove StyleBro's too, below).
-            var optOuts = packages is null ? [] : OptOuts(file, files, root).Where(p => !removes.Contains(p, StringComparer.OrdinalIgnoreCase)).ToList();
+            var optOuts = packages is null ? [] : OptOuts(file, files, scope).Where(p => !removes.Contains(p, StringComparer.OrdinalIgnoreCase)).ToList();
             if (optOuts.Count > 0 || optIns.Count > 0)
             {
                 optedOut.UnionWith(optOuts);
@@ -919,7 +925,7 @@ internal static class PreviewCommand
             EditFile(file, text => AddItem(text, "<PackageReference Remove=\"StyleBro.Analyzers\" />"));
         }
 
-        string Names(IEnumerable<string> paths) => string.Join(", ", paths.Select(f => Path.GetRelativePath(root, f).Replace('\\', '/')));
+        string Names(IEnumerable<string> paths) => string.Join(", ", paths.Select(f => Path.GetRelativePath(scope, f).Replace('\\', '/')));
         var where = new[] { targets.Count > 0 ? $"to {Names(targets)}" : null, packagesConfig.Count > 0 ? $"the packages.config way to {Names(packagesConfig)}" : null };
         return $"StyleBro.Analyzers {version} {string.Join(", ", where.OfType<string>())}"
             + (versions.Count > 0 ? $" (version in {Names(versions)})" : string.Empty)
@@ -956,6 +962,10 @@ internal static class PreviewCommand
             }
         }
     }
+
+    /// <summary>Whether <paramref name="root"/> is a folder below <paramref name="top"/> (not the same folder).</summary>
+    private static bool IsBelow(string root, string top) =>
+        Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)).StartsWith(Path.TrimEndingDirectorySeparator(Path.GetFullPath(top)) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>Whether an MSBuild file under the root mentions StyleBro.Analyzers (a reference to it).</summary>
     public static bool ReferencesStyleBro(string root) => ReferencesStyleBro(StyleCopSetup.EnumerateFiles(root));

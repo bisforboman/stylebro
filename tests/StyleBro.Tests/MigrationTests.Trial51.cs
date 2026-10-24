@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection;
 using System.Text.Json.Nodes;
 using StyleBro.Migrate;
 
@@ -157,4 +158,30 @@ public sealed partial class MigrationTests
         Capture(() => Assert.Equal(0, PreviewCommand.Run("init", [source, "--diff=" + patch], Format)));
         Assert.Contains("[Crlf.cs]", File.ReadAllText(patch), StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void Preview_OfAProject_AddsThePackageToTheDirectoryBuildPropsItImports()
+    {
+        // AsyncEx: 'bro preview format src/Nito.AsyncEx.Tasks/Nito.AsyncEx.Tasks.csproj' created
+        // src/Nito.AsyncEx.Tasks/Directory.Build.props, which hid src/Directory.Build.props (warnings as errors, docs, FxCop).
+        Write("src/Directory.Build.props", "<Project>\n  <PropertyGroup>\n    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>\n  </PropertyGroup>\n</Project>\n");
+        Write("src/Tasks/Tasks.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
+        Write("test/Tests/Tests.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
+        var tasks = Path.Combine(root, "src", "Tasks");
+
+        Assert.Equal("StyleBro.Analyzers " + PackageVersionOfTool() + " to src/Directory.Build.props", PreviewCommand.AddPackage(tasks, root));
+        Assert.Contains("StyleBro.Analyzers", File.ReadAllText(Path.Combine(root, "src", "Directory.Build.props")), StringComparison.Ordinal);
+        Assert.False(File.Exists(Path.Combine(tasks, "Directory.Build.props")));
+        Assert.False(File.Exists(Path.Combine(root, "test", "Directory.Build.props")));
+
+        // Central package management from above the project: the version goes into that Directory.Packages.props.
+        Write("Directory.Packages.props", "<Project>\n  <PropertyGroup>\n    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>\n  </PropertyGroup>\n  <ItemGroup>\n  </ItemGroup>\n</Project>\n");
+        Write("lib/Lib/Lib.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
+        Assert.NotNull(PreviewCommand.AddPackage(Path.Combine(root, "lib", "Lib"), root));
+        Assert.Contains("<PackageVersion Include=\"StyleBro.Analyzers\"", File.ReadAllText(Path.Combine(root, "Directory.Packages.props")), StringComparison.Ordinal);
+        Assert.Contains("<PackageReference Include=\"StyleBro.Analyzers\" PrivateAssets=\"all\" />", File.ReadAllText(Path.Combine(root, "Directory.Build.props")), StringComparison.Ordinal);
+    }
+
+    private static string PackageVersionOfTool() =>
+        typeof(PreviewCommand).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0];
 }

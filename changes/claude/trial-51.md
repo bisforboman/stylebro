@@ -9,3 +9,7 @@
 - **bro preview**: files a repository committed with CRLF line endings although `.gitattributes` normalizes them
   (`* text=auto`) keep their endings in the preview's copy. The preview then shows what `bro init` and `bro format` do in
   the repository, instead of converting them to LF (which changed the value of multi-line string literals).
+- **bro preview** of a folder or project (`bro preview format src/Lib/Lib.csproj`) adds StyleBro.Analyzers to the
+  `Directory.Build.props` that project already imports (and its version to the `Directory.Packages.props` above it), instead
+  of creating a new `Directory.Build.props` in the project's folder that hid the one above (its warnings-as-errors and other
+  settings were missing from the preview).
