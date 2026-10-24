@@ -292,3 +292,27 @@ Observations (not verdict findings, for the fixer to weigh):
   would help if it named `EnforceCodeStyleInBuild` as what lets the build prove the net462 parts.
 - `bro preview init --engine host` is now accepted, but prints no Engine line, so it's hard to tell which engine the
   preview used.
+
+## Re-check 2 (over-split fix, 36330b2 = the fixer's 8f5dd57 before its rebase), default engine
+
+Packed as `0.8.0-trial50r3` from `claude/trial-50` at 36330b2. Fresh clone of `base` (`r3-default`): `bro init --write`,
+StyleBro.Analyzers 0.8.0-trial50r3, `bro format --timings`, `bro check`, `bro check --build`, TWAE builds, tests. Logs:
+`logs/r3-default/`.
+
+| Command | Exit | Time |
+|---|---|---|
+| `bro init --write` | 0 | 6 s |
+| `bro format --timings` | 3 (run 1: 61 files, run 2: 0; Not verified: the 4 net462 parts) | 199 s (run 1 151.9 s, run 2 46.0 s) |
+| `bro check` | 3 | 51 s |
+| `bro check --build` | 3 (Debug/Release/SignedRelease: no findings, no new errors) | 219 s |
+| TWAE `dotnet build` Debug / Release | 0 errors, 21 warnings each | 13 s / 12 s |
+| `dotnet test` Debug / Release | 901/901, 901/901 | 12 s / 11 s |
+
+- Runs: 6 (net10.0 one run with 12 projects; net462 one; net8.0 two parts, NCalc.Core | NCalc.Benchmarks apart;
+  netstandard2.0 one; netstandard2.0 Release one), down from 16. Shared files line: "each group gets a run of its own:
+  NCalc.Core | NCalc.Benchmarks. Some projects have a file as an additional file (AdditionalFiles) that another compiles
+  (src/NCalc.Parser/LogicalExpressionParser.parlot.cs): ...".
+- No crash in any log. The tree after format is identical to the 4c60b3c tree (`diff -r` against `r2-default`) apart from
+  Directory.Packages.props (the package version, r3 vs r2).
+- Format run 1: 151.9 s (the whole command 199 s, against 273 s at 4c60b3c and 162 s at the start of the trial, when the
+  Benchmarks run crashed early). IEEERemainder holds (same tree). No new findings.

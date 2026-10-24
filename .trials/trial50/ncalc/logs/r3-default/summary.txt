@@ -1,0 +1,8 @@
+init exit=0 6s
+format exit=3 199s
+check exit=3 51s
+check-build exit=3 219s
+build-Debug exit=0 13s
+build-Release exit=0 12s
+test-Debug exit=0 12s
+test-Release exit=0 11s
