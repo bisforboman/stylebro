@@ -1,0 +1,12 @@
+preview	0	77s	bro preview migrate . --engine host
+setup	0	9s	bash -c bro migrate . --write && sed -i "s#<GlobalPackageReference Include=\"StyleCop.Analyzers\" Version=\"1.3.149-beta\" />#<GlobalPackageReference Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial53.1\" />#" Directory.Packages.props && git diff --stat
+format	0	67s	bro format --engine host
+check	0	44s	bro check --engine host
+check-json	0
+checkbuild	0	167s	bro check --build --engine host
+checkbuild-json	0
+twae-Debug	0	28s	twae Debug
+test-Debug	0	29s	env CFG=Debug bash -c dotnet test --solution Nerdbank.Streams.slnx -c $CFG
+twae-Release	0	29s	twae Release
+test-Release	0	29s	env CFG=Release bash -c dotnet test --solution Nerdbank.Streams.slnx -c $CFG
+DONE

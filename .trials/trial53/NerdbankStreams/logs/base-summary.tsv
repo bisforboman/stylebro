@@ -1,0 +1,6 @@
+build	0	33s	dotnet build Nerdbank.Streams.slnx -c Debug
+twae-Debug	0	46s	twae Debug
+test-Debug	0	39s	env CFG=Debug bash -c dotnet test --solution Nerdbank.Streams.slnx -c $CFG
+twae-Release	0	52s	twae Release
+test-Release	0	45s	env CFG=Release bash -c dotnet test --solution Nerdbank.Streams.slnx -c $CFG
+DONE
