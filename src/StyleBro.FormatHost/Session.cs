@@ -32,6 +32,9 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
     private static readonly SemaphoreSlim FixGate = new(1, 1);
 
     private readonly ConcurrentDictionary<string, Lazy<Task<Loaded>>> workspaces = new(StringComparer.Ordinal);
+
+    // The workspaces as a copy of the repository has the files (Run with a copy): per copy and workspace.
+    private readonly ConcurrentDictionary<string, Lazy<Task<Loaded>>> copies = new(StringComparer.Ordinal);
     private readonly DotnetFormat format = DotnetFormat.Load();
     private readonly AnalysisCache cache = new();
     private readonly Func<string, IDisposable> measure = measure;
@@ -42,7 +45,7 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
     /// set in this process while a fix run applies its fixes: what bro gives a 'dotnet format' process that the fixers read
     /// (the repository's names), not what changes how the projects load.
     /// </summary>
-    public int Run(string workspace, string folder, IReadOnlyList<string> environment, IReadOnlyList<string> variables, IReadOnlyList<string> selections, IReadOnlyList<string> arguments, Action<string> output)
+    public int Run(string workspace, string folder, IReadOnlyList<string> environment, IReadOnlyList<string> variables, IReadOnlyList<string> selections, IReadOnlyList<string> arguments, Action<string> output, CopyOf? copy = null)
     {
         if (FormatArguments.Parse(arguments) is not { } parsed)
         {
@@ -51,13 +54,22 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
 
         try
         {
-            return this.RunAsync(workspace, folder, environment, variables, selections, parsed, output).GetAwaiter().GetResult();
+            return this.RunAsync(workspace, folder, environment, variables, selections, parsed, output, copy).GetAwaiter().GetResult();
         }
         catch (Exception exception)
         {
             // What 'dotnet format' prints when it throws (bro's IsCrash reads it).
             output($"Unhandled exception: {exception}");
             return 1;
+        }
+    }
+
+    /// <summary>Drops what the runs on <paramref name="copy"/> kept (<see cref="CopyOf"/>): the copy is gone.</summary>
+    public void Forget(string copy)
+    {
+        foreach (var key in this.copies.Keys.Where(k => k.EndsWith("\n" + copy, StringComparison.Ordinal)).ToList())
+        {
+            this.copies.TryRemove(key, out _);
         }
     }
 
@@ -70,7 +82,7 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
         }
     }
 
-    private async Task<int> RunAsync(string workspace, string folder, IReadOnlyList<string> environment, IReadOnlyList<string> variables, IReadOnlyList<string> selections, FormatArguments arguments, Action<string> output)
+    private async Task<int> RunAsync(string workspace, string folder, IReadOnlyList<string> environment, IReadOnlyList<string> variables, IReadOnlyList<string> selections, FormatArguments arguments, Action<string> output, CopyOf? copy)
     {
         var level = (LogLevel)FormatArguments.LogLevelOf(arguments.Verbosity);
         var names = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -89,6 +101,17 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
         {
             plain.LogError(this.format.Text("Could_not_format_0_Format_currently_supports_only_CSharp_and_Visual_Basic_projects"), workspace);
             return 1;
+        }
+
+        if (copy is not null)
+        {
+            loaded = await this.CopyAsync(workspace, environment, loaded, copy).ConfigureAwait(false);
+
+            // A file the copy doesn't have (git ignores it) that the build didn't write: a load of the copy wouldn't have it.
+            if (loaded.Missing)
+            {
+                return Entry.Declined;
+            }
         }
 
         // The files as they are now: what bro and the runs before this one changed on disk.
@@ -192,6 +215,40 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
         return this.workspaces.GetOrAdd(key, _ => new Lazy<Task<Loaded>>(() => this.OpenAsync(workspace, environment, solution))).Value;
     }
 
+    // The loaded workspace as the copy has its files: it starts from the solution as the repository's files are now, and reads
+    // every file back from the copy at its first run, so only what differs there changes (and compiles again).
+    private Task<Loaded> CopyAsync(string workspace, IReadOnlyList<string> environment, Loaded loaded, CopyOf copy)
+    {
+        var key = workspace + "\n" + string.Join("\n", environment) + "\n" + copy.Copy;
+        return this.copies.GetOrAdd(key, _ => new Lazy<Task<Loaded>>(async () =>
+        {
+            var current = await loaded.SyncAsync(this.measure).ConfigureAwait(false);
+            return new Loaded(loaded.Workspace, loaded.Solution, loaded.Diagnostics, unsupported: false, disk: new DiskState(copy.OnDisk), current: current) { Missing = MissingIn(current, copy) };
+        })).Value;
+    }
+
+    /// <summary>
+    /// Whether <paramref name="solution"/> has a document whose file <paramref name="copy"/> lacks, other than what the build
+    /// writes next to a project's intermediate assembly (obj/Debug/net8.0: generated assembly info, global usings, XAML code),
+    /// which a load of the copy writes there too.
+    /// </summary>
+    internal static bool MissingIn(Solution solution, CopyOf copy)
+    {
+        foreach (var project in solution.Projects)
+        {
+            var built = Path.GetDirectoryName(project.CompilationOutputInfo.AssemblyPath) is { Length: > 0 } folder ? folder + Path.DirectorySeparatorChar : null;
+            foreach (var path in project.Documents.Select(d => d.FilePath).OfType<string>())
+            {
+                if (!(built is not null && path.StartsWith(built, StringComparison.Ordinal)) && !File.Exists(copy.OnDisk(path)))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     private async Task<Loaded> OpenAsync(string workspace, IReadOnlyList<string> environment, bool solution)
     {
         await EnvironmentGate.WaitAsync().ConfigureAwait(false);
@@ -257,11 +314,12 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
         private readonly SemaphoreSlim gate = new(1, 1);
         private Solution current;
 
-        public Loaded(MSBuildWorkspace workspace, Solution solution, ImmutableList<WorkspaceDiagnostic> diagnostics, bool unsupported, string? failure = null)
+        public Loaded(MSBuildWorkspace workspace, Solution solution, ImmutableList<WorkspaceDiagnostic> diagnostics, bool unsupported, string? failure = null, DiskState? disk = null, Solution? current = null)
         {
             this.Workspace = workspace;
             this.Solution = solution;
-            this.current = solution;
+            this.current = current ?? solution;
+            this.Disk = disk ?? new DiskState();
             this.Diagnostics = diagnostics;
             this.Unsupported = unsupported;
             this.Failure = failure;
@@ -278,7 +336,10 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
         /// <summary>Why the workspace didn't load, or null (<see cref="Entry.LoadFailed"/>).</summary>
         public string? Failure { get; }
 
-        public DiskState Disk { get; } = new();
+        public DiskState Disk { get; }
+
+        /// <summary>Gets a value indicating whether a copy lacks one of the documents' files (<see cref="MissingIn"/>).</summary>
+        public bool Missing { get; init; }
 
         /// <summary>The solution with the files as they are on disk now.</summary>
         public async Task<Solution> SyncAsync(Func<string, IDisposable> measure)
@@ -310,4 +371,21 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
             }
         }
     }
+}
+
+/// <summary>
+/// A run on a copy of the repository (bro's check formats one to tell kept findings apart) in the repository's loaded
+/// workspace: the paths are the repository's (<see cref="Source"/>), the files are read from and written to the copy
+/// (<see cref="Copy"/>), so the copy needs no load of its own, and what the repository's runs analyzed carries over.
+/// </summary>
+internal sealed class CopyOf(string copy, string source)
+{
+    /// <summary>Gets the copy's folder, with a separator at the end.</summary>
+    public string Copy { get; } = copy;
+
+    /// <summary>Gets the repository's folder the copy was made of, with a separator at the end.</summary>
+    public string Source { get; } = source;
+
+    /// <summary>The copy's file for a path in the repository (a path outside it stays as it is).</summary>
+    public string OnDisk(string path) => path.StartsWith(this.Source, StringComparison.Ordinal) ? this.Copy + path.Substring(this.Source.Length) : path;
 }

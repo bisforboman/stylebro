@@ -33,6 +33,17 @@ public static class Entry
     public static int Run(object session, string workspace, string folder, string[] environment, string[] variables, string[] selections, string[] arguments, Action<string> output) =>
         ((Session)session).Run(workspace, folder, environment, variables, selections, arguments, output);
 
+    /// <summary>
+    /// <see cref="Run"/> for a run on <paramref name="copy"/>, a copy of <paramref name="source"/> (folders ending in a
+    /// separator): every path it is given and prints is the repository's (bro maps them), and the files are read from and written
+    /// to the copy, in the workspace the repository's runs loaded.
+    /// </summary>
+    public static int RunCopy(object session, string copy, string source, string workspace, string folder, string[] environment, string[] variables, string[] selections, string[] arguments, Action<string> output) =>
+        ((Session)session).Run(workspace, folder, environment, variables, selections, arguments, output, new CopyOf(copy, source));
+
+    /// <summary>Drops what the runs on <paramref name="copy"/> (<see cref="RunCopy"/>) kept.</summary>
+    public static void Forget(object session, string copy) => ((Session)session).Forget(copy);
+
     /// <summary>Ends a host: its workspaces are disposed.</summary>
     public static void Close(object session) => ((Session)session).Dispose();
 }
