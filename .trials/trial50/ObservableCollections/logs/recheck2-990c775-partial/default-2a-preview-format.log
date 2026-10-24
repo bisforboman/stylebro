@@ -1,0 +1,29 @@
+Previewing 'bro format' on a copy; nothing in /home/user/stylebro/.trials/trial50/ObservableCollections/f-default changes.
+Copying the repository to /tmp/stylebro-preview-KE3tXG/f-default... 0s
+Format run 1... 1m 18s
+Format run 2... 25s
+Format: 45 files, 411 reported changes, clean after 1 run
+  BRO1505  Elements should be separated by a bla...    21 files
+  IMPORTS                                              13 files
+  BRO1002  Single-line comments should begin wit...     9 files
+  BRO1517  Code should not contain multiple blan...     9 files
+  BRO1514  Braces should not be omitted                 5 files
+  IDE0055  Whitespace and formatting                    5 files
+  BRO1141  Object creation with an initializer: ...     4 files
+  BRO1139  Write 'else if' on one line                  3 files
+  BRO1504  Single-line comments should be preced...     3 files
+  BRO1518  Closing braces should not be preceded...     3 files
+  ... and 20 more rules
+Sample (BRO1505, sandbox/BlazorApp/Pages/Index.razor.cs):
+  (adds a blank line)
+Sample (IMPORTS, tests/ObservableCollections.R3.Tests/_GlobalUsings.cs):
+  +global using FluentAssertions;
+Sample (BRO1002, sandbox/WpfApp/AssemblyInfo.cs):
+  -    ResourceDictionaryLocation.None, //where theme specific resource dictionaries are located
+  -                                     //(used if a resource is not found in the page,
+  +    ResourceDictionaryLocation.None, // where theme specific resource dictionaries are located
+  +                                     // (used if a resource is not found in the page,
+Full diff: /home/user/stylebro/.trials/trial50/ObservableCollections/logs/recheck2/default-2a.patch (2,299 lines)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 1m 44s.
+exit 0 time 104.391351486
