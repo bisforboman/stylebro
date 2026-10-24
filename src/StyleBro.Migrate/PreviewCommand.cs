@@ -263,7 +263,7 @@ internal static class PreviewCommand
             // migrate reads the global configs packages add from the restore output (trial 48, Pidgin): the copy gets the
             // repository's, so the settings step sees what 'bro migrate --write' in the repository would.
             var restoreOutput = command is not ("init" or "format") && !restored ? CopiedRestoreFolders(source, copy) : [];
-            MakeRepository(copy, ignoredTracked, restoreOutput);
+            MakeRepository(copy, ignoredTracked, restoreOutput, source);
             var baseline = Head(copy);
 
             if (command != "format")
@@ -556,7 +556,7 @@ internal static class PreviewCommand
             }
             else if (Directory.Exists(from) && StyleCopSetup.IsNestedRepository(from))
             {
-                MakeRepository(to, Copy(from, to));
+                MakeRepository(to, Copy(from, to), source: from);
             }
             else if (Directory.Exists(from))
             {
@@ -1137,10 +1137,18 @@ internal static class PreviewCommand
         return packages.Insert(at, indentation + item + newLine);
     }
 
-    /// <summary>Makes the folder a git repository with everything in it committed.</summary>
-    public static void MakeRepository(string folder, IReadOnlyCollection<string>? ignoredTracked = null, IReadOnlyCollection<string>? excluded = null)
+    /// <summary>
+    /// Makes the folder a git repository with everything in it committed. With <paramref name="source"/> (the repository it
+    /// copies), the files that one committed with CRLF line endings stay so (<see cref="CommittedWithCrLf"/>).
+    /// </summary>
+    public static void MakeRepository(string folder, IReadOnlyCollection<string>? ignoredTracked = null, IReadOnlyCollection<string>? excluded = null, string? source = null)
     {
         GitChecked(folder, "init", "-q");
+        if (source is not null && Git(source, "ls-files", "--eol", "-z") is (0, var eol) && CommittedWithCrLf(eol).ToList() is { Count: > 0 } kept)
+        {
+            File.AppendAllLines(Path.Combine(folder, ".git", "info", "attributes"), kept.Select(p => $"/{p} -text"));
+        }
+
         foreach (var chunk in (ignoredTracked ?? []).Chunk(100))
         {
             GitChecked(folder, ["add", "-f", "--", .. chunk]);
@@ -1155,6 +1163,20 @@ internal static class PreviewCommand
         File.AppendAllText(Path.Combine(folder, ".git", "info", "exclude"), "\nbin/\nobj/\n" + packages + copied);
         Commit(folder, "baseline");
     }
+
+    /// <summary>
+    /// The files 'git ls-files --eol -z' output shows with CRLF (or mixed) line endings in the index ('i/crlf'), whose paths a
+    /// gitattributes line can name. A 'text' attribute normalizes such a file when the copy's repository adds it: esprima-dotnet
+    /// (`* text=auto`) committed two files with CRLF; in the copy their index entry became LF, init counted them as converted by
+    /// git (no `end_of_line = crlf` for the one whose multi-line string literals would change), and the patch made both LF,
+    /// where init and format in the repository keep them CRLF.
+    /// </summary>
+    public static IEnumerable<string> CommittedWithCrLf(string output) =>
+        output.Split('\0').Where(entry => entry.IndexOf('\t') is var tab and > 0 && entry.Substring(0, tab).Split(' ', StringSplitOptions.RemoveEmptyEntries) is [("i/crlf" or "i/mixed"), ..])
+            .Select(entry => entry.Substring(entry.IndexOf('\t') + 1))
+
+            // ponytail: a path with whitespace, quotes or glob characters is left out (gitattributes would need it quoted or escaped).
+            .Where(path => path.Length > 0 && !path.Any(c => char.IsWhiteSpace(c) || c is '"' or '*' or '?' or '[' or '\\' or '!' or '#'));
 
     /// <summary>
     /// Rewrites a file (null text: it doesn't exist yet) keeping its UTF-8 byte order mark (File.ReadAllText drops it and

@@ -6,3 +6,6 @@
 - **bro format/check**: test projects whose libraries reference each other (multi-targeted, an old framework such as
   netstandard1.3 first) are formatted again. Each per-framework run now also loads the projects they reference from the
   solution, so `dotnet format` no longer skips the tests ("references didn't load") and leaves findings for the build.
+- **bro preview**: files a repository committed with CRLF line endings although `.gitattributes` normalizes them
+  (`* text=auto`) keep their endings in the preview's copy. The preview then shows what `bro init` and `bro format` do in
+  the repository, instead of converting them to LF (which changed the value of multi-line string literals).

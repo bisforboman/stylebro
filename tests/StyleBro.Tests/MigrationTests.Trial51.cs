@@ -104,4 +104,57 @@ public sealed partial class MigrationTests
         Assert.DoesNotContain(lines, l => l.Contains("skipped Tests", StringComparison.Ordinal));
         Assert.Contains(lines, l => l.Contains("C.cs(5,20)", StringComparison.Ordinal));
     }
+
+    [Fact]
+    public void Preview_TheCopy_KeepsFilesCommittedWithCrLf()
+    {
+        // esprima-dotnet: '* text=auto', and two files committed with CRLF before it. The copy's repository stored them as LF,
+        // so init counted them as converted by git (no 'end_of_line = crlf' for a file whose multi-line strings would change)
+        // and the patch made them LF; in the repository init and format keep them CRLF.
+        var source = Path.Combine(root, "source");
+        Directory.CreateDirectory(source);
+        void Git(string folder, params string[] arguments) => Assert.Equal(0, PreviewCommand.Git(folder, ["-c", "user.name=t", "-c", "user.email=t@example.invalid", .. arguments]).Code);
+        Git(source, "init", "-q");
+        File.WriteAllText(Path.Combine(source, "Crlf.cs"), "class Crlf\r\n{\r\n    string S = @\"a\r\nb\";\r\n}\r\n");
+        File.WriteAllText(Path.Combine(source, "Lf.cs"), "class Lf\n{\n}\n");
+        Git(source, "add", "-A");
+        Git(source, "commit", "-q", "-m", "files");
+        File.WriteAllText(Path.Combine(source, ".gitattributes"), "* text=auto\n");
+        Git(source, "add", "-A");
+        Git(source, "commit", "-q", "-m", "attributes");
+        Assert.Equal(["Crlf.cs"], PreviewCommand.CommittedWithCrLf(PreviewCommand.Git(source, "ls-files", "--eol", "-z").Output));
+
+        var copy = Path.Combine(root, "copy");
+        PreviewCommand.MakeRepository(copy, PreviewCommand.Copy(source, copy), source: source);
+
+        var eol = PreviewCommand.Git(copy, "ls-files", "--eol", "-z").Output.Split('\0');
+        Assert.Contains(eol, e => e.StartsWith("i/crlf", StringComparison.Ordinal) && e.EndsWith("\tCrlf.cs", StringComparison.Ordinal));
+        Assert.Contains(eol, e => e.StartsWith("i/lf", StringComparison.Ordinal) && e.EndsWith("\tLf.cs", StringComparison.Ordinal));
+        Assert.Empty(PreviewCommand.CommittedWithCrLf("i/crlf  w/crlf  attr/text=auto \tmy file.cs\0i/lf    w/lf    attr/text=auto \tA.cs\0"));
+
+        // The preview's own copy: init sees the CRLF file as the repository has it and keeps its ending.
+        File.WriteAllText(Path.Combine(source, "App.csproj"), "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
+        for (var i = 0; i < 10; i++)
+        {
+            File.WriteAllText(Path.Combine(source, $"Lf{i}.cs"), $"class Lf{i}\n{{\n}}\n");
+        }
+
+        Git(source, "add", "-A");
+        Git(source, "commit", "-q", "-m", "more");
+        var patch = Path.Combine(root, "out.patch");
+        int Format(string[] args, Action<string> log)
+        {
+            var report = Array.IndexOf(args, "--report");
+            if (report >= 0)
+            {
+                Directory.CreateDirectory(args[report + 1]);
+                File.WriteAllText(Path.Combine(args[report + 1], "format-report.json"), "[]");
+            }
+
+            return 0;
+        }
+
+        Capture(() => Assert.Equal(0, PreviewCommand.Run("init", [source, "--diff=" + patch], Format)));
+        Assert.Contains("[Crlf.cs]", File.ReadAllText(patch), StringComparison.Ordinal);
+    }
 }
