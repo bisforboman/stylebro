@@ -120,7 +120,10 @@ parity runs the host took 45, 36, 97, 195, 255 and 569-640 s; the checks now sha
 runs keep their workspaces.
 
 PalCalc's runs on formatted code miss the target: each of its three configurations is a workspace of its own (load and
-compile, ~20-25 s each), and `bro check` formats a copy to tell kept findings apart, which loads them again.
+compile, ~20-25 s each). `bro check` formats a copy there to tell kept findings apart, which used to load all three again;
+the copy now runs in the check's workspaces: `bro check` on formatted code 147-153 s before, 107-110 s now (plain
+`dotnet format --verify-no-changes` 50 s), and 276 s before, 201-209 s now on the code before its first `bro format`. What
+is left of the copy's time is its own planning (MSBuild evaluations and a restore, ~20 s).
 
 The parity harness (`scripts/format-speed/Compare-Format.ps1`, `check`, `format`, `check` with both engines) gave the same
 working trees, kept findings, exit codes and `--json` reports on all six, twice each, and the host the same trees in both
