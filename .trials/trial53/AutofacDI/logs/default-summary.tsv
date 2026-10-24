@@ -1,2 +1,6 @@
 preview	0	85s	bro preview migrate .
 setup	0	9s	bash -c bro migrate . --write && git ls-files "*.csproj" | xargs sed -i "s#<PackageReference Include=\"StyleCop.Analyzers\" Version=\"1.2.0-beta.556\">#<PackageReference Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial53.1\">#" && git diff --stat
+format	0	58s	bro format
+check	0	44s	bro check
+check-json	0
+checkbuild	0	408s	bro check --build

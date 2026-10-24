@@ -4,3 +4,9 @@ format	0	57s	bro format --engine host
 check	0	0s	bro check --engine host
 check-json	0
 checkbuild	0	98s	bro check --build --engine host
+checkbuild-json	0
+twae-Debug	0	11s	twae Debug
+test-Debug	1	56s	env CFG=Debug bash -c dotnet test BaGet.sln -c $CFG
+twae-Release	0	20s	twae Release
+test-Release	1	52s	env CFG=Release bash -c dotnet test BaGet.sln -c $CFG
+DONE

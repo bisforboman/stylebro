@@ -1,0 +1,6 @@
+build	0	23s	dotnet build Sharprompt.slnx -c Debug
+twae-Debug	0	14s	twae Debug
+test-Debug	0	30s	env CFG=Debug bash -c dotnet test --solution Sharprompt.slnx -c $CFG
+twae-Release	0	11s	twae Release
+test-Release	0	28s	env CFG=Release bash -c dotnet test --solution Sharprompt.slnx -c $CFG
+DONE
