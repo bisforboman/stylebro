@@ -684,6 +684,18 @@ internal sealed class StyleCopSetup
     public static IEnumerable<string> EnumerateFiles(string root) => EnumerateFiles(root, ownRoot: false);
 
     /// <summary>
+    /// Whether a folder's files are an extracted NuGet package's: a .nupkg (or NuGet's '.nupkg.metadata') and no project,
+    /// solution or Directory.Build.props/.targets, which a package's root never has (trial 52: DbUp commits
+    /// src/dbup.1.2.3.nupkg next to src/DbUp.sln, and init saw none of its projects or code).
+    /// </summary>
+    public static bool IsExtractedPackage(IEnumerable<string> files)
+    {
+        var names = files.Select(Path.GetFileName).ToList();
+        return names.Any(n => n!.EndsWith(".nupkg", StringComparison.OrdinalIgnoreCase) || n.EndsWith(".nupkg.metadata", StringComparison.OrdinalIgnoreCase))
+            && !names.Any(n => Regex.IsMatch(n!, @"(\.(cs|vb|fs)proj|\.slnx?|\.slnf)$|^Directory\.Build\.(props|targets)$", RegexOptions.IgnoreCase));
+    }
+
+    /// <summary>
     /// <see cref="EnumerateFiles(string)"/>; with <paramref name="ownRoot"/>, also without the folders below the root whose
     /// .editorconfig says 'root = true' (<see cref="EditorConfigRoots"/>): the root's settings don't reach their files.
     /// </summary>
@@ -695,7 +707,7 @@ internal sealed class StyleCopSetup
         {
             var directory = pending.Pop();
             var files = Directory.GetFiles(directory);
-            if (files.Any(f => f.EndsWith(".nupkg", StringComparison.OrdinalIgnoreCase)))
+            if (IsExtractedPackage(files))
             {
                 continue;
             }

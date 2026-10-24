@@ -1468,7 +1468,7 @@ internal static class PreviewCommand
                 return known;
             }
 
-            var package = Directory.Exists(directory) && Directory.EnumerateFiles(directory).Any(f => f.EndsWith(".nupkg", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".nupkg.metadata", StringComparison.OrdinalIgnoreCase));
+            var package = Directory.Exists(directory) && StyleCopSetup.IsExtractedPackage(Directory.EnumerateFiles(directory));
             if (packageFolders is not null)
             {
                 packageFolders[directory] = package;
