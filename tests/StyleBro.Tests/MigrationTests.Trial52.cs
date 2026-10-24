@@ -42,7 +42,7 @@ public sealed partial class MigrationTests
         }
 
         var result = Migration.Generate(StyleCopSetup.Read(root), root);
-        var note = "Line endings: your .editorconfig says end_of_line = crlf, and 3 C# files of 12 are LF as committed (git doesn't convert them): 'format' converts them to CRLF";
+        var note = "Line endings: your .editorconfig says end_of_line = crlf, and 3 of 12 C# files are LF as committed (git doesn't convert them): 'format' converts them to CRLF";
         Assert.Contains(result.Notes, n => n.StartsWith(note, StringComparison.Ordinal));
         Assert.DoesNotContain("end_of_line = lf", result.Lines);
 

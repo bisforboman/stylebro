@@ -1292,7 +1292,7 @@ internal static class Conventions
         var other = value == "lf" ? "CRLF" : "LF";
         return others == 0
             ? null
-            : $"Line endings: {file ?? "your .editorconfig"} says end_of_line = {value}, and {Plural(others, "C# file")} of {endings.Sum()} {(others == 1 ? "is" : "are")} {other} as committed (git doesn't convert them): 'format' converts {(others == 1 ? "it" : "them")} to {value.ToUpperInvariant()} (a whole-file change each). To keep that out of the formatting changes, convert them in a commit of their own first, or add '*.cs text eol={value}' to .gitattributes and run 'git add --renormalize .'.";
+            : $"Line endings: {file ?? "your .editorconfig"} says end_of_line = {value}, and {others} of {Plural(endings.Sum(), "C# file")} {(others == 1 ? "is" : "are")} {other} as committed (git doesn't convert them): 'format' converts {(others == 1 ? "it" : "them")} to {value.ToUpperInvariant()} (a whole-file change each). To keep that out of the formatting changes, convert them in a commit of their own first, or add '*.cs text eol={value}' to .gitattributes and run 'git add --renormalize .'.";
     }
 
     /// <summary>
