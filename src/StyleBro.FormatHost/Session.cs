@@ -79,6 +79,12 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
         plain.LogTrace(this.format.Text("Loading_workspace"));
         var watch = Stopwatch.StartNew();
         var loaded = await this.LoadAsync(workspace, environment, arguments.IsSolution || !File.Exists(workspace) || !workspace.EndsWith("proj", StringComparison.OrdinalIgnoreCase)).ConfigureAwait(false);
+        if (loaded.Failure is { } failure)
+        {
+            output(Entry.LoadFailedMarker + failure);
+            return Entry.LoadFailed;
+        }
+
         if (loaded.Unsupported)
         {
             plain.LogError(this.format.Text("Could_not_format_0_Format_currently_supports_only_CSharp_and_Visual_Basic_projects"), workspace);
@@ -204,7 +210,18 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
             var opened = MSBuildWorkspace.Create(new Dictionary<string, string>(StringComparer.Ordinal) { ["AlwaysCompileMarkupFilesInSeparateDomain"] = bool.FalseString });
             if (solution)
             {
-                await opened.OpenSolutionAsync(workspace).ConfigureAwait(false);
+                try
+                {
+                    await opened.OpenSolutionAsync(workspace).ConfigureAwait(false);
+                }
+                catch (Exception exception) when (exception is not OperationCanceledException)
+                {
+                    // Trial 50, ncalc: a file one project has as an additional file and another compiles ("The solution does
+                    // not contain the specified document", SDK 10.0.1xx). bro runs 'dotnet format' instead, which it gives a
+                    // project file then; a solution 'dotnet format' can't open either fails there as it would without the host.
+                    opened.Dispose();
+                    return new Loaded(opened, opened.CurrentSolution, ImmutableList<WorkspaceDiagnostic>.Empty, unsupported: false, failure: exception.Message);
+                }
             }
             else
             {
@@ -240,13 +257,14 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
         private readonly SemaphoreSlim gate = new(1, 1);
         private Solution current;
 
-        public Loaded(MSBuildWorkspace workspace, Solution solution, ImmutableList<WorkspaceDiagnostic> diagnostics, bool unsupported)
+        public Loaded(MSBuildWorkspace workspace, Solution solution, ImmutableList<WorkspaceDiagnostic> diagnostics, bool unsupported, string? failure = null)
         {
             this.Workspace = workspace;
             this.Solution = solution;
             this.current = solution;
             this.Diagnostics = diagnostics;
             this.Unsupported = unsupported;
+            this.Failure = failure;
         }
 
         public MSBuildWorkspace Workspace { get; }
@@ -256,6 +274,9 @@ internal sealed class Session(Func<string, IDisposable> measure) : IDisposable
         public ImmutableList<WorkspaceDiagnostic> Diagnostics { get; }
 
         public bool Unsupported { get; }
+
+        /// <summary>Why the workspace didn't load, or null (<see cref="Entry.LoadFailed"/>).</summary>
+        public string? Failure { get; }
 
         public DiskState Disk { get; } = new();
 

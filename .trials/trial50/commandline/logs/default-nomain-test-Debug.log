@@ -1,0 +1,13 @@
+  Determining projects to restore...
+  Restored /home/user/stylebro/.trials/trial50/commandline/default-nomain/src/CommandLine/CommandLine.csproj (in 387 ms).
+  Restored /home/user/stylebro/.trials/trial50/commandline/default-nomain/tests/CommandLine.Tests/CommandLine.Tests.csproj (in 480 ms).
+  CommandLine -> /home/user/stylebro/.trials/trial50/commandline/default-nomain/src/CommandLine/bin/Debug/netstandard2.0/CommandLine.dll
+/home/user/stylebro/.trials/trial50/commandline/default-nomain/tests/CommandLine.Tests/Unit/Issue389Tests.cs(25,33): warning BRO1309: Rename '__Main' to 'Main' (https://bisforboman.github.io/stylebro/rules/BRO1309/) [/home/user/stylebro/.trials/trial50/commandline/default-nomain/tests/CommandLine.Tests/CommandLine.Tests.csproj::TargetFramework=netcoreapp3.1]
+  CommandLine.Tests -> /home/user/stylebro/.trials/trial50/commandline/default-nomain/tests/CommandLine.Tests/bin/Debug/netcoreapp3.1/CommandLine.Tests.dll
+Test run for /home/user/stylebro/.trials/trial50/commandline/default-nomain/tests/CommandLine.Tests/bin/Debug/netcoreapp3.1/CommandLine.Tests.dll (.NETCoreApp,Version=v3.1)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:   684, Skipped:     0, Total:   684, Duration: 669 ms - CommandLine.Tests.dll (netcoreapp3.1)

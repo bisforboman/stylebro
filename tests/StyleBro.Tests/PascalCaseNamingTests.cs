@@ -606,6 +606,42 @@ public class PascalCaseNamingTests
             }
             """));
 
+    // Trial 50, commandline: '__Main' -> 'Main' in a test project that Microsoft.NET.Test.Sdk gives an entry point on .NET Core
+    // was a second entry point (CS0017, no test built). A static method keeps a name that would become 'Main'; an instance one
+    // doesn't (it is no entry point).
+    [Fact]
+    public Task AStaticMethodRenamedToMain_IsKept() => VerifyFixAsync(
+        """
+        internal static class Helper
+        {
+            internal static int __Main(string[] args) => args.Length;
+
+            internal static void main()
+            {
+            }
+        }
+
+        internal class Instance
+        {
+            internal int {|BRO1309:main|}(string[] args) => args.Length;
+        }
+        """,
+        """
+        internal static class Helper
+        {
+            internal static int __Main(string[] args) => args.Length;
+
+            internal static void main()
+            {
+            }
+        }
+
+        internal class Instance
+        {
+            internal int Main(string[] args) => args.Length;
+        }
+        """);
+
     private const string PrivateMembersRule = """
         dotnet_naming_symbols.private_members.applicable_kinds = property, event, field
         dotnet_naming_symbols.private_members.applicable_accessibilities = private, private_protected

@@ -1,0 +1,13 @@
+preview-init	0	42s	bro preview init --engine host --diff=/home/user/stylebro/.trials/trial50/commandline/logs/r-host-preview-init.patch
+init	0	4s	bro init --write
+preview-format	0	39s	bro preview format --engine host --diff=/home/user/stylebro/.trials/trial50/commandline/logs/r-host-preview-format.patch
+format-diff	0	38s	bro format --diff=/home/user/stylebro/.trials/trial50/commandline/logs/r-host-format-diff.patch --engine host
+format	0	43s	bro format --engine host
+check	0	18s	bro check --engine host
+check-json	0
+checkbuild	0	53s	bro check --build --engine host
+checkbuild-json	0
+twae-Debug	0	7s	dotnet build CommandLine.sln -c Debug --no-incremental -p:TreatWarningsAsErrors=true
+test-Debug	0	5s	dotnet test tests/CommandLine.Tests -c Debug -f netcoreapp3.1
+twae-Release	0	7s	dotnet build CommandLine.sln -c Release --no-incremental -p:TreatWarningsAsErrors=true
+test-Release	0	5s	dotnet test tests/CommandLine.Tests -c Release -f netcoreapp3.1

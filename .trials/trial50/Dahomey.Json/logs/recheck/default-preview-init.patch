@@ -1,0 +1,3243 @@
+diff --git a/.editorconfig b/.editorconfig
+new file mode 100644
+index 0000000..ec4e67d
+--- /dev/null
++++ b/.editorconfig
+@@ -0,0 +1,69 @@
++root = true
++
++# BEGIN stylebro-migrate (stylebro-migrate init: built-in .NET rules for StyleBro's preset; edits inside are replaced)
++[*.cs]
++# Built-in .NET rules that cover StyleCop rules, at the preset's severities. Their options (brace placement, modifier
++# order, ...) come from StyleBro's preset. The severities have to be here: 'dotnet format' ignores rule severities in a
++# package's global config. Add <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> to report them on build too.
++
++# Braces (SA1503, SA1519, SA1520) are StyleBro's BRO1514-BRO1516: IDE0011's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0011.severity = none
++# Formatting: spacing, indentation, line breaks (SA1000-SA1028, SA1107, SA1134, SA1137, SA1500)
++dotnet_diagnostic.IDE0055.severity = warning
++# Access modifiers (SA1400, SA1205) are StyleBro's BRO1404/BRO1007: IDE0040's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0040.severity = none
++# Modifier order: access modifier first, then static (SA1206, SA1207)
++dotnet_diagnostic.IDE0036.severity = warning
++# 'int' instead of 'Int32' (SA1121)
++dotnet_diagnostic.IDE0049.severity = warning
++# Unnecessary parentheses (SA1119) are StyleBro's BRO1405: IDE0047's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0047.severity = none
++# Parentheses that show precedence (SA1407, SA1408) are StyleBro's BRO1406/BRO1407: IDE0048's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0048.severity = none
++# Using placement (SA1200) is StyleBro's BRO1008: IDE0065's fix can change what names bind to (CS0104, CS0118)
++dotnet_diagnostic.IDE0065.severity = none
++# Blank lines (SA1507, SA1508, SA1513) are StyleBro's BRO1517-BRO1519: the SDK's fixes break multi-targeted projects
++dotnet_diagnostic.IDE2000.severity = none
++dotnet_diagnostic.IDE2002.severity = none
++dotnet_diagnostic.IDE2003.severity = none
++# 'this.' qualification isn't required (SA1101 is off in the preset)
++dotnet_diagnostic.IDE0009.severity = none
++
++# Conventions in this repository's code (stylebro-migrate init counted them; delete a line to have it counted again)
++# init: private fields: named '_field' in 99 of 103 places in your code
++stylebro_private_field_naming = _camelCase
++# init: one-line jumps ('if (x) return;'): allowed, because your code has some (9 of 205 places on the 'if' line without braces; any 3 keep them allowed: without it BRO1514 would add braces to each)
++stylebro_allow_single_line_jump_statements = true
++# init: multi-line initializers: without a trailing comma in 121 of 142 places in your code
++stylebro_trailing_comma = omit
++# init: null checks: '== null' in 215 of 227 places in your code
++stylebro_null_check_style = equality_operator
++# init: default values: 'default' in 18 of 20 places in your code
++csharp_prefer_simple_default_expression = true
++# init: ')' of split lists: your code mixes both forms (56 after the last item, 21 on its own line), so BRO1110 is off. To choose one: set stylebro_closing_parenthesis_placement and remove the next line.
++dotnet_diagnostic.BRO1110.severity = none
++# init: ': base(...)'/': this(...)': your code mixes both forms (11 on its own line, 15 on the constructor's line), so BRO1105 is off. To choose one: set stylebro_constructor_initializer_placement and remove the next line.
++dotnet_diagnostic.BRO1105.severity = none
++# init: mixed arithmetic ('a + b * c'): without parentheses in 3 of 3 places in your code
++dotnet_style_parentheses_in_arithmetic_binary_operators = never_if_unnecessary
++# init: statements on their 'if'/loop/'case' line: allowed, because your code has some (9 of 145 places on their owner's line; any 3 keep them allowed: csharp_preserve_single_line_statements = false would move each to a line of its own)
++csharp_preserve_single_line_statements = true
++# init: types' members: your code mixes both forms (61 in BRO1001's order, 93 in another order), so BRO1001 is off. To choose one: set dotnet_diagnostic.BRO1001.severity and remove the next line.
++dotnet_diagnostic.BRO1001.severity = none
++# init: overloads BRO1001 could split: next to each other in 4 of 4 places in your code
++stylebro_keep_overloads_together = true
++# init: split lists' items: your code mixes both forms (29 one per line, 22 grouped on lines), so BRO1108 is off. To choose one: set dotnet_diagnostic.BRO1108.severity and remove the next line.
++dotnet_diagnostic.BRO1108.severity = none
++# init: unsigned literal suffixes: 16 of 16 in your code are lower case ('0u', '1ul'), so BRO1135 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1135.severity = none
++# init: property summaries: your code mixes both forms (10 starting with 'Gets'/'Sets', 8 in their own words), so BRO1604 is off. To choose one: set dotnet_diagnostic.BRO1604.severity and remove the next line.
++dotnet_diagnostic.BRO1604.severity = none
++# init: private static fields: your code mixes both forms (6 without a prefix, 4 with an 's_'/'t_' prefix), so BRO1307 is off. To choose one: set dotnet_diagnostic.BRO1307.severity and remove the next line.
++dotnet_diagnostic.BRO1307.severity = none
++# init: C# files' line endings: LF in 160 of 160 files in your code
++end_of_line = lf
++# init: non-private fields: your code mixes both forms (28 PascalCase or as your naming rule says, 10 named otherwise), so BRO1306 is off. To choose one: set dotnet_diagnostic.BRO1306.severity and remove the next line.
++dotnet_diagnostic.BRO1306.severity = none
++# init: using directives: 127 of 135 files sorted, 3 of 42 with System first
++dotnet_sort_system_directives_first = false
++# END stylebro-migrate
+diff --git a/Directory.Build.props b/Directory.Build.props
+new file mode 100644
+index 0000000..b8aa332
+--- /dev/null
++++ b/Directory.Build.props
+@@ -0,0 +1,9 @@
++<Project>
++  <PropertyGroup>
++    <!-- StyleBro's rules up to this preset version: raise it (or 'latest') for the rules of newer releases. -->
++    <StyleBroPreset>1.0</StyleBroPreset>
++  </PropertyGroup>
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial50.2" PrivateAssets="all" />
++  </ItemGroup>
++</Project>
+diff --git a/src/Dahomey.Json.Tests/BaseObjectTests.cs b/src/Dahomey.Json.Tests/BaseObjectTests.cs
+index ece8604..61b6c98 100644
+--- a/src/Dahomey.Json.Tests/BaseObjectTests.cs
++++ b/src/Dahomey.Json.Tests/BaseObjectTests.cs
+@@ -82,7 +82,7 @@ namespace Dahomey.Json.Tests
+             const string json = @"{""Value"":{""Id"":12}}";
+             Object obj = new Object
+             {
+-                Value = new JsonObject()
++                Value = new JsonObject
+                 {
+                     ["Id"] = 12
+                 }
+diff --git a/src/Dahomey.Json.Tests/CamelCaseDictionaryKeysTests.cs b/src/Dahomey.Json.Tests/CamelCaseDictionaryKeysTests.cs
+index dd7ede9..1c9a03e 100644
+--- a/src/Dahomey.Json.Tests/CamelCaseDictionaryKeysTests.cs
++++ b/src/Dahomey.Json.Tests/CamelCaseDictionaryKeysTests.cs
+@@ -20,7 +20,7 @@ namespace Dahomey.Json.Tests
+         {
+             JsonSerializerOptions options = new JsonSerializerOptions
+             {
+-                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
++                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
+             };
+             options.SetupExtensions();
+ 
+@@ -31,8 +31,8 @@ namespace Dahomey.Json.Tests
+                 Summary = "Hot",
+                 TemperatureRanges = new Dictionary<string, int>
+                 {
+-                    ["ColdMinTemp" ] = 20,
+-                    ["hotMinTemp"] = 40,
++                    ["ColdMinTemp"] = 20,
++                    ["hotMinTemp"] = 40
+                 }
+             };
+ 
+diff --git a/src/Dahomey.Json.Tests/CamelCaseTests.cs b/src/Dahomey.Json.Tests/CamelCaseTests.cs
+index 46be168..302ba0f 100644
+--- a/src/Dahomey.Json.Tests/CamelCaseTests.cs
++++ b/src/Dahomey.Json.Tests/CamelCaseTests.cs
+@@ -18,7 +18,7 @@ namespace Dahomey.Json.Tests
+         {
+             JsonSerializerOptions options = new JsonSerializerOptions
+             {
+-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
++                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+             };
+             options.SetupExtensions();
+ 
+@@ -36,7 +36,7 @@ namespace Dahomey.Json.Tests
+         {
+             JsonSerializerOptions options = new JsonSerializerOptions
+             {
+-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
++                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+             };
+             options.SetupExtensions();
+ 
+diff --git a/src/Dahomey.Json.Tests/ClassMemberModifierTests.cs b/src/Dahomey.Json.Tests/ClassMemberModifierTests.cs
+index 56602d0..88da686 100644
+--- a/src/Dahomey.Json.Tests/ClassMemberModifierTests.cs
++++ b/src/Dahomey.Json.Tests/ClassMemberModifierTests.cs
+@@ -1,7 +1,7 @@
+-﻿using Xunit;
++﻿using Dahomey.Json.Attributes;
+ using System.Reflection;
+-using Dahomey.Json.Attributes;
+ using System.Text.Json;
++using Xunit;
+ 
+ namespace Dahomey.Json.Tests
+ {
+@@ -45,7 +45,7 @@ namespace Dahomey.Json.Tests
+ 
+             ObjectWithPrivateProperty obj = new ObjectWithPrivateProperty(2, 3)
+             {
+-                Id = 1,
++                Id = 1
+             };
+ 
+             const string json = @"{""Id"":1,""PrivateProp1"":2}";
+@@ -76,7 +76,7 @@ namespace Dahomey.Json.Tests
+             [JsonProperty]
+             private int PrivateProp1;
+ 
+-            private int PrivateProp2;
++            private int _privateProp2;
+ 
+             public ObjectWithPrivateField()
+             {
+@@ -85,7 +85,7 @@ namespace Dahomey.Json.Tests
+             public ObjectWithPrivateField(int privateProp1, int privateProp2)
+             {
+                 PrivateProp1 = privateProp1;
+-                PrivateProp2 = privateProp2;
++                _privateProp2 = privateProp2;
+             }
+ 
+             public int GetProp1()
+@@ -95,7 +95,7 @@ namespace Dahomey.Json.Tests
+ 
+             public int GetProp2()
+             {
+-                return PrivateProp2;
++                return _privateProp2;
+             }
+         }
+ 
+@@ -107,7 +107,7 @@ namespace Dahomey.Json.Tests
+ 
+             ObjectWithPrivateField obj = new ObjectWithPrivateField(2, 3)
+             {
+-                Id = 1,
++                Id = 1
+             };
+ 
+             const string json = @"{""Id"":1,""PrivateProp1"":2}";
+diff --git a/src/Dahomey.Json.Tests/CreatorMappingTests.cs b/src/Dahomey.Json.Tests/CreatorMappingTests.cs
+index c3cb6a5..0e7607f 100644
+--- a/src/Dahomey.Json.Tests/CreatorMappingTests.cs
++++ b/src/Dahomey.Json.Tests/CreatorMappingTests.cs
+@@ -10,17 +10,17 @@ namespace Dahomey.Json.Tests
+     {
+         private class ObjectWithConstructor
+         {
+-            private int id;
+-            private string name;
++            private int _id;
++            private string _name;
+ 
+-            public int Id => id;
+-            public string Name => name;
++            public int Id => _id;
++            public string Name => _name;
+             public int Age { get; set; }
+ 
+             public ObjectWithConstructor(int id, string name)
+             {
+-                this.id = id;
+-                this.name = name;
++                _id = id;
++                _name = name;
+             }
+         }
+ 
+diff --git a/src/Dahomey.Json.Tests/CustomPropertyNameTests.cs b/src/Dahomey.Json.Tests/CustomPropertyNameTests.cs
+index 1778865..acafb6b 100644
+--- a/src/Dahomey.Json.Tests/CustomPropertyNameTests.cs
++++ b/src/Dahomey.Json.Tests/CustomPropertyNameTests.cs
+@@ -34,7 +34,7 @@ namespace Dahomey.Json.Tests
+         {
+             JsonSerializerOptions options = new JsonSerializerOptions
+             {
+-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
++                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+             };
+             options.SetupExtensions();
+ 
+diff --git a/src/Dahomey.Json.Tests/DataContractAndMemberTests.cs b/src/Dahomey.Json.Tests/DataContractAndMemberTests.cs
+index d4ab5ce..baae2cd 100644
+--- a/src/Dahomey.Json.Tests/DataContractAndMemberTests.cs
++++ b/src/Dahomey.Json.Tests/DataContractAndMemberTests.cs
+@@ -85,7 +85,7 @@ namespace Dahomey.Json.Tests
+         }
+ 
+         [Theory]
+-        [InlineData(@"{}", typeof(JsonException))]
++        [InlineData("{}", typeof(JsonException))]
+         [InlineData(@"{""String"":null}", typeof(JsonException))]
+         [InlineData(@"{""String"":""Foo""}", null)]
+         public void ReadIsRequired(string json, Type expectedExceptionType)
+diff --git a/src/Dahomey.Json.Tests/DefaultIgnoreConditionTests.cs b/src/Dahomey.Json.Tests/DefaultIgnoreConditionTests.cs
+index 77a8a84..6e82b50 100644
+--- a/src/Dahomey.Json.Tests/DefaultIgnoreConditionTests.cs
++++ b/src/Dahomey.Json.Tests/DefaultIgnoreConditionTests.cs
+@@ -18,7 +18,7 @@ namespace Dahomey.Json.Tests
+ 
+         [Theory]
+         [InlineData(JsonIgnoreCondition.Never, @"{""Value"":0,""VersionValue"":null}")]
+-        [InlineData(JsonIgnoreCondition.WhenWritingDefault, @"{}")]
++        [InlineData(JsonIgnoreCondition.WhenWritingDefault, "{}")]
+         [InlineData(JsonIgnoreCondition.WhenWritingNull, @"{""Value"":0}")]
+         public void DefaultIgnoreCondition(JsonIgnoreCondition jsonIgnoreCondition, string expectedJson)
+         {
+diff --git a/src/Dahomey.Json.Tests/DefaultValueTests.cs b/src/Dahomey.Json.Tests/DefaultValueTests.cs
+index b6a1988..a6d4828 100644
+--- a/src/Dahomey.Json.Tests/DefaultValueTests.cs
++++ b/src/Dahomey.Json.Tests/DefaultValueTests.cs
+@@ -1,7 +1,7 @@
+-﻿using Xunit;
++﻿using Dahomey.Json.Attributes;
+ using System.ComponentModel;
+-using Dahomey.Json.Attributes;
+ using System.Text.Json;
++using Xunit;
+ 
+ namespace Dahomey.Json.Tests
+ {
+diff --git a/src/Dahomey.Json.Tests/DictionaryTests.cs b/src/Dahomey.Json.Tests/DictionaryTests.cs
+index cd99e31..cf8e6a5 100644
+--- a/src/Dahomey.Json.Tests/DictionaryTests.cs
++++ b/src/Dahomey.Json.Tests/DictionaryTests.cs
+@@ -176,7 +176,7 @@ namespace Dahomey.Json.Tests
+ 
+             Dictionary<string, string> expected = new Dictionary<string, string>
+             {
+-                ["key"] = expectedValue,
++                ["key"] = expectedValue
+             };
+ 
+             Helper.TestRead<Dictionary<string, string>>(json, expected, options, expectedExceptionType);
+diff --git a/src/Dahomey.Json.Tests/DiscriminatorTests.cs b/src/Dahomey.Json.Tests/DiscriminatorTests.cs
+index 46ce964..83fd617 100644
+--- a/src/Dahomey.Json.Tests/DiscriminatorTests.cs
++++ b/src/Dahomey.Json.Tests/DiscriminatorTests.cs
+@@ -1,16 +1,15 @@
++using Dahomey.Json.Attributes;
++using Dahomey.Json.Serialization.Conventions;
+ using System;
+ using System.Collections.Generic;
+ using System.Text;
+ using System.Text.Json;
+-using Dahomey.Json.Attributes;
+-using Dahomey.Json.Serialization.Conventions;
+ using Xunit;
+ 
+ namespace Dahomey.Json.Tests
+ {
+     public class BaseBaseObjectHolder
+     {
+-
+     }
+ 
+     public class BaseObjectHolder : BaseBaseObjectHolder
+@@ -136,6 +135,7 @@ namespace Dahomey.Json.Tests
+                 {
+                     throw new JsonException($"Unknown type discriminator: {discriminator}");
+                 }
++
+                 return type;
+             }
+ 
+@@ -199,7 +199,7 @@ namespace Dahomey.Json.Tests
+                 {
+                     Id = 1,
+                     Name = "foo"
+-                },
++                }
+             };
+ 
+             string actual = JsonSerializer.Serialize(obj, options);
+diff --git a/src/Dahomey.Json.Tests/DynamicObjectTests.cs b/src/Dahomey.Json.Tests/DynamicObjectTests.cs
+index 0bd503c..9474f35 100644
+--- a/src/Dahomey.Json.Tests/DynamicObjectTests.cs
++++ b/src/Dahomey.Json.Tests/DynamicObjectTests.cs
+@@ -40,7 +40,7 @@ namespace Dahomey.Json.Tests
+             obj.Number = 12.12;
+             obj.Bool = true;
+             obj.Null = null;
+-            obj.Array = new [] { 1, 2 };
++            obj.Array = new[] { 1, 2 };
+             obj.Object = new JsonObject();
+             obj.Object.Id = 1;
+ 
+diff --git a/src/Dahomey.Json.Tests/ExceptionTests.cs b/src/Dahomey.Json.Tests/ExceptionTests.cs
+index 473710c..4cc2b5a 100644
+--- a/src/Dahomey.Json.Tests/ExceptionTests.cs
++++ b/src/Dahomey.Json.Tests/ExceptionTests.cs
+@@ -6,10 +6,12 @@ namespace Dahomey.Json.Tests
+ {
+     public class ExceptionTests
+     {
+-        public class Inner {
++        public class Inner
++        {
+             [JsonPropertyName("bar")]
+             public long Bar { get; set; }
+         }
++
+         public class Outer
+         {
+             [JsonPropertyName("foo")]
+diff --git a/src/Dahomey.Json.Tests/GuidConverter.cs b/src/Dahomey.Json.Tests/GuidConverter.cs
+index 1af7d55..69e5f4e 100644
+--- a/src/Dahomey.Json.Tests/GuidConverter.cs
++++ b/src/Dahomey.Json.Tests/GuidConverter.cs
+@@ -14,6 +14,7 @@ namespace Dahomey.Json.Tests
+             {
+                 throw new JsonException();
+             }
++
+             return value;
+         }
+ 
+@@ -24,6 +25,7 @@ namespace Dahomey.Json.Tests
+             {
+                 throw new JsonException();
+             }
++
+             writer.WriteStringValue(buffer);
+         }
+     }
+diff --git a/src/Dahomey.Json.Tests/Helper.cs b/src/Dahomey.Json.Tests/Helper.cs
+index 273f476..f5f8038 100644
+--- a/src/Dahomey.Json.Tests/Helper.cs
++++ b/src/Dahomey.Json.Tests/Helper.cs
+@@ -1,7 +1,7 @@
+-﻿using Xunit;
+-using System;
++﻿using System;
+ using System.Collections;
+ using System.Text.Json;
++using Xunit;
+ 
+ namespace Dahomey.Json.Tests
+ {
+@@ -117,7 +117,7 @@ namespace Dahomey.Json.Tests
+             }
+             else
+             {
+-                 Write(value, options);
++                Write(value, options);
+             }
+         }
+     }
+diff --git a/src/Dahomey.Json.Tests/IgnoreNullValuesTests.cs b/src/Dahomey.Json.Tests/IgnoreNullValuesTests.cs
+index 848580c..78ec8e2 100644
+--- a/src/Dahomey.Json.Tests/IgnoreNullValuesTests.cs
++++ b/src/Dahomey.Json.Tests/IgnoreNullValuesTests.cs
+@@ -13,6 +13,7 @@ namespace Dahomey.Json.Tests
+             {
+                 Summary = "No summary";
+             }
++
+             public DateTimeOffset Date { get; set; }
+             public int TemperatureCelsius { get; set; }
+             public string Summary { get; set; }
+diff --git a/src/Dahomey.Json.Tests/InterfaceCollectionTests.cs b/src/Dahomey.Json.Tests/InterfaceCollectionTests.cs
+index 7cd3e43..30b480e 100644
+--- a/src/Dahomey.Json.Tests/InterfaceCollectionTests.cs
++++ b/src/Dahomey.Json.Tests/InterfaceCollectionTests.cs
+@@ -87,7 +87,6 @@ namespace Dahomey.Json.Tests
+             Assert.Equal(json, actual);
+         }
+ 
+-
+         private class ObjectWithIReadOnlyList
+         {
+             public IReadOnlyList<int> Collection { get; set; }
+diff --git a/src/Dahomey.Json.Tests/Issues/Issue0019.cs b/src/Dahomey.Json.Tests/Issues/Issue0019.cs
+index 657f808..4d7278d 100644
+--- a/src/Dahomey.Json.Tests/Issues/Issue0019.cs
++++ b/src/Dahomey.Json.Tests/Issues/Issue0019.cs
+@@ -20,7 +20,7 @@ namespace Dahomey.Json.Tests.Issues
+ 
+             const string json = @"{""Property"":""Test""}";
+             var test = JsonSerializer.Deserialize<Test>(json, options);
+-                
++
+             Assert.NotNull(test);
+             Assert.Equal("Test", test.Property);
+         }
+diff --git a/src/Dahomey.Json.Tests/Issues/Issue0025.cs b/src/Dahomey.Json.Tests/Issues/Issue0025.cs
+index b734bab..dc569ae 100644
+--- a/src/Dahomey.Json.Tests/Issues/Issue0025.cs
++++ b/src/Dahomey.Json.Tests/Issues/Issue0025.cs
+@@ -11,12 +11,14 @@ namespace Dahomey.Json.Tests.Issues
+     /// </summary>
+     public class Issue0025
+     {
+-        public interface IIdentity<TKey> where TKey : notnull
++        public interface IIdentity<TKey>
++            where TKey : notnull
+         {
+             TKey Id { get; set; }
+         }
+ 
+-        public abstract class EntityState<TKey> : IIdentity<TKey> where TKey : notnull
++        public abstract class EntityState<TKey> : IIdentity<TKey>
++            where TKey : notnull
+         {
+             public TKey Id { get; set; }
+         }
+@@ -34,7 +36,10 @@ namespace Dahomey.Json.Tests.Issues
+ 
+         internal sealed class RequestDB : RequestEntityState
+         {
+-            public bool ShouldSerializeDocuments() { return false; }
++            public bool ShouldSerializeDocuments()
++            {
++                return false;
++            }
+         }
+ 
+         [Fact]
+diff --git a/src/Dahomey.Json.Tests/Issues/Issue0033.cs b/src/Dahomey.Json.Tests/Issues/Issue0033.cs
+index 4749871..6e86673 100644
+--- a/src/Dahomey.Json.Tests/Issues/Issue0033.cs
++++ b/src/Dahomey.Json.Tests/Issues/Issue0033.cs
+@@ -24,12 +24,12 @@ namespace Dahomey.Json.Tests.Issues
+             options.SetupExtensions();
+ 
+             const string json = @"{""Date"":""2019-08-01T00:00:00-07:00"",""TemperatureCelsius"":25,""Summary"":""Hot"",""DatesAvailable"":[""2019-08-01T00:00:00-07:00"",""2019-08-02T00:00:00-07:00""],""SummaryWords"":[""Cool"",""Windy"",""Humid""]}";
+-            var weatherForecast = new WeatherForecastWithExtensionDataAndIDictionary()
++            var weatherForecast = new WeatherForecastWithExtensionDataAndIDictionary
+             {
+                 Summary = "Hot",
+                 Date = DateTimeOffset.Parse("2019-08-01T00:00:00-07:00"),
+                 TemperatureCelsius = 25,
+-                ExtensionData = new Dictionary<string, object>()
++                ExtensionData = new Dictionary<string, object>
+                 {
+                     {"DatesAvailable", new List<string> { "2019-08-01T00:00:00-07:00", "2019-08-02T00:00:00-07:00" } },
+                     {"SummaryWords", new List<string> { "Cool", "Windy", "Humid" }}
+@@ -38,7 +38,6 @@ namespace Dahomey.Json.Tests.Issues
+             var serialized = JsonSerializer.Serialize(weatherForecast, options);
+ 
+             Assert.Equal(json, serialized);
+-
+         }
+ 
+         [Fact]
+@@ -91,4 +90,3 @@ namespace Dahomey.Json.Tests.Issues
+         }
+     }
+ }
+-
+diff --git a/src/Dahomey.Json.Tests/Issues/Issue0034.cs b/src/Dahomey.Json.Tests/Issues/Issue0034.cs
+index 77acd51..db37fae 100644
+--- a/src/Dahomey.Json.Tests/Issues/Issue0034.cs
++++ b/src/Dahomey.Json.Tests/Issues/Issue0034.cs
+@@ -19,7 +19,10 @@ namespace Dahomey.Json.Tests.Issues
+             [JsonPropertyName("data")]
+             public IResultData Data { get; set; }
+         }
+-        public interface IResultData { }
++
++        public interface IResultData
++        {
++        }
+ 
+         [JsonDiscriminator("message")]
+         public class MessageResult : IResultData
+diff --git a/src/Dahomey.Json.Tests/Issues/Issue0039.cs b/src/Dahomey.Json.Tests/Issues/Issue0039.cs
+index bfccfdd..facbbab 100644
+--- a/src/Dahomey.Json.Tests/Issues/Issue0039.cs
++++ b/src/Dahomey.Json.Tests/Issues/Issue0039.cs
+@@ -39,7 +39,7 @@ namespace Dahomey.Json.Tests.Issues
+             {
+                 _defaultConvention.Apply(options, objectMapping);
+ 
+-               objectMapping.SetDiscriminator(typeof(T).Name);
++                objectMapping.SetDiscriminator(typeof(T).Name);
+             }
+         }
+ 
+diff --git a/src/Dahomey.Json.Tests/Issues/Issue0041.cs b/src/Dahomey.Json.Tests/Issues/Issue0041.cs
+index 4d8ced2..f1c3eff 100644
+--- a/src/Dahomey.Json.Tests/Issues/Issue0041.cs
++++ b/src/Dahomey.Json.Tests/Issues/Issue0041.cs
+@@ -9,7 +9,7 @@ namespace Dahomey.Json.Tests.Issues
+ {
+     public class Issue0041
+     {
+-        //[JsonConverter(typeof(ProblemDetailsJsonConverter))]
++        // [JsonConverter(typeof(ProblemDetailsJsonConverter))]
+         public class ProblemDetails
+         {
+             [JsonPropertyName("type")]
+@@ -37,7 +37,7 @@ namespace Dahomey.Json.Tests.Issues
+             JsonSerializerOptions options = new JsonSerializerOptions();
+             options.SetupExtensions();
+ 
+-            object value = new ProblemDetails() { Status = 400 };
++            object value = new ProblemDetails { Status = 400 };
+             const string json = @"{""type"":null,""title"":null,""status"":400,""detail"":null,""instance"":null}";
+ 
+             string result = JsonSerializer.Serialize(value, value.GetType(), options);
+diff --git a/src/Dahomey.Json.Tests/Issues/Issue0045.cs b/src/Dahomey.Json.Tests/Issues/Issue0045.cs
+index 6064140..430c293 100644
+--- a/src/Dahomey.Json.Tests/Issues/Issue0045.cs
++++ b/src/Dahomey.Json.Tests/Issues/Issue0045.cs
+@@ -36,6 +36,7 @@ namespace Dahomey.Json.Tests.Issues
+             options.SetupExtensions();
+             var json = JsonSerializer.Serialize(s1, options);
+             var s2 = JsonSerializer.Deserialize<MyStruct>(json, options);
++
+             // serialized as "intValue", but JsonConstructor specifies "IntValue"
+             Assert.Equal(default, s2.IntValue);
+         }
+diff --git a/src/Dahomey.Json.Tests/Issues/Issue0047.cs b/src/Dahomey.Json.Tests/Issues/Issue0047.cs
+index 344599d..a63cf82 100644
+--- a/src/Dahomey.Json.Tests/Issues/Issue0047.cs
++++ b/src/Dahomey.Json.Tests/Issues/Issue0047.cs
+@@ -1,7 +1,7 @@
+ ﻿using Dahomey.Json.Attributes;
++using Dahomey.Json.NamingPolicies;
+ using System.Text.Json;
+ using System.Text.Json.Serialization;
+-using Dahomey.Json.NamingPolicies;
+ using Xunit;
+ 
+ namespace Dahomey.Json.Tests.Issues
+diff --git a/src/Dahomey.Json.Tests/Issues/Issue0064.cs b/src/Dahomey.Json.Tests/Issues/Issue0064.cs
+index 57127b5..d4c2dff 100644
+--- a/src/Dahomey.Json.Tests/Issues/Issue0064.cs
++++ b/src/Dahomey.Json.Tests/Issues/Issue0064.cs
+@@ -57,9 +57,9 @@ namespace Dahomey.Json.Tests.Issues
+             options.SetupExtensions();
+             options.GetObjectMappingConventionRegistry().RegisterProvider(
+                 new CustomObjectMappingConventionProvider
+-                { 
++                {
+                     FieldNameChanges = new Dictionary<string, string>
+-                    { 
++                    {
+                         ["Name"] = "foo"
+                     }
+                 }
+diff --git a/src/Dahomey.Json.Tests/Issues/Issue0065.cs b/src/Dahomey.Json.Tests/Issues/Issue0065.cs
+index daeab2a..df3ad37 100644
+--- a/src/Dahomey.Json.Tests/Issues/Issue0065.cs
++++ b/src/Dahomey.Json.Tests/Issues/Issue0065.cs
+@@ -16,7 +16,7 @@ namespace Dahomey.Json.Tests.Issues
+         {
+             JsonSerializerOptions options = new JsonSerializerOptions().SetupExtensions();
+ 
+-            var test = JsonSerializer.Deserialize<Test>(@"{}", options);
++            var test = JsonSerializer.Deserialize<Test>("{}", options);
+         }
+     }
+ }
+diff --git a/src/Dahomey.Json.Tests/Issues/Issue0074.cs b/src/Dahomey.Json.Tests/Issues/Issue0074.cs
+index e69236e..68b9f6a 100644
+--- a/src/Dahomey.Json.Tests/Issues/Issue0074.cs
++++ b/src/Dahomey.Json.Tests/Issues/Issue0074.cs
+@@ -17,7 +17,7 @@ namespace Dahomey.Json.Tests.Issues
+         {
+             ClassWithUri objectWithUri = new ClassWithUri
+             {
+-                UrisAreNullable = null,
++                UrisAreNullable = null
+             };
+ 
+             const string expectedJson = @"{""UrisAreNullable"":null}";
+@@ -43,7 +43,7 @@ namespace Dahomey.Json.Tests.Issues
+         {
+             ClassWithUri objectWithUri = new ClassWithUri
+             {
+-                UrisAreNullable = null,
++                UrisAreNullable = null
+             };
+ 
+             const string expectedJson = @"{""UrisAreNullable"":null}";
+diff --git a/src/Dahomey.Json.Tests/Issues/Issue0076.cs b/src/Dahomey.Json.Tests/Issues/Issue0076.cs
+index 61aa2ef..60b3fb2 100644
+--- a/src/Dahomey.Json.Tests/Issues/Issue0076.cs
++++ b/src/Dahomey.Json.Tests/Issues/Issue0076.cs
+@@ -23,7 +23,7 @@ namespace Dahomey.Json.Tests.Issues
+             public override JsonConverter CreateConverter(Type type, JsonSerializerOptions options)
+             {
+                 var innerType = type.GetGenericArguments()[0];
+-                var factoryType = typeof(WrapperJsonConverterInner<>).MakeGenericType(new Type[] {innerType});
++                var factoryType = typeof(WrapperJsonConverterInner<>).MakeGenericType(innerType);
+ 
+                 var converter = (JsonConverter)Activator.CreateInstance(
+                     factoryType,
+@@ -38,14 +38,14 @@ namespace Dahomey.Json.Tests.Issues
+             private class WrapperJsonConverterInner<T> : JsonConverter<Wrapper<T>>
+             {
+                 private const string WrapperPropertyName = "Wrapper";
+-                
++
+                 public override Wrapper<T> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+                 {
+                     if (reader.TokenType != JsonTokenType.StartObject)
+                     {
+                         throw new JsonException();
+                     }
+-                
++
+                     reader.Read();
+                     if (reader.TokenType == JsonTokenType.EndObject)
+                     {
+@@ -62,7 +62,7 @@ namespace Dahomey.Json.Tests.Issues
+                     {
+                         throw new JsonException();
+                     }
+-                
++
+                     var value = JsonSerializer.Deserialize<T>(ref reader, options);
+ 
+                     reader.Read();
+@@ -71,8 +71,7 @@ namespace Dahomey.Json.Tests.Issues
+                         throw new JsonException();
+                     }
+ 
+-                    return new Wrapper<T> {Value = value};
+-
++                    return new Wrapper<T> { Value = value };
+                 }
+ 
+                 public override void Write(Utf8JsonWriter writer, Wrapper<T> wrapper, JsonSerializerOptions options)
+@@ -91,20 +90,20 @@ namespace Dahomey.Json.Tests.Issues
+         private sealed class Wrapper<T>
+         {
+             public bool PropertyThatThrows => throw new Exception("Do not access this property.");
+-            
+-            public T Value { set; get; }
++
++            public T Value { get; set; }
+         }
+ 
+         private sealed class ClassWithWrapper
+         {
+             public Wrapper<string> WrappedValue { get; set; }
+-            
++
+             public ClassWithWrapper()
+             {
+                 WrappedValue = new Wrapper<string>();
+             }
+         }
+-        
++
+         [Fact]
+         public void TestSerializationWithFactoryConverter()
+         {
+@@ -119,13 +118,13 @@ namespace Dahomey.Json.Tests.Issues
+ 
+             var obj = new ClassWithWrapper
+             {
+-                WrappedValue = {Value = "test-value"}
++                WrappedValue = { Value = "test-value" }
+             };
+             var actualJson = JsonSerializer.Serialize(obj, options);
+ 
+             Assert.Equal(expectedJson, actualJson);
+         }
+-        
++
+         [Fact]
+         public void TestDeserializationWithFactoryConverter()
+         {
+diff --git a/src/Dahomey.Json.Tests/JsonIgnoreTests.cs b/src/Dahomey.Json.Tests/JsonIgnoreTests.cs
+index b7dbe70..fe99f56 100644
+--- a/src/Dahomey.Json.Tests/JsonIgnoreTests.cs
++++ b/src/Dahomey.Json.Tests/JsonIgnoreTests.cs
+@@ -86,7 +86,7 @@ namespace Dahomey.Json.Tests
+                 Always = 12,
+                 Never = 0,
+                 WhenWritingDefault = 0,
+-                WhenWritingNull = null,
++                WhenWritingNull = null
+             };
+ 
+             const string expected = @"{""Never"":0,""WhenWritingNullableValue"":123}";
+@@ -121,7 +121,7 @@ namespace Dahomey.Json.Tests
+                 Always = 12,
+                 Never = 0,
+                 WhenWritingDefault = 0,
+-                WhenWritingNull = null,
++                WhenWritingNull = null
+             };
+ 
+             const string expected = @"{""Always"":12,""Never"":0,""WhenWritingDefault"":0,""WhenWritingNullableValue"":123}";
+diff --git a/src/Dahomey.Json.Tests/JsonNodeTests.cs b/src/Dahomey.Json.Tests/JsonNodeTests.cs
+index 34420d3..ac02a56 100644
+--- a/src/Dahomey.Json.Tests/JsonNodeTests.cs
++++ b/src/Dahomey.Json.Tests/JsonNodeTests.cs
+@@ -84,9 +84,9 @@ namespace Dahomey.Json.Tests
+ 
+         [Theory]
+         [InlineData("12.12", 12.12f)]
+-        //[InlineData(@"""NaN""", float.NaN)]
+-        //[InlineData(@"""∞""", float.PositiveInfinity)]
+-        //[InlineData(@"""-∞""", float.NegativeInfinity)]
++        // [InlineData(@"""NaN""", float.NaN)]
++        // [InlineData(@"""∞""", float.PositiveInfinity)]
++        // [InlineData(@"""-∞""", float.NegativeInfinity)]
+         public void ReadSingle(string json, float expectedValue)
+         {
+             JsonSerializerOptions options = new JsonSerializerOptions();
+@@ -97,9 +97,9 @@ namespace Dahomey.Json.Tests
+ 
+         [Theory]
+         [InlineData("12.12", 12.12f)]
+-        //[InlineData(@"""NaN""", float.NaN)]
+-        //[InlineData(@"""\u221E""", float.PositiveInfinity)]
+-        //[InlineData(@"""-\u221E""", float.NegativeInfinity)]
++        // [InlineData(@"""NaN""", float.NaN)]
++        // [InlineData(@"""\u221E""", float.PositiveInfinity)]
++        // [InlineData(@"""-\u221E""", float.NegativeInfinity)]
+         public void WriteSingle(string json, float value)
+         {
+             JsonSerializerOptions options = new JsonSerializerOptions();
+@@ -110,9 +110,9 @@ namespace Dahomey.Json.Tests
+ 
+         [Theory]
+         [InlineData("12.12", 12.12)]
+-        //[InlineData(@"""NaN""", double.NaN)]
+-        //[InlineData(@"""∞""", double.PositiveInfinity)]
+-        //[InlineData(@"""-∞""", double.NegativeInfinity)]
++        // [InlineData(@"""NaN""", double.NaN)]
++        // [InlineData(@"""∞""", double.PositiveInfinity)]
++        // [InlineData(@"""-∞""", double.NegativeInfinity)]
+         public void ReadDouble(string json, double expectedValue)
+         {
+             JsonSerializerOptions options = new JsonSerializerOptions();
+@@ -123,9 +123,9 @@ namespace Dahomey.Json.Tests
+ 
+         [Theory]
+         [InlineData("12.12", 12.12)]
+-        //[InlineData(@"""NaN""", double.NaN)]
+-        //[InlineData(@"""\u221E""", double.PositiveInfinity)]
+-        //[InlineData(@"""-\u221E""", double.NegativeInfinity)]
++        // [InlineData(@"""NaN""", double.NaN)]
++        // [InlineData(@"""\u221E""", double.PositiveInfinity)]
++        // [InlineData(@"""-\u221E""", double.NegativeInfinity)]
+         public void WriteDouble(string json, double value)
+         {
+             JsonSerializerOptions options = new JsonSerializerOptions();
+@@ -246,20 +246,20 @@ namespace Dahomey.Json.Tests
+             Assert.NotNull(value);
+             Assert.Equal(JsonValueKind.Array, value.ValueKind);
+             Assert.IsType<JsonArray>(value);
+-            JsonArray JsonArray = (JsonArray)value;
+-            Assert.Equal(2, JsonArray.Count);
+-            Assert.Equal(JsonValueKind.Number, JsonArray[0].ValueKind);
+-            Assert.Equal(1, ((JsonNumber)JsonArray[0]).GetDouble());
+-            Assert.Equal(JsonValueKind.Number, JsonArray[1].ValueKind);
+-            Assert.Equal(2, ((JsonNumber)JsonArray[1]).GetDouble());
++            JsonArray jsonArray = (JsonArray)value;
++            Assert.Equal(2, jsonArray.Count);
++            Assert.Equal(JsonValueKind.Number, jsonArray[0].ValueKind);
++            Assert.Equal(1, ((JsonNumber)jsonArray[0]).GetDouble());
++            Assert.Equal(JsonValueKind.Number, jsonArray[1].ValueKind);
++            Assert.Equal(2, ((JsonNumber)jsonArray[1]).GetDouble());
+ 
+             // object
+             value = actualObject.GetPropertyValue("object");
+             Assert.NotNull(value);
+             Assert.Equal(JsonValueKind.Object, value.ValueKind);
+             Assert.IsType<JsonObject>(value);
+-            JsonObject JsonObject = (JsonObject)value;
+-            value = JsonObject.GetPropertyValue("id");
++            JsonObject jsonObject = (JsonObject)value;
++            value = jsonObject.GetPropertyValue("id");
+             Assert.NotNull(value);
+             Assert.Equal(JsonValueKind.Number, value.ValueKind);
+             Assert.IsType<JsonNumber>(value);
+@@ -282,7 +282,7 @@ namespace Dahomey.Json.Tests
+                 ["bool"] = true,
+                 ["null"] = null,
+                 ["array"] = new JsonArray { 1, 2 },
+-                ["object"] = new JsonObject { ["id"] = 1 },
++                ["object"] = new JsonObject { ["id"] = 1 }
+             };
+             Helper.TestWrite(obj, json, options);
+         }
+@@ -330,20 +330,20 @@ namespace Dahomey.Json.Tests
+             Assert.NotNull(actualArrayValue);
+             Assert.Equal(JsonValueKind.Array, actualArrayValue.ValueKind);
+             Assert.IsType<JsonArray>(actualArrayValue);
+-            JsonArray JsonArray = (JsonArray)actualArrayValue;
+-            Assert.Equal(2, JsonArray.Count);
+-            Assert.Equal(JsonValueKind.Number, JsonArray[0].ValueKind);
+-            Assert.Equal(1, ((JsonNumber)JsonArray[0]).GetInt32());
+-            Assert.Equal(JsonValueKind.Number, JsonArray[1].ValueKind);
+-            Assert.Equal(2, ((JsonNumber)JsonArray[1]).GetInt32());
++            JsonArray jsonArray = (JsonArray)actualArrayValue;
++            Assert.Equal(2, jsonArray.Count);
++            Assert.Equal(JsonValueKind.Number, jsonArray[0].ValueKind);
++            Assert.Equal(1, ((JsonNumber)jsonArray[0]).GetInt32());
++            Assert.Equal(JsonValueKind.Number, jsonArray[1].ValueKind);
++            Assert.Equal(2, ((JsonNumber)jsonArray[1]).GetInt32());
+ 
+             // object
+             JsonNode actualObject = actualArray[5];
+             Assert.NotNull(actualObject);
+             Assert.Equal(JsonValueKind.Object, actualObject.ValueKind);
+             Assert.IsType<JsonObject>(actualObject);
+-            JsonObject JsonObject = (JsonObject)actualObject;
+-            JsonNode value = JsonObject.GetPropertyValue("id");
++            JsonObject jsonObject = (JsonObject)actualObject;
++            JsonNode value = jsonObject.GetPropertyValue("id");
+             Assert.NotNull(value);
+             Assert.Equal(JsonValueKind.Number, value.ValueKind);
+             Assert.IsType<JsonNumber>(value);
+@@ -398,7 +398,7 @@ namespace Dahomey.Json.Tests
+                 ["Bool"] = true,
+                 ["Null"] = null,
+                 ["Array"] = new JsonArray { 1, 2 },
+-                ["Object"] = new JsonObject { ["Id"] = 1 },
++                ["Object"] = new JsonObject { ["Id"] = 1 }
+             };
+ 
+             MyObject myObject = obj.ToObject<MyObject>(options);
+@@ -432,16 +432,16 @@ namespace Dahomey.Json.Tests
+             JsonObject obj1 = JsonObject.FromObject(myObject, options);
+             JsonObject obj2 = JsonObject.FromObject(myObject, typeof(MyObject), options);
+ 
+-            Assert.All(new[] {obj1, obj2}, obj =>
++            Assert.All(new[] { obj1, obj2 }, obj =>
+             {
+                 Assert.NotNull(obj);
+                 Assert.Equal("foo", obj["String"]);
+-                Assert.Equal(12.12, ((JsonNumber) obj["Number"]).GetDouble(), 3);
++                Assert.Equal(12.12, ((JsonNumber)obj["Number"]).GetDouble(), 3);
+                 Assert.Equal(true, obj["Bool"]);
+                 Assert.Equal(JsonValueKind.Null, obj["Null"].ValueKind);
+-                Assert.Equal(new JsonArray(new[] {1, 2}), obj["Array"]);
++                Assert.Equal(new JsonArray(new[] { 1, 2 }), obj["Array"]);
+                 Assert.NotNull(obj["Object"]);
+-                Assert.Equal(1, ((JsonObject) obj["Object"])["Id"]);
++                Assert.Equal(1, ((JsonObject)obj["Object"])["Id"]);
+             });
+         }
+ 
+@@ -455,7 +455,7 @@ namespace Dahomey.Json.Tests
+                 ["Bool"] = true,
+                 ["Null"] = null,
+                 ["Array"] = new JsonArray { 1, 2 },
+-                ["Object"] = new JsonObject { ["Id"] = 1 },
++                ["Object"] = new JsonObject { ["Id"] = 1 }
+             };
+ 
+             const string json = @"{""String"":""foo"",""Number"":12.12,""Bool"":true,""Null"":null,""Array"":[1,2],""Object"":{""Id"":1}}";
+@@ -476,7 +476,7 @@ namespace Dahomey.Json.Tests
+ 
+             JsonObject expected = new JsonObject
+             {
+-                ["key"] = expectedValue,
++                ["key"] = expectedValue
+             };
+ 
+             Helper.TestRead<JsonObject>(json, expected, options, expectedExceptionType);
+diff --git a/src/Dahomey.Json.Tests/KebabCaseNamingPolicyTests.cs b/src/Dahomey.Json.Tests/KebabCaseNamingPolicyTests.cs
+index 75a5d1e..356ef89 100644
+--- a/src/Dahomey.Json.Tests/KebabCaseNamingPolicyTests.cs
++++ b/src/Dahomey.Json.Tests/KebabCaseNamingPolicyTests.cs
+@@ -1,6 +1,6 @@
+-﻿using System.Text.Json;
++﻿using Dahomey.Json.NamingPolicies;
++using System.Text.Json;
+ using System.Text.Json.Serialization;
+-using Dahomey.Json.NamingPolicies;
+ using Xunit;
+ 
+ namespace Dahomey.Json.Tests
+@@ -10,11 +10,11 @@ namespace Dahomey.Json.Tests
+         public class StringObject
+         {
+             [JsonPropertyName("AnotherName")] public string String { get; set; }
+-            
++
+             public string PascalCaseProperty { get; set; }
+-            
++
+             public string camelCaseProperty { get; set; }
+-            
++
+             public string _0ALotOf1Symbols { get; set; }
+ 
+             public string lowercasename { get; set; }
+@@ -33,23 +33,23 @@ namespace Dahomey.Json.Tests
+             {
+                 PropertyNamingPolicy = new KebabCaseNamingPolicy()
+             }.SetupExtensions();
+-            
++
+             var actual = Helper.Write(new StringObject().SetAll(), options);
+             const string expected = @"{""AnotherName"":""test"",""pascal-case-property"":""test"",""camel-case-property"":""test"",""_0-a-lot-of1-symbols"":""test"",""lowercasename"":""test""}";
+-            
++
+             Assert.Equal(expected, actual);
+         }
+-        
++
+         [Fact]
+         public void TestConvertRead()
+         {
+             const string json = @"{""AnotherName"":""test"",""pascal-case-property"":""test"",""camel-case-property"":""test"",""_0-a-lot-of1-symbols"":""test"",""lowercasename"":""test""}";
+-            
++
+             JsonSerializerOptions options = new JsonSerializerOptions
+             {
+                 PropertyNamingPolicy = new KebabCaseNamingPolicy()
+             }.SetupExtensions();
+-            
++
+             var actual = Helper.Read<StringObject>(json, options);
+ 
+             string[] values =
+diff --git a/src/Dahomey.Json.Tests/ObjectMappingTests.cs b/src/Dahomey.Json.Tests/ObjectMappingTests.cs
+index b5d7910..284e0ba 100644
+--- a/src/Dahomey.Json.Tests/ObjectMappingTests.cs
++++ b/src/Dahomey.Json.Tests/ObjectMappingTests.cs
+@@ -1,11 +1,11 @@
+-﻿using Xunit;
++﻿using Dahomey.Json.Serialization.Conventions;
++using Dahomey.Json.Serialization.Converters.Mappings;
+ using System;
+ using System.Linq;
+ using System.Reflection;
+ using System.Text.Json;
+-using Dahomey.Json.Serialization.Converters.Mappings;
+ using System.Text.Json.Serialization;
+-using Dahomey.Json.Serialization.Conventions;
++using Xunit;
+ 
+ namespace Dahomey.Json.Tests
+ {
+@@ -125,7 +125,7 @@ namespace Dahomey.Json.Tests
+             Helper.TestWrite(obj, json, options);
+         }
+ 
+-        class ObjectWithGuid
++        private class ObjectWithGuid
+         {
+             public Guid Guid { get; set; }
+         }
+@@ -266,7 +266,7 @@ namespace Dahomey.Json.Tests
+             };
+ 
+             const string json = @"{""_t"":""inherited"",""InheritedValue"":13,""BaseValue"":12}";
+-            Helper.TestWrite<BaseObject>(obj, json,  options);
++            Helper.TestWrite<BaseObject>(obj, json, options);
+         }
+ 
+         public class OptInObjectMappingConventionProvider : IObjectMappingConventionProvider
+diff --git a/src/Dahomey.Json.Tests/ObjectTests.cs b/src/Dahomey.Json.Tests/ObjectTests.cs
+index 94c20cf..89fa44f 100644
+--- a/src/Dahomey.Json.Tests/ObjectTests.cs
++++ b/src/Dahomey.Json.Tests/ObjectTests.cs
+@@ -13,7 +13,7 @@ namespace Dahomey.Json.Tests
+         {
+             None = 0,
+             Value1 = 1,
+-            Value2 = 2,
++            Value2 = 2
+         }
+ 
+         public class SimpleObject
+@@ -685,7 +685,7 @@ namespace Dahomey.Json.Tests
+             {
+                 JsonNode = new JsonArray(new JsonNode[] { 1, true, new JsonNull() })
+             };
+-                
++
+             Helper.TestWrite(obj, json, options);
+         }
+     }
+diff --git a/src/Dahomey.Json.Tests/ReadOnlyPropertyTests.cs b/src/Dahomey.Json.Tests/ReadOnlyPropertyTests.cs
+index 0f2e3b6..f9d355e 100644
+--- a/src/Dahomey.Json.Tests/ReadOnlyPropertyTests.cs
++++ b/src/Dahomey.Json.Tests/ReadOnlyPropertyTests.cs
+@@ -189,6 +189,7 @@ namespace Dahomey.Json.Tests
+             Assert.True(obj.MyClass.ContainsKey("MyKey"));
+             Assert.Equal(12, obj.MyClass["MyKey"].MyInt32);
+         }
++
+         public class SimpleTestClassWithReadOnlyDictionaryProperty
+         {
+             public IDictionary<string, SimpleTestClass> MyClass { get; } = new Dictionary<string, SimpleTestClass>();
+diff --git a/src/Dahomey.Json.Tests/ReferenceHandlingTests.Deserialize.cs b/src/Dahomey.Json.Tests/ReferenceHandlingTests.Deserialize.cs
+index f3d7fb8..efa91e9 100644
+--- a/src/Dahomey.Json.Tests/ReferenceHandlingTests.Deserialize.cs
++++ b/src/Dahomey.Json.Tests/ReferenceHandlingTests.Deserialize.cs
+@@ -20,9 +20,10 @@ namespace Dahomey.Json.Tests
+             public List<Employee> Subordinates2 { get; set; }
+             public Dictionary<string, Employee> Contacts { get; set; }
+             public Dictionary<string, Employee> Contacts2 { get; set; }
+-            //Properties with default value to verify they get overwritten when deserializing into them.
++
++            // Properties with default value to verify they get overwritten when deserializing into them.
+             public List<string> SubordinatesString { get; set; } = new List<string> { "Bob" };
+-            public Dictionary<string, string> ContactsString { get; set; } = new Dictionary<string, string>() { { "Bob", "555-5555" } };
++            public Dictionary<string, string> ContactsString { get; set; } = new Dictionary<string, string> { { "Bob", "555-5555" } };
+         }
+ 
+         public class EmployeeWithContacts
+@@ -59,7 +60,7 @@ namespace Dahomey.Json.Tests
+             Assert.NotNull(employee);
+         }
+ 
+-        [Fact] //Employee list as a property and then use reference to itself on nested Employee.
++        [Fact] // Employee list as a property and then use reference to itself on nested Employee.
+         public static void ObjectReferenceLoop()
+         {
+             string json =
+@@ -114,7 +115,7 @@ namespace Dahomey.Json.Tests
+             Assert.Same(employee, employee.Contacts["Angela"]);
+         }
+ 
+-        [Fact] //Employee list as a property and then use reference to itself on nested Employee.
++        [Fact] // Employee list as a property and then use reference to itself on nested Employee.
+         public static void ObjectWithArrayReferenceDeeper()
+         {
+             string json =
+@@ -206,8 +207,10 @@ namespace Dahomey.Json.Tests
+             }";
+ 
+             Employee employee = JsonSerializer.Deserialize<Employee>(json, s_deserializerOptionsPreserve);
++
+             // presereved array.
+             Assert.Empty(employee.SubordinatesString);
++
+             // reference to preserved array.
+             Assert.Empty(employee.Manager.SubordinatesString);
+             Assert.Same(employee.Manager.SubordinatesString, employee.SubordinatesString);
+@@ -244,9 +247,9 @@ namespace Dahomey.Json.Tests
+             Assert.Empty(employee.Contacts2);
+         }
+ 
+-        //[Fact]
+-        //public static async Task TestJsonPathDoesNotFailOnMultiThreads()
+-        //{
++        // [Fact]
++        // public static async Task TestJsonPathDoesNotFailOnMultiThreads()
++        // {
+         //    const int ThreadCount = 8;
+         //    const int ConcurrentTestsCount = 4;
+         //    Task[] tasks = new Task[ThreadCount * ConcurrentTestsCount];
+@@ -260,19 +263,19 @@ namespace Dahomey.Json.Tests
+         //    }
+ 
+         //    await Task.WhenAll(tasks);
+-        //}
++        // }
+ 
+-        //private static void TestIdTask()
+-        //{
++        // private static void TestIdTask()
++        // {
+         //    JsonException ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Employee>(@"{""$id"":1}", s_deserializerOptionsPreserve));
+         //    Assert.Equal("$.$id", ex.Path);
+-        //}
++        // }
+ 
+-        //private static void TestRefTask()
+-        //{
++        // private static void TestRefTask()
++        // {
+         //    JsonException ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Employee>(@"{""$ref"":1}", s_deserializerOptionsPreserve));
+         //    Assert.Equal("$.$ref", ex.Path);
+-        //}
++        // }
+ 
+         [Fact]
+         public static void DictionaryWithoutMetadata()
+@@ -282,7 +285,7 @@ namespace Dahomey.Json.Tests
+             Assert.NotNull(dictionary);
+         }
+ 
+-        [Fact] //Employee list as a property and then use reference to itself on nested Employee.
++        [Fact] // Employee list as a property and then use reference to itself on nested Employee.
+         public static void DictionaryReferenceLoop()
+         {
+             string json =
+@@ -444,7 +447,7 @@ namespace Dahomey.Json.Tests
+         }
+ 
+         [Fact]
+-        public static void ArrayWithDuplicates() //Make sure the serializer can understand lists that were wrapped in braces.
++        public static void ArrayWithDuplicates() // Make sure the serializer can understand lists that were wrapped in braces.
+         {
+             string json =
+             @"{
+@@ -481,7 +484,7 @@ namespace Dahomey.Json.Tests
+         }
+ 
+         [Fact]
+-        public static void ArrayNotPreservedWithDuplicates() //Make sure the serializer can understand lists that were wrapped in braces.
++        public static void ArrayNotPreservedWithDuplicates() // Make sure the serializer can understand lists that were wrapped in braces.
+         {
+             string json =
+             @"[
+@@ -613,7 +616,7 @@ namespace Dahomey.Json.Tests
+             Assert.Equal("$[0]", ex.Path);
+         }
+ 
+-        [Fact] //This only demonstrates that behavior with converters remain the same.
++        [Fact] // This only demonstrates that behavior with converters remain the same.
+         public static void DeserializeWithListConverter()
+         {
+             string json =
+@@ -645,8 +648,8 @@ namespace Dahomey.Json.Tests
+             Assert.Empty(angela.Manager.Subordinates);
+         }
+ 
+-        //NOTE: If you implement a converter, you are on your own when handling metadata properties and therefore references.Newtonsoft does the same.
+-        //However; is there a way to recall preserved references previously found in the payload and to store new ones found in the converter's payload? that would be a cool enhancement.
++        // NOTE: If you implement a converter, you are on your own when handling metadata properties and therefore references.Newtonsoft does the same.
++        // However; is there a way to recall preserved references previously found in the payload and to store new ones found in the converter's payload? that would be a cool enhancement.
+         private class ListOfEmployeeConverter : JsonConverter<List<Employee>>
+         {
+             public override List<Employee> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+@@ -660,6 +663,7 @@ namespace Dahomey.Json.Tests
+                     {
+                         case JsonTokenType.StartObject:
+                             startObjectCount++; break;
++
+                         case JsonTokenType.EndObject:
+                             endObjectCount++; break;
+                     }
+diff --git a/src/Dahomey.Json.Tests/ReferenceHandlingTests.Serialize.cs b/src/Dahomey.Json.Tests/ReferenceHandlingTests.Serialize.cs
+index 40aba89..51d9556 100644
+--- a/src/Dahomey.Json.Tests/ReferenceHandlingTests.Serialize.cs
++++ b/src/Dahomey.Json.Tests/ReferenceHandlingTests.Serialize.cs
+@@ -8,15 +8,15 @@ namespace Dahomey.Json.Tests
+     public partial class ReferenceHandlingTests
+     {
+         private static readonly JsonSerializerOptions s_serializerOptionsPreserve = new JsonSerializerOptions().SetupExtensions().SetReferenceHandling(ReferenceHandling.Preserve);
+-        private static readonly Newtonsoft.Json.JsonSerializerSettings s_newtonsoftSerializerSettingsPreserve = new Newtonsoft.Json.JsonSerializerSettings 
+-        { 
+-            PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.All, 
++        private static readonly Newtonsoft.Json.JsonSerializerSettings s_newtonsoftSerializerSettingsPreserve = new Newtonsoft.Json.JsonSerializerSettings
++        {
++            PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.All,
+             ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Serialize
+         };
+ 
+-        //[Fact]
+-        //public static void WriteIgnoringReferenceLoops()
+-        //{
++        // [Fact]
++        // public static void WriteIgnoringReferenceLoops()
++        // {
+         //    JsonSerializerOptions options = new JsonSerializerOptions().SetupExtensions();
+         //    options.SetReferenceHandling(ReferenceHandling.Ignore);
+ 
+@@ -28,11 +28,11 @@ namespace Dahomey.Json.Tests
+ 
+         //    const string json = @"{""Name"":""Angela"",""Manager"":{""Name"":""Bob"",""Subordinates"":[]}}";
+         //    Helper.TestWrite(angela, json, options);
+-        //}
++        // }
+ 
+-        //[Fact]
+-        //public static void WritePreservingReference()
+-        //{
++        // [Fact]
++        // public static void WritePreservingReference()
++        // {
+         //    JsonSerializerOptions options = new JsonSerializerOptions().SetupExtensions();
+         //    options.SetReferenceHandling(ReferenceHandling.Preserve);
+ 
+@@ -44,7 +44,7 @@ namespace Dahomey.Json.Tests
+ 
+         //    const string json = @"{""$id"":""1"",""Name"":""Angela"",""Manager"":{""$id"":""2"",""Name"":""Bob"",""Subordinates"":{""$id"":""3"",""$values"":[{""$ref"":""1""}]}}}";
+         //    Helper.TestWrite(angela, json, options);
+-        //}
++        // }
+ 
+         private class EmployeeExtensionData : Employee
+         {
+@@ -103,16 +103,16 @@ namespace Dahomey.Json.Tests
+         [Fact]
+         public static void ValueTypesShouldNotContainId()
+         {
+-            //Struct as root.
++            // Struct as root.
+             EmployeeStruct employee = new EmployeeStruct
+             {
+                 Name = "Angela",
+-                //Struct as property.
++                // Struct as property.
+                 Job = new JobStruct
+                 {
+                     Title = "Software Engineer"
+                 },
+-                //ImmutableArray<T> as property.
++                // ImmutableArray<T> as property.
+                 Roles =
+                     ImmutableArray.Create(
+                         new RoleStruct
+@@ -125,9 +125,10 @@ namespace Dahomey.Json.Tests
+                         })
+             };
+ 
+-            //ImmutableArray<T> as root.
++            // ImmutableArray<T> as root.
+             ImmutableArray<EmployeeStruct> array =
+-            //Struct as array element (same as struct being root).
++
++            // Struct as array element (same as struct being root).
+             ImmutableArray.Create(employee);
+ 
+             // Regardless of using preserve, do not emit $id to value types; that is why we compare against default.
+diff --git a/src/Dahomey.Json.Tests/ReferenceHandlingTests.cs b/src/Dahomey.Json.Tests/ReferenceHandlingTests.cs
+index 6e455d9..9996c62 100644
+--- a/src/Dahomey.Json.Tests/ReferenceHandlingTests.cs
++++ b/src/Dahomey.Json.Tests/ReferenceHandlingTests.cs
+@@ -142,7 +142,7 @@ namespace Dahomey.Json.Tests
+         public static void DictionaryObjectLoop()
+         {
+             Dictionary<string, Employee> root = new Dictionary<string, Employee>();
+-            root["Angela"] = new Employee() { Name = "Angela", Contacts = root };
++            root["Angela"] = new Employee { Name = "Angela", Contacts = root };
+ 
+             string expected = Newtonsoft.Json.JsonConvert.SerializeObject(root, s_newtonsoftSerializerSettingsPreserve);
+             string actual = JsonSerializer.Serialize(root, s_serializerOptionsPreserve);
+@@ -210,6 +210,7 @@ namespace Dahomey.Json.Tests
+         public static void UnicodeDictionaryKeys()
+         {
+             Dictionary<string, int> obj = new Dictionary<string, int> { { "A\u0467", 1 } };
++
+             // Verify the name is escaped after serialize.
+             string json = JsonSerializer.Serialize(obj, s_serializerOptionsPreserve);
+             Assert.Equal(@"{""$id"":""1"",""A\u0467"":1}", json);
+@@ -221,7 +222,7 @@ namespace Dahomey.Json.Tests
+             // Verify with encoder.
+             var optionsWithEncoder = new JsonSerializerOptions
+             {
+-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
++                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+             }.SetupExtensions().SetReferenceHandling(ReferenceHandling.Preserve);
+             json = JsonSerializer.Serialize(obj, optionsWithEncoder);
+             Assert.Equal("{\"$id\":\"1\",\"A\u0467\":1}", json);
+@@ -262,9 +263,9 @@ namespace Dahomey.Json.Tests
+         }
+         #endregion
+ 
+-        //[Fact]
+-        //public static async Task PreserveReferenceOfTypeObjectAsync()
+-        //{
++        // [Fact]
++        // public static async Task PreserveReferenceOfTypeObjectAsync()
++        // {
+         //    var root = new ClassWithObjectProperty();
+         //    root.Child = new ClassWithObjectProperty();
+         //    root.Sibling = root.Child;
+@@ -280,7 +281,7 @@ namespace Dahomey.Json.Tests
+ 
+         //    ClassWithObjectProperty rootCopy = await JsonSerializer.DeserializeAsync<ClassWithObjectProperty>(stream, s_serializerOptionsPreserve);
+         //    Assert.Same(rootCopy.Child, rootCopy.Sibling);
+-        //}
++        // }
+ 
+         [Fact]
+         public static void DoNotPreserveReferenceWhenRefPropertyIsAbsent()
+@@ -295,9 +296,9 @@ namespace Dahomey.Json.Tests
+             Assert.IsType<JsonElement>(root.Sibling);
+         }
+ 
+-        //[Fact]
+-        //public static void VerifyValidationsOnPreservedReferenceOfTypeObject()
+-        //{
++        // [Fact]
++        // public static void VerifyValidationsOnPreservedReferenceOfTypeObject()
++        // {
+         //    const string baseJson = @"{""Child"":{""$id"":""1""},""Sibling"":";
+ 
+         //    // A JSON object that contains a '$ref' metadata property must not contain any other properties.
+@@ -313,7 +314,7 @@ namespace Dahomey.Json.Tests
+         //    testJson = baseJson + @"{""$ref"":1}}";
+         //    ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<ClassWithObjectProperty>(testJson, s_serializerOptionsPreserve));
+         //    Assert.Equal("$.Sibling", ex.Path);
+-        //}
++        // }
+ 
+         private class ClassWithObjectProperty
+         {
+diff --git a/src/Dahomey.Json.Tests/RequiredTests.cs b/src/Dahomey.Json.Tests/RequiredTests.cs
+index bd8b55d..caa4407 100644
+--- a/src/Dahomey.Json.Tests/RequiredTests.cs
++++ b/src/Dahomey.Json.Tests/RequiredTests.cs
+@@ -13,16 +13,16 @@ namespace Dahomey.Json.Tests
+         }
+ 
+         [Theory]
+-        [InlineData(RequirementPolicy.Never, @"{}", null)]
++        [InlineData(RequirementPolicy.Never, "{}", null)]
+         [InlineData(RequirementPolicy.Never, @"{""String"":null}", null)]
+         [InlineData(RequirementPolicy.Never, @"{""String"":""Foo""}", null)]
+-        [InlineData(RequirementPolicy.Always, @"{}", typeof(JsonException))]
++        [InlineData(RequirementPolicy.Always, "{}", typeof(JsonException))]
+         [InlineData(RequirementPolicy.Always, @"{""String"":null}", typeof(JsonException))]
+         [InlineData(RequirementPolicy.Always, @"{""String"":""Foo""}", null)]
+-        [InlineData(RequirementPolicy.AllowNull, @"{}", typeof(JsonException))]
++        [InlineData(RequirementPolicy.AllowNull, "{}", typeof(JsonException))]
+         [InlineData(RequirementPolicy.AllowNull, @"{""String"":null}", null)]
+         [InlineData(RequirementPolicy.AllowNull, @"{""String"":""Foo""}", null)]
+-        [InlineData(RequirementPolicy.DisallowNull, @"{}", null)]
++        [InlineData(RequirementPolicy.DisallowNull, "{}", null)]
+         [InlineData(RequirementPolicy.DisallowNull, @"{""String"":null}", typeof(JsonException))]
+         [InlineData(RequirementPolicy.DisallowNull, @"{""String"":""Foo""}", null)]
+         public void TestRead(RequirementPolicy requirementPolicy, string json, Type expectedExceptionType)
+@@ -33,7 +33,8 @@ namespace Dahomey.Json.Tests
+                 objectMapping
+                     .AutoMap()
+                     .ClearMemberMappings()
+-                    .MapMember(o => o.String).SetRequired(requirementPolicy)
++                    .MapMember(o => o.String)
++                    .SetRequired(requirementPolicy)
+             );
+ 
+             Helper.TestRead<StringObject>(json, options, expectedExceptionType);
+@@ -60,7 +61,8 @@ namespace Dahomey.Json.Tests
+                 objectMapping
+                     .AutoMap()
+                     .ClearMemberMappings()
+-                    .MapMember(o => o.String).SetRequired(requirementPolicy)
++                    .MapMember(o => o.String)
++                    .SetRequired(requirementPolicy)
+             );
+ 
+             StringObject obj = new StringObject
+@@ -78,7 +80,7 @@ namespace Dahomey.Json.Tests
+         }
+ 
+         [Theory]
+-        [InlineData(@"{}", typeof(JsonException))]
++        [InlineData("{}", typeof(JsonException))]
+         [InlineData(@"{""String"":null}", typeof(JsonException))]
+         [InlineData(@"{""String"":""Foo""}", null)]
+         public void TestReadWithAttribute(string json, Type expectedExceptionType)
+diff --git a/src/Dahomey.Json.Tests/SnakeCaseNamingPolicyTests.cs b/src/Dahomey.Json.Tests/SnakeCaseNamingPolicyTests.cs
+index 5e0e425..c936626 100644
+--- a/src/Dahomey.Json.Tests/SnakeCaseNamingPolicyTests.cs
++++ b/src/Dahomey.Json.Tests/SnakeCaseNamingPolicyTests.cs
+@@ -1,6 +1,6 @@
+-﻿using System.Text.Json;
++﻿using Dahomey.Json.NamingPolicies;
++using System.Text.Json;
+ using System.Text.Json.Serialization;
+-using Dahomey.Json.NamingPolicies;
+ using Xunit;
+ 
+ namespace Dahomey.Json.Tests
+@@ -10,15 +10,15 @@ namespace Dahomey.Json.Tests
+         public class StringObject
+         {
+             [JsonPropertyName("AnotherName")] public string String { get; set; }
+-            
++
+             public string PascalCaseProperty { get; set; }
+-            
++
+             public string camelCaseProperty { get; set; }
+-            
++
+             public string _0ALotOf1Symbols { get; set; }
+ 
+             public string lowercasename { get; set; }
+-            
++
+             public StringObject SetAll()
+             {
+                 PascalCaseProperty = camelCaseProperty = _0ALotOf1Symbols = lowercasename = String = "test";
+@@ -33,23 +33,23 @@ namespace Dahomey.Json.Tests
+             {
+                 PropertyNamingPolicy = new SnakeCaseNamingPolicy()
+             }.SetupExtensions();
+-            
++
+             var actual = Helper.Write(new StringObject().SetAll(), options);
+             const string expected = @"{""AnotherName"":""test"",""pascal_case_property"":""test"",""camel_case_property"":""test"",""_0_a_lot_of1_symbols"":""test"",""lowercasename"":""test""}";
+-            
++
+             Assert.Equal(expected, actual);
+         }
+-        
++
+         [Fact]
+         public void TestConvertRead()
+         {
+             const string json = @"{""AnotherName"":""test"",""pascal_case_property"":""test"",""camel_case_property"":""test"",""_0_a_lot_of1_symbols"":""test"",""lowercasename"":""test""}";
+-            
++
+             JsonSerializerOptions options = new JsonSerializerOptions
+             {
+                 PropertyNamingPolicy = new SnakeCaseNamingPolicy()
+             }.SetupExtensions();
+-            
++
+             var actual = Helper.Read<StringObject>(json, options);
+ 
+             string[] values =
+diff --git a/src/Dahomey.Json.Tests/StackOverflow/Question58926112.cs b/src/Dahomey.Json.Tests/StackOverflow/Question58926112.cs
+index ca466c4..c8e84b0 100644
+--- a/src/Dahomey.Json.Tests/StackOverflow/Question58926112.cs
++++ b/src/Dahomey.Json.Tests/StackOverflow/Question58926112.cs
+@@ -12,25 +12,25 @@ namespace Dahomey.Json.Tests.StackOverflow
+     {
+         public class SelectiveSerializer : IObjectMappingConvention
+         {
+-            private readonly IObjectMappingConvention defaultObjectMappingConvention = new DefaultObjectMappingConvention();
+-            private readonly string[] fields;
++            private readonly IObjectMappingConvention _defaultObjectMappingConvention = new DefaultObjectMappingConvention();
++            private readonly string[] _fields;
+ 
+             public SelectiveSerializer(string fields)
+             {
+                 var fieldColl = fields.Split(',');
+-                this.fields = fieldColl
++                _fields = fieldColl
+                     .Select(f => f.ToLower().Trim())
+                     .ToArray();
+             }
+ 
+             public void Apply<T>(JsonSerializerOptions options, ObjectMapping<T> objectMapping)
+             {
+-                defaultObjectMappingConvention.Apply<T>(options, objectMapping);
++                _defaultObjectMappingConvention.Apply<T>(options, objectMapping);
+                 foreach (IMemberMapping memberMapping in objectMapping.MemberMappings)
+                 {
+                     if (memberMapping is MemberMapping<T> member)
+                     {
+-                        member.SetShouldSerializeMethod(o => fields.Contains(member.MemberName.ToLower()));
++                        member.SetShouldSerializeMethod(o => _fields.Contains(member.MemberName.ToLower()));
+                     }
+                 }
+             }
+diff --git a/src/Dahomey.Json.Tests/StructTests.cs b/src/Dahomey.Json.Tests/StructTests.cs
+index 6d284da..7d085be 100644
+--- a/src/Dahomey.Json.Tests/StructTests.cs
++++ b/src/Dahomey.Json.Tests/StructTests.cs
+@@ -8,6 +8,7 @@ namespace Dahomey.Json.Tests
+         public struct FieldSerializationStruct
+         {
+             public int A { get; set; }
++
+             public int B;
+ 
+             public FieldSerializationStruct(int a, int b)
+@@ -47,6 +48,7 @@ namespace Dahomey.Json.Tests
+         public class FieldSerializationClassWithStruct
+         {
+             public int A { get; set; } = 1;
++
+             public FieldSerializationStruct B = new FieldSerializationStruct(2, 3);
+         }
+ 
+diff --git a/src/Dahomey.Json/JsonSerializerExtensions.cs b/src/Dahomey.Json/JsonSerializerExtensions.cs
+index 0e5f264..c4fde01 100644
+--- a/src/Dahomey.Json/JsonSerializerExtensions.cs
++++ b/src/Dahomey.Json/JsonSerializerExtensions.cs
+@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
+ using System.Text.Json;
+ 
+ [assembly: CLSCompliant(true)]
++
+ namespace Dahomey.Json
+ {
+     public static class JsonSerializerExtensions
+diff --git a/src/Dahomey.Json/MemberJsonException.cs b/src/Dahomey.Json/MemberJsonException.cs
+index e01d382..1a77332 100644
+--- a/src/Dahomey.Json/MemberJsonException.cs
++++ b/src/Dahomey.Json/MemberJsonException.cs
+@@ -9,7 +9,8 @@ namespace Dahomey.Json
+         public Type MemberType { get; }
+ 
+         public MemberJsonException(string memberName, Type memberType, Exception innerException)
+-            : base(BuildMessage(memberName, memberType, innerException), 
++            : base(
++                BuildMessage(memberName, memberType, innerException),
+                   BuildPath(memberName, innerException), null, null, BuildInnerException(innerException))
+         {
+             MemberType = BuildMemberType(memberType, innerException);
+@@ -17,7 +18,7 @@ namespace Dahomey.Json
+ 
+         private static string BuildPath(string memberName, Exception innerException)
+         {
+-            if (innerException is MemberJsonException memberJsonException && memberJsonException.Path !=null)
++            if (innerException is MemberJsonException memberJsonException && memberJsonException.Path != null)
+             {
+                 return $"$.{memberName}.{memberJsonException.Path.Substring(2)}";
+             }
+diff --git a/src/Dahomey.Json/NamingPolicies/SeparatedCaseNamingExtensions.cs b/src/Dahomey.Json/NamingPolicies/SeparatedCaseNamingExtensions.cs
+index c3979f1..8f48646 100644
+--- a/src/Dahomey.Json/NamingPolicies/SeparatedCaseNamingExtensions.cs
++++ b/src/Dahomey.Json/NamingPolicies/SeparatedCaseNamingExtensions.cs
+@@ -7,20 +7,28 @@ namespace Dahomey.Json.NamingPolicies
+         internal static string ToSeparatedCase(this string name, char separator)
+         {
+             if (string.IsNullOrEmpty(name))
++            {
+                 return string.Empty;
++            }
+ 
+             int countOfCapitalLettersFromFirstIndex = 0;
+             ReadOnlySpan<char> nameSpan = name.AsSpan();
+             bool isFirstLetterCapital = char.IsUpper(nameSpan[0]);
+-            
++
+             foreach (char nameChar in nameSpan.Slice(1))
++            {
+                 if (char.IsUpper(nameChar))
++                {
+                     countOfCapitalLettersFromFirstIndex++;
++                }
++            }
+ 
+             if (countOfCapitalLettersFromFirstIndex == 0)
+             {
+                 if (!isFirstLetterCapital)
++                {
+                     return name;
++                }
+ 
+ #if NETCOREAPP3_0 || NETCOREAPP3_1
+                 return string.Create(nameSpan.Length, name,
+@@ -49,7 +57,7 @@ namespace Dahomey.Json.NamingPolicies
+             return destination.ToString();
+ #endif
+         }
+-        
++
+         private static void ConvertToSeparatedCase(Span<char> destination, ReadOnlySpan<char> nameSpan, char separator)
+         {
+             int position = 0;
+@@ -59,7 +67,10 @@ namespace Dahomey.Json.NamingPolicies
+                 if (char.IsUpper(nameChar))
+                 {
+                     if (position > 0)
++                    {
+                         destination[position++] = separator;
++                    }
++
+                     destination[position++] = char.ToLowerInvariant(nameChar);
+                 }
+                 else
+diff --git a/src/Dahomey.Json/Node/JsonArray.cs b/src/Dahomey.Json/Node/JsonArray.cs
+index 77b14ea..bd0f4b6 100644
+--- a/src/Dahomey.Json/Node/JsonArray.cs
++++ b/src/Dahomey.Json/Node/JsonArray.cs
+@@ -318,6 +318,7 @@ namespace System.Text.Json
+             _version++;
+             return _list.RemoveAll(match);
+         }
++
+         /// <summary>
+         ///   Removes the item at the specified index of the collection.
+         /// </summary>
+@@ -375,7 +376,7 @@ namespace System.Text.Json
+         }
+ 
+         /// <summary>
+-        ///   Returns <see cref="JsonValueKind.Array"/>
++        ///   Returns <see cref="JsonValueKind.Array"/>.
+         /// </summary>
+         public override JsonValueKind ValueKind { get => JsonValueKind.Array; }
+     }
+diff --git a/src/Dahomey.Json/Node/JsonNode.cs b/src/Dahomey.Json/Node/JsonNode.cs
+index 09623cc..b50323e 100644
+--- a/src/Dahomey.Json/Node/JsonNode.cs
++++ b/src/Dahomey.Json/Node/JsonNode.cs
+@@ -13,14 +13,16 @@ namespace System.Text.Json
+     /// </summary>
+     public abstract partial class JsonNode
+     {
+-        private protected JsonNode() { }
++        private protected JsonNode()
++        {
++        }
+ 
+         /// <summary>
+         ///   Transforms this instance into <see cref="JsonElement"/> representation.
+         ///   Operations performed on this instance will modify the returned <see cref="JsonElement"/>.
+         /// </summary>
+         /// <returns>Mutable <see cref="JsonElement"/> with <see cref="JsonNode"/> underneath.</returns>
+-        //public JsonElement AsJsonElement() => new JsonElement(this);
++        // public JsonElement AsJsonElement() => new JsonElement(this);
+ 
+         /// <summary>
+         ///   The <see cref="JsonValueKind"/> that the node is.
+@@ -37,15 +39,15 @@ namespace System.Text.Json
+         /// <exception cref="ArgumentException">
+         ///   Provided <see cref="JsonElement"/> was not built from <see cref="JsonNode"/>.
+         /// </exception>
+-        //public static JsonNode GetNode(JsonElement jsonElement)
+-        //{
++        // public static JsonNode GetNode(JsonElement jsonElement)
++        // {
+         //    if (jsonElement.IsImmutable)
+         //    {
+         //        throw new ArgumentException(SR.NotNodeJsonElementParent);
+         //    }
+         //    Debug.Assert(jsonElement._parent != null);
+         //    return (JsonNode)jsonElement._parent;
+-        //}
++        // }
+ 
+         /// <summary>
+         ///    Gets the <see cref="JsonNode"/> represented by the <paramref name="jsonElement"/>.
+@@ -56,10 +58,10 @@ namespace System.Text.Json
+         /// <param name="jsonNode"><see cref="JsonNode"/> represented by <paramref name="jsonElement"/>.</param>
+         /// <returns>
+         ///  <see langword="true"/> if the operation succeded;
+-        ///  otherwise, <see langword="false"/>
++        ///  otherwise, <see langword="false"/>.
+         /// </returns>
+-        //public static bool TryGetNode(JsonElement jsonElement, [NotNullWhen(true)] out JsonNode? jsonNode)
+-        //{
++        // public static bool TryGetNode(JsonElement jsonElement, [NotNullWhen(true)] out JsonNode? jsonNode)
++        // {
+         //    if (!jsonElement.IsImmutable)
+         //    {
+         //        Debug.Assert(jsonElement._parent != null);
+@@ -69,7 +71,7 @@ namespace System.Text.Json
+ 
+         //    jsonNode = null;
+         //    return false;
+-        //}
++        // }
+ 
+         /// <summary>
+         ///   Performs a deep copy operation on this instance.
+@@ -98,13 +100,13 @@ namespace System.Text.Json
+         ///   Converts a <see cref="DateTime"/> to a <see cref="JsonString"/>.
+         /// </summary>
+         /// <param name="value">The value to convert.</param>
+-        //public static implicit operator JsonNode(DateTime value) => new JsonString(value);
++        // public static implicit operator JsonNode(DateTime value) => new JsonString(value);
+ 
+         /// <summary>
+         ///   Converts a <see cref="DateTimeOffset"/> to a <see cref="JsonString"/>.
+         /// </summary>
+         /// <param name="value">The value to convert.</param>
+-        //public static implicit operator JsonNode(DateTimeOffset value) => new JsonString(value);
++        // public static implicit operator JsonNode(DateTimeOffset value) => new JsonString(value);
+ 
+         /// <summary>
+         ///   Converts a <see cref="Guid"/> to a <see cref="JsonString"/>.
+diff --git a/src/Dahomey.Json/Node/JsonNull.cs b/src/Dahomey.Json/Node/JsonNull.cs
+index 857bd2c..ad4453c 100644
+--- a/src/Dahomey.Json/Node/JsonNull.cs
++++ b/src/Dahomey.Json/Node/JsonNull.cs
+@@ -12,7 +12,9 @@ namespace System.Text.Json
+         /// <summary>
+         ///   Initializes a new instance of the <see cref="JsonNull"/> class representing the value <see langword="null"/>.
+         /// </summary>
+-        public JsonNull() { }
++        public JsonNull()
++        {
++        }
+ 
+         internal static JsonNull Instance { get; } = new JsonNull();
+ 
+diff --git a/src/Dahomey.Json/Node/JsonNumber.cs b/src/Dahomey.Json/Node/JsonNumber.cs
+index d44b641..7306664 100644
+--- a/src/Dahomey.Json/Node/JsonNumber.cs
++++ b/src/Dahomey.Json/Node/JsonNumber.cs
+@@ -280,7 +280,7 @@ namespace System.Text.Json
+         /// </param>
+         /// <returns>
+         ///  <see langword="true"/> if instance was converted successfully;
+-        ///  otherwise, <see langword="false"/>
++        ///  otherwise, <see langword="false"/>.
+         /// </returns>
+         public bool TryGetByte(out byte value) => byte.TryParse(_value, out value);
+ 
+@@ -294,7 +294,7 @@ namespace System.Text.Json
+         /// </param>
+         /// <returns>
+         ///  <see langword="true"/> if instance was converted successfully;
+-        ///  otherwise, <see langword="false"/>
++        ///  otherwise, <see langword="false"/>.
+         /// </returns>
+         public bool TryGetInt16(out short value) => short.TryParse(_value, out value);
+ 
+@@ -308,7 +308,7 @@ namespace System.Text.Json
+         /// </param>
+         /// <returns>
+         ///  <see langword="true"/> if instance was converted successfully;
+-        ///  otherwise, <see langword="false"/>
++        ///  otherwise, <see langword="false"/>.
+         /// </returns>
+         public bool TryGetInt32(out int value) => int.TryParse(_value, out value);
+ 
+@@ -322,7 +322,7 @@ namespace System.Text.Json
+         /// </param>
+         /// <returns>
+         ///  <see langword="true"/> if instance was converted successfully;
+-        ///  otherwise, <see langword="false"/>
++        ///  otherwise, <see langword="false"/>.
+         /// </returns>
+         public bool TryGetInt64(out long value) => long.TryParse(_value, out value);
+ 
+@@ -336,7 +336,7 @@ namespace System.Text.Json
+         /// </param>
+         /// <returns>
+         ///  <see langword="true"/> if instance was converted successfully;
+-        ///  otherwise, <see langword="false"/>
++        ///  otherwise, <see langword="false"/>.
+         /// </returns>
+         /// <remarks>
+         ///   On .NET Core this method does not return <see langword="false"/> for values larger than
+@@ -356,7 +356,7 @@ namespace System.Text.Json
+         /// </param>
+         /// <returns>
+         ///  <see langword="true"/> if instance was converted successfully;
+-        ///  otherwise, <see langword="false"/>
++        ///  otherwise, <see langword="false"/>.
+         /// </returns>
+         /// <remarks>
+         ///   On .NET Core this method does not return <see langword="false"/> for values larger than
+@@ -376,7 +376,7 @@ namespace System.Text.Json
+         /// </param>
+         /// <returns>
+         ///  <see langword="true"/> if instance was converted successfully;
+-        ///  otherwise, <see langword="false"/>
++        ///  otherwise, <see langword="false"/>.
+         /// </returns>
+         [CLSCompliant(false)]
+         public bool TryGetSByte(out sbyte value) => sbyte.TryParse(_value, out value);
+@@ -391,7 +391,7 @@ namespace System.Text.Json
+         /// </param>
+         /// <returns>
+         ///  <see langword="true"/> if instance was converted successfully;
+-        ///  otherwise, <see langword="false"/>
++        ///  otherwise, <see langword="false"/>.
+         /// </returns>
+         [CLSCompliant(false)]
+         public bool TryGetUInt16(out ushort value) => ushort.TryParse(_value, out value);
+@@ -406,7 +406,7 @@ namespace System.Text.Json
+         /// </param>
+         /// <returns>
+         ///  <see langword="true"/> if instance was converted successfully;
+-        ///  otherwise, <see langword="false"/>
++        ///  otherwise, <see langword="false"/>.
+         /// </returns>
+         [CLSCompliant(false)]
+         public bool TryGetUInt32(out uint value) => uint.TryParse(_value, out value);
+@@ -421,7 +421,7 @@ namespace System.Text.Json
+         /// </param>
+         /// <returns>
+         ///  <see langword="true"/> if instance was converted successfully;
+-        ///  otherwise, <see langword="false"/>
++        ///  otherwise, <see langword="false"/>.
+         /// </returns>
+         [CLSCompliant(false)]
+         public bool TryGetUInt64(out ulong value) => ulong.TryParse(_value, out value);
+@@ -436,7 +436,7 @@ namespace System.Text.Json
+         /// </param>
+         /// <returns>
+         ///  <see langword="true"/> if instance was converted successfully;
+-        ///  otherwise, <see langword="false"/>
++        ///  otherwise, <see langword="false"/>.
+         /// </returns>
+         public bool TryGetDecimal(out decimal value) => decimal.TryParse(_value, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
+ 
+@@ -459,6 +459,7 @@ namespace System.Text.Json
+                 {
+                     throw new ArgumentNullException(nameof(value));
+                 }
++
+                 throw new ArgumentException("Empty string to initialize number", nameof(value));
+             }
+ 
+@@ -466,6 +467,7 @@ namespace System.Text.Json
+             {
+                 throw new ArgumentException("Invalid number", nameof(value));
+             }
++
+             _value = value;
+         }
+ 
+@@ -506,8 +508,10 @@ namespace System.Text.Json
+             {
+                 throw new ArgumentException();
+             }
++
+             _value = value.ToString(CultureInfo.InvariantCulture);
+         }
++
+         /// <summary>
+         ///   Changes the numeric value of this instance to represent a specified <see cref="double"/> value.
+         /// </summary>
+@@ -521,6 +525,7 @@ namespace System.Text.Json
+             {
+                 throw new ArgumentException();
+             }
++
+             _value = value.ToString(CultureInfo.InvariantCulture);
+         }
+ 
+@@ -624,7 +629,7 @@ namespace System.Text.Json
+         public override JsonNode Clone() => new JsonNumber(_value);
+ 
+         /// <summary>
+-        ///   Returns <see cref="JsonValueKind.Number"/>
++        ///   Returns <see cref="JsonValueKind.Number"/>.
+         /// </summary>
+         public override JsonValueKind ValueKind { get => JsonValueKind.Number; }
+     }
+diff --git a/src/Dahomey.Json/Node/JsonObject.cs b/src/Dahomey.Json/Node/JsonObject.cs
+index 994dfbc..469ce38 100644
+--- a/src/Dahomey.Json/Node/JsonObject.cs
++++ b/src/Dahomey.Json/Node/JsonObject.cs
+@@ -27,13 +27,14 @@ namespace System.Text.Json
+             _dictionary = new Dictionary<string, JsonObjectProperty>();
+             _version = 0;
+         }
++
+         /// <summary>
+         ///   Initializes a new instance of the <see cref="JsonObject"/> class representing provided set of JSON properties.
+         /// </summary>
+         /// <param name="jsonProperties">>Properties to represent as a JSON object.</param>
+         public JsonObject(IEnumerable<KeyValuePair<string, JsonNode?>> jsonProperties)
+-            : this()
+-            => AddRange(jsonProperties);
++            : this() =>
++            AddRange(jsonProperties);
+ 
+         /// <summary>
+         ///   Gets or sets the value of the specified property.
+@@ -205,17 +206,17 @@ namespace System.Text.Json
+                 throw new ArgumentNullException(nameof(propertyName));
+             }
+ 
+-            JsonObjectProperty? _current = _first;
++            JsonObjectProperty? current = _first;
+ 
+-            while (_current != null && !string.Equals(_current.Name, propertyName, stringComparison))
++            while (current != null && !string.Equals(current.Name, propertyName, stringComparison))
+             {
+-                _current = _current.Next;
++                current = current.Next;
+             }
+ 
+-            if (_current != null)
++            if (current != null)
+             {
+-                AdjustLinkedListPointers(_current);
+-                _dictionary.Remove(_current.Name);
++                AdjustLinkedListPointers(current);
++                _dictionary.Remove(current.Name);
+                 return true;
+             }
+ 
+@@ -338,7 +339,7 @@ namespace System.Text.Json
+         /// <param name="jsonNode">The JSON value of the property with the specified name.</param>
+         /// <returns>
+         ///  <see langword="true"/> if a property with the specified name was found;
+-        ///  otherwise, <see langword="false"/>
++        ///  otherwise, <see langword="false"/>.
+         /// </returns>
+         /// <remarks>
+         ///   When this method returns <see langword="false"/>, the value of <paramref name="jsonNode"/> is meaningless.
+@@ -363,7 +364,7 @@ namespace System.Text.Json
+         /// <param name="jsonNode">The JSON value of the property with the specified name.</param>
+         /// <returns>
+         ///  <see langword="true"/> if property with specified name was found;
+-        ///  otherwise, <see langword="false"/>
++        ///  otherwise, <see langword="false"/>.
+         /// </returns>
+         /// <remarks>
+         ///   When this method returns <see langword="false"/>, the value of <paramref name="jsonNode"/> is meaningless.
+@@ -444,7 +445,7 @@ namespace System.Text.Json
+         /// <param name="jsonObject">The JSON object value of the property with the specified name.</param>
+         /// <returns>
+         ///  <see langword="true"/> if JSON object property with specified name was found;
+-        ///  otherwise, <see langword="false"/>
++        ///  otherwise, <see langword="false"/>.
+         /// </returns>
+         public bool TryGetJsonObjectPropertyValue(string propertyName, [NotNullWhen(true)] out JsonObject? jsonObject)
+         {
+@@ -466,7 +467,7 @@ namespace System.Text.Json
+         /// <param name="jsonObject">The JSON object value of the property with the specified name.</param>
+         /// <returns>
+         ///  <see langword="true"/> if JSON object property with specified name was found;
+-        ///  otherwise, <see langword="false"/>
++        ///  otherwise, <see langword="false"/>.
+         /// </returns>
+         /// <remarks>
+         ///   If <paramref name="stringComparison"/> is set to <see cref="StringComparison.Ordinal"/>, calling this method is equivalent to calling <see cref="TryGetJsonObjectPropertyValue(string, out JsonObject)"/>.
+@@ -536,7 +537,7 @@ namespace System.Text.Json
+         /// <param name="jsonArray">The JSON array value of the property with the specified name.</param>
+         /// <returns>
+         ///  <see langword="true"/> if JSON array property with specified name was found;
+-        ///  otherwise, <see langword="false"/>
++        ///  otherwise, <see langword="false"/>.
+         /// </returns>
+         public bool TryGetJsonArrayPropertyValue(string propertyName, [NotNullWhen(true)] out JsonArray? jsonArray)
+         {
+@@ -558,7 +559,7 @@ namespace System.Text.Json
+         /// <param name="jsonArray">The JSON array value of the property with the specified name.</param>
+         /// <returns>
+         ///  <see langword="true"/> if JSON array property with specified name was found;
+-        ///  otherwise, <see langword="false"/>
++        ///  otherwise, <see langword="false"/>.
+         /// </returns>
+         /// <remarks>
+         ///   If <paramref name="stringComparison"/> is set to <see cref="StringComparison.Ordinal"/>, calling this method is equivalent to calling <see cref="TryGetJsonArrayPropertyValue(string, out JsonArray)"/>.
+@@ -590,6 +591,7 @@ namespace System.Text.Json
+             {
+                 list.Add(item.Value.Value);
+             }
++
+             return list;
+         }
+ 
+@@ -628,17 +630,17 @@ namespace System.Text.Json
+         }
+ 
+         /// <summary>
+-        ///   Returns <see cref="JsonValueKind.Object"/>
++        ///   Returns <see cref="JsonValueKind.Object"/>.
+         /// </summary>
+         public override JsonValueKind ValueKind { get => JsonValueKind.Object; }
+ 
+         /// <summary>
+-        ///    Convert a .NET CLR type to a <see cref="JsonObject"/>
++        ///    Convert a .NET CLR type to a <see cref="JsonObject"/>.
+         /// </summary>
+-        /// <param name="obj">Value to convert to <see cref="JsonObject"/></param>
+-        /// <param name="options">Serialization options</param>
+-        /// <typeparam name="T">Type of <see cref="obj"/></typeparam>
+-        /// <returns><see cref="JsonObject"/> representation of specified <see cref="T"/> value</returns>
++        /// <typeparam name="T">Type of <see cref="obj"/>.</typeparam>
++        /// <param name="obj">Value to convert to <see cref="JsonObject"/>.</param>
++        /// <param name="options">Serialization options.</param>
++        /// <returns><see cref="JsonObject"/> representation of specified <see cref="T"/> value.</returns>
+         [return: MaybeNull]
+         public static JsonObject FromObject<T>(T obj, JsonSerializerOptions? options = null)
+         {
+@@ -651,12 +653,12 @@ namespace System.Text.Json
+         }
+ 
+         /// <summary>
+-        ///    Convert a .NET CLR type to a <see cref="JsonObject"/>
++        ///    Convert a .NET CLR type to a <see cref="JsonObject"/>.
+         /// </summary>
+-        /// <param name="obj">Value to convert to <see cref="JsonObject"/></param>
+-        /// <param name="objType">Type of <see cref="obj"/></param>
+-        /// <param name="options">Serialization options</param>
+-        /// <returns><see cref="JsonObject"/> representation of specified <see cref="Object"/> value</returns>
++        /// <param name="obj">Value to convert to <see cref="JsonObject"/>.</param>
++        /// <param name="objType">Type of <see cref="obj"/>.</param>
++        /// <param name="options">Serialization options.</param>
++        /// <returns><see cref="JsonObject"/> representation of specified <see cref="Object"/> value.</returns>
+         [return: MaybeNull]
+         public static JsonObject FromObject(object obj, Type objType, JsonSerializerOptions? options = null)
+         {
+diff --git a/src/Dahomey.Json/Node/JsonString.cs b/src/Dahomey.Json/Node/JsonString.cs
+index 2b78b46..4ebb474 100644
+--- a/src/Dahomey.Json/Node/JsonString.cs
++++ b/src/Dahomey.Json/Node/JsonString.cs
+@@ -2,10 +2,10 @@
+ // The .NET Foundation licenses this file to you under the MIT license.
+ // See the LICENSE file in the project root for more information.
+ 
+-using System.Globalization;
+ using System.Buffers;
+ using System.Diagnostics;
+ using System.Diagnostics.CodeAnalysis;
++using System.Globalization;
+ 
+ namespace System.Text.Json
+ {
+@@ -49,7 +49,7 @@ namespace System.Text.Json
+         /// <exception cref="ArgumentOutOfRangeException">
+         ///   The date and time is outside the range of dates supported by the calendar used by the invariant culture.
+         /// </exception>
+-        //public JsonString(DateTime value) => Value = JsonHelpers.FormatDateTime(value);
++        // public JsonString(DateTime value) => Value = JsonHelpers.FormatDateTime(value);
+ 
+         /// <summary>
+         ///  Initializes a new instance of the <see cref="JsonString"/> with an ISO 8601 representation of the <see cref="DateTimeOffset"/> structure.
+@@ -58,7 +58,7 @@ namespace System.Text.Json
+         /// <exception cref="ArgumentOutOfRangeException">
+         ///   The date and time is outside the range of dates supported by the calendar used by the invariant culture.
+         /// </exception>
+-        //public JsonString(DateTimeOffset value) => Value = JsonHelpers.FormatDateTimeOffset(value);
++        // public JsonString(DateTimeOffset value) => Value = JsonHelpers.FormatDateTimeOffset(value);
+ 
+         /// <summary>
+         ///   Gets or sets the text value represented by the instance.
+@@ -85,7 +85,7 @@ namespace System.Text.Json
+         /// <exception cref="FormatException">
+         ///   Text value of this instance is not in an ISO 8601 defined DateTime format.
+         /// </exception>
+-        //public DateTime GetDateTime() => JsonHelpers.TryParseAsISO(_value.AsSpan(), out DateTime value) ? value : throw new FormatException(SR.FormatDateTime);
++        // public DateTime GetDateTime() => JsonHelpers.TryParseAsISO(_value.AsSpan(), out DateTime value) ? value : throw new FormatException(SR.FormatDateTime);
+ 
+         /// <summary>
+         ///   Converts the ISO 8601 text value of this instance to <see cref="DateTimeOffset"/> equivalent.
+@@ -94,7 +94,7 @@ namespace System.Text.Json
+         /// <exception cref="FormatException">
+         ///   Text value of this instance is not in an ISO 8601 defined DateTimeOffset format.
+         /// </exception>
+-        //public DateTimeOffset GetDateTimeOffset() => JsonHelpers.TryParseAsISO(_value.AsSpan(), out DateTimeOffset value) ? value : throw new FormatException(SR.FormatDateTimeOffset);
++        // public DateTimeOffset GetDateTimeOffset() => JsonHelpers.TryParseAsISO(_value.AsSpan(), out DateTimeOffset value) ? value : throw new FormatException(SR.FormatDateTimeOffset);
+ 
+         /// <summary>
+         ///   Converts the text value of this instance to its <see cref="Guid"/> equivalent.
+@@ -115,9 +115,9 @@ namespace System.Text.Json
+         /// </param>
+         /// <returns>
+         ///  <see langword="true"/> if instance was converted successfully;
+-        ///  otherwise, <see langword="false"/>
++        ///  otherwise, <see langword="false"/>.
+         /// </returns>
+-        //public bool TryGetDateTime(out DateTime value) => JsonHelpers.TryParseAsISO(_value.AsSpan(), out value);
++        // public bool TryGetDateTime(out DateTime value) => JsonHelpers.TryParseAsISO(_value.AsSpan(), out value);
+ 
+         /// <summary>
+         ///   Converts the ISO 8601 text value of this instance to its <see cref="DateTimeOffset"/> equivalent.
+@@ -129,9 +129,9 @@ namespace System.Text.Json
+         /// </param>
+         /// <returns>
+         ///  <see langword="true"/> if instance was converted successfully;
+-        ///  otherwise, <see langword="false"/>
++        ///  otherwise, <see langword="false"/>.
+         /// </returns>
+-        //public bool TryGetDateTimeOffset(out DateTimeOffset value) => JsonHelpers.TryParseAsISO(_value.AsSpan(), out value);
++        // public bool TryGetDateTimeOffset(out DateTimeOffset value) => JsonHelpers.TryParseAsISO(_value.AsSpan(), out value);
+ 
+         /// <summary>
+         ///   Converts the text value of this instance to its <see cref="Guid"/> equivalent.
+@@ -208,7 +208,7 @@ namespace System.Text.Json
+         public override JsonNode Clone() => new JsonString(Value);
+ 
+         /// <summary>
+-        ///   Returns <see cref="JsonValueKind.String"/>
++        ///   Returns <see cref="JsonValueKind.String"/>.
+         /// </summary>
+         public override JsonValueKind ValueKind { get => JsonValueKind.String; }
+ 
+diff --git a/src/Dahomey.Json/ReadOnlyPropertyHandling.cs b/src/Dahomey.Json/ReadOnlyPropertyHandling.cs
+index ab4be8b..c03f9c1 100644
+--- a/src/Dahomey.Json/ReadOnlyPropertyHandling.cs
++++ b/src/Dahomey.Json/ReadOnlyPropertyHandling.cs
+@@ -4,6 +4,6 @@
+     {
+         Default = 0,
+         Ignore = 1,
+-        Read = 2,
++        Read = 2
+     }
+ }
+diff --git a/src/Dahomey.Json/ReferenceHandling.cs b/src/Dahomey.Json/ReferenceHandling.cs
+index a5fc5d0..fb3cf4a 100644
+--- a/src/Dahomey.Json/ReferenceHandling.cs
++++ b/src/Dahomey.Json/ReferenceHandling.cs
+@@ -4,6 +4,6 @@
+     {
+         Default = 0,
+         Ignore = 1,
+-        Preserve = 2,
++        Preserve = 2
+     }
+ }
+diff --git a/src/Dahomey.Json/Serialization/Conventions/DefaultDiscriminatorConvention.cs b/src/Dahomey.Json/Serialization/Conventions/DefaultDiscriminatorConvention.cs
+index d2065c4..52de54e 100644
+--- a/src/Dahomey.Json/Serialization/Conventions/DefaultDiscriminatorConvention.cs
++++ b/src/Dahomey.Json/Serialization/Conventions/DefaultDiscriminatorConvention.cs
+@@ -1,9 +1,9 @@
+-﻿using System.Collections.Generic;
+-using System.Text.Json.Serialization;
+-using System.Text.Json;
++﻿using Dahomey.Json.Serialization.Converters.Mappings;
+ using System;
++using System.Collections.Generic;
+ using System.Text;
+-using Dahomey.Json.Serialization.Converters.Mappings;
++using System.Text.Json;
++using System.Text.Json.Serialization;
+ 
+ namespace Dahomey.Json.Serialization.Conventions
+ {
+@@ -50,13 +50,14 @@ namespace Dahomey.Json.Serialization.Conventions
+ 
+             if (discriminator == null)
+             {
+-                throw new JsonException($"Null discriminator");
++                throw new JsonException("Null discriminator");
+             }
+ 
+             if (!_typesByDiscriminator.TryGetValue(discriminator, out Type? type))
+             {
+                 throw new JsonException($"Unknown type discriminator: {discriminator}");
+             }
++
+             return type;
+         }
+ 
+diff --git a/src/Dahomey.Json/Serialization/Conventions/DiscriminatorConventionRegistry.cs b/src/Dahomey.Json/Serialization/Conventions/DiscriminatorConventionRegistry.cs
+index 99f5b0e..91a2045 100644
+--- a/src/Dahomey.Json/Serialization/Conventions/DiscriminatorConventionRegistry.cs
++++ b/src/Dahomey.Json/Serialization/Conventions/DiscriminatorConventionRegistry.cs
+@@ -19,6 +19,7 @@ namespace Dahomey.Json.Serialization.Conventions
+         public DiscriminatorConventionRegistry(JsonSerializerOptions options)
+         {
+             _options = options;
++
+             // order matters. It's in reverse order of how they'll get consumed
+             RegisterConvention(new DefaultDiscriminatorConvention<string>(options));
+         }
+@@ -32,7 +33,6 @@ namespace Dahomey.Json.Serialization.Conventions
+         /// Registers the convention.This behaves like a stack, so the 
+         /// last convention registered is the first convention consulted.
+         /// </summary>
+-        /// <param name="type">The type.</param>
+         /// <param name="convention">The convention.</param>
+         public void RegisterConvention(IDiscriminatorConvention convention)
+         {
+diff --git a/src/Dahomey.Json/Serialization/Conventions/IDiscriminatorConvention.cs b/src/Dahomey.Json/Serialization/Conventions/IDiscriminatorConvention.cs
+index 265c562..a051d7b 100644
+--- a/src/Dahomey.Json/Serialization/Conventions/IDiscriminatorConvention.cs
++++ b/src/Dahomey.Json/Serialization/Conventions/IDiscriminatorConvention.cs
+@@ -6,8 +6,11 @@ namespace Dahomey.Json.Serialization.Conventions
+     public interface IDiscriminatorConvention
+     {
+         ReadOnlySpan<byte> MemberName { get; }
++
+         bool TryRegisterType(Type type);
++
+         Type ReadDiscriminator(ref Utf8JsonReader reader);
++
+         void WriteDiscriminator(Utf8JsonWriter writer, Type actualType);
+     }
+ }
+diff --git a/src/Dahomey.Json/Serialization/Converters/AbstractCollectionConverter.cs b/src/Dahomey.Json/Serialization/Converters/AbstractCollectionConverter.cs
+index 46e10ee..33e1341 100644
+--- a/src/Dahomey.Json/Serialization/Converters/AbstractCollectionConverter.cs
++++ b/src/Dahomey.Json/Serialization/Converters/AbstractCollectionConverter.cs
+@@ -21,6 +21,7 @@ namespace Dahomey.Json.Serialization.Converters
+         }
+ 
+         protected abstract ICollection<TI> InstantiateWorkingCollection();
++
+         protected abstract TC InstantiateCollection(ICollection<TI> workingCollection);
+ 
+         public override bool CanConvert(Type typeToConvert)
+@@ -73,6 +74,7 @@ namespace Dahomey.Json.Serialization.Converters
+                         {
+                             throw new JsonException("Expected $values member name");
+                         }
++
+                         reader.Read();
+                     }
+                     else if (memberName.SequenceEqual(ReferenceHandler.REF_MEMBER_NAME))
+@@ -82,7 +84,7 @@ namespace Dahomey.Json.Serialization.Converters
+ 
+                         if (@ref == null)
+                         {
+-                            throw new JsonException($"Cannot resolve null reference");
++                            throw new JsonException("Cannot resolve null reference");
+                         }
+ 
+                         object? @object = SerializationContext.Current.ReferenceHandler.ResolveReference(@ref);
+diff --git a/src/Dahomey.Json/Serialization/Converters/AbstractDictionaryConverter.cs b/src/Dahomey.Json/Serialization/Converters/AbstractDictionaryConverter.cs
+index fb4a156..13133a9 100644
+--- a/src/Dahomey.Json/Serialization/Converters/AbstractDictionaryConverter.cs
++++ b/src/Dahomey.Json/Serialization/Converters/AbstractDictionaryConverter.cs
+@@ -18,6 +18,7 @@ namespace Dahomey.Json.Serialization.Converters
+         private readonly ReferenceHandling _referenceHandling;
+ 
+         protected abstract IDictionary<TK, TV> InstantiateWorkingCollection();
++
+         protected abstract TC InstantiateCollection(IDictionary<TK, TV> workingCollection);
+ 
+         public AbstractDictionaryConverter(JsonSerializerOptions options)
+@@ -61,7 +62,7 @@ namespace Dahomey.Json.Serialization.Converters
+                 {
+                     reader.Read();
+ 
+-                    switch(reader.TokenType)
++                    switch (reader.TokenType)
+                     {
+                         case JsonTokenType.EndObject:
+                             end = true;
+@@ -83,7 +84,7 @@ namespace Dahomey.Json.Serialization.Converters
+ 
+                                     if (@ref == null)
+                                     {
+-                                        throw new JsonException($"Cannot resolve null reference");
++                                        throw new JsonException("Cannot resolve null reference");
+                                     }
+ 
+                                     object? @object = SerializationContext.Current.ReferenceHandler.ResolveReference(@ref);
+@@ -124,15 +125,17 @@ namespace Dahomey.Json.Serialization.Converters
+                                             {
+                                                 throw new JsonException($"Duplicate property '{key}'");
+                                             }
++
+                                             break;
+                                     }
+                                 }
+                             }
++
+                             break;
++
+                         default:
+                             throw new JsonException();
+                     }
+-
+                 }
+                 else if (reader.TokenType != JsonTokenType.StartObject)
+                 {
+@@ -173,6 +176,7 @@ namespace Dahomey.Json.Serialization.Converters
+                                 {
+                                     throw new JsonException($"Duplicate property '{key}'");
+                                 }
++
+                                 break;
+                         }
+                     }
+diff --git a/src/Dahomey.Json/Serialization/Converters/DictionaryKeys/IDictionaryKeyConverter.cs b/src/Dahomey.Json/Serialization/Converters/DictionaryKeys/IDictionaryKeyConverter.cs
+index 76e4612..4370c92 100644
+--- a/src/Dahomey.Json/Serialization/Converters/DictionaryKeys/IDictionaryKeyConverter.cs
++++ b/src/Dahomey.Json/Serialization/Converters/DictionaryKeys/IDictionaryKeyConverter.cs
+@@ -5,8 +5,9 @@ namespace Dahomey.Json.Serialization.Converters.DictionaryKeys
+     public interface IDictionaryKeyConverter<T>
+     {
+         string ToString(T key);
++
+         T Read(ref Utf8JsonReader reader, JsonSerializerOptions options);
++
+         void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options);
+     }
+-
+ }
+diff --git a/src/Dahomey.Json/Serialization/Converters/DictionaryKeys/StringDictionaryKeyConverter.cs b/src/Dahomey.Json/Serialization/Converters/DictionaryKeys/StringDictionaryKeyConverter.cs
+index fd8c6f7..1761dc8 100644
+--- a/src/Dahomey.Json/Serialization/Converters/DictionaryKeys/StringDictionaryKeyConverter.cs
++++ b/src/Dahomey.Json/Serialization/Converters/DictionaryKeys/StringDictionaryKeyConverter.cs
+@@ -27,5 +27,4 @@ namespace Dahomey.Json.Serialization.Converters.DictionaryKeys
+             return key;
+         }
+     }
+-
+ }
+diff --git a/src/Dahomey.Json/Serialization/Converters/DictionaryKeys/Utf8DictionaryKeyConverter.cs b/src/Dahomey.Json/Serialization/Converters/DictionaryKeys/Utf8DictionaryKeyConverter.cs
+index 3a55752..f0dd5a6 100644
+--- a/src/Dahomey.Json/Serialization/Converters/DictionaryKeys/Utf8DictionaryKeyConverter.cs
++++ b/src/Dahomey.Json/Serialization/Converters/DictionaryKeys/Utf8DictionaryKeyConverter.cs
+@@ -10,6 +10,7 @@ namespace Dahomey.Json.Serialization.Converters.DictionaryKeys
+     public class Utf8DictionaryKeyConverter<T> : IDictionaryKeyConverter<T>
+     {
+         private delegate bool TryParseDelegate(ReadOnlySpan<byte> source, out T value, out int bytesConsumed, char standardFormat);
++
+         private delegate bool TryFormatDelegate(T value, Span<byte> destination, out int bytesWritten, StandardFormat format);
+ 
+         private readonly TryParseDelegate _tryParseFunc;
+@@ -54,6 +55,7 @@ namespace Dahomey.Json.Serialization.Converters.DictionaryKeys
+             {
+                 throw new JsonException();
+             }
++
+             writer.WritePropertyName(rawString.Slice(0, bytesWritten));
+         }
+ 
+@@ -64,8 +66,8 @@ namespace Dahomey.Json.Serialization.Converters.DictionaryKeys
+             {
+                 throw new JsonException();
+             }
++
+             return Encoding.ASCII.GetString(rawString.Slice(0, bytesWritten));
+         }
+     }
+-
+ }
+diff --git a/src/Dahomey.Json/Serialization/Converters/ExtensionDataMemberConverter.cs b/src/Dahomey.Json/Serialization/Converters/ExtensionDataMemberConverter.cs
+index 4c8e55c..1237b0d 100644
+--- a/src/Dahomey.Json/Serialization/Converters/ExtensionDataMemberConverter.cs
++++ b/src/Dahomey.Json/Serialization/Converters/ExtensionDataMemberConverter.cs
+@@ -11,6 +11,7 @@ namespace Dahomey.Json.Serialization.Converters
+     public interface IExtensionDataMemberConverter
+     {
+         void Read(ref Utf8JsonReader reader, object obj, ReadOnlySpan<byte> memberName, JsonSerializerOptions options);
++
+         void Write(Utf8JsonWriter writer, object obj, JsonSerializerOptions options);
+     }
+ 
+@@ -35,6 +36,7 @@ namespace Dahomey.Json.Serialization.Converters
+             {
+                 _memberSetter = (Action<T, TDict>)propertyInfo.SetMethod.CreateDelegate(typeof(Action<T, TDict>));
+             }
++
+             _jsonElementConverter = options.GetConverter<JsonElement>();
+             _jsonValueConverter = options.GetConverter<TValue>();
+         }
+diff --git a/src/Dahomey.Json/Serialization/Converters/Factories/CollectionConverterFactory.cs b/src/Dahomey.Json/Serialization/Converters/Factories/CollectionConverterFactory.cs
+index 9fad0f4..002498b 100644
+--- a/src/Dahomey.Json/Serialization/Converters/Factories/CollectionConverterFactory.cs
++++ b/src/Dahomey.Json/Serialization/Converters/Factories/CollectionConverterFactory.cs
+@@ -11,7 +11,7 @@ namespace Dahomey.Json.Serialization.Converters.Factories
+     {
+         public override bool CanConvert(Type typeToConvert)
+         {
+-            return typeToConvert.IsArray && typeToConvert != typeof(byte[])
++            return (typeToConvert.IsArray && typeToConvert != typeof(byte[]))
+                 || (typeToConvert.IsGenericType
+                 && (typeToConvert.GetGenericTypeDefinition() == typeof(ImmutableArray<>)
+                 || typeToConvert.GetGenericTypeDefinition() == typeof(ImmutableList<>)
+@@ -19,13 +19,13 @@ namespace Dahomey.Json.Serialization.Converters.Factories
+                 || typeToConvert.GetGenericTypeDefinition() == typeof(ImmutableHashSet<>)
+                 || typeToConvert.GetInterfaces()
+                     .Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(ICollection<>))
+-                || typeToConvert.IsInterface
++                || (typeToConvert.IsInterface
+                     && (typeToConvert.GetGenericTypeDefinition() == typeof(ISet<>)
+                         || typeToConvert.GetGenericTypeDefinition() == typeof(IList<>)
+                         || typeToConvert.GetGenericTypeDefinition() == typeof(ICollection<>)
+                         || typeToConvert.GetGenericTypeDefinition() == typeof(IEnumerable<>)
+                         || typeToConvert.GetGenericTypeDefinition() == typeof(IReadOnlyList<>)
+-                        || typeToConvert.GetGenericTypeDefinition() == typeof(IReadOnlyCollection<>))));
++                        || typeToConvert.GetGenericTypeDefinition() == typeof(IReadOnlyCollection<>)))));
+         }
+ 
+         public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
+diff --git a/src/Dahomey.Json/Serialization/Converters/Factories/DictionaryConverterFactory.cs b/src/Dahomey.Json/Serialization/Converters/Factories/DictionaryConverterFactory.cs
+index 0123d7a..7cdaf06 100644
+--- a/src/Dahomey.Json/Serialization/Converters/Factories/DictionaryConverterFactory.cs
++++ b/src/Dahomey.Json/Serialization/Converters/Factories/DictionaryConverterFactory.cs
+@@ -12,14 +12,14 @@ namespace Dahomey.Json.Serialization.Converters.Factories
+     {
+         public override bool CanConvert(Type typeToConvert)
+         {
+-            return typeToConvert.IsGenericType
++            return (typeToConvert.IsGenericType
+                 && (typeToConvert.GetGenericTypeDefinition() == typeof(ImmutableDictionary<,>)
+                 || typeToConvert.GetGenericTypeDefinition() == typeof(ImmutableSortedDictionary<,>)
+                 || typeToConvert.GetInterfaces()
+                     .Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+-                || typeToConvert.IsInterface
++                || (typeToConvert.IsInterface
+                     && (typeToConvert.GetGenericTypeDefinition() == typeof(IDictionary<,>)
+-                    || typeToConvert.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>)))
++                    || typeToConvert.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>)))))
+                 || typeToConvert.GetInterfaces()
+                     .Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IDictionary<,>));
+         }
+diff --git a/src/Dahomey.Json/Serialization/Converters/Factories/ObjectConverterFactory.cs b/src/Dahomey.Json/Serialization/Converters/Factories/ObjectConverterFactory.cs
+index ed57f1a..f11d19b 100644
+--- a/src/Dahomey.Json/Serialization/Converters/Factories/ObjectConverterFactory.cs
++++ b/src/Dahomey.Json/Serialization/Converters/Factories/ObjectConverterFactory.cs
+@@ -10,16 +10,16 @@ namespace Dahomey.Json.Serialization.Converters.Factories
+     {
+         public override bool CanConvert(Type typeToConvert)
+         {
+-            return typeToConvert.IsClass 
++            return (typeToConvert.IsClass
+                     && typeToConvert != typeof(string)
+-                    && typeToConvert != typeof(byte[])
++                    && typeToConvert != typeof(byte[]))
+                 || typeToConvert.IsInterface
+-                || typeToConvert.IsStruct()
++                || (typeToConvert.IsStruct()
+                     && typeToConvert != typeof(DateTime)
+                     && typeToConvert != typeof(DateTimeOffset)
+                     && typeToConvert != typeof(Guid)
+                     && typeToConvert != typeof(JsonElement)
+-                    && typeToConvert != typeof(Decimal);
++                    && typeToConvert != typeof(Decimal));
+         }
+ 
+         public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
+diff --git a/src/Dahomey.Json/Serialization/Converters/InterfaceDictionaryConverter.cs b/src/Dahomey.Json/Serialization/Converters/InterfaceDictionaryConverter.cs
+index b7b42bf..f2660a8 100644
+--- a/src/Dahomey.Json/Serialization/Converters/InterfaceDictionaryConverter.cs
++++ b/src/Dahomey.Json/Serialization/Converters/InterfaceDictionaryConverter.cs
+@@ -6,7 +6,6 @@ namespace Dahomey.Json.Serialization.Converters
+     public class InterfaceDictionaryConverter<TI, TK, TV> : AbstractDictionaryConverter<TI, TK, TV>
+         where TK : notnull
+         where TI : IEnumerable<KeyValuePair<TK, TV>>
+-
+     {
+         public InterfaceDictionaryConverter(JsonSerializerOptions options)
+             : base(options)
+diff --git a/src/Dahomey.Json/Serialization/Converters/JsonNodeConverter.cs b/src/Dahomey.Json/Serialization/Converters/JsonNodeConverter.cs
+index fc8242a..35ad38a 100644
+--- a/src/Dahomey.Json/Serialization/Converters/JsonNodeConverter.cs
++++ b/src/Dahomey.Json/Serialization/Converters/JsonNodeConverter.cs
+@@ -92,6 +92,7 @@ namespace Dahomey.Json.Serialization.Converters
+                         {
+                             obj.Add(propertyName, propertyValue);
+                         }
++
+                         break;
+ 
+                     case DuplicatePropertyNameHandling.Error:
+@@ -103,6 +104,7 @@ namespace Dahomey.Json.Serialization.Converters
+                         {
+                             throw new JsonException($"Duplicate property '{propertyName}'");
+                         }
++
+                         break;
+                 }
+             }
+@@ -125,6 +127,7 @@ namespace Dahomey.Json.Serialization.Converters
+                     {
+                         WriteObject(writer, (JsonObject)value, options);
+                     }
++
+                     break;
+ 
+                 case JsonValueKind.Array:
+@@ -132,6 +135,7 @@ namespace Dahomey.Json.Serialization.Converters
+                     {
+                         WriteArray(writer, (JsonArray)value, options);
+                     }
++
+                     break;
+ 
+                 case JsonValueKind.String:
+diff --git a/src/Dahomey.Json/Serialization/Converters/Mappings/AnonymousObjectMappingConventionProvider.cs b/src/Dahomey.Json/Serialization/Converters/Mappings/AnonymousObjectMappingConventionProvider.cs
+index 90fad72..dbe51c2 100644
+--- a/src/Dahomey.Json/Serialization/Converters/Mappings/AnonymousObjectMappingConventionProvider.cs
++++ b/src/Dahomey.Json/Serialization/Converters/Mappings/AnonymousObjectMappingConventionProvider.cs
+@@ -5,8 +5,8 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+ {
+     public class AnonymousObjectMappingConventionProvider : IObjectMappingConventionProvider
+     {
+-        private static readonly AnonymousObjectMappingConvention _anonymousObjectMappingConvention
+-            = new AnonymousObjectMappingConvention();
++        private static readonly AnonymousObjectMappingConvention _anonymousObjectMappingConvention =
++            new AnonymousObjectMappingConvention();
+ 
+         public IObjectMappingConvention? GetConvention(Type type)
+         {
+diff --git a/src/Dahomey.Json/Serialization/Converters/Mappings/CreatorMapping.cs b/src/Dahomey.Json/Serialization/Converters/Mappings/CreatorMapping.cs
+index 0a794e7..ee5538c 100644
+--- a/src/Dahomey.Json/Serialization/Converters/Mappings/CreatorMapping.cs
++++ b/src/Dahomey.Json/Serialization/Converters/Mappings/CreatorMapping.cs
+@@ -105,7 +105,7 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+ 
+                     if (memberMapping == null || memberMapping.MemberName == null)
+                     {
+-                        _memberNames.Add(new ReadOnlyMemory<byte>());
++                        _memberNames.Add(default);
+                     }
+                     else
+                     {
+diff --git a/src/Dahomey.Json/Serialization/Converters/Mappings/DefaultObjectMappingConvention.cs b/src/Dahomey.Json/Serialization/Converters/Mappings/DefaultObjectMappingConvention.cs
+index 9ea3307..3a286dd 100644
+--- a/src/Dahomey.Json/Serialization/Converters/Mappings/DefaultObjectMappingConvention.cs
++++ b/src/Dahomey.Json/Serialization/Converters/Mappings/DefaultObjectMappingConvention.cs
+@@ -101,6 +101,7 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+                 {
+                     continue;
+                 }
++
+                 if ((fieldInfo.IsPrivate || fieldInfo.IsStatic)
+                     && !fieldInfo.IsDefined(typeof(JsonPropertyNameAttribute))
+                     && !fieldInfo.IsDefined(typeof(JsonPropertyAttribute)))
+@@ -125,7 +126,7 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+ 
+                 memberMappings.Add(memberMapping);
+             }
+-            
++
+             objectMapping.AddMemberMappings(memberMappings.OrderBy(x => x.Order).ToArray());
+ 
+             if (!type.IsAbstract)
+@@ -149,6 +150,7 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+                         creatorMapping.SetMemberNames(constructorAttribute.MemberNames);
+                     }
+                 }
++
+                 // if no default constructor, pick up first one
+                 else if (constructorInfos.Length > 0 && !constructorInfos.Any(c => c.GetParameters().Length == 0))
+                 {
+@@ -209,8 +211,8 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+ 
+ #if NET5_0_OR_GREATER
+             if (options.DefaultIgnoreCondition == JsonIgnoreCondition.WhenWritingDefault
+-                || options.DefaultIgnoreCondition == JsonIgnoreCondition.WhenWritingNull 
+-                && (memberMapping.MemberType.IsClass || Nullable.GetUnderlyingType(memberMapping.MemberType) != null))
++                || (options.DefaultIgnoreCondition == JsonIgnoreCondition.WhenWritingNull
++                && (memberMapping.MemberType.IsClass || Nullable.GetUnderlyingType(memberMapping.MemberType) != null)))
+             {
+                 memberMapping.SetIgnoreIfDefault(true);
+             }
+@@ -219,8 +221,8 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+             if (jsonIgnoreAttribute != null)
+             {
+                 if (jsonIgnoreAttribute.Condition == JsonIgnoreCondition.WhenWritingDefault
+-                    || jsonIgnoreAttribute.Condition == JsonIgnoreCondition.WhenWritingNull 
+-                    && (memberMapping.MemberType.IsClass || Nullable.GetUnderlyingType(memberMapping.MemberType) != null))
++                    || (jsonIgnoreAttribute.Condition == JsonIgnoreCondition.WhenWritingNull
++                    && (memberMapping.MemberType.IsClass || Nullable.GetUnderlyingType(memberMapping.MemberType) != null)))
+                 {
+                     memberMapping.SetIgnoreIfDefault(true);
+                 }
+@@ -234,12 +236,12 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+             Type objectType = typeof(T);
+ 
+             MethodInfo? shouldSerializeMethodInfo = objectType.GetMethod(
+-                shouldSerializeMethodName, 
+-                BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Instance, 
++                shouldSerializeMethodName,
++                BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Instance,
+                 null, new Type[] { }, null);
+ 
+-            if (shouldSerializeMethodInfo != null &&
+-                shouldSerializeMethodInfo.ReturnType == typeof(bool))
++            if (shouldSerializeMethodInfo != null
++                && shouldSerializeMethodInfo.ReturnType == typeof(bool))
+             {
+                 // obj => ((TClass) obj).ShouldSerializeXyz()
+                 ParameterExpression objParameter = Expression.Parameter(typeof(object), "obj");
+diff --git a/src/Dahomey.Json/Serialization/Converters/Mappings/DiscriminatorMapping.cs b/src/Dahomey.Json/Serialization/Converters/Mappings/DiscriminatorMapping.cs
+index 6402787..d179913 100644
+--- a/src/Dahomey.Json/Serialization/Converters/Mappings/DiscriminatorMapping.cs
++++ b/src/Dahomey.Json/Serialization/Converters/Mappings/DiscriminatorMapping.cs
+@@ -25,7 +25,8 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+         public RequirementPolicy RequirementPolicy { get; set; } = RequirementPolicy.Never;
+         public int Order { get; set; }
+ 
+-        public DiscriminatorMapping(DiscriminatorConventionRegistry discriminatorConventionRegistry, 
++        public DiscriminatorMapping(
++            DiscriminatorConventionRegistry discriminatorConventionRegistry,
+             IObjectMapping objectMapping)
+         {
+             _discriminatorConventionRegistry = discriminatorConventionRegistry;
+diff --git a/src/Dahomey.Json/Serialization/Converters/Mappings/ICreatorMapping.cs b/src/Dahomey.Json/Serialization/Converters/Mappings/ICreatorMapping.cs
+index 6b18b32..2b1584c 100644
+--- a/src/Dahomey.Json/Serialization/Converters/Mappings/ICreatorMapping.cs
++++ b/src/Dahomey.Json/Serialization/Converters/Mappings/ICreatorMapping.cs
+@@ -6,6 +6,7 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+     public interface ICreatorMapping : IMappingInitialization
+     {
+         IReadOnlyCollection<ReadOnlyMemory<byte>>? MemberNames { get; }
++
+         object CreateInstance(Dictionary<ReadOnlyMemory<byte>, object> values);
+     }
+ }
+diff --git a/src/Dahomey.Json/Serialization/Converters/Mappings/IMappingInitialization.cs b/src/Dahomey.Json/Serialization/Converters/Mappings/IMappingInitialization.cs
+index 0e1cfc6..20324eb 100644
+--- a/src/Dahomey.Json/Serialization/Converters/Mappings/IMappingInitialization.cs
++++ b/src/Dahomey.Json/Serialization/Converters/Mappings/IMappingInitialization.cs
+@@ -3,6 +3,7 @@
+     public interface IMappingInitialization
+     {
+         void Initialize();
++
+         void PostInitialize();
+     }
+ }
+diff --git a/src/Dahomey.Json/Serialization/Converters/Mappings/IMemberMapping.cs b/src/Dahomey.Json/Serialization/Converters/Mappings/IMemberMapping.cs
+index 81c00cf..5311796 100644
+--- a/src/Dahomey.Json/Serialization/Converters/Mappings/IMemberMapping.cs
++++ b/src/Dahomey.Json/Serialization/Converters/Mappings/IMemberMapping.cs
+@@ -18,6 +18,7 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+         Func<object, bool>? ShouldSerializeMethod { get; set; }
+         RequirementPolicy RequirementPolicy { get; set; }
+         int Order { get; set; }
++
+         IMemberConverter GenerateMemberConverter();
+     }
+ }
+diff --git a/src/Dahomey.Json/Serialization/Converters/Mappings/IObjectMapping.cs b/src/Dahomey.Json/Serialization/Converters/Mappings/IObjectMapping.cs
+index 63cf844..b1a67ed 100644
+--- a/src/Dahomey.Json/Serialization/Converters/Mappings/IObjectMapping.cs
++++ b/src/Dahomey.Json/Serialization/Converters/Mappings/IObjectMapping.cs
+@@ -21,7 +21,9 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+         IExtensionDataMemberConverter? ExtensionData { get; }
+ 
+         void AutoMap();
++
+         bool IsCreatorMember(ReadOnlySpan<byte> memberName);
++
+         void AddDiscriminatorMapping();
+     }
+ }
+diff --git a/src/Dahomey.Json/Serialization/Converters/Mappings/MemberMapping.cs b/src/Dahomey.Json/Serialization/Converters/Mappings/MemberMapping.cs
+index f6bafee..2ad0983 100644
+--- a/src/Dahomey.Json/Serialization/Converters/Mappings/MemberMapping.cs
++++ b/src/Dahomey.Json/Serialization/Converters/Mappings/MemberMapping.cs
+@@ -25,7 +25,8 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+         public RequirementPolicy RequirementPolicy { get; set; }
+         public int Order { get; set; }
+ 
+-        public MemberMapping(JsonSerializerOptions options,
++        public MemberMapping(
++            JsonSerializerOptions options,
+             IObjectMapping objectMapping, MemberInfo memberInfo, Type memberType)
+         {
+             _objectMapping = objectMapping;
+@@ -134,7 +135,7 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+                 }
+                 else
+                 {
+-                    MemberName= MemberInfo.Name;
++                    MemberName = MemberInfo.Name;
+                 }
+             }
+         }
+@@ -145,15 +146,15 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+             {
+                 Converter = _options.GetConverter(MemberType);
+             }
+-            
++
+             if (Converter is JsonConverterFactory factory)
+             {
+                 Converter = factory.CreateConverter(MemberType, _options);
+                 if (Converter == null)
+                 {
+                     throw new JsonException($"Cannot find a converter for type {MemberType}");
+-                }            
+-           }
++                }
++            }
+ 
+             VerifyMemberConverterType(Converter.GetType());
+         }
+@@ -211,7 +212,7 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+             if ((DefaultValue == null && MemberType.IsValueType && Nullable.GetUnderlyingType(MemberType) == null)
+                 || (DefaultValue != null && DefaultValue.GetType() != MemberType))
+             {
+-                throw new JsonException($"Default value type mismatch");
++                throw new JsonException("Default value type mismatch");
+             }
+         }
+     }
+diff --git a/src/Dahomey.Json/Serialization/Converters/Mappings/ObjectMapping.cs b/src/Dahomey.Json/Serialization/Converters/Mappings/ObjectMapping.cs
+index 84e083a..1af6087 100644
+--- a/src/Dahomey.Json/Serialization/Converters/Mappings/ObjectMapping.cs
++++ b/src/Dahomey.Json/Serialization/Converters/Mappings/ObjectMapping.cs
+@@ -11,7 +11,7 @@ using System.Text.Json;
+ namespace Dahomey.Json.Serialization.Converters.Mappings
+ {
+     /// <summary>
+-    /// Represent a mapping between a class and Cbor serialization framework
++    /// Represent a mapping between a class and Cbor serialization framework.
+     /// </summary>
+     /// <typeparam name="T">The class.</typeparam>
+     public class ObjectMapping<T> : IObjectMapping
+@@ -19,7 +19,7 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+         private readonly JsonSerializerOptions _options;
+         private List<IMemberMapping> _memberMappings = new List<IMemberMapping>();
+         private ICreatorMapping? _creatorMapping = null;
+-        private Action? _orderByAction = null; 
++        private Action? _orderByAction = null;
+ 
+         public Type ObjectType { get; private set; }
+ 
+@@ -102,15 +102,16 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+         public ObjectMapping<T> MapExtensionData(PropertyInfo propertyInfo)
+         {
+             Type propertyType = propertyInfo.PropertyType;
+-            if (!typeof(IDictionary<string, JsonElement>).IsAssignableFrom(propertyType) &&
+-                !typeof(IDictionary<string, object>).IsAssignableFrom(propertyType))
+-            { 
++            if (!typeof(IDictionary<string, JsonElement>).IsAssignableFrom(propertyType)
++                && !typeof(IDictionary<string, object>).IsAssignableFrom(propertyType))
++            {
+                 throw new JsonException("Invalid Serialization DataExtension Property");
+             }
+ 
+             ExtensionData = (IExtensionDataMemberConverter?)
+-                Activator.CreateInstance(typeof(ExtensionDataMemberConverter<,,>)
+-                    .MakeGenericType(typeof(T), propertyType, propertyType.GetGenericArguments()[1]),
++                Activator.CreateInstance(
++                    typeof(ExtensionDataMemberConverter<,,>)
++                        .MakeGenericType(typeof(T), propertyType, propertyType.GetGenericArguments()[1]),
+                     propertyInfo, _options);
+ 
+             if (ExtensionData == null)
+@@ -151,7 +152,6 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+             return creatorMapping;
+         }
+ 
+-
+         private CreatorMapping MapCreator(MethodInfo method)
+         {
+             if (method == null)
+@@ -235,9 +235,9 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+         {
+             _orderByAction = () =>
+             {
+-                 _memberMappings = _memberMappings
+-                    .OrderBy(propertySelector)
+-                    .ToList();
++                _memberMappings = _memberMappings
++                   .OrderBy(propertySelector)
++                   .ToList();
+             };
+         }
+ 
+@@ -267,7 +267,7 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+ 
+         public void Initialize()
+         {
+-            foreach(IMemberMapping mapping in _memberMappings)
++            foreach (IMemberMapping mapping in _memberMappings)
+             {
+                 if (mapping is IMappingInitialization memberInitialization)
+                 {
+@@ -308,10 +308,12 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+                 case ExpressionType.MemberAccess:
+                     memberExpression = (MemberExpression)body;
+                     break;
++
+                 case ExpressionType.Convert:
+                     var convertExpression = (UnaryExpression)body;
+                     memberExpression = (MemberExpression)convertExpression.Operand;
+                     break;
++
+                 default:
+                     throw new InvalidOperationException("Invalid lambda expression");
+             }
+diff --git a/src/Dahomey.Json/Serialization/Converters/Mappings/ObjectMappingConventionRegistry.cs b/src/Dahomey.Json/Serialization/Converters/Mappings/ObjectMappingConventionRegistry.cs
+index b1d813d..12237d6 100644
+--- a/src/Dahomey.Json/Serialization/Converters/Mappings/ObjectMappingConventionRegistry.cs
++++ b/src/Dahomey.Json/Serialization/Converters/Mappings/ObjectMappingConventionRegistry.cs
+@@ -9,7 +9,7 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+     {
+         private readonly ConcurrentDictionary<Type, IObjectMappingConvention> _conventions = new ConcurrentDictionary<Type, IObjectMappingConvention>();
+         private readonly ConcurrentStack<IObjectMappingConventionProvider> _providers = new ConcurrentStack<IObjectMappingConventionProvider>();
+-        
++
+         public ObjectMappingConventionRegistry()
+         {
+             // order matters. It's in reverse order of how they'll get consumed
+@@ -55,7 +55,7 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+         }
+ 
+         /// <summary>
+-        /// Registers the convention
++        /// Registers the convention.
+         /// </summary>
+         /// <param name="type">The type.</param>
+         /// <param name="convention">The convention.</param>
+diff --git a/src/Dahomey.Json/Serialization/Converters/Mappings/ObjectMappingRegistry.cs b/src/Dahomey.Json/Serialization/Converters/Mappings/ObjectMappingRegistry.cs
+index 609457a..f1721f4 100644
+--- a/src/Dahomey.Json/Serialization/Converters/Mappings/ObjectMappingRegistry.cs
++++ b/src/Dahomey.Json/Serialization/Converters/Mappings/ObjectMappingRegistry.cs
+@@ -6,8 +6,9 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+ {
+     public class ObjectMappingRegistry
+     {
+-        private readonly ConcurrentDictionary<Type, IObjectMapping> _objectMappings
+-            = new ConcurrentDictionary<Type, IObjectMapping>();
++        private readonly ConcurrentDictionary<Type, IObjectMapping> _objectMappings =
++            new ConcurrentDictionary<Type, IObjectMapping>();
++
+         private readonly JsonSerializerOptions _options;
+ 
+         public ObjectMappingRegistry(JsonSerializerOptions options)
+diff --git a/src/Dahomey.Json/Serialization/Converters/Mappings/StandardObjectMappingConvention.cs b/src/Dahomey.Json/Serialization/Converters/Mappings/StandardObjectMappingConvention.cs
+index 7a0ea75..3d1d834 100644
+--- a/src/Dahomey.Json/Serialization/Converters/Mappings/StandardObjectMappingConvention.cs
++++ b/src/Dahomey.Json/Serialization/Converters/Mappings/StandardObjectMappingConvention.cs
+@@ -136,16 +136,16 @@ namespace Dahomey.Json.Serialization.Converters.Mappings
+             }
+ 
+             MethodInfo? shouldSerializeMethodInfo = objectType.GetMethod(shouldSerializeMethodName, new Type[] { });
+-            if (shouldSerializeMethodInfo != null &&
+-                shouldSerializeMethodInfo.IsPublic &&
+-                shouldSerializeMethodInfo.ReturnType == typeof(bool))
++            if (shouldSerializeMethodInfo != null
++                && shouldSerializeMethodInfo.IsPublic
++                && shouldSerializeMethodInfo.ReturnType == typeof(bool))
+             {
+                 // obj => ((TClass) obj).ShouldSerializeXyz()
+                 ParameterExpression objParameter = Expression.Parameter(typeof(object), "obj");
+                 Expression<Func<object, bool>> lambdaExpression = Expression.Lambda<Func<object, bool>>(
+                     Expression.Call(
+-                        Expression.Convert(objParameter, objectType), 
+-                        shouldSerializeMethodInfo), 
++                        Expression.Convert(objParameter, objectType),
++                        shouldSerializeMethodInfo),
+                     objParameter);
+ 
+                 memberMapping.SetShouldSerializeMethod(lambdaExpression.Compile());
+diff --git a/src/Dahomey.Json/Serialization/Converters/MemberConverter.cs b/src/Dahomey.Json/Serialization/Converters/MemberConverter.cs
+index c4c0beb..2e1e522 100644
+--- a/src/Dahomey.Json/Serialization/Converters/MemberConverter.cs
++++ b/src/Dahomey.Json/Serialization/Converters/MemberConverter.cs
+@@ -20,16 +20,22 @@ namespace Dahomey.Json.Serialization.Converters
+         RequirementPolicy RequirementPolicy { get; }
+ 
+         void Read(ref Utf8JsonReader reader, object obj, JsonSerializerOptions options);
++
+         void Write(Utf8JsonWriter writer, object obj, JsonSerializerOptions options);
++
+         object Read(ref Utf8JsonReader reader, JsonSerializerOptions options);
++
+         void Set(object obj, object value, JsonSerializerOptions options);
++
+         bool ShouldSerialize(object obj, Type declaredType, JsonSerializerOptions options);
+     }
+ 
+     public interface IMemberConverter<T>
+     {
+         void Read(ref Utf8JsonReader reader, ref T instance, JsonSerializerOptions options);
++
+         void Write(Utf8JsonWriter writer, ref T instance, JsonSerializerOptions options);
++
+         bool ShouldSerialize(ref T instance, Type declaredType, JsonSerializerOptions options);
+     }
+ 
+@@ -121,7 +127,7 @@ namespace Dahomey.Json.Serialization.Converters
+                 {
+                     _memberSetter((T)obj, _jsonConverter.Read(ref reader, typeof(TM), options)!);
+                 }
+-                catch(Exception ex)
++                catch (Exception ex)
+                 {
+                     throw new MemberJsonException(MemberNameAsString, typeof(TM), ex);
+                 }
+@@ -521,11 +527,12 @@ namespace Dahomey.Json.Serialization.Converters
+                 return false;
+             }
+ 
+-            DiscriminatorPolicy discriminatorPolicy = _discriminatorPolicy != DiscriminatorPolicy.Default ? _discriminatorPolicy
++            DiscriminatorPolicy discriminatorPolicy = _discriminatorPolicy != DiscriminatorPolicy.Default
++                ? _discriminatorPolicy
+                 : (options.GetDiscriminatorConventionRegistry().DiscriminatorPolicy != DiscriminatorPolicy.Default ? options.GetDiscriminatorConventionRegistry().DiscriminatorPolicy : DiscriminatorPolicy.Auto);
+ 
+             return discriminatorPolicy == DiscriminatorPolicy.Always
+-                || discriminatorPolicy == DiscriminatorPolicy.Auto && obj.GetType() != declaredType;
++                || (discriminatorPolicy == DiscriminatorPolicy.Auto && obj.GetType() != declaredType);
+         }
+ 
+         public void Write(Utf8JsonWriter writer, object obj, JsonSerializerOptions options)
+diff --git a/src/Dahomey.Json/Serialization/Converters/NullableConverter.cs b/src/Dahomey.Json/Serialization/Converters/NullableConverter.cs
+index 494d30e..98ceef4 100644
+--- a/src/Dahomey.Json/Serialization/Converters/NullableConverter.cs
++++ b/src/Dahomey.Json/Serialization/Converters/NullableConverter.cs
+@@ -4,7 +4,8 @@ using System.Text.Json.Serialization;
+ 
+ namespace Dahomey.Json.Serialization.Converters
+ {
+-    public class NullableConverter<T> : JsonConverter<T?> where T : struct
++    public class NullableConverter<T> : JsonConverter<T?>
++        where T : struct
+     {
+         private readonly JsonConverter<T> _jsonConverter;
+ 
+diff --git a/src/Dahomey.Json/Serialization/Converters/ObjectConverter.cs b/src/Dahomey.Json/Serialization/Converters/ObjectConverter.cs
+index 1938c75..d3a0a17 100644
+--- a/src/Dahomey.Json/Serialization/Converters/ObjectConverter.cs
++++ b/src/Dahomey.Json/Serialization/Converters/ObjectConverter.cs
+@@ -1,12 +1,12 @@
+-﻿using System.Collections.Generic;
+-using System.Reflection;
++﻿using Dahomey.Json.Attributes;
+ using Dahomey.Json.Serialization.Conventions;
++using Dahomey.Json.Serialization.Converters.Mappings;
+ using Dahomey.Json.Util;
+-using System.Text.Json;
+ using System;
++using System.Collections.Generic;
++using System.Reflection;
+ using System.Text;
+-using Dahomey.Json.Serialization.Converters.Mappings;
+-using Dahomey.Json.Attributes;
++using System.Text.Json;
+ 
+ namespace Dahomey.Json.Serialization.Converters
+ {
+@@ -15,8 +15,11 @@ namespace Dahomey.Json.Serialization.Converters
+         IReadOnlyList<IMemberConverter> MemberConvertersForWrite { get; }
+         IReadOnlyList<IMemberConverter> RequiredMemberConvertersForRead { get; }
+         IObjectMapping ObjectMapping { get; }
++
+         object CreateInstance();
++
+         void ReadValue(ref Utf8JsonReader reader, object obj, ReadOnlySpan<byte> memberName, JsonSerializerOptions options, HashSet<IMemberConverter> readMembers);
++
+         bool ReadValue(ref Utf8JsonReader reader, ReadOnlySpan<byte> memberName, JsonSerializerOptions options, HashSet<IMemberConverter>? readMembers, out object value);
+     }
+ 
+@@ -51,6 +54,7 @@ namespace Dahomey.Json.Serialization.Converters
+                         {
+                             converters.ForReadAsString!.Add(memberConverter.MemberNameAsString!, memberConverter);
+                         }
++
+                         converters.ForRead.Add(memberConverter.MemberName, memberConverter);
+ 
+                         if (memberConverter.RequirementPolicy == RequirementPolicy.AllowNull
+@@ -83,7 +87,6 @@ namespace Dahomey.Json.Serialization.Converters
+         public IReadOnlyList<IMemberConverter> RequiredMemberConvertersForRead => _memberConverters.Value.RequiredForRead;
+         public IObjectMapping ObjectMapping => _objectMapping;
+ 
+-
+         public ObjectConverter(JsonSerializerOptions options)
+         {
+             _objectMapping = options.GetObjectMappingRegistry().Lookup<T>();
+@@ -162,7 +165,7 @@ namespace Dahomey.Json.Serialization.Converters
+                 {
+                     reader.Read();
+ 
+-                    switch(reader.TokenType)
++                    switch (reader.TokenType)
+                     {
+                         case JsonTokenType.EndObject:
+                             end = true;
+@@ -184,7 +187,7 @@ namespace Dahomey.Json.Serialization.Converters
+ 
+                                     if (@ref == null)
+                                     {
+-                                        throw new JsonException($"Cannot resolve null reference");
++                                        throw new JsonException("Cannot resolve null reference");
+                                     }
+ 
+                                     object? @object = SerializationContext.Current.ReferenceHandler.ResolveReference(@ref);
+@@ -210,6 +213,7 @@ namespace Dahomey.Json.Serialization.Converters
+ 
+                                 break;
+                             }
++
+                         default:
+                             throw new JsonException();
+                     }
+@@ -292,7 +296,7 @@ namespace Dahomey.Json.Serialization.Converters
+             }
+         }
+ 
+-        private void ReadMember(ref Utf8JsonReader reader, ref T obj, ref IObjectConverter? converter, 
++        private void ReadMember(ref Utf8JsonReader reader, ref T obj, ref IObjectConverter? converter,
+             JsonSerializerOptions options, ref Dictionary<ReadOnlyMemory<byte>, object>? creatorValues,
+             ref Dictionary<ReadOnlyMemory<byte>, object>? regularValues,
+             HashSet<IMemberConverter>? readMembers, string? id)
+@@ -405,10 +409,10 @@ namespace Dahomey.Json.Serialization.Converters
+         {
+             var memberConverters = _memberConverters.Value;
+ 
+-            if (options.PropertyNameCaseInsensitive
+-                && memberConverters.ForReadAsString != null && memberConverters.ForReadAsString.TryGetValue(Encoding.UTF8.GetString(memberName), out IMemberConverter? memberConverter)
+-                || !options.PropertyNameCaseInsensitive
+-                && memberConverters.ForRead.TryGetValue(memberName, out memberConverter))
++            if ((options.PropertyNameCaseInsensitive
++                && memberConverters.ForReadAsString != null && memberConverters.ForReadAsString.TryGetValue(Encoding.UTF8.GetString(memberName), out IMemberConverter? memberConverter))
++                || (!options.PropertyNameCaseInsensitive
++                && memberConverters.ForRead.TryGetValue(memberName, out memberConverter)))
+             {
+                 if (readMembers != null)
+                 {
+@@ -435,10 +439,10 @@ namespace Dahomey.Json.Serialization.Converters
+         {
+             var memberConverters = _memberConverters.Value;
+ 
+-            if (options.PropertyNameCaseInsensitive
+-                && memberConverters.ForReadAsString != null && memberConverters.ForReadAsString.TryGetValue(Encoding.UTF8.GetString(memberName), out IMemberConverter? memberConverter)
+-                || !options.PropertyNameCaseInsensitive
+-                && memberConverters.ForRead.TryGetValue(memberName, out memberConverter))
++            if ((options.PropertyNameCaseInsensitive
++                && memberConverters.ForReadAsString != null && memberConverters.ForReadAsString.TryGetValue(Encoding.UTF8.GetString(memberName), out IMemberConverter? memberConverter))
++                || (!options.PropertyNameCaseInsensitive
++                && memberConverters.ForRead.TryGetValue(memberName, out memberConverter)))
+             {
+                 if (readMembers != null)
+                 {
+@@ -447,7 +451,7 @@ namespace Dahomey.Json.Serialization.Converters
+ 
+                 memberConverter.Read(ref reader, obj, options);
+             }
+-            else if(_discriminatorConvention != null && memberName.SequenceEqual(_discriminatorConvention.MemberName))
++            else if (_discriminatorConvention != null && memberName.SequenceEqual(_discriminatorConvention.MemberName))
+             {
+                 reader.Skip();
+             }
+@@ -469,15 +473,16 @@ namespace Dahomey.Json.Serialization.Converters
+         {
+             var memberConverters = _memberConverters.Value;
+ 
+-            if (options.PropertyNameCaseInsensitive
+-                && memberConverters.ForReadAsString != null && memberConverters.ForReadAsString.TryGetValue(Encoding.UTF8.GetString(memberName), out IMemberConverter? memberConverter)
+-                || !options.PropertyNameCaseInsensitive
+-                && memberConverters.ForRead.TryGetValue(memberName, out memberConverter))
++            if ((options.PropertyNameCaseInsensitive
++                && memberConverters.ForReadAsString != null && memberConverters.ForReadAsString.TryGetValue(Encoding.UTF8.GetString(memberName), out IMemberConverter? memberConverter))
++                || (!options.PropertyNameCaseInsensitive
++                && memberConverters.ForRead.TryGetValue(memberName, out memberConverter)))
+             {
+                 if (readMembers != null)
+                 {
+                     readMembers.Add(memberConverter);
+                 }
++
+                 value = memberConverter.Read(ref reader, options);
+                 return true;
+             }
+@@ -564,13 +569,10 @@ namespace Dahomey.Json.Serialization.Converters
+                             typedMemberConverter.Write(writer, ref value, options);
+                         }
+                     }
+-                    else
++                    else if (memberConverter.ShouldSerialize(value!, typeof(T), options))
+                     {
+-                        if (memberConverter.ShouldSerialize(value!, typeof(T), options))
+-                        {
+-                            writer.WritePropertyName(memberConverter.MemberName);
+-                            memberConverter.Write(writer, value!, options);
+-                        }
++                        writer.WritePropertyName(memberConverter.MemberName);
++                        memberConverter.Write(writer, value!, options);
+                     }
+                 }
+ 
+@@ -579,7 +581,7 @@ namespace Dahomey.Json.Serialization.Converters
+                 {
+                     memberConverters.ExtensionData.Write(writer, value!, options);
+                 }
+-                
++
+                 writer.WriteEndObject();
+ 
+                 if (_objectMapping.OnSerializedMethod != null)
+diff --git a/src/Dahomey.Json/Serialization/Converters/UriConverter.cs b/src/Dahomey.Json/Serialization/Converters/UriConverter.cs
+index 005ebf5..36a46e9 100644
+--- a/src/Dahomey.Json/Serialization/Converters/UriConverter.cs
++++ b/src/Dahomey.Json/Serialization/Converters/UriConverter.cs
+@@ -14,12 +14,9 @@ namespace Dahomey.Json.Serialization.Converters
+             {
+                 return null!;
+             }
+-            else
++            else if (Uri.TryCreate(uriString, UriKind.RelativeOrAbsolute, out Uri? value))
+             {
+-                if (Uri.TryCreate(uriString, UriKind.RelativeOrAbsolute, out Uri? value))
+-                {
+-                    return value;
+-                }
++                return value;
+             }
+ 
+             throw new JsonException();
+diff --git a/src/Dahomey.Json/Serialization/ReferenceHandler.cs b/src/Dahomey.Json/Serialization/ReferenceHandler.cs
+index 04e88d2..167e7b6 100644
+--- a/src/Dahomey.Json/Serialization/ReferenceHandler.cs
++++ b/src/Dahomey.Json/Serialization/ReferenceHandler.cs
+@@ -24,6 +24,7 @@ namespace Dahomey.Json.Serialization
+             {
+                 reference = (_nextReference++).ToString();
+             }
++
+             _refs2Objects.TryAdd(reference, obj);
+             _objects2Refs.TryAdd(obj, reference);
+         }
+@@ -31,7 +32,7 @@ namespace Dahomey.Json.Serialization
+         public string GetReference(object obj, out bool firstReference)
+         {
+             bool firstRef = false;
+-            string @ref =  _objects2Refs.GetOrAdd(obj, newObj =>
++            string @ref = _objects2Refs.GetOrAdd(obj, newObj =>
+             {
+                 string reference = (_nextReference++).ToString();
+                 _refs2Objects.TryAdd(reference, newObj);
+diff --git a/src/Dahomey.Json/Serialization/SerializationContext.cs b/src/Dahomey.Json/Serialization/SerializationContext.cs
+index 6ce9c41..257db06 100644
+--- a/src/Dahomey.Json/Serialization/SerializationContext.cs
++++ b/src/Dahomey.Json/Serialization/SerializationContext.cs
+@@ -5,8 +5,8 @@ namespace Dahomey.Json.Serialization
+ {
+     public class SerializationContext
+     {
+-        private readonly static AsyncLocal<SerializationContext> _current
+-            = new AsyncLocal<SerializationContext>();
++        private static readonly AsyncLocal<SerializationContext> _current =
++            new AsyncLocal<SerializationContext>();
+ 
+         private Lazy<ReferenceHandler> _referenceHandler = new Lazy<ReferenceHandler>(() => new ReferenceHandler());
+ 
+diff --git a/src/Dahomey.Json/Util/ArrayBufferWriter.cs b/src/Dahomey.Json/Util/ArrayBufferWriter.cs
+index aec1c08..8e28e2c 100644
+--- a/src/Dahomey.Json/Util/ArrayBufferWriter.cs
++++ b/src/Dahomey.Json/Util/ArrayBufferWriter.cs
+@@ -36,10 +36,14 @@ namespace Dahomey.Json.Util
+         public void Advance(int count)
+         {
+             if (count < 0)
++            {
+                 throw new ArgumentException(nameof(count));
++            }
+ 
+             if (_size > _buffer.Length - count)
++            {
+                 throw new InvalidOperationException();
++            }
+ 
+             _size += count;
+         }
+@@ -61,7 +65,9 @@ namespace Dahomey.Json.Util
+         private void CheckAndResizeBuffer(int sizeHint)
+         {
+             if (sizeHint < 0)
++            {
+                 throw new ArgumentException(nameof(sizeHint));
++            }
+ 
+             if (sizeHint == 0)
+             {
+diff --git a/src/Dahomey.Json/Util/ConstructorInfoExtensions.cs b/src/Dahomey.Json/Util/ConstructorInfoExtensions.cs
+index ec5d1b9..48edce7 100644
+--- a/src/Dahomey.Json/Util/ConstructorInfoExtensions.cs
++++ b/src/Dahomey.Json/Util/ConstructorInfoExtensions.cs
+@@ -17,7 +17,6 @@ namespace Dahomey.Json.Util
+ 
+             Expression<Func<T>> lambda = Expression.Lambda<Func<T>>(body, parameters);
+             return lambda.Compile();
+-
+         }
+ 
+         public static Delegate CreateDelegate(this ConstructorInfo constructorInfo)
+diff --git a/src/Dahomey.Json/Util/Default.cs b/src/Dahomey.Json/Util/Default.cs
+index d3979c7..f980742 100644
+--- a/src/Dahomey.Json/Util/Default.cs
++++ b/src/Dahomey.Json/Util/Default.cs
+@@ -9,6 +9,7 @@ namespace Dahomey.Json.Util
+         private static readonly ConcurrentDictionary<Type, object?> _values = new ConcurrentDictionary<Type, object?>();
+ 
+         public static T Value<T>() => default!;
++
+         public static object? Value(Type type) => _values.GetOrAdd(type, GenerateValue);
+ 
+         private static object? GenerateValue(Type type)
+diff --git a/src/Dahomey.Json/Util/FieldInfoExtensions.cs b/src/Dahomey.Json/Util/FieldInfoExtensions.cs
+index fdcd909..d091d46 100644
+--- a/src/Dahomey.Json/Util/FieldInfoExtensions.cs
++++ b/src/Dahomey.Json/Util/FieldInfoExtensions.cs
+@@ -5,6 +5,7 @@ using System.Reflection;
+ namespace Dahomey.Json.Util
+ {
+     public delegate TP StructMemberGetterDelegate<T, TP>(ref T instance);
++
+     public delegate void StructMemberSetterDelegate<T, TP>(ref T instance, TP value);
+ 
+     public static class FieldInfoExtensions
+diff --git a/src/Dahomey.Json/Util/ReadOnlyMemoryEqualityComparer.cs b/src/Dahomey.Json/Util/ReadOnlyMemoryEqualityComparer.cs
+index 7d57471..b14a9e3 100644
+--- a/src/Dahomey.Json/Util/ReadOnlyMemoryEqualityComparer.cs
++++ b/src/Dahomey.Json/Util/ReadOnlyMemoryEqualityComparer.cs
+@@ -20,6 +20,7 @@ namespace Dahomey.Json.Util
+             {
+                 hash = 37 * hash + t.GetHashCode();
+             }
++
+             return hash;
+         }
+     }
+diff --git a/src/Dahomey.Json/Util/Utf8JsonWriterExtensions.cs b/src/Dahomey.Json/Util/Utf8JsonWriterExtensions.cs
+index 15cdbc2..6c1aa20 100644
+--- a/src/Dahomey.Json/Util/Utf8JsonWriterExtensions.cs
++++ b/src/Dahomey.Json/Util/Utf8JsonWriterExtensions.cs
+@@ -7,6 +7,7 @@ namespace Dahomey.Json.Util
+     public static class Utf8JsonWriterExtensions
+     {
+         private delegate void WriteFormatedNumberValueFuncDelegate(Utf8JsonWriter writer, ReadOnlySpan<byte> utf8FormattedNumber);
++
+         private static readonly WriteFormatedNumberValueFuncDelegate s_writeFormatedNmberValueFunc;
+ 
+         static Utf8JsonWriterExtensions()
+@@ -23,7 +24,7 @@ namespace Dahomey.Json.Util
+                 throw new JsonException("Unexpected");
+             }
+ 
+-            s_writeFormatedNmberValueFunc = 
++            s_writeFormatedNmberValueFunc =
+                 (WriteFormatedNumberValueFuncDelegate)method
+                     .CreateDelegate(typeof(WriteFormatedNumberValueFuncDelegate));
+         }

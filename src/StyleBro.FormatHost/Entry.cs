@@ -11,6 +11,15 @@ public static class Entry
     /// <summary>What <see cref="Run"/> returns for a command the host doesn't run: bro starts 'dotnet format' for it.</summary>
     public const int Declined = -1;
 
+    /// <summary>
+    /// What <see cref="Run"/> returns when the workspace didn't load (an exception in MSBuildWorkspace), after a line
+    /// <see cref="LoadFailedMarker"/> + why: bro runs 'dotnet format' for the rest of the command (owner's decision 2026-10-24).
+    /// </summary>
+    public const int LoadFailed = -2;
+
+    /// <summary>Starts the output line that says why the workspace didn't load (bro's FormatHost reads it, the user doesn't see it).</summary>
+    public const string LoadFailedMarker = "stylebro-host-load-failed: ";
+
     /// <summary>A host for one command; <paramref name="measure"/> times its phases (bro's --timings).</summary>
     public static object Open(Func<string, IDisposable> measure) => new Session(measure);
 

@@ -93,6 +93,16 @@ internal static class PreviewCommand
     {
         // Each file keeps its own line ending, as in FormatCommand.Run (trial 28: every changed file of an LF repository was
         // CRLF in the patch, the whitespace pass writing the OS's ending without end_of_line).
+        // --engine picks what formats the copy, as in 'bro format' (trial 50: passed on, 'dotnet format' printed its usage text);
+        // without it, the engine the command already uses (Program takes the option first).
+        var engineNamed = options.Contains(FormatCommand.EngineOption);
+        if (FormatCommand.TakeEngine(ref options, out var engineError) is not { } engineName)
+        {
+            Console.Error.WriteLine(engineError);
+            return 1;
+        }
+
+        using var engine = engineNamed ? FormatCommand.UseEngine(engineName) : null;
         var formatOnce = format ?? FormatCommand.RunPlain;
         var keepingEndings = FormatCommand.KeepingLineEndings((a, o) => formatOnce(a, o!));
         format = (a, o) => keepingEndings(a, o);
@@ -271,7 +281,7 @@ internal static class PreviewCommand
             JsonReport.Set("path", source);
             JsonReport.Set("write", false);
 
-            var package = AddPackage(File.Exists(target) ? Path.GetDirectoryName(target)! : target);
+            var package = AddPackage(File.Exists(target) ? Path.GetDirectoryName(target)! : target, copy);
             AddIgnoredSettings(copy);
             Commit(copy, "settings");
             var configured = Head(copy);
@@ -821,11 +831,14 @@ internal static class PreviewCommand
     /// Remove item for StyleBro's too), else to the Directory.Build.props every project imports
     /// (<see cref="Migration.PropsFiles"/>: a nested one shadows the root's). Where central package management is on for a
     /// file (<see cref="CentralPackages"/>), the version goes into that Directory.Packages.props. Returns what it edited, or null.
+    /// The Directory.Build.props/.targets and Directory.Packages.props above the root, up to <paramref name="top"/> (the copy's
+    /// folder), count too: MSBuild imports them (trial 50: a preview of 'Lib' added Lib/Directory.Build.props, which hid the
+    /// root one that already had the reference).
     /// </summary>
-    public static string? AddPackage(string root)
+    public static string? AddPackage(string root, string? top = null)
     {
         var files = StyleCopSetup.EnumerateFiles(root).ToList();
-        if (ReferencesStyleBro(files))
+        if (ReferencesStyleBro(files.Concat(ImportedFromAbove(root, top))))
         {
             return null;
         }
@@ -912,6 +925,36 @@ internal static class PreviewCommand
             + (versions.Count > 0 ? $" (version in {Names(versions)})" : string.Empty)
             + (optedOut.Count > 0 ? $", with a version for {Names(optedOut)} (central package management off there)" : string.Empty)
             + (removes.Count > 0 ? $", removed again in {Names(removes)} (they remove StyleCop.Analyzers)" : string.Empty);
+    }
+
+    /// <summary>
+    /// The Directory.Build.props/.targets and Directory.Packages.props files in the folders above <paramref name="root"/>, up to
+    /// and including <paramref name="top"/> (none without it, or when the root isn't under it).
+    /// </summary>
+    public static IEnumerable<string> ImportedFromAbove(string root, string? top)
+    {
+        if (top is null)
+        {
+            yield break;
+        }
+
+        var limit = Path.TrimEndingDirectorySeparator(Path.GetFullPath(top));
+        var start = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root));
+        if (start.Equals(limit, StringComparison.OrdinalIgnoreCase) || !start.StartsWith(limit + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+        {
+            yield break;
+        }
+
+        for (var folder = Path.GetDirectoryName(start); folder is not null && folder.Length >= limit.Length; folder = Path.GetDirectoryName(folder))
+        {
+            foreach (var name in new[] { "Directory.Build.props", "Directory.Build.targets", "Directory.Packages.props" })
+            {
+                if (File.Exists(Path.Combine(folder, name)))
+                {
+                    yield return Path.Combine(folder, name);
+                }
+            }
+        }
     }
 
     /// <summary>Whether an MSBuild file under the root mentions StyleBro.Analyzers (a reference to it).</summary>

@@ -1,0 +1,26 @@
+Previewing 'bro format' on a copy; nothing in /home/user/stylebro/.trials/trial50/Dahomey.Json/d3-host changes.
+Copying the repository to /tmp/stylebro-preview-xwLBkE/d3-host... 0s
+Format run 1... 42s
+Format run 2... 3s
+Format: 92 files, 338 reported changes, clean after 1 run
+  IDE0055  Whitespace and formatting                   28 files
+  BRO1505  Elements should be separated by a bla...    25 files
+  BRO1519  Closing brace should be followed by b...    14 files
+  BRO1401  Use a trailing comma in multi-line in...    13 files
+  IMPORTS                                              11 files
+  BRO1138  A string literal should be a plain st...     9 files
+  BRO1002  Single-line comments should begin wit...     7 files
+  BRO1518  Closing braces should not be preceded...     7 files
+  BRO1603  Documentation text should end with a ...     7 files
+  BRO1407  Conditional expressions should declar...     6 files
+  ... and 28 more rules
+Sample (IDE0055, src/Dahomey.Json.Tests/DynamicObjectTests.cs):
+  -            obj.Array = new [] { 1, 2 };
+  +            obj.Array = new[] { 1, 2 };
+Sample (BRO1505, src/Dahomey.Json.Tests/IgnoreNullValuesTests.cs):
+  (adds a blank line)
+Sample (BRO1519, src/Dahomey.Json.Tests/GuidConverter.cs):
+  (adds a blank line)
+Full diff: .git/stylebro-preview.patch (3,153 lines)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 46s.

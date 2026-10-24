@@ -1,0 +1,23 @@
+default preview-init exit=0 92s :: bro preview init
+default init exit=0 3s :: bro init --write
+default format exit=0 92s :: bro format
+default check exit=0 20s :: bro check
+default check-json exit=0 21s :: bash -c bro check  --json > /home/user/stylebro/.trials/trial50/Dahomey.Json/logs/recheck2/default-check.json
+default check-build exit=0 51s :: bro check --build
+default check-build-json exit=0 49s :: bash -c bro check --build  --json > /home/user/stylebro/.trials/trial50/Dahomey.Json/logs/recheck2/default-check-build.json
+default build-Debug exit=1 7s :: dotnet build src/Dahomey.Json.sln -c Debug --no-incremental -p:TreatWarningsAsErrors=true -p:NuGetAudit=false
+default build-Release exit=1 7s :: dotnet build src/Dahomey.Json.sln -c Release --no-incremental -p:TreatWarningsAsErrors=true -p:NuGetAudit=false
+default test exit=0 6s :: dotnet test src/Dahomey.Json.sln -c Release --no-build
+host preview-init exit=0 48s :: bro preview init --engine host
+host init exit=0 3s :: bro init --write
+host format exit=0 51s :: bro format --engine host
+host check exit=0 19s :: bro check --engine host
+host check-json exit=0 18s :: bash -c bro check --engine host --json > /home/user/stylebro/.trials/trial50/Dahomey.Json/logs/recheck2/host-check.json
+host check-build exit=0 49s :: bro check --build --engine host
+host check-build-json exit=0 50s :: bash -c bro check --build --engine host --json > /home/user/stylebro/.trials/trial50/Dahomey.Json/logs/recheck2/host-check-build.json
+host build-Debug exit=1 6s :: dotnet build src/Dahomey.Json.sln -c Debug --no-incremental -p:TreatWarningsAsErrors=true -p:NuGetAudit=false
+host build-Release exit=1 5s :: dotnet build src/Dahomey.Json.sln -c Release --no-incremental -p:TreatWarningsAsErrors=true -p:NuGetAudit=false
+host test exit=0 4s :: dotnet test src/Dahomey.Json.sln -c Release --no-build
+host preview-format exit=0 47s :: bro preview format --engine host
+default preview-format-engine-dotnet exit=0 80s :: bro preview format --engine dotnet-format
+host format-diff exit=0 47s :: bro format --diff --engine host

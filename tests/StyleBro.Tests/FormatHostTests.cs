@@ -389,6 +389,48 @@ public sealed class FormatHostTests : IDisposable
         Assert.Single(found, l => FormatCommand.IsFindingLine(l) && l.Contains("D.cs(7,", StringComparison.Ordinal));
     }
 
+    // Against the SDK on this machine (trial 50, ncalc): when MSBuildWorkspace throws opening the solution, the host says why
+    // and declines, so bro runs 'dotnet format' for the rest of the command. Any SDK throws on a solution file that isn't XML;
+    // SDK 10.0.1xx (not 10.0.4xx) also on a file one project has as an additional file and another compiles, and there the
+    // host must decline as 'dotnet format' crashes, elsewhere say what it says.
+    [Fact]
+    public void AWorkspaceThatDoesntLoad_IsDeclinedWithTheReason()
+    {
+        var root = this.NewFolder();
+        Write(root, "Repro.slnx", "<Solution>\n  <Project Path=\"App/App.csproj\" />\n  <Project Path=\"Lib/Lib.csproj\" />\n</Solution>\n");
+        Write(root, "Broken.slnx", "<Solution>\n  <Project Path=\"App/App.csproj\"\n");
+        Write(root, "Lib/Lib.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFramework>net8.0</TargetFramework>\n  </PropertyGroup>\n  <ItemGroup>\n    <Compile Remove=\"Shared.cs\" />\n    <AdditionalFiles Include=\"Shared.cs\" />\n  </ItemGroup>\n</Project>\n");
+        Write(root, "Lib/Shared.cs", "namespace Lib;\n\npublic static class Shared\n{\n    public static int One() => 1;\n}\n");
+        Write(root, "App/App.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFramework>net8.0</TargetFramework>\n  </PropertyGroup>\n  <ItemGroup>\n    <Compile Include=\"../Lib/Shared.cs\" />\n  </ItemGroup>\n</Project>\n");
+        Assert.Equal(0, Dotnet(root, out _, "restore", "Repro.slnx"));
+
+        var log = new List<string>();
+        using var host = FormatHost.Open(root, log.Add);
+        Assert.True(host is not null, string.Join("\n", log));
+        string[] Check(string solution) => ["format", "whitespace", solution, "--verify-no-changes", "--no-restore"];
+
+        var broken = Path.Combine(root, "Broken.slnx");
+        var output = new List<string>();
+        Assert.Null(host.Run(broken, root, [], [], [], Check(broken), output.Add, out var failure));
+        Assert.Contains("not closed", failure, StringComparison.Ordinal);
+        Assert.Empty(output);
+        Assert.StartsWith("Engine: the host couldn't load the workspace (", FormatHost.LoadFailedLine(failure!), StringComparison.Ordinal);
+
+        var solution = Path.Combine(root, "Repro.slnx");
+        var plainCode = Dotnet(root, out var plain, Check(solution));
+        var code = host.Run(solution, root, [], [], [], Check(solution), _ => { }, out failure);
+        if (plain.Any(FormatCommand.IsCrash))
+        {
+            Assert.Null(code);
+            Assert.Contains("does not contain the specified document", failure, StringComparison.Ordinal);
+        }
+        else
+        {
+            Assert.Equal(plainCode, code);
+            Assert.Null(failure);
+        }
+    }
+
     public void Dispose()
     {
         foreach (var folder in this.folders)

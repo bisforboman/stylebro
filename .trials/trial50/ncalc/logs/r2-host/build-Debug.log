@@ -1,0 +1,95 @@
+  Determining projects to restore...
+  Restored /home/user/stylebro/.trials/trial50/ncalc/r2-host/example/NCalc.Playground/NCalc.Playground.csproj (in 514 ms).
+  Restored /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.Sync/NCalc.Sync.csproj (in 498 ms).
+  Restored /home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj (in 505 ms).
+  11 of 14 projects are up-to-date for restore.
+  NCalc.Domain -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.Domain/bin/Debug/net462/NCalc.Domain.dll
+  NCalc.Domain -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.Domain/bin/Debug/netstandard2.0/NCalc.Domain.dll
+  NCalc.Domain -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.Domain/bin/Debug/net8.0/NCalc.Domain.dll
+  NCalc.Domain -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.Domain/bin/Debug/net10.0/NCalc.Domain.dll
+  NCalc.Docs -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/docs/bin/Debug/netstandard2.0/NCalc.Docs.dll
+  NCalc.Parser -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.Parser/bin/Debug/netstandard2.0/NCalc.Parser.dll
+  NCalc.SourceGenerators -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.SourceGenerators/bin/Debug/netstandard2.0/NCalc.SourceGenerators.dll
+  NCalc.Parser -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.Parser/bin/Debug/net8.0/NCalc.Parser.dll
+  NCalc.Parser -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.Parser/bin/Debug/net10.0/NCalc.Parser.dll
+  NCalc.Core -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.Core/bin/Debug/netstandard2.0/NCalc.Core.dll
+  NCalc.Core -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.Core/bin/Debug/net8.0/NCalc.Core.dll
+  NCalc -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc/bin/Debug/net8.0/NCalc.dll
+  NCalc.Async -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.Async/bin/Debug/net8.0/NCalc.Async.dll
+  NCalc.LambdaCompilation -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/Plugins/NCalc.LambdaCompilation/bin/Debug/net8.0/NCalc.LambdaCompilation.dll
+  NCalc.LambdaCompilation -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/Plugins/NCalc.LambdaCompilation/bin/Debug/netstandard2.0/NCalc.LambdaCompilation.dll
+  NCalc.Async -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.Async/bin/Debug/netstandard2.0/NCalc.Async.dll
+  NCalc -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc/bin/Debug/netstandard2.0/NCalc.dll
+  NCalc.Sync -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.Sync/bin/Debug/netstandard2.0/NCalc.Sync.dll
+  NCalc.Sync -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.Sync/bin/Debug/net8.0/NCalc.Sync.dll
+  NCalc.DependencyInjection -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.DependencyInjection/bin/Debug/netstandard2.0/NCalc.DependencyInjection.dll
+  NCalc.DependencyInjection -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.DependencyInjection/bin/Debug/net8.0/NCalc.DependencyInjection.dll
+  NCalc.Core -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.Core/bin/Debug/net462/NCalc.Core.dll
+  NCalc.Core -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.Core/bin/Debug/net10.0/NCalc.Core.dll
+  NCalc.Async -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.Async/bin/Debug/net10.0/NCalc.Async.dll
+  NCalc.Sync -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.Sync/bin/Debug/net10.0/NCalc.Sync.dll
+  NCalc.MemoryCache -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/Plugins/NCalc.MemoryCache/bin/Debug/netstandard2.0/NCalc.MemoryCache.dll
+  NCalc -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc/bin/Debug/net10.0/NCalc.dll
+  NCalc.LambdaCompilation -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/Plugins/NCalc.LambdaCompilation/bin/Debug/net462/NCalc.LambdaCompilation.dll
+  NCalc.Async -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.Async/bin/Debug/net462/NCalc.Async.dll
+  NCalc.Sync -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.Sync/bin/Debug/net462/NCalc.Sync.dll
+  NCalc.DependencyInjection -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.DependencyInjection/bin/Debug/net462/NCalc.DependencyInjection.dll
+  NCalc -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc/bin/Debug/net462/NCalc.dll
+  NCalc.Benchmarks -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Benchmarks/bin/Debug/net8.0/NCalc.Benchmarks.dll
+  NCalc.LambdaCompilation -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/Plugins/NCalc.LambdaCompilation/bin/Debug/net10.0/NCalc.LambdaCompilation.dll
+  NCalc.MemoryCache -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/Plugins/NCalc.MemoryCache/bin/Debug/net8.0/NCalc.MemoryCache.dll
+  NCalc.DependencyInjection -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/NCalc.DependencyInjection/bin/Debug/net10.0/NCalc.DependencyInjection.dll
+  NCalc.MemoryCache -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/Plugins/NCalc.MemoryCache/bin/Debug/net462/NCalc.MemoryCache.dll
+  NCalc.MemoryCache -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/src/Plugins/NCalc.MemoryCache/bin/Debug/net10.0/NCalc.MemoryCache.dll
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/ServiceCollectionExtensionsTests.cs(113,36): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/ServiceCollectionExtensionsTests.cs(114,30): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/ServiceCollectionExtensionsTests.cs(115,24): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/ServiceCollectionExtensionsTests.cs(129,36): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/ServiceCollectionExtensionsTests.cs(130,30): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/ServiceCollectionExtensionsTests.cs(131,24): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/ServiceCollectionExtensionsTests.cs(148,43): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/ServiceCollectionExtensionsTests.cs(149,24): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/ServiceCollectionExtensionsTests.cs(156,73): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/ServiceCollectionExtensionsTests.cs(242,34): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/ServiceCollectionExtensionsTests.cs(264,34): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/MathTests.cs(93,34): warning CS0168: The variable 'ex' is declared but never used [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/MathTests.cs(169,34): warning CS0168: The variable 'ex' is declared but never used [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/MathTests.cs(246,34): warning CS0168: The variable 'ex' is declared but never used [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/LambdaTests.cs(603,26): warning CS0168: The variable 'ex' is declared but never used [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/LambdaTests.cs(827,17): warning CS8605: Unboxing a possibly null value. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/LambdaTests.cs(874,32): warning CS8605: Unboxing a possibly null value. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/LambdaTests.cs(896,28): warning CS8605: Unboxing a possibly null value. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/MultiThreadTests.cs(16,13): warning TUnit0018: Test methods should not assign instance data [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/LambdaTests.cs(294,19): warning TUnitAssertions0005: Assert.That(...) should not be used with a constant value [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/LambdaTests.cs(298,15): warning TUnitAssertions0005: Assert.That(...) should not be used with a constant value [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+  NCalc.Tests -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/bin/Debug/net10.0/NCalc.Tests.dll
+  NCalc.Playground -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/example/NCalc.Playground/bin/Debug/net10.0/NCalc.Playground.dll
+  NCalc.Playground (Blazor output) -> /home/user/stylebro/.trials/trial50/ncalc/r2-host/example/NCalc.Playground/bin/Debug/net10.0/wwwroot
+
+Build succeeded.
+
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/ServiceCollectionExtensionsTests.cs(113,36): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/ServiceCollectionExtensionsTests.cs(114,30): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/ServiceCollectionExtensionsTests.cs(115,24): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/ServiceCollectionExtensionsTests.cs(129,36): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/ServiceCollectionExtensionsTests.cs(130,30): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/ServiceCollectionExtensionsTests.cs(131,24): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/ServiceCollectionExtensionsTests.cs(148,43): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/ServiceCollectionExtensionsTests.cs(149,24): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/ServiceCollectionExtensionsTests.cs(156,73): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/ServiceCollectionExtensionsTests.cs(242,34): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/ServiceCollectionExtensionsTests.cs(264,34): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/MathTests.cs(93,34): warning CS0168: The variable 'ex' is declared but never used [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/MathTests.cs(169,34): warning CS0168: The variable 'ex' is declared but never used [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/MathTests.cs(246,34): warning CS0168: The variable 'ex' is declared but never used [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/LambdaTests.cs(603,26): warning CS0168: The variable 'ex' is declared but never used [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/LambdaTests.cs(827,17): warning CS8605: Unboxing a possibly null value. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/LambdaTests.cs(874,32): warning CS8605: Unboxing a possibly null value. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/LambdaTests.cs(896,28): warning CS8605: Unboxing a possibly null value. [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/MultiThreadTests.cs(16,13): warning TUnit0018: Test methods should not assign instance data [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/LambdaTests.cs(294,19): warning TUnitAssertions0005: Assert.That(...) should not be used with a constant value [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/LambdaTests.cs(298,15): warning TUnitAssertions0005: Assert.That(...) should not be used with a constant value [/home/user/stylebro/.trials/trial50/ncalc/r2-host/test/NCalc.Tests/NCalc.Tests.csproj]
+    21 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:14.21

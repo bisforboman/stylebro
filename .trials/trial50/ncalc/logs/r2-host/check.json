@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "command": "format",
+  "previewOf": null,
+  "path": "/home/user/stylebro/.trials/trial50/ncalc/r2-host",
+  "write": false,
+  "settings": [],
+  "conventions": [],
+  "sonar": null,
+  "agentsMd": null,
+  "runs": [
+    {
+      "run": 1,
+      "filesChanged": [],
+      "changesPerRule": {}
+    }
+  ],
+  "changesPerRule": {},
+  "filesPerRule": null,
+  "keptFindings": [
+    {
+      "path": "test/NCalc.Tests/LambdaTests.cs",
+      "line": 477,
+      "column": 23,
+      "rule": "BRO1306",
+      "reason": "NameInString",
+      "reasonText": "the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time",
+      "message": "Rename 'x' to 'X'"
+    },
+    {
+      "path": "test/NCalc.Tests/LambdaTests.cs",
+      "line": 478,
+      "column": 23,
+      "rule": "BRO1306",
+      "reason": "NameInString",
+      "reasonText": "the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time",
+      "message": "Rename 'y' to 'Y'"
+    },
+    {
+      "path": "test/NCalc.Tests/LambdaTests.cs",
+      "line": 637,
+      "column": 23,
+      "rule": "BRO1306",
+      "reason": "NameInString",
+      "reasonText": "the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time",
+      "message": "Rename 'x' to 'X'"
+    },
+    {
+      "path": "test/NCalc.Tests/LambdaTests.cs",
+      "line": 638,
+      "column": 23,
+      "rule": "BRO1306",
+      "reason": "NameInString",
+      "reasonText": "the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time",
+      "message": "Rename 'y' to 'Y'"
+    }
+  ],
+  "patch": null,
+  "clean": false,
+  "exitCode": 3,
+  "notChecked": [
+    "IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)",
+    "NCalc.Core (net462): 'dotnet format' couldn't load it (references didn't load), so the code only that framework compiles",
+    "NCalc.DependencyInjection (net462): 'dotnet format' couldn't load it (references didn't load), so the code only that framework compiles",
+    "NCalc.LambdaCompilation (net462): 'dotnet format' couldn't load it (references didn't load), so the code only that framework compiles",
+    "NCalc.MemoryCache (net462): 'dotnet format' couldn't load it (references didn't load), so the code only that framework compiles"
+  ]
+}

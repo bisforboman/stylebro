@@ -1,0 +1,20 @@
+Checking StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net6.0, net6.0-windows, net8.0, netstandard2.0, netstandard2.1). net6.0: only the projects whose code compiles differently there.
+Checked netstandard2.1 (run 1 of 5)
+Checked netstandard2.0 (run 2 of 5)
+Checked net6.0 (run 3 of 5)
+Checked net8.0 (run 4 of 5)
+Checked net6.0-windows (run 5 of 5)
+Formatting a copy: net6.0 (3 project(s), 1 file with findings)
+Formatting a copy: net8.0 (5 project(s), 1 file with findings)
+Formatting a copy: netstandard2.0 (2 project(s), 1 file with findings)
+Formatting a copy: netstandard2.1 (2 project(s), 1 file with findings)
+== net6.0 (3 project(s))
+/home/user/stylebro/.trials/trial50/ObservableCollections/host/src/ObservableCollections/RingBuffer.cs(91,41): warning BRO1514: Put the statement in braces [/home/user/stylebro/.trials/trial50/ObservableCollections/host/src/ObservableCollections/ObservableCollections.csproj]
+== net8.0 (5 project(s))
+== netstandard2.0 (2 project(s))
+'dotnet format' had warnings loading the workspace in its netstandard2.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+== netstandard2.1 (2 project(s))
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Not clean: formatting would change 1 file. Run 'bro format'.

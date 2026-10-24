@@ -1,0 +1,185 @@
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net6.0, net6.0-windows, net8.0, netstandard2.0, netstandard2.1). net6.0: only the projects whose code compiles differently there.
+Checked netstandard2.0 (run 1 of 5)
+Checked netstandard2.1 (run 2 of 5)
+Checked net6.0 (run 3 of 5)
+Checked net8.0 (run 4 of 5)
+Checked net6.0-windows (run 5 of 5)
+== net6.0 (3 project(s), 36 files with findings)
+== net6.0-windows (1 project(s), 2 files with findings)
+== net8.0 (5 project(s), 30 files with findings)
+== netstandard2.0 (2 project(s), 25 files with findings)
+'dotnet format' had warnings loading the workspace in its netstandard2.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+== netstandard2.1 (2 project(s), 25 files with findings)
+Run 1: 45 files changed:
+  sandbox/AvaloniaApp/MainWindow.axaml.cs
+  sandbox/AvaloniaApp/Program.cs
+  sandbox/BlazorApp/Data/WeatherForecastService.cs
+  sandbox/BlazorApp/Pages/Error.cshtml.cs
+  sandbox/BlazorApp/Pages/Index.razor.cs
+  sandbox/ConsoleApp/Program.cs
+  sandbox/WpfApp/AssemblyInfo.cs
+  sandbox/WpfApp/MainWindow.xaml.cs
+  src/ObservableCollections.R3/ObservableCollectionR3Extensions.cs
+  src/ObservableCollections.R3/ObservableCollectionR3Extensions.View.cs
+  ... and 35 more
+Checked netstandard2.1 (run 1 of 5)
+Checked netstandard2.0 (run 2 of 5)
+Checked net8.0 (run 3 of 5)
+Checked net6.0 (run 4 of 5)
+Checked net6.0-windows (run 5 of 5)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Timings (phases that ran at once overlap):
+  total                                                 49.6 s
+  run 1                                                 46.4 s
+  plan: projects (solution list, evaluations)            2.2 s
+  restore                                                2.8 s
+  generators: build check                                0.0 s
+  plan: frameworks and configurations (evaluations)      2.0 s
+  check: netstandard2.0                                 13.2 s
+  check: net8.0                                         14.6 s
+  check: net6.0                                         14.6 s
+  check: netstandard2.1                                 13.3 s
+  host: load workspace                                   5.7 s
+  host: read changed files                               0.0 s
+  host: read changed files                               0.0 s
+  host: read changed files                               0.0 s
+  host: read changed files                               0.0 s
+  host: check whitespaceformatter                        0.7 s
+  host: check whitespaceformatter                        0.6 s
+  host: check whitespaceformatter                        0.4 s
+  host: check finalnewlineformatter                      0.1 s
+  host: check finalnewlineformatter                      0.1 s
+  host: check whitespaceformatter                        0.4 s
+  host: check endoflineformatter                         0.0 s
+  host: check endoflineformatter                         0.0 s
+  host: check charsetformatter                           0.0 s
+  host: check charsetformatter                           0.0 s
+  host: check organizeimportsformatter                   0.2 s
+  host: check organizeimportsformatter                   0.2 s
+  host: check code style                                 2.8 s
+  host: check code style                                 2.2 s
+  host: check finalnewlineformatter                      0.0 s
+  host: check endoflineformatter                         0.0 s
+  host: check charsetformatter                           0.0 s
+  host: check organizeimportsformatter                   0.1 s
+  host: check code style                                 2.1 s
+  host: check finalnewlineformatter                      0.0 s
+  host: check endoflineformatter                         0.0 s
+  host: check charsetformatter                           0.0 s
+  host: check organizeimportsformatter                   0.0 s
+  host: check code style                                 1.9 s
+  host: check analyzer reference                         3.7 s
+  host: check analyzer reference                         3.7 s
+  host: check analyzer reference                         5.0 s
+  host: check analyzer reference                         4.4 s
+  check: net6.0-windows                                  0.3 s
+  host: read changed files                               0.0 s
+  host: check whitespaceformatter                        0.0 s
+  host: check finalnewlineformatter                      0.0 s
+  host: check endoflineformatter                         0.0 s
+  host: check charsetformatter                           0.0 s
+  host: check organizeimportsformatter                   0.0 s
+  host: check code style                                 0.1 s
+  host: check analyzer reference                         0.1 s
+  fix: net6.0                                           14.6 s
+  host: read changed files                               0.0 s
+  host: fix whitespaceformatter                          0.3 s
+  host: fix finalnewlineformatter                        0.0 s
+  host: fix endoflineformatter                           0.0 s
+  host: fix charsetformatter                             0.0 s
+  host: fix organizeimportsformatter                     0.0 s
+  host: fix code style                                   0.7 s
+  host: fix analyzer reference                          13.6 s
+  fix: net6.0-windows                                    0.7 s
+  host: read changed files                               0.0 s
+  host: fix whitespaceformatter                          0.0 s
+  host: fix finalnewlineformatter                        0.0 s
+  host: fix endoflineformatter                           0.0 s
+  host: fix charsetformatter                             0.0 s
+  host: fix organizeimportsformatter                     0.0 s
+  host: fix code style                                   0.2 s
+  host: fix analyzer reference                           0.4 s
+  fix: net8.0                                            4.3 s
+  host: read changed files                               0.0 s
+  host: fix whitespaceformatter                          0.2 s
+  host: fix finalnewlineformatter                        0.0 s
+  host: fix endoflineformatter                           0.0 s
+  host: fix charsetformatter                             0.0 s
+  host: fix organizeimportsformatter                     0.0 s
+  host: fix code style                                   0.9 s
+  host: fix analyzer reference                           3.0 s
+  fix: netstandard2.0                                    1.2 s
+  host: read changed files                               0.0 s
+  host: fix whitespaceformatter                          0.1 s
+  host: fix finalnewlineformatter                        0.0 s
+  host: fix endoflineformatter                           0.0 s
+  host: fix charsetformatter                             0.0 s
+  host: fix organizeimportsformatter                     0.0 s
+  host: fix code style                                   0.6 s
+  host: fix analyzer reference                           0.4 s
+  fix: netstandard2.1                                    1.1 s
+  host: read changed files                               0.0 s
+  host: fix whitespaceformatter                          0.2 s
+  host: fix finalnewlineformatter                        0.0 s
+  host: fix endoflineformatter                           0.0 s
+  host: fix charsetformatter                             0.0 s
+  host: fix organizeimportsformatter                     0.0 s
+  host: fix code style                                   0.5 s
+  host: fix analyzer reference                           0.3 s
+  run 2                                                  2.8 s
+  plan: projects (solution list, evaluations)            0.0 s
+  generators: build check                                0.0 s
+  plan: frameworks and configurations (evaluations)      0.0 s
+  check: netstandard2.1                                  1.1 s
+  check: net6.0                                          2.2 s
+  host: read changed files                               0.0 s
+  check: net8.0                                          1.9 s
+  check: netstandard2.0                                  1.2 s
+  host: read changed files                               0.0 s
+  host: read changed files                               0.0 s
+  host: read changed files                               0.0 s
+  host: check whitespaceformatter                        0.4 s
+  host: check whitespaceformatter                        0.4 s
+  host: check whitespaceformatter                        0.5 s
+  host: check whitespaceformatter                        0.3 s
+  host: check finalnewlineformatter                      0.0 s
+  host: check endoflineformatter                         0.1 s
+  host: check finalnewlineformatter                      0.0 s
+  host: check endoflineformatter                         0.0 s
+  host: check charsetformatter                           0.0 s
+  host: check charsetformatter                           0.0 s
+  host: check organizeimportsformatter                   0.0 s
+  host: check organizeimportsformatter                   0.0 s
+  host: check code style                                 0.6 s
+  host: check code style                                 0.8 s
+  host: check finalnewlineformatter                      0.0 s
+  host: check endoflineformatter                         0.0 s
+  host: check charsetformatter                           0.0 s
+  host: check organizeimportsformatter                   0.0 s
+  host: check code style                                 0.5 s
+  host: check finalnewlineformatter                      0.0 s
+  host: check endoflineformatter                         0.0 s
+  host: check charsetformatter                           0.0 s
+  host: check organizeimportsformatter                   0.0 s
+  host: check code style                                 0.5 s
+  host: check analyzer reference                         0.0 s
+  host: check analyzer reference                         0.0 s
+  host: check analyzer reference                         0.6 s
+  host: check analyzer reference                         0.9 s
+  check: net6.0-windows                                  0.1 s
+  host: read changed files                               0.0 s
+  host: check whitespaceformatter                        0.0 s
+  host: check finalnewlineformatter                      0.0 s
+  host: check endoflineformatter                         0.0 s
+  host: check charsetformatter                           0.0 s
+  host: check organizeimportsformatter                   0.0 s
+  host: check code style                                 0.0 s
+  host: check analyzer reference                         0.1 s
+
+real	0m49.827s
+user	1m57.009s
+sys	0m5.937s
+exit 0

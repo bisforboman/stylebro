@@ -1,0 +1,11 @@
+diff --git a/Lib/Directory.Build.props b/Lib/Directory.Build.props
+new file mode 100644
+index 0000000..7f1fee8
+--- /dev/null
++++ b/Lib/Directory.Build.props
+@@ -0,0 +1,5 @@
++<Project>
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial50.2" PrivateAssets="all" />
++  </ItemGroup>
++</Project>

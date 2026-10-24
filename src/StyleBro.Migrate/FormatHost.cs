@@ -24,6 +24,9 @@ internal sealed class FormatHost : IDisposable
 
     private const string RollForwardVariable = "DOTNET_ROLL_FORWARD";
 
+    // The host's Entry.LoadFailedMarker (another load context: plain strings only).
+    private const string LoadFailedMarker = "stylebro-host-load-failed: ";
+
     private readonly MethodInfo run;
     private readonly MethodInfo close;
     private readonly object session;
@@ -194,21 +197,46 @@ internal sealed class FormatHost : IDisposable
         return File.Exists(framework) && File.Exists(own) && AssemblyName.GetAssemblyName(framework).Version >= AssemblyName.GetAssemblyName(own).Version;
     }
 
+    /// <summary>What to say when the host's workspace didn't load: 'dotnet format' runs the rest of the command.</summary>
+    public static string LoadFailedLine(string reason) => $"Engine: the host couldn't load the workspace ({reason.TrimEnd('.')}), so 'dotnet format' runs the checks and fixes.";
+
     /// <summary>
     /// Runs 'dotnet <paramref name="arguments"/>' (a 'format' check or fix run) in the host, or returns null for a command it
     /// doesn't run (bro then starts it). <paramref name="environment"/>: what the child process would get that changes how
     /// MSBuild loads the projects; <paramref name="variables"/>: what else it would get, which the fixers read;
     /// <paramref name="selections"/>: the run's projects ('path|framework'), empty for the whole workspace.
     /// </summary>
-    public int? Run(string workspace, string folder, IEnumerable<string> environment, IEnumerable<string> variables, IEnumerable<string> selections, IEnumerable<string> arguments, Action<string> output)
+    public int? Run(string workspace, string folder, IEnumerable<string> environment, IEnumerable<string> variables, IEnumerable<string> selections, IEnumerable<string> arguments, Action<string> output) =>
+        this.Run(workspace, folder, environment, variables, selections, arguments, output, out _);
+
+    /// <summary>
+    /// <see cref="Run(string, string, IEnumerable{string}, IEnumerable{string}, IEnumerable{string}, IEnumerable{string}, Action{string})"/>,
+    /// and why the workspace didn't load (<paramref name="loadFailure"/>, null when it did): bro then runs 'dotnet format'
+    /// for the rest of the command.
+    /// </summary>
+    public int? Run(string workspace, string folder, IEnumerable<string> environment, IEnumerable<string> variables, IEnumerable<string> selections, IEnumerable<string> arguments, Action<string> output, out string? loadFailure)
     {
+        loadFailure = null;
         var list = arguments.ToList();
         if (list.Count == 0 || list[0] != "format")
         {
             return null;
         }
 
-        var code = (int)this.run.Invoke(null, [this.session, workspace, folder, environment.ToArray(), variables.ToArray(), selections.ToArray(), list.Skip(1).ToArray(), output])!;
+        string? failure = null;
+        void Output(string line)
+        {
+            if (line.StartsWith(LoadFailedMarker, StringComparison.Ordinal))
+            {
+                failure = line.Substring(LoadFailedMarker.Length);
+                return;
+            }
+
+            output(line);
+        }
+
+        var code = (int)this.run.Invoke(null, [this.session, workspace, folder, environment.ToArray(), variables.ToArray(), selections.ToArray(), list.Skip(1).ToArray(), (Action<string>)Output])!;
+        loadFailure = failure;
         return code < 0 ? null : code;
     }
 

@@ -1,0 +1,8 @@
+default preview-init exit=0 96s :: bro preview init
+default init exit=0 4s :: bro init --write
+default format exit=0 97s :: bro format
+default check exit=0 21s :: bro check
+default check-json exit=0 21s :: bash -c bro check  --json > /home/user/stylebro/.trials/trial50/Dahomey.Json/logs/recheck/default-check.json
+default check-build exit=0 52s :: bro check --build
+default check-build-json exit=0 52s :: bash -c bro check --build  --json > /home/user/stylebro/.trials/trial50/Dahomey.Json/logs/recheck/default-check-build.json
+default preview-format-engine-dotnet exit=0 84s :: bro preview format --engine dotnet-format

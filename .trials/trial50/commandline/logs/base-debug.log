@@ -1,0 +1,23 @@
+  Determining projects to restore...
+  Restored /home/user/stylebro/.trials/trial50/commandline/base/src/CommandLine/CommandLine.csproj (in 7.27 sec).
+  Restored /home/user/stylebro/.trials/trial50/commandline/base/tests/CommandLine.Tests/CommandLine.Tests.csproj (in 9.02 sec).
+  CommandLine -> /home/user/stylebro/.trials/trial50/commandline/base/src/CommandLine/bin/Debug/netstandard2.0/CommandLine.dll
+  CommandLine -> /home/user/stylebro/.trials/trial50/commandline/base/src/CommandLine/bin/Debug/net45/CommandLine.dll
+  CommandLine -> /home/user/stylebro/.trials/trial50/commandline/base/src/CommandLine/bin/Debug/net40/CommandLine.dll
+  CommandLine -> /home/user/stylebro/.trials/trial50/commandline/base/src/CommandLine/bin/Debug/net461/CommandLine.dll
+/home/user/stylebro/.trials/trial50/commandline/base/tests/CommandLine.Tests/Unit/Core/GetoptTokenizerTests.cs(93,13): warning xUnit2013: Do not use Assert.Equal() to check for collection size. (https://xunit.github.io/xunit.analyzers/rules/xUnit2013) [/home/user/stylebro/.trials/trial50/commandline/base/tests/CommandLine.Tests/CommandLine.Tests.csproj::TargetFramework=net461]
+/home/user/stylebro/.trials/trial50/commandline/base/tests/CommandLine.Tests/Unit/Core/GetoptTokenizerTests.cs(93,13): warning xUnit2013: Do not use Assert.Equal() to check for collection size. (https://xunit.github.io/xunit.analyzers/rules/xUnit2013) [/home/user/stylebro/.trials/trial50/commandline/base/tests/CommandLine.Tests/CommandLine.Tests.csproj::TargetFramework=netcoreapp3.1]
+  CommandLine.Tests -> /home/user/stylebro/.trials/trial50/commandline/base/tests/CommandLine.Tests/bin/Debug/net461/CommandLine.Tests.dll
+  CommandLine.Tests -> /home/user/stylebro/.trials/trial50/commandline/base/tests/CommandLine.Tests/bin/Debug/netcoreapp3.1/CommandLine.Tests.dll
+  The package CommandLineParser.0.0.0 is missing a readme. Go to https://aka.ms/nuget/authoring-best-practices/readme to learn why package readmes are important.
+  Successfully created package '/home/user/stylebro/.trials/trial50/commandline/base/src/CommandLine/bin/Debug/CommandLineParser.0.0.0.nupkg'.
+  Successfully created package '/home/user/stylebro/.trials/trial50/commandline/base/src/CommandLine/bin/Debug/CommandLineParser.0.0.0.snupkg'.
+
+Build succeeded.
+
+/home/user/stylebro/.trials/trial50/commandline/base/tests/CommandLine.Tests/Unit/Core/GetoptTokenizerTests.cs(93,13): warning xUnit2013: Do not use Assert.Equal() to check for collection size. (https://xunit.github.io/xunit.analyzers/rules/xUnit2013) [/home/user/stylebro/.trials/trial50/commandline/base/tests/CommandLine.Tests/CommandLine.Tests.csproj::TargetFramework=net461]
+/home/user/stylebro/.trials/trial50/commandline/base/tests/CommandLine.Tests/Unit/Core/GetoptTokenizerTests.cs(93,13): warning xUnit2013: Do not use Assert.Equal() to check for collection size. (https://xunit.github.io/xunit.analyzers/rules/xUnit2013) [/home/user/stylebro/.trials/trial50/commandline/base/tests/CommandLine.Tests/CommandLine.Tests.csproj::TargetFramework=netcoreapp3.1]
+    2 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:18.12

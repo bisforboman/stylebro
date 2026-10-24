@@ -1,0 +1,8 @@
+Previewing 'bro format' on a copy; nothing in /home/user/stylebro/.trials/trial50/spot-dahomey-engine changes.
+Copying the repository to /tmp/stylebro-preview-YdBAiL/spot-dahomey-engine... 0s
+Settings: 5 lines in Lib/Directory.Build.props (StyleBro.Analyzers)
+  StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial50.2 to Directory.Build.props for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).
+Format run 1... 8s
+Format: 0 files, 0 reported changes, nothing to change
+Full diff: .git/stylebro-preview.patch (11 lines)
+Done in 8s.

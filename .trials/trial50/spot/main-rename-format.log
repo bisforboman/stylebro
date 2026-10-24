@@ -1,0 +1,5 @@
+Fixing StyleBro's rules and the built-in rules init and migrate turn on (141 ids); --all applies every analyzer's and compiler fix.
+Run 1: 1 file changed:
+  Program.cs
+Checked 1 project (run 1 of 1)
+Run 2: 0 files changed, clean.

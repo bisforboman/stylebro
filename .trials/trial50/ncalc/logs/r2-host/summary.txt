@@ -1,0 +1,13 @@
+preview exit=3 266s
+init exit=0 6s
+format exit=3 285s
+format2 exit=3 85s
+check exit=3 57s
+check-json exit=3 57s
+check-build exit=3 220s
+check-build-json exit=3 219s
+build-Debug exit=0 14s
+build-Release exit=0 12s
+test-Debug exit=0 11s
+test-Release exit=0 10s
+done

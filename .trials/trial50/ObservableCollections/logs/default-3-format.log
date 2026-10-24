@@ -1,0 +1,64 @@
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net6.0, net6.0-windows, net8.0, netstandard2.0, netstandard2.1). net6.0: only the projects whose code compiles differently there.
+Checked netstandard2.1 (run 1 of 5)
+Checked netstandard2.0 (run 2 of 5)
+Checked net6.0 (run 3 of 5)
+Checked net8.0 (run 4 of 5)
+Checked net6.0-windows (run 5 of 5)
+== net6.0 (3 project(s), 36 files with findings)
+== net6.0-windows (1 project(s), 2 files with findings)
+== net8.0 (5 project(s), 30 files with findings)
+== netstandard2.0 (2 project(s), 25 files with findings)
+'dotnet format' had warnings loading the workspace in its netstandard2.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+== netstandard2.1 (2 project(s), 25 files with findings)
+Run 1: 45 files changed:
+  sandbox/AvaloniaApp/MainWindow.axaml.cs
+  sandbox/AvaloniaApp/Program.cs
+  sandbox/BlazorApp/Data/WeatherForecastService.cs
+  sandbox/BlazorApp/Pages/Error.cshtml.cs
+  sandbox/BlazorApp/Pages/Index.razor.cs
+  sandbox/ConsoleApp/Program.cs
+  sandbox/WpfApp/AssemblyInfo.cs
+  sandbox/WpfApp/MainWindow.xaml.cs
+  src/ObservableCollections.R3/ObservableCollectionR3Extensions.cs
+  src/ObservableCollections.R3/ObservableCollectionR3Extensions.View.cs
+  ... and 35 more
+Checked netstandard2.1 (run 1 of 5)
+Checked netstandard2.0 (run 2 of 5)
+Checked net6.0 (run 3 of 5)
+Checked net8.0 (run 4 of 5)
+Checked net6.0-windows (run 5 of 5)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Timings (phases that ran at once overlap):
+  total                                                111.7 s
+  run 1                                                 89.2 s
+  plan: projects (solution list, evaluations)            2.3 s
+  restore                                                2.8 s
+  generators: build check                                0.0 s
+  plan: frameworks and configurations (evaluations)      2.2 s
+  check: net8.0                                         14.4 s
+  check: netstandard2.1                                 11.2 s
+  check: netstandard2.0                                 11.2 s
+  check: net6.0                                         14.3 s
+  check: net6.0-windows                                  7.0 s
+  fix: net6.0                                           21.5 s
+  fix: net6.0-windows                                    8.0 s
+  fix: net8.0                                           12.7 s
+  fix: netstandard2.0                                    8.2 s
+  fix: netstandard2.1                                    7.8 s
+  run 2                                                 22.0 s
+  plan: projects (solution list, evaluations)            0.0 s
+  generators: build check                                0.0 s
+  plan: frameworks and configurations (evaluations)      0.0 s
+  check: netstandard2.1                                 11.3 s
+  check: net6.0                                         14.7 s
+  check: net8.0                                         14.7 s
+  check: netstandard2.0                                 11.4 s
+  check: net6.0-windows                                  7.0 s
+
+real	1m51.799s
+user	3m55.033s
+sys	0m16.422s
+exit 0

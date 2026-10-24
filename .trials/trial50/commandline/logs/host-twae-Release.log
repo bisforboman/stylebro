@@ -1,0 +1,20 @@
+  Determining projects to restore...
+  Restored /home/user/stylebro/.trials/trial50/commandline/host/src/CommandLine/CommandLine.csproj (in 381 ms).
+  Restored /home/user/stylebro/.trials/trial50/commandline/host/tests/CommandLine.Tests/CommandLine.Tests.csproj (in 464 ms).
+  CommandLine -> /home/user/stylebro/.trials/trial50/commandline/host/src/CommandLine/bin/Release/net40/CommandLine.dll
+  CommandLine -> /home/user/stylebro/.trials/trial50/commandline/host/src/CommandLine/bin/Release/net45/CommandLine.dll
+  CommandLine -> /home/user/stylebro/.trials/trial50/commandline/host/src/CommandLine/bin/Release/netstandard2.0/CommandLine.dll
+  CommandLine -> /home/user/stylebro/.trials/trial50/commandline/host/src/CommandLine/bin/Release/net461/CommandLine.dll
+  CommandLine.Tests -> /home/user/stylebro/.trials/trial50/commandline/host/tests/CommandLine.Tests/bin/Release/net461/CommandLine.Tests.dll
+/home/user/stylebro/.trials/trial50/commandline/host/tests/CommandLine.Tests/Unit/Issue389Tests.cs(25,33): error CS0017: Program has more than one entry point defined. Compile with /main to specify the type that contains the entry point. [/home/user/stylebro/.trials/trial50/commandline/host/tests/CommandLine.Tests/CommandLine.Tests.csproj::TargetFramework=netcoreapp3.1]
+  The package CommandLineParser.0.0.0 is missing a readme. Go to https://aka.ms/nuget/authoring-best-practices/readme to learn why package readmes are important.
+  Successfully created package '/home/user/stylebro/.trials/trial50/commandline/host/src/CommandLine/bin/Release/CommandLineParser.0.0.0.nupkg'.
+  Successfully created package '/home/user/stylebro/.trials/trial50/commandline/host/src/CommandLine/bin/Release/CommandLineParser.0.0.0.snupkg'.
+
+Build FAILED.
+
+/home/user/stylebro/.trials/trial50/commandline/host/tests/CommandLine.Tests/Unit/Issue389Tests.cs(25,33): error CS0017: Program has more than one entry point defined. Compile with /main to specify the type that contains the entry point. [/home/user/stylebro/.trials/trial50/commandline/host/tests/CommandLine.Tests/CommandLine.Tests.csproj::TargetFramework=netcoreapp3.1]
+    0 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:07.59

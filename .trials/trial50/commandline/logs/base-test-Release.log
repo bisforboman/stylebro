@@ -1,0 +1,12 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  CommandLine -> /home/user/stylebro/.trials/trial50/commandline/base/src/CommandLine/bin/Release/netstandard2.0/CommandLine.dll
+/home/user/stylebro/.trials/trial50/commandline/base/tests/CommandLine.Tests/Unit/Core/GetoptTokenizerTests.cs(93,13): warning xUnit2013: Do not use Assert.Equal() to check for collection size. (https://xunit.github.io/xunit.analyzers/rules/xUnit2013) [/home/user/stylebro/.trials/trial50/commandline/base/tests/CommandLine.Tests/CommandLine.Tests.csproj::TargetFramework=netcoreapp3.1]
+  CommandLine.Tests -> /home/user/stylebro/.trials/trial50/commandline/base/tests/CommandLine.Tests/bin/Release/netcoreapp3.1/CommandLine.Tests.dll
+Test run for /home/user/stylebro/.trials/trial50/commandline/base/tests/CommandLine.Tests/bin/Release/netcoreapp3.1/CommandLine.Tests.dll (.NETCoreApp,Version=v3.1)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:   684, Skipped:     0, Total:   684, Duration: 631 ms - CommandLine.Tests.dll (netcoreapp3.1)
