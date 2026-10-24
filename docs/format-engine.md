@@ -31,6 +31,15 @@ through MSBuildLocator), the command says so and uses `dotnet format`:
 Engine: the host can't run here (the SDK's dotnet-format needs .NET 10, and 'bro' runs on .NET 8), so 'dotnet format' runs the checks and fixes.
 ```
 
+The host opens the whole solution once per configuration. When that load fails, the rest of the command uses
+`dotnet format` too. One case: a file that one project has as an additional file (`AdditionalFiles`, as some source
+generators add them) and another project compiles. The SDK's workspace can't open a solution that loads that file both
+ways, so `dotnet format` gets those projects in runs of their own:
+
+```
+Engine: the host couldn't load the workspace (The solution does not contain the specified document), so 'dotnet format' runs the checks and fixes.
+```
+
 ## How it fixes
 
 A fix run in the host does what a `dotnet format` run does, in the same order: the whitespace, line ending, charset and
