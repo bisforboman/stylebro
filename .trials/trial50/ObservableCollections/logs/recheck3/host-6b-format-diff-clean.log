@@ -1,0 +1,8 @@
+Previewing 'bro format' on a copy; nothing in /home/user/stylebro/.trials/trial50/ObservableCollections/f-host changes.
+Copying the repository to /tmp/stylebro-preview-6s6dGv/f-host... 0s
+Format run 1... 30s
+Format: 0 files, 0 reported changes, nothing to change
+Full diff: /home/user/stylebro/.trials/trial50/ObservableCollections/logs/recheck3/host-6b.patch (0 lines)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 31s.
+exit 0 time 30.962394516

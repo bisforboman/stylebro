@@ -173,3 +173,36 @@ Logs: `.trials/trial50/ObservableCollections/logs/` (`base-*`, `default-*`, `hos
   Directory.Build.props. Format's output is the same apart from the order of the `Checked` lines. The `Not checked:` lines are
   the same single IDE0049 line in all 18 logs. The `--json` output is identical, and every exit code is 0.
 - The builds and tests match the untouched code. Format converges in one changing run. No new findings.
+
+### Final pass (4c60b3c)
+
+- I started on 990c775, packed as 0.8.0-trial50.3. The default engine finished there with all 14 steps at exit 0 (logs:
+  `logs/recheck2-990c775-partial/`). Then the fixer moved the pass to 4c60b3c, which adds f09f8c8: a multi-targeted project's
+  additional files now come from each framework's evaluation. This repository has two multi-targeted libraries, so I redid
+  the whole pass there.
+- StyleBro 4c60b3c, packed as `0.8.0-trial50.4`, run with `bro --version` = 0.8.0-trial50.4. Fresh clones `f-default` and
+  `f-host` of `base`, made by `V=0.8.0-trial50.4 LOGDIR=recheck3 PFX=f recheck.sh <engine>`. Logs: `logs/recheck3/`.
+
+| Step | Default: exit, time | Host: exit, time |
+|---|---|---|
+| `bro preview init` | 0, 115 s (45 files, clean after 1 run) | 0, 100 s (same) |
+| `bro init --write` | 0, 6 s | 0, 5 s |
+| `bro preview format [--engine host] --diff=<file>` | 0, 110 s, 2,299 lines | 0, 49 s, identical patch |
+| `bro format [--engine host] --diff=<file>` | 0, 101 s, identical patch | 0, 48 s, identical patch |
+| `bro format` | 0, 125 s: run 1 45 files, run 2 clean | 0, 54 s: the same |
+| `bro format --once` again | 0: 0 files changed | 0: 0 files changed |
+| `bro check` / `--json` | 0, Clean / `clean: true, exitCode: 0` | 0, Clean / identical JSON |
+| `bro check --build` / `--json` | 0, Clean / exit 0 | 0, Clean / identical JSON |
+| preview format / format --diff on the formatted tree | 0 / 0, empty patches | 0 / 0, empty patches |
+| TWAE Debug / Release | 0 errors | 0 errors |
+| Tests Debug / Release | 24 + 10 passed | 24 + 10 passed |
+
+- **Unchanged:**
+  - The trees after format are identical between the engines, and identical to the 1a25ead re-check apart from the package
+    version.
+  - The preview and `--diff` patches are byte-identical to the 1a25ead ones, which I had already shown apply to the init'd
+    tree and give the formatted tree.
+  - Format's output is identical apart from the order of the `Checked` lines. All 18 `Not checked:` lines are the single
+    IDE0049 line. The `--json` output is identical.
+  - Builds and tests match the untouched code.
+- No new findings. Finding 1 stays fixed.
