@@ -44,4 +44,29 @@ public sealed partial class MigrationTests
         error = CaptureError(() => Capture(() => Assert.Equal(1, Program.Main(["preview", "init", root, "--engine", "fast"]))));
         Assert.Contains("--engine takes 'host'", error, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void Preview_OfASubfolder_SeesTheReferenceAbove()
+    {
+        // Dahomey.Json's re-check: 'bro preview format Lib' with the reference in the root Directory.Build.props said "wasn't
+        // referenced" and added Lib/Directory.Build.props, which would hide the root one.
+        Write("Directory.Build.props", "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"StyleBro.Analyzers\" Version=\"1.0.0\" PrivateAssets=\"all\" />\n  </ItemGroup>\n</Project>\n");
+        Write("Lib/Lib.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
+        var lib = Path.Combine(root, "Lib");
+
+        Assert.Equal([Path.Combine(root, "Directory.Build.props")], PreviewCommand.ImportedFromAbove(lib, root));
+        Assert.Null(PreviewCommand.AddPackage(lib, root));
+        Assert.False(File.Exists(Path.Combine(lib, "Directory.Build.props")));
+
+        // The preview itself (its copy's root is the top).
+        PreviewCommand.MakeRepository(root);
+        var output = Capture(() => CaptureError(() => Assert.Throws<InvalidOperationException>(() => PreviewCommand.Run("format", new[] { Path.Combine(lib, "Lib.csproj"), "--diff=" + Path.Combine(root, "out.patch") }, (_, _) => throw new InvalidOperationException("format ran")))));
+        Assert.DoesNotContain("wasn't referenced", output, StringComparison.Ordinal);
+
+        // Nothing above the top counts, and without a reference the subfolder still gets one.
+        Assert.Empty(PreviewCommand.ImportedFromAbove(lib, lib));
+        File.WriteAllText(Path.Combine(root, "Directory.Build.props"), "<Project />\n");
+        Assert.NotNull(PreviewCommand.AddPackage(lib, root));
+        Assert.Contains("StyleBro.Analyzers", File.ReadAllText(Path.Combine(lib, "Directory.Build.props")), StringComparison.Ordinal);
+    }
 }
