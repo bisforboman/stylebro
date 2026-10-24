@@ -853,6 +853,12 @@ internal static partial class FormatCommand
             ? (match.Groups["name"].Value, match.Groups["framework"].Value)
             : (skipped, run);
 
+    /// <summary>
+    /// Whether a line is one of the command's own headers (the rules line, the notes about the runs, the engine), which a check
+    /// shows as they come and a later format run doesn't repeat.
+    /// </summary>
+    public static bool IsHeaderLine(string line) => Headers.Any(h => line.StartsWith(h, StringComparison.Ordinal));
+
     /// <summary>Whether a line of 'dotnet format''s output says it crashed (an unhandled exception: its changes may be half written).</summary>
     public static bool IsCrash(string line) => line.StartsWith("Unhandled exception", StringComparison.Ordinal);
 
@@ -3590,7 +3596,7 @@ internal static partial class FormatCommand
         // is before it (the header came after the progress).
         var code = runOnce(args, line =>
         {
-            if (line.StartsWith(ProgressPrefix, StringComparison.Ordinal) || Headers.Any(h => line.StartsWith(h, StringComparison.Ordinal)))
+            if (line.StartsWith(ProgressPrefix, StringComparison.Ordinal) || IsHeaderLine(line))
             {
                 log(line);
             }
@@ -4718,7 +4724,7 @@ internal static partial class FormatCommand
                 {
                     (output ?? Console.WriteLine)(line);
                 }
-                else if (!Headers.Any(h => line.StartsWith(h, StringComparison.Ordinal)))
+                else if (!IsHeaderLine(line))
                 {
                     log(line);
                 }

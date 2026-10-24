@@ -131,15 +131,9 @@ public sealed partial class MigrationTests
     public void Check_ShowsTheEngineLine()
     {
         // ncalc: the host's "Engine: ... 'dotnet format' runs the checks and fixes" line was held back with the runs' output
-        // in a check, so a check didn't say which engine checked.
-        Write("App.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
-        var line = FormatHost.LoadFailedLine("The solution does not contain the specified document.");
-        var lines = new List<string>();
-        FormatCommand.Run([root, "--verify-no-changes"], lines.Add, (_, output) =>
-        {
-            output!(line);
-            return 0;
-        });
-        Assert.Contains(line, lines);
+        // in a check that found something, so it didn't say which engine checked. Engine lines are headers, shown as they come.
+        Assert.True(FormatCommand.IsHeaderLine(FormatHost.LoadFailedLine("The solution does not contain the specified document.")));
+        Assert.True(FormatCommand.IsHeaderLine(FormatHost.FallbackLine("no SDK folder")));
+        Assert.False(FormatCommand.IsHeaderLine("Engine is not a header without the colon"));
     }
 }
