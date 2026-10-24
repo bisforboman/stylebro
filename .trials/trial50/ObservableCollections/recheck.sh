@@ -4,15 +4,15 @@ set -u
 R=/home/user/stylebro/.trials/trial50/ObservableCollections
 . $R/env.sh
 e=$1; E=""; [ "$e" = host ] && E="--engine host"
-L=$R/logs/recheck; mkdir -p $L
-d=$R/r-$e; rm -rf $d; git clone -q $R/base $d; cd $d; git checkout -q 8ed7ad87b35885b2540158d9188d710b1cf32763
+export V=${V:-0.8.0-trial50.2}; L=$R/logs/${LOGDIR:-recheck}; mkdir -p $L
+d=$R/${PFX:-r}-$e; rm -rf $d; git clone -q $R/base $d; cd $d; git checkout -q 8ed7ad87b35885b2540158d9188d710b1cf32763
 run() { local n=$1; shift; local s=$(date +%s.%N); "$@" > $L/$e-$n.log 2>&1; local x=$?; echo "exit $x time $(echo "$(date +%s.%N) - $s" | bc)" >> $L/$e-$n.log; echo "$e $n: exit $x"; }
 gc() { git add -A; git -c user.email=t@t -c user.name=t commit -qm "$1"; }
 run 1-preview-init bro preview init
 run 2-init bro init --write
 python3 - <<'EOF'
 p='Directory.Build.props';s=open(p,encoding='utf-8').read()
-s=s.replace('</Project>','  <ItemGroup>\n    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial50.2" PrivateAssets="all" />\n  </ItemGroup>\n</Project>')
+s=s.replace('</Project>','  <ItemGroup>\n    <PackageReference Include="StyleBro.Analyzers" Version="'+__import__('os').environ['V']+'" PrivateAssets="all" />\n  </ItemGroup>\n</Project>')
 open(p,'w',encoding='utf-8').write(s)
 EOF
 gc init
