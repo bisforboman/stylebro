@@ -1,0 +1,23 @@
+{
+  "repo": "shibayan/Sharprompt",
+  "branch": "master",
+  "commit": "5e17ace494e7e7a87cd0daa3e3481eead749a68f",
+  "csFiles": 96,
+  "tags": [
+    "multi-target",
+    "library",
+    "generator",
+    "several-test-projects"
+  ],
+  "setups": "Root Directory.Build.props (Nullable) and Directory.Packages.props, global.json selects Microsoft.Testing.Platform; Sharprompt net8.0;net10.0 packs an in-solution source generator (netstandard2.0) through a custom target; a NativeAot test project with its own Directory.Build.props; no analyzers.",
+  "build": "ok",
+  "workaround": null,
+  "tests": "dotnet test --solution Sharprompt.slnx (MTP): 1,352 passed",
+  "usedIn": null,
+  "verified": {
+    "by": "trial 52 session",
+    "date": "2026-10-24",
+    "sdks": "10.0.113, 8.0.132 (DOTNET_ROLL_FORWARD=Major)"
+  },
+  "notes": "Also random.json entry 55. An in-solution generator packed by a custom MSBuild target; MTP test runner."
+}
