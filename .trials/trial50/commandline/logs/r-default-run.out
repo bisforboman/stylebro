@@ -1,0 +1,12 @@
+preview-init rc=0 88s
+init rc=0 4s
+preview-format rc=0 66s
+format-diff rc=0 66s
+format rc=0 80s
+check rc=0 19s
+checkbuild rc=0 54s
+twae-Debug rc=0 7s
+test-Debug rc=0 6s
+twae-Release rc=0 7s
+test-Release rc=0 6s
+done

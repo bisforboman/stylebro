@@ -1,0 +1,29 @@
+Previewing 'bro format' on a copy; nothing in /home/user/stylebro/.trials/trial50/commandline/r-host changes.
+Copying the repository to /tmp/stylebro-preview-MfP2BE/r-host... 0s
+Format run 1... 35s
+Format run 2... 3s
+Format: 142 files, 5,903 reported changes, clean after 1 run
+  IDE0055  Whitespace and formatting                   79 files
+  ENDOFLINE                                             65 files
+  BRO1002  Single-line comments should begin wit...    30 files
+  BRO1518  Closing braces should not be preceded...    28 files
+  BRO1108  Parameters should be on the same line...    21 files
+  BRO1505  Elements should be separated by a bla...    19 files
+  FINALNEWLINE                                             19 files
+  BRO1504  Single-line comments should be preced...    17 files
+  BRO1110  Closing parenthesis or bracket should...    16 files
+  BRO1517  Code should not contain multiple blan...    16 files
+  ... and 36 more rules
+Sample (IDE0055, src/CommandLine/Core/PartitionExtensions.cs):
+  -        public static Tuple<IEnumerable<T>,IEnumerable<T>> PartitionByPredicate<T>(
+  +        public static Tuple<IEnumerable<T>, IEnumerable<T>> PartitionByPredicate<T>(
+Sample (ENDOFLINE, src/CommandLine/Infrastructure/ReferenceEqualityComparer.cs):
+  (changes only line endings or whitespace)
+Sample (BRO1002, tests/CommandLine.Tests/Fakes/Options_With_Sequence.cs):
+  -        //[Option("string-seq")]
+  -        //public IEnumerable<string> StringSequence { get; set; } 
+  +        // [Option("string-seq")]
+  +        // public IEnumerable<string> StringSequence { get; set; } 
+Full diff: /home/user/stylebro/.trials/trial50/commandline/logs/r-host-preview-format.patch (15,920 lines)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 39s.

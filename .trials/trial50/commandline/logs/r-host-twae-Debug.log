@@ -1,0 +1,17 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  CommandLine -> /home/user/stylebro/.trials/trial50/commandline/r-host/src/CommandLine/bin/Debug/net45/CommandLine.dll
+  CommandLine -> /home/user/stylebro/.trials/trial50/commandline/r-host/src/CommandLine/bin/Debug/net40/CommandLine.dll
+  CommandLine -> /home/user/stylebro/.trials/trial50/commandline/r-host/src/CommandLine/bin/Debug/netstandard2.0/CommandLine.dll
+  CommandLine -> /home/user/stylebro/.trials/trial50/commandline/r-host/src/CommandLine/bin/Debug/net461/CommandLine.dll
+  The package CommandLineParser.0.0.0 is missing a readme. Go to https://aka.ms/nuget/authoring-best-practices/readme to learn why package readmes are important.
+  Successfully created package '/home/user/stylebro/.trials/trial50/commandline/r-host/src/CommandLine/bin/Debug/CommandLineParser.0.0.0.nupkg'.
+  Successfully created package '/home/user/stylebro/.trials/trial50/commandline/r-host/src/CommandLine/bin/Debug/CommandLineParser.0.0.0.snupkg'.
+  CommandLine.Tests -> /home/user/stylebro/.trials/trial50/commandline/r-host/tests/CommandLine.Tests/bin/Debug/net461/CommandLine.Tests.dll
+  CommandLine.Tests -> /home/user/stylebro/.trials/trial50/commandline/r-host/tests/CommandLine.Tests/bin/Debug/netcoreapp3.1/CommandLine.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:06.23

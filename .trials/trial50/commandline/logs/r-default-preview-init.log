@@ -1,0 +1,113 @@
+Previewing 'bro init --write' and 'bro format' on a copy; nothing in /home/user/stylebro/.trials/trial50/commandline/r-default changes.
+Copying the repository to /tmp/stylebro-preview-qRiGuq/r-default... 0s
+Conventions in the code (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  default  private fields: 140 of 152 named 'field' -> camelCase
+  default  '{' of multi-line blocks: 2092 of 2187 on its own line -> all
+  default  else/catch/finally after '}': 44 of 51 on a new line -> true
+  both     one-line if/else/loop/using/lock bodies: 290 with braces, 183 without braces -> both allowed
+  kept     one-line jumps ('if (x) return;'): 116 of 349 on the 'if' line without braces -> true (3 are enough)
+  default  operators where a line wraps: 213 of 232 at the start of the line -> beginning_of_line
+  too few  '=>' where a line wraps: 1 place -> default stays (end_of_line)
+  default  '=' where a line wraps: 56 of 56 at the end of the line -> end_of_line
+  off      multi-line initializers: 52 with a trailing comma, 110 without a trailing comma -> BRO1401 is off
+  off      empty strings: 144 string.Empty, 66 "" -> BRO1106 is off
+  kept     null checks: 180 of 181 '== null' -> equality_operator
+  default  one-line <summary> texts: 334 of 334 on three lines -> multi_line
+  default  default values: 35 of 37 'default(T)' -> false
+  default  ')' of split lists: 430 of 457 after the last item -> last_item
+  off      split lists: 188 first item on the next line, 81 first item after '(' -> BRO1107 is off
+  default  ': base(...)'/': this(...)': 63 of 66 on its own line -> own_line
+  default  'where' constraints: 3 of 3 on their own line -> own_line
+  default  'new T { ... }' with an initializer: 146 of 161 without '()' -> omit
+  off      switch sections: 14 after a blank line, 41 without a blank line -> BRO1526 is off
+  default  files' using directives: 147 of 147 outside the namespace -> outside_namespace
+  too few  mixed arithmetic ('a + b * c'): 1 place -> default stays (always_for_clarity)
+  kept     statements on their 'if'/loop/'case' line: 125 of 314 on their owner's line -> true (3 are enough)
+  off      overrides/interface implementations: 23 with a doc comment, 10 without a doc comment -> BRO1601 is off
+  off      types' members: 69 in BRO1001's order, 36 in another order -> BRO1001 is off
+  mixed    overloads BRO1001 could split: 5 apart, 1 next to each other -> default stays (false)
+  too few  lambda-first calls: 2 calls -> default stays (false)
+  default  split lists' items: 257 of 288 one per line -> warning
+  too few  unsigned literal suffixes: 2 places -> default stays (warning)
+  default  private-by-default members: 279 of 295 with 'private' -> for_non_interface_members
+  too few  partial type parts: 2 partial parts -> default stays (warning)
+  off      internal-by-default types: 111 of 116 without an access modifier -> BRO1404 is off
+  too few  'case X:' blocks: 1 block -> default stays (true)
+  off      property summaries: 65 starting with 'Gets'/'Sets', 30 in their own words -> BRO1604 is off
+  default  adjacent locals of one type: 17 of 17 declared one by one -> warning
+  default  declarations with 2+ attributes: 102 of 105 one per list ('[A]' '[B]') -> warning
+  default  adjacent fields of one type: 46 of 46 declared one by one -> warning
+  default  private static fields: 6 of 6 without a prefix -> warning
+  default  built-in type names: 163 of 173 only keywords ('int') -> warning
+  default  empty blocks ('{ }'): 50 of 52 on two lines -> false
+  default  block-bodied properties/methods: 151 of 174 on several lines -> warning
+  default  statement blocks ('if (x) { y(); }'): 301 of 303 on several lines -> warning
+  off      accessor bodies: 23 laid out alike, 11 one-line and multi-line mixed -> BRO1510 is off
+  default  auto-property accessors ('{ get; set; }'): 316 of 319 on one line -> warning
+  set      C# files' line endings: 188 files -> set in .editorconfig (crlf)
+  off      statements after a block's '}': 82 after a blank line, 234 right below the '}' -> BRO1519 is off
+  off      nested ifs BRO1149 would merge: 3 nested -> BRO1149 is off
+  default  neighbouring members: 1014 of 1045 with a blank line between -> warning
+  default  doc comments below code: 360 of 383 after a blank line -> warning
+  default  '//' comments above code: 613 of 613 right above the code -> warning
+  default  '//' comments below code: 317 of 394 after a blank line -> warning
+  default  doc comment texts: 1257 of 1302 ending with a period -> warning
+  default  doc element order (param, returns, remarks): 38 of 43 in BRO1619's order -> warning
+  off      keywords in doc comments: 1 '<see langword="null"/>', 6 '<c>null</c>' -> BRO1618 is off
+  default  non-private fields: 10 of 10 PascalCase or as your naming rule says -> warning
+  default  doc comments above their element: 386 of 388 right above it -> warning
+  both     using directives: 75 of 112 files sorted, 32 of 40 with System first -> not sorted
+  default  private constants/static readonly fields: 13 of 13 PascalCase -> PascalCase
+  default  spacing, control-flow keywords: 599 of 605 'if (x)' -> 'if (x)'
+  default  spacing, control-flow parentheses: 605 of 605 'if (x)' -> 'if (x)'
+  default  spacing, parenthesized expressions: 248 of 248 '(a + b)' -> '(a + b)'
+  default  spacing, cast parentheses: 412 of 412 '(int)x' -> '(int)x'
+  default  spacing, casts: 396 of 412 '(int)x' -> '(int)x'
+  default  spacing, call arguments: 3067 of 3067 'F(x)' -> 'F(x)'
+  default  spacing, declared parameters: 545 of 546 'void F(int x)' -> 'void F(int x)'
+Summary:
+  Kept your style for 42 settings: wrote stylebro_allow_single_line_jump_statements, stylebro_null_check_style,
+    csharp_preserve_single_line_statements; 39 were already StyleBro's default.
+  Allowed both forms for 2 settings because your code mixes them: csharp_prefer_braces = when_multiline (one-line
+    if/else/loop/using/lock bodies), dotnet_sort_system_directives_first not set (using directives).
+  Turned 10 rules off because your code mixes both forms: BRO1401 (multi-line initializers), BRO1106 (empty strings),
+    BRO1107 (split lists), BRO1526 (switch sections), BRO1601 (overrides/interface implementations),
+    BRO1001 (types' members), BRO1604 (property summaries), BRO1510 (accessor bodies),
+    BRO1519 (statements after a block's '}'), BRO1618 (keywords in doc comments).
+  Turned 2 rules off because your code doesn't do what they enforce: BRO1404 (internal-by-default types: 111 of 116
+    without an access modifier), BRO1149 (nested ifs BRO1149 would merge: 3 nested).
+  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
+  6 settings had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_arrow_placement_when_wrapping,
+    dotnet_style_parentheses_in_arithmetic_binary_operators, stylebro_allow_leading_multiline_lambda,
+    dotnet_diagnostic.BRO1135.severity, dotnet_diagnostic.BRO1007.severity, csharp_indent_case_contents_when_block.
+Settings: 65 lines in .editorconfig; 4 lines in Directory.Build.props (StyleBro.Analyzers)
+  StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial50.r2 to Directory.Build.props for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).
+Format run 1... 1m 7s
+Format run 2... 14s
+Format: 142 files, 5,905 reported changes, clean after 1 run
+  IDE0055  Whitespace and formatting                   79 files
+  ENDOFLINE                                             65 files
+  BRO1002  Single-line comments should begin wit...    30 files
+  BRO1518  Closing braces should not be preceded...    28 files
+  BRO1108  Parameters should be on the same line...    21 files
+  BRO1505  Elements should be separated by a bla...    19 files
+  FINALNEWLINE                                             19 files
+  BRO1504  Single-line comments should be preced...    17 files
+  BRO1110  Closing parenthesis or bracket should...    16 files
+  BRO1517  Code should not contain multiple blan...    16 files
+  ... and 36 more rules
+Sample (IDE0055, src/CommandLine/Core/PartitionExtensions.cs):
+  -        public static Tuple<IEnumerable<T>,IEnumerable<T>> PartitionByPredicate<T>(
+  +        public static Tuple<IEnumerable<T>, IEnumerable<T>> PartitionByPredicate<T>(
+Sample (ENDOFLINE, src/CommandLine/Infrastructure/ReferenceEqualityComparer.cs):
+  (changes only line endings or whitespace)
+Sample (BRO1002, tests/CommandLine.Tests/Fakes/Options_With_Sequence.cs):
+  -        //[Option("string-seq")]
+  -        //public IEnumerable<string> StringSequence { get; set; } 
+  +        // [Option("string-seq")]
+  +        // public IEnumerable<string> StringSequence { get; set; } 
+Full diff: /home/user/stylebro/.trials/trial50/commandline/logs/r-default-preview-init.patch (16,012 lines)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 1m 28s.

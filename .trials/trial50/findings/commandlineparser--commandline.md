@@ -189,3 +189,48 @@ Logs: `logs/host-preview.log`, `logs/pvf-host.log`, `logs/pvf-default.log`.
 - 65 files' line endings changed (ENDOFLINE) and 19 got a final newline: the repository's own `.editorconfig`
   (`end_of_line = crlf`, `insert_final_newline = true`); the committed files were mixed.
 - IDE0049 held back on SDK 10.0.113: documented note, not counted in the verdict.
+
+## Re-check (2026-10-24, fixer's 990c775, PR #294)
+
+- StyleBro `claude/trial-50` at 990c775, repacked as `0.8.0-trial50.r2` (both packages, same feed), `dotnet tool update -g
+  StyleBro.Tool --version 0.8.0-trial50.r2`. Fresh clones of `base` at 1e3607b: `r-default`, `r-host`. Script
+  `commandline/run2.sh <clone> <tag> [--engine host]`, the two engines one after the other:
+
+```
+bro preview init [--engine host] --diff=<file>
+# step 1: StyleBro.Analyzers 0.8.0-trial50.r2 in Directory.Build.props (LF this time)
+bro init --write
+bro preview format [--engine host] --diff=<file>
+bro format --diff=<file> [--engine host]
+bro format [--engine host]
+bro check [--engine host]               (+ --json)
+bro check --build [--engine host]       (+ --json)
+dotnet build CommandLine.sln -c Debug|Release --no-incremental -p:TreatWarningsAsErrors=true
+dotnet test tests/CommandLine.Tests -c Debug|Release -f netcoreapp3.1
+```
+
+| Command | Default: exit | time | Host: exit | time | Verdict (both) |
+|---|---|---|---|---|---|
+| `bro preview init` | 0 | 88 s | 0 | 42 s | 142 files, clean after 1 run |
+| `bro init --write` | 0 | 4 s | 0 | 4 s | as before |
+| `bro preview format` | 0 | 66 s | 0 | 39 s | 142 files, clean after 1 run |
+| `bro format --diff` | 0 | 66 s | 0 | 38 s | 142 files, clean after 1 run |
+| `bro format` | 0 | 80 s | 0 | 43 s | run 1: 142 files; run 2: 0, clean |
+| `bro check` / `--json` | 0 / 0 | 19 s | 0 / 0 | 18 s | clean; `clean: true`, `exitCode: 0` |
+| `bro check --build` / `--json` | 0 / 0 | 54 s | 0 / 0 | 53 s | "Debug: no findings, no new errors. Release: ... Clean."; `clean: true`, `exitCode: 0` |
+| Debug / Release TWAE build | 0 / 0 | 7 s | 0 / 0 | 7 s | 0 errors, 0 warnings (the baseline's xUnit2013 is fixed) |
+| Tests Debug / Release | 0 / 0 | 6 s | 0 / 0 | 5 s | 684 / 684 passed, both (baseline 684) |
+
+- Finding 1 fixed: `Issue389Tests.cs` keeps `__Main` (no `Main` line in its diff), no CS0017, the 684 tests build and pass.
+- Finding 2 fixed: all three previews take `--engine host` and pass.
+- Patches: each preview's / `--diff`'s patch applied to a copy of its starting state (base for preview init, the
+  post-init copy for the other two) gives exactly the format tree; the only exception is preview init's Directory.Build.props
+  (the preview puts StyleBro.Analyzers in its own `<ItemGroup>`, my step 1 put it into the existing one, as in the first
+  run). The three patches are byte-identical between the engines.
+- Engines: trees byte-identical after everything; exit codes and verdicts identical; `--json` identical apart from `path`
+  (`notChecked`: the same one IDE0049 note). Logs differ only in the order of the `Checked` lines, the default engine's
+  netcoreapp3.1 load-warning note (PR #287) and the preview summaries' "5,905" vs "5,903 reported changes" (the documented
+  count wobble from `dotnet format`'s fix order, docs/format-engine.md; the patches are identical).
+- Verdicts match the builds and tests: no false Clean, no false Not verified, format converges after one changing run, no
+  test that passed before fails. **No findings in the re-check.**
+- Logs: `commandline/logs/r-default-*`, `commandline/logs/r-host-*`.
