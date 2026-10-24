@@ -2,7 +2,7 @@
 # run2.sh <clone dir> <tag> [engine args...]: the re-check steps on a fresh clone; logs in logs/<tag>-*.log, summary in logs/<tag>-summary.tsv
 set -u
 D=$(realpath "$1"); TAG=$2; shift 2; ENG=("$@")
-V=0.8.0-trial50.r2
+V=0.8.0-trial50.r3
 L=$(realpath "$(dirname "$0")")/logs
 export NuGetAudit=false NUGET_CERT_REVOCATION_MODE=offline DOTNET_ROLL_FORWARD=Major DOTNET_CLI_TELEMETRY_OPTOUT=1
 S=$L/$TAG-summary.tsv
