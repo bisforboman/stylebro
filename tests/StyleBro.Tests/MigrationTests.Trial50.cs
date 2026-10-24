@@ -69,4 +69,18 @@ public sealed partial class MigrationTests
         Assert.NotNull(PreviewCommand.AddPackage(lib, root));
         Assert.Contains("StyleBro.Analyzers", File.ReadAllText(Path.Combine(lib, "Directory.Build.props")), StringComparison.Ordinal);
     }
+
+    [Theory]
+    [InlineData(0, 0, 0)]
+    [InlineData(0, 2, 2)]
+    [InlineData(2, 0, 2)]
+    [InlineData(2, 1, 1)]
+    [InlineData(1, 2, 1)]
+    [InlineData(1, 3, 1)]
+    public void Runs_AFailureAfterFindings_IsTheExitCode(int exit, int code, int expected)
+    {
+        // ncalc: the first runs found kept findings (2), the NCalc.Benchmarks run crashed (1), and 'bro check' said "Not
+        // verified: ... the rest is clean" (3) for code that run never checked.
+        Assert.Equal(expected, FormatCommand.Worse(exit, code));
+    }
 }

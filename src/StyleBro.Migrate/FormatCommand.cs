@@ -899,6 +899,14 @@ internal static partial class FormatCommand
             + $"{string.Join("; ", failures)}. {char.ToUpperInvariant(where[0][0])}{where[0][1..]}{string.Concat(where.Skip(1).Select(w => "; " + w))}.";
     }
 
+    /// <summary>
+    /// The runs' exit code so far after a run that exited <paramref name="code"/>: a failure (not 0 or <see cref="NotCleanExitCode"/>)
+    /// over findings, findings over clean, else the first. Trial 50, ncalc: the first runs' findings (2) hid a later run's crash
+    /// (1), and check said "the rest is clean" for code that run never checked.
+    /// </summary>
+    public static int Worse(int exit, int code) =>
+        exit is 0 || (exit == NotCleanExitCode && code is not (0 or NotCleanExitCode)) ? code : exit;
+
     /// <summary>What to say after a run crashed: the run's projects, and the SDK bug when the crash is the linked-file merge's.</summary>
     public static string CrashMessage(IEnumerable<string> projects) =>
         $"'dotnet format' crashed in the run for {string.Join(", ", projects.Order(StringComparer.OrdinalIgnoreCase))}, possibly after writing part of its changes (listed below). "
@@ -5787,7 +5795,7 @@ internal static partial class FormatCommand
             }
 
             Crashed(plan[index].Projects);
-            exit = exit == 0 ? code : exit;
+            exit = Worse(exit, code);
         }
 
         try
