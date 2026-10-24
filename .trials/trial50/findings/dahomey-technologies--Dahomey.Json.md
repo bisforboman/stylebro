@@ -226,3 +226,24 @@ Repacked from `claude/trial-50` at `990c775` as `0.8.0-trial50.3`. Fresh clones 
 - TWAE builds (both engines, Debug and Release): 0 warnings, the same 15 netstandard2.0 CS0122 errors as the untouched code. Tests
   360 / 372 / 374 passed, 0 failed.
 - Verdicts match the builds and tests. **No findings left.**
+
+### Final pass, again at 4c60b3c
+
+The fixer moved the final pass to `4c60b3c`. Its f09f8c8 changes FormatCommand for multi-targeted projects' additional
+files, so I re-ran the whole pass: packed as `0.8.0-trial50.4`, fresh clones `r3default/`, `r3host/`, `p3-*`, `d3-host/`,
+script `r3.sh` (r2.sh with the new version and paths), logs `logs/recheck3/` (`summary.txt`: every command, exit code, time).
+
+- Every bro command exits 0 on both engines, with the same verdicts as at 990c775:
+  - preview init: 83 s (default), 48 s (host).
+  - format: 93 s / 48 s. Run 1 changes 92 files, run 2 nothing.
+  - check: 21 s / 20 s, Clean.
+  - check --build: 52 s / 49 s, Clean (15 untouched errors not counted).
+  - preview format: 76 s (`--engine dotnet-format`), 45 s (`--engine host`).
+  - `format --diff --engine host`: 46 s.
+- Trees: `r3default` == `r3host` == the 990c775 tree. The preview init patches of the two engines are byte-identical, and
+  the patch, applied, gives the format tree. The three format previews (3,153 lines each) are byte-identical, and each
+  one, applied, gives the format tree.
+- `--json` of check and check --build: equal apart from `path`; clean true, exit 0, one `notChecked` (IDE0049).
+- The spot repro `bro preview format Lib`, with and without `--engine host`: exit 0, no "wasn't referenced", empty patch.
+- TWAE Debug and Release: 0 warnings and the 15 untouched CS0122 errors, on both engines. Tests 360 / 372 / 374 passed, 0 failed.
+- **No findings.**
