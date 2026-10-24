@@ -798,3 +798,34 @@ One section per trial (repositories, what broke, what was fixed, the owner's ver
   `<clear/>`s). error-or's net462 tests need Mono (fail before and after); EasyNetQ's IntegrationTests need RabbitMQ (left
   out) and Hosepipe.Tests fail 8-12 of 17 untouched. GOTCHA: a mutation script using `[IO.File]` with relative paths
   mutated the main checkout, not the worktree (.NET's current directory isn't PowerShell's location): join with the root.
+
+## Trial 53 (2026-10-24, not clean: owner "Not clean", tally 0; host soak: clean, 2 clean soaks on the new host code)
+
+- Repos (three random plus one targeted): shibayan/Sharprompt, AArnott/Nerdbank.Streams,
+  autofac/Autofac.Extensions.DependencyInjection (random, seed 53: draws 39, 54, 13 of 55 entries; only entry 55, Sharprompt,
+  was unused, so entries 56-60 were appended first (Nerdbank.Streams, Autofac.Extensions.DependencyInjection, Sleet,
+  Finbuckle.MultiTenant, Flurl; smoke-built and tested) and the walks ended on 55-57; `.trials/trial53/logs/picks.md`),
+  loic-sharma/BaGet (targeted at trial 52's .nupkg fix: `tests/BaGet.Tests/TestData/` commits TestData.1.2.3.nupkg next to C#
+  code, no project there; no pool entry had either lens, added). Tested main 241bca8 (after #300). Findings files:
+  `.trials/trial53/findings/`.
+- One session, the repositories in two parallel chains (base, default, host on fresh clones each). Wall clock: 20:13 start,
+  waiting for #300 until 20:38, runs 20:40-22:00, verdict asked at 22:40 (about 2.5 h).
+- BaGet: `charset = utf-8` with 16 of 248 C# files committed with a BOM; init turns IDE0055 on and format stripped the 16
+  BOMs without a word (trial 52's minority note covered only end_of_line). Owner: "Warn only"
+  (docs/decisions/2026-10-24-trial-53-a-minority-of-files-against-the-repositorys.md): `Conventions.ConvertedMinorityFileNote`
+  for charset and insert_final_newline, in init and migrate (with IDE0055 on).
+- BaGet's lens: `IsExtractedPackage` still took TestData/ (a .nupkg and no project) for a package. No effect on BaGet (its
+  file there is a generated .Designer.cs), but a spot repro with ordinary code there: format fixed the file and said "Run 1:
+  0 files changed, clean" (its snapshot never saw the folder; init and the preview's copy skipped it too). An extracted
+  package's .nupkg is named after its folder (packages.config, also -ExcludeVersion) or its id/version folders (a global
+  packages folder); `.nupkg.metadata` still counts.
+- Sharprompt, Nerdbank.Streams (StyleCop 1.3 as a GlobalPackageReference, submodule compiled in), Autofac (StyleCop + Sonar
+  rulesets, 8 solution configurations): no findings; Autofac's `end_of_line = crlf` is for `*.sln` only (not the lens).
+- Format host soak (owner: "Clean soak"): all four identical on both engines (trees, exit codes, --json, builds, tests);
+  logs differ only in run order and PR #287's load note. Format (s, default/host): 63/57, 152/78, 58/38, 108/67 (BaGet,
+  Sharprompt, Autofac, Nerdbank.Streams).
+- Environment: SDK 10.0.113 + 8.0.132 and pwsh were there; the trial feed in the user-level NuGet.Config and in BaGet's
+  nuget.config (`<clear/>`); global.json lowered in Nerdbank.Streams (10.0.402), Autofac (10.0.203); BaGet netcoreapp3.1 needs
+  `DOTNET_ROLL_FORWARD=Major` and fails 47 + 2 tests untouched. Autofac's Bench project runs real benchmarks under
+  `dotnet test -c Release` (hung the first baseline; tests limited to test/). One worker restart near the end (nothing lost:
+  findings were committed). GOTCHA again: `pkill -f` with a pattern in the same command line killed the shell.

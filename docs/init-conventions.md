@@ -204,7 +204,9 @@ A few settings work a little differently:
   its own), and the report says how to switch (remove the line and run `bro format`). Ical.Net:
   `charset = utf-8` with 108 of 223 files starting with a BOM, all 108 stripped; the starter kit:
   `insert_final_newline = false` with 1,092 of 1,597 files ending in a line break, all 1,092 removed. `bro
-  migrate --write` does the same. `trim_trailing_whitespace = false` can't be kept this way: `dotnet format` doesn't read the key
+  migrate --write` does the same. When the files do follow it but a few don't (BaGet: `charset = utf-8`, 16 of 248 files
+  with a BOM), the key stays and the report says how many files `format` changes (with IDE0055 on), so you can change
+  them in a commit of their own first; the same for a few files against your `end_of_line`. `trim_trailing_whitespace = false` can't be kept this way: `dotnet format` doesn't read the key
   and trims trailing whitespace on every line it formats, so the report only says so (with IDE0055 off nothing is trimmed).
   These keys (and `end_of_line`) are judged per file against the `.editorconfig` that decides it, as the compiler reads
   them: the nearest one that sets the key wins, within it the last matching section. A nearer file overrides anything

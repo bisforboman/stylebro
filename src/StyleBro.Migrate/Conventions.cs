@@ -1296,6 +1296,41 @@ internal static class Conventions
     }
 
     /// <summary>
+    /// <see cref="ConvertedMinorityNote"/> for <see cref="CharsetKey"/> and <see cref="FinalNewlineKey"/>: the report note when
+    /// the repository's own key is set and some C# files have the other form, which 'format' changes once IDE0055 is on (owner's
+    /// decision 2026-10-24, "Warn only"; trial 53, BaGet: 'charset = utf-8', 16 of 248 files with a BOM, all 16 stripped
+    /// without a word). Null when there are none or the value isn't one of the key's two; the caller asks only where
+    /// <see cref="ContradictedFileSetting"/> wrote nothing.
+    /// </summary>
+    public static string? ConvertedMinorityFileNote(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> own, string key)
+    {
+        var (title, values) = key == CharsetKey ? ("Charset", new[] { "utf-8", "utf-8-bom" }) : ("Final line breaks", new[] { "false", "true" });
+        if (!own.TryGetValue(key, out var setting) || !counts.TryGetValue(key, out var files))
+        {
+            return null;
+        }
+
+        var value = setting.Split(':')[0].Trim().ToLowerInvariant();
+        var keyForm = Array.IndexOf(values, value);
+        var others = keyForm < 0 ? 0 : files[1 - keyForm];
+        if (others == 0)
+        {
+            return null;
+        }
+
+        var one = others == 1;
+        var (form, change) = (key == CharsetKey, keyForm) switch
+        {
+            (true, 0) => (one ? "starts with a BOM" : "start with a BOM", "removes the BOM from"),
+            (true, _) => (one ? "starts without a BOM" : "start without a BOM", "adds a BOM to"),
+            (false, 0) => (one ? "ends with a line break" : "end with a line break", "removes the last line break from"),
+            _ => (one ? "ends without a line break" : "end without a line break", "adds a last line break to"),
+        };
+        var them = one ? "it" : "them";
+        return $"{title}: your .editorconfig says {key} = {value}, and {others} of {Plural(files.Sum(), "C# file")} {form}: 'format' {change} {them}. To keep that out of the formatting changes, change {them} in a commit of their own first.";
+    }
+
+    /// <summary>
     /// The line and the note when the repository's own <paramref name="key"/> (<see cref="CharsetKey"/> or
     /// <see cref="FinalNewlineKey"/>, for C# files) doesn't have <see cref="Winner"/>'s share of the C# files, or null. Like an
     /// end_of_line the files contradict (owner's decision 2026-10-12, "Keep endings out of it, warn"): nothing enforced it, so

@@ -686,13 +686,32 @@ internal sealed class StyleCopSetup
     /// <summary>
     /// Whether a folder's files are an extracted NuGet package's: a .nupkg (or NuGet's '.nupkg.metadata') and no project,
     /// solution or Directory.Build.props/.targets, which a package's root never has (trial 52: DbUp commits
-    /// src/dbup.1.2.3.nupkg next to src/DbUp.sln, and init saw none of its projects or code).
+    /// src/dbup.1.2.3.nupkg next to src/DbUp.sln, and init saw none of its projects or code). The .nupkg must be named the way
+    /// NuGet names an extracted one: after its folder ('packages/Old.Lib.1.0.0/Old.Lib.1.0.0.nupkg', packages.config) or
+    /// after the id and version folders ('old.lib/1.0.0/old.lib.1.0.0.nupkg', a global packages folder). Trial 53: BaGet
+    /// commits tests/BaGet.Tests/TestData/TestData.1.2.3.nupkg next to C# code and no project, and 'format' fixed a file
+    /// there that its snapshot never saw ("0 files changed").
     /// </summary>
     public static bool IsExtractedPackage(IEnumerable<string> files)
     {
-        var names = files.Select(Path.GetFileName).ToList();
-        return names.Any(n => n!.EndsWith(".nupkg", StringComparison.OrdinalIgnoreCase) || n.EndsWith(".nupkg.metadata", StringComparison.OrdinalIgnoreCase))
-            && !names.Any(n => Regex.IsMatch(n!, @"(\.(cs|vb|fs)proj|\.slnx?|\.slnf)$|^Directory\.Build\.(props|targets)$", RegexOptions.IgnoreCase));
+        var paths = files.ToList();
+        var names = paths.Select(Path.GetFileName).ToList();
+        if (names.Any(n => Regex.IsMatch(n!, @"(\.(cs|vb|fs)proj|\.slnx?|\.slnf)$|^Directory\.Build\.(props|targets)$", RegexOptions.IgnoreCase)))
+        {
+            return false;
+        }
+
+        if (names.Any(n => n!.EndsWith(".nupkg.metadata", StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+
+        var folder = paths.Count == 0 ? null : Path.GetDirectoryName(Path.GetFullPath(paths[0]));
+        var name = Path.GetFileName(folder);
+        var parent = Path.GetFileName(Path.GetDirectoryName(folder));
+        return name is not null && names.Any(n => n!.EndsWith(".nupkg", StringComparison.OrdinalIgnoreCase)
+            && Path.GetFileNameWithoutExtension(n) is var package
+            && (package.Equals(name, StringComparison.OrdinalIgnoreCase) || package.Equals($"{parent}.{name}", StringComparison.OrdinalIgnoreCase)));
     }
 
     /// <summary>

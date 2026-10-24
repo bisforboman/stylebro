@@ -1,0 +1,24 @@
+{
+  "repo": "loic-sharma/BaGet",
+  "branch": "main",
+  "commit": "5a8502ca4e3b21acd369d4a98c2529dac2d81cfe",
+  "csFiles": 304,
+  "tags": [
+    "library",
+    "app",
+    "web",
+    "subfolder-props",
+    "committed-nupkg"
+  ],
+  "setups": "src/ and tests/Directory.Build.props (none at the root; the samples projects have none), .editorconfig with charset = utf-8 (16 C# files with a BOM), no analyzers, no TreatWarningsAsErrors; netcoreapp3.1 apps and tests, netstandard2.0 libraries; nuget.config <clear/>s; tests/BaGet.Tests/TestData/ holds TestData.1.2.3.nupkg/.snupkg next to TestData.Designer.cs and no project.",
+  "build": "ok with workaround",
+  "workaround": "DOTNET_ROLL_FORWARD=Major (netcoreapp3.1); the trial feed in its nuget.config",
+  "tests": "dotnet test BaGet.sln: Core 117, Protocol 46, Web 20 pass; BaGet.Tests 47 of 66 and Protocol.Samples.Tests 2 of 8 fail untouched (FormatException; nuget.org)",
+  "usedIn": "trial 53",
+  "verified": {
+    "by": "trial 53 session",
+    "date": "2026-10-24",
+    "sdks": "10.0.113, 8.0.132"
+  },
+  "notes": "A committed .nupkg next to C# code in a folder without a project (trial 52/53's extracted-package check); a minority of BOM files against charset = utf-8."
+}

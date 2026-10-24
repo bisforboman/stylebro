@@ -1,0 +1,6 @@
+build	0	29s	dotnet build BaGet.sln -c Debug
+twae-Debug	0	16s	twae Debug
+test-Debug	1	43s	env CFG=Debug bash -c dotnet test BaGet.sln -c $CFG
+twae-Release	0	16s	twae Release
+test-Release	1	40s	env CFG=Release bash -c dotnet test BaGet.sln -c $CFG
+DONE
