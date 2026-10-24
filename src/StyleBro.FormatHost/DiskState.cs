@@ -21,6 +21,16 @@ namespace StyleBro.Host;
 public sealed class DiskState
 {
     private readonly Dictionary<string, (long Length, DateTime Written)> stamps = new(StringComparer.Ordinal);
+    private readonly Func<string, string> onDisk;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DiskState"/> class. <paramref name="onDisk"/> gives the file a document's
+    /// path stands for (a copy of the repository the documents are read from and written to), else the path itself.
+    /// </summary>
+    public DiskState(Func<string, string>? onDisk = null)
+    {
+        this.onDisk = onDisk ?? (p => p);
+    }
 
     /// <summary>
     /// Writes <paramref name="text"/> as MSBuildWorkspace saves a document: in the text's encoding, else the file's own, else
@@ -44,7 +54,7 @@ public sealed class DiskState
     {
         foreach (var path in Paths(solution))
         {
-            this.Stamp(path);
+            this.Stamp(this.onDisk(path));
         }
     }
 
@@ -57,7 +67,7 @@ public sealed class DiskState
         var changed = 0;
         foreach (var group in solution.Projects.SelectMany(p => p.Documents).Where(d => d.FilePath is not null).GroupBy(d => d.FilePath!, StringComparer.Ordinal))
         {
-            var path = group.Key;
+            var path = this.onDisk(group.Key);
             if (!File.Exists(path) || (this.stamps.TryGetValue(path, out var stamp) && stamp == Read(path)))
             {
                 continue;
@@ -96,7 +106,13 @@ public sealed class DiskState
             foreach (var id in change.GetChangedDocuments())
             {
                 var document = after.GetDocument(id)!;
-                if (document.FilePath is not { } path || written.Contains(path, StringComparer.Ordinal))
+                if (document.FilePath is not { } documentPath)
+                {
+                    continue;
+                }
+
+                var path = this.onDisk(documentPath);
+                if (written.Contains(path, StringComparer.Ordinal))
                 {
                     continue;
                 }
@@ -111,7 +127,7 @@ public sealed class DiskState
                 Write(path, text);
                 written.Add(path);
                 this.Stamp(path);
-                foreach (var copy in current.GetDocumentIdsWithFilePath(path))
+                foreach (var copy in current.GetDocumentIdsWithFilePath(documentPath))
                 {
                     current = current.WithDocumentText(copy, text, PreservationMode.PreserveValue);
                 }

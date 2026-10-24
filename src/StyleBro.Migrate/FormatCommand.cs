@@ -3764,6 +3764,10 @@ internal static partial class FormatCommand
             }
 
             var copyRoot = Path.GetFullPath(Path.Combine(copy, Path.GetRelativePath(source, root)));
+
+            // --engine host: the copy's runs in the repository's workspaces, as the checks above loaded and analyzed them (not
+            // with files outside the repository: those of the copy are elsewhere).
+            using (outside.Count == 0 ? CopyHost(copy, source) : null)
             using (namesInCopy)
             using (new KeptVariable(keptFile))
             {

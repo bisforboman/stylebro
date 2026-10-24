@@ -7,6 +7,19 @@ namespace StyleBro.Tests;
 public sealed partial class MigrationTests
 {
     [Fact]
+    public void ACopysPaths_MoveToTheRepositorys_AndBack()
+    {
+        // check's kept-findings copy runs in the repository's host (--engine host): what the copy's run hands it, and what it prints.
+        var sep = Path.DirectorySeparatorChar;
+        var copy = $"{sep}tmp{sep}stylebro-verify-1{sep}";
+        var repository = $"{sep}src{sep}repo{sep}";
+        Assert.Equal($"{repository}Lib{sep}A.cs(1,1): warning BRO1001", FormatCommand.MovePaths($"{copy}Lib{sep}A.cs(1,1): warning BRO1001", copy, repository));
+        Assert.Equal(repository.TrimEnd(sep), FormatCommand.MovePaths(copy.TrimEnd(sep), copy, repository));
+        Assert.Equal("--include", FormatCommand.MovePaths("--include", copy, repository));
+        Assert.Equal($"{sep}tmp{sep}stylebro-verify-10{sep}A.cs", FormatCommand.MovePaths($"{sep}tmp{sep}stylebro-verify-10{sep}A.cs", copy, repository));
+    }
+
+    [Fact]
     public void ARunsFiles_AreNamedByTheProcessAndTheirContent()
     {
         // --engine host keys a configuration's workspace by them: run 2 of a command found a new path and loaded it again.

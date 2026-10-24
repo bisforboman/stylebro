@@ -65,7 +65,11 @@ results as the fixes. So:
 - two runs that share a project (a library every framework's run references) analyze it once;
 - the check after a run that changed files analyzes again only the projects a fix reached and the ones referencing them,
   as `dotnet format` would find them: a result is reused only for the same content it was computed on;
-- a command's runs keep each configuration's workspace loaded, so run 2 loads nothing again.
+- a command's runs keep each configuration's workspace loaded, so run 2 loads nothing again;
+- `bro check` formats a copy of the repository to tell kept findings (the ones StyleBro's fixes leave on purpose) from the
+  rest. The copy's runs use the workspaces the check loaded, with the copy's files, so they load nothing and analyze again only
+  what the copy's fixes change. A copy without one of the workspace's files (one git ignores, which the copy leaves out) gets
+  workspaces of its own, as before.
 
 Between two runs, and between the runs of a command's frameworks and configurations, the host reads back the files that
 changed on disk (a run's own fixes, CSharpier, the indentation `format` keeps, a lone CR it converts), so every run sees
@@ -110,7 +114,10 @@ parity runs the host took 45, 36, 97, 195, 255 and 569-640 s; the checks now sha
 runs keep their workspaces.
 
 PalCalc's runs on formatted code miss the target: each of its three configurations is a workspace of its own (load and
-compile, ~20-25 s each), and `bro check` formats a copy to tell kept findings apart, which loads them again.
+compile, ~20-25 s each). `bro check` formats a copy there to tell kept findings apart, which used to load all three again;
+the copy now runs in the check's workspaces: `bro check` on formatted code 147-153 s before, 107-110 s now (plain
+`dotnet format --verify-no-changes` 50 s), and 276 s before, 201-209 s now on the code before its first `bro format`. What
+is left of the copy's time is its own planning (MSBuild evaluations and a restore, ~20 s).
 
 The parity harness (`scripts/format-speed/Compare-Format.ps1`, `check`, `format`, `check` with both engines) gave the same
 working trees, kept findings, exit codes and `--json` reports on all six, twice each, and the host the same trees in both

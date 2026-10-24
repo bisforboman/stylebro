@@ -28,6 +28,8 @@ internal sealed class FormatHost : IDisposable
     private const string LoadFailedMarker = "stylebro-host-load-failed: ";
 
     private readonly MethodInfo run;
+    private readonly MethodInfo runCopy;
+    private readonly MethodInfo forget;
     private readonly MethodInfo close;
     private readonly object session;
 
@@ -35,6 +37,8 @@ internal sealed class FormatHost : IDisposable
     {
         var entry = host.GetType("StyleBro.Host.Entry", throwOnError: true)!;
         this.run = entry.GetMethod("Run")!;
+        this.runCopy = entry.GetMethod("RunCopy")!;
+        this.forget = entry.GetMethod("Forget")!;
         this.close = entry.GetMethod("Close")!;
         Func<string, IDisposable> measure = FormatCommand.PhaseTimes.Measure;
         this.session = entry.GetMethod("Open")!.Invoke(null, [measure])!;
@@ -214,7 +218,15 @@ internal sealed class FormatHost : IDisposable
     /// and why the workspace didn't load (<paramref name="loadFailure"/>, null when it did): bro then runs 'dotnet format'
     /// for the rest of the command.
     /// </summary>
-    public int? Run(string workspace, string folder, IEnumerable<string> environment, IEnumerable<string> variables, IEnumerable<string> selections, IEnumerable<string> arguments, Action<string> output, out string? loadFailure)
+    public int? Run(string workspace, string folder, IEnumerable<string> environment, IEnumerable<string> variables, IEnumerable<string> selections, IEnumerable<string> arguments, Action<string> output, out string? loadFailure) =>
+        this.Run(null, workspace, folder, environment, variables, selections, arguments, output, out loadFailure);
+
+    /// <summary>
+    /// <see cref="Run(string, string, IEnumerable{string}, IEnumerable{string}, IEnumerable{string}, IEnumerable{string}, Action{string}, out string?)"/>
+    /// for a run on <paramref name="copy"/> (folders with a separator at the end: the copy and the repository it was made of),
+    /// in the repository's workspace: the paths given and printed are the repository's, the files are the copy's.
+    /// </summary>
+    public int? Run((string Copy, string Source)? copy, string workspace, string folder, IEnumerable<string> environment, IEnumerable<string> variables, IEnumerable<string> selections, IEnumerable<string> arguments, Action<string> output, out string? loadFailure)
     {
         loadFailure = null;
         var list = arguments.ToList();
@@ -235,10 +247,16 @@ internal sealed class FormatHost : IDisposable
             output(line);
         }
 
-        var code = (int)this.run.Invoke(null, [this.session, workspace, folder, environment.ToArray(), variables.ToArray(), selections.ToArray(), list.Skip(1).ToArray(), (Action<string>)Output])!;
+        object[] parameters = [this.session, workspace, folder, environment.ToArray(), variables.ToArray(), selections.ToArray(), list.Skip(1).ToArray(), (Action<string>)Output];
+        var code = copy is { } of
+            ? (int)this.runCopy.Invoke(null, [this.session, of.Copy, of.Source, .. parameters.Skip(1)])!
+            : (int)this.run.Invoke(null, parameters)!;
         loadFailure = failure;
         return code < 0 ? null : code;
     }
+
+    /// <summary>Drops what the runs on <paramref name="copy"/> kept (its workspaces as the copy has the files).</summary>
+    public void Forget(string copy) => this.forget.Invoke(null, [this.session, copy]);
 
     /// <inheritdoc/>
     public void Dispose() => this.close.Invoke(null, [this.session]);
