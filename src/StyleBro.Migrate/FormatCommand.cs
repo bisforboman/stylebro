@@ -917,15 +917,25 @@ internal static partial class FormatCommand
         exit is 0 || (exit == NotCleanExitCode && code is not (0 or NotCleanExitCode)) ? code : exit;
 
     /// <summary>
-    /// Whether the projects a run loads (<paramref name="loaded"/>) have a file that one compiles and one (the same or another)
-    /// has as an additional file: MSBuildWorkspace then crashes opening a solution or solution filter with them ("The solution
-    /// does not contain the specified document"), and opening a project file doesn't (owner's decision 2026-10-24, trial 50:
-    /// Parlot's generator makes NCalc.Parser's '*.parlot.cs' additional files, and NCalc.Benchmarks compiles one).
+    /// Whether the projects a run loads (<paramref name="loaded"/>) have a file that one has as an additional file and another
+    /// compiles: MSBuildWorkspace then crashes opening a solution or solution filter with them ("The solution does not contain
+    /// the specified document"), and opening a project file doesn't (owner's decision 2026-10-24, trial 50: Parlot's generator
+    /// makes NCalc.Parser's '*.parlot.cs' additional files, and NCalc.Benchmarks compiles one). Not a project's own files: a
+    /// multi-targeted project's outer evaluation still lists them as Compile items (ncalc: every project that loads NCalc.Parser
+    /// ran alone, 16 runs instead of 6).
     /// </summary>
     public static bool LoadsAdditionalAsCompile(IReadOnlyCollection<string> loaded, Func<string, IEnumerable<string>> compile, Func<string, IEnumerable<string>> additional)
     {
-        var additionalFiles = loaded.SelectMany(additional).Select(Path.GetFullPath).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        return additionalFiles.Count > 0 && loaded.SelectMany(compile).Any(f => additionalFiles.Contains(Path.GetFullPath(f)));
+        var owners = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var project in loaded)
+        {
+            foreach (var file in additional(project).Select(Path.GetFullPath))
+            {
+                (owners.TryGetValue(file, out var set) ? set : owners[file] = new HashSet<string>(StringComparer.OrdinalIgnoreCase)).Add(project);
+            }
+        }
+
+        return owners.Count > 0 && loaded.Any(p => compile(p).Any(f => owners.TryGetValue(Path.GetFullPath(f), out var set) && set.Any(o => !o.Equals(p, StringComparison.OrdinalIgnoreCase))));
     }
 
     /// <summary>The projects opening <paramref name="project"/> loads: it and what it references, transitively.</summary>

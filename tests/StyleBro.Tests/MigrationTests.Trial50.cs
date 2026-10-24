@@ -119,6 +119,15 @@ public sealed partial class MigrationTests
             new List<List<string>> { new() { "Benchmarks", "Other" }, new() { "Parser", "Core", "Tests" } },
             FormatCommand.Separate(["Benchmarks", "Other", "Parser", "Core", "Tests"], Refs, p => compile[p], additional: Additional));
 
+        // A project's own additional files that its outer evaluation lists as Compile items (a multi-targeted project's) don't
+        // count: ncalc's net10.0 ran in 11 parts, every project that loads NCalc.Parser alone.
+        compile["Parser"] = ["parser.cs", "Grammar.parlot.cs"];
+        compile["Benchmarks"] = ["bench.cs"];
+        Assert.False(FormatCommand.LoadsAdditionalAsCompile(FormatCommand.LoadedWith("Tests", Refs), p => compile[p], Additional));
+        Assert.Single(FormatCommand.Separate(["Parser", "Core", "Benchmarks", "Tests", "Other"], Refs, p => compile[p], additional: Additional));
+        compile["Parser"] = ["parser.cs"];
+        compile["Benchmarks"] = ["Grammar.parlot.cs", "bench.cs"];
+
         // Without additional files: one run, as before.
         Assert.Single(FormatCommand.Separate(["Parser", "Core", "Benchmarks", "Tests", "Other"], Refs, p => compile[p]));
 
