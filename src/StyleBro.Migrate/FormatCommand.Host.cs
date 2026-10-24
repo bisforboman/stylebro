@@ -119,6 +119,7 @@ internal static partial class FormatCommand
         private readonly object gate = new();
         private bool opened;
         private FormatHost? host;
+        private FormatHost? retired;
 
         public static HostScope? For(string root, Action<string> log)
         {
@@ -157,7 +158,28 @@ internal static partial class FormatCommand
                 open = this.host;
             }
 
-            return open?.Run(workspace, root, HostEnvironment(run), HostVariables(run), selections, arguments, output) ?? otherwise();
+            string? failure = null;
+            if (open is not null && open.Run(workspace, root, HostEnvironment(run), HostVariables(run), selections, arguments, output, out failure) is { } code)
+            {
+                return code;
+            }
+
+            // The workspace didn't load (trial 50, ncalc): this run and the rest of the command run 'dotnet format'.
+            if (failure is not null)
+            {
+                lock (this.gate)
+                {
+                    if (ReferenceEquals(this.host, open))
+                    {
+                        // Disposed with the command (Close): checks running at once may still be using it.
+                        log(FormatHost.LoadFailedLine(failure));
+                        this.retired = open;
+                        this.host = null;
+                    }
+                }
+            }
+
+            return otherwise();
         }
 
         /// <summary>Nothing: the command closes its hosts (<see cref="Close"/>), so the next run finds its workspaces loaded.</summary>
@@ -170,7 +192,9 @@ internal static partial class FormatCommand
             lock (this.gate)
             {
                 this.host?.Dispose();
+                this.retired?.Dispose();
                 this.host = null;
+                this.retired = null;
             }
         }
     }

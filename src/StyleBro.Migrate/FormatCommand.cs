@@ -233,7 +233,7 @@ internal static partial class FormatCommand
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, bool> BuiltGenerators = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>The lines a run prints before its 'dotnet format' runs, which later runs and checks say once.</summary>
-    private static readonly string[] Headers = [FixingHeader, XunitHeader, HeldBackHeader, IfBodiesHeader, ProtectedHeader, NotAsErrorsHeader, VisualBasicHeader, GeneratorsHeader, CheckingHeader, MultiTargetedHeader, ConfigurationsHeader, MissingHeader, SharedFilesHeader, TraversalHeader, "Using ", NoWhitespaceHeader, PartlyWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader, PartlyLoadedHeader, NotBuiltHeader];
+    private static readonly string[] Headers = [FixingHeader, XunitHeader, HeldBackHeader, IfBodiesHeader, ProtectedHeader, NotAsErrorsHeader, VisualBasicHeader, GeneratorsHeader, CheckingHeader, MultiTargetedHeader, ConfigurationsHeader, MissingHeader, SharedFilesHeader, TraversalHeader, "Using ", "Engine: ", NoWhitespaceHeader, PartlyWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader, PartlyLoadedHeader, NotBuiltHeader];
 
     /// <summary>The projects and configurations a --verify-no-changes run on a folder couldn't check (<see cref="RecordUnchecked"/>), per folder.</summary>
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, List<(string Project, string Configuration)>> Unchecked = new(StringComparer.OrdinalIgnoreCase);
@@ -5816,7 +5816,7 @@ internal static partial class FormatCommand
                 {
                     // The host loads every framework: the run's projects as the instances of its framework.
                     var selections = selected.Select(x => $"{projects[x].FullPath}|{(framework.Length == 0 ? string.Empty : Spelling(projects[x].FullPath, framework))}").ToList();
-                    return Format(filter ?? workspacePath, options, a => hostScope.Run(workspacePath, environment, selections, a.ToList(), output, () => Dotnet(root, environment, a, output)), Passes(whitespaceExclusions, include));
+                    return Format(byProject ?? filter ?? workspacePath, options, a => hostScope.Run(workspacePath, environment, selections, a.ToList(), output, () => Dotnet(root, environment, a, output)), Passes(whitespaceExclusions, include));
                 }
 
                 return Format(byProject ?? filter ?? workspacePath, options, a => Dotnet(root, environment, a, output), Passes(whitespaceExclusions, include));

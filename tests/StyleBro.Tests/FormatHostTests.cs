@@ -389,6 +389,30 @@ public sealed class FormatHostTests : IDisposable
         Assert.Single(found, l => FormatCommand.IsFindingLine(l) && l.Contains("D.cs(7,", StringComparison.Ordinal));
     }
 
+    // Against the SDK on this machine (trial 50, ncalc): a file one project has as an additional file and another compiles makes
+    // MSBuildWorkspace throw opening the solution. The host says why and declines, so bro runs 'dotnet format' (on the project
+    // file) for the rest of the command.
+    [Fact]
+    public void AWorkspaceThatDoesntLoad_IsDeclinedWithTheReason()
+    {
+        var root = this.NewFolder();
+        Write(root, "Repro.slnx", "<Solution>\n  <Project Path=\"App/App.csproj\" />\n  <Project Path=\"Lib/Lib.csproj\" />\n</Solution>\n");
+        Write(root, "Lib/Lib.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFramework>net8.0</TargetFramework>\n  </PropertyGroup>\n  <ItemGroup>\n    <Compile Remove=\"Shared.cs\" />\n    <AdditionalFiles Include=\"Shared.cs\" />\n  </ItemGroup>\n</Project>\n");
+        Write(root, "Lib/Shared.cs", "namespace Lib;\n\npublic static class Shared\n{\n    public static int One() => 1;\n}\n");
+        Write(root, "App/App.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFramework>net8.0</TargetFramework>\n  </PropertyGroup>\n  <ItemGroup>\n    <Compile Include=\"../Lib/Shared.cs\" />\n  </ItemGroup>\n</Project>\n");
+        Assert.Equal(0, Dotnet(root, out _, "restore", "Repro.slnx"));
+
+        var log = new List<string>();
+        using var host = FormatHost.Open(root, log.Add);
+        Assert.True(host is not null, string.Join("\n", log));
+        var solution = Path.Combine(root, "Repro.slnx");
+        var output = new List<string>();
+        Assert.Null(host.Run(solution, root, [], [], [], ["format", "whitespace", solution, "--verify-no-changes", "--no-restore"], output.Add, out var failure));
+        Assert.Contains("does not contain the specified document", failure, StringComparison.Ordinal);
+        Assert.Empty(output);
+        Assert.StartsWith("Engine: the host couldn't load the workspace (", FormatHost.LoadFailedLine(failure!), StringComparison.Ordinal);
+    }
+
     public void Dispose()
     {
         foreach (var folder in this.folders)

@@ -126,4 +126,20 @@ public sealed partial class MigrationTests
         var line = FormatCommand.SharedFilesLine([[["Parser", "Core"], ["Benchmarks"]]], ["src/Grammar.parlot.cs"]);
         Assert.StartsWith("Shared files: each group gets a run of its own: Parser, Core | Benchmarks. Some projects have a file as an additional file (AdditionalFiles) that another compiles (src/Grammar.parlot.cs)", line, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void Check_ShowsTheEngineLine()
+    {
+        // ncalc: the host's "Engine: ... 'dotnet format' runs the checks and fixes" line was held back with the runs' output
+        // in a check, so a check didn't say which engine checked.
+        Write("App.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
+        var line = FormatHost.LoadFailedLine("The solution does not contain the specified document.");
+        var lines = new List<string>();
+        FormatCommand.Run([root, "--verify-no-changes"], lines.Add, (_, output) =>
+        {
+            output!(line);
+            return 0;
+        });
+        Assert.Contains(line, lines);
+    }
 }
