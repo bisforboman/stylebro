@@ -24,6 +24,9 @@ internal sealed class FormatHost : IDisposable
 
     private const string RollForwardVariable = "DOTNET_ROLL_FORWARD";
 
+    // The host's Entry.LoadFailedMarker (another load context: plain strings only).
+    private const string LoadFailedMarker = "stylebro-host-load-failed: ";
+
     private readonly MethodInfo run;
     private readonly MethodInfo close;
     private readonly object session;
@@ -120,9 +123,6 @@ internal sealed class FormatHost : IDisposable
             ? Directory.GetDirectories(shared).Select(d => Version.TryParse(Regex.Replace(Path.GetFileName(d), "-.*$", string.Empty), out var v) ? v.Major : (int?)null).Max()
             : null;
 
-    // The host's Entry.LoadFailedMarker (another load context: plain strings only).
-    private const string LoadFailedMarker = "stylebro-host-load-failed: ";
-
     /// <summary>What to say when the host can't run: 'dotnet format' runs the checks and fixes instead.</summary>
     public static string FallbackLine(string reason) => $"Engine: the host can't run here ({reason.TrimEnd('.')}), so 'dotnet format' runs the checks and fixes.";
 
@@ -197,6 +197,9 @@ internal sealed class FormatHost : IDisposable
         return File.Exists(framework) && File.Exists(own) && AssemblyName.GetAssemblyName(framework).Version >= AssemblyName.GetAssemblyName(own).Version;
     }
 
+    /// <summary>What to say when the host's workspace didn't load: 'dotnet format' runs the rest of the command.</summary>
+    public static string LoadFailedLine(string reason) => $"Engine: the host couldn't load the workspace ({reason.TrimEnd('.')}), so 'dotnet format' runs the checks and fixes.";
+
     /// <summary>
     /// Runs 'dotnet <paramref name="arguments"/>' (a 'format' check or fix run) in the host, or returns null for a command it
     /// doesn't run (bro then starts it). <paramref name="environment"/>: what the child process would get that changes how
@@ -236,9 +239,6 @@ internal sealed class FormatHost : IDisposable
         loadFailure = failure;
         return code < 0 ? null : code;
     }
-
-    /// <summary>What to say when the host's workspace didn't load: 'dotnet format' runs the rest of the command.</summary>
-    public static string LoadFailedLine(string reason) => $"Engine: the host couldn't load the workspace ({reason.TrimEnd('.')}), so 'dotnet format' runs the checks and fixes.";
 
     /// <inheritdoc/>
     public void Dispose() => this.close.Invoke(null, [this.session]);
