@@ -21,8 +21,13 @@ because Dapper's untouched builds fail on ReferenceTrimmer's RT0000). The host w
 hook (`SelectFrameworkProps`). After it both engines agree byte for byte.
 
 TWAE builds and tests: the same on both engines and as the untouched code (Finbuckle 607/607, Sleet 1,881 + the 1 failure
-it has untouched, Flurl 521/547 with the 26 network tests failing untouched, Dapper 8/8 and the 65 tests that pass without
-database servers, by name; Dapper's TWAE builds fail on the same 5 RT0000 errors as the untouched code).
+it has untouched, Flurl 521/547 with the 26 network tests failing untouched, Dapper 8/8 (and, default engine on 0.8.0-trial54.2, the 65 tests that pass without
+database servers, the same by name); Dapper's TWAE builds fail on the same 5 RT0000 errors as the untouched code).
 
 Timings (s, default/host): format 96/89, 138/96, 117/49, 429/109 (Finbuckle, Sleet, Flurl, Dapper on 0.8.0-trial54.2);
 check --build 66/94, 248/223, 84/91, 172/145. Two repositories ran in parallel on 4 CPUs, so the timings are noisy.
+
+Regression check of the fix: Sleet and Flurl (multi-targeted) again on 0.8.0-trial54.2, default engine: the same exit codes
+and the same trees as on 0.8.0-trial54.1 (the patches differ only in blob hashes, from the package version in the props).
+Finbuckle (one framework, no per-framework runs): init again on 0.8.0-trial54.2, the .editorconfig byte for byte the same,
+the summary now "Turned 12 rules off ... BRO1306 (non-private fields; private constants/static readonly fields)".

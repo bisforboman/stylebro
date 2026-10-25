@@ -26,7 +26,8 @@ namespace StyleBro.Migrate;
 /// The framework is chosen with TargetFramework as an environment variable: unlike a property set later, the project
 /// file's own conditions ('$(TargetFramework)' == 'net46' for DefineConstants, references) see it. It reaches every
 /// project the run loads, also referenced ones, so <see cref="SelectFrameworkTargets"/> clears it again, right after
-/// the project file, for projects that should load as usual (<see cref="Keep"/>): forcing a library onto a framework it
+/// the project file, for projects that should load as usual (<see cref="Keep"/>), and <see cref="SelectFrameworkProps"/>
+/// before NuGet's props, so their packages' props and targets agree: forcing a library onto a framework it
 /// doesn't have failed (Newtonsoft.Json's net46 tests: no net46 reference assemblies for the library, the tests were
 /// skipped silently), and clearing it for every project without the framework failed too (Serilog's TestDummies,
 /// netstandard2.0, references Serilog, which then offered only net8.0: TestDummies and the tests that use it didn't load).

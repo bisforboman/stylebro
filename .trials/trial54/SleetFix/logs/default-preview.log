@@ -80,4 +80,34 @@ Summary:
     dotnet_diagnostic.BRO1142.severity, dotnet_diagnostic.BRO1619.severity.
 Settings: 58 lines in .editorconfig; 9 lines in Directory.Build.props (StyleBro.Analyzers); 1 line in Directory.Packages.props (StyleBro.Analyzers)
   StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial54.2 to Directory.Build.props (version in Directory.Packages.props) for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).
-Format run 1... 
+Format run 1... 1m 14s
+Format run 2... 26s
+Format: 122 files, 421 reported changes, clean after 1 run
+  BRO1603  Documentation text should end with a ...    45 files
+  BRO1108  Parameters should be on the same line...    15 files
+  BRO1138  A string literal should be a plain st...    13 files
+  BRO1401  Use a trailing comma in multi-line in...    13 files
+  BRO1517  Code should not contain multiple blan...    13 files
+  BRO1519  Closing brace should be followed by b...    13 files
+  IMPORTS                                              12 files
+  BRO1518  Closing braces should not be preceded...     9 files
+  BRO1503  Opening braces should not be followed...     8 files
+  BRO1504  Single-line comments should be preced...     8 files
+  ... and 20 more rules
+Sample (BRO1603, src/SleetLib/Commands/RecreateCommand.cs):
+  -        /// Apply setting handlers
+  +        /// Apply setting handlers.
+Sample (BRO1108, src/Sleet/DeleteAppCommand.cs):
+  -            var optionConfigFile = cmd.Option(Constants.ConfigOption, Constants.ConfigDesc,
+  +            var optionConfigFile = cmd.Option(Constants.ConfigOption,
+  +                Constants.ConfigDesc,
+Sample (BRO1138, src/SleetLib/Commands/DeleteCommand.cs):
+  -                log.LogMinimal($"Successfully deleted packages.");
+  +                log.LogMinimal("Successfully deleted packages.");
+Clean: 1 finding kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them (https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose).
+  src/SleetLib/AssemblyVersionHelper.cs(11,40): BRO1306 Rename '_lock' to 'Lock'. Kept: at a use of the name, the new name would mean something else.
+Baseline (in the patch): stylebro.baseline: added 1 kept finding, so the build and 'format --verify-no-changes' skip it (new violations still fail; delete an entry to see it again) (https://bisforboman.github.io/stylebro/baseline/).
+Full diff: .git/stylebro-preview.patch (3,962 lines)
+Not checked: xunit.analyzers' rules: xunit.analyzers 2.2.0's fixes have no Fix All, so 'dotnet format' can't apply or check them (a note: the build still reports their warnings; the verdict doesn't count them)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 1m 51s.
