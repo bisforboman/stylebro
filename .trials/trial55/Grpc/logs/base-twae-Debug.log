@@ -53,3 +53,7 @@
   DN_Server -> /home/user/w55/Grpc/base/examples/dotnet-grpc/DN_Server/bin/Debug/net10.0/DN_Server.dll
   TraderSys.FullStockTicker.Shared -> /home/user/w55/Grpc/base/examples/wcf-port/FullStockTicker/src/TraderSys.FullStockTicker.Shared/bin/Debug/net10.0/TraderSys.FullStockTicker.Shared.dll
   JustProtos -> /home/user/w55/Grpc/base/examples/pb-net/JustProtos/bin/Debug/net10.0/JustProtos.dll
+  TraderSys.StockMarket -> /home/user/w55/Grpc/base/examples/wcf-port/FullStockTicker/src/TraderSys.StockMarket/bin/Debug/net10.0/TraderSys.StockMarket.dll
+  Shared_FS -> /home/user/w55/Grpc/base/examples/pb-net-grpc/Shared_FS/bin/Debug/net10.0/Shared_FS.dll
+  TraderSys.Portfolios.Shared -> /home/user/w55/Grpc/base/examples/wcf-port/TraderSys/src/TraderSys.Portfolios.Shared/bin/Debug/net10.0/TraderSys.Portfolios.Shared.dll
+  TraderSys.StockMarket -> /home/user/w55/Grpc/base/examples/wcf-port/SimpleStockTicker/src/TraderSys.StockMarket/bin/Debug/net10.0/TraderSys.StockMarket.dll
