@@ -1,2 +1,12 @@
 preview	0	618s	bro preview init --engine dotnet-format
 setup	0	8s	bash -c python3 /home/user/stylebro/.trials/trial55/addref.py Src/Directory.Packages.props "<PackageVersion Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial55.1\" />" && python3 /home/user/stylebro/.trials/trial55/addref.py Src/Directory.Build.props "<PackageReference Include=\"StyleBro.Analyzers\" PrivateAssets=\"all\" />" && git diff --stat && bro init --write
+format	0	834s	bro format --engine dotnet-format
+check	0	185s	bro check --engine dotnet-format
+check-json	0
+checkbuild	0	610s	bro check --build --engine dotnet-format
+checkbuild-json	0
+twae-Debug	0	33s	twae Debug
+test-Debug	1	19s	env CFG=Debug bash -c dotnet test Src/Newtonsoft.Json.Schema.slnx -c $CFG
+twae-Release	0	30s	twae Release
+test-Release	1	17s	env CFG=Release bash -c dotnet test Src/Newtonsoft.Json.Schema.slnx -c $CFG
+DONE

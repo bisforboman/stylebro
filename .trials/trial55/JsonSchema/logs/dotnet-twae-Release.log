@@ -1,0 +1,30 @@
+  Determining projects to restore...
+  Restored /home/user/w55/JsonSchema/dotnet/Src/Newtonsoft.Json.Schema.TestConsole/Newtonsoft.Json.Schema.TestConsole.csproj (in 612 ms).
+  Restored /home/user/w55/JsonSchema/dotnet/Src/Newtonsoft.Json.Schema/Newtonsoft.Json.Schema.csproj (in 612 ms).
+  Restored /home/user/w55/JsonSchema/dotnet/Src/Newtonsoft.Json.Schema.Tests/Newtonsoft.Json.Schema.Tests.csproj (in 792 ms).
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.401/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand/JamesNK-Newtonsoft.Json.Schema'. [/home/user/w55/JsonSchema/dotnet/Src/Newtonsoft.Json.Schema/Newtonsoft.Json.Schema.csproj::TargetFramework=netstandard2.1]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.401/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w55/JsonSchema/dotnet/Src/Newtonsoft.Json.Schema/Newtonsoft.Json.Schema.csproj::TargetFramework=netstandard2.1]
+  Newtonsoft.Json.Schema -> /home/user/w55/JsonSchema/dotnet/Src/Newtonsoft.Json.Schema/bin/Release/net45/Newtonsoft.Json.Schema.dll
+  Newtonsoft.Json.Schema -> /home/user/w55/JsonSchema/dotnet/Src/Newtonsoft.Json.Schema/bin/Release/netstandard2.1/Newtonsoft.Json.Schema.dll
+  Newtonsoft.Json.Schema -> /home/user/w55/JsonSchema/dotnet/Src/Newtonsoft.Json.Schema/bin/Release/net35/Newtonsoft.Json.Schema.dll
+  Newtonsoft.Json.Schema -> /home/user/w55/JsonSchema/dotnet/Src/Newtonsoft.Json.Schema/bin/Release/net40/Newtonsoft.Json.Schema.dll
+  Newtonsoft.Json.Schema.Tests -> /home/user/w55/JsonSchema/dotnet/Src/Newtonsoft.Json.Schema.Tests/bin/Release/net10.0/Newtonsoft.Json.Schema.Tests.dll
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.401/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand/JamesNK-Newtonsoft.Json.Schema'. [/home/user/w55/JsonSchema/dotnet/Src/Newtonsoft.Json.Schema/Newtonsoft.Json.Schema.csproj::TargetFramework=netstandard2.0]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.401/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w55/JsonSchema/dotnet/Src/Newtonsoft.Json.Schema/Newtonsoft.Json.Schema.csproj::TargetFramework=netstandard2.0]
+  Newtonsoft.Json.Schema -> /home/user/w55/JsonSchema/dotnet/Src/Newtonsoft.Json.Schema/bin/Release/netstandard2.0/Newtonsoft.Json.Schema.dll
+  Newtonsoft.Json.Schema.Tests -> /home/user/w55/JsonSchema/dotnet/Src/Newtonsoft.Json.Schema.Tests/bin/Release/net35/Newtonsoft.Json.Schema.Tests.dll
+  Newtonsoft.Json.Schema.Tests -> /home/user/w55/JsonSchema/dotnet/Src/Newtonsoft.Json.Schema.Tests/bin/Release/net46/Newtonsoft.Json.Schema.Tests.dll
+  Newtonsoft.Json.Schema.Tests -> /home/user/w55/JsonSchema/dotnet/Src/Newtonsoft.Json.Schema.Tests/bin/Release/net40/Newtonsoft.Json.Schema.Tests.dll
+  Newtonsoft.Json.Schema.TestConsole -> /home/user/w55/JsonSchema/dotnet/Src/Newtonsoft.Json.Schema.TestConsole/bin/Release/net46/Newtonsoft.Json.Schema.TestConsole.exe
+  Newtonsoft.Json.Schema.Tests -> /home/user/w55/JsonSchema/dotnet/Src/Newtonsoft.Json.Schema.Tests/bin/Release/net8.0/Newtonsoft.Json.Schema.Tests.dll
+
+Build succeeded.
+
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.401/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand/JamesNK-Newtonsoft.Json.Schema'. [/home/user/w55/JsonSchema/dotnet/Src/Newtonsoft.Json.Schema/Newtonsoft.Json.Schema.csproj::TargetFramework=netstandard2.1]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.401/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w55/JsonSchema/dotnet/Src/Newtonsoft.Json.Schema/Newtonsoft.Json.Schema.csproj::TargetFramework=netstandard2.1]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.401/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand/JamesNK-Newtonsoft.Json.Schema'. [/home/user/w55/JsonSchema/dotnet/Src/Newtonsoft.Json.Schema/Newtonsoft.Json.Schema.csproj::TargetFramework=netstandard2.0]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.401/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w55/JsonSchema/dotnet/Src/Newtonsoft.Json.Schema/Newtonsoft.Json.Schema.csproj::TargetFramework=netstandard2.0]
+    4 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:29.58

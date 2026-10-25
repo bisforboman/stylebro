@@ -1,0 +1,17 @@
+Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Indentation kept: src/ZLinq/Linq/Sum.cs:21,26,32-33,36,159: '#if' decides whether these lines are an if/else (or loop) body, inside a block, or (a '#region' line) compiled at all, so each framework or configuration would indent them its own way. Their indentation is left as it is.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net6.0, net8.0, net9.0, netstandard2.0, netstandard2.1). net8.0, net9.0, netstandard2.1: only the projects whose code compiles differently there.
+Configurations: runs for Release (Benchmark) too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.
+Shared files: these projects compile the same files with other '#if' symbols or settings, so each group gets a run of its own (loaded together, 'dotnet format' crashes: https://github.com/dotnet/roslyn/issues/86001): Benchmark, ZLinq, ZLinq.Tests | ConsoleApp; ConsoleAppNet6 | ZLinq.Tests; ZLinq.DropInGenerator | ZLinq.
+Checked netstandard2.0, part 1 of 2 (run 1 of 12)
+Checked netstandard2.0, part 2 of 2 (run 2 of 12)
+Checked net10.0, Release (run 3 of 12)
+Checked netstandard2.1 (run 4 of 12)
+Checked net6.0, part 2 of 2 (run 5 of 12)
+Checked net10.0, part 1 of 2 (run 6 of 12)
+Checked net8.0, Release (run 7 of 12)
+Checked net10.0, part 2 of 2 (run 8 of 12)
+Checked net8.0 (run 9 of 12)
+Checked net9.0, Release (run 10 of 12)
+Checked net6.0, part 1 of 2 (run 11 of 12)
