@@ -122,6 +122,22 @@ The `bro format` investigation (per-framework runs, convergence, speed on large 
   don't import the root). Seen on Serilog, not changed here: the host's note says to add `--verbosity diagnostic`, but at
   that level it lists no warning (a follow-up).
 
+- **Engine report parity** (2026-10-25, backlog 076, trial 55's soak). Both reproduced on the trial commits (protobuf-net.Grpc
+  3471179, ZLinq f7591df) with a debug build logging each run's view, the instance behind each finding and each run's files.
+  - protobuf-net.Grpc, 28 more findings with the host (23 IDE0055 beside WHITESPACE, 5 BRO in ContractOperation.cs): not
+    re-analysis (both engines' checks analyze the solution the whitespace formatter returned). The net10.0 run's view had
+    protobuf-net.Grpc twice: Test.Integration(net10.0) references ClientFactory, which has no net10.0, so its net8.0
+    instance came in with its own reference to protobuf-net.Grpc(net8.0). dotnet-format's whitespace formatter formats one
+    copy per file path, so the analyzers reported the other instance's unformatted copy. `Views.Of` retargeted only the run's
+    own instances' references (trial 47); now every reference in the view to a project the run names goes to the named
+    instance, as a `dotnet format` run of that framework loads one instance per project. After: the host's check lists the
+    same 1,072 finding lines as the old engine.
+  - ZLinq, 71/220/220 vs 69/218/218 "files with findings": the old engine's net6.0 part 2 run loads ZLinq (no net6.0) with
+    all its frameworks and so checks and fixes `Internal/SingleSpan.cs` and `Internal/Polyfill/ArraySegmentExtensions.cs`
+    (netstandard2.0-only BRO1519); net8.0 and net9.0 then check those files again because an earlier run changed them (the
+    `Touched` files), their own checks found nothing there. The host loads the instance the build uses. Owner: a documented
+    difference of the fallback engine (docs/decisions/2026-10-25-the-old-engines-loose-load-of-a-referenced-project-stays-a.md).
+
 - **Tracker bugs** (2026-10-04, docs/beyond-stylecop.md "Possible bugs to check", all fixed): BRO1504 treats a
   collection expression's `[` like `{` (StyleCop #3766); BRO1603 accepts a period before closing `)`/`]`/`"`/`'`
   (#2860), puts the period after a trailing entity (`&gt;.`), and skips `stylebro_exclude_from_punctuation_check` tags

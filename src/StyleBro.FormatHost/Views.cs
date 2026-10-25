@@ -14,12 +14,14 @@ public static class Views
     /// <summary>
     /// The view of <paramref name="solution"/> a run checks: the instances <paramref name="selections"/> name ('path|framework',
     /// the framework as that project spells it, '' for all its instances) and every project they reference, transitively.
-    /// <paramref name="names"/> gets the instance names to write as a single-framework load names them. A reference of one of
-    /// the run's framework instances to another instance of a project the run names goes to the named one, as in a
-    /// 'dotnet format' run of that framework, which loads one instance per project: MSBuildWorkspace sends a reference it can't
-    /// match by output to the project's first instance (SmartFormat, trial 47: its net462 projects referenced the libraries'
-    /// netstandard2.0 instances, and the analyzers reported those instances' copies of the files, which the whitespace
-    /// formatter had left alone: findings at the positions before formatting).
+    /// <paramref name="names"/> gets the instance names to write as a single-framework load names them. A reference to another
+    /// instance of a project the run names goes to the named one, as in a 'dotnet format' run of that framework, which loads
+    /// one instance per project: MSBuildWorkspace sends a reference it can't match by output to the project's first instance
+    /// (SmartFormat, trial 47: its net462 projects referenced the libraries' netstandard2.0 instances), and a referenced
+    /// project without the run's framework references its own frameworks' instances (protobuf-net.Grpc, trial 55: in the
+    /// net10.0 run ClientFactory(net8.0) brought in protobuf-net.Grpc(net8.0)). dotnet-format's whitespace formatter formats one
+    /// copy of a file, so the analyzers reported the other instance's unformatted copy: findings at the positions before
+    /// formatting, which a 'dotnet format' run doesn't have.
     /// </summary>
     public static Solution Of(Solution solution, IReadOnlyList<string> selections, Dictionary<string, string> names)
     {
@@ -31,7 +33,6 @@ public static class Views
         var roots = RootsOf(solution, selections);
         var frameworks = FrameworksOf(selections);
         var named = roots.Where(p => p.FilePath is not null).GroupBy(p => p.FilePath!, StringComparer.OrdinalIgnoreCase).Where(g => g.Count() == 1).ToDictionary(g => g.Key, g => g.Single().Id, StringComparer.OrdinalIgnoreCase);
-        var rootIds = roots.Select(p => p.Id).ToHashSet();
         var retargeted = new List<(ProjectId Project, ProjectReference From, ProjectId To)>();
         var keep = new HashSet<ProjectId>();
         var stack = new Stack<Project>(roots);
@@ -40,7 +41,6 @@ public static class Views
             var project = stack.Pop();
             if (keep.Add(project.Id))
             {
-                var ofTheRun = rootIds.Contains(project.Id) || (FrameworkOf(project.Name) is { } own && frameworks.Contains(own));
                 foreach (var reference in project.ProjectReferences)
                 {
                     if (solution.GetProject(reference.ProjectId) is not { } referenced)
@@ -48,7 +48,7 @@ public static class Views
                         continue;
                     }
 
-                    if (ofTheRun && referenced.FilePath is { } path && named.TryGetValue(path, out var instance) && instance != referenced.Id)
+                    if (referenced.FilePath is { } path && named.TryGetValue(path, out var instance) && instance != referenced.Id)
                     {
                         retargeted.Add((project.Id, reference, instance));
                         referenced = solution.GetProject(instance)!;
