@@ -124,6 +124,31 @@ public sealed class FormatHostTests : IDisposable
     }
 
     [Fact]
+    public void AView_ReferencesTheInstancesTheRunNames_FromAProjectWithoutItsFramework()
+    {
+        // protobuf-net.Grpc (trial 55): in the net10.0 run, ClientFactory(net8.0) (no net10.0) brought in protobuf-net.Grpc(net8.0)
+        // next to the run's protobuf-net.Grpc(net10.0); the whitespace formatter formatted one copy of each file and the analyzers
+        // reported the other's: IDE0055 next to WHITESPACE, findings at the positions before formatting.
+        using var workspace = new AdhocWorkspace();
+        var solution = workspace.CurrentSolution;
+        ProjectId Add(string name, string path, params ProjectId[] references)
+        {
+            var id = ProjectId.CreateNewId(name);
+            solution = solution.AddProject(ProjectInfo.Create(id, VersionStamp.Default, name, name, LanguageNames.CSharp, filePath: path, projectReferences: references.Select(r => new ProjectReference(r))));
+            return id;
+        }
+
+        var grpc8 = Add("Grpc(net8.0)", "/r/Grpc/Grpc.csproj");
+        var grpc10 = Add("Grpc(net10.0)", "/r/Grpc/Grpc.csproj");
+        var factory8 = Add("Factory(net8.0)", "/r/Factory/Factory.csproj", grpc8);
+        var test10 = Add("Test(net10.0)", "/r/Test/Test.csproj", grpc10, factory8);
+        var view = Views.Of(solution, ["/r/Grpc/Grpc.csproj|net10.0", "/r/Test/Test.csproj|net10.0"], []);
+
+        Assert.Equal(new HashSet<ProjectId> { grpc10, factory8, test10 }, view.ProjectIds.ToHashSet());
+        Assert.Equal([grpc10], view.GetProject(factory8)!.ProjectReferences.Select(r => r.ProjectId));
+    }
+
+    [Fact]
     public void AView_HasTheLoadWarnings_OfItsProjects_AndOfProjectsThatDidntLoad()
     {
         using var workspace = new AdhocWorkspace();
