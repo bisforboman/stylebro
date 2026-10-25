@@ -57,5 +57,5 @@ ignoring case), each smoke-built (`smoke.sh`: restore + Debug build + `dotnet te
 - 64 ZiggyCreatures/FusionCache (main af09f81a): 262 .cs, MTP; 1,614 pass, 11 fail untouched (distributed-cache tests).
 
 Checked and not appended: ninject/Ninject (335 .cs: Nerdbank.GitVersioning fails on a shallow clone, needs a full one;
-not smoke-built again), jbogard/Respawn and robinrodricks/FluentFTP (tests need databases / FTP servers), mganss/ExcelMapper
+not smoke-built again), jbogard/Respawn and robinrodricks/FluentFTP (database and FTP libraries whose tests likely need servers; not smoke-built), mganss/ExcelMapper
 and nreco/LambdaParser (20 and 12 .cs), Cysharp/R3 (455 .cs, not smoke-built: four were enough).
