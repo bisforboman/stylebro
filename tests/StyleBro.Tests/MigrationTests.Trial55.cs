@@ -26,4 +26,24 @@ public sealed partial class MigrationTests
         Assert.False(File.Exists(Path.Combine(root, "stylebro.baseline")));
         Assert.Single(Analyzers.Baseline.Baseline.Parse(File.ReadAllText(Path.Combine(root, "Src", "stylebro.baseline"))).Entries);
     }
+
+    [Fact]
+    public void Preview_ListsAnIndentationNoteOnce_WhenALaterPassNumbersTheChangedText()
+    {
+        // ZLinq: the preview's first format pass said Sum.cs:21,26,32,142, its second (on the fixed text) Sum.cs:21,26,32-33,36,159,
+        // and the summary listed both.
+        var first = IfBodies.Line(FormatCommand.IfBodiesHeader, root, new Dictionary<string, (string, List<int>)> { [Path.Combine(root, "src", "Sum.cs")] = (string.Empty, [20, 25, 31, 141]) });
+        var second = IfBodies.Line(FormatCommand.IfBodiesHeader, root, new Dictionary<string, (string, List<int>)> { [Path.Combine(root, "src", "Sum.cs")] = (string.Empty, [20, 25, 31, 32, 35, 158]) });
+        var other = IfBodies.Line(FormatCommand.IfBodiesHeader, root, new Dictionary<string, (string, List<int>)> { [Path.Combine(root, "src", "Sum.cs")] = (string.Empty, [20]), [Path.Combine(root, "src", "Max.cs")] = (string.Empty, [4]) });
+        Assert.Contains("src/Sum.cs:21,26,32,142: ", first, StringComparison.Ordinal);
+
+        var notes = new List<string>();
+        Assert.True(PreviewCommand.IsNewNote(notes, first));
+        notes.Add(first);
+        Assert.False(PreviewCommand.IsNewNote(notes, first));
+        Assert.False(PreviewCommand.IsNewNote(notes, second));
+        Assert.True(PreviewCommand.IsNewNote(notes, other));
+        Assert.False(PreviewCommand.IsNewNote(notes, "Run 2: 0 files changed, clean."));
+        Assert.True(PreviewCommand.IsNewNote(notes, FormatCommand.NotBuiltHeader + " Tools/Tools.csproj"));
+    }
 }
