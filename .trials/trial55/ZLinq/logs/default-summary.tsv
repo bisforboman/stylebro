@@ -4,3 +4,9 @@ format	0	684s	bro format
 check	0	232s	bro check
 check-json	0
 checkbuild	0	495s	bro check --build
+checkbuild-json	0
+twae-Debug	0	80s	twae Debug
+test-Debug	0	42s	env CFG=Debug bash -c dotnet test ZLinq.slnx -c $CFG
+twae-Release	0	78s	twae Release
+test-Release	0	41s	env CFG=Release bash -c dotnet test ZLinq.slnx -c $CFG
+DONE

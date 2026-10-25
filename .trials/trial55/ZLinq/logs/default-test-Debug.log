@@ -1,0 +1,39 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  ZLinq -> /home/user/w55/ZLinq/default/src/ZLinq/bin/Debug/netstandard2.1/ZLinq.dll
+  ZLinq -> /home/user/w55/ZLinq/default/src/ZLinq/bin/Debug/net9.0/ZLinq.dll
+  ZLinq -> /home/user/w55/ZLinq/default/src/ZLinq/bin/Debug/net10.0/ZLinq.dll
+  ZLinq.Godot -> /home/user/w55/ZLinq/default/src/ZLinq.Godot/bin/Debug/net9.0/ZLinq.Godot.dll
+  ZLinq.Json -> /home/user/w55/ZLinq/default/src/ZLinq.Json/bin/Debug/net9.0/ZLinq.Json.dll
+  ZLinq.FileSystem -> /home/user/w55/ZLinq/default/src/ZLinq.FileSystem/bin/Debug/net10.0/ZLinq.FileSystem.dll
+  ZLinq.Godot -> /home/user/w55/ZLinq/default/src/ZLinq.Godot/bin/Debug/net10.0/ZLinq.Godot.dll
+  ZLinq.Tests -> /home/user/w55/ZLinq/default/tests/ZLinq.Tests/bin/Debug/net9.0/ZLinq.Tests.dll
+  Benchmark -> /home/user/w55/ZLinq/default/sandbox/Benchmark/bin/Debug/net10.0/Benchmark.dll
+  ZLinq.FileSystem -> /home/user/w55/ZLinq/default/src/ZLinq.FileSystem/bin/Debug/netstandard2.1/ZLinq.FileSystem.dll
+  ZLinq.Json -> /home/user/w55/ZLinq/default/src/ZLinq.Json/bin/Debug/netstandard2.1/ZLinq.Json.dll
+  ZLinq.Json -> /home/user/w55/ZLinq/default/src/ZLinq.Json/bin/Debug/net10.0/ZLinq.Json.dll
+  ZLinq -> /home/user/w55/ZLinq/default/src/ZLinq/bin/Debug/net8.0/ZLinq.dll
+  ZLinq.FileSystem -> /home/user/w55/ZLinq/default/src/ZLinq.FileSystem/bin/Debug/net9.0/ZLinq.FileSystem.dll
+  ZLinq.Tests -> /home/user/w55/ZLinq/default/tests/ZLinq.Tests/bin/Debug/net10.0/ZLinq.Tests.dll
+  ZLinq -> /home/user/w55/ZLinq/default/src/ZLinq/bin/Debug/netstandard2.0/ZLinq.dll
+  ZLinq.Tests -> /home/user/w55/ZLinq/default/tests/ZLinq.Tests/bin/Debug/net6.0/ZLinq.Tests.dll
+  ZLinq.FileSystem -> /home/user/w55/ZLinq/default/src/ZLinq.FileSystem/bin/Debug/net8.0/ZLinq.FileSystem.dll
+  ZLinq.Json -> /home/user/w55/ZLinq/default/src/ZLinq.Json/bin/Debug/net8.0/ZLinq.Json.dll
+  ZLinq.FileSystem -> /home/user/w55/ZLinq/default/src/ZLinq.FileSystem/bin/Debug/netstandard2.0/ZLinq.FileSystem.dll
+  ZLinq.Json -> /home/user/w55/ZLinq/default/src/ZLinq.Json/bin/Debug/netstandard2.0/ZLinq.Json.dll
+  Benchmark -> /home/user/w55/ZLinq/default/sandbox/Benchmark/bin/Debug/net8.0/Benchmark.dll
+  ZLinq.Godot -> /home/user/w55/ZLinq/default/src/ZLinq.Godot/bin/Debug/net8.0/ZLinq.Godot.dll
+  ZLinq.Tests -> /home/user/w55/ZLinq/default/tests/ZLinq.Tests/bin/Debug/net8.0/ZLinq.Tests.dll
+  Benchmark -> /home/user/w55/ZLinq/default/sandbox/Benchmark/bin/Debug/net9.0/Benchmark.dll
+  Run tests: '/home/user/w55/ZLinq/default/tests/ZLinq.Tests/bin/Debug/net9.0/ZLinq.Tests.dll' [net9.0|x64]
+  Run tests: '/home/user/w55/ZLinq/default/tests/ZLinq.Tests/bin/Debug/net8.0/ZLinq.Tests.dll' [net8.0|x64]
+  Run tests: '/home/user/w55/ZLinq/default/tests/ZLinq.Tests/bin/Debug/net6.0/ZLinq.Tests.dll' [net6.0|x64]
+  Run tests: '/home/user/w55/ZLinq/default/tests/ZLinq.Tests/bin/Debug/net10.0/ZLinq.Tests.dll' [net10.0|x64]
+  Passed! - Failed: 0, Passed: 1172, Skipped: 1, Total: 1173, Duration: 16s 221ms - ZLinq.Tests.dll (net8.0|x64)
+  Tests succeeded: '/home/user/w55/ZLinq/default/tests/ZLinq.Tests/bin/Debug/net8.0/ZLinq.Tests.dll' [net8.0|x64]
+  Passed! - Failed: 0, Passed: 1079, Skipped: 1, Total: 1080, Duration: 16s 393ms
+  Tests succeeded: '/home/user/w55/ZLinq/default/tests/ZLinq.Tests/bin/Debug/net6.0/ZLinq.Tests.dll' [net6.0|x64]
+  Passed! - Failed: 0, Passed: 1182, Skipped: 2, Total: 1184, Duration: 25s 020ms - ZLinq.Tests.dll (net9.0|x64)
+  Tests succeeded: '/home/user/w55/ZLinq/default/tests/ZLinq.Tests/bin/Debug/net9.0/ZLinq.Tests.dll' [net9.0|x64]
+  Passed! - Failed: 0, Passed: 1182, Skipped: 2, Total: 1184, Duration: 25s 595ms - ZLinq.Tests.dll (net10.0|x64)
+  Tests succeeded: '/home/user/w55/ZLinq/default/tests/ZLinq.Tests/bin/Debug/net10.0/ZLinq.Tests.dll' [net10.0|x64]
