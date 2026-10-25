@@ -3,8 +3,8 @@
 ## Question
 
 The format host (`--engine host`, StyleBro.FormatHost) had three clean soaks in a row on its current code (trials 52-54):
-byte for byte the same trees, exit codes and `--json` as the default engine, and 1.6-3.3x faster on the six parity
-repositories. The earlier decision ([ships behind --engine host first](2026-10-17-the-format-host-ships-behind-engine-host-first.md),
+byte for byte the same trees, exit codes and `--json` as the default engine; a first `bro format` was 1.8-3.4x faster on
+the six parity repositories (format-engine.md). The earlier decision ([ships behind --engine host first](2026-10-17-the-format-host-ships-behind-engine-host-first.md),
 "the default after about 3 clean soaks", [2026-10-23](2026-10-23-a-host-only-difference-makes-a-trials-soak-not-clean.md))
 left the switch to the owner. Does the host become the default for `bro format`, `bro check` and the previews, and what
 happens to the old engine?

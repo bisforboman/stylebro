@@ -114,6 +114,13 @@ The `bro format` investigation (per-framework runs, convergence, speed on large 
   F# one, gets dotnet format's own "only C# and Visual Basic" error from the host too), workloads (a framework that needs a missing workload is left out before the runs),
   configurations (one workspace per configuration), `--report`, `--once`, `--all`, the kept-findings copy of `bro check`
   (the repository's workspaces; a copy missing a file gets its own host, not `dotnet format`).
+  Parity before the switch (Compare-Format, host side naming no engine, 4 cores, SDK 10.0.113; times in format-engine.md):
+  same trees, exit codes and --json on all six; output the same on four, and on Newtonsoft.Json and Serilog only the
+  load-warning note names another run (the old engine's forced-framework "project reference without a matching metadata
+  reference", Serilog's in net10.0). Setup notes: lower every global.json (Newtonsoft's Src/, PalCalc's adonis-ui/ pins
+  5.0.400), `EnableWindowsTargeting` for PalCalc, Newtonsoft's package reference in Src/Directory.Build.props (its projects
+  don't import the root). Seen on Serilog, not changed here: the host's note says to add `--verbosity diagnostic`, but at
+  that level it lists no warning (a follow-up).
 
 - **Tracker bugs** (2026-10-04, docs/beyond-stylecop.md "Possible bugs to check", all fixed): BRO1504 treats a
   collection expression's `[` like `{` (StyleCop #3766); BRO1603 accepts a period before closing `)`/`]`/`"`/`'`

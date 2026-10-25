@@ -136,6 +136,21 @@ it can't match, an effect of forcing one framework on the projects, which the ho
 doesn't have
 ([decision](https://github.com/bisforboman/stylebro/blob/main/docs/decisions/2026-10-23-the-format-host-keeps-its-own-workspace-load-warnings.md)).
 
+Before the switch (2026-10-25), the harness ran once more on the six with the host as the default (its runs named no
+engine), on a 4-core Linux machine with SDK 10.0.113: the same working trees, exit codes and `--json` reports on all six.
+The output was the same on CliFx, error-or, System.IO.Abstractions and PalCalc; on Newtonsoft.Json and Serilog only the
+"had warnings loading the workspace" note named another run (Serilog: the `dotnet-format` engine's net10.0 run has the
+same unmatched project reference). `--engine dotnet-format` and the default, in seconds:
+
+| Repository | `check` | `format` | `check` again |
+|---|---:|---:|---:|
+| CliFx | 106 / 46 | 117 / 35 | 36 / 22 |
+| error-or | 49 / 23 | 61 / 22 | 17 / 16 |
+| Serilog | 166 / 89 | 126 / 68 | 30 / 29 |
+| System.IO.Abstractions | 435 / 195 | 316 / 137 | 83 / 88 |
+| PalCalc | 534 / 220 | 336 / 182 | 93 / 102 |
+| Newtonsoft.Json | 1,185 / 444 | 1,204 / 358 | 845 / 254 |
+
 Trial 47 ran the harness and `bro check --build` with both engines on four more repositories (CSharpFunctionalExtensions,
 zio, SmartFormat, fluentvalue). It found one difference, now fixed: in SmartFormat's net462 run the host's view also had the
 libraries' netstandard2.0 instances (MSBuildWorkspace sends a project reference it can't match by output to a project's
