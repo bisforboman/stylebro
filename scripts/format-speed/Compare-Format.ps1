@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 # The parity harness of docs/proposals/format-speed.md: runs 'bro check', 'bro format' and 'bro check' again with the
-# old engine (--engine dotnet-format: 'dotnet format' processes) and the host (--engine host, the default since 2026-10-25;
-# both named, so the harness doesn't depend on the default) on two fresh clones of the same commit, and compares
+# old engine (--engine dotnet-format: 'dotnet format' processes) and the host (the default since 2026-10-25, so its runs
+# name no engine and go the way a user's do) on two fresh clones of the same commit, and compares
 # what users see: the exit codes, the output (the clone's path written as <root>, the --timings block left out, finding
 # lines, kept-finding lines and "Checked" progress lines compared as sorted sets: both engines analyze and fix
 # concurrently, so their order isn't stable between two runs of the same engine either), the working trees after 'format' (stylebro.baseline included)
@@ -57,7 +57,7 @@ function Normalize([string[]] $lines, [string] $root) {
 function Run([string] $engine, [string] $clone, [string] $step, [string[]] $arguments) {
     $log = Join-Path $Work "$name-$engine-$step.txt"
     $json = Join-Path $Work "$name-$engine-$step.json"
-    $engineOption = @('--engine', $engine)
+    $engineOption = if ($engine -eq 'host') { @() } else { @('--engine', $engine) }
     $command = "$Bro $($arguments -join ' ') $clone --timings $($engineOption -join ' ') $($Option -join ' ') --json"
     if ($Reuse -and (Test-Path $log)) {
         $code = if (Test-Path "$log.exit") { [int](Get-Content "$log.exit") } else { $null }
