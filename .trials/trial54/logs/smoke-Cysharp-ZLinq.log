@@ -1,0 +1,27 @@
+== build
+  ZLinq.Json -> /home/user/cand/new/Cysharp-ZLinq/src/ZLinq.Json/bin/Debug/net10.0/ZLinq.Json.dll
+  ZLinq.FileSystem -> /home/user/cand/new/Cysharp-ZLinq/src/ZLinq.FileSystem/bin/Debug/netstandard2.0/ZLinq.FileSystem.dll
+  ConsoleAppNativeAOT -> /home/user/cand/new/Cysharp-ZLinq/sandbox/ConsoleAppNativeAOT/bin/Debug/net10.0/linux-x64/ConsoleAppNativeAOT.dll
+  ZLinq.Json -> /home/user/cand/new/Cysharp-ZLinq/src/ZLinq.Json/bin/Debug/netstandard2.0/ZLinq.Json.dll
+  ConsoleApp -> /home/user/cand/new/Cysharp-ZLinq/sandbox/ConsoleApp/bin/Debug/net10.0/ConsoleApp.dll
+  FileGen -> /home/user/cand/new/Cysharp-ZLinq/src/FileGen/bin/Debug/net10.0/FileGen.dll
+  ZLinq.Tests -> /home/user/cand/new/Cysharp-ZLinq/tests/ZLinq.Tests/bin/Debug/net10.0/ZLinq.Tests.dll
+  ZLinq.Godot -> /home/user/cand/new/Cysharp-ZLinq/src/ZLinq.Godot/bin/Debug/net10.0/ZLinq.Godot.dll
+  Benchmark -> /home/user/cand/new/Cysharp-ZLinq/sandbox/Benchmark/bin/Debug/net10.0/Benchmark.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:01:36.89
+build rc 0
+== test
+  Passed! - Failed: 0, Passed: 1079, Skipped: 1, Total: 1080, Duration: 14s 309ms
+  Tests succeeded: '/home/user/cand/new/Cysharp-ZLinq/tests/ZLinq.Tests/bin/Debug/net6.0/ZLinq.Tests.dll' [net6.0|x64]
+  Passed! - Failed: 0, Passed: 1172, Skipped: 1, Total: 1173, Duration: 17s 415ms - ZLinq.Tests.dll (net8.0|x64)
+  Tests succeeded: '/home/user/cand/new/Cysharp-ZLinq/tests/ZLinq.Tests/bin/Debug/net8.0/ZLinq.Tests.dll' [net8.0|x64]
+  Passed! - Failed: 0, Passed: 1182, Skipped: 2, Total: 1184, Duration: 22s 314ms - ZLinq.Tests.dll (net10.0|x64)
+  Tests succeeded: '/home/user/cand/new/Cysharp-ZLinq/tests/ZLinq.Tests/bin/Debug/net10.0/ZLinq.Tests.dll' [net10.0|x64]
+  Passed! - Failed: 0, Passed: 1182, Skipped: 2, Total: 1184, Duration: 22s 120ms - ZLinq.Tests.dll (net9.0|x64)
+  Tests succeeded: '/home/user/cand/new/Cysharp-ZLinq/tests/ZLinq.Tests/bin/Debug/net9.0/ZLinq.Tests.dll' [net9.0|x64]
+test rc 0

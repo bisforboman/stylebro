@@ -1,0 +1,45 @@
+  Determining projects to restore...
+  Restored /home/user/w54/Finbuckle/base/test/Finbuckle.MultiTenant.Identity.EntityFrameworkCore.Test/Finbuckle.MultiTenant.Identity.EntityFrameworkCore.Test.csproj (in 1.22 sec).
+  Restored /home/user/w54/Finbuckle/base/samples/WebApiSample/WebApiSample.csproj (in 1.77 sec).
+  Restored /home/user/w54/Finbuckle/base/test/Finbuckle.MultiTenant.Test/Finbuckle.MultiTenant.Test.csproj (in 1.76 sec).
+  Restored /home/user/w54/Finbuckle/base/samples/IdentityAppSample/IdentityAppSample.csproj (in 1.83 sec).
+  Restored /home/user/w54/Finbuckle/base/test/Finbuckle.MultiTenant.AspNetCore.Test/Finbuckle.MultiTenant.AspNetCore.Test.csproj (in 42 ms).
+  Restored /home/user/w54/Finbuckle/base/test/Finbuckle.MultiTenant.EntityFrameworkCore.Test/Finbuckle.MultiTenant.EntityFrameworkCore.Test.csproj (in 94 ms).
+  5 of 11 projects are up-to-date for restore.
+  Finbuckle.MultiTenant.Abstractions -> /home/user/w54/Finbuckle/base/src/Finbuckle.MultiTenant.Abstractions/bin/Debug/net10.0/Finbuckle.MultiTenant.Abstractions.dll
+  Finbuckle.MultiTenant -> /home/user/w54/Finbuckle/base/src/Finbuckle.MultiTenant/bin/Debug/net10.0/Finbuckle.MultiTenant.dll
+  Finbuckle.MultiTenant.AspNetCore -> /home/user/w54/Finbuckle/base/src/Finbuckle.MultiTenant.AspNetCore/bin/Debug/net10.0/Finbuckle.MultiTenant.AspNetCore.dll
+  Finbuckle.MultiTenant.EntityFrameworkCore -> /home/user/w54/Finbuckle/base/src/Finbuckle.MultiTenant.EntityFrameworkCore/bin/Debug/net10.0/Finbuckle.MultiTenant.EntityFrameworkCore.dll
+  Finbuckle.MultiTenant.Test -> /home/user/w54/Finbuckle/base/test/Finbuckle.MultiTenant.Test/bin/Debug/net10.0/Finbuckle.MultiTenant.Test.dll
+Test run for /home/user/w54/Finbuckle/base/test/Finbuckle.MultiTenant.Test/bin/Debug/net10.0/Finbuckle.MultiTenant.Test.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:   258, Skipped:     0, Total:   258, Duration: 1 s - Finbuckle.MultiTenant.Test.dll (net10.0)
+  Finbuckle.MultiTenant.Identity.EntityFrameworkCore -> /home/user/w54/Finbuckle/base/src/Finbuckle.MultiTenant.Identity.EntityFrameworkCore/bin/Debug/net10.0/Finbuckle.MultiTenant.Identity.EntityFrameworkCore.dll
+  Finbuckle.MultiTenant.EntityFrameworkCore.Test -> /home/user/w54/Finbuckle/base/test/Finbuckle.MultiTenant.EntityFrameworkCore.Test/bin/Debug/net10.0/Finbuckle.MultiTenant.EntityFrameworkCore.Test.dll
+Test run for /home/user/w54/Finbuckle/base/test/Finbuckle.MultiTenant.EntityFrameworkCore.Test/bin/Debug/net10.0/Finbuckle.MultiTenant.EntityFrameworkCore.Test.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+  Finbuckle.MultiTenant.AspNetCore.Test -> /home/user/w54/Finbuckle/base/test/Finbuckle.MultiTenant.AspNetCore.Test/bin/Debug/net10.0/Finbuckle.MultiTenant.AspNetCore.Test.dll
+Test run for /home/user/w54/Finbuckle/base/test/Finbuckle.MultiTenant.AspNetCore.Test/bin/Debug/net10.0/Finbuckle.MultiTenant.AspNetCore.Test.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:   157, Skipped:     0, Total:   157, Duration: 2 s - Finbuckle.MultiTenant.AspNetCore.Test.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   105, Skipped:     0, Total:   105, Duration: 6 s - Finbuckle.MultiTenant.EntityFrameworkCore.Test.dll (net10.0)
+  Finbuckle.MultiTenant.Identity.EntityFrameworkCore.Test -> /home/user/w54/Finbuckle/base/test/Finbuckle.MultiTenant.Identity.EntityFrameworkCore.Test/bin/Debug/net10.0/Finbuckle.MultiTenant.Identity.EntityFrameworkCore.Test.dll
+Test run for /home/user/w54/Finbuckle/base/test/Finbuckle.MultiTenant.Identity.EntityFrameworkCore.Test/bin/Debug/net10.0/Finbuckle.MultiTenant.Identity.EntityFrameworkCore.Test.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    87, Skipped:     0, Total:    87, Duration: 5 s - Finbuckle.MultiTenant.Identity.EntityFrameworkCore.Test.dll (net10.0)

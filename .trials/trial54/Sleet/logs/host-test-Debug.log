@@ -1,0 +1,242 @@
+Running tests from /home/user/w54/Sleet/host/artifacts/bin/Sleet.CmdExe.Tests/debug/Sleet.CmdExe.Tests.dll (net10.0|x64)
+Running tests from /home/user/w54/Sleet/host/artifacts/bin/Sleet.Azure.Tests/debug/Sleet.Azure.Tests.dll (net10.0|x64)
+Running tests from /home/user/w54/Sleet/host/artifacts/bin/Sleet.CliTool.Tests/debug/Sleet.CliTool.Tests.dll (net10.0|x64)
+Running tests from /home/user/w54/Sleet/host/artifacts/bin/Sleet.AmazonS3.Tests/debug/Sleet.AmazonS3.Tests.dll (net10.0|x64)
+skipped Sleet.CmdExe.Tests.DynamicSettingsTests.RunAllCommandsWithInputProperties (0ms)
+  Windows only test
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.CmdExe.Tests/debug/Sleet.CmdExe.Tests.dll (net10.0|x64)
+skipped Sleet.CmdExe.Tests.BasicTests.GivenABadCommandVerifyFailure (0ms)
+  Windows only test
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.CmdExe.Tests/debug/Sleet.CmdExe.Tests.dll (net10.0|x64)
+skipped Sleet.CmdExe.Tests.DynamicSettingsTests.InitWithEnvVarsWithNonSleetNetConfigVerifyFeedOutput (0ms)
+  Windows only test
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.CmdExe.Tests/debug/Sleet.CmdExe.Tests.dll (net10.0|x64)
+skipped Sleet.CmdExe.Tests.DynamicSettingsTests.InitWithEnvVarsVerifyFeedOutput (0ms)
+  Windows only test
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.CmdExe.Tests/debug/Sleet.CmdExe.Tests.dll (net10.0|x64)
+skipped Sleet.CmdExe.Tests.DynamicSettingsTests.InitWithPropertiesVerifyFeedOutput (0ms)
+  Windows only test
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.CmdExe.Tests/debug/Sleet.CmdExe.Tests.dll (net10.0|x64)
+skipped Sleet.CmdExe.Tests.BasicTests.RunCreateConfigVerifySuccess (0ms)
+  Windows only test
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.CmdExe.Tests/debug/Sleet.CmdExe.Tests.dll (net10.0|x64)
+/home/user/w54/Sleet/host/artifacts/bin/Sleet.CmdExe.Tests/debug/Sleet.CmdExe.Tests.dll (net10.0|x64) passed (563ms)
+failed Sleet.CliTool.Tests.BasicTests.InstallToolVerifySuccess (79ms)
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.CliTool.Tests/debug/Sleet.CliTool.Tests.dll (net10.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.IO.FileNotFoundException : Unable to find artifacts/nupkgs, try running these tests from build.ps1
+    at Sleet.Test.Common.CmdRunner.GetPath(String relativePath) in /home/user/w54/Sleet/host/test/Sleet.Test.Common/CmdRunner.cs:37
+    at Sleet.CliTool.Tests.BasicTests.InstallToolVerifySuccess() in /home/user/w54/Sleet/host/test/Sleet.CliTool.Tests/BasicTests.cs:32
+    --- End of stack trace from previous location ---
+skipped Sleet.Azure.Tests.CacheControlTests.GivenCustomCacheControl_VerifyHeadersAreSet (0ms)
+  Start local-env or set SLEET_TEST_ACCOUNT to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.Azure.Tests/debug/Sleet.Azure.Tests.dll (net10.0|x64)
+skipped Sleet.Azure.Tests.AzureNuGetIntegrationTests.GivenPushCreatesAContainerVerifyNuGetCanRead (0ms)
+  Start local-env or set SLEET_TEST_ACCOUNT to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.Azure.Tests/debug/Sleet.Azure.Tests.dll (net10.0|x64)
+skipped Sleet.Azure.Tests.BasicTests.GivenAStorageAccountWithNoInitVerifyPushSucceeds (0ms)
+  Start local-env or set SLEET_TEST_ACCOUNT to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.Azure.Tests/debug/Sleet.Azure.Tests.dll (net10.0|x64)
+skipped Sleet.Azure.Tests.SubFeedTests.SubFeed_PushAndVerifyNoFilesInRoot (0ms)
+  Start local-env or set SLEET_TEST_ACCOUNT to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.Azure.Tests/debug/Sleet.Azure.Tests.dll (net10.0|x64)
+skipped Sleet.Azure.Tests.CacheControlTests.GivenDefaultSettings_VerifyCacheControlIsNoStore (0ms)
+  Start local-env or set SLEET_TEST_ACCOUNT to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.Azure.Tests/debug/Sleet.Azure.Tests.dll (net10.0|x64)
+/home/user/w54/Sleet/host/artifacts/bin/Sleet.CliTool.Tests/debug/Sleet.CliTool.Tests.dll (net10.0|x64) failed with 1 error(s) (662ms)
+Exit code: 2
+skipped Sleet.Azure.Tests.CacheControlTests.GivenCustomCacheControlViaFactory_VerifyHeadersAreSet (0ms)
+  Start local-env or set SLEET_TEST_ACCOUNT to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.Azure.Tests/debug/Sleet.Azure.Tests.dll (net10.0|x64)
+skipped Sleet.Azure.Tests.BasicTests.GivenAStorageAccountVerifyPushAndRemoveSucceed (0ms)
+  Start local-env or set SLEET_TEST_ACCOUNT to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.Azure.Tests/debug/Sleet.Azure.Tests.dll (net10.0|x64)
+skipped Sleet.Azure.Tests.BasicTests.GivenAStorageAccountVerifyPushSucceeds (0ms)
+  Start local-env or set SLEET_TEST_ACCOUNT to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.Azure.Tests/debug/Sleet.Azure.Tests.dll (net10.0|x64)
+skipped Sleet.Azure.Tests.BasicTests.GivenAStorageAccountVerifyInitSucceeds (0ms)
+  Start local-env or set SLEET_TEST_ACCOUNT to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.Azure.Tests/debug/Sleet.Azure.Tests.dll (net10.0|x64)
+skipped Sleet.Azure.Tests.BasicTests.GivenAStorageAccountVerifyPushWithBaseURI (0ms)
+  Start local-env or set SLEET_TEST_ACCOUNT to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.Azure.Tests/debug/Sleet.Azure.Tests.dll (net10.0|x64)
+skipped Sleet.Azure.Tests.BasicTests.GivenAStorageAccountWithNoContainerVerifyPushSucceeds (0ms)
+  Start local-env or set SLEET_TEST_ACCOUNT to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.Azure.Tests/debug/Sleet.Azure.Tests.dll (net10.0|x64)
+skipped Sleet.Azure.Tests.SubFeedTests.SubFeed_PushAndVerifyWithNestedFeedsVerifySuccess (0ms)
+  Start local-env or set SLEET_TEST_ACCOUNT to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.Azure.Tests/debug/Sleet.Azure.Tests.dll (net10.0|x64)
+skipped Sleet.Azure.Tests.SubFeedTests.SubFeed_InitMultipleFeedsVerifyDestroyDoesNotModifyOthers (0ms)
+  Start local-env or set SLEET_TEST_ACCOUNT to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.Azure.Tests/debug/Sleet.Azure.Tests.dll (net10.0|x64)
+skipped Sleet.Azure.Tests.AzureFileSystemTests.GivenAStorageAccountVerifyContainerOperations (0ms)
+  Start local-env or set SLEET_TEST_ACCOUNT to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.Azure.Tests/debug/Sleet.Azure.Tests.dll (net10.0|x64)
+skipped Sleet.Azure.Tests.AzureFileSystemTests.GivenAStorageAccountConnStringVerifyFileSystemFactoryCreatesFS (0ms)
+  Start local-env or set SLEET_TEST_ACCOUNT to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.Azure.Tests/debug/Sleet.Azure.Tests.dll (net10.0|x64)
+/home/user/w54/Sleet/host/artifacts/bin/Sleet.Azure.Tests/debug/Sleet.Azure.Tests.dll (net10.0|x64) passed (907ms)
+Running tests from /home/user/w54/Sleet/host/artifacts/bin/SleetLib.Tests/debug_net8.0/SleetLib.Tests.dll (net8.0|x64)
+skipped Sleet.AmazonS3.Tests.SubFeedTests.SubFeed_PushAndVerifyNoFilesInRoot (0ms)
+  Start local-env or set SLEET_TEST_S3_ACCESS_KEY_ID and SLEET_TEST_S3_SECRET_ACCESS_KEY to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.AmazonS3.Tests/debug/Sleet.AmazonS3.Tests.dll (net10.0|x64)
+skipped Sleet.AmazonS3.Tests.AmazonS3NuGetIntegrationTests.GivenPushCreatesAnS3BucketVerifyNuGetCanRead (0ms)
+  Start local-env or set SLEET_TEST_S3_ACCESS_KEY_ID and SLEET_TEST_S3_SECRET_ACCESS_KEY to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.AmazonS3.Tests/debug/Sleet.AmazonS3.Tests.dll (net10.0|x64)
+skipped Sleet.AmazonS3.Tests.AmazonS3FileSystemTests.GivenAS3AccountVerifyBucketOperations (0ms)
+  Start local-env or set SLEET_TEST_S3_ACCESS_KEY_ID and SLEET_TEST_S3_SECRET_ACCESS_KEY to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.AmazonS3.Tests/debug/Sleet.AmazonS3.Tests.dll (net10.0|x64)
+skipped Sleet.AmazonS3.Tests.CacheControlTests.GivenCustomCacheControl_VerifyHeadersAreSet (0ms)
+  Start local-env or set SLEET_TEST_S3_ACCESS_KEY_ID and SLEET_TEST_S3_SECRET_ACCESS_KEY to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.AmazonS3.Tests/debug/Sleet.AmazonS3.Tests.dll (net10.0|x64)
+skipped Sleet.AmazonS3.Tests.CacheControlTests.GivenCustomCacheControlViaFactory_VerifyHeadersAreSet (0ms)
+  Start local-env or set SLEET_TEST_S3_ACCESS_KEY_ID and SLEET_TEST_S3_SECRET_ACCESS_KEY to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.AmazonS3.Tests/debug/Sleet.AmazonS3.Tests.dll (net10.0|x64)
+skipped Sleet.AmazonS3.Tests.CacheControlTests.GivenDefaultSettings_VerifyCacheControlIsNoStore (0ms)
+  Start local-env or set SLEET_TEST_S3_ACCESS_KEY_ID and SLEET_TEST_S3_SECRET_ACCESS_KEY to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.AmazonS3.Tests/debug/Sleet.AmazonS3.Tests.dll (net10.0|x64)
+skipped Sleet.AmazonS3.Tests.SubFeedTests.SubFeed_PushAndVerifyWithNestedFeedsVerifySuccess (0ms)
+  Start local-env or set SLEET_TEST_S3_ACCESS_KEY_ID and SLEET_TEST_S3_SECRET_ACCESS_KEY to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.AmazonS3.Tests/debug/Sleet.AmazonS3.Tests.dll (net10.0|x64)
+skipped Sleet.AmazonS3.Tests.SubFeedTests.SubFeed_InitMultipleFeedsVerifyDestroyDoesNotModifyOthers (0ms)
+  Start local-env or set SLEET_TEST_S3_ACCESS_KEY_ID and SLEET_TEST_S3_SECRET_ACCESS_KEY to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.AmazonS3.Tests/debug/Sleet.AmazonS3.Tests.dll (net10.0|x64)
+skipped Sleet.AmazonS3.Tests.BasicTests.GivenAStorageAccountWithNoInitVerifyPushSucceeds (0ms)
+  Start local-env or set SLEET_TEST_S3_ACCESS_KEY_ID and SLEET_TEST_S3_SECRET_ACCESS_KEY to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.AmazonS3.Tests/debug/Sleet.AmazonS3.Tests.dll (net10.0|x64)
+skipped Sleet.AmazonS3.Tests.BasicTests.GivenAStorageAccountVerifyInitSucceeds (0ms)
+  Start local-env or set SLEET_TEST_S3_ACCESS_KEY_ID and SLEET_TEST_S3_SECRET_ACCESS_KEY to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.AmazonS3.Tests/debug/Sleet.AmazonS3.Tests.dll (net10.0|x64)
+skipped Sleet.AmazonS3.Tests.BasicTests.GivenAStorageAccountVerifyPushAndRemoveSucceed (0ms)
+  Start local-env or set SLEET_TEST_S3_ACCESS_KEY_ID and SLEET_TEST_S3_SECRET_ACCESS_KEY to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.AmazonS3.Tests/debug/Sleet.AmazonS3.Tests.dll (net10.0|x64)
+skipped Sleet.AmazonS3.Tests.BasicTests.GivenAStorageAccountWithNoContainerPublicAclVerifyPushSucceeds (0ms)
+  Start local-env or set SLEET_TEST_S3_ACCESS_KEY_ID and SLEET_TEST_S3_SECRET_ACCESS_KEY to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.AmazonS3.Tests/debug/Sleet.AmazonS3.Tests.dll (net10.0|x64)
+skipped Sleet.AmazonS3.Tests.BasicTests.GivenAStorageAccountWithNoContainerVerifyPushSucceeds (0ms)
+  Start local-env or set SLEET_TEST_S3_ACCESS_KEY_ID and SLEET_TEST_S3_SECRET_ACCESS_KEY to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.AmazonS3.Tests/debug/Sleet.AmazonS3.Tests.dll (net10.0|x64)
+skipped Sleet.AmazonS3.Tests.BasicTests.GivenAStorageAccountVerifyPushAndSucceedWithBaseURI (0ms)
+  Start local-env or set SLEET_TEST_S3_ACCESS_KEY_ID and SLEET_TEST_S3_SECRET_ACCESS_KEY to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.AmazonS3.Tests/debug/Sleet.AmazonS3.Tests.dll (net10.0|x64)
+skipped Sleet.AmazonS3.Tests.BasicTests.GivenAStorageAccountWithNoContainerVerifyInitSucceeds (0ms)
+  Start local-env or set SLEET_TEST_S3_ACCESS_KEY_ID and SLEET_TEST_S3_SECRET_ACCESS_KEY to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.AmazonS3.Tests/debug/Sleet.AmazonS3.Tests.dll (net10.0|x64)
+skipped Sleet.AmazonS3.Tests.BasicTests.GivenAStorageAccountVerifyPushSucceeds (0ms)
+  Start local-env or set SLEET_TEST_S3_ACCESS_KEY_ID and SLEET_TEST_S3_SECRET_ACCESS_KEY to run this test, see CONTRIBUTING.md.
+  from /home/user/w54/Sleet/host/artifacts/bin/Sleet.AmazonS3.Tests/debug/Sleet.AmazonS3.Tests.dll (net10.0|x64)
+/home/user/w54/Sleet/host/artifacts/bin/Sleet.AmazonS3.Tests/debug/Sleet.AmazonS3.Tests.dll (net10.0|x64) passed (926ms)
+Running tests from /home/user/w54/Sleet/host/artifacts/bin/SleetLib.Tests/debug_net10.0/SleetLib.Tests.dll (net10.0|x64)
+Running tests from /home/user/w54/Sleet/host/artifacts/bin/SleetLib.Tests/debug_net9.0/SleetLib.Tests.dll (net10.0|x64)
+Running tests from /home/user/w54/Sleet/host/artifacts/bin/Sleet.Tests/debug_net8.0/Sleet.Tests.dll (net8.0|x64)
+[+39/x0/?0] SleetLib.Tests.dll (net8.0|x64)(1s)
+[+0/x0/?0] SleetLib.Tests.dll (net10.0|x64)(1s)
+[+0/x0/?0] SleetLib.Tests.dll (net10.0|x64)(1s)
+[+0/x0/?0] Sleet.Tests.dll (net8.0|x64)(0s)
+
+skipped SleetLib.Tests.AddRemoveTests.AddRemove_AddMultipleBatchesCIOnly (0ms)
+  Set env var: CIBUILD to run this test. This can be ignored for non CI scenarios.
+  from /home/user/w54/Sleet/host/artifacts/bin/SleetLib.Tests/debug_net9.0/SleetLib.Tests.dll (net10.0|x64)
+skipped SleetLib.Tests.AddRemoveTests.AddRemove_AddMultipleBatchesCIOnly (0ms)
+  Set env var: CIBUILD to run this test. This can be ignored for non CI scenarios.
+  from /home/user/w54/Sleet/host/artifacts/bin/SleetLib.Tests/debug_net10.0/SleetLib.Tests.dll (net10.0|x64)
+[+139/x0/?0] SleetLib.Tests.dll (net8.0|x64)(4s)
+[+180/x0/?1] SleetLib.Tests.dll (net10.0|x64)(4s)
+[+150/x0/?1] SleetLib.Tests.dll (net10.0|x64)(4s)
+[+8/x0/?0] Sleet.Tests.dll (net8.0|x64)(3s)
+
+skipped SleetLib.Tests.AddRemoveTests.AddRemove_AddMultipleBatchesCIOnly (0ms)
+  Set env var: CIBUILD to run this test. This can be ignored for non CI scenarios.
+  from /home/user/w54/Sleet/host/artifacts/bin/SleetLib.Tests/debug_net8.0/SleetLib.Tests.dll (net8.0|x64)
+/home/user/w54/Sleet/host/artifacts/bin/Sleet.Tests/debug_net8.0/Sleet.Tests.dll (net8.0|x64) passed (4s 861ms)
+Running tests from /home/user/w54/Sleet/host/artifacts/bin/Sleet.Tests/debug_net9.0/Sleet.Tests.dll (net10.0|x64)
+[+239/x0/?1] SleetLib.Tests.dll (net8.0|x64)(7s)
+[+260/x0/?1] SleetLib.Tests.dll (net10.0|x64)(7s)
+[+197/x0/?1] SleetLib.Tests.dll (net10.0|x64)(7s)
+[+6/x0/?0] Sleet.Tests.dll (net10.0|x64)(1s)
+
+/home/user/w54/Sleet/host/artifacts/bin/Sleet.Tests/debug_net9.0/Sleet.Tests.dll (net10.0|x64) passed (3s 632ms)
+Running tests from /home/user/w54/Sleet/host/artifacts/bin/Sleet.Tests/debug_net10.0/Sleet.Tests.dll (net10.0|x64)
+[+287/x0/?1] SleetLib.Tests.dll (net8.0|x64)(10s)
+[+377/x0/?1] SleetLib.Tests.dll (net10.0|x64)(10s)
+[+252/x0/?1] SleetLib.Tests.dll (net10.0|x64)(10s)
+[+0/x0/?0] Sleet.Tests.dll (net10.0|x64)(0s)
+
+[+455/x0/?1] SleetLib.Tests.dll (net8.0|x64)(13s)
+[+464/x0/?1] SleetLib.Tests.dll (net10.0|x64)(13s)
+[+352/x0/?1] SleetLib.Tests.dll (net10.0|x64)(13s)
+[+14/x0/?0] Sleet.Tests.dll (net10.0|x64)(3s)
+
+/home/user/w54/Sleet/host/artifacts/bin/Sleet.Tests/debug_net10.0/Sleet.Tests.dll (net10.0|x64) passed (3s 975ms)
+Running tests from /home/user/w54/Sleet/host/artifacts/bin/Sleet.Integration.Tests/debug_net8.0/Sleet.Integration.Tests.dll (net8.0|x64)
+[+485/x0/?1] SleetLib.Tests.dll (net8.0|x64)(16s)
+[+472/x0/?1] SleetLib.Tests.dll (net10.0|x64)(16s)
+[+477/x0/?1] SleetLib.Tests.dll (net10.0|x64)(16s)
+[+1/x0/?0] Sleet.Integration.Tests.dll (net8.0|x64)(1s)
+
+/home/user/w54/Sleet/host/artifacts/bin/Sleet.Integration.Tests/debug_net8.0/Sleet.Integration.Tests.dll (net8.0|x64) passed (4s 275ms)
+Running tests from /home/user/w54/Sleet/host/artifacts/bin/Sleet.Integration.Tests/debug_net9.0/Sleet.Integration.Tests.dll (net10.0|x64)
+[+485/x0/?1] SleetLib.Tests.dll (net8.0|x64)(19s)
+[+475/x0/?1] SleetLib.Tests.dll (net10.0|x64)(19s)
+[+490/x0/?1] SleetLib.Tests.dll (net10.0|x64)(19s)
+[+0/x0/?0] Sleet.Integration.Tests.dll (net10.0|x64)(0s)
+
+skipped SleetLib.Tests.FeedTests.Feed_LocalTypeSupportsRelativePath (0ms)
+  Windows only test
+  from /home/user/w54/Sleet/host/artifacts/bin/SleetLib.Tests/debug_net9.0/SleetLib.Tests.dll (net10.0|x64)
+skipped SleetLib.Tests.FeedTests.Feed_LocalTypeSupportsRelativePath (0ms)
+  Windows only test
+  from /home/user/w54/Sleet/host/artifacts/bin/SleetLib.Tests/debug_net8.0/SleetLib.Tests.dll (net8.0|x64)
+[+496/x0/?2] SleetLib.Tests.dll (net8.0|x64)(22s)
+[+479/x0/?1] SleetLib.Tests.dll (net10.0|x64)(22s)
+[+505/x0/?2] SleetLib.Tests.dll (net10.0|x64)(22s)
+[+8/x0/?0] Sleet.Integration.Tests.dll (net10.0|x64)(3s)
+
+/home/user/w54/Sleet/host/artifacts/bin/Sleet.Integration.Tests/debug_net9.0/Sleet.Integration.Tests.dll (net10.0|x64) passed (3s 666ms)
+Running tests from /home/user/w54/Sleet/host/artifacts/bin/Sleet.Integration.Tests/debug_net10.0/Sleet.Integration.Tests.dll (net10.0|x64)
+/home/user/w54/Sleet/host/artifacts/bin/SleetLib.Tests/debug_net9.0/SleetLib.Tests.dll (net10.0|x64) passed (23s 031ms)
+/home/user/w54/Sleet/host/artifacts/bin/SleetLib.Tests/debug_net8.0/SleetLib.Tests.dll (net8.0|x64) passed (25s 009ms)
+[+479/x0/?1] SleetLib.Tests.dll (net10.0|x64)(25s)
+[+4/x0/?0] Sleet.Integration.Tests.dll (net10.0|x64)(2s)
+
+[+479/x0/?1] SleetLib.Tests.dll (net10.0|x64)(28s)
+[+4/x0/?0] Sleet.Integration.Tests.dll (net10.0|x64)(5s)
+
+[+481/x0/?1] SleetLib.Tests.dll (net10.0|x64)(31s)
+[+4/x0/?0] Sleet.Integration.Tests.dll (net10.0|x64)(8s)
+
+[+481/x0/?1] SleetLib.Tests.dll (net10.0|x64)(34s)
+[+4/x0/?0] Sleet.Integration.Tests.dll (net10.0|x64)(11s)
+
+/home/user/w54/Sleet/host/artifacts/bin/Sleet.Integration.Tests/debug_net10.0/Sleet.Integration.Tests.dll (net10.0|x64) passed (13s 786ms)
+[+481/x0/?1] SleetLib.Tests.dll (net10.0|x64)(37s)
+
+[+484/x0/?1] SleetLib.Tests.dll (net10.0|x64)(40s)
+
+skipped SleetLib.Tests.FeedTests.Feed_LocalTypeSupportsRelativePath (0ms)
+  Windows only test
+  from /home/user/w54/Sleet/host/artifacts/bin/SleetLib.Tests/debug_net10.0/SleetLib.Tests.dll (net10.0|x64)
+[+580/x0/?2] SleetLib.Tests.dll (net10.0|x64)(43s)
+
+/home/user/w54/Sleet/host/artifacts/bin/SleetLib.Tests/debug_net10.0/SleetLib.Tests.dll (net10.0|x64) passed (45s 830ms)
+
+Test run summary: Failed!
+  /home/user/w54/Sleet/host/artifacts/bin/Sleet.Integration.Tests/debug_net10.0/Sleet.Integration.Tests.dll (net10.0|x64) passed (13s 786ms)
+  /home/user/w54/Sleet/host/artifacts/bin/Sleet.Integration.Tests/debug_net8.0/Sleet.Integration.Tests.dll (net8.0|x64) passed (4s 275ms)
+  /home/user/w54/Sleet/host/artifacts/bin/Sleet.Tests/debug_net8.0/Sleet.Tests.dll (net8.0|x64) passed (4s 861ms)
+  /home/user/w54/Sleet/host/artifacts/bin/SleetLib.Tests/debug_net9.0/SleetLib.Tests.dll (net10.0|x64) passed (23s 031ms)
+  /home/user/w54/Sleet/host/artifacts/bin/Sleet.Tests/debug_net9.0/Sleet.Tests.dll (net10.0|x64) passed (3s 632ms)
+  /home/user/w54/Sleet/host/artifacts/bin/Sleet.Integration.Tests/debug_net9.0/Sleet.Integration.Tests.dll (net10.0|x64) passed (3s 666ms)
+  /home/user/w54/Sleet/host/artifacts/bin/Sleet.AmazonS3.Tests/debug/Sleet.AmazonS3.Tests.dll (net10.0|x64) passed (926ms)
+  /home/user/w54/Sleet/host/artifacts/bin/Sleet.Tests/debug_net10.0/Sleet.Tests.dll (net10.0|x64) passed (3s 975ms)
+  /home/user/w54/Sleet/host/artifacts/bin/Sleet.Azure.Tests/debug/Sleet.Azure.Tests.dll (net10.0|x64) passed (907ms)
+  /home/user/w54/Sleet/host/artifacts/bin/Sleet.CliTool.Tests/debug/Sleet.CliTool.Tests.dll (net10.0|x64) failed with 1 error(s) (662ms)
+  /home/user/w54/Sleet/host/artifacts/bin/SleetLib.Tests/debug_net8.0/SleetLib.Tests.dll (net8.0|x64) passed (25s 009ms)
+  /home/user/w54/Sleet/host/artifacts/bin/Sleet.CmdExe.Tests/debug/Sleet.CmdExe.Tests.dll (net10.0|x64) passed (563ms)
+  /home/user/w54/Sleet/host/artifacts/bin/SleetLib.Tests/debug_net10.0/SleetLib.Tests.dll (net10.0|x64) passed (45s 830ms)
+
+  total: 1925
+  failed: 1
+  succeeded: 1881
+  skipped: 43
+  duration: 47s 552ms
+Test run completed with non-success exit code: 2 (see: https://aka.ms/testingplatform/exitcodes)

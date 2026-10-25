@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "command": "format",
+  "previewOf": null,
+  "path": "/home/user/w54/Dapper/host",
+  "write": false,
+  "settings": [],
+  "conventions": [],
+  "sonar": null,
+  "agentsMd": null,
+  "runs": [
+    {
+      "run": 1,
+      "filesChanged": [],
+      "changesPerRule": {}
+    }
+  ],
+  "changesPerRule": {},
+  "filesPerRule": null,
+  "keptFindings": [
+    {
+      "path": "Dapper/SqlMapper.DapperRow.Descriptor.cs",
+      "line": 51,
+      "column": 55,
+      "rule": "BRO1307",
+      "reason": "NewNameMeansSomethingElse",
+      "reasonText": "at a use of the name, the new name would mean something else",
+      "message": "Rename 's_converter' to 'Converter'"
+    }
+  ],
+  "patch": null,
+  "clean": false,
+  "exitCode": 3,
+  "notChecked": [
+    "IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)"
+  ]
+}

@@ -1,0 +1,12 @@
+preview	0	104s	bro preview init --engine host
+setup	0	11s	bash -c python3 /home/user/stylebro/.trials/trial54/addref.py Directory.Packages.props "<PackageVersion Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial54.1\" />" && python3 /home/user/stylebro/.trials/trial54/addref.py build/common.props "<PackageReference Include=\"StyleBro.Analyzers\" PrivateAssets=\"all\" />" && git diff --stat && bro init --write
+format	0	96s	bro format --engine host
+check	0	45s	bro check --engine host
+check-json	0
+checkbuild	0	223s	bro check --build --engine host
+checkbuild-json	0
+twae-Debug	0	30s	twae Debug
+test-Debug	2	52s	env CFG=Debug bash -c dotnet test --solution Sleet.slnx -c $CFG
+twae-Release	0	25s	twae Release
+test-Release	2	59s	env CFG=Release bash -c dotnet test --solution Sleet.slnx -c $CFG
+DONE

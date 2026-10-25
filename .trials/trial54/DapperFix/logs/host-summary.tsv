@@ -1,0 +1,12 @@
+preview	0	102s	bro preview init --engine host
+setup	0	7s	bash -c python3 /home/user/stylebro/.trials/trial54/addref.py Directory.Packages.props "<PackageVersion Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial54.2\" />" && python3 /home/user/stylebro/.trials/trial54/addref.py Directory.Build.props "<PackageReference Include=\"StyleBro.Analyzers\" PrivateAssets=\"all\" />" && git diff --stat && bro init --write
+format	0	109s	bro format --engine host
+check	0	59s	bro check --engine host
+check-json	0
+checkbuild	3	145s	bro check --build --engine host
+checkbuild-json	3
+twae-Debug	1	15s	twae Debug
+test-Debug	0	24s	env CFG=Debug bash -c dotnet test tests/Dapper.Tests/Dapper.Tests.csproj -c $CFG -f net10.0 --filter "FullyQualifiedName~Sqlite|FullyQualifiedName~DuckDB"
+twae-Release	1	16s	twae Release
+test-Release	0	24s	env CFG=Release bash -c dotnet test tests/Dapper.Tests/Dapper.Tests.csproj -c $CFG -f net10.0 --filter "FullyQualifiedName~Sqlite|FullyQualifiedName~DuckDB"
+DONE

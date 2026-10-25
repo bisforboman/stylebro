@@ -1,0 +1,19 @@
+== build
+/root/.nuget/packages/nerdbank.gitversioning/3.5.113/build/Nerdbank.GitVersioning.Inner.targets(17,5): error MSB4018:    at Nerdbank.GitVersioning.Managed.GitExtensions.GetCommitHeight(GitRepository repository, GitCommit startingCommit, GitWalkTracker tracker, Func`2 continueStepping) [/root/.nuget/packages/nerdbank.gitversioning/3.5.113/build/PrivateP2PCaching.proj]
+/root/.nuget/packages/nerdbank.gitversioning/3.5.113/build/Nerdbank.GitVersioning.Inner.targets(17,5): error MSB4018:    at Nerdbank.GitVersioning.Managed.GitExtensions.GetHeight(ManagedGitContext context, Func`2 continueStepping) [/root/.nuget/packages/nerdbank.gitversioning/3.5.113/build/PrivateP2PCaching.proj]
+/root/.nuget/packages/nerdbank.gitversioning/3.5.113/build/Nerdbank.GitVersioning.Inner.targets(17,5): error MSB4018:    at Nerdbank.GitVersioning.Managed.GitExtensions.GetVersionHeight(ManagedGitContext context, Version baseVersion) [/root/.nuget/packages/nerdbank.gitversioning/3.5.113/build/PrivateP2PCaching.proj]
+/root/.nuget/packages/nerdbank.gitversioning/3.5.113/build/Nerdbank.GitVersioning.Inner.targets(17,5): error MSB4018:    at Nerdbank.GitVersioning.Managed.ManagedGitContext.CalculateVersionHeight(VersionOptions committedVersion, VersionOptions workingVersion) [/root/.nuget/packages/nerdbank.gitversioning/3.5.113/build/PrivateP2PCaching.proj]
+/root/.nuget/packages/nerdbank.gitversioning/3.5.113/build/Nerdbank.GitVersioning.Inner.targets(17,5): error MSB4018:    at Nerdbank.GitVersioning.VersionOracle..ctor(GitContext context, ICloudBuild cloudBuild, Nullable`1 overrideVersionHeightOffset) [/root/.nuget/packages/nerdbank.gitversioning/3.5.113/build/PrivateP2PCaching.proj]
+/root/.nuget/packages/nerdbank.gitversioning/3.5.113/build/Nerdbank.GitVersioning.Inner.targets(17,5): error MSB4018:    --- End of inner exception stack trace --- [/root/.nuget/packages/nerdbank.gitversioning/3.5.113/build/PrivateP2PCaching.proj]
+/root/.nuget/packages/nerdbank.gitversioning/3.5.113/build/Nerdbank.GitVersioning.Inner.targets(17,5): error MSB4018:    at Nerdbank.GitVersioning.VersionOracle.<.ctor>g__ThrowShallowClone|5_0(Exception inner) [/root/.nuget/packages/nerdbank.gitversioning/3.5.113/build/PrivateP2PCaching.proj]
+/root/.nuget/packages/nerdbank.gitversioning/3.5.113/build/Nerdbank.GitVersioning.Inner.targets(17,5): error MSB4018:    at Nerdbank.GitVersioning.VersionOracle..ctor(GitContext context, ICloudBuild cloudBuild, Nullable`1 overrideVersionHeightOffset) [/root/.nuget/packages/nerdbank.gitversioning/3.5.113/build/PrivateP2PCaching.proj]
+/root/.nuget/packages/nerdbank.gitversioning/3.5.113/build/Nerdbank.GitVersioning.Inner.targets(17,5): error MSB4018:    at Nerdbank.GitVersioning.Tasks.GetBuildVersion.ExecuteInner() [/root/.nuget/packages/nerdbank.gitversioning/3.5.113/build/PrivateP2PCaching.proj]
+/root/.nuget/packages/nerdbank.gitversioning/3.5.113/build/Nerdbank.GitVersioning.Inner.targets(17,5): error MSB4018:    at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result) [/root/.nuget/packages/nerdbank.gitversioning/3.5.113/build/PrivateP2PCaching.proj]
+/root/.nuget/packages/nerdbank.gitversioning/3.5.113/build/Nerdbank.GitVersioning.Inner.targets(17,5): error MSB4018:    at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture) [/root/.nuget/packages/nerdbank.gitversioning/3.5.113/build/PrivateP2PCaching.proj]
+    2 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:10.56
+build rc 1
+== test
+test rc 1

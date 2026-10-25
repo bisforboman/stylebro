@@ -1,0 +1,331 @@
+Checking StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Indentation kept: Dapper/SqlMapper.cs:3991-4058: '#if' decides whether these lines are an if/else (or loop) body, inside a block, or (a '#region' line) compiled at all, so each framework or configuration would indent them its own way. Their indentation is left as it is.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net461, net472, net481, net5.0, net8.0, netstandard2.0). net10.0: only the projects whose code compiles differently there.
+Configurations: runs for Release (Dapper, Dapper.StrongName, Dapper.Tests.Performance) too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.
+Shared files: these projects compile the same files with other '#if' symbols or settings, so each group gets a run of its own (loaded together, 'dotnet format' crashes: https://github.com/dotnet/roslyn/issues/86001): Dapper.EntityFramework.StrongName, Dapper.StrongName | Dapper, Dapper.EntityFramework; Dapper | Dapper.StrongName; Dapper.StrongName | Dapper.
+Checked net5.0 (run 1 of 17)
+Checked net461, Release, part 2 of 2 (run 2 of 17)
+Checked netstandard2.0, part 2 of 2 (run 3 of 17)
+Checked net10.0 (run 4 of 17)
+Checked net472, Release (run 5 of 17)
+Checked net461, part 1 of 2 (run 6 of 17)
+Checked net10.0, Release, part 1 of 2 (run 7 of 17)
+Checked net8.0, part 1 of 2 (run 8 of 17)
+Checked netstandard2.0, Release, part 1 of 2 (run 9 of 17)
+Checked net461, part 2 of 2 (run 10 of 17)
+Checked net8.0, part 2 of 2 (run 11 of 17)
+Checked netstandard2.0, Release, part 2 of 2 (run 12 of 17)
+Checked net10.0, Release, part 2 of 2 (run 13 of 17)
+Checked net472 (run 14 of 17)
+Checked net461, Release, part 1 of 2 (run 15 of 17)
+Checked net481 (run 16 of 17)
+Checked netstandard2.0, part 1 of 2 (run 17 of 17)
+Formatting a copy: net461, part 1 of 2 (3 project(s), 1 file with findings)
+Formatting a copy: net461, part 2 of 2 (4 project(s), 1 file with findings)
+Formatting a copy: net8.0, part 1 of 2 (5 project(s), 1 file with findings)
+Formatting a copy: net8.0, part 2 of 2 (1 project(s), 1 file with findings)
+Formatting a copy: netstandard2.0, part 1 of 2 (4 project(s), 1 file with findings)
+Formatting a copy: netstandard2.0, part 2 of 2 (1 project(s), 1 file with findings)
+Formatting a copy: net10.0, Release, part 1 of 2 (2 project(s), 1 file with findings)
+Formatting a copy: net10.0, Release, part 2 of 2 (1 project(s), 1 file with findings)
+Formatting a copy: net461, Release, part 1 of 2 (1 project(s), 1 file with findings)
+Formatting a copy: net461, Release, part 2 of 2 (1 project(s), 1 file with findings)
+Formatting a copy: netstandard2.0, Release, part 1 of 2 (1 project(s), 1 file with findings)
+Formatting a copy: netstandard2.0, Release, part 2 of 2 (1 project(s), 1 file with findings)
+The dotnet runtime version is '10.0.13'.
+Formatting code files in workspace '/home/user/w54/Dapper/diag/.stylebro-format-0.slnf'.
+Loading workspace.
+Msbuild failed when processing the file '/home/user/w54/Dapper/diag/Dapper/Dapper.csproj' with message: The URL of repository remote 'origin' is invalid: '/home/user/cand/StackExchange-Dapper'.
+Duplicate source file '/home/user/w54/Dapper/diag/Dapper/PublicAPI.Shipped.txt' in project '/home/user/w54/Dapper/diag/Dapper/Dapper.csproj'
+Duplicate source file '/home/user/w54/Dapper/diag/Dapper/PublicAPI.Unshipped.txt' in project '/home/user/w54/Dapper/diag/Dapper/Dapper.csproj'
+Msbuild failed when processing the file '/home/user/w54/Dapper/diag/benchmarks/Dapper.Tests.Performance/Dapper.Tests.Performance.csproj' with message: The URL of repository remote 'origin' is invalid: '/home/user/cand/StackExchange-Dapper'.
+Project Dapper is using configuration from '/home/user/w54/Dapper/diag/.editorconfig'.
+Project Dapper is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial54.1/build/presets/stylebro.1.0.globalconfig'.
+Project Dapper is using configuration from '/home/user/w54/Dapper/diag/Dapper/obj/Debug/net10.0/Dapper.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Dapper is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_10_default.globalconfig'.
+Project Dapper.Tests.Performance is using configuration from '/home/user/w54/Dapper/diag/.editorconfig'.
+Project Dapper.Tests.Performance is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial54.1/build/presets/stylebro.1.0.globalconfig'.
+Project Dapper.Tests.Performance is using configuration from '/home/user/w54/Dapper/diag/benchmarks/Dapper.Tests.Performance/obj/Debug/net10.0/Dapper.Tests.Performance.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Dapper.Tests.Performance is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_10_default.globalconfig'.
+Complete in 5223ms.
+Determining formattable files.
+Complete in 412ms.
+Running formatters.
+Running Code Style analysis.
+Determining diagnostics...
+Running 2 analyzers on Dapper.Tests.Performance.
+Complete in 9235ms.
+Analysis complete in 9235ms.
+Running Analyzer Reference analysis.
+Running 70 analyzers on Dapper.Tests.Performance.
+Complete in 3749ms.
+Analysis complete in 3749ms.
+Complete in 14680ms.
+Formatted 0 of 96 files.
+Format complete in 20315ms.
+== net461, part 1 of 2 (3 project(s))
+Formatting code files in workspace '/home/user/w54/Dapper/diag/.stylebro-format-1.slnf'.
+Found project reference without a matching metadata reference: /home/user/w54/Dapper/diag/Dapper.StrongName/Dapper.StrongName.csproj
+Project Dapper.EntityFramework.StrongName is using configuration from '/home/user/w54/Dapper/diag/.editorconfig'.
+Project Dapper.EntityFramework.StrongName is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial54.1/build/presets/stylebro.1.0.globalconfig'.
+Project Dapper.EntityFramework.StrongName is using configuration from '/home/user/w54/Dapper/diag/Dapper.EntityFramework.StrongName/obj/Debug/net461/Dapper.EntityFramework.StrongName.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Dapper.ProviderTools is using configuration from '/home/user/w54/Dapper/diag/.editorconfig'.
+Project Dapper.ProviderTools is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial54.1/build/presets/stylebro.1.0.globalconfig'.
+Project Dapper.ProviderTools is using configuration from '/home/user/w54/Dapper/diag/Dapper.ProviderTools/obj/Debug/net461/Dapper.ProviderTools.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Dapper.StrongName is using configuration from '/home/user/w54/Dapper/diag/.editorconfig'.
+Project Dapper.StrongName is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial54.1/build/presets/stylebro.1.0.globalconfig'.
+Project Dapper.StrongName is using configuration from '/home/user/w54/Dapper/diag/Dapper.StrongName/obj/Debug/net461/Dapper.StrongName.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 9912ms.
+Complete in 746ms.
+Running 2 analyzers on Dapper.EntityFramework.StrongName.
+Running 2 analyzers on Dapper.ProviderTools.
+Running 2 analyzers on Dapper.StrongName.
+Complete in 4163ms.
+Analysis complete in 4164ms.
+Running 70 analyzers on Dapper.EntityFramework.StrongName.
+Running 70 analyzers on Dapper.ProviderTools.
+Running 70 analyzers on Dapper.StrongName.
+Complete in 9819ms.
+Analysis complete in 9819ms.
+Complete in 15585ms.
+Formatted code file '/home/user/w54/Dapper/diag/Dapper/SqlMapper.DapperRow.Descriptor.cs'.
+Formatted 1 of 67 files.
+Format complete in 26244ms.
+== net461, part 2 of 2 (4 project(s))
+Formatting code files in workspace '/home/user/w54/Dapper/diag/.stylebro-format-2.slnf'.
+Found project reference without a matching metadata reference: /home/user/w54/Dapper/diag/Dapper/Dapper.csproj
+Project Dapper.EntityFramework is using configuration from '/home/user/w54/Dapper/diag/.editorconfig'.
+Project Dapper.EntityFramework is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial54.1/build/presets/stylebro.1.0.globalconfig'.
+Project Dapper.EntityFramework is using configuration from '/home/user/w54/Dapper/diag/Dapper.EntityFramework/obj/Debug/net461/Dapper.EntityFramework.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Dapper.Rainbow is using configuration from '/home/user/w54/Dapper/diag/.editorconfig'.
+Project Dapper.Rainbow is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial54.1/build/presets/stylebro.1.0.globalconfig'.
+Project Dapper.Rainbow is using configuration from '/home/user/w54/Dapper/diag/Dapper.Rainbow/obj/Debug/net461/Dapper.Rainbow.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Dapper.SqlBuilder is using configuration from '/home/user/w54/Dapper/diag/.editorconfig'.
+Project Dapper.SqlBuilder is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial54.1/build/presets/stylebro.1.0.globalconfig'.
+Project Dapper.SqlBuilder is using configuration from '/home/user/w54/Dapper/diag/Dapper.SqlBuilder/obj/Debug/net461/Dapper.SqlBuilder.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Dapper is using configuration from '/home/user/w54/Dapper/diag/Dapper/obj/Debug/net461/Dapper.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 5882ms.
+Complete in 867ms.
+Running 2 analyzers on Dapper.EntityFramework.
+Running 2 analyzers on Dapper.Rainbow.
+Running 2 analyzers on Dapper.SqlBuilder.
+Running 2 analyzers on Dapper.
+Complete in 3466ms.
+Analysis complete in 3466ms.
+Running 70 analyzers on Dapper.EntityFramework.
+Running 70 analyzers on Dapper.Rainbow.
+Running 70 analyzers on Dapper.SqlBuilder.
+Running 70 analyzers on Dapper.
+Complete in 12142ms.
+Analysis complete in 12143ms.
+Complete in 18396ms.
+Formatted 1 of 72 files.
+Format complete in 25147ms.
+Formatting code files in workspace '/home/user/w54/Dapper/diag/.stylebro-format-3.slnf'.
+Msbuild failed when processing the file '/home/user/w54/Dapper/diag/Dapper/Dapper.csproj' with message: The result "" of evaluating the value "$(ReferenceTrimmerTasksAssembly)" of the "AssemblyFile" attribute in element <UsingTask> is not valid.  /root/.nuget/packages/referencetrimmer/3.5.7/build/ReferenceTrimmer.targets
+Msbuild failed when processing the file '/home/user/w54/Dapper/diag/benchmarks/Dapper.Tests.Performance/Dapper.Tests.Performance.csproj' with message: The result "" of evaluating the value "$(ReferenceTrimmerTasksAssembly)" of the "AssemblyFile" attribute in element <UsingTask> is not valid.
+Msbuild failed when processing the file '/home/user/w54/Dapper/diag/Dapper.EntityFramework/Dapper.EntityFramework.csproj' with message: The result "" of evaluating the value "$(ReferenceTrimmerTasksAssembly)" of the "AssemblyFile" attribute in element <UsingTask> is not valid.  /root/.nuget/packages/referencetrimmer/3.5.7/build/ReferenceTrimmer.targets
+Found project reference without a matching metadata reference: /home/user/w54/Dapper/diag/Dapper.EntityFramework/Dapper.EntityFramework.csproj
+Project Dapper.Tests.Performance is using configuration from '/home/user/w54/Dapper/diag/benchmarks/Dapper.Tests.Performance/obj/Debug/net472/Dapper.Tests.Performance.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 17217ms.
+Complete in 1011ms.
+'dotnet format' skipped Dapper.Tests.Performance: MSBuild couldn't load it or a project it references for this run (often reference assemblies missing for its target framework). The restore isn't the cause; add '--verbosity diagnostic' to this 'bro format' command to see MSBuild's message ("Msbuild failed when processing the file ...") in its net472 run.
+Complete in 3247ms.
+Analysis complete in 3247ms.
+Complete in 29ms.
+Analysis complete in 29ms.
+Complete in 5221ms.
+Formatted 0 of 42 files.
+Format complete in 23450ms.
+Formatting code files in workspace '/home/user/w54/Dapper/diag/.stylebro-format-4.slnf'.
+Msbuild failed when processing the file '/home/user/w54/Dapper/diag/Dapper.ProviderTools/Dapper.ProviderTools.csproj' with message: The result "" of evaluating the value "$(ReferenceTrimmerTasksAssembly)" of the "AssemblyFile" attribute in element <UsingTask> is not valid.  /root/.nuget/packages/referencetrimmer/3.5.7/build/ReferenceTrimmer.targets
+Msbuild failed when processing the file '/home/user/w54/Dapper/diag/Dapper.SqlBuilder/Dapper.SqlBuilder.csproj' with message: The result "" of evaluating the value "$(ReferenceTrimmerTasksAssembly)" of the "AssemblyFile" attribute in element <UsingTask> is not valid.  /root/.nuget/packages/referencetrimmer/3.5.7/build/ReferenceTrimmer.targets
+Msbuild failed when processing the file '/home/user/w54/Dapper/diag/tests/Dapper.Tests/Dapper.Tests.csproj' with message: The result "" of evaluating the value "$(ReferenceTrimmerTasksAssembly)" of the "AssemblyFile" attribute in element <UsingTask> is not valid.
+Msbuild failed when processing the file '/home/user/w54/Dapper/diag/tests/Dapper.Tests/Dapper.Tests.csproj' with message: The URL of repository remote 'origin' is invalid: '/home/user/cand/StackExchange-Dapper'.
+Found project reference without a matching metadata reference: /home/user/w54/Dapper/diag/Dapper.ProviderTools/Dapper.ProviderTools.csproj
+Found project reference without a matching metadata reference: /home/user/w54/Dapper/diag/Dapper.SqlBuilder/Dapper.SqlBuilder.csproj
+Project Dapper.Tests is using configuration from '/home/user/w54/Dapper/diag/.editorconfig'.
+Project Dapper.Tests is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial54.1/build/presets/stylebro.1.0.globalconfig'.
+Project Dapper.Tests is using configuration from '/home/user/w54/Dapper/diag/tests/Dapper.Tests/obj/Debug/net481/Dapper.Tests.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 12794ms.
+Complete in 2876ms.
+'dotnet format' skipped Dapper.Tests: MSBuild couldn't load it or a project it references for this run (often reference assemblies missing for its target framework). The restore isn't the cause; add '--verbosity diagnostic' to this 'bro format' command to see MSBuild's message ("Msbuild failed when processing the file ...") in its net481 run.
+Complete in 1478ms.
+Analysis complete in 1478ms.
+Complete in 49ms.
+Analysis complete in 49ms.
+Complete in 4702ms.
+Formatted 0 of 57 files.
+Format complete in 20373ms.
+Formatting code files in workspace '/home/user/w54/Dapper/diag/.stylebro-format-5.slnf'.
+Project Dapper.Rainbow is using configuration from '/home/user/w54/Dapper/diag/Dapper.Rainbow/obj/Debug/net5.0/Dapper.Rainbow.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Dapper.Rainbow is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_5_default.globalconfig'.
+Complete in 3250ms.
+Msbuild failed when processing the file '/home/user/w54/Dapper/diag/Dapper.Rainbow/Dapper.Rainbow.csproj' with message: The result "" of evaluating the value "$(ReferenceTrimmerTasksAssembly)" of the "AssemblyFile" attribute in element <UsingTask> is not valid.
+Msbuild failed when processing the file '/home/user/w54/Dapper/diag/Dapper.Rainbow/Dapper.Rainbow.csproj' with message: The URL of repository remote 'origin' is invalid: '/home/user/cand/StackExchange-Dapper'.
+Complete in 370ms.
+'dotnet format' skipped Dapper.Rainbow: MSBuild couldn't load it or a project it references for this run (often reference assemblies missing for its target framework). The restore isn't the cause; add '--verbosity diagnostic' to this 'bro format' command to see MSBuild's message ("Msbuild failed when processing the file ...") in its net5.0 run.
+Complete in 567ms.
+Analysis complete in 567ms.
+Complete in 54ms.
+Analysis complete in 54ms.
+Complete in 1836ms.
+Formatted 0 of 8 files.
+Format complete in 5456ms.
+== net8.0, part 1 of 2 (5 project(s))
+Formatting code files in workspace '/home/user/w54/Dapper/diag/.stylebro-format-6.slnf'.
+Msbuild failed when processing the file '/home/user/w54/Dapper/diag/docs/docs.csproj' with message: The URL of repository remote 'origin' is invalid: '/home/user/cand/StackExchange-Dapper'.
+Msbuild failed when processing the file '/home/user/w54/Dapper/diag/Dapper.ProviderTools/Dapper.ProviderTools.csproj' with message: The URL of repository remote 'origin' is invalid: '/home/user/cand/StackExchange-Dapper'.
+Msbuild failed when processing the file '/home/user/w54/Dapper/diag/Dapper.SqlBuilder/Dapper.SqlBuilder.csproj' with message: The URL of repository remote 'origin' is invalid: '/home/user/cand/StackExchange-Dapper'.
+Project docs is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial54.1/build/presets/stylebro.1.0.globalconfig'.
+Project docs is using configuration from '/home/user/w54/Dapper/diag/docs/obj/Debug/net8.0/docs.GeneratedMSBuildEditorConfig.editorconfig'.
+Project docs is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_8_default.globalconfig'.
+Project Dapper.ProviderTools is using configuration from '/home/user/w54/Dapper/diag/Dapper.ProviderTools/obj/Debug/net8.0/Dapper.ProviderTools.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Dapper.ProviderTools is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_8_default.globalconfig'.
+Project Dapper.SqlBuilder is using configuration from '/home/user/w54/Dapper/diag/Dapper.SqlBuilder/obj/Debug/net8.0/Dapper.SqlBuilder.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Dapper.SqlBuilder is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_8_default.globalconfig'.
+Project Dapper is using configuration from '/home/user/w54/Dapper/diag/Dapper/obj/Debug/net8.0/Dapper.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Dapper is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_8_default.globalconfig'.
+Project Dapper.Tests is using configuration from '/home/user/w54/Dapper/diag/tests/Dapper.Tests/obj/Debug/net8.0/Dapper.Tests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Dapper.Tests is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_8_default.globalconfig'.
+Complete in 13929ms.
+Complete in 1165ms.
+Running 2 analyzers on Dapper.Tests.
+Complete in 8168ms.
+Analysis complete in 8173ms.
+Running 89 analyzers on Dapper.Tests.
+Complete in 17209ms.
+Analysis complete in 17209ms.
+Complete in 28981ms.
+Formatted 1 of 125 files.
+Format complete in 44075ms.
+== net8.0, part 2 of 2 (1 project(s))
+Formatting code files in workspace '/home/user/w54/Dapper/diag/.stylebro-format-7.slnf'.
+Msbuild failed when processing the file '/home/user/w54/Dapper/diag/Dapper.StrongName/Dapper.StrongName.csproj' with message: The URL of repository remote 'origin' is invalid: '/home/user/cand/StackExchange-Dapper'.
+Project Dapper.StrongName is using configuration from '/home/user/w54/Dapper/diag/Dapper.StrongName/obj/Debug/net8.0/Dapper.StrongName.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Dapper.StrongName is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_8_default.globalconfig'.
+Complete in 3833ms.
+Complete in 621ms.
+Complete in 11706ms.
+Analysis complete in 11708ms.
+Complete in 19027ms.
+Analysis complete in 19027ms.
+Complete in 34299ms.
+Formatted 1 of 54 files.
+Format complete in 38754ms.
+== netstandard2.0, part 1 of 2 (4 project(s))
+Formatting code files in workspace '/home/user/w54/Dapper/diag/.stylebro-format-8.slnf'.
+Project Dapper.ProviderTools is using configuration from '/home/user/w54/Dapper/diag/Dapper.ProviderTools/obj/Debug/netstandard2.0/Dapper.ProviderTools.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Dapper.Rainbow is using configuration from '/home/user/w54/Dapper/diag/Dapper.Rainbow/obj/Debug/netstandard2.0/Dapper.Rainbow.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Dapper.SqlBuilder is using configuration from '/home/user/w54/Dapper/diag/Dapper.SqlBuilder/obj/Debug/netstandard2.0/Dapper.SqlBuilder.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Dapper is using configuration from '/home/user/w54/Dapper/diag/Dapper/obj/Debug/netstandard2.0/Dapper.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 10952ms.
+Complete in 1951ms.
+Complete in 4287ms.
+Analysis complete in 4288ms.
+Complete in 9666ms.
+Analysis complete in 9666ms.
+Complete in 17408ms.
+Formatted 1 of 73 files.
+Format complete in 30312ms.
+== netstandard2.0, part 2 of 2 (1 project(s))
+Formatting code files in workspace '/home/user/w54/Dapper/diag/.stylebro-format-9.slnf'.
+Project Dapper.StrongName is using configuration from '/home/user/w54/Dapper/diag/Dapper.StrongName/obj/Debug/netstandard2.0/Dapper.StrongName.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 3418ms.
+Complete in 641ms.
+Complete in 2167ms.
+Analysis complete in 2167ms.
+Complete in 9667ms.
+Analysis complete in 9667ms.
+Complete in 13832ms.
+Format complete in 17894ms.
+== net10.0, Release, part 1 of 2 (2 project(s))
+Formatting code files in workspace '/home/user/w54/Dapper/diag/.stylebro-format-10.slnf'.
+Project Dapper is using configuration from '/home/user/w54/Dapper/diag/Dapper/obj/Release/net10.0/Dapper.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Dapper.Tests.Performance is using configuration from '/home/user/w54/Dapper/diag/benchmarks/Dapper.Tests.Performance/obj/Release/net10.0/Dapper.Tests.Performance.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 8094ms.
+Complete in 969ms.
+Complete in 7462ms.
+Analysis complete in 7462ms.
+Complete in 10777ms.
+Analysis complete in 10777ms.
+Complete in 21276ms.
+Formatted 1 of 96 files.
+Format complete in 30339ms.
+== net10.0, Release, part 2 of 2 (1 project(s))
+Formatting code files in workspace '/home/user/w54/Dapper/diag/.stylebro-format-11.slnf'.
+Project Dapper.StrongName is using configuration from '/home/user/w54/Dapper/diag/Dapper.StrongName/obj/Release/net10.0/Dapper.StrongName.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Dapper.StrongName is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_10_default.globalconfig'.
+Complete in 4225ms.
+Complete in 715ms.
+Complete in 8154ms.
+Analysis complete in 8154ms.
+Complete in 25078ms.
+Analysis complete in 25078ms.
+Complete in 36644ms.
+Format complete in 41589ms.
+== net461, Release, part 1 of 2 (1 project(s))
+Formatting code files in workspace '/home/user/w54/Dapper/diag/.stylebro-format-12.slnf'.
+Project Dapper.StrongName is using configuration from '/home/user/w54/Dapper/diag/Dapper.StrongName/obj/Release/net461/Dapper.StrongName.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 7995ms.
+Complete in 1216ms.
+Complete in 4776ms.
+Analysis complete in 4781ms.
+Complete in 9713ms.
+Analysis complete in 9713ms.
+Complete in 18484ms.
+Format complete in 27696ms.
+== net461, Release, part 2 of 2 (1 project(s))
+Formatting code files in workspace '/home/user/w54/Dapper/diag/.stylebro-format-13.slnf'.
+Project Dapper is using configuration from '/home/user/w54/Dapper/diag/Dapper/obj/Release/net461/Dapper.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 3431ms.
+Complete in 548ms.
+Complete in 2563ms.
+Analysis complete in 2563ms.
+Complete in 8230ms.
+Analysis complete in 8230ms.
+Complete in 12625ms.
+Format complete in 16605ms.
+Formatting code files in workspace '/home/user/w54/Dapper/diag/.stylebro-format-14.slnf'.
+Project Dapper.Tests.Performance is using configuration from '/home/user/w54/Dapper/diag/benchmarks/Dapper.Tests.Performance/obj/Release/net472/Dapper.Tests.Performance.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 8354ms.
+Complete in 718ms.
+Complete in 3475ms.
+Analysis complete in 3480ms.
+Complete in 56ms.
+Analysis complete in 56ms.
+Complete in 5239ms.
+Format complete in 14314ms.
+== netstandard2.0, Release, part 1 of 2 (1 project(s))
+Formatting code files in workspace '/home/user/w54/Dapper/diag/.stylebro-format-15.slnf'.
+Project Dapper.StrongName is using configuration from '/home/user/w54/Dapper/diag/Dapper.StrongName/obj/Release/netstandard2.0/Dapper.StrongName.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 9253ms.
+Complete in 2536ms.
+Complete in 2439ms.
+Analysis complete in 2440ms.
+Complete in 3013ms.
+Analysis complete in 3013ms.
+Complete in 9126ms.
+Format complete in 20915ms.
+== netstandard2.0, Release, part 2 of 2 (1 project(s))
+Formatting code files in workspace '/home/user/w54/Dapper/diag/.stylebro-format-16.slnf'.
+Project Dapper is using configuration from '/home/user/w54/Dapper/diag/Dapper/obj/Release/netstandard2.0/Dapper.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 7042ms.
+Complete in 1681ms.
+Complete in 8193ms.
+Analysis complete in 8209ms.
+Complete in 13810ms.
+Analysis complete in 13810ms.
+Complete in 27432ms.
+Format complete in 36155ms.
+Partly incomplete: 'dotnet format' skipped Dapper.Tests.Performance for net472 (references didn't load): code only that framework compiles (inside #if) wasn't formatted.
+Partly incomplete: 'dotnet format' skipped Dapper.Tests for net481 (references didn't load): code only that framework compiles (inside #if) wasn't formatted.
+Partly incomplete: 'dotnet format' skipped Dapper.Rainbow for net5.0 (references didn't load): code only that framework compiles (inside #if) wasn't formatted.
+1 finding kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them (https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose).
+  Dapper/SqlMapper.DapperRow.Descriptor.cs(51,55): BRO1307 Rename 's_converter' to 'Converter'. Kept: at a use of the name, the new name would mean something else.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Not checked: Dapper.Rainbow (net5.0): 'dotnet format' couldn't load it (references didn't load), so the code only that framework compiles
+Not checked: Dapper.Tests (net481): 'dotnet format' couldn't load it (references didn't load), so the code only that framework compiles
+Not checked: Dapper.Tests.Performance (net472): 'dotnet format' couldn't load it (references didn't load), so the code only that framework compiles
+Not verified: 3 parts of the build weren't checked (the 'Not checked:' lines above); the rest is clean. The build may still report findings there: fix what's named, or build it (bro check --build).

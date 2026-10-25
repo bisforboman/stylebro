@@ -1,0 +1,25 @@
+  Determining projects to restore...
+  Restored /home/user/w54/Finbuckle/default/test/Finbuckle.MultiTenant.Test/Finbuckle.MultiTenant.Test.csproj (in 529 ms).
+  Restored /home/user/w54/Finbuckle/default/samples/WebApiSample/WebApiSample.csproj (in 402 ms).
+  Restored /home/user/w54/Finbuckle/default/test/Finbuckle.MultiTenant.Identity.EntityFrameworkCore.Test/Finbuckle.MultiTenant.Identity.EntityFrameworkCore.Test.csproj (in 395 ms).
+  Restored /home/user/w54/Finbuckle/default/test/Finbuckle.MultiTenant.AspNetCore.Test/Finbuckle.MultiTenant.AspNetCore.Test.csproj (in 7 ms).
+  Restored /home/user/w54/Finbuckle/default/samples/IdentityAppSample/IdentityAppSample.csproj (in 447 ms).
+  Restored /home/user/w54/Finbuckle/default/test/Finbuckle.MultiTenant.EntityFrameworkCore.Test/Finbuckle.MultiTenant.EntityFrameworkCore.Test.csproj (in 25 ms).
+  5 of 11 projects are up-to-date for restore.
+  Finbuckle.MultiTenant.Abstractions -> /home/user/w54/Finbuckle/default/src/Finbuckle.MultiTenant.Abstractions/bin/Release/net10.0/Finbuckle.MultiTenant.Abstractions.dll
+  Finbuckle.MultiTenant -> /home/user/w54/Finbuckle/default/src/Finbuckle.MultiTenant/bin/Release/net10.0/Finbuckle.MultiTenant.dll
+  Finbuckle.MultiTenant.EntityFrameworkCore -> /home/user/w54/Finbuckle/default/src/Finbuckle.MultiTenant.EntityFrameworkCore/bin/Release/net10.0/Finbuckle.MultiTenant.EntityFrameworkCore.dll
+  Finbuckle.MultiTenant.AspNetCore -> /home/user/w54/Finbuckle/default/src/Finbuckle.MultiTenant.AspNetCore/bin/Release/net10.0/Finbuckle.MultiTenant.AspNetCore.dll
+  Finbuckle.MultiTenant.Identity.EntityFrameworkCore -> /home/user/w54/Finbuckle/default/src/Finbuckle.MultiTenant.Identity.EntityFrameworkCore/bin/Release/net10.0/Finbuckle.MultiTenant.Identity.EntityFrameworkCore.dll
+  Finbuckle.MultiTenant.AspNetCore.Test -> /home/user/w54/Finbuckle/default/test/Finbuckle.MultiTenant.AspNetCore.Test/bin/Release/net10.0/Finbuckle.MultiTenant.AspNetCore.Test.dll
+  Finbuckle.MultiTenant.Test -> /home/user/w54/Finbuckle/default/test/Finbuckle.MultiTenant.Test/bin/Release/net10.0/Finbuckle.MultiTenant.Test.dll
+  Finbuckle.MultiTenant.Identity.EntityFrameworkCore.Test -> /home/user/w54/Finbuckle/default/test/Finbuckle.MultiTenant.Identity.EntityFrameworkCore.Test/bin/Release/net10.0/Finbuckle.MultiTenant.Identity.EntityFrameworkCore.Test.dll
+  WebApiSample -> /home/user/w54/Finbuckle/default/samples/WebApiSample/bin/Release/net10.0/WebApiSample.dll
+  Finbuckle.MultiTenant.EntityFrameworkCore.Test -> /home/user/w54/Finbuckle/default/test/Finbuckle.MultiTenant.EntityFrameworkCore.Test/bin/Release/net10.0/Finbuckle.MultiTenant.EntityFrameworkCore.Test.dll
+  IdentityAppSample -> /home/user/w54/Finbuckle/default/samples/IdentityAppSample/bin/Release/net10.0/IdentityAppSample.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:10.83

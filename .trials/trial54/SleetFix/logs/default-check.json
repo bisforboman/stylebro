@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "command": "format",
+  "previewOf": null,
+  "path": "/home/user/w54/SleetFix/default",
+  "write": false,
+  "settings": [],
+  "conventions": [],
+  "sonar": null,
+  "agentsMd": null,
+  "runs": [
+    {
+      "run": 1,
+      "filesChanged": [],
+      "changesPerRule": {}
+    }
+  ],
+  "changesPerRule": {},
+  "filesPerRule": null,
+  "keptFindings": [
+    {
+      "path": "src/SleetLib/AssemblyVersionHelper.cs",
+      "line": 11,
+      "column": 40,
+      "rule": "BRO1306",
+      "reason": "NewNameMeansSomethingElse",
+      "reasonText": "at a use of the name, the new name would mean something else",
+      "message": "Rename '_lock' to 'Lock'"
+    }
+  ],
+  "patch": null,
+  "clean": true,
+  "exitCode": 0,
+  "notChecked": [
+    "xunit.analyzers' rules: xunit.analyzers 2.2.0's fixes have no Fix All, so 'dotnet format' can't apply or check them (a note: the build still reports their warnings; the verdict doesn't count them)",
+    "IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)"
+  ]
+}

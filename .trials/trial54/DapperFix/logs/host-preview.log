@@ -1,0 +1,125 @@
+Previewing 'bro init --write' and 'bro format' on a copy; nothing in /home/user/w54/DapperFix/host changes.
+Copying the repository to /tmp/stylebro-preview-BOZxxU/host... 0s
+Conventions in the code (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  off      private fields: 48 named 'field', 76 named '_field' -> BRO1303 is off
+  set      '{' of multi-line blocks: 2822 of 2822 on its own line -> set in .editorconfig (all)
+  set      else/catch/finally after '}': 278 of 279 on a new line -> set in .editorconfig (true)
+  both     one-line if/else/loop/using/lock bodies: 298 with braces, 312 without braces -> both allowed
+  kept     one-line jumps ('if (x) return;'): 100 of 175 on the 'if' line without braces -> true (3 are enough)
+  default  operators where a line wraps: 83 of 86 at the start of the line -> beginning_of_line
+  off      '=>' where a line wraps: 126 at the end of the line, 69 at the start of the line -> BRO1521 is off
+  off      '=' where a line wraps: 17 at the end of the line, 7 at the start of the line -> BRO1522 is off
+  kept     multi-line initializers: 64 of 85 without a trailing comma -> omit
+  kept     empty strings: 29 of 33 "" -> literal
+  default  null checks: 231 of 268 'is null' -> pattern_matching
+  default  one-line <summary> texts: 408 of 408 on three lines -> multi_line
+  too few  <inheritdoc/> tags: 1 place -> default stays (compact)
+  kept     default values: 64 of 74 'default' -> true
+  default  ')' of split lists: 163 of 187 after the last item -> last_item
+  off      split lists: 28 first item on the next line, 60 first item after '(' -> BRO1107 is off
+  off      ': base(...)'/': this(...)': 13 on its own line, 14 on the constructor's line -> BRO1105 is off
+  kept     'where' constraints: 48 of 57 on the declaration's line -> same_line
+  default  'new T { ... }' with an initializer: 86 of 111 without '()' -> omit
+  kept     switch sections: 57 of 57 without a blank line -> omit
+  default  files' using directives: 126 of 126 outside the namespace -> outside_namespace
+  default  mixed arithmetic ('a + b * c'): 12 of 12 with parentheses -> always_for_clarity
+  kept     statements on their 'if'/loop/'case' line: 263 of 447 on their owner's line -> true (3 are enough)
+  off      overrides/interface implementations: 235 of 265 without a doc comment -> BRO1601 is off
+  off      types' members: 82 in BRO1001's order, 99 in another order -> BRO1001 is off
+  mixed    overloads BRO1001 could split: 10 apart, 7 next to each other -> default stays (false)
+  kept     lambda-first calls: 25 of 25 rest on the lambda's last line -> true
+  off      split lists' items: 58 one per line, 54 grouped on lines -> BRO1108 is off
+  default  private-by-default members: 478 of 495 with 'private' -> for_non_interface_members
+  default  partial type parts: 41 of 41 with an access modifier -> warning
+  default  internal-by-default types: 27 of 28 with 'internal' -> warning
+  off      property summaries: 64 of 66 in their own words -> BRO1604 is off
+  off      adjacent locals of one type: 25 declared one by one, 26 declared together ('int a, b;') -> BRO1142 is off
+  off      declarations with 2+ attributes: 26 one per list ('[A]' '[B]'), 24 combined ('[A, B]') -> BRO1102 is off
+  off      adjacent fields of one type: 10 declared one by one, 13 declared together ('int a, b;') -> BRO1114 is off
+  default  private static fields: 52 of 63 without a prefix -> warning
+  set      built-in type names: 126 of 126 only keywords ('int') -> set in .editorconfig (true:suggestion)
+  both     empty blocks ('{ }'): 14 on two lines, 41 on one line -> both allowed
+  default  block-bodied properties/methods: 34 of 34 on several lines -> warning
+  default  statement blocks ('if (x) { y(); }'): 415 of 448 on several lines -> warning
+  default  accessor bodies: 15 of 15 laid out alike -> warning
+  default  auto-property accessors ('{ get; set; }'): 491 of 491 on one line -> warning
+  kept     C# files' line endings: 156 of 156 CRLF -> crlf
+  off      statements after a block's '}': 128 after a blank line, 239 right below the '}' -> BRO1519 is off
+  off      nested ifs BRO1149 would merge: 4 nested -> BRO1149 is off
+  default  neighbouring members: 1547 of 1886 with a blank line between -> warning
+  default  doc comments below code: 335 of 384 after a blank line -> warning
+  default  '//' comments above code: 388 of 388 right above the code -> warning
+  off      '//' comments below code: 189 after a blank line, 69 right below the code -> BRO1504 is off
+  default  doc comment texts: 1321 of 1614 ending with a period -> warning
+  default  doc element order (param, returns, exception, remarks): 36 of 42 in BRO1619's order -> warning
+  off      keywords in doc comments: 21 of 21 '<c>null</c>' -> BRO1618 is off
+  off      non-private fields: 20 PascalCase or as your naming rule says, 16 named otherwise -> BRO1306 is off
+  default  doc comments above their element: 455 of 455 right above it -> warning
+  default  primary-constructor parameter names: 6 of 6 like 'logger' -> warning
+  kept     tuple element names: 88 of 116 '(int count, ...)' -> camelCase
+  set      using directives: 100 of 112 files sorted, 12 of 25 with System first -> set in .editorconfig
+  note     using directives: your .editorconfig sets dotnet_sort_system_directives_first = true, and 'dotnet format' sorts usings whenever it is set (to any value): 25 of 112 files aren't in that order (System first), and 'format' will reorder them. If your team doesn't keep usings in that order, remove dotnet_sort_system_directives_first from .editorconfig (init can't: 'unset' sorts them too).
+  off      private constants/static readonly fields: 16 PascalCase, 26 camelCase, 4 _camelCase -> BRO1306 is off
+  default  spacing, control-flow keywords: 1030 of 1036 'if (x)' -> 'if (x)'
+  default  spacing, control-flow parentheses: 1036 of 1036 'if (x)' -> 'if (x)'
+  default  spacing, parenthesized expressions: 199 of 199 '(a + b)' -> '(a + b)'
+  default  spacing, cast parentheses: 432 of 432 '(int)x' -> '(int)x'
+  default  spacing, casts: 431 of 432 '(int)x' -> '(int)x'
+  default  spacing, call arguments: 5574 of 5574 'F(x)' -> 'F(x)'
+  default  spacing, declared parameters: 923 of 923 'void F(int x)' -> 'void F(int x)'
+Summary:
+  Kept your style for 39 settings: wrote stylebro_allow_single_line_jump_statements, stylebro_trailing_comma,
+    stylebro_empty_string_style, csharp_prefer_simple_default_expression, stylebro_constraint_placement,
+    stylebro_blank_line_between_switch_sections, csharp_preserve_single_line_statements,
+    stylebro_allow_leading_multiline_lambda, end_of_line,
+    stylebro_tuple_element_name_casing; 29 were already StyleBro's default.
+  Allowed both forms for 2 settings because your code mixes them: csharp_prefer_braces = when_multiline (one-line
+    if/else/loop/using/lock bodies), stylebro_allow_empty_single_line_blocks = true (empty blocks ('{ }')).
+  Turned 13 rules off because your code mixes both forms: BRO1303 (private fields), BRO1521 ('=>' where a line wraps),
+    BRO1522 ('=' where a line wraps), BRO1107 (split lists), BRO1105 (': base(...)'/': this(...)'),
+    BRO1001 (types' members), BRO1108 (split lists' items), BRO1142 (adjacent locals of one type),
+    BRO1102 (declarations with 2+ attributes), BRO1114 (adjacent fields of one type),
+    BRO1519 (statements after a block's '}'), BRO1504 ('//' comments below code),
+    BRO1306 (non-private fields; private constants/static readonly fields).
+  Turned 4 rules off because your code doesn't do what they enforce: BRO1601 (overrides/interface implementations: 235
+    of 265 without a doc comment), BRO1604 (property summaries: 64 of 66 in their own words),
+    BRO1149 (nested ifs BRO1149 would merge: 4 nested), BRO1618 (keywords in doc comments: 21 of 21 '<c>null</c>').
+  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
+  1 setting had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_inheritdoc_style.
+  note     Charset: your .editorconfig says charset = utf-8-bom, and 1 of 156 C# files starts without a BOM: 'format' adds a BOM to it. To keep that out of the formatting changes, change it in a commit of their own first.
+  note     Final line breaks: your .editorconfig says insert_final_newline = true, and 2 of 156 C# files end without a line break: 'format' adds a last line break to them. To keep that out of the formatting changes, change them in a commit of their own first.
+Settings: 91 lines in .editorconfig; 4 lines in Directory.Build.props (StyleBro.Analyzers); 1 line in Directory.Packages.props (StyleBro.Analyzers)
+  StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial54.2 to Directory.Build.props (version in Directory.Packages.props) for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).
+Format run 1... 1m 26s
+Format run 2... 6s
+Format: 128 files, 1,187 reported changes, clean after 1 run
+  BRO1505  Elements should be separated by a bla...    72 files
+  BRO1603  Documentation text should end with a ...    41 files
+  IMPORTS                                              27 files
+  IDE0055  Whitespace and formatting                   22 files
+  BRO1401  Use a trailing comma in multi-line in...    14 files
+  BRO1513  Element documentation header should b...    12 files
+  BRO1517  Code should not contain multiple blan...    12 files
+  BRO1002  Single-line comments should begin wit...    11 files
+  BRO1110  Closing parenthesis or bracket should...    11 files
+  BRO1307  Field names should not begin with a p...     9 files
+  ... and 36 more rules
+Sample (BRO1505, Dapper/DataTableHandler.cs):
+  (adds a blank line)
+Sample (BRO1603, Dapper.EntityFramework/Handlers.cs):
+  -    /// Acts on behalf of all type-handlers in this package
+  +    /// Acts on behalf of all type-handlers in this package.
+Sample (IMPORTS, Dapper.EntityFramework/DbGeometryHandler.cs):
+  -using Microsoft.SqlServer.Types;
+  -using System;
+  +using System;
+Clean: 1 finding kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them (https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose).
+  Dapper/SqlMapper.DapperRow.Descriptor.cs(51,55): BRO1307 Rename 's_converter' to 'Converter'. Kept: at a use of the name, the new name would mean something else.
+Baseline (in the patch): stylebro.baseline: added 1 kept finding, so the build and 'format --verify-no-changes' skip it (new violations still fail; delete an entry to see it again) (https://bisforboman.github.io/stylebro/baseline/).
+Full diff: .git/stylebro-preview.patch (8,067 lines)
+Note: Indentation kept: Dapper/SqlMapper.cs:3940-4007: '#if' decides whether these lines are an if/else (or loop) body, inside a block, or (a '#region' line) compiled at all, so each framework or configuration would indent them its own way. Their indentation is left as it is.
+Note: Indentation kept: Dapper/SqlMapper.cs:3991-4058: '#if' decides whether these lines are an if/else (or loop) body, inside a block, or (a '#region' line) compiled at all, so each framework or configuration would indent them its own way. Their indentation is left as it is.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 1m 41s.

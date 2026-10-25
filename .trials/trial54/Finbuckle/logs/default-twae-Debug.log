@@ -1,0 +1,19 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Finbuckle.MultiTenant.Abstractions -> /home/user/w54/Finbuckle/default/src/Finbuckle.MultiTenant.Abstractions/bin/Debug/net10.0/Finbuckle.MultiTenant.Abstractions.dll
+  Finbuckle.MultiTenant -> /home/user/w54/Finbuckle/default/src/Finbuckle.MultiTenant/bin/Debug/net10.0/Finbuckle.MultiTenant.dll
+  Finbuckle.MultiTenant.AspNetCore -> /home/user/w54/Finbuckle/default/src/Finbuckle.MultiTenant.AspNetCore/bin/Debug/net10.0/Finbuckle.MultiTenant.AspNetCore.dll
+  Finbuckle.MultiTenant.EntityFrameworkCore -> /home/user/w54/Finbuckle/default/src/Finbuckle.MultiTenant.EntityFrameworkCore/bin/Debug/net10.0/Finbuckle.MultiTenant.EntityFrameworkCore.dll
+  Finbuckle.MultiTenant.Identity.EntityFrameworkCore -> /home/user/w54/Finbuckle/default/src/Finbuckle.MultiTenant.Identity.EntityFrameworkCore/bin/Debug/net10.0/Finbuckle.MultiTenant.Identity.EntityFrameworkCore.dll
+  WebApiSample -> /home/user/w54/Finbuckle/default/samples/WebApiSample/bin/Debug/net10.0/WebApiSample.dll
+  Finbuckle.MultiTenant.Test -> /home/user/w54/Finbuckle/default/test/Finbuckle.MultiTenant.Test/bin/Debug/net10.0/Finbuckle.MultiTenant.Test.dll
+  Finbuckle.MultiTenant.AspNetCore.Test -> /home/user/w54/Finbuckle/default/test/Finbuckle.MultiTenant.AspNetCore.Test/bin/Debug/net10.0/Finbuckle.MultiTenant.AspNetCore.Test.dll
+  Finbuckle.MultiTenant.EntityFrameworkCore.Test -> /home/user/w54/Finbuckle/default/test/Finbuckle.MultiTenant.EntityFrameworkCore.Test/bin/Debug/net10.0/Finbuckle.MultiTenant.EntityFrameworkCore.Test.dll
+  Finbuckle.MultiTenant.Identity.EntityFrameworkCore.Test -> /home/user/w54/Finbuckle/default/test/Finbuckle.MultiTenant.Identity.EntityFrameworkCore.Test/bin/Debug/net10.0/Finbuckle.MultiTenant.Identity.EntityFrameworkCore.Test.dll
+  IdentityAppSample -> /home/user/w54/Finbuckle/default/samples/IdentityAppSample/bin/Debug/net10.0/IdentityAppSample.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:12.12
