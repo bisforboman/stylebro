@@ -1,0 +1,79 @@
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+Visual Basic: Client_VB.vbproj, Server_VB.vbproj, Shared_VB.vbproj: Visual Basic projects are left alone, 'format' runs on the C# projects only.
+xUnit: xunit.analyzers 1.27.0 is restored here, and from 1.24 on its code fixes have no Fix All, which 'dotnet format' needs: its assertion fixes aren't applied (the build still reports their warnings; your IDE fixes them one at a time).
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net10.0-windows, net472, net8.0, netstandard2.0, netstandard2.1). net8.0, netstandard2.1: only the projects whose code compiles differently there.
+Configurations: runs for Release (Client, DN_Client, docs, JustProtos and 12 more) too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.
+Shared files: these projects compile the same files with other '#if' symbols or settings, so each group gets a run of its own (loaded together, 'dotnet format' crashes: https://github.com/dotnet/roslyn/issues/86001): protobuf-net.Grpc.Test.Integration | protobuf-net.Grpc.Test.IntegrationUpLevel.
+Checked net8.0, Release, part 1 of 2 (run 1 of 17)
+Checked net8.0, Release, part 2 of 2 (run 2 of 17)
+Checked netstandard2.0, Release (run 3 of 17)
+Checked net10.0, Release, part 1 of 2 (run 4 of 17)
+Checked netstandard2.1, Release (run 5 of 17)
+Checked net10.0, Release, part 2 of 2 (run 6 of 17)
+Checked net472, Release, part 1 of 2 (run 7 of 17)
+Checked net472, Release, part 2 of 2 (run 8 of 17)
+Checked net8.0, part 1 of 2 (run 9 of 17)
+Checked net8.0, part 2 of 2 (run 10 of 17)
+Checked netstandard2.0 (run 11 of 17)
+Checked netstandard2.1 (run 12 of 17)
+Checked net10.0, part 1 of 2 (run 13 of 17)
+Checked net10.0, part 2 of 2 (run 14 of 17)
+Checked net10.0-windows (run 15 of 17)
+Checked net472, part 1 of 2 (run 16 of 17)
+Checked net472, part 2 of 2 (run 17 of 17)
+== net10.0, part 1 of 2 (34 project(s), 98 files with findings)
+'dotnet format' had warnings loading the workspace in its net10.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+== net10.0, part 2 of 2 (1 project(s), 7 files with findings)
+== net10.0-windows (1 project(s), 4 files with findings)
+== net472, part 1 of 2 (8 project(s), 60 files with findings)
+== net472, part 2 of 2 (1 project(s), 7 files with findings)
+== net8.0, part 1 of 2 (2 project(s), 8 files with findings)
+== net8.0, part 2 of 2 (1 project(s), 7 files with findings)
+== netstandard2.0 (4 project(s), 37 files with findings)
+== netstandard2.1 (1 project(s), 31 files with findings)
+== net10.0, Release, part 1 of 2 (14 project(s), 60 files with findings)
+== net10.0, Release, part 2 of 2 (1 project(s), 7 files with findings)
+== net472, Release, part 1 of 2 (5 project(s), 55 files with findings)
+== net472, Release, part 2 of 2 (1 project(s), 7 files with findings)
+== net8.0, Release, part 1 of 2 (2 project(s), 8 files with findings)
+== net8.0, Release, part 2 of 2 (1 project(s), 7 files with findings)
+== netstandard2.0, Release (4 project(s), 37 files with findings)
+== netstandard2.1, Release (1 project(s), 31 files with findings)
+Run 1: 103 files changed:
+  examples/dotnet-grpc/DN_Server/Program.cs
+  examples/grpc/Client/Program.cs
+  examples/grpc/Server/Program.cs
+  examples/pb-net-grpc/Client_CS/Program.cs
+  examples/pb-net-grpc/Server_CS/FakeAuthenticationHandler.cs
+  examples/pb-net-grpc/Server_CS/MyCounter.cs
+  examples/pb-net-grpc/Server_CS/Program.cs
+  examples/pb-net-grpc/Server_CS/ServiceBinderWithServiceResolutionFromServiceCollection.cs
+  examples/perf/PerfClient/Program.cs
+  examples/perf/PerfServer/Program.cs
+  ... and 93 more
+Checked net8.0, Release, part 1 of 2 (run 1 of 17)
+Checked net8.0, part 1 of 2 (run 2 of 17)
+Checked net8.0, Release, part 2 of 2 (run 3 of 17)
+Checked net8.0, part 2 of 2 (run 4 of 17)
+Checked netstandard2.0 (run 5 of 17)
+Checked netstandard2.0, Release (run 6 of 17)
+Checked netstandard2.1 (run 7 of 17)
+Checked netstandard2.1, Release (run 8 of 17)
+Checked net10.0, Release, part 1 of 2 (run 9 of 17)
+Checked net10.0, Release, part 2 of 2 (run 10 of 17)
+Checked net472, Release, part 1 of 2 (run 11 of 17)
+Checked net472, Release, part 2 of 2 (run 12 of 17)
+Checked net10.0, part 1 of 2 (run 13 of 17)
+Checked net10.0, part 2 of 2 (run 14 of 17)
+Checked net10.0-windows (run 15 of 17)
+Checked net472, part 1 of 2 (run 16 of 17)
+Checked net472, part 2 of 2 (run 17 of 17)
+Run 2: 0 files changed, clean.
+Clean: 2 findings kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them (https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose).
+  src/protobuf-net.Grpc/Internal/ContractOperation.cs(264,38): BRO1311 Rename tuple element 'category' to 'Category'. Kept: another element of the same tuple type keeps its name, and a tuple type's elements are renamed together (first: 'type': the name is in disabled #if code, which can't be checked).
+  src/protobuf-net.Grpc/Internal/ContractOperation.cs(277,62): BRO1311 Rename tuple element 'category' to 'Category'. Kept: another element of the same tuple type keeps its name, and a tuple type's elements are renamed together (first: 'type': the name is in disabled #if code, which can't be checked).
+Baseline: stylebro.baseline: added 2 kept findings, so the build and 'format --verify-no-changes' skip them (new violations still fail; delete an entry to see it again) (https://bisforboman.github.io/stylebro/baseline/).
+src/protobuf-net.Grpc.Reflection/Generated/Reflection.cs is generated and checked in: rebuild and commit it.
+Not checked: xunit.analyzers' rules: xunit.analyzers 1.27.0's fixes have no Fix All, so 'dotnet format' can't apply or check them (a note: the build still reports their warnings; the verdict doesn't count them)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

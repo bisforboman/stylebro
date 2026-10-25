@@ -82,6 +82,23 @@ internal static class PreviewCommand
     public static string DefaultPatchPath(string folder) =>
         Path.GetFullPath(Path.Combine(Git(folder, "rev-parse", "--absolute-git-dir") is (0, var gitDir) && gitDir.Trim().Length > 0 ? gitDir.Trim() : Path.GetTempPath(), DefaultPatch));
 
+    /// <summary>
+    /// Whether a format pass's line is a note the preview lists at the end (what format left out on purpose: old-style
+    /// projects it doesn't restore, projects without StyleBro or not built, lines whose indentation '#if' decides) that it
+    /// hasn't listed yet. An "Indentation kept" note naming the same files as an earlier one is the same note: a later pass
+    /// numbers the lines of the text an earlier pass changed (trial 55, ZLinq: Sum.cs listed twice, with different lines).
+    /// </summary>
+    public static bool IsNewNote(IReadOnlyCollection<string> notes, string line)
+    {
+        if (!new[] { FormatCommand.OldStyleHeader, FormatCommand.PartlyLoadedHeader, FormatCommand.NotBuiltHeader, FormatCommand.IfBodiesHeader }.Any(h => line.StartsWith(h, StringComparison.Ordinal)) || notes.Contains(line))
+        {
+            return false;
+        }
+
+        static string Files(string note) => Regex.Replace(note, @":[0-9][0-9,\-]*(?=, |: | and )", string.Empty);
+        return !line.StartsWith(FormatCommand.IfBodiesHeader, StringComparison.Ordinal) || !notes.Any(n => Files(n) == Files(line));
+    }
+
     /// <summary>Whether the options ask for a preview.</summary>
     public static bool Wants(IEnumerable<string> options) => options.Any(o => o == "--diff" || o.StartsWith("--diff=", StringComparison.Ordinal));
 
@@ -198,7 +215,7 @@ internal static class PreviewCommand
 
                 // What format left out on purpose (old-style projects it doesn't restore, projects without StyleBro or not built,
                 // lines whose indentation '#if' decides).
-                if (new[] { FormatCommand.OldStyleHeader, FormatCommand.PartlyLoadedHeader, FormatCommand.NotBuiltHeader, FormatCommand.IfBodiesHeader }.Any(h => line.StartsWith(h, StringComparison.Ordinal)) && !notes.Contains(line))
+                if (IsNewNote(notes, line))
                 {
                     notes.Add(line);
                 }

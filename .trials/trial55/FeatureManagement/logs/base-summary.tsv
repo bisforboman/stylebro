@@ -1,0 +1,6 @@
+build	0	48s	dotnet build Microsoft.FeatureManagement.sln -c Debug
+twae-Debug	1	5s	twae Debug
+test-Debug	1	35s	env CFG=Debug bash -c dotnet test Microsoft.FeatureManagement.sln -c $CFG
+twae-Release	1	4s	twae Release
+test-Release	1	39s	env CFG=Release bash -c dotnet test Microsoft.FeatureManagement.sln -c $CFG
+DONE

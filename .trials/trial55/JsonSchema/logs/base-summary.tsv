@@ -1,0 +1,6 @@
+build	0	60s	dotnet build Src/Newtonsoft.Json.Schema.slnx -c Debug
+twae-Debug	0	31s	twae Debug
+test-Debug	1	30s	env CFG=Debug bash -c dotnet test Src/Newtonsoft.Json.Schema.slnx -c $CFG
+twae-Release	0	37s	twae Release
+test-Release	1	31s	env CFG=Release bash -c dotnet test Src/Newtonsoft.Json.Schema.slnx -c $CFG
+DONE

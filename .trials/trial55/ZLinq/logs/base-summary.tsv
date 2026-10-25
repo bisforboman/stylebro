@@ -1,0 +1,6 @@
+build	0	131s	dotnet build ZLinq.slnx -c Debug
+twae-Debug	0	134s	twae Debug
+test-Debug	0	63s	env CFG=Debug bash -c dotnet test ZLinq.slnx -c $CFG
+twae-Release	0	70s	twae Release
+test-Release	0	41s	env CFG=Release bash -c dotnet test ZLinq.slnx -c $CFG
+DONE

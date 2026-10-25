@@ -1,0 +1,207 @@
+Using Src/Newtonsoft.Json.Schema.slnx: no solution or project at the root, and it's the only solution one folder down.
+Checking StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net35, net40, net45, net46, net8.0, netstandard2.0, netstandard2.1).
+Configurations: runs for Release (Newtonsoft.Json.Schema, Newtonsoft.Json.Schema.Tests) too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.
+Checked net46 (run 1 of 16)
+Checked net10.0 (run 2 of 16)
+Checked net10.0, Release (run 3 of 16)
+Checked net46, Release (run 4 of 16)
+Checked net8.0 (run 5 of 16)
+Checked net8.0, Release (run 6 of 16)
+Checked net35 (run 7 of 16)
+Checked netstandard2.0 (run 8 of 16)
+Checked net35, Release (run 9 of 16)
+Checked netstandard2.0, Release (run 10 of 16)
+Checked netstandard2.1 (run 11 of 16)
+Checked netstandard2.1, Release (run 12 of 16)
+Checked net40 (run 13 of 16)
+Checked net40, Release (run 14 of 16)
+Checked net45 (run 15 of 16)
+Checked net45, Release (run 16 of 16)
+Formatting a copy: net35 (2 project(s), 1 file with findings)
+Formatting a copy: net40 (2 project(s), 1 file with findings)
+Formatting a copy: net45 (1 project(s), 1 file with findings)
+Formatting a copy: netstandard2.0 (1 project(s), 1 file with findings)
+Formatting a copy: netstandard2.1 (1 project(s), 1 file with findings)
+Formatting a copy: net35, Release (2 project(s), 1 file with findings)
+Formatting a copy: net40, Release (2 project(s), 1 file with findings)
+Formatting a copy: net45, Release (1 project(s), 1 file with findings)
+Formatting a copy: netstandard2.0, Release (1 project(s), 1 file with findings)
+Formatting a copy: netstandard2.1, Release (1 project(s), 1 file with findings)
+Formatting code files in workspace '/home/user/w55/JsonSchema/default/Src/.stylebro-format-0.slnf'.
+Loading workspace.
+Msbuild failed when processing the file '/home/user/w55/JsonSchema/default/Src/Newtonsoft.Json.Schema/Newtonsoft.Json.Schema.csproj' with message: The URL of repository remote 'origin' is invalid: '/home/user/cand/JamesNK-Newtonsoft.Json.Schema'.
+Complete in 10783ms.
+Determining formattable files.
+Complete in 5237ms.
+Running formatters.
+Running Code Style analysis.
+Determining diagnostics...
+Running 2 analyzers on Newtonsoft.Json.Schema.Tests.
+Complete in 16242ms.
+Analysis complete in 16242ms.
+Running Analyzer Reference analysis.
+Running 90 analyzers on Newtonsoft.Json.Schema.Tests.
+Complete in 20286ms.
+Analysis complete in 20286ms.
+Complete in 40683ms.
+Formatted 0 of 277 files.
+Format complete in 56703ms.
+== net35 (2 project(s))
+Formatting code files in workspace '/home/user/w55/JsonSchema/default/Src/.stylebro-format-1.slnf'.
+Complete in 25ms.
+Complete in 12185ms.
+Running 2 analyzers on Newtonsoft.Json.Schema.
+Complete in 28785ms.
+Analysis complete in 28786ms.
+Running 71 analyzers on Newtonsoft.Json.Schema.Tests.
+Running 71 analyzers on Newtonsoft.Json.Schema.
+Complete in 49806ms.
+Analysis complete in 49806ms.
+Complete in 84503ms.
+Formatted code file '/home/user/w55/JsonSchema/default/Src/Newtonsoft.Json.Schema/Infrastructure/JSchemaReader.cs'.
+Formatted 1 of 274 files.
+Format complete in 96714ms.
+== net40 (2 project(s))
+Formatting code files in workspace '/home/user/w55/JsonSchema/default/Src/.stylebro-format-2.slnf'.
+Complete in 10ms.
+Complete in 919ms.
+Complete in 4470ms.
+Analysis complete in 4470ms.
+Complete in 20920ms.
+Analysis complete in 20920ms.
+Complete in 33918ms.
+Formatted 1 of 276 files.
+Format complete in 34847ms.
+== net45 (1 project(s))
+Formatting code files in workspace '/home/user/w55/JsonSchema/default/Src/.stylebro-format-3.slnf'.
+Complete in 6ms.
+Complete in 2ms.
+Complete in 2911ms.
+Analysis complete in 2911ms.
+Complete in 8155ms.
+Analysis complete in 8155ms.
+Complete in 12887ms.
+Formatted 1 of 126 files.
+Format complete in 12895ms.
+Formatting code files in workspace '/home/user/w55/JsonSchema/default/Src/.stylebro-format-4.slnf'.
+Found project reference without a matching metadata reference: /home/user/w55/JsonSchema/default/Src/Newtonsoft.Json.Schema/Newtonsoft.Json.Schema.csproj
+Found project reference without a matching metadata reference: /home/user/w55/JsonSchema/default/Src/Newtonsoft.Json.Schema.Tests/Newtonsoft.Json.Schema.Tests.csproj
+Complete in 10791ms.
+Complete in 1752ms.
+Running 2 analyzers on Newtonsoft.Json.Schema.TestConsole.
+Complete in 10755ms.
+Analysis complete in 10755ms.
+Running 71 analyzers on Newtonsoft.Json.Schema.TestConsole.
+Complete in 18388ms.
+Analysis complete in 18389ms.
+Complete in 35255ms.
+Formatted 0 of 279 files.
+Format complete in 47799ms.
+Formatting code files in workspace '/home/user/w55/JsonSchema/default/Src/.stylebro-format-5.slnf'.
+Complete in 35ms.
+Complete in 12548ms.
+Complete in 19083ms.
+Analysis complete in 19083ms.
+Complete in 24303ms.
+Analysis complete in 24303ms.
+Complete in 50315ms.
+Format complete in 62898ms.
+== netstandard2.0 (1 project(s))
+Formatting code files in workspace '/home/user/w55/JsonSchema/default/Src/.stylebro-format-6.slnf'.
+Complete in 96ms.
+Complete in 109ms.
+Complete in 10959ms.
+Analysis complete in 10960ms.
+Complete in 31053ms.
+Analysis complete in 31053ms.
+Complete in 46239ms.
+Format complete in 46444ms.
+== netstandard2.1 (1 project(s))
+Formatting code files in workspace '/home/user/w55/JsonSchema/default/Src/.stylebro-format-7.slnf'.
+Complete in 3ms.
+Complete in 70ms.
+Complete in 5157ms.
+Analysis complete in 5157ms.
+Complete in 9210ms.
+Analysis complete in 9210ms.
+Complete in 18147ms.
+Format complete in 18220ms.
+Formatting code files in workspace '/home/user/w55/JsonSchema/default/Src/.stylebro-format-8.slnf'.
+Complete in 24625ms.
+Complete in 2351ms.
+Complete in 13961ms.
+Analysis complete in 13961ms.
+Complete in 22985ms.
+Analysis complete in 22985ms.
+Complete in 39435ms.
+Format complete in 66411ms.
+== net35, Release (2 project(s))
+Formatting code files in workspace '/home/user/w55/JsonSchema/default/Src/.stylebro-format-9.slnf'.
+Complete in 43ms.
+Complete in 8328ms.
+Complete in 34626ms.
+Analysis complete in 34626ms.
+Complete in 47700ms.
+Analysis complete in 47700ms.
+Complete in 87998ms.
+Format complete in 96369ms.
+== net40, Release (2 project(s))
+Formatting code files in workspace '/home/user/w55/JsonSchema/default/Src/.stylebro-format-10.slnf'.
+Complete in 1583ms.
+Complete in 2570ms.
+Analysis complete in 2570ms.
+Complete in 22921ms.
+Analysis complete in 22921ms.
+Complete in 28301ms.
+Format complete in 29890ms.
+== net45, Release (1 project(s))
+Formatting code files in workspace '/home/user/w55/JsonSchema/default/Src/.stylebro-format-11.slnf'.
+Complete in 22ms.
+Complete in 2296ms.
+Analysis complete in 2296ms.
+Complete in 8681ms.
+Analysis complete in 8681ms.
+Complete in 11448ms.
+Format complete in 11472ms.
+Formatting code files in workspace '/home/user/w55/JsonSchema/default/Src/.stylebro-format-12.slnf'.
+Complete in 24697ms.
+Complete in 5283ms.
+Complete in 14634ms.
+Analysis complete in 14634ms.
+Complete in 21231ms.
+Analysis complete in 21231ms.
+Complete in 38550ms.
+Formatted 0 of 276 files.
+Format complete in 68530ms.
+Formatting code files in workspace '/home/user/w55/JsonSchema/default/Src/.stylebro-format-13.slnf'.
+Complete in 11716ms.
+Complete in 21082ms.
+Analysis complete in 21082ms.
+Complete in 29102ms.
+Analysis complete in 29102ms.
+Complete in 53114ms.
+Format complete in 64833ms.
+== netstandard2.0, Release (1 project(s))
+Formatting code files in workspace '/home/user/w55/JsonSchema/default/Src/.stylebro-format-14.slnf'.
+Complete in 659ms.
+Complete in 317ms.
+Complete in 14698ms.
+Analysis complete in 14698ms.
+Complete in 11096ms.
+Analysis complete in 11096ms.
+Complete in 32637ms.
+Format complete in 33613ms.
+== netstandard2.1, Release (1 project(s))
+Formatting code files in workspace '/home/user/w55/JsonSchema/default/Src/.stylebro-format-15.slnf'.
+Complete in 9ms.
+Complete in 1321ms.
+Analysis complete in 1322ms.
+Complete in 14217ms.
+Analysis complete in 14217ms.
+Complete in 16539ms.
+Format complete in 16550ms.
+Clean: 1 finding kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them (https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose).
+  Src/Newtonsoft.Json.Schema/Infrastructure/JSchemaReader.cs(28,35): BRO1306 Rename '_schemaDiscovery' to 'SchemaDiscovery'. Kept: at a use of the name, the new name would mean something else.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

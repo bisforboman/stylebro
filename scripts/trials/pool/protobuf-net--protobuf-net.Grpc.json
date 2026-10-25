@@ -1,0 +1,22 @@
+{
+  "repo": "protobuf-net/protobuf-net.Grpc",
+  "branch": "main",
+  "commit": "3471179ce47470ed8858c9f5cb69314c5e00dbcc",
+  "csFiles": 164,
+  "tags": [
+    "library",
+    "multi-target",
+    "several-test-projects"
+  ],
+  "setups": "protobuf-net.Grpc.slnx with C#, F# and Visual Basic examples and a VS solution configuration; libraries net472/netstandard2.0/2.1/net8.0/net10.0, AspNetCore libraries net8.0;net10.0, tests net472;net8.0;net10.0 referencing them (no net472 there); Nerdbank.GitVersioning and PublicApiAnalyzers in every project; central package management; nuget.config <clear /> (and a <clear/> inside a comment above it); global.json 10.0.203; a WPF example (net10.0-windows).",
+  "build": "ok with workaround",
+  "workaround": "EnableWindowsTargeting=true (the WPF example); a full clone (Nerdbank.GitVersioning); global.json lowered; with -p:TreatWarningsAsErrors=true the untouched code fails on 20 RS0016",
+  "tests": "dotnet test protobuf-net.Grpc.slnx: 14 + 184/185 + 184/185 + 216 per framework (net472 doesn't run on Linux); the DuplexEcho integration tests are timing-flaky (0, 2 and 5 failures in three untouched runs)",
+  "usedIn": "trial 55",
+  "verified": {
+    "by": "trial 55 session",
+    "date": "2026-10-25",
+    "sdks": "10.0.113, 8.0.132"
+  },
+  "notes": "A project referencing libraries that lack one of its frameworks, with packages bringing props and targets (trial 54's load fix); a hand-run protogen file whose name is inside a project name."
+}

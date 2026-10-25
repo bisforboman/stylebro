@@ -1,0 +1,6 @@
+{
+  "area": "Hardening",
+  "item": "Engine report parity (host vs dotnet format)",
+  "notes": "Trial 55's soak (docs/decisions/2026-10-25-trial-55-the-engines-finding-report-differences-go-to-a.md, owner: follow-up PR): identical trees, exit codes, verdicts, builds and tests, but two output differences. (1) protobuf-net.Grpc: on unformatted code the host's check lists 28 findings dotnet format doesn't (23 IDE0055 next to WHITESPACE errors, 5 BRO findings on lines an earlier fix changes in src/protobuf-net.Grpc/Internal/ContractOperation.cs): dotnet format analyzes again after each fix, the host keeps its first analysis; `changesPerRule.IDE0055` 54 vs 31, the preview's reported changes 407 vs 384. (2) ZLinq: in a run for a framework a project lacks (ZLinq.Tests' net6.0; ZLinq has none) the old engine loads the referenced project with all its frameworks (StyleBroFormatLoose) and lists more files with findings (71/220/220 vs 69/218/218). Findings: .trials/trial55/findings/soak.md.",
+  "status": "Planned"
+}

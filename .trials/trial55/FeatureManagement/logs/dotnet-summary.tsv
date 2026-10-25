@@ -1,0 +1,12 @@
+preview	0	160s	bro preview init --engine dotnet-format
+setup	0	13s	bash -c python3 /home/user/stylebro/.trials/trial55/addref.py Directory.Build.props "<PackageReference Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial55.1\" PrivateAssets=\"all\" />" && git diff --stat && bro init --write
+format	0	230s	bro format --engine dotnet-format
+check	0	79s	bro check --engine dotnet-format
+check-json	0
+checkbuild	3	129s	bro check --build --engine dotnet-format
+checkbuild-json	3
+twae-Debug	1	5s	twae Debug
+test-Debug	1	56s	env CFG=Debug bash -c dotnet test Microsoft.FeatureManagement.sln -c $CFG
+twae-Release	1	5s	twae Release
+test-Release	1	44s	env CFG=Release bash -c dotnet test Microsoft.FeatureManagement.sln -c $CFG
+DONE

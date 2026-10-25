@@ -1,0 +1,71 @@
+Using Src/Newtonsoft.Json.Schema.slnx: no solution or project at the root, and it's the only solution one folder down.
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net35, net40, net45, net46, net8.0, netstandard2.0, netstandard2.1).
+Configurations: runs for Release (Newtonsoft.Json.Schema, Newtonsoft.Json.Schema.Tests) too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.
+Checked net46, Release (run 1 of 16)
+Checked net10.0 (run 2 of 16)
+Checked net46 (run 3 of 16)
+Checked net10.0, Release (run 4 of 16)
+Checked net8.0, Release (run 5 of 16)
+Checked net35 (run 6 of 16)
+Checked net8.0 (run 7 of 16)
+Checked net35, Release (run 8 of 16)
+Checked netstandard2.0, Release (run 9 of 16)
+Checked netstandard2.0 (run 10 of 16)
+Checked net40 (run 11 of 16)
+Checked net40, Release (run 12 of 16)
+Checked netstandard2.1, Release (run 13 of 16)
+Checked netstandard2.1 (run 14 of 16)
+Checked net45 (run 15 of 16)
+Checked net45, Release (run 16 of 16)
+== net10.0 (1 project(s), 47 files with findings)
+'dotnet format' had warnings loading the workspace in its net10.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+== net35 (2 project(s), 123 files with findings)
+== net40 (2 project(s), 135 files with findings)
+== net45 (1 project(s), 82 files with findings)
+== net46 (2 project(s), 53 files with findings)
+== net8.0 (1 project(s), 53 files with findings)
+== netstandard2.0 (1 project(s), 83 files with findings)
+== netstandard2.1 (1 project(s), 83 files with findings)
+== net10.0, Release (1 project(s), 53 files with findings)
+== net35, Release (2 project(s), 136 files with findings)
+== net40, Release (2 project(s), 136 files with findings)
+== net45, Release (1 project(s), 83 files with findings)
+== net46, Release (1 project(s), 53 files with findings)
+== net8.0, Release (1 project(s), 53 files with findings)
+== netstandard2.0, Release (1 project(s), 83 files with findings)
+== netstandard2.1, Release (1 project(s), 83 files with findings)
+Run 1: 136 files changed:
+  Src/Newtonsoft.Json.Schema.Tests/Documentation/GeneratingSchemas.cs
+  Src/Newtonsoft.Json.Schema.Tests/Documentation/LoadingSchemas.cs
+  Src/Newtonsoft.Json.Schema.Tests/Documentation/PerformanceTests.cs
+  Src/Newtonsoft.Json.Schema.Tests/Documentation/Samples/Generation/CreateCustomProvider.cs
+  Src/Newtonsoft.Json.Schema.Tests/Documentation/Samples/Load/JsonSchemaParse.cs
+  Src/Newtonsoft.Json.Schema.Tests/Documentation/Samples/Validate/CustomJsonValidator.cs
+  Src/Newtonsoft.Json.Schema.Tests/Documentation/Samples/Validate/JsonValidatingReaderAndSerializer.cs
+  Src/Newtonsoft.Json.Schema.Tests/Documentation/Samples/Validate/JsonValidatingWriterAndSerializer.cs
+  Src/Newtonsoft.Json.Schema.Tests/Documentation/Samples/Validate/JTokenIsValidWithMessages.cs
+  Src/Newtonsoft.Json.Schema.Tests/Documentation/Samples/Validate/JTokenValidateWithEvent.cs
+  ... and 126 more
+Checked net46, Release (run 1 of 16)
+Checked net46 (run 2 of 16)
+Checked net10.0, Release (run 3 of 16)
+Checked net10.0 (run 4 of 16)
+Checked net8.0, Release (run 5 of 16)
+Checked net8.0 (run 6 of 16)
+Checked net35, Release (run 7 of 16)
+Checked net35 (run 8 of 16)
+Checked netstandard2.0, Release (run 9 of 16)
+Checked netstandard2.0 (run 10 of 16)
+Checked net40 (run 11 of 16)
+Checked net40, Release (run 12 of 16)
+Checked netstandard2.1 (run 13 of 16)
+Checked netstandard2.1, Release (run 14 of 16)
+Checked net45 (run 15 of 16)
+Checked net45, Release (run 16 of 16)
+Run 2: 0 files changed, clean.
+Clean: 1 finding kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them (https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose).
+  Src/Newtonsoft.Json.Schema/Infrastructure/JSchemaReader.cs(28,35): BRO1306 Rename '_schemaDiscovery' to 'SchemaDiscovery'. Kept: at a use of the name, the new name would mean something else.
+Baseline: stylebro.baseline: added 1 kept finding, so the build and 'format --verify-no-changes' skip it (new violations still fail; delete an entry to see it again) (https://bisforboman.github.io/stylebro/baseline/).
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

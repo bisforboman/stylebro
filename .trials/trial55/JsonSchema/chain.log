@@ -1,0 +1,11 @@
+base start 10:41
+base done 10:44
+default start 10:45
+default restarted (CPM setup) 10:47
+default start 10:47
+default done 11:18
+dotnet start 11:18
+dotnet done 12:10
+soak start 12:10
+soak done rc=0 12:50
+CHAIN-DONE

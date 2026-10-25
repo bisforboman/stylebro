@@ -1,0 +1,2 @@
+host rc=0 Format: 103 files, 407 reported changes, clean after 1 run
+dotnet rc=0 Format: 103 files, 384 reported changes, clean after 1 run

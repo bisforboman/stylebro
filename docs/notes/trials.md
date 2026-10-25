@@ -865,3 +865,40 @@ engines (`.trials/README.md`, "Engine soak").
   Sleet's global.json lowered. Dapper needs a full clone (Nerdbank.GitVersioning); its TWAE builds fail untouched on 5 RT0000
   (ReferenceTrimmer wants doc files) and most tests need database servers (Sqlite/DuckDB ones run). A trial clone's `origin`
   is a local path, which SourceLink reports in `--verbosity diagnostic` logs (harmless).
+
+## Trial 55 (2026-10-25, not clean: owner "Not clean", tally 0; host soak: not clean, the first with the host as the default)
+
+- Repos (three random plus one targeted): Cysharp/ZLinq, JamesNK/Newtonsoft.Json.Schema, microsoft/FeatureManagement-Dotnet
+  (random, seed 55: draws 11, 25, 19 of 64 entries walked to 60-62, appended by trial 54; only entry 63, FusionCache, is
+  unused now: trial 56 appends first; `.trials/trial55/logs/picks.md`), protobuf-net/protobuf-net.Grpc (targeted at trial 54's
+  load fix: net472 tests referencing net8.0/net10.0-only libraries, Nerdbank.GitVersioning in every project; no pool entry
+  fit, about 25 candidates scanned with `scanmt.py`, added). Tested main 09d42be (after #303). Findings files:
+  `.trials/trial55/findings/`.
+- One session, two parallel chains (base, default = host, `--engine dotnet-format` on fresh clones, then
+  `Compare-Format.ps1`). Wall clock: 10:37 start, runs 10:41-14:57, investigation until 15:45, verdict asked then.
+- Newtonsoft.Json.Schema keeps its only solution in Src/: the preview's patch had Src/stylebro.baseline, `bro format` on the
+  root wrote stylebro.baseline (and `format Src/x.slnx` Src/). `Repeat` passed the folder it shows paths from as the new
+  baseline's folder; trial 28's `NewBaselineFolder` decides now. The root file worked for the build; only the preview's
+  promise differed.
+- ZLinq: the preview listed "Indentation kept: src/ZLinq/Linq/Sum.cs" twice (21,26,32,142 and 21,26,32-33,36,159): each preview
+  format pass is its own process, the second numbered the fixed text. The preview keeps the first note for the same files.
+- protobuf-net.Grpc: "Generated/Reflection.cs is generated and checked in: rebuild and commit it" for a hand-run protogen
+  file, because `protobuf-net.Grpc.Reflection.csproj` in a ProjectReference contains its name; a build step must name it whole.
+  Trial 54's fix held: the net472 runs loaded every project on both engines.
+- FeatureManagement-Dotnet: no findings; trial 53's final-newline note fired for exactly its one file; check --build said
+  "Not verified" (exit 3) for builds that fail untouched on NU1510, honest. The TWAE builds fail untouched on all four but ZLinq
+  (NU1510/ASPDEPR008, RS0016) and matched after the fixes; protobuf-net.Grpc's DuplexEcho tests are flaky untouched.
+- Host soak (owner: "Not clean"; follow-up PR, backlog 076, docs/decisions/2026-10-25-trial-55-...): trees, exit codes,
+  verdicts, builds and tests identical on all four, no fallback to dotnet format. Two output differences: on unformatted code
+  the host lists 28 findings dotnet format doesn't on protobuf-net.Grpc (IDE0055 beside WHITESPACE, BRO findings on lines an
+  earlier fix changes: dotnet format analyzes again after each fix), so `changesPerRule.IDE0055` 54/31 and the preview's
+  "reported changes" 407/384; on ZLinq the old engine loads a referenced project without the run's framework with all its
+  frameworks (`StyleBroFormatLoose`) and lists 2 more files with findings in three runs. #303's Serilog follow-up didn't
+  reproduce (the host lists Newtonsoft.Json.Schema's load warning at `--verbosity diagnostic`). Format (s, host/dotnet-format):
+  203/834, 684/1308, 92/230, 235/790 (Json.Schema, ZLinq, FeatureManagement, Grpc), two chains on 4 cores.
+- Environment: SDK 10.0.113 + 8.0.132 and pwsh were there; the trial feed in the user-level NuGet.Config and after the first
+  `<clear />` outside a comment in each repo's nuget.config (protobuf-net.Grpc has `<clear/>` inside a comment: prep's sed put
+  the feed in it, `addfeed.py` now); global.json files with an `sdk` version lowered (not a test resource named global.json);
+  CPM repos get step 1 as PackageVersion + PackageReference; `EnableWindowsTargeting=true` for protobuf-net.Grpc; ZLinq is TWAE
+  under CI=true. Running chains rewrite their tracked logs, so the stop hook kept asking to commit: in-progress logs stay
+  untracked until their chain ends. One worker restart (nothing lost).

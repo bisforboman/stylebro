@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "command": "format",
+  "previewOf": null,
+  "path": "/home/user/w55/ZLinq/default",
+  "write": false,
+  "settings": [],
+  "conventions": [],
+  "sonar": null,
+  "agentsMd": null,
+  "runs": [
+    {
+      "run": 1,
+      "filesChanged": [],
+      "changesPerRule": {}
+    }
+  ],
+  "changesPerRule": {},
+  "filesPerRule": null,
+  "keptFindings": [
+    {
+      "path": "sandbox/Benchmark/BenchmarkDotNet/ExtensionMethods/ConsumerExtensions.BinaryOperations.cs",
+      "line": 41,
+      "column": 129,
+      "rule": "BRO1311",
+      "reason": "KeptWithOtherElement",
+      "reasonText": "another element of the same tuple type keeps its name, and a tuple type's elements are renamed together",
+      "message": "Rename tuple element 'y' to 'Y'"
+    },
+    {
+      "path": "sandbox/Benchmark/BenchmarkDotNet/ExtensionMethods/ConsumerExtensions.BinaryOperations.cs",
+      "line": 41,
+      "column": 155,
+      "rule": "BRO1311",
+      "reason": "KeptWithOtherElement",
+      "reasonText": "another element of the same tuple type keeps its name, and a tuple type's elements are renamed together",
+      "message": "Rename tuple element 'y' to 'Y'"
+    },
+    {
+      "path": "sandbox/Benchmark/BenchmarkDotNet/ExtensionMethods/ConsumerExtensions.BinaryOperations.cs",
+      "line": 57,
+      "column": 111,
+      "rule": "BRO1311",
+      "reason": "KeptWithOtherElement",
+      "reasonText": "another element of the same tuple type keeps its name, and a tuple type's elements are renamed together",
+      "message": "Rename tuple element 'y' to 'Y'"
+    },
+    {
+      "path": "sandbox/Benchmark/BenchmarkDotNet/ExtensionMethods/ConsumerExtensions.BinaryOperations.cs",
+      "line": 57,
+      "column": 124,
+      "rule": "BRO1311",
+      "reason": "KeptWithOtherElement",
+      "reasonText": "another element of the same tuple type keeps its name, and a tuple type's elements are renamed together",
+      "message": "Rename tuple element 'y' to 'Y'"
+    },
+    {
+      "path": "sandbox/Benchmark/BenchmarkDotNet/ExtensionMethods/ConsumerExtensions.BinaryOperations.cs",
+      "line": 65,
+      "column": 116,
+      "rule": "BRO1311",
+      "reason": "KeptWithOtherElement",
+      "reasonText": "another element of the same tuple type keeps its name, and a tuple type's elements are renamed together",
+      "message": "Rename tuple element 'y' to 'Y'"
+    },
+    {
+      "path": "sandbox/Benchmark/BenchmarkDotNet/ExtensionMethods/ConsumerExtensions.BinaryOperations.cs",
+      "line": 65,
+      "column": 130,
+      "rule": "BRO1311",
+      "reason": "KeptWithOtherElement",
+      "reasonText": "another element of the same tuple type keeps its name, and a tuple type's elements are renamed together",
+      "message": "Rename tuple element 'y' to 'Y'"
+    },
+    {
+      "path": "sandbox/Benchmark/BenchmarkDotNet/ExtensionMethods/ConsumerExtensions.BinaryOperations.cs",
+      "line": 73,
+      "column": 117,
+      "rule": "BRO1311",
+      "reason": "KeptWithOtherElement",
+      "reasonText": "another element of the same tuple type keeps its name, and a tuple type's elements are renamed together",
+      "message": "Rename tuple element 'y' to 'Y'"
+    },
+    {
+      "path": "sandbox/Benchmark/BenchmarkDotNet/ExtensionMethods/ConsumerExtensions.BinaryOperations.cs",
+      "line": 73,
+      "column": 131,
+      "rule": "BRO1311",
+      "reason": "KeptWithOtherElement",
+      "reasonText": "another element of the same tuple type keeps its name, and a tuple type's elements are renamed together",
+      "message": "Rename tuple element 'y' to 'Y'"
+    },
+    {
+      "path": "sandbox/Benchmark/BenchmarkDotNet/ExtensionMethods/ConsumerExtensions.BinaryOperations.cs",
+      "line": 89,
+      "column": 107,
+      "rule": "BRO1311",
+      "reason": "KeptWithOtherElement",
+      "reasonText": "another element of the same tuple type keeps its name, and a tuple type's elements are renamed together",
+      "message": "Rename tuple element 'y' to 'Y'"
+    },
+    {
+      "path": "sandbox/Benchmark/BenchmarkDotNet/ExtensionMethods/ConsumerExtensions.BinaryOperations.cs",
+      "line": 89,
+      "column": 120,
+      "rule": "BRO1311",
+      "reason": "KeptWithOtherElement",
+      "reasonText": "another element of the same tuple type keeps its name, and a tuple type's elements are renamed together",
+      "message": "Rename tuple element 'y' to 'Y'"
+    },
+    {
+      "path": "tests/ZLinq.Tests/LifecycleTests.cs",
+      "line": 16,
+      "column": 43,
+      "rule": "BRO1311",
+      "reason": "KeptWithOtherElement",
+      "reasonText": "another element of the same tuple type keeps its name, and a tuple type's elements are renamed together",
+      "message": "Rename tuple element 'unary1' to 'Unary1'"
+    },
+    {
+      "path": "tests/ZLinq.Tests/LifecycleTests.cs",
+      "line": 16,
+      "column": 57,
+      "rule": "BRO1311",
+      "reason": "KeptWithOtherElement",
+      "reasonText": "another element of the same tuple type keeps its name, and a tuple type's elements are renamed together",
+      "message": "Rename tuple element 'unary2' to 'Unary2'"
+    },
+    {
+      "path": "tests/ZLinq.Tests/LifecycleTests.cs",
+      "line": 16,
+      "column": 70,
+      "rule": "BRO1311",
+      "reason": "KeptWithOtherElement",
+      "reasonText": "another element of the same tuple type keeps its name, and a tuple type's elements are renamed together",
+      "message": "Rename tuple element 'sink' to 'Sink'"
+    },
+    {
+      "path": "tests/ZLinq.Tests/LifecycleTests.cs",
+      "line": 57,
+      "column": 43,
+      "rule": "BRO1311",
+      "reason": "KeptWithOtherElement",
+      "reasonText": "another element of the same tuple type keeps its name, and a tuple type's elements are renamed together",
+      "message": "Rename tuple element 'unary' to 'Unary'"
+    },
+    {
+      "path": "tests/ZLinq.Tests/LifecycleTests.cs",
+      "line": 57,
+      "column": 57,
+      "rule": "BRO1311",
+      "reason": "KeptWithOtherElement",
+      "reasonText": "another element of the same tuple type keeps its name, and a tuple type's elements are renamed together",
+      "message": "Rename tuple element 'binary' to 'Binary'"
+    },
+    {
+      "path": "tests/ZLinq.Tests/LifecycleTests.cs",
+      "line": 57,
+      "column": 70,
+      "rule": "BRO1311",
+      "reason": "KeptWithOtherElement",
+      "reasonText": "another element of the same tuple type keeps its name, and a tuple type's elements are renamed together",
+      "message": "Rename tuple element 'sink' to 'Sink'"
+    }
+  ],
+  "patch": null,
+  "clean": true,
+  "exitCode": 0,
+  "notChecked": [
+    "xunit.analyzers' rules: xunit.analyzers 1.24.0's fixes have no Fix All, so 'dotnet format' can't apply or check them (a note: the build still reports their warnings; the verdict doesn't count them)",
+    "IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)"
+  ]
+}
