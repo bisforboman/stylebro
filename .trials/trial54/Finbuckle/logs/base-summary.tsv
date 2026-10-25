@@ -1,3 +1,6 @@
 build	0	49s	dotnet build Finbuckle.MultiTenant.slnx -c Debug
 twae-Debug	0	16s	twae Debug
 test-Debug	0	33s	env CFG=Debug bash -c dotnet test Finbuckle.MultiTenant.slnx -c $CFG
+twae-Release	0	12s	twae Release
+test-Release	0	31s	env CFG=Release bash -c dotnet test Finbuckle.MultiTenant.slnx -c $CFG
+DONE

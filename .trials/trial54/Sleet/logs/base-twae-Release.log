@@ -1,0 +1,30 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  SleetLib -> /home/user/w54/Sleet/base/artifacts/bin/SleetLib/release_net8.0/SleetLib.dll
+  SleetLib -> /home/user/w54/Sleet/base/artifacts/bin/SleetLib/release_net10.0/SleetLib.dll
+  Sleet.Test.Common -> /home/user/w54/Sleet/base/artifacts/bin/Sleet.Test.Common/release_net10.0/Sleet.Test.Common.dll
+  Sleet.Azure.Tests -> /home/user/w54/Sleet/base/artifacts/bin/Sleet.Azure.Tests/release/Sleet.Azure.Tests.dll
+  SleetLib -> /home/user/w54/Sleet/base/artifacts/bin/SleetLib/release_net9.0/SleetLib.dll
+  Sleet.Test.Common -> /home/user/w54/Sleet/base/artifacts/bin/Sleet.Test.Common/release_net9.0/Sleet.Test.Common.dll
+  Sleet -> /home/user/w54/Sleet/base/artifacts/bin/Sleet/release_net8.0/Sleet.dll
+  Sleet.Integration.Tests -> /home/user/w54/Sleet/base/artifacts/bin/Sleet.Integration.Tests/release_net10.0/Sleet.Integration.Tests.dll
+  Sleet.Test.Common -> /home/user/w54/Sleet/base/artifacts/bin/Sleet.Test.Common/release_net8.0/Sleet.Test.Common.dll
+  Sleet -> /home/user/w54/Sleet/base/artifacts/bin/Sleet/release_net9.0/Sleet.dll
+  Sleet -> /home/user/w54/Sleet/base/artifacts/bin/Sleet/release_net10.0/Sleet.dll
+  Sleet.AmazonS3.Tests -> /home/user/w54/Sleet/base/artifacts/bin/Sleet.AmazonS3.Tests/release/Sleet.AmazonS3.Tests.dll
+  Sleet.Integration.Tests -> /home/user/w54/Sleet/base/artifacts/bin/Sleet.Integration.Tests/release_net9.0/Sleet.Integration.Tests.dll
+  Sleet.CmdExe.Tests -> /home/user/w54/Sleet/base/artifacts/bin/Sleet.CmdExe.Tests/release/Sleet.CmdExe.Tests.dll
+  SleetLib.Tests -> /home/user/w54/Sleet/base/artifacts/bin/SleetLib.Tests/release_net10.0/SleetLib.Tests.dll
+  SleetLib.Tests -> /home/user/w54/Sleet/base/artifacts/bin/SleetLib.Tests/release_net9.0/SleetLib.Tests.dll
+  Sleet.CliTool.Tests -> /home/user/w54/Sleet/base/artifacts/bin/Sleet.CliTool.Tests/release/Sleet.CliTool.Tests.dll
+  Sleet.Tests -> /home/user/w54/Sleet/base/artifacts/bin/Sleet.Tests/release_net9.0/Sleet.Tests.dll
+  Sleet.Tests -> /home/user/w54/Sleet/base/artifacts/bin/Sleet.Tests/release_net10.0/Sleet.Tests.dll
+  Sleet.Integration.Tests -> /home/user/w54/Sleet/base/artifacts/bin/Sleet.Integration.Tests/release_net8.0/Sleet.Integration.Tests.dll
+  SleetLib.Tests -> /home/user/w54/Sleet/base/artifacts/bin/SleetLib.Tests/release_net8.0/SleetLib.Tests.dll
+  Sleet.Tests -> /home/user/w54/Sleet/base/artifacts/bin/Sleet.Tests/release_net8.0/Sleet.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:32.01

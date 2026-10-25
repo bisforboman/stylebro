@@ -1,0 +1,1 @@
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.

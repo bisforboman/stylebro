@@ -1,0 +1,2 @@
+preview	0	78s	bro preview init --engine host
+setup	0	9s	bash -c for p in src/Directory.Build.props test/*/*.csproj samples/*/*.csproj; do python3 /home/user/stylebro/.trials/trial54/addref.py $p "<PackageReference Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial54.1\" PrivateAssets=\"all\" />"; done && git diff --stat && bro init --write

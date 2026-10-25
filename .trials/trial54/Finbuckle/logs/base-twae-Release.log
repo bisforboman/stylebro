@@ -9,3 +9,17 @@
   Finbuckle.MultiTenant.Abstractions -> /home/user/w54/Finbuckle/base/src/Finbuckle.MultiTenant.Abstractions/bin/Release/net10.0/Finbuckle.MultiTenant.Abstractions.dll
   Finbuckle.MultiTenant -> /home/user/w54/Finbuckle/base/src/Finbuckle.MultiTenant/bin/Release/net10.0/Finbuckle.MultiTenant.dll
   Finbuckle.MultiTenant.AspNetCore -> /home/user/w54/Finbuckle/base/src/Finbuckle.MultiTenant.AspNetCore/bin/Release/net10.0/Finbuckle.MultiTenant.AspNetCore.dll
+  Finbuckle.MultiTenant.Test -> /home/user/w54/Finbuckle/base/test/Finbuckle.MultiTenant.Test/bin/Release/net10.0/Finbuckle.MultiTenant.Test.dll
+  Finbuckle.MultiTenant.EntityFrameworkCore -> /home/user/w54/Finbuckle/base/src/Finbuckle.MultiTenant.EntityFrameworkCore/bin/Release/net10.0/Finbuckle.MultiTenant.EntityFrameworkCore.dll
+  WebApiSample -> /home/user/w54/Finbuckle/base/samples/WebApiSample/bin/Release/net10.0/WebApiSample.dll
+  Finbuckle.MultiTenant.AspNetCore.Test -> /home/user/w54/Finbuckle/base/test/Finbuckle.MultiTenant.AspNetCore.Test/bin/Release/net10.0/Finbuckle.MultiTenant.AspNetCore.Test.dll
+  Finbuckle.MultiTenant.Identity.EntityFrameworkCore -> /home/user/w54/Finbuckle/base/src/Finbuckle.MultiTenant.Identity.EntityFrameworkCore/bin/Release/net10.0/Finbuckle.MultiTenant.Identity.EntityFrameworkCore.dll
+  Finbuckle.MultiTenant.EntityFrameworkCore.Test -> /home/user/w54/Finbuckle/base/test/Finbuckle.MultiTenant.EntityFrameworkCore.Test/bin/Release/net10.0/Finbuckle.MultiTenant.EntityFrameworkCore.Test.dll
+  Finbuckle.MultiTenant.Identity.EntityFrameworkCore.Test -> /home/user/w54/Finbuckle/base/test/Finbuckle.MultiTenant.Identity.EntityFrameworkCore.Test/bin/Release/net10.0/Finbuckle.MultiTenant.Identity.EntityFrameworkCore.Test.dll
+  IdentityAppSample -> /home/user/w54/Finbuckle/base/samples/IdentityAppSample/bin/Release/net10.0/IdentityAppSample.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:11.90

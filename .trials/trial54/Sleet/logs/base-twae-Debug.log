@@ -19,3 +19,12 @@
   Sleet.Integration.Tests -> /home/user/w54/Sleet/base/artifacts/bin/Sleet.Integration.Tests/debug_net9.0/Sleet.Integration.Tests.dll
   Sleet.CmdExe.Tests -> /home/user/w54/Sleet/base/artifacts/bin/Sleet.CmdExe.Tests/debug/Sleet.CmdExe.Tests.dll
   Sleet.Tests -> /home/user/w54/Sleet/base/artifacts/bin/Sleet.Tests/debug_net9.0/Sleet.Tests.dll
+  Sleet.Tests -> /home/user/w54/Sleet/base/artifacts/bin/Sleet.Tests/debug_net8.0/Sleet.Tests.dll
+  SleetLib.Tests -> /home/user/w54/Sleet/base/artifacts/bin/SleetLib.Tests/debug_net10.0/SleetLib.Tests.dll
+  SleetLib.Tests -> /home/user/w54/Sleet/base/artifacts/bin/SleetLib.Tests/debug_net9.0/SleetLib.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:40.82
