@@ -1,19 +1,21 @@
-# The in-process engine (experimental)
+# The in-process engine
 
-`bro format` and `bro check` run `dotnet format` for their checks and fixes: one process per target framework,
-configuration and pass, each loading and compiling the solution again. With `--engine host` the checks **and the fixes**
-run inside the `bro` process instead: each configuration's workspace (Debug, Release, ...) is loaded once, with every target
-framework of a multi-targeted project in it, and every check and fix of the command runs on it, in every run.
+`bro format` and `bro check` run their checks and fixes inside the `bro` process: each configuration's workspace (Debug,
+Release, ...) is loaded once, with every target framework of a multi-targeted project in it, and every check and fix of
+the command runs on it, in every run. Earlier releases started `dotnet format` for each run instead: one process per target
+framework, configuration and pass, each loading and compiling the solution again. That engine is still there for at
+least one release, as a fallback:
 
 ```
-bro check --engine host
-bro format --engine host
-bro preview init --engine host   # or format, migrate: the preview's format runs
+bro check --engine dotnet-format
+bro format --engine dotnet-format
+bro preview init --engine dotnet-format   # or format, migrate: the preview's format runs
 ```
 
-It is experimental: the default stays `dotnet format` (`--engine dotnet-format`) until the host has given the same results
-on every trial repository. It is meant to do exactly what the default does, only faster: the same changed files, findings,
-kept findings, gaps (`Not checked:`), verdict and exit codes. If you see a difference, please report it with both outputs.
+The in-process engine became the default after it gave the same results as `dotnet format` on three trials in a row
+(byte for byte the same files, findings, kept findings, gaps (`Not checked:`), verdict, exit codes and `--json`), only
+faster. If you see a difference between the two, please report it with both outputs. `--engine host` names the
+in-process engine explicitly.
 
 ## What it uses
 
@@ -54,7 +56,7 @@ none of them in what a fix writes:
   by file. Which rules' fixes meet comes from StyleBro's fix-order tests (two rules one test fixes together meet); those
   keep their order, each in a later round than the one before it. A fix whose edits touch another's in the same file goes
   in a round of its own after it, and so does every rule of another analyzer or of the SDK. Renames (the Naming rules)
-  come last, one round each. Measured with `bro format --engine host` (4 cores, SDK 10.0.113): Serilog's analyzer fixes
+  come last, one round each. Measured with `bro format` (4 cores, SDK 10.0.113): Serilog's analyzer fixes
   took 50-51 s one rule at a time and 36-40 s in rounds (47 rules in 15 steps), Newtonsoft.Json's 178 s and 107 s; the
   whole command 92-93 s and 77-85 s, 476 s and 408 s, with the same files written.
 - **Each fixer is called once per id.** `dotnet format` calls it once per project that references the analyzers (17 times
@@ -106,7 +108,7 @@ On a 4-core Linux machine with SDK 10.0.113, nothing else running, on the trial 
 `bro format` can't use on multi-targeted code (it merges the frameworks' copies of a file); the targets are a first run
 within ~3x a plain `dotnet format` and a run on formatted code within ~1.5x a plain `dotnet format --verify-no-changes`.
 
-| Repository | Plain `dotnet format` | `bro format --engine host`, first run | Plain verify of the result | `bro format --engine host` again | `bro check --engine host` |
+| Repository | Plain `dotnet format` | `bro format`, first run | Plain verify of the result | `bro format` again | `bro check` |
 |---|---:|---:|---:|---:|---:|
 | CliFx (CSharpier, 3 frameworks) | 49 s | 57 s (1.2x) | 41 s | 25 s (0.6x) | 26 s (0.6x) |
 | error-or (migrated from StyleCop) | 27 s | 31 s (1.2x) | 26 s | 16 s (0.6x) | 16 s (0.6x) |
@@ -114,7 +116,7 @@ within ~3x a plain `dotnet format` and a run on formatted code within ~1.5x a pl
 | System.IO.Abstractions (7 frameworks, Release) | 207 s | 261 s (1.3x) | 107 s | 98 s (0.9x) | 97 s (0.9x) |
 | PalCalc (WPF, 3 configurations) | 140 s | 266 s (1.9x) | 62 s | 135 s (2.2x) | 110 s (1.8x) |
 
-The table was measured when the host started fixing (phase 2). Against the default engine, from the parity runs (same
+The table was measured when the host started fixing (phase 2). Against `--engine dotnet-format`, from the parity runs (same
 machine, the two engines one after the other), `bro format` took 35-36 s instead of 116-118 s on CliFx, 22-29 s instead of
 60-71 s on error-or, 78-83 s instead of 130-136 s on Serilog, 141-158 s instead of 283-334 s on System.IO.Abstractions,
 221-255 s instead of 367-434 s on PalCalc and 489-629 s instead of 1,214-1,443 s on Newtonsoft.Json (8 frameworks). In phase 2's
@@ -129,7 +131,7 @@ is left of the copy's time is its own planning (MSBuild evaluations and a restor
 
 The parity harness (`scripts/format-speed/Compare-Format.ps1`, `check`, `format`, `check` with both engines) gave the same
 working trees, kept findings, exit codes and `--json` reports on all six, twice each, and the host the same trees in both
-rounds. One note differs on Newtonsoft.Json and error-or: the default engine's net20 (net462) run warns about a project reference
+rounds. One note differs on Newtonsoft.Json and error-or: the `dotnet-format` engine's net20 (net462) run warns about a project reference
 it can't match, an effect of forcing one framework on the projects, which the host, loading every framework at once,
 doesn't have
 ([decision](https://github.com/bisforboman/stylebro/blob/main/docs/decisions/2026-10-23-the-format-host-keeps-its-own-workspace-load-warnings.md)).
@@ -140,6 +142,6 @@ libraries' netstandard2.0 instances (MSBuildWorkspace sends a project reference 
 first instance), and the analyzers reported their copies of the files, which the whitespace formatter had left alone, as
 findings at the positions before formatting. A run's references now go to the instances the run names, as in a
 `dotnet format` run of that framework. The `changesPerRule` counts of `--json` can differ by one or two between two runs of
-the default engine on the same code (CSharpFunctionalExtensions: 104 and 105 BRO1505 changes), because `dotnet format` fixes
+the `dotnet-format` engine on the same code (CSharpFunctionalExtensions: 104 and 105 BRO1505 changes), because `dotnet format` fixes
 the ids in an order that changes from one run to the next, and another fix sometimes adds a blank line BRO1505 would have;
 the host's order is fixed.

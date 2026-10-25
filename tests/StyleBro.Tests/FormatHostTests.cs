@@ -174,13 +174,37 @@ public sealed class FormatHostTests : IDisposable
         Assert.Null(error);
         Assert.Equal(["/r", "--verify-no-changes"], args);
 
+        // The host is the default (owner's decision 2026-10-25); --engine dotnet-format still picks the old engine.
         args = ["/r"];
+        Assert.Equal(FormatCommand.HostEngine, FormatCommand.TakeEngine(ref args, out _));
+        Assert.Equal(FormatCommand.HostEngine, FormatCommand.CurrentEngine);
+        args = ["/r", "--engine", "dotnet-format"];
         Assert.Equal(FormatCommand.DotnetFormatEngine, FormatCommand.TakeEngine(ref args, out _));
+        Assert.Equal(["/r"], args);
 
         args = ["/r", "--engine", "fast"];
         Assert.Null(FormatCommand.TakeEngine(ref args, out error));
         Assert.Contains("--engine takes 'host'", error);
         Assert.Equal(1, FormatCommand.Run(["/r", "--engine"], _ => { }, (_, _) => throw new InvalidOperationException("ran")));
+    }
+
+    [Fact]
+    public void TheCommandsThatRunTheHost_RollForward()
+    {
+        // The host is the default: format, check and every preview run it unless they name the old engine, so they run
+        // again on the newest runtime; the commands that run no format don't.
+        Assert.True(FormatHost.UsesHost(["format"]));
+        Assert.True(FormatHost.UsesHost(["check", "src"]));
+        Assert.True(FormatHost.UsesHost(["--json", "check"]));
+        Assert.True(FormatHost.UsesHost(["preview", "init"]));
+        Assert.True(FormatHost.UsesHost(["init", "--diff"]));
+        Assert.True(FormatHost.UsesHost(["init", "--engine", "host"]));
+        Assert.False(FormatHost.UsesHost(["check", "--engine", "dotnet-format"]));
+        Assert.False(FormatHost.UsesHost(["format", "--engine"]));
+        Assert.False(FormatHost.UsesHost(["init", "--write"]));
+        Assert.False(FormatHost.UsesHost(["migrate", "--write"]));
+        Assert.False(FormatHost.UsesHost(["baseline", "--diff"]));
+        Assert.False(FormatHost.UsesHost(["--version"]));
     }
 
     [Fact]

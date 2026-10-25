@@ -10,7 +10,7 @@
 # Formatter: 'csharpier' for a repository CSharpier formats: the init flow, then CSharpier, then both must be clean
 # (Invoke-RealWorld.ps1). Its CSharpier version is the one in the repository's tool manifest.
 # BroFormat: after the checks, 'bro init --write' + 'bro format' on the untouched code, which must settle (exit 2 fails;
-# owner's choice 2026-10-23: Newtonsoft.Json only, the default engine).
+# owner's choice 2026-10-23: Newtonsoft.Json only, the default engine: the host since 2026-10-25).
 # MaxFixSeconds: the fix-time limit, the 'dotnet format' runs together (until no changes). Over it, the job fails, naming
 # the repo, the time and the limit (owner's choice 2026-10-24). The values are about 2x the median of 13 runs on each
 # repo's own runner after the speed fixes of 2026-10-22 (PR #280): the nightlies of 2026-10-23 and -24 and the latest

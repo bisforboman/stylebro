@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 namespace StyleBro.Migrate;
 
 /// <summary>
-/// The in-process engine of 'bro format' (--engine host, docs/proposals/format-speed.md, phases 1 and 2: checks and fixes). It loads
+/// The in-process engine of 'bro format' (the default since 2026-10-25, --engine host; docs/proposals/format-speed.md, phases 1 and 2: checks and fixes). It loads
 /// StyleBro.FormatHost into a load context of its own that resolves Roslyn, MSBuild and dotnet-format from the SDK the
 /// repository's global.json selects (owner's decision 2026-10-17), next to the Roslyn 4.8 the tool itself uses; the two
 /// never share a type, so everything crossing over is a string, an array of them, a delegate or an exit code. One host per
@@ -84,7 +84,7 @@ internal sealed class FormatHost : IDisposable
     }
 
     /// <summary>
-    /// With --engine host on a runtime older than the newest one installed, runs this command again on the newest
+    /// For a command that runs the host (<see cref="UsesHost"/>) on a runtime older than the newest one installed, runs it again on the newest
     /// (DOTNET_ROLL_FORWARD=LatestMajor) in the same console and returns its exit code; else null. The tool's
     /// RollForward=Major only moves to a newer runtime when its own (.NET 8) is missing, and the SDK's dotnet-format needs
     /// the SDK's runtime.
@@ -99,8 +99,7 @@ internal sealed class FormatHost : IDisposable
             return null;
         }
 
-        var at = Array.IndexOf(args, FormatCommand.EngineOption);
-        if (at < 0 || at + 1 >= args.Length || args[at + 1] != FormatCommand.HostEngine
+        if (!UsesHost(args)
             || NewestRuntime(Path.GetDirectoryName(typeof(object).Assembly.Location)) is not { } newest || newest <= Environment.Version.Major
             || Environment.ProcessPath is not { } process)
         {
@@ -119,6 +118,23 @@ internal sealed class FormatHost : IDisposable
         using var child = System.Diagnostics.Process.Start(start)!;
         child.WaitForExit();
         return child.ExitCode;
+    }
+
+    /// <summary>
+    /// Whether the command line runs the host: one that names --engine host, or a format, check or preview
+    /// (<see cref="Program.Expand"/>) that names no engine (the host is the default since 2026-10-25). Not with
+    /// --engine dotnet-format, nor for the commands that run no format (init, migrate and baseline without --diff).
+    /// </summary>
+    public static bool UsesHost(string[] args)
+    {
+        var at = Array.IndexOf(args, FormatCommand.EngineOption);
+        if (at >= 0)
+        {
+            return at + 1 < args.Length && args[at + 1] == FormatCommand.HostEngine;
+        }
+
+        return Program.Expand(args.Where(a => a != JsonReport.Option).ToArray()) is { } expanded
+            && (expanded.FirstOrDefault() == "format" || (expanded.FirstOrDefault() != "baseline" && PreviewCommand.Wants(expanded)));
     }
 
     /// <summary>The highest major version among the runtimes next to <paramref name="runtimeFolder"/> (shared/Microsoft.NETCore.App/8.0.32), or null.</summary>

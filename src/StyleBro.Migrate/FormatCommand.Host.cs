@@ -6,19 +6,19 @@ using System.Linq;
 namespace StyleBro.Migrate;
 
 /// <summary>
-/// Phase 1 of docs/proposals/format-speed.md (owner's decisions 2026-10-17): the checks run in an in-process host
-/// (<see cref="FormatHost"/>) with --engine host; fixes still run in 'dotnet format' processes, and without the option
-/// everything does, as before.
+/// docs/proposals/format-speed.md (owner's decisions 2026-10-17): the checks and fixes run in an in-process host
+/// (<see cref="FormatHost"/>), the default since 2026-10-25; --engine dotnet-format runs them in 'dotnet format' processes,
+/// as before.
 /// </summary>
 internal static partial class FormatCommand
 {
-    /// <summary>Picks what runs the checks and fixes: <see cref="HostEngine"/> or <see cref="DotnetFormatEngine"/> (the default).</summary>
+    /// <summary>Picks what runs the checks and fixes: <see cref="HostEngine"/> (the default) or <see cref="DotnetFormatEngine"/>.</summary>
     public const string EngineOption = "--engine";
 
-    /// <summary>The in-process host (experimental).</summary>
+    /// <summary>The in-process host (the default since 2026-10-25, owner's decision).</summary>
     public const string HostEngine = "host";
 
-    /// <summary>A 'dotnet format' process per run and pass.</summary>
+    /// <summary>A 'dotnet format' process per run and pass: the default until 2026-10-25, kept as a fallback.</summary>
     public const string DotnetFormatEngine = "dotnet-format";
 
     private static readonly System.Threading.AsyncLocal<string?> Engine = new();
@@ -31,10 +31,10 @@ internal static partial class FormatCommand
     private static readonly System.Threading.AsyncLocal<List<CopyMap>?> Copies = new();
 
     /// <summary>Gets the engine this command uses (<see cref="UseEngine"/>).</summary>
-    public static string CurrentEngine => Engine.Value ?? DotnetFormatEngine;
+    public static string CurrentEngine => Engine.Value ?? HostEngine;
 
     /// <summary>
-    /// Takes --engine out of <paramref name="args"/>: the engine it names, else <see cref="DotnetFormatEngine"/>; null and
+    /// Takes --engine out of <paramref name="args"/>: the engine it names, else <see cref="HostEngine"/>; null and
     /// <paramref name="error"/> for a value that is neither.
     /// </summary>
     public static string? TakeEngine(ref string[] args, out string? error)
@@ -43,13 +43,13 @@ internal static partial class FormatCommand
         var at = Array.IndexOf(args, EngineOption);
         if (at < 0)
         {
-            return DotnetFormatEngine;
+            return HostEngine;
         }
 
         var value = at + 1 < args.Length ? args[at + 1] : null;
         if (value is not (HostEngine or DotnetFormatEngine))
         {
-            error = $"{EngineOption} takes '{HostEngine}' (experimental: checks and fixes run in this process) or '{DotnetFormatEngine}' (the default).";
+            error = $"{EngineOption} takes '{HostEngine}' (the default: checks and fixes run in this process) or '{DotnetFormatEngine}' (a 'dotnet format' process per run, as before 2026-10-25).";
             return null;
         }
 
@@ -78,14 +78,14 @@ internal static partial class FormatCommand
     }
 
     /// <summary>
-    /// With --engine host, makes the runs on <paramref name="copy"/>, a copy of <paramref name="source"/>, use the host of the
+    /// With the host engine, makes the runs on <paramref name="copy"/>, a copy of <paramref name="source"/>, use the host of the
     /// repository's runs until disposed: its workspaces, as loaded and analyzed for the repository, with the copy's files (the
     /// paths mapped both ways), instead of loading the copy's (check's kept findings: PalCalc loaded its three configurations
     /// again). A copy run whose folder has no host of the repository's opens its own, as before.
     /// </summary>
     public static IDisposable CopyHost(string copy, string source)
     {
-        if (Engine.Value != HostEngine)
+        if (CurrentEngine != HostEngine)
         {
             return new EngineScope(() => { });
         }
@@ -154,8 +154,8 @@ internal static partial class FormatCommand
     private static List<string> HostVariables(RunEnvironment? run) => run?.Names is { } names ? [$"{StyleBro.Analyzers.RepositoryNames.Variable}={names}"] : [];
 
     /// <summary>
-    /// The host of a 'format' or 'check' command with --engine host for one folder, opened at its first run and closed with the
-    /// command (every run of the command uses it: its workspaces stay loaded); null with the default engine. A host that can't
+    /// The host of a 'format' or 'check' command with the host engine for one folder, opened at its first run and closed with the
+    /// command (every run of the command uses it: its workspaces stay loaded); null with --engine dotnet-format. A host that can't
     /// run here says why once and runs nothing.
     /// </summary>
     private sealed class HostScope(string root, Action<string> log, CopyMap? copy = null, HostScope? source = null) : IDisposable
@@ -174,7 +174,7 @@ internal static partial class FormatCommand
 
         public static HostScope? For(string root, Action<string> log)
         {
-            if (Engine.Value != HostEngine)
+            if (CurrentEngine != HostEngine)
             {
                 return null;
             }

@@ -57,7 +57,7 @@ site leaves out (`decisions.md`, `decisions/`, `backlog.md`, `beyond-stylecop.md
 - **Fixes converge in one run, in any order.** After a fix the analyzer reports nothing, and a second `dotnet format`
   run changes nothing, whichever order `dotnet format` runs the rules in (`FixOrderTests`). The analyzer and the fix
   share one piece of logic. A new rule, or a new `FixOrderTests` case, also goes into
-  `src/StyleBro.FormatHost/FixInteractions.txt` (which rules' fixes `bro format --engine host` may apply together):
+  `src/StyleBro.FormatHost/FixInteractions.txt` (which rules' fixes `bro format`'s in-process engine may apply together):
   `STYLEBRO_WRITE_INTERACTIONS=1 dotnet test --filter FixInteractionsTests` writes it.
 - **Skip what can't be fixed safely.** No diagnostic is better than a wrong fix (for example code between `#if`
   directives).
