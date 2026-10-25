@@ -829,3 +829,37 @@ One section per trial (repositories, what broke, what was fixed, the owner's ver
   `DOTNET_ROLL_FORWARD=Major` and fails 47 + 2 tests untouched. Autofac's Bench project runs real benchmarks under
   `dotnet test -c Release` (hung the first baseline; tests limited to test/). One worker restart near the end (nothing lost:
   findings were committed). GOTCHA again: `pkill -f` with a pattern in the same command line killed the shell.
+
+## Trial 54 (2026-10-25, not clean: owner "Not clean", tally 0; host soak: clean, 3 clean soaks on the new host code)
+
+- Repos (three random plus one targeted): Finbuckle/Finbuckle.MultiTenant, emgarten/Sleet, tmenier/Flurl (random, seed 54:
+  draws 58, 8, 28 of 60 entries; the walks ended on 58, 57, 59, the last unused entries, so entries 61-64 were appended for
+  trial 55: ZLinq, Newtonsoft.Json.Schema, FeatureManagement-Dotnet, FusionCache, smoke-built and tested;
+  `.trials/trial54/logs/picks.md`), StackExchange/Dapper (targeted at trial 53's charset/final-newline notes: `charset =
+  utf-8-bom` with 1 of 157 C# files without a BOM, `insert_final_newline = true` with 2 without; no pool entry had either
+  lens, added). Tested main dc107c4 (after #301). Findings files: `.trials/trial54/findings/`.
+- One session, the repositories in two parallel chains (base, default, host on fresh clones each). Wall clock: 23:48 start
+  (#301 had merged), first round done 00:51, fixes and re-checks until 02:00, verdict asked then; one worker restart (nothing
+  lost: findings were committed), the owner's answers came through the parent session at 06:48.
+- Dapper: in the net472, net481 and net5.0 runs (Dapper.Tests.Performance, Dapper.Tests, Dapper.Rainbow) the referenced Dapper
+  library (net461;netstandard2.0;net8.0;net10.0) didn't load: NuGet's `nuget.g.props` saw the environment's framework (its
+  per-framework ImportGroups matched none) and `nuget.g.targets` the framework `SelectFrameworkTargets` had cleared (the outer
+  build's `buildMultiTargeting/ReferenceTrimmer.targets`, whose task assembly the unimported props define). Format said
+  "Not verified" and check --build "Not clean" (16 findings in the skipped net472 code), both honest. The host engine, which
+  sets no framework in the environment, loaded everything. Fixed: `SelectFrameworkProps`, the same condition through
+  `CustomBeforeDirectoryBuildProps` (before Directory.Build.props and NuGet's props). After it Dapper is clean on both
+  engines, byte for byte; Sleet and Flurl re-run on the fix gave the same trees.
+- Dapper: "DataClasses.designer.cs is generated and checked in: rebuild and commit it" for a LINQ to SQL designer file (next
+  to its .dbml). A `.designer.cs` next to a `.dbml`, `.xsd` or `.edmx` is designer-written now. Trial 53's notes fired as
+  intended (1 BOM and 2 final line breaks announced, and exactly those changed).
+- Finbuckle (and Dapper): init's summary said "Turned 13 rules off" with BRO1306 twice (non-private fields, private
+  constants). One entry per rule now. Sleet and Flurl: no findings (Flurl: 146 kept findings, 139 BRO1603 in doc texts its
+  code generator holds as strings, listed and baselined as designed).
+- Format host soak (owner: "Clean soak"): Finbuckle, Sleet, Flurl identical (trees, exit codes, --json); logs differ in run
+  order and PR #287's load note. Dapper differed only through the default engine's load bug above (the host was right);
+  identical on the fix. Format (s, default/host): 96/89, 138/96, 117/49, 429/109 (Finbuckle, Sleet, Flurl, Dapper).
+- Environment: SDK 10.0.113 + 8.0.132 and pwsh were there; the trial feed in the user-level NuGet.Config and in the repos'
+  `NuGet.Config` (`<clear/>`; prep.sh now finds the file case-insensitively and adds the feed to the first `<clear />` only);
+  Sleet's global.json lowered. Dapper needs a full clone (Nerdbank.GitVersioning); its TWAE builds fail untouched on 5 RT0000
+  (ReferenceTrimmer wants doc files) and most tests need database servers (Sqlite/DuckDB ones run). A trial clone's `origin`
+  is a local path, which SourceLink reports in `--verbosity diagnostic` logs (harmless).
