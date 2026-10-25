@@ -1,0 +1,2 @@
+build	0	48s	dotnet build Microsoft.FeatureManagement.sln -c Debug
+twae-Debug	1	5s	twae Debug
