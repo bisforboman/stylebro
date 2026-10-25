@@ -4740,6 +4740,11 @@ internal static partial class FormatCommand
     /// </summary>
     private static int Repeat(string[] args, string root, Action<string> log, Action<string>? output, Func<string[], Action<string>?, int> runOnce, int maxRuns = MaxRuns, string? shown = null)
     {
+        // A new baseline goes where a whole run on the repository puts it (NewBaselineFolder): not into the folder the paths
+        // are shown from (trial 55, Newtonsoft.Json.Schema: the only solution in Src/, the preview's patch had Src/stylebro.baseline
+        // and 'bro format' wrote stylebro.baseline).
+        var newBaseline = shown is null ? null : NewBaselineFolder(shown);
+
         // The paths it lists are relative to this (--files: the repository's root, not the files' project folder).
         shown ??= root;
         var keptFile = Path.Combine(Path.GetTempPath(), $"stylebro-kept-{Guid.NewGuid():N}.tsv");
@@ -4907,7 +4912,7 @@ internal static partial class FormatCommand
                 var keptFindings = ReadKept(keptFile, root, root);
                 unfixed.ForEach(log);
                 var settled = (changed.Count == 0 || endingsOnly) && failures.Count == 0;
-                var baselined = settled ? BaselineKept(root, keptFindings, shown) : null;
+                var baselined = settled ? BaselineKept(root, keptFindings, newBaseline) : null;
                 if (settled)
                 {
                     // The run's check reported the kept findings (and nothing else), so verify's does, and ends with these lines.

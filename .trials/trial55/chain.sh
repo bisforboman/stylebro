@@ -2,7 +2,7 @@
 # chain.sh <key>: base, default (no engine named: the host), dotnet (--engine dotnet-format) on fresh clones (W=/home/user/w55/<key>/<tag>)
 K=$1; W=/home/user/w55/$K; T=/home/user/stylebro/.trials/trial55
 export PATH=/home/user/bro55:$PATH
-for tag in base default dotnet; do
+for tag in ${TAGS:-base default dotnet}; do
   $T/prep.sh $K $W/$tag > $T/$K/prep-$tag.log 2>&1 || { echo "prep $tag failed" >> $T/$K/chain.log; exit 1; }
   echo "$tag start $(date -u +%H:%M)" >> $T/$K/chain.log
   if [ $tag = dotnet ]; then $T/run.sh $K $W/$tag $tag --engine dotnet-format; else $T/run.sh $K $W/$tag $tag; fi
