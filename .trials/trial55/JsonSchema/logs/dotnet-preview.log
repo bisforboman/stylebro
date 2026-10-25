@@ -1,0 +1,110 @@
+Previewing 'bro init --write' and 'bro format' on a copy; nothing in /home/user/w55/JsonSchema/dotnet changes.
+Copying the repository to /tmp/stylebro-preview-628tHg/dotnet... 0s
+Conventions in the code (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  kept     private fields: 161 of 177 named '_field' -> _camelCase
+  default  '{' of multi-line blocks: 4355 of 4361 on its own line -> all
+  default  else/catch/finally after '}': 276 of 276 on a new line -> true
+  default  one-line if/else/loop/using/lock bodies: 921 of 926 with braces -> true
+  default  one-line jumps ('if (x) return;'): 406 in braces -> false
+  default  operators where a line wraps: 101 of 133 at the start of the line -> beginning_of_line
+  default  '=' where a line wraps: 57 of 57 at the end of the line -> end_of_line
+  kept     multi-line initializers: 292 of 303 without a trailing comma -> omit
+  off      empty strings: 8 string.Empty, 14 "" -> BRO1106 is off
+  kept     null checks: 473 of 473 '== null' -> equality_operator
+  default  one-line <summary> texts: 344 of 365 on three lines -> multi_line
+  kept     default values: 18 of 19 'default' -> true
+  default  ')' of split lists: 208 of 214 after the last item -> last_item
+  off      split lists: 62 first item on the next line, 113 first item after '(' -> BRO1107 is off
+  default  ': base(...)'/': this(...)': 24 of 31 on its own line -> own_line
+  off      'where' constraints: 1 on their own line, 6 on the declaration's line -> BRO1111 is off
+  default  'new T { ... }' with an initializer: 262 of 285 without '()' -> omit
+  kept     switch sections: 211 of 216 without a blank line -> omit
+  default  files' using directives: 255 of 255 outside the namespace -> outside_namespace
+  off      mixed arithmetic ('a + b * c'): 9 with parentheses, 8 without parentheses -> BRO1406 is off
+  default  statements on their 'if'/loop/'case' line: 475 of 476 on a line of their own -> false
+  off      overrides/interface implementations: 159 of 212 without a doc comment -> BRO1601 is off
+  off      types' members: 86 in BRO1001's order, 93 in another order -> BRO1001 is off
+  mixed    overloads BRO1001 could split: 5 apart, 7 next to each other -> default stays (false)
+  both     lambda-first calls: 23 one argument per line, 34 rest on the lambda's last line -> both allowed
+  off      split lists' items: 63 one per line, 113 grouped on lines -> BRO1108 is off
+  default  private-by-default members: 566 of 566 with 'private' -> for_non_interface_members
+  default  internal-by-default types: 116 of 116 with 'internal' -> warning
+  mixed    'case X:' blocks: 17 indented, 10 at the label's level -> default stays (true)
+  default  property summaries: 130 of 146 starting with 'Gets'/'Sets' -> warning
+  default  adjacent locals of one type: 233 of 233 declared one by one -> warning
+  default  declarations with 2+ attributes: 61 of 62 one per list ('[A]' '[B]') -> warning
+  default  adjacent fields of one type: 229 of 229 declared one by one -> warning
+  default  private static fields: 70 of 70 without a prefix -> warning
+  default  built-in type names: 232 of 235 only keywords ('int') -> warning
+  default  empty blocks ('{ }'): 69 of 73 on two lines -> false
+  default  block-bodied properties/methods: 61 of 61 on several lines -> warning
+  default  statement blocks ('if (x) { y(); }'): 971 of 971 on several lines -> warning
+  default  accessor bodies: 6 of 6 laid out alike -> warning
+  default  auto-property accessors ('{ get; set; }'): 353 of 353 on one line -> warning
+  off      '#region's inside members: 41 '#region's -> BRO1113 is off
+  kept     C# files' line endings: 273 of 273 LF -> lf
+  default  statements after a block's '}': 689 of 881 after a blank line -> warning
+  off      nested ifs BRO1149 would merge: 31 nested -> BRO1149 is off
+  default  neighbouring members: 1799 of 1815 with a blank line between -> warning
+  default  doc comments below code: 253 of 254 after a blank line -> warning
+  default  '//' comments above code: 598 of 598 right above the code -> warning
+  default  '//' comments below code: 152 of 178 after a blank line -> warning
+  default  doc comment texts: 645 of 646 ending with a period -> warning
+  off      doc element order (param, returns, exception, remarks): 4 in BRO1619's order, 1 in another order -> BRO1619 is off
+  off      keywords in doc comments: 47 of 47 '<c>null</c>' -> BRO1618 is off
+  default  non-private fields: 113 of 138 PascalCase or as your naming rule says -> warning
+  default  doc comments above their element: 310 of 310 right above it -> warning
+  default  using directives: 210 of 228 files sorted, 141 of 142 with System first -> sorted, System first
+  default  private constants/static readonly fields: 115 of 122 PascalCase -> PascalCase
+  default  spacing, control-flow keywords: 1597 of 1597 'if (x)' -> 'if (x)'
+  default  spacing, control-flow parentheses: 1597 of 1597 'if (x)' -> 'if (x)'
+  default  spacing, parenthesized expressions: 181 of 181 '(a + b)' -> '(a + b)'
+  default  spacing, cast parentheses: 278 of 278 '(int)x' -> '(int)x'
+  default  spacing, casts: 246 of 278 '(int)x' -> '(int)x'
+  default  spacing, call arguments: 7676 of 7676 'F(x)' -> 'F(x)'
+  default  spacing, declared parameters: 790 of 790 'void F(int x)' -> 'void F(int x)'
+Summary:
+  Kept your style for 48 settings: wrote stylebro_private_field_naming, stylebro_trailing_comma,
+    stylebro_null_check_style, csharp_prefer_simple_default_expression, stylebro_blank_line_between_switch_sections,
+    end_of_line; 42 were already StyleBro's default.
+  Allowed both forms for 1 setting because your code mixes them: stylebro_allow_leading_multiline_lambda = true
+    (lambda-first calls).
+  Turned 7 rules off because your code mixes both forms: BRO1106 (empty strings), BRO1107 (split lists),
+    BRO1111 ('where' constraints), BRO1406 (mixed arithmetic ('a + b * c')), BRO1001 (types' members),
+    BRO1108 (split lists' items), BRO1619 (doc element order (param, returns, exception, remarks)).
+  Turned 4 rules off because your code doesn't do what they enforce: BRO1601 (overrides/interface implementations: 159
+    of 212 without a doc comment), BRO1113 ('#region's inside members: 41 '#region's),
+    BRO1149 (nested ifs BRO1149 would merge: 31 nested), BRO1618 (keywords in doc comments: 47 of 47 '<c>null</c>').
+  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
+Settings: 71 lines in .editorconfig; 4 lines in Src/Directory.Build.props (StyleBro.Analyzers); 1 line in Src/Directory.Packages.props (StyleBro.Analyzers)
+  StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial55.1 to Src/Directory.Build.props (version in Src/Directory.Packages.props) for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).
+Format run 1... 7m 5s
+Format run 2... 3m 1s
+Format: 136 files, 686 reported changes, clean after 1 run
+  BRO1519  Closing brace should be followed by b...    40 files
+  BRO1405  Statement should not use unnecessary ...    26 files
+  IDE0055  Whitespace and formatting                   25 files
+  BRO1303  Private field names should be camelCase     14 files
+  BRO1520  Place the operator consistently when ...    12 files
+  BRO1138  A string literal should be a plain st...    11 files
+  BRO1504  Single-line comments should be preced...    11 files
+  BRO1505  Elements should be separated by a bla...    10 files
+  BRO1002  Single-line comments should begin wit...     9 files
+  BRO1139  Write 'else if' on one line                  9 files
+  ... and 27 more rules
+Sample (BRO1519, Src/Newtonsoft.Json.Schema.Tests/Documentation/Samples/Generation/CreateCustomProvider.cs):
+  (adds a blank line)
+Sample (BRO1405, Src/Newtonsoft.Json.Schema.Tests/Documentation/Samples/Validate/JsonValidatingReaderAndSerializer.cs):
+  -            bool isValid = (messages.Count == 0);
+  +            bool isValid = messages.Count == 0;
+Sample (IDE0055, Src/Newtonsoft.Json.Schema.Tests/Documentation/LoadingSchemas.cs):
+  -#region ParseString
+  +            #region ParseString
+Clean: 1 finding kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them (https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose).
+  Src/Newtonsoft.Json.Schema/Infrastructure/JSchemaReader.cs(28,35): BRO1306 Rename '_schemaDiscovery' to 'SchemaDiscovery'. Kept: at a use of the name, the new name would mean something else.
+Baseline (in the patch): Src/stylebro.baseline: added 1 kept finding, so the build and 'format --verify-no-changes' skip it (new violations still fail; delete an entry to see it again) (https://bisforboman.github.io/stylebro/baseline/).
+Full diff: .git/stylebro-preview.patch (7,102 lines)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 10m 17s.

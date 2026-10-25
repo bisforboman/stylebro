@@ -1,0 +1,5 @@
+Using Src/Newtonsoft.Json.Schema.slnx: no solution or project at the root, and it's the only solution one folder down.
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net35, net40, net45, net46, net8.0, netstandard2.0, netstandard2.1).
+Configurations: runs for Release (Newtonsoft.Json.Schema, Newtonsoft.Json.Schema.Tests) too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.

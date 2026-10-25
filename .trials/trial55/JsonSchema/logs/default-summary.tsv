@@ -3,3 +3,10 @@ setup	0	8s	bash -c python3 /home/user/stylebro/.trials/trial55/addref.py Src/Dir
 format	0	203s	bro format
 check	0	128s	bro check
 check-json	0
+checkbuild	0	513s	bro check --build
+checkbuild-json	0
+twae-Debug	0	42s	twae Debug
+test-Debug	1	26s	env CFG=Debug bash -c dotnet test Src/Newtonsoft.Json.Schema.slnx -c $CFG
+twae-Release	0	27s	twae Release
+test-Release	1	20s	env CFG=Release bash -c dotnet test Src/Newtonsoft.Json.Schema.slnx -c $CFG
+DONE
