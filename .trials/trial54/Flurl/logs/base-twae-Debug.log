@@ -1,0 +1,35 @@
+  Determining projects to restore...
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/w54/Flurl/base/src/Flurl.CodeGen/Flurl.CodeGen.csproj]
+  Restored /home/user/w54/Flurl/base/src/Flurl.CodeGen/Flurl.CodeGen.csproj (in 347 ms).
+  Restored /home/user/w54/Flurl/base/test/Flurl.Test/Flurl.Test.csproj (in 526 ms).
+  3 of 5 projects are up-to-date for restore.
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/w54/Flurl/base/src/Flurl.CodeGen/Flurl.CodeGen.csproj]
+  Flurl.CodeGen -> /home/user/w54/Flurl/base/src/Flurl.CodeGen/bin/Debug/net6.0/Flurl.CodeGen.dll
+  Flurl -> /home/user/w54/Flurl/base/src/Flurl/bin/Debug/net461/Flurl.dll
+  Flurl -> /home/user/w54/Flurl/base/src/Flurl/bin/Debug/netstandard2.0/Flurl.dll
+  Flurl.Http -> /home/user/w54/Flurl/base/src/Flurl.Http/bin/Debug/net461/Flurl.Http.dll
+  Flurl -> /home/user/w54/Flurl/base/src/Flurl/bin/Debug/net472/Flurl.dll
+  Flurl.Http.Newtonsoft -> /home/user/w54/Flurl/base/src/Flurl.Http.Newtonsoft/bin/Debug/net461/Flurl.Http.Newtonsoft.dll
+  Flurl.Http -> /home/user/w54/Flurl/base/src/Flurl.Http/bin/Debug/netstandard2.0/Flurl.Http.dll
+  Flurl.Http -> /home/user/w54/Flurl/base/src/Flurl.Http/bin/Debug/net6.0/Flurl.Http.dll
+  Flurl.Test -> /home/user/w54/Flurl/base/test/Flurl.Test/bin/Debug/net461/Flurl.Test.dll
+  Flurl.Http.Newtonsoft -> /home/user/w54/Flurl/base/src/Flurl.Http.Newtonsoft/bin/Debug/netstandard2.0/Flurl.Http.Newtonsoft.dll
+  Successfully created package '/home/user/w54/Flurl/base/src/Flurl.Http/bin/Debug/Flurl.Http.4.0.2.nupkg'.
+  Successfully created package '/home/user/w54/Flurl/base/src/Flurl.Http/bin/Debug/Flurl.Http.4.0.2.snupkg'.
+  The package Flurl.4.0.0 is missing a readme. Go to https://aka.ms/nuget/authoring-best-practices/readme to learn why package readmes are important.
+  Successfully created package '/home/user/w54/Flurl/base/src/Flurl/bin/Debug/Flurl.4.0.0.nupkg'.
+  Successfully created package '/home/user/w54/Flurl/base/src/Flurl/bin/Debug/Flurl.4.0.0.snupkg'.
+  Flurl.Http.Newtonsoft -> /home/user/w54/Flurl/base/src/Flurl.Http.Newtonsoft/bin/Debug/net6.0/Flurl.Http.Newtonsoft.dll
+  Flurl.Test -> /home/user/w54/Flurl/base/test/Flurl.Test/bin/Debug/net48/Flurl.Test.dll
+  Flurl.Test -> /home/user/w54/Flurl/base/test/Flurl.Test/bin/Debug/net6.0/Flurl.Test.dll
+  Successfully created package '/home/user/w54/Flurl/base/src/Flurl.Http.Newtonsoft/bin/Debug/Flurl.Http.Newtonsoft.0.9.1.nupkg'.
+  Successfully created package '/home/user/w54/Flurl/base/src/Flurl.Http.Newtonsoft/bin/Debug/Flurl.Http.Newtonsoft.0.9.1.snupkg'.
+
+Build succeeded.
+
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/w54/Flurl/base/src/Flurl.CodeGen/Flurl.CodeGen.csproj]
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/w54/Flurl/base/src/Flurl.CodeGen/Flurl.CodeGen.csproj]
+    2 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:12.14

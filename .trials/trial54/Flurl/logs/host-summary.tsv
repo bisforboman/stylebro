@@ -1,0 +1,12 @@
+preview	0	41s	bro preview init --engine host
+setup	0	7s	bash -c for p in src/*/*.csproj test/*/*.csproj; do python3 /home/user/stylebro/.trials/trial54/addref.py $p "<PackageReference Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial54.1\" PrivateAssets=\"all\" />"; done && git diff --stat && bro init --write
+format	0	49s	bro format --engine host
+check	0	26s	bro check --engine host
+check-json	0
+checkbuild	0	91s	bro check --build --engine host
+checkbuild-json	0
+twae-Debug	0	9s	twae Debug
+test-Debug	1	17s	env CFG=Debug bash -c dotnet test test/Flurl.Test/Flurl.Test.csproj -c $CFG -f net6.0
+twae-Release	0	18s	twae Release
+test-Release	1	16s	env CFG=Release bash -c dotnet test test/Flurl.Test/Flurl.Test.csproj -c $CFG -f net6.0
+DONE

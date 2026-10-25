@@ -1,1 +1,15 @@
 Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+Run 1: 84 files changed:
+  samples/IdentityAppSample/Controllers/HomeController.cs
+  samples/IdentityAppSample/Program.cs
+  samples/IdentityAppSample/SampleHelper.cs
+  samples/WebApiSample/AppTenantInfo.cs
+  samples/WebApiSample/Program.cs
+  samples/WebApiSample/SampleHelper.cs
+  src/Finbuckle.MultiTenant.Abstractions/AmbientTenantContext.cs
+  src/Finbuckle.MultiTenant.Abstractions/IMultiTenantStore.cs
+  src/Finbuckle.MultiTenant.Abstractions/InternalTenantContext.cs
+  src/Finbuckle.MultiTenant.Abstractions/ITenantContext.cs
+  ... and 74 more
+Checked 11 projects (run 1 of 1)
+Run 2: 0 files changed, clean.

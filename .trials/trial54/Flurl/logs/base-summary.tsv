@@ -1,0 +1,6 @@
+build	0	28s	dotnet build Flurl.sln -c Debug
+twae-Debug	0	12s	twae Debug
+test-Debug	1	19s	env CFG=Debug bash -c dotnet test test/Flurl.Test/Flurl.Test.csproj -c $CFG -f net6.0
+twae-Release	0	17s	twae Release
+test-Release	1	16s	env CFG=Release bash -c dotnet test test/Flurl.Test/Flurl.Test.csproj -c $CFG -f net6.0
+DONE

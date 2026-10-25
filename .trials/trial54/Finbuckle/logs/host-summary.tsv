@@ -1,2 +1,12 @@
 preview	0	78s	bro preview init --engine host
 setup	0	9s	bash -c for p in src/Directory.Build.props test/*/*.csproj samples/*/*.csproj; do python3 /home/user/stylebro/.trials/trial54/addref.py $p "<PackageReference Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial54.1\" PrivateAssets=\"all\" />"; done && git diff --stat && bro init --write
+format	0	89s	bro format --engine host
+check	0	1s	bro check --engine host
+check-json	0
+checkbuild	0	94s	bro check --build --engine host
+checkbuild-json	0
+twae-Debug	0	15s	twae Debug
+test-Debug	0	25s	env CFG=Debug bash -c dotnet test Finbuckle.MultiTenant.slnx -c $CFG
+twae-Release	0	21s	twae Release
+test-Release	0	27s	env CFG=Release bash -c dotnet test Finbuckle.MultiTenant.slnx -c $CFG
+DONE
