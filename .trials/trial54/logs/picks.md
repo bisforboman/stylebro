@@ -21,8 +21,8 @@ the package), and an `.editorconfig` `charset` / `insert_final_newline` that a m
 
 Scanned (`scan.py`, shallow clones, unused only): Fody/Fody, Fody/PropertyChanged, NuGet/NuGetGallery (5 test .nupkg files
 next to C# code, but 4,199 .cs, too large, and .NET Framework), Particular/NServiceBus.Persistence.Sql, dotnet/docfx (831 .cs),
-dotnet/sourcelink (charset utf-8-bom: 128 of 132 with a BOM, 1 without a final newline; Arcade SDK from Azure DevOps feeds,
-blocked by the proxy), fluentmigrator (1,248 .cs), microsoft/MSBuildLocator (15 .cs), nuke-build/nuke (646 .cs, 347 BOMs:
+dotnet/sourcelink (charset utf-8-bom: 128 of 132 with a BOM, 1 without a final newline; Arcade SDK from dotnet-eng feeds,
+not smoke-built), fluentmigrator (1,248 .cs), microsoft/MSBuildLocator (15 .cs), nuke-build/nuke (646 .cs, 347 BOMs:
 not a minority), oleg-shilo/cs-script. Of the random picks, Sleet has `charset = utf-8` with no BOMs (follows it), Finbuckle
 and Flurl set neither.
 

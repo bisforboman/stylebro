@@ -92,4 +92,34 @@ Summary:
   note     Final line breaks: your .editorconfig says insert_final_newline = true, and 2 of 156 C# files end without a line break: 'format' adds a last line break to them. To keep that out of the formatting changes, change them in a commit of their own first.
 Settings: 91 lines in .editorconfig; 4 lines in Directory.Build.props (StyleBro.Analyzers); 1 line in Directory.Packages.props (StyleBro.Analyzers)
   StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial54.2 to Directory.Build.props (version in Directory.Packages.props) for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).
-Format run 1... 
+Format run 1... 4m 40s
+Format run 2... 1m 16s
+Format: 128 files, 1,187 reported changes, clean after 1 run
+  BRO1505  Elements should be separated by a bla...    72 files
+  BRO1603  Documentation text should end with a ...    41 files
+  IMPORTS                                              27 files
+  IDE0055  Whitespace and formatting                   22 files
+  BRO1401  Use a trailing comma in multi-line in...    14 files
+  BRO1513  Element documentation header should b...    12 files
+  BRO1517  Code should not contain multiple blan...    12 files
+  BRO1002  Single-line comments should begin wit...    11 files
+  BRO1110  Closing parenthesis or bracket should...    11 files
+  BRO1307  Field names should not begin with a p...     9 files
+  ... and 36 more rules
+Sample (BRO1505, Dapper/DataTableHandler.cs):
+  (adds a blank line)
+Sample (BRO1603, Dapper.EntityFramework/Handlers.cs):
+  -    /// Acts on behalf of all type-handlers in this package
+  +    /// Acts on behalf of all type-handlers in this package.
+Sample (IMPORTS, Dapper.EntityFramework/DbGeometryHandler.cs):
+  -using Microsoft.SqlServer.Types;
+  -using System;
+  +using System;
+Clean: 1 finding kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them (https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose).
+  Dapper/SqlMapper.DapperRow.Descriptor.cs(51,55): BRO1307 Rename 's_converter' to 'Converter'. Kept: at a use of the name, the new name would mean something else.
+Baseline (in the patch): stylebro.baseline: added 1 kept finding, so the build and 'format --verify-no-changes' skip it (new violations still fail; delete an entry to see it again) (https://bisforboman.github.io/stylebro/baseline/).
+Full diff: .git/stylebro-preview.patch (8,067 lines)
+Note: Indentation kept: Dapper/SqlMapper.cs:3940-4007: '#if' decides whether these lines are an if/else (or loop) body, inside a block, or (a '#region' line) compiled at all, so each framework or configuration would indent them its own way. Their indentation is left as it is.
+Note: Indentation kept: Dapper/SqlMapper.cs:3991-4058: '#if' decides whether these lines are an if/else (or loop) body, inside a block, or (a '#region' line) compiled at all, so each framework or configuration would indent them its own way. Their indentation is left as it is.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 6m 5s.
