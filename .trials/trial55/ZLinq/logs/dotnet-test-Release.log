@@ -1,0 +1,39 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  ZLinq -> /home/user/w55/ZLinq/dotnet/src/ZLinq/bin/Release/net8.0/ZLinq.dll
+  ZLinq -> /home/user/w55/ZLinq/dotnet/src/ZLinq/bin/Release/net9.0/ZLinq.dll
+  ZLinq -> /home/user/w55/ZLinq/dotnet/src/ZLinq/bin/Release/netstandard2.0/ZLinq.dll
+  ZLinq -> /home/user/w55/ZLinq/dotnet/src/ZLinq/bin/Release/net10.0/ZLinq.dll
+  ZLinq -> /home/user/w55/ZLinq/dotnet/src/ZLinq/bin/Release/netstandard2.1/ZLinq.dll
+  ZLinq.Godot -> /home/user/w55/ZLinq/dotnet/src/ZLinq.Godot/bin/Release/net10.0/ZLinq.Godot.dll
+  ZLinq.FileSystem -> /home/user/w55/ZLinq/dotnet/src/ZLinq.FileSystem/bin/Release/net9.0/ZLinq.FileSystem.dll
+  ZLinq.FileSystem -> /home/user/w55/ZLinq/dotnet/src/ZLinq.FileSystem/bin/Release/netstandard2.1/ZLinq.FileSystem.dll
+  ZLinq.Json -> /home/user/w55/ZLinq/dotnet/src/ZLinq.Json/bin/Release/netstandard2.0/ZLinq.Json.dll
+  ZLinq.FileSystem -> /home/user/w55/ZLinq/dotnet/src/ZLinq.FileSystem/bin/Release/net10.0/ZLinq.FileSystem.dll
+  Benchmark -> /home/user/w55/ZLinq/dotnet/sandbox/Benchmark/bin/Release/net10.0/Benchmark.dll
+  ZLinq.Json -> /home/user/w55/ZLinq/dotnet/src/ZLinq.Json/bin/Release/net10.0/ZLinq.Json.dll
+  ZLinq.Json -> /home/user/w55/ZLinq/dotnet/src/ZLinq.Json/bin/Release/net9.0/ZLinq.Json.dll
+  ZLinq.Godot -> /home/user/w55/ZLinq/dotnet/src/ZLinq.Godot/bin/Release/net8.0/ZLinq.Godot.dll
+  ZLinq.Json -> /home/user/w55/ZLinq/dotnet/src/ZLinq.Json/bin/Release/net8.0/ZLinq.Json.dll
+  ZLinq.FileSystem -> /home/user/w55/ZLinq/dotnet/src/ZLinq.FileSystem/bin/Release/net8.0/ZLinq.FileSystem.dll
+  ZLinq.FileSystem -> /home/user/w55/ZLinq/dotnet/src/ZLinq.FileSystem/bin/Release/netstandard2.0/ZLinq.FileSystem.dll
+  Benchmark -> /home/user/w55/ZLinq/dotnet/sandbox/Benchmark/bin/Release/net8.0/Benchmark.dll
+  ZLinq.Json -> /home/user/w55/ZLinq/dotnet/src/ZLinq.Json/bin/Release/netstandard2.1/ZLinq.Json.dll
+  ZLinq.Godot -> /home/user/w55/ZLinq/dotnet/src/ZLinq.Godot/bin/Release/net9.0/ZLinq.Godot.dll
+  Benchmark -> /home/user/w55/ZLinq/dotnet/sandbox/Benchmark/bin/Release/net9.0/Benchmark.dll
+  ZLinq.Tests -> /home/user/w55/ZLinq/dotnet/tests/ZLinq.Tests/bin/Release/net6.0/ZLinq.Tests.dll
+  ZLinq.Tests -> /home/user/w55/ZLinq/dotnet/tests/ZLinq.Tests/bin/Release/net9.0/ZLinq.Tests.dll
+  ZLinq.Tests -> /home/user/w55/ZLinq/dotnet/tests/ZLinq.Tests/bin/Release/net10.0/ZLinq.Tests.dll
+  ZLinq.Tests -> /home/user/w55/ZLinq/dotnet/tests/ZLinq.Tests/bin/Release/net8.0/ZLinq.Tests.dll
+  Run tests: '/home/user/w55/ZLinq/dotnet/tests/ZLinq.Tests/bin/Release/net8.0/ZLinq.Tests.dll' [net8.0|x64]
+  Run tests: '/home/user/w55/ZLinq/dotnet/tests/ZLinq.Tests/bin/Release/net10.0/ZLinq.Tests.dll' [net10.0|x64]
+  Run tests: '/home/user/w55/ZLinq/dotnet/tests/ZLinq.Tests/bin/Release/net9.0/ZLinq.Tests.dll' [net9.0|x64]
+  Run tests: '/home/user/w55/ZLinq/dotnet/tests/ZLinq.Tests/bin/Release/net6.0/ZLinq.Tests.dll' [net6.0|x64]
+  Passed! - Failed: 0, Passed: 1079, Skipped: 1, Total: 1080, Duration: 12s 419ms
+  Tests succeeded: '/home/user/w55/ZLinq/dotnet/tests/ZLinq.Tests/bin/Release/net6.0/ZLinq.Tests.dll' [net6.0|x64]
+  Passed! - Failed: 0, Passed: 1172, Skipped: 1, Total: 1173, Duration: 17s 946ms - ZLinq.Tests.dll (net8.0|x64)
+  Tests succeeded: '/home/user/w55/ZLinq/dotnet/tests/ZLinq.Tests/bin/Release/net8.0/ZLinq.Tests.dll' [net8.0|x64]
+  Passed! - Failed: 0, Passed: 1182, Skipped: 2, Total: 1184, Duration: 25s 402ms - ZLinq.Tests.dll (net9.0|x64)
+  Tests succeeded: '/home/user/w55/ZLinq/dotnet/tests/ZLinq.Tests/bin/Release/net9.0/ZLinq.Tests.dll' [net9.0|x64]
+  Passed! - Failed: 0, Passed: 1182, Skipped: 2, Total: 1184, Duration: 25s 211ms - ZLinq.Tests.dll (net10.0|x64)
+  Tests succeeded: '/home/user/w55/ZLinq/dotnet/tests/ZLinq.Tests/bin/Release/net10.0/ZLinq.Tests.dll' [net10.0|x64]

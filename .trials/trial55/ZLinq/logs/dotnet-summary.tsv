@@ -7,3 +7,6 @@ checkbuild	0	602s	bro check --build --engine dotnet-format
 checkbuild-json	0
 twae-Debug	0	95s	twae Debug
 test-Debug	0	53s	env CFG=Debug bash -c dotnet test ZLinq.slnx -c $CFG
+twae-Release	0	130s	twae Release
+test-Release	0	57s	env CFG=Release bash -c dotnet test ZLinq.slnx -c $CFG
+DONE
