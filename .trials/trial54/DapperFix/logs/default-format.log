@@ -54,3 +54,22 @@ Run 1: 128 files changed:
 Checked netstandard2.0, part 2 of 2 (run 1 of 17)
 Checked net5.0 (run 2 of 17)
 Checked net461, Release, part 2 of 2 (run 3 of 17)
+Checked net10.0 (run 4 of 17)
+Checked net472, Release (run 5 of 17)
+Checked net461, part 1 of 2 (run 6 of 17)
+Checked net10.0, Release, part 1 of 2 (run 7 of 17)
+Checked net8.0, part 1 of 2 (run 8 of 17)
+Checked netstandard2.0, Release, part 1 of 2 (run 9 of 17)
+Checked net461, part 2 of 2 (run 10 of 17)
+Checked net10.0, Release, part 2 of 2 (run 11 of 17)
+Checked net8.0, part 2 of 2 (run 12 of 17)
+Checked netstandard2.0, Release, part 2 of 2 (run 13 of 17)
+Checked net461, Release, part 1 of 2 (run 14 of 17)
+Checked net472 (run 15 of 17)
+Checked netstandard2.0, part 1 of 2 (run 16 of 17)
+Checked net481 (run 17 of 17)
+Run 2: 0 files changed, clean.
+Clean: 1 finding kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them (https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose).
+  Dapper/SqlMapper.DapperRow.Descriptor.cs(51,55): BRO1307 Rename 's_converter' to 'Converter'. Kept: at a use of the name, the new name would mean something else.
+Baseline: stylebro.baseline: added 1 kept finding, so the build and 'format --verify-no-changes' skip it (new violations still fail; delete an entry to see it again) (https://bisforboman.github.io/stylebro/baseline/).
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
