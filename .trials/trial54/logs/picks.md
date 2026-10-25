@@ -41,3 +41,21 @@ and Flurl set neither.
 | emgarten/Sleet | main | 833134d176a6781b1fa3d5f902eee49720184ccf |
 | tmenier/Flurl | dev | 36a3fa2b7e29ba1e44a39edfd0d4ae36284a6c75 |
 | StackExchange/Dapper | main | eb47546a408bbf6c178bda4f04dc205bc51ffbfe |
+
+## Appended for trial 55 (entries 61-64)
+
+After this trial's draws every entry of `random.json` is used, so four candidates were appended at the end (alphabetically,
+ignoring case), each smoke-built (`smoke.sh`: restore + Debug build + `dotnet test`, SDK 10.0.113 + 8.0.132,
+`NuGetAudit=false`, `NUGET_CERT_REVOCATION_MODE=offline`, `DOTNET_ROLL_FORWARD=Major`; logs `smoke-*.log`):
+
+- 61 Cysharp/ZLinq (main f7591df2): 572 .cs, net6.0-net10.0 + netstandard2.0/2.1, a source generator; tests all pass
+  (1,079-1,182 per framework, 1-2 skipped).
+- 62 JamesNK/Newtonsoft.Json.Schema (master 5456c4bf): 273 .cs, solution in Src/ (global.json 10.0.401, lowered locally);
+  775/797 (net10.0) and 773/795 (net8.0) pass untouched, the 22 failures are file-system errors on Linux.
+- 63 microsoft/FeatureManagement-Dotnet (main 787f8199): 192 .cs, net8.0/net10.0 (+ a .NET Framework test target that
+  doesn't run on Linux, exit 1); 87 + 21 + 39 tests pass per framework.
+- 64 ZiggyCreatures/FusionCache (main af09f81a): 262 .cs, MTP; 1,614 pass, 11 fail untouched (distributed-cache tests).
+
+Checked and not appended: ninject/Ninject (335 .cs: Nerdbank.GitVersioning fails on a shallow clone, needs a full one;
+not smoke-built again), jbogard/Respawn and robinrodricks/FluentFTP (tests need databases / FTP servers), mganss/ExcelMapper
+and nreco/LambdaParser (20 and 12 .cs), Cysharp/R3 (platform projects needing workloads).
