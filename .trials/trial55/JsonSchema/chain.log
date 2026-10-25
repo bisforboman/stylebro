@@ -7,3 +7,5 @@ default done 11:18
 dotnet start 11:18
 dotnet done 12:10
 soak start 12:10
+soak done rc=0 12:50
+CHAIN-DONE

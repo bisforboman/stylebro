@@ -1,0 +1,1 @@
+build	0	75s	dotnet build protobuf-net.Grpc.slnx -c Debug

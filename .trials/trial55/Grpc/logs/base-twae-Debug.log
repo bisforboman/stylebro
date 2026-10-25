@@ -1,0 +1,55 @@
+  Determining projects to restore...
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/FullStockTicker/src/TraderSys.FullStockTicker.Shared/TraderSys.FullStockTicker.Shared.csproj (in 451 ms).
+  Restored /home/user/w55/Grpc/base/docs/docs.csproj (in 447 ms).
+  Restored /home/user/w55/Grpc/base/src/protobuf-net.Grpc.AspNetCore.Reflection/protobuf-net.Grpc.AspNetCore.Reflection.csproj (in 447 ms).
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/FullStockTicker/src/TraderSys.FullStockTickerClientApp/TraderSys.FullStockTickerClientApp.csproj (in 454 ms).
+  Restored /home/user/w55/Grpc/base/examples/pb-net-grpc/Shared_VB/Shared_VB.vbproj (in 6 ms).
+  Restored /home/user/w55/Grpc/base/examples/pb-net/JustProtos/JustProtos.csproj (in 5 ms).
+  Restored /home/user/w55/Grpc/base/examples/pb-net-grpc/Shared_FS/Shared_FS.fsproj (in 5 ms).
+  Restored /home/user/w55/Grpc/base/examples/perf/PerfClient/PerfClient.csproj (in 61 ms).
+  Restored /home/user/w55/Grpc/base/examples/perf/PerfServer/PerfServer.csproj (in 63 ms).
+  Restored /home/user/w55/Grpc/base/examples/pb-net-grpc/Client_VB/Client_VB.vbproj (in 12 ms).
+  Restored /home/user/w55/Grpc/base/examples/grpc/Shared/Shared.csproj (in 4 ms).
+  Restored /home/user/w55/Grpc/base/examples/pb-net-grpc/Server_CS/Server_CS.csproj (in 26 ms).
+  Restored /home/user/w55/Grpc/base/examples/grpc/Server/Server.csproj (in 4 ms).
+  Restored /home/user/w55/Grpc/base/examples/pb-net-grpc/Client_CS/Client_CS.csproj (in 13 ms).
+  Restored /home/user/w55/Grpc/base/examples/grpc/Client/Client.csproj (in 4 ms).
+  Restored /home/user/w55/Grpc/base/examples/pb-net-grpc/Client_FS/Client_FS.fsproj (in 29 ms).
+  Restored /home/user/w55/Grpc/base/examples/dotnet-grpc/DN_Client/DN_Client.csproj (in 4 ms).
+  Restored /home/user/w55/Grpc/base/examples/dotnet-grpc/DN_Server/DN_Server.csproj (in 11 ms).
+  Restored /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj (in 89 ms).
+  Restored /home/user/w55/Grpc/base/toys/PlayClient/PlayClient.csproj (in 85 ms).
+  Restored /home/user/w55/Grpc/base/toys/PlayServer/PlayServer.csproj (in 91 ms).
+  Restored /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test/protobuf-net.Grpc.Test.csproj (in 210 ms).
+  Restored /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/protobuf-net.Grpc.Test.Integration.csproj (in 103 ms).
+  Restored /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.IntegrationUpLevel/protobuf-net.Grpc.Test.IntegrationUpLevel.csproj (in 101 ms).
+  Restored /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Reflection.Test/protobuf-net.Grpc.Reflection.Test.csproj (in 85 ms).
+  Restored /home/user/w55/Grpc/base/src/protobuf-net.Grpc.Reflection/protobuf-net.Grpc.Reflection.csproj (in 95 ms).
+  Restored /home/user/w55/Grpc/base/src/protobuf-net.Grpc.Native/protobuf-net.Grpc.Native.csproj (in 79 ms).
+  Restored /home/user/w55/Grpc/base/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj (in 141 ms).
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/TraderSys/src/TraderSys.Portfolios.Shared/TraderSys.Portfolios.Shared.csproj (in 8 ms).
+  Restored /home/user/w55/Grpc/base/src/protobuf-net.Grpc.ClientFactory/protobuf-net.Grpc.ClientFactory.csproj (in 212 ms).
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/TraderSys/src/TraderSys.Portfolios.ClientConsole/TraderSys.Portfolios.ClientConsole.csproj (in 104 ms).
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/TraderSys/src/TraderSys.Portfolios/TraderSys.Portfolios.csproj (in 192 ms).
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/SimpleStockTicker/src/TraderSys.StockMarket/TraderSys.StockMarket.csproj (in 8 ms).
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/TraderSys/src/TraderSys.PortfolioData/TraderSys.PortfolioData.csproj (in 14 ms).
+  Restored /home/user/w55/Grpc/base/src/protobuf-net.Grpc.AspNetCore/protobuf-net.Grpc.AspNetCore.csproj (in 14 ms).
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/SimpleStockTicker/src/TraderSys.SimpleStockTickerServer.Shared/TraderSys.SimpleStockTickerServer.Shared.csproj (in 5 ms).
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/FullStockTicker/src/TraderSys.StockMarket/TraderSys.StockMarket.csproj (in 4 ms).
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/SimpleStockTicker/src/TraderSys.SimpleStockTickerServer/TraderSys.SimpleStockTickerServer.csproj (in 14 ms).
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/FullStockTicker/src/TraderSys.FullStockTickerServer/TraderSys.FullStockTickerServer.csproj (in 9 ms).
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/SimpleStockTicker/src/TraderSys.SimpleStockTickerServer.ClientConsole/TraderSys.SimpleStockTickerServer.ClientConsole.csproj (in 25 ms).
+  Restored /home/user/w55/Grpc/base/examples/pb-net-grpc/Shared_CS/Shared_CS.csproj (in 16 ms).
+  Restored /home/user/w55/Grpc/base/examples/pb-net-grpc/Server_FS/Server_FS.fsproj (in 10 ms).
+  Restored /home/user/w55/Grpc/base/examples/pb-net-grpc/Server_VB/Server_VB.vbproj (in 18 ms).
+  Shared -> /home/user/w55/Grpc/base/examples/grpc/Shared/bin/Debug/net10.0/Shared.dll
+  docs -> /home/user/w55/Grpc/base/docs/bin/Debug/net10.0/docs.dll
+  Client -> /home/user/w55/Grpc/base/examples/grpc/Client/bin/Debug/net10.0/Client.dll
+  DN_Client -> /home/user/w55/Grpc/base/examples/dotnet-grpc/DN_Client/bin/Debug/net10.0/DN_Client.dll
+  Server -> /home/user/w55/Grpc/base/examples/grpc/Server/bin/Debug/net10.0/Server.dll
+  Shared_VB -> /home/user/w55/Grpc/base/examples/pb-net-grpc/Shared_VB/bin/Debug/net10.0/Shared_VB.dll
+/home/user/w55/Grpc/base/src/protobuf-net.Grpc/Configuration/ProtoBufMarshallerFactory.cs(163,46): error RS0016: Symbol 'ProtoBuf.Grpc.Configuration.ProtoBufMarshallerFactory.UplevelBufferReadCount.get -> int' is not part of the declared public API (https://github.com/dotnet/roslyn/blob/main/src/RoslynAnalyzers/PublicApiAnalyzers/PublicApiAnalyzers.Help.md) [/home/user/w55/Grpc/base/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj::TargetFramework=net10.0]
+/home/user/w55/Grpc/base/src/protobuf-net.Grpc/Configuration/ProtoBufMarshallerFactory.cs(164,47): error RS0016: Symbol 'ProtoBuf.Grpc.Configuration.ProtoBufMarshallerFactory.UplevelBufferWriteCount.get -> int' is not part of the declared public API (https://github.com/dotnet/roslyn/blob/main/src/RoslynAnalyzers/PublicApiAnalyzers/PublicApiAnalyzers.Help.md) [/home/user/w55/Grpc/base/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj::TargetFramework=net10.0]
+  DN_Server -> /home/user/w55/Grpc/base/examples/dotnet-grpc/DN_Server/bin/Debug/net10.0/DN_Server.dll
+  TraderSys.FullStockTicker.Shared -> /home/user/w55/Grpc/base/examples/wcf-port/FullStockTicker/src/TraderSys.FullStockTicker.Shared/bin/Debug/net10.0/TraderSys.FullStockTicker.Shared.dll
+  JustProtos -> /home/user/w55/Grpc/base/examples/pb-net/JustProtos/bin/Debug/net10.0/JustProtos.dll

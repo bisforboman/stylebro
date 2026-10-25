@@ -1,0 +1,38 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  ZLinq -> /home/user/w55/ZLinq/dotnet/src/ZLinq/bin/Debug/net10.0/ZLinq.dll
+  ZLinq -> /home/user/w55/ZLinq/dotnet/src/ZLinq/bin/Debug/netstandard2.0/ZLinq.dll
+  ZLinq.DropInGenerator -> /home/user/w55/ZLinq/dotnet/src/ZLinq.DropInGenerator/bin/Debug/netstandard2.0/ZLinq.DropInGenerator.dll
+  ZLinq -> /home/user/w55/ZLinq/dotnet/src/ZLinq/bin/Debug/net9.0/ZLinq.dll
+  ZLinq -> /home/user/w55/ZLinq/dotnet/src/ZLinq/bin/Debug/net8.0/ZLinq.dll
+  ZLinq -> /home/user/w55/ZLinq/dotnet/src/ZLinq/bin/Debug/netstandard2.1/ZLinq.dll
+  ConsoleAppNativeAOT -> /home/user/w55/ZLinq/dotnet/sandbox/ConsoleAppNativeAOT/bin/Debug/net10.0/linux-x64/ConsoleAppNativeAOT.dll
+  ZLinq.Tests -> /home/user/w55/ZLinq/dotnet/tests/ZLinq.Tests/bin/Debug/net10.0/ZLinq.Tests.dll
+  FileGen -> /home/user/w55/ZLinq/dotnet/src/FileGen/bin/Debug/net10.0/FileGen.dll
+  ZLinq.Json -> /home/user/w55/ZLinq/dotnet/src/ZLinq.Json/bin/Debug/net10.0/ZLinq.Json.dll
+  ZLinq.FileSystem -> /home/user/w55/ZLinq/dotnet/src/ZLinq.FileSystem/bin/Debug/net10.0/ZLinq.FileSystem.dll
+  ZLinq.FileSystem -> /home/user/w55/ZLinq/dotnet/src/ZLinq.FileSystem/bin/Debug/net8.0/ZLinq.FileSystem.dll
+  ConsoleApp -> /home/user/w55/ZLinq/dotnet/sandbox/ConsoleApp/bin/Debug/net10.0/ConsoleApp.dll
+  Benchmark -> /home/user/w55/ZLinq/dotnet/sandbox/Benchmark/bin/Debug/net8.0/Benchmark.dll
+  ZLinq.Godot -> /home/user/w55/ZLinq/dotnet/src/ZLinq.Godot/bin/Debug/net8.0/ZLinq.Godot.dll
+  ZLinq.FileSystem -> /home/user/w55/ZLinq/dotnet/src/ZLinq.FileSystem/bin/Debug/netstandard2.1/ZLinq.FileSystem.dll
+  ConsoleAppNet6 -> /home/user/w55/ZLinq/dotnet/sandbox/ConsoleAppNet6/bin/Debug/net6.0/ConsoleAppNet6.dll
+  ZLinq.Json -> /home/user/w55/ZLinq/dotnet/src/ZLinq.Json/bin/Debug/netstandard2.1/ZLinq.Json.dll
+  ZLinq.Json -> /home/user/w55/ZLinq/dotnet/src/ZLinq.Json/bin/Debug/net8.0/ZLinq.Json.dll
+  ZLinq.FileSystem -> /home/user/w55/ZLinq/dotnet/src/ZLinq.FileSystem/bin/Debug/netstandard2.0/ZLinq.FileSystem.dll
+  ZLinq.Json -> /home/user/w55/ZLinq/dotnet/src/ZLinq.Json/bin/Debug/netstandard2.0/ZLinq.Json.dll
+  ZLinq.Tests -> /home/user/w55/ZLinq/dotnet/tests/ZLinq.Tests/bin/Debug/net6.0/ZLinq.Tests.dll
+  Benchmark -> /home/user/w55/ZLinq/dotnet/sandbox/Benchmark/bin/Debug/net10.0/Benchmark.dll
+  ZLinq.Godot -> /home/user/w55/ZLinq/dotnet/src/ZLinq.Godot/bin/Debug/net9.0/ZLinq.Godot.dll
+  ZLinq.Tests -> /home/user/w55/ZLinq/dotnet/tests/ZLinq.Tests/bin/Debug/net8.0/ZLinq.Tests.dll
+  ZLinq.Json -> /home/user/w55/ZLinq/dotnet/src/ZLinq.Json/bin/Debug/net9.0/ZLinq.Json.dll
+  ZLinq.Godot -> /home/user/w55/ZLinq/dotnet/src/ZLinq.Godot/bin/Debug/net10.0/ZLinq.Godot.dll
+  ZLinq.Tests -> /home/user/w55/ZLinq/dotnet/tests/ZLinq.Tests/bin/Debug/net9.0/ZLinq.Tests.dll
+  Benchmark -> /home/user/w55/ZLinq/dotnet/sandbox/Benchmark/bin/Debug/net9.0/Benchmark.dll
+  ZLinq.FileSystem -> /home/user/w55/ZLinq/dotnet/src/ZLinq.FileSystem/bin/Debug/net9.0/ZLinq.FileSystem.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:01:34.98
