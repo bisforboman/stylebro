@@ -99,11 +99,16 @@ public sealed partial class MigrationTests
             File.WriteAllText(assets, json.ToJsonString());
         }
 
-        var lines = new List<string>();
-        FormatCommand.Run([Path.Combine(root, "Chain.sln"), "--verify-no-changes", "--no-restore"], lines.Add);
+        // Both engines: the run's solution filter is what 'dotnet format' (--engine dotnet-format) loads; the host, the
+        // default, loads the solution and picks the run's projects in it.
+        foreach (var engine in new[] { FormatCommand.DotnetFormatEngine, FormatCommand.HostEngine })
+        {
+            var lines = new List<string>();
+            FormatCommand.Run([Path.Combine(root, "Chain.sln"), "--verify-no-changes", "--no-restore", FormatCommand.EngineOption, engine], lines.Add);
 
-        Assert.DoesNotContain(lines, l => l.Contains("skipped Tests", StringComparison.Ordinal));
-        Assert.Contains(lines, l => l.Contains("C.cs(5,20)", StringComparison.Ordinal));
+            Assert.DoesNotContain(lines, l => l.Contains("skipped Tests", StringComparison.Ordinal));
+            Assert.Contains(lines, l => l.Contains("C.cs(5,20)", StringComparison.Ordinal));
+        }
     }
 
     [Fact]

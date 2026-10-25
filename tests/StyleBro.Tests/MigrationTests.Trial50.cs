@@ -25,7 +25,12 @@ public sealed partial class MigrationTests
         Assert.Equal(FormatCommand.HostEngine, engine);
         Assert.DoesNotContain(FormatCommand.EngineOption, seen!);
         Assert.DoesNotContain(FormatCommand.HostEngine, seen!);
-        Assert.Equal(FormatCommand.DotnetFormatEngine, FormatCommand.CurrentEngine);
+        Assert.Equal(FormatCommand.HostEngine, FormatCommand.CurrentEngine);
+
+        // The old engine, named: the copy is formatted with it (the host is the default).
+        Capture(() => CaptureError(() => Assert.Throws<InvalidOperationException>(() => PreviewCommand.Run("format", new[] { project, "--diff", "--engine", "dotnet-format" }, Format))));
+        Assert.Equal(FormatCommand.DotnetFormatEngine, engine);
+        Assert.DoesNotContain(FormatCommand.DotnetFormatEngine, seen!);
 
         // A value that is neither engine stops before the copy, as 'bro format' does.
         var error = CaptureError(() => Capture(() => Assert.Equal(1, PreviewCommand.Run("format", new[] { project, "--diff", "--engine", "fast" }, (_, _) => throw new InvalidOperationException("format ran")))));

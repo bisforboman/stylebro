@@ -84,7 +84,7 @@ The `bro format` investigation (per-framework runs, convergence, speed on large 
   Polly (migrate): the same trees and output before and after (122 and 2 files, then clean).
   Why CI missed it: `Invoke-RealWorld.ps1` runs `dotnet format analyzers <sln> --diagnostics <BRO ids>` with every
   framework in one workspace: no whitespace pass, no per-framework runs, no IDE rules, so this class can't show there.
-  `BroFormat = $true` (Newtonsoft only, default engine; owner's choice) adds `bro init --write` + `bro format` on the
+  `BroFormat = $true` (Newtonsoft only, default engine (the host since 2026-10-25); owner's choice) adds `bro init --write` + `bro format` on the
   untouched code after the checks; exit 2 fails the job.
   Its first CI run (Windows, newest SDK 10) failed: `Serialization/TraceJsonWriter.cs` flipped `// base.WriteValue(value)
   will error` 8 columns deeper and back. The line sits in the last else body of an if/else chain split by `#if
@@ -92,6 +92,35 @@ The `bro format` investigation (per-framework runs, convergence, speed on large 
   not the comment line, which the formatter indents like the statement below it. Converged locally (SDK 10.0.113, LF and
   CRLF checkouts: 312 files, then clean), so the job now prints the diff of one more run when format isn't clean
   (that's how the line was found). Fix: the `//` lines right above a protected line are protected too.
+
+- **The host is the default engine** (2026-10-25, owner's decision after three clean soaks, trials 52-54;
+  docs/decisions/2026-10-25-the-format-host-becomes-the-default-engine.md). `FormatCommand.TakeEngine` and `CurrentEngine`
+  give `host` when no `--engine` is named; `--engine dotnet-format` (the old value, kept) is the fallback for at least one
+  release. `FormatHost.UsesHost` decides the roll-forward to the newest runtime: `--engine host`, or a `format`/`check`/preview
+  command line (after `Program.Expand`) that names no engine; not for init/migrate/baseline without `--diff`.
+  Where the default path still runs `dotnet format` processes (each prints why, or is per run and silent):
+  - the host can't run (`Engine: the host can't run here ...`, once per command): no SDK folder for `dotnet --version`, an
+    SDK without `DotnetTools/dotnet-format/dotnet-format.dll`, SDK 8's dotnet-format (MSBuildLocator: a global.json that
+    selects SDK 8, trial 49's Cocona), no runtime as new as the SDK's dotnet-format needs, StyleBro.FormatHost.dll missing,
+    any exception while opening it;
+  - the workspace doesn't load (`Engine: the host couldn't load the workspace ...`, then the rest of the command): trial 50's
+    AdditionalFiles/compiled file;
+  - a run with an option `FormatArguments.Parse` doesn't take (`--folder`, `--binarylog`, an unknown pass-through option, a
+    `--severity`/`--verbosity` value it doesn't know): that run only;
+  - the IDE-suppression probe (`FormatHonorsIdeSuppressions`, one `dotnet format style` per process) and the builds
+    (`check --build`, generators): not format runs, the same on both engines.
+  Covered by the host as by the old engine (same code before the run decides): `--files` (RunFiles -> Repeat/Verify ->
+  the same per-run host scope), Visual Basic (left alone: `--exclude **/*.vb`, as before; a project that is neither C# nor VB, an
+  F# one, gets dotnet format's own "only C# and Visual Basic" error from the host too), workloads (a framework that needs a missing workload is left out before the runs),
+  configurations (one workspace per configuration), `--report`, `--once`, `--all`, the kept-findings copy of `bro check`
+  (the repository's workspaces; a copy missing a file gets its own host, not `dotnet format`).
+  Parity before the switch (Compare-Format, host side naming no engine, 4 cores, SDK 10.0.113; times in format-engine.md):
+  same trees, exit codes and --json on all six; output the same on four, and on Newtonsoft.Json and Serilog only the
+  load-warning note names another run (the old engine's forced-framework "project reference without a matching metadata
+  reference", Serilog's in net10.0). Setup notes: lower every global.json (Newtonsoft's Src/, PalCalc's adonis-ui/ pins
+  5.0.400), `EnableWindowsTargeting` for PalCalc, Newtonsoft's package reference in Src/Directory.Build.props (its projects
+  don't import the root). Seen on Serilog, not changed here: the host's note says to add `--verbosity diagnostic`, but at
+  that level it lists no warning (a follow-up).
 
 - **Tracker bugs** (2026-10-04, docs/beyond-stylecop.md "Possible bugs to check", all fixed): BRO1504 treats a
   collection expression's `[` like `{` (StyleCop #3766); BRO1603 accepts a period before closing `)`/`]`/`"`/`'`

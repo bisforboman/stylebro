@@ -46,7 +46,7 @@ internal static class Program
               the Sonar rules that are on turn on the StyleBro and .NET rules that fix what they report. --sonar-profile
               takes a quality profile exported from the server (api/qualityprofiles/backup) instead of the defaults.
 
-          bro format [folder, solution or project] [--files <a.cs> <b.cs> ...] [--all] [--once] [--restore] [--timings] [dotnet format options]
+          bro format [folder, solution or project] [--files <a.cs> <b.cs> ...] [--all] [--once] [--restore] [--timings] [--engine dotnet-format] [dotnet format options]
               'dotnet format' that fixes StyleBro's rules and the built-in rules init/migrate turn on (plus whitespace),
               once per target framework in multi-targeted repositories, never inside git submodules. Runs again until a
               run changes nothing (at most 3 runs) and prints the files each run changed (the first 10); --once runs once. --all also
@@ -63,6 +63,8 @@ internal static class Program
               just the projects they belong to: a fraction of a whole run. With --verify-no-changes too.
               The restore is skipped when its output is current; --restore restores anyway, --no-restore never.
               --timings prints how long each phase took.
+              The checks and fixes run inside 'bro' (each configuration's workspace loaded once); --engine dotnet-format
+              starts a 'dotnet format' process per run instead, as earlier releases did (also for check and preview).
 
           bro check [folder, solution or project] [--files <a.cs> ...] [--build] [options]
               The same as 'bro format --verify-no-changes'. --build then builds every configuration of the solution with
@@ -120,7 +122,7 @@ internal static class Program
 
     public static int Main(string[] args)
     {
-        // --engine host loads the SDK's dotnet-format, built for the SDK's runtime: on an older one, run again on the newest.
+        // The host engine loads the SDK's dotnet-format, built for the SDK's runtime: on an older one, run again on the newest.
         if (FormatHost.RollForward(args) is { } rolled)
         {
             return rolled;
@@ -883,7 +885,7 @@ internal static class Program
 
         // A preview's format runs take --engine like 'bro format' (trial 50: 'preview init --engine host' was an unknown option).
         string? engineError = null;
-        var previewEngine = command != "baseline" && PreviewCommand.Wants(options) ? FormatCommand.TakeEngine(ref options, out engineError) : FormatCommand.DotnetFormatEngine;
+        var previewEngine = command != "baseline" && PreviewCommand.Wants(options) ? FormatCommand.TakeEngine(ref options, out engineError) : FormatCommand.HostEngine;
         if (previewEngine is null)
         {
             Console.Error.WriteLine(engineError);

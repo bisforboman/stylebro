@@ -115,3 +115,11 @@ to the git root, and a repro inside the agent's clone without its own `.git` wou
 A brief for a container run (written per trial, not committed) must give the agent its container name and the
 Start/Remove lines, say that every command runs through `docker exec` (paths `/work`, `/logs`, `/feed`), to clone inside
 the container, and the no-desktop rule.
+
+## Engine soak (until the next release)
+
+Since 2026-10-25 the in-process host is `bro format`'s default engine
+([decision](../docs/decisions/2026-10-25-the-format-host-becomes-the-default-engine.md)); `--engine dotnet-format` is the old
+one. Until the next release, every trial still runs its soak on both: `scripts/format-speed/Compare-Format.ps1` on each
+repository (it names both engines, `check`, `format`, `check`), plus `bro check --build` with each engine. A difference
+between the engines makes the soak not clean (decision of 2026-10-23); the trial's own commands use the default (host).

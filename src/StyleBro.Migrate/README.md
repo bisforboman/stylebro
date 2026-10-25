@@ -79,7 +79,9 @@ file: the check for CI and AI agents (plain `dotnet format --verify-no-changes` 
 clean `format` on the same code it answers from that run's record in seconds.
 
 The restore is skipped when its output is current (`--restore` restores anyway, `--no-restore` never), and `--timings`
-prints how long each phase took.
+prints how long each phase took. The checks and fixes run inside `bro` (each configuration's workspace loaded once);
+`--engine dotnet-format` starts a `dotnet format` process per run instead, as earlier releases did
+([The in-process engine](https://bisforboman.github.io/stylebro/format-engine/)).
 
 ## Scripts and AI agents
 

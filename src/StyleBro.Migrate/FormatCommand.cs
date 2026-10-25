@@ -302,7 +302,7 @@ internal static partial class FormatCommand
         // --timings: how long each phase took, after everything else (docs/proposals/format-speed.md, "Also seen").
         using var timings = args.Contains(TimingsOption) ? PhaseTimes.Start() : null;
 
-        // --engine host: the checks and fixes run in this process (FormatHost).
+        // The host engine (the default; --engine dotnet-format runs 'dotnet format' processes): the checks and fixes run in this process (FormatHost).
         if (TakeEngine(ref args, out var engineError) is not { } engineName)
         {
             (output ?? Console.Error.WriteLine)(engineError!);
@@ -5281,7 +5281,7 @@ internal static partial class FormatCommand
 
         using var directiveMask = new DirectiveMask(root, directiveFiles);
 
-        // --engine host: the checks and fixes of this run in this process, each configuration's workspace loaded once per command.
+        // The host engine: the checks and fixes of this run in this process, each configuration's workspace loaded once per command.
         using var hostScope = HostScope.For(root, log);
 
         int Format(string target, List<string> options, Func<IEnumerable<string>, int> run, string[]? runPasses = null)
