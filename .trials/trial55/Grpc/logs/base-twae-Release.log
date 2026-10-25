@@ -1,0 +1,142 @@
+  Determining projects to restore...
+  Restored /home/user/w55/Grpc/base/docs/docs.csproj (in 494 ms).
+  Restored /home/user/w55/Grpc/base/examples/pb-net-grpc/Client_FS/Client_FS.fsproj (in 494 ms).
+  Restored /home/user/w55/Grpc/base/examples/pb-net-grpc/Client_VB/Client_VB.vbproj (in 494 ms).
+  Restored /home/user/w55/Grpc/base/examples/pb-net-grpc/Server_CS/Server_CS.csproj (in 494 ms).
+  Restored /home/user/w55/Grpc/base/examples/pb-net-grpc/Client_CS/Client_CS.csproj (in 9 ms).
+  Restored /home/user/w55/Grpc/base/examples/grpc/Client/Client.csproj (in 11 ms).
+  Restored /home/user/w55/Grpc/base/examples/grpc/Server/Server.csproj (in 20 ms).
+  Restored /home/user/w55/Grpc/base/examples/grpc/Shared/Shared.csproj (in 30 ms).
+  Restored /home/user/w55/Grpc/base/examples/dotnet-grpc/DN_Server/DN_Server.csproj (in 8 ms).
+  Restored /home/user/w55/Grpc/base/examples/dotnet-grpc/DN_Client/DN_Client.csproj (in 9 ms).
+  Restored /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj (in 140 ms).
+  Restored /home/user/w55/Grpc/base/toys/PlayServer/PlayServer.csproj (in 167 ms).
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/TraderSys/src/TraderSys.Portfolios/TraderSys.Portfolios.csproj (in 123 ms).
+  Restored /home/user/w55/Grpc/base/toys/PlayClient/PlayClient.csproj (in 165 ms).
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/TraderSys/src/TraderSys.PortfolioData/TraderSys.PortfolioData.csproj (in 9 ms).
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/TraderSys/src/TraderSys.Portfolios.Shared/TraderSys.Portfolios.Shared.csproj (in 18 ms).
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/SimpleStockTicker/src/TraderSys.StockMarket/TraderSys.StockMarket.csproj (in 7 ms).
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/TraderSys/src/TraderSys.Portfolios.ClientConsole/TraderSys.Portfolios.ClientConsole.csproj (in 20 ms).
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/FullStockTicker/src/TraderSys.StockMarket/TraderSys.StockMarket.csproj (in 4 ms).
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/SimpleStockTicker/src/TraderSys.SimpleStockTickerServer.Shared/TraderSys.SimpleStockTickerServer.Shared.csproj (in 20 ms).
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/SimpleStockTicker/src/TraderSys.SimpleStockTickerServer.ClientConsole/TraderSys.SimpleStockTickerServer.ClientConsole.csproj (in 20 ms).
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/SimpleStockTicker/src/TraderSys.SimpleStockTickerServer/TraderSys.SimpleStockTickerServer.csproj (in 19 ms).
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/FullStockTicker/src/TraderSys.FullStockTicker.Shared/TraderSys.FullStockTicker.Shared.csproj (in 47 ms).
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/FullStockTicker/src/TraderSys.FullStockTickerServer/TraderSys.FullStockTickerServer.csproj (in 11 ms).
+  Restored /home/user/w55/Grpc/base/examples/pb-net/JustProtos/JustProtos.csproj (in 9 ms).
+  Restored /home/user/w55/Grpc/base/examples/perf/PerfClient/PerfClient.csproj (in 12 ms).
+  Restored /home/user/w55/Grpc/base/examples/perf/PerfServer/PerfServer.csproj (in 33 ms).
+  Restored /home/user/w55/Grpc/base/examples/wcf-port/FullStockTicker/src/TraderSys.FullStockTickerClientApp/TraderSys.FullStockTickerClientApp.csproj (in 101 ms).
+  Restored /home/user/w55/Grpc/base/examples/pb-net-grpc/Shared_VB/Shared_VB.vbproj (in 13 ms).
+  Restored /home/user/w55/Grpc/base/examples/pb-net-grpc/Shared_FS/Shared_FS.fsproj (in 5 ms).
+  Restored /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Reflection.Test/protobuf-net.Grpc.Reflection.Test.csproj (in 203 ms).
+  Restored /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/protobuf-net.Grpc.Test.Integration.csproj (in 206 ms).
+  Restored /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.IntegrationUpLevel/protobuf-net.Grpc.Test.IntegrationUpLevel.csproj (in 213 ms).
+  Restored /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test/protobuf-net.Grpc.Test.csproj (in 220 ms).
+  Restored /home/user/w55/Grpc/base/src/protobuf-net.Grpc.Reflection/protobuf-net.Grpc.Reflection.csproj (in 151 ms).
+  Restored /home/user/w55/Grpc/base/src/protobuf-net.Grpc.Native/protobuf-net.Grpc.Native.csproj (in 134 ms).
+  Restored /home/user/w55/Grpc/base/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj (in 173 ms).
+  Restored /home/user/w55/Grpc/base/src/protobuf-net.Grpc.AspNetCore/protobuf-net.Grpc.AspNetCore.csproj (in 27 ms).
+  Restored /home/user/w55/Grpc/base/examples/pb-net-grpc/Shared_CS/Shared_CS.csproj (in 8 ms).
+  Restored /home/user/w55/Grpc/base/src/protobuf-net.Grpc.AspNetCore.Reflection/protobuf-net.Grpc.AspNetCore.Reflection.csproj (in 35 ms).
+  Restored /home/user/w55/Grpc/base/examples/pb-net-grpc/Server_FS/Server_FS.fsproj (in 15 ms).
+  Restored /home/user/w55/Grpc/base/examples/pb-net-grpc/Server_VB/Server_VB.vbproj (in 18 ms).
+  Restored /home/user/w55/Grpc/base/src/protobuf-net.Grpc.ClientFactory/protobuf-net.Grpc.ClientFactory.csproj (in 343 ms).
+  Shared -> /home/user/w55/Grpc/base/examples/grpc/Shared/bin/Release/net10.0/Shared.dll
+  docs -> /home/user/w55/Grpc/base/docs/bin/Release/net10.0/docs.dll
+  Client -> /home/user/w55/Grpc/base/examples/grpc/Client/bin/Release/net10.0/Client.dll
+  Server -> /home/user/w55/Grpc/base/examples/grpc/Server/bin/Release/net10.0/Server.dll
+  DN_Client -> /home/user/w55/Grpc/base/examples/dotnet-grpc/DN_Client/bin/Release/net10.0/DN_Client.dll
+  Shared_VB -> /home/user/w55/Grpc/base/examples/pb-net-grpc/Shared_VB/bin/Release/net10.0/Shared_VB.dll
+  JustProtos -> /home/user/w55/Grpc/base/examples/pb-net/JustProtos/bin/Release/net10.0/JustProtos.dll
+  TraderSys.FullStockTicker.Shared -> /home/user/w55/Grpc/base/examples/wcf-port/FullStockTicker/src/TraderSys.FullStockTicker.Shared/bin/Release/net10.0/TraderSys.FullStockTicker.Shared.dll
+  protobuf-net.Grpc -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc/bin/Release/net10.0/protobuf-net.Grpc.dll
+  DN_Server -> /home/user/w55/Grpc/base/examples/dotnet-grpc/DN_Server/bin/Release/net10.0/DN_Server.dll
+  TraderSys.StockMarket -> /home/user/w55/Grpc/base/examples/wcf-port/FullStockTicker/src/TraderSys.StockMarket/bin/Release/net10.0/TraderSys.StockMarket.dll
+  Shared_CS -> /home/user/w55/Grpc/base/examples/pb-net-grpc/Shared_CS/bin/Release/net10.0/Shared_CS.dll
+  Client_CS -> /home/user/w55/Grpc/base/examples/pb-net-grpc/Client_CS/bin/Release/net10.0/Client_CS.dll
+  protobuf-net.Grpc.Native -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.Native/bin/Release/net10.0/protobuf-net.Grpc.Native.dll
+  Client_VB -> /home/user/w55/Grpc/base/examples/pb-net-grpc/Client_VB/bin/Release/net10.0/Client_VB.dll
+  protobuf-net.Grpc.AspNetCore -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.AspNetCore/bin/Release/net10.0/protobuf-net.Grpc.AspNetCore.dll
+  TraderSys.SimpleStockTickerServer.Shared -> /home/user/w55/Grpc/base/examples/wcf-port/SimpleStockTicker/src/TraderSys.SimpleStockTickerServer.Shared/bin/Release/net10.0/TraderSys.SimpleStockTickerServer.Shared.dll
+  TraderSys.StockMarket -> /home/user/w55/Grpc/base/examples/wcf-port/SimpleStockTicker/src/TraderSys.StockMarket/bin/Release/net10.0/TraderSys.StockMarket.dll
+  PerfClient -> /home/user/w55/Grpc/base/examples/perf/PerfClient/bin/Release/net10.0/PerfClient.dll
+  TraderSys.Portfolios.Shared -> /home/user/w55/Grpc/base/examples/wcf-port/TraderSys/src/TraderSys.Portfolios.Shared/bin/Release/net10.0/TraderSys.Portfolios.Shared.dll
+  Shared_FS -> /home/user/w55/Grpc/base/examples/pb-net-grpc/Shared_FS/bin/Release/net10.0/Shared_FS.dll
+  TraderSys.PortfolioData -> /home/user/w55/Grpc/base/examples/wcf-port/TraderSys/src/TraderSys.PortfolioData/bin/Release/net10.0/TraderSys.PortfolioData.dll
+  TraderSys.SimpleStockTickerServer.ClientConsole -> /home/user/w55/Grpc/base/examples/wcf-port/SimpleStockTicker/src/TraderSys.SimpleStockTickerServer.ClientConsole/bin/Release/net10.0/TraderSys.SimpleStockTickerServer.ClientConsole.dll
+  protobuf-net.Grpc -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc/bin/Release/net8.0/protobuf-net.Grpc.dll
+  TraderSys.FullStockTickerServer -> /home/user/w55/Grpc/base/examples/wcf-port/FullStockTicker/src/TraderSys.FullStockTickerServer/bin/Release/net10.0/TraderSys.FullStockTickerServer.dll
+  PerfServer -> /home/user/w55/Grpc/base/examples/perf/PerfServer/bin/Release/net10.0/PerfServer.dll
+  PlayClient -> /home/user/w55/Grpc/base/toys/PlayClient/bin/Release/net10.0/PlayClient.dll
+  PlayServer -> /home/user/w55/Grpc/base/toys/PlayServer/bin/Release/net10.0/PlayServer.dll
+  protobuf-net.Grpc -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc/bin/Release/net472/protobuf-net.Grpc.dll
+  Client_FS -> /home/user/w55/Grpc/base/examples/pb-net-grpc/Client_FS/bin/Release/net10.0/Client_FS.dll
+  protobuf-net.Grpc.Reflection -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.Reflection/bin/Release/net10.0/protobuf-net.Grpc.Reflection.dll
+  protobuf-net.Grpc.Reflection -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.Reflection/bin/Release/net472/protobuf-net.Grpc.Reflection.dll
+  protobuf-net.Grpc.Native -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.Native/bin/Release/net472/protobuf-net.Grpc.Native.dll
+  protobuf-net.Grpc.Test.Integration -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/bin/Release/net10.0/protobuf-net.Grpc.Test.Integration.dll
+  TraderSys.Portfolios.ClientConsole -> /home/user/w55/Grpc/base/examples/wcf-port/TraderSys/src/TraderSys.Portfolios.ClientConsole/bin/Release/net10.0/TraderSys.Portfolios.ClientConsole.dll
+  protobuf-net.Grpc -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc/bin/Release/netstandard2.1/protobuf-net.Grpc.dll
+  protobuf-net.Grpc.Test -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test/bin/Release/net472/protobuf-net.Grpc.Test.exe
+  protobuf-net.Grpc.Reflection.Test -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Reflection.Test/bin/Release/net472/protobuf-net.Grpc.Reflection.Test.exe
+  protobuf-net.Grpc -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc/bin/Release/netstandard2.0/protobuf-net.Grpc.dll
+  protobuf-net.Grpc.ClientFactory -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.ClientFactory/bin/Release/netstandard2.1/protobuf-net.Grpc.ClientFactory.dll
+  protobuf-net.Grpc.Reflection -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.Reflection/bin/Release/net8.0/protobuf-net.Grpc.Reflection.dll
+  protobuf-net.Grpc.ClientFactory -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.ClientFactory/bin/Release/netstandard2.0/protobuf-net.Grpc.ClientFactory.dll
+  protobuf-net.Grpc.AspNetCore.Reflection -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.AspNetCore.Reflection/bin/Release/net10.0/protobuf-net.Grpc.AspNetCore.Reflection.dll
+  protobuf-net.Grpc.Reflection -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.Reflection/bin/Release/netstandard2.0/protobuf-net.Grpc.Reflection.dll
+  protobuf-net.Grpc.Reflection -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.Reflection/bin/Release/netstandard2.1/protobuf-net.Grpc.Reflection.dll
+  Server_FS -> /home/user/w55/Grpc/base/examples/pb-net-grpc/Server_FS/bin/Release/net10.0/Server_FS.dll
+  protobuf-net.Grpc.ClientFactory -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.ClientFactory/bin/Release/net8.0/protobuf-net.Grpc.ClientFactory.dll
+  protobuf-net.Grpc.Test.IntegrationUpLevel -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.IntegrationUpLevel/bin/Release/net10.0/protobuf-net.Grpc.Test.IntegrationUpLevel.dll
+  protobuf-net.Grpc.Native -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.Native/bin/Release/net8.0/protobuf-net.Grpc.Native.dll
+  protobuf-net.Grpc.AspNetCore.Reflection -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.AspNetCore.Reflection/bin/Release/net8.0/protobuf-net.Grpc.AspNetCore.Reflection.dll
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/IProxy.cs(8,18): error CS1591: Missing XML comment for publicly visible type or member 'IProxy' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net10.0]
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/IProxy.cs(11,20): error CS1591: Missing XML comment for publicly visible type or member 'IProxy.Operation(In, CallContext)' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net10.0]
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/IProxy.cs(15,14): error CS1591: Missing XML comment for publicly visible type or member 'In' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net10.0]
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/IProxy.cs(18,14): error CS1591: Missing XML comment for publicly visible type or member 'Out' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net10.0]
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/ProxyFactory.cs(8,21): error CS1591: Missing XML comment for publicly visible type or member 'ProxyFactory' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net10.0]
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/ProxyFactory.cs(10,26): error CS1591: Missing XML comment for publicly visible type or member 'ProxyFactory.Create()' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net10.0]
+  protobuf-net.Grpc.Reflection.Test -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Reflection.Test/bin/Release/net8.0/protobuf-net.Grpc.Reflection.Test.dll
+  TraderSys.Portfolios -> /home/user/w55/Grpc/base/examples/wcf-port/TraderSys/src/TraderSys.Portfolios/bin/Release/net10.0/TraderSys.Portfolios.dll
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/IProxy.cs(8,18): error CS1591: Missing XML comment for publicly visible type or member 'IProxy' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net8.0]
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/IProxy.cs(11,20): error CS1591: Missing XML comment for publicly visible type or member 'IProxy.Operation(In, CallContext)' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net8.0]
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/IProxy.cs(15,14): error CS1591: Missing XML comment for publicly visible type or member 'In' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net8.0]
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/IProxy.cs(18,14): error CS1591: Missing XML comment for publicly visible type or member 'Out' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net8.0]
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/ProxyFactory.cs(8,21): error CS1591: Missing XML comment for publicly visible type or member 'ProxyFactory' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net8.0]
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/ProxyFactory.cs(10,26): error CS1591: Missing XML comment for publicly visible type or member 'ProxyFactory.Create()' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net8.0]
+  TraderSys.FullStockTickerClientApp -> /home/user/w55/Grpc/base/examples/wcf-port/FullStockTicker/src/TraderSys.FullStockTickerClientApp/bin/Release/net10.0-windows/TraderSys.FullStockTickerClientApp.dll
+  protobuf-net.Grpc.AspNetCore -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.AspNetCore/bin/Release/net8.0/protobuf-net.Grpc.AspNetCore.dll
+  protobuf-net.Grpc.Reflection.Test -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Reflection.Test/bin/Release/net10.0/protobuf-net.Grpc.Reflection.Test.dll
+  Server_CS -> /home/user/w55/Grpc/base/examples/pb-net-grpc/Server_CS/bin/Release/net10.0/Server_CS.dll
+  protobuf-net.Grpc.Test.Integration -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/bin/Release/net472/protobuf-net.Grpc.Test.Integration.exe
+  PlayClient -> /home/user/w55/Grpc/base/toys/PlayClient/bin/Release/net472/PlayClient.exe
+  PlayClient -> /home/user/w55/Grpc/base/toys/PlayClient/bin/Release/net8.0/PlayClient.dll
+  protobuf-net.Grpc.Test.IntegrationUpLevel -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.IntegrationUpLevel/bin/Release/net472/protobuf-net.Grpc.Test.IntegrationUpLevel.exe
+  protobuf-net.Grpc.Test.IntegrationUpLevel -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.IntegrationUpLevel/bin/Release/net8.0/protobuf-net.Grpc.Test.IntegrationUpLevel.dll
+  PlayServer -> /home/user/w55/Grpc/base/toys/PlayServer/bin/Release/net472/PlayServer.exe
+  TraderSys.SimpleStockTickerServer -> /home/user/w55/Grpc/base/examples/wcf-port/SimpleStockTicker/src/TraderSys.SimpleStockTickerServer/bin/Release/net10.0/TraderSys.SimpleStockTickerServer.dll
+  protobuf-net.Grpc.Native -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.Native/bin/Release/netstandard2.0/protobuf-net.Grpc.Native.dll
+  PlayServer -> /home/user/w55/Grpc/base/toys/PlayServer/bin/Release/net8.0/PlayServer.dll
+  Server_VB -> /home/user/w55/Grpc/base/examples/pb-net-grpc/Server_VB/bin/Release/net10.0/Server_VB.dll
+  protobuf-net.Grpc.Test.Integration -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/bin/Release/net8.0/protobuf-net.Grpc.Test.Integration.dll
+
+Build FAILED.
+
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/IProxy.cs(8,18): error CS1591: Missing XML comment for publicly visible type or member 'IProxy' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net10.0]
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/IProxy.cs(11,20): error CS1591: Missing XML comment for publicly visible type or member 'IProxy.Operation(In, CallContext)' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net10.0]
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/IProxy.cs(15,14): error CS1591: Missing XML comment for publicly visible type or member 'In' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net10.0]
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/IProxy.cs(18,14): error CS1591: Missing XML comment for publicly visible type or member 'Out' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net10.0]
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/ProxyFactory.cs(8,21): error CS1591: Missing XML comment for publicly visible type or member 'ProxyFactory' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net10.0]
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/ProxyFactory.cs(10,26): error CS1591: Missing XML comment for publicly visible type or member 'ProxyFactory.Create()' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net10.0]
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/IProxy.cs(8,18): error CS1591: Missing XML comment for publicly visible type or member 'IProxy' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net8.0]
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/IProxy.cs(11,20): error CS1591: Missing XML comment for publicly visible type or member 'IProxy.Operation(In, CallContext)' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net8.0]
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/IProxy.cs(15,14): error CS1591: Missing XML comment for publicly visible type or member 'In' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net8.0]
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/IProxy.cs(18,14): error CS1591: Missing XML comment for publicly visible type or member 'Out' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net8.0]
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/ProxyFactory.cs(8,21): error CS1591: Missing XML comment for publicly visible type or member 'ProxyFactory' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net8.0]
+/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/ProxyFactory.cs(10,26): error CS1591: Missing XML comment for publicly visible type or member 'ProxyFactory.Create()' [/home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/protobuf-net.Grpc.Tests.TestProxy.csproj::TargetFramework=net8.0]
+    0 Warning(s)
+    12 Error(s)
+
+Time Elapsed 00:00:59.40

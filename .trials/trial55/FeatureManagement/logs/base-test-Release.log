@@ -1,0 +1,112 @@
+  Determining projects to restore...
+  Restored /home/user/w55/FeatureManagement/base/src/Microsoft.FeatureManagement.Telemetry.ApplicationInsights/Microsoft.FeatureManagement.Telemetry.ApplicationInsights.csproj (in 691 ms).
+  Restored /home/user/w55/FeatureManagement/base/examples/BlazorServerApp/BlazorServerApp.csproj (in 681 ms).
+  Restored /home/user/w55/FeatureManagement/base/examples/FeatureFlagDemo/FeatureFlagDemo.csproj (in 684 ms).
+  Restored /home/user/w55/FeatureManagement/base/examples/VariantAndTelemetryDemo/VariantAndTelemetryDemo.csproj (in 688 ms).
+  Restored /home/user/w55/FeatureManagement/base/examples/ConsoleApp/ConsoleApp.csproj (in 24 ms).
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj : warning NU1510: PackageReference Microsoft.Extensions.Configuration.Json will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [/home/user/w55/FeatureManagement/base/Microsoft.FeatureManagement.sln]
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj : warning NU1510: PackageReference System.Text.Json will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [/home/user/w55/FeatureManagement/base/Microsoft.FeatureManagement.sln]
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj : warning NU1510: PackageReference Microsoft.Extensions.DependencyInjection will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [/home/user/w55/FeatureManagement/base/Microsoft.FeatureManagement.sln]
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement/Tests.FeatureManagement.csproj : warning NU1510: PackageReference System.Text.Json will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [/home/user/w55/FeatureManagement/base/Microsoft.FeatureManagement.sln]
+  Restored /home/user/w55/FeatureManagement/base/src/Microsoft.FeatureManagement/Microsoft.FeatureManagement.csproj (in 132 ms).
+  Restored /home/user/w55/FeatureManagement/base/src/Microsoft.FeatureManagement.Telemetry.OpenTelemetry/Microsoft.FeatureManagement.Telemetry.OpenTelemetry.csproj (in 125 ms).
+  Restored /home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.Telemetry.OpenTelemetry/Tests.FeatureManagement.Telemetry.OpenTelemetry.csproj (in 351 ms).
+  Restored /home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj (in 339 ms).
+  Restored /home/user/w55/FeatureManagement/base/src/Microsoft.FeatureManagement.AspNetCore/Microsoft.FeatureManagement.AspNetCore.csproj (in 31 ms).
+  Restored /home/user/w55/FeatureManagement/base/examples/VariantServiceDemo/VariantServiceDemo.csproj (in 32 ms).
+  Restored /home/user/w55/FeatureManagement/base/examples/RazorPages/RazorPages.csproj (in 18 ms).
+  Restored /home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement/Tests.FeatureManagement.csproj (in 521 ms).
+  Restored /home/user/w55/FeatureManagement/base/examples/TargetingConsoleApp/TargetingConsoleApp.csproj (in 23 ms).
+  Restored /home/user/w55/FeatureManagement/base/examples/OpenTelemetryDemo/OpenTelemetryDemo.csproj (in 442 ms).
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement/Tests.FeatureManagement.csproj : warning NU1510: PackageReference System.Text.Json will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [TargetFramework=net48]
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj : warning NU1510: PackageReference Microsoft.Extensions.Configuration.Json will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [TargetFramework=net8.0]
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj : warning NU1510: PackageReference System.Text.Json will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [TargetFramework=net8.0]
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj : warning NU1510: PackageReference Microsoft.Extensions.DependencyInjection will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [TargetFramework=net8.0]
+  Microsoft.FeatureManagement -> /home/user/w55/FeatureManagement/base/src/Microsoft.FeatureManagement/bin/Release/netstandard2.0/Microsoft.FeatureManagement.dll
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement/Tests.FeatureManagement.csproj : warning NU1510: PackageReference System.Text.Json will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [TargetFramework=net8.0]
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement/Tests.FeatureManagement.csproj : warning NU1510: PackageReference System.Text.Json will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [TargetFramework=net10.0]
+  Microsoft.FeatureManagement -> /home/user/w55/FeatureManagement/base/src/Microsoft.FeatureManagement/bin/Release/netstandard2.1/Microsoft.FeatureManagement.dll
+  Microsoft.FeatureManagement -> /home/user/w55/FeatureManagement/base/src/Microsoft.FeatureManagement/bin/Release/net10.0/Microsoft.FeatureManagement.dll
+  Microsoft.FeatureManagement -> /home/user/w55/FeatureManagement/base/src/Microsoft.FeatureManagement/bin/Release/net8.0/Microsoft.FeatureManagement.dll
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj : warning NU1510: PackageReference Microsoft.Extensions.Configuration.Json will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [TargetFramework=net10.0]
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj : warning NU1510: PackageReference System.Text.Json will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [TargetFramework=net10.0]
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj : warning NU1510: PackageReference Microsoft.Extensions.DependencyInjection will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [TargetFramework=net10.0]
+  Microsoft.FeatureManagement.AspNetCore -> /home/user/w55/FeatureManagement/base/src/Microsoft.FeatureManagement.AspNetCore/bin/Release/net8.0/Microsoft.FeatureManagement.AspNetCore.dll
+  Tests.FeatureManagement -> /home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement/bin/Release/net10.0/Tests.FeatureManagement.dll
+  Microsoft.FeatureManagement.Telemetry.OpenTelemetry -> /home/user/w55/FeatureManagement/base/src/Microsoft.FeatureManagement.Telemetry.OpenTelemetry/bin/Release/netstandard2.1/Microsoft.FeatureManagement.Telemetry.OpenTelemetry.dll
+  Microsoft.FeatureManagement.Telemetry.ApplicationInsights -> /home/user/w55/FeatureManagement/base/src/Microsoft.FeatureManagement.Telemetry.ApplicationInsights/bin/Release/netstandard2.1/Microsoft.FeatureManagement.Telemetry.ApplicationInsights.dll
+  Microsoft.FeatureManagement.AspNetCore -> /home/user/w55/FeatureManagement/base/src/Microsoft.FeatureManagement.AspNetCore/bin/Release/net10.0/Microsoft.FeatureManagement.AspNetCore.dll
+  Tests.FeatureManagement.AspNetCore -> /home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/bin/Release/net8.0/Tests.FeatureManagement.AspNetCore.dll
+  Tests.FeatureManagement -> /home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement/bin/Release/net8.0/Tests.FeatureManagement.dll
+  Microsoft.FeatureManagement.Telemetry.ApplicationInsights -> /home/user/w55/FeatureManagement/base/src/Microsoft.FeatureManagement.Telemetry.ApplicationInsights/bin/Release/netstandard2.0/Microsoft.FeatureManagement.Telemetry.ApplicationInsights.dll
+  Microsoft.FeatureManagement.Telemetry.OpenTelemetry -> /home/user/w55/FeatureManagement/base/src/Microsoft.FeatureManagement.Telemetry.OpenTelemetry/bin/Release/netstandard2.0/Microsoft.FeatureManagement.Telemetry.OpenTelemetry.dll
+  Tests.FeatureManagement.Telemetry.OpenTelemetry -> /home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.Telemetry.OpenTelemetry/bin/Release/net8.0/Tests.FeatureManagement.Telemetry.OpenTelemetry.dll
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/FeatureManagementAspNetCore.cs(30,52): warning ASPDEPR008: 'WebHost' is obsolete: 'WebHost is obsolete. Use HostBuilder or WebApplicationBuilder instead. For more information, visit https://aka.ms/aspnet/deprecate/008.' (https://aka.ms/aspnet/deprecate/008) [/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj::TargetFramework=net10.0]
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/FeatureManagementAspNetCore.cs(30,37): warning ASPDEPR008: 'TestServer.TestServer(IWebHostBuilder)' is obsolete: 'IWebHost, which this method uses, is obsolete. Use one of the ctors that takes an IServiceProvider instead. For more information, visit https://aka.ms/aspnet/deprecate/008.' (https://aka.ms/aspnet/deprecate/008) [/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj::TargetFramework=net10.0]
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/FeatureManagementAspNetCore.cs(55,66): warning ASPDEPR008: 'TestServer.Host' is obsolete: 'IWebHost is obsolete. Use IHost instead. For more information, visit https://aka.ms/aspnet/deprecate/008.' (https://aka.ms/aspnet/deprecate/008) [/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj::TargetFramework=net10.0]
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/FeatureManagementAspNetCore.cs(79,52): warning ASPDEPR008: 'WebHost' is obsolete: 'WebHost is obsolete. Use HostBuilder or WebApplicationBuilder instead. For more information, visit https://aka.ms/aspnet/deprecate/008.' (https://aka.ms/aspnet/deprecate/008) [/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj::TargetFramework=net10.0]
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/FeatureManagementAspNetCore.cs(79,37): warning ASPDEPR008: 'TestServer.TestServer(IWebHostBuilder)' is obsolete: 'IWebHost, which this method uses, is obsolete. Use one of the ctors that takes an IServiceProvider instead. For more information, visit https://aka.ms/aspnet/deprecate/008.' (https://aka.ms/aspnet/deprecate/008) [/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj::TargetFramework=net10.0]
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/FeatureManagementAspNetCore.cs(90,66): warning ASPDEPR008: 'TestServer.Host' is obsolete: 'IWebHost is obsolete. Use IHost instead. For more information, visit https://aka.ms/aspnet/deprecate/008.' (https://aka.ms/aspnet/deprecate/008) [/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj::TargetFramework=net10.0]
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/FeatureManagementAspNetCore.cs(142,52): warning ASPDEPR008: 'WebHost' is obsolete: 'WebHost is obsolete. Use HostBuilder or WebApplicationBuilder instead. For more information, visit https://aka.ms/aspnet/deprecate/008.' (https://aka.ms/aspnet/deprecate/008) [/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj::TargetFramework=net10.0]
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/FeatureManagementAspNetCore.cs(142,37): warning ASPDEPR008: 'TestServer.TestServer(IWebHostBuilder)' is obsolete: 'IWebHost, which this method uses, is obsolete. Use one of the ctors that takes an IServiceProvider instead. For more information, visit https://aka.ms/aspnet/deprecate/008.' (https://aka.ms/aspnet/deprecate/008) [/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj::TargetFramework=net10.0]
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/FeatureManagementAspNetCore.cs(158,66): warning ASPDEPR008: 'TestServer.Host' is obsolete: 'IWebHost is obsolete. Use IHost instead. For more information, visit https://aka.ms/aspnet/deprecate/008.' (https://aka.ms/aspnet/deprecate/008) [/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj::TargetFramework=net10.0]
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/FeatureManagementAspNetCore.cs(210,48): warning ASPDEPR008: 'WebHost' is obsolete: 'WebHost is obsolete. Use HostBuilder or WebApplicationBuilder instead. For more information, visit https://aka.ms/aspnet/deprecate/008.' (https://aka.ms/aspnet/deprecate/008) [/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj::TargetFramework=net10.0]
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/FeatureManagementAspNetCore.cs(210,33): warning ASPDEPR008: 'TestServer.TestServer(IWebHostBuilder)' is obsolete: 'IWebHost, which this method uses, is obsolete. Use one of the ctors that takes an IServiceProvider instead. For more information, visit https://aka.ms/aspnet/deprecate/008.' (https://aka.ms/aspnet/deprecate/008) [/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj::TargetFramework=net10.0]
+/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/FeatureManagementAspNetCore.cs(224,45): warning ASPDEPR008: 'TestServer.Host' is obsolete: 'IWebHost is obsolete. Use IHost instead. For more information, visit https://aka.ms/aspnet/deprecate/008.' (https://aka.ms/aspnet/deprecate/008) [/home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj::TargetFramework=net10.0]
+  Tests.FeatureManagement.Telemetry.OpenTelemetry -> /home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.Telemetry.OpenTelemetry/bin/Release/net10.0/Tests.FeatureManagement.Telemetry.OpenTelemetry.dll
+Test run for /home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.Telemetry.OpenTelemetry/bin/Release/net8.0/Tests.FeatureManagement.Telemetry.OpenTelemetry.dll (.NETCoreApp,Version=v8.0)
+Test run for /home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.Telemetry.OpenTelemetry/bin/Release/net10.0/Tests.FeatureManagement.Telemetry.OpenTelemetry.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+  Tests.FeatureManagement -> /home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement/bin/Release/net48/Tests.FeatureManagement.dll
+Test run for /home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement/bin/Release/net48/Tests.FeatureManagement.dll (.NETFramework,Version=v4.8)
+VSTest version 18.0.2 (x64)
+
+Test run for /home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement/bin/Release/net8.0/Tests.FeatureManagement.dll (.NETCoreApp,Version=v8.0)
+Starting test execution, please wait...
+VSTest version 18.0.2 (x64)
+
+A total of 1 test files matched the specified pattern.
+Starting test execution, please wait...
+System.IO.FileNotFoundException: Could not find 'mono' host. Make sure that 'mono' is installed on the machine and is available in PATH environment variable.
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Helpers.DotnetHostHelper.GetMonoPath() in /_/src/vstest/src/Microsoft.TestPlatform.CoreUtilities/Helpers/DotnetHostHelper.cs:line 100
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Hosting.DefaultTestHostManager.GetTestHostProcessStartInfo(IEnumerable`1 sources, IDictionary`2 environmentVariables, TestRunnerConnectionInfo connectionInfo) in /_/src/vstest/src/Microsoft.TestPlatform.TestHostProvider/Hosting/DefaultTestHostManager.cs:line 219
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Client.ProxyOperationManager.SetupChannel(IEnumerable`1 sources, String runSettings) in /_/src/vstest/src/Microsoft.TestPlatform.CrossPlatEngine/Client/ProxyOperationManager.cs:line 229
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Client.ProxyExecutionManager.InitializeTestRun(TestRunCriteria testRunCriteria, IInternalTestRunEventsHandler eventHandler) in /_/src/vstest/src/Microsoft.TestPlatform.CrossPlatEngine/Client/ProxyExecutionManager.cs:line 184
+A total of 1 test files matched the specified pattern.
+
+Test Run Aborted.
+Test run for /home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement/bin/Release/net10.0/Tests.FeatureManagement.dll (.NETCoreApp,Version=v10.0)
+
+Passed!  - Failed:     0, Passed:    39, Skipped:     0, Total:    39, Duration: 1 s - Tests.FeatureManagement.Telemetry.OpenTelemetry.dll (net10.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    39, Skipped:     0, Total:    39, Duration: 828 ms - Tests.FeatureManagement.Telemetry.OpenTelemetry.dll (net8.0)
+
+Passed!  - Failed:     0, Passed:    87, Skipped:     0, Total:    87, Duration: 891 ms - Tests.FeatureManagement.dll (net8.0)
+  Tests.FeatureManagement.AspNetCore -> /home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/bin/Release/net10.0/Tests.FeatureManagement.AspNetCore.dll
+Test run for /home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/bin/Release/net8.0/Tests.FeatureManagement.AspNetCore.dll (.NETCoreApp,Version=v8.0)
+Test run for /home/user/w55/FeatureManagement/base/tests/Tests.FeatureManagement.AspNetCore/bin/Release/net10.0/Tests.FeatureManagement.AspNetCore.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+
+Passed!  - Failed:     0, Passed:    87, Skipped:     0, Total:    87, Duration: 890 ms - Tests.FeatureManagement.dll (net10.0)
+Starting test execution, please wait...
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    21, Skipped:     0, Total:    21, Duration: 1 s - Tests.FeatureManagement.AspNetCore.dll (net8.0)
+
+Passed!  - Failed:     0, Passed:    21, Skipped:     0, Total:    21, Duration: 1 s - Tests.FeatureManagement.AspNetCore.dll (net10.0)

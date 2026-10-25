@@ -1,0 +1,336 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  protobuf-net.Grpc -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc/bin/Debug/net10.0/protobuf-net.Grpc.dll
+  protobuf-net.Grpc -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc/bin/Debug/net472/protobuf-net.Grpc.dll
+  protobuf-net.Grpc -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc/bin/Debug/net8.0/protobuf-net.Grpc.dll
+  protobuf-net.Grpc -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc/bin/Debug/netstandard2.1/protobuf-net.Grpc.dll
+  protobuf-net.Grpc -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc/bin/Debug/netstandard2.0/protobuf-net.Grpc.dll
+  protobuf-net.Grpc.Reflection -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.Reflection/bin/Debug/net472/protobuf-net.Grpc.Reflection.dll
+  protobuf-net.Grpc.AspNetCore -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.AspNetCore/bin/Debug/net8.0/protobuf-net.Grpc.AspNetCore.dll
+  protobuf-net.Grpc.ClientFactory -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.ClientFactory/bin/Debug/net8.0/protobuf-net.Grpc.ClientFactory.dll
+  protobuf-net.Grpc.AspNetCore -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.AspNetCore/bin/Debug/net10.0/protobuf-net.Grpc.AspNetCore.dll
+  protobuf-net.Grpc.Reflection -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.Reflection/bin/Debug/net8.0/protobuf-net.Grpc.Reflection.dll
+  protobuf-net.Grpc.Native -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.Native/bin/Debug/net10.0/protobuf-net.Grpc.Native.dll
+  protobuf-net.Grpc.Native -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.Native/bin/Debug/net8.0/protobuf-net.Grpc.Native.dll
+  protobuf-net.Grpc.Native -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.Native/bin/Debug/net472/protobuf-net.Grpc.Native.dll
+  protobuf-net.Grpc.Reflection -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.Reflection/bin/Debug/net10.0/protobuf-net.Grpc.Reflection.dll
+  protobuf-net.Grpc.Reflection -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.Reflection/bin/Debug/netstandard2.1/protobuf-net.Grpc.Reflection.dll
+  protobuf-net.Grpc.ClientFactory -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.ClientFactory/bin/Debug/netstandard2.1/protobuf-net.Grpc.ClientFactory.dll
+  protobuf-net.Grpc.Native -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.Native/bin/Debug/netstandard2.0/protobuf-net.Grpc.Native.dll
+  protobuf-net.Grpc.Reflection -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.Reflection/bin/Debug/netstandard2.0/protobuf-net.Grpc.Reflection.dll
+  protobuf-net.Grpc.ClientFactory -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.ClientFactory/bin/Debug/netstandard2.0/protobuf-net.Grpc.ClientFactory.dll
+  protobuf-net.Grpc.Test -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test/bin/Debug/net472/protobuf-net.Grpc.Test.exe
+  protobuf-net.Grpc.Test.Integration -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/bin/Debug/net472/protobuf-net.Grpc.Test.Integration.exe
+  PlayClient -> /home/user/w55/Grpc/base/toys/PlayClient/bin/Debug/net8.0/PlayClient.dll
+  protobuf-net.Grpc.Test.IntegrationUpLevel -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.IntegrationUpLevel/bin/Debug/net472/protobuf-net.Grpc.Test.IntegrationUpLevel.exe
+  PlayClient -> /home/user/w55/Grpc/base/toys/PlayClient/bin/Debug/net472/PlayClient.exe
+  PlayClient -> /home/user/w55/Grpc/base/toys/PlayClient/bin/Debug/net10.0/PlayClient.dll
+  protobuf-net.Grpc.Reflection.Test -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Reflection.Test/bin/Debug/net472/protobuf-net.Grpc.Reflection.Test.exe
+  protobuf-net.Grpc.AspNetCore.Reflection -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.AspNetCore.Reflection/bin/Debug/net8.0/protobuf-net.Grpc.AspNetCore.Reflection.dll
+  protobuf-net.Grpc.Reflection.Test -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Reflection.Test/bin/Debug/net8.0/protobuf-net.Grpc.Reflection.Test.dll
+  protobuf-net.Grpc.Tests.TestProxy -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/bin/Debug/net8.0/protobuf-net.Grpc.Tests.TestProxy.dll
+  protobuf-net.Grpc.AspNetCore.Reflection -> /home/user/w55/Grpc/base/src/protobuf-net.Grpc.AspNetCore.Reflection/bin/Debug/net10.0/protobuf-net.Grpc.AspNetCore.Reflection.dll
+  protobuf-net.Grpc.Test.IntegrationUpLevel -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.IntegrationUpLevel/bin/Debug/net8.0/protobuf-net.Grpc.Test.IntegrationUpLevel.dll
+  protobuf-net.Grpc.Tests.TestProxy -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Tests.TestProxy/bin/Debug/net10.0/protobuf-net.Grpc.Tests.TestProxy.dll
+  PlayServer -> /home/user/w55/Grpc/base/toys/PlayServer/bin/Debug/net472/PlayServer.exe
+  PlayServer -> /home/user/w55/Grpc/base/toys/PlayServer/bin/Debug/net8.0/PlayServer.dll
+  PlayServer -> /home/user/w55/Grpc/base/toys/PlayServer/bin/Debug/net10.0/PlayServer.dll
+  protobuf-net.Grpc.Test.Integration -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/bin/Debug/net8.0/protobuf-net.Grpc.Test.Integration.dll
+  protobuf-net.Grpc.Reflection.Test -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Reflection.Test/bin/Debug/net10.0/protobuf-net.Grpc.Reflection.Test.dll
+  protobuf-net.Grpc.Test.IntegrationUpLevel -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.IntegrationUpLevel/bin/Debug/net10.0/protobuf-net.Grpc.Test.IntegrationUpLevel.dll
+Test run for /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.IntegrationUpLevel/bin/Debug/net8.0/protobuf-net.Grpc.Test.IntegrationUpLevel.dll (.NETCoreApp,Version=v8.0)
+Test run for /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.IntegrationUpLevel/bin/Debug/net472/protobuf-net.Grpc.Test.IntegrationUpLevel.exe (.NETFramework,Version=v4.7.2)
+VSTest version 18.0.2 (x64)
+
+Test run for /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.IntegrationUpLevel/bin/Debug/net10.0/protobuf-net.Grpc.Test.IntegrationUpLevel.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+  protobuf-net.Grpc.Test -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test/bin/Debug/net8.0/protobuf-net.Grpc.Test.dll
+Starting test execution, please wait...
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+System.IO.FileNotFoundException: Could not find 'mono' host. Make sure that 'mono' is installed on the machine and is available in PATH environment variable.
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Helpers.DotnetHostHelper.GetMonoPath() in /_/src/vstest/src/Microsoft.TestPlatform.CoreUtilities/Helpers/DotnetHostHelper.cs:line 100
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Hosting.DefaultTestHostManager.GetTestHostProcessStartInfo(IEnumerable`1 sources, IDictionary`2 environmentVariables, TestRunnerConnectionInfo connectionInfo) in /_/src/vstest/src/Microsoft.TestPlatform.TestHostProvider/Hosting/DefaultTestHostManager.cs:line 219
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Client.ProxyOperationManager.SetupChannel(IEnumerable`1 sources, String runSettings) in /_/src/vstest/src/Microsoft.TestPlatform.CrossPlatEngine/Client/ProxyOperationManager.cs:line 229
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Client.ProxyExecutionManager.InitializeTestRun(TestRunCriteria testRunCriteria, IInternalTestRunEventsHandler eventHandler) in /_/src/vstest/src/Microsoft.TestPlatform.CrossPlatEngine/Client/ProxyExecutionManager.cs:line 184
+A total of 1 test files matched the specified pattern.
+
+VSTest version 18.0.2 (x64)
+Test Run Aborted.
+
+Test run for /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Reflection.Test/bin/Debug/net472/protobuf-net.Grpc.Reflection.Test.exe (.NETFramework,Version=v4.7.2)
+Test run for /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Reflection.Test/bin/Debug/net8.0/protobuf-net.Grpc.Reflection.Test.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+System.IO.FileNotFoundException: Could not find 'mono' host. Make sure that 'mono' is installed on the machine and is available in PATH environment variable.
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Helpers.DotnetHostHelper.GetMonoPath() in /_/src/vstest/src/Microsoft.TestPlatform.CoreUtilities/Helpers/DotnetHostHelper.cs:line 100
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Hosting.DefaultTestHostManager.GetTestHostProcessStartInfo(IEnumerable`1 sources, IDictionary`2 environmentVariables, TestRunnerConnectionInfo connectionInfo) in /_/src/vstest/src/Microsoft.TestPlatform.TestHostProvider/Hosting/DefaultTestHostManager.cs:line 219
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Client.ProxyOperationManager.SetupChannel(IEnumerable`1 sources, String runSettings) in /_/src/vstest/src/Microsoft.TestPlatform.CrossPlatEngine/Client/ProxyOperationManager.cs:line 229
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Client.ProxyExecutionManager.InitializeTestRun(TestRunCriteria testRunCriteria, IInternalTestRunEventsHandler eventHandler) in /_/src/vstest/src/Microsoft.TestPlatform.CrossPlatEngine/Client/ProxyExecutionManager.cs:line 184
+
+Test Run Aborted.
+Test run for /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Reflection.Test/bin/Debug/net10.0/protobuf-net.Grpc.Reflection.Test.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:06.69]     protobuf_net.Grpc.Test.Integration.Issues.Issue109.Issue_109 [SKIP]
+  Skipped protobuf_net.Grpc.Test.Integration.Issues.Issue109.Issue_109 [1 ms]
+[xUnit.net 00:00:06.89]     protobuf_net.Grpc.Test.Integration.Issues.Issue109.Issue_109 [SKIP]
+[xUnit.net 00:00:07.92]     protobuf_net.Grpc.Test.Integration.NativeStreamTests.DuplexEcho(scenario: FaultSuccessGoodProducer, expectedCount: 0, flags: CaptureMetadata, expectBrittle: False) [FAIL]
+  Skipped protobuf_net.Grpc.Test.Integration.Issues.Issue109.Issue_109 [1 ms]
+  Failed protobuf_net.Grpc.Test.Integration.NativeStreamTests.DuplexEcho(scenario: FaultSuccessGoodProducer, expectedCount: 0, flags: CaptureMetadata, expectBrittle: False) [24 ms]
+  Error Message:
+   ProtoBuf.Grpc.Internal.IncompleteSendRpcException : A message could not be sent because the server had already terminated the connection; this exception can be suppressed by specifying the IgnoreStreamTermination flag when creating the CallContext
+---- Grpc.Core.RpcException : Status(StatusCode="OK", Detail="")
+  Stack Trace:
+     at ProtoBuf.Grpc.Internal.Reshape.SendAll[T](IClientStreamWriter`1 output, IAsyncEnumerable`1 request, CancellationTokenSource allDone, Boolean ignoreStreamTermination) in /home/user/w55/Grpc/base/src/protobuf-net.Grpc/Internal/Reshape.cs:line 943
+   at ProtoBuf.Grpc.Internal.Reshape.SendAll[T](IClientStreamWriter`1 output, IAsyncEnumerable`1 request, CancellationTokenSource allDone, Boolean ignoreStreamTermination) in /home/user/w55/Grpc/base/src/protobuf-net.Grpc/Internal/Reshape.cs:line 933
+   at ProtoBuf.Grpc.Internal.Reshape.DuplexAsyncImpl[TRequest,TResponse](AsyncDuplexStreamingCall`2 call, MetadataContext metadata, Boolean ignoreStreamTermination, IAsyncEnumerable`1 request, CancellationToken contextCancel, CancellationToken consumerCancel)+MoveNext() in /home/user/w55/Grpc/base/src/protobuf-net.Grpc/Internal/Reshape.cs:line 879
+   at ProtoBuf.Grpc.Internal.Reshape.DuplexAsyncImpl[TRequest,TResponse](AsyncDuplexStreamingCall`2 call, MetadataContext metadata, Boolean ignoreStreamTermination, IAsyncEnumerable`1 request, CancellationToken contextCancel, CancellationToken consumerCancel)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()
+   at protobuf_net.Grpc.Test.Integration.StreamTests.DuplexEcho(Scenario scenario, Int32 expectedCount, CallContextFlags flags, Boolean expectBrittle) in /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/StreamTests.cs:line 634
+   at protobuf_net.Grpc.Test.Integration.StreamTests.DuplexEcho(Scenario scenario, Int32 expectedCount, CallContextFlags flags, Boolean expectBrittle) in /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/StreamTests.cs:line 634
+   at protobuf_net.Grpc.Test.Integration.StreamTests.DuplexEcho(Scenario scenario, Int32 expectedCount, CallContextFlags flags, Boolean expectBrittle) in /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/StreamTests.cs:line 667
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at ProtoBuf.Grpc.Internal.Reshape.SendAll[T](IClientStreamWriter`1 output, IAsyncEnumerable`1 request, CancellationTokenSource allDone, Boolean ignoreStreamTermination) in /home/user/w55/Grpc/base/src/protobuf-net.Grpc/Internal/Reshape.cs:line 938
+  Standard Output Messages:
+ 10/25/2026 15:30:06:starting producer
+ 10/25/2026 15:30:06:server checking scenario
+ 10/25/2026 15:30:06:server yielding response headers
+ 10/25/2026 15:30:06:server setting response status in advance
+ 10/25/2026 15:30:06:server faulting with success
+ 10/25/2026 15:30:06:producer yielding 0
+ 10/25/2026 15:30:06:exiting producer
+
+
+
+Passed!  - Failed:     0, Passed:    14, Skipped:     0, Total:    14, Duration: 1 s - protobuf-net.Grpc.Reflection.Test.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:    14, Skipped:     0, Total:    14, Duration: 2 s - protobuf-net.Grpc.Reflection.Test.dll (net8.0)
+[xUnit.net 00:00:09.56]     protobuf_net.Grpc.Test.Integration.NativeStreamTests.DuplexEcho(scenario: FaultSuccessBadProducer, expectedCount: 0, flags: CaptureMetadata, expectBrittle: False) [FAIL]
+  Failed protobuf_net.Grpc.Test.Integration.NativeStreamTests.DuplexEcho(scenario: FaultSuccessBadProducer, expectedCount: 0, flags: CaptureMetadata, expectBrittle: False) [18 ms]
+  Error Message:
+   ProtoBuf.Grpc.Internal.IncompleteSendRpcException : A message could not be sent because the server had already terminated the connection; this exception can be suppressed by specifying the IgnoreStreamTermination flag when creating the CallContext
+---- Grpc.Core.RpcException : Status(StatusCode="OK", Detail="")
+  Stack Trace:
+     at ProtoBuf.Grpc.Internal.Reshape.SendAll[T](IClientStreamWriter`1 output, IAsyncEnumerable`1 request, CancellationTokenSource allDone, Boolean ignoreStreamTermination) in /home/user/w55/Grpc/base/src/protobuf-net.Grpc/Internal/Reshape.cs:line 943
+   at ProtoBuf.Grpc.Internal.Reshape.SendAll[T](IClientStreamWriter`1 output, IAsyncEnumerable`1 request, CancellationTokenSource allDone, Boolean ignoreStreamTermination) in /home/user/w55/Grpc/base/src/protobuf-net.Grpc/Internal/Reshape.cs:line 933
+   at ProtoBuf.Grpc.Internal.Reshape.DuplexAsyncImpl[TRequest,TResponse](AsyncDuplexStreamingCall`2 call, MetadataContext metadata, Boolean ignoreStreamTermination, IAsyncEnumerable`1 request, CancellationToken contextCancel, CancellationToken consumerCancel)+MoveNext() in /home/user/w55/Grpc/base/src/protobuf-net.Grpc/Internal/Reshape.cs:line 879
+   at ProtoBuf.Grpc.Internal.Reshape.DuplexAsyncImpl[TRequest,TResponse](AsyncDuplexStreamingCall`2 call, MetadataContext metadata, Boolean ignoreStreamTermination, IAsyncEnumerable`1 request, CancellationToken contextCancel, CancellationToken consumerCancel)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()
+   at protobuf_net.Grpc.Test.Integration.StreamTests.DuplexEcho(Scenario scenario, Int32 expectedCount, CallContextFlags flags, Boolean expectBrittle) in /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/StreamTests.cs:line 634
+   at protobuf_net.Grpc.Test.Integration.StreamTests.DuplexEcho(Scenario scenario, Int32 expectedCount, CallContextFlags flags, Boolean expectBrittle) in /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/StreamTests.cs:line 634
+   at protobuf_net.Grpc.Test.Integration.StreamTests.DuplexEcho(Scenario scenario, Int32 expectedCount, CallContextFlags flags, Boolean expectBrittle) in /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/StreamTests.cs:line 667
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at ProtoBuf.Grpc.Internal.Reshape.SendAll[T](IClientStreamWriter`1 output, IAsyncEnumerable`1 request, CancellationTokenSource allDone, Boolean ignoreStreamTermination) in /home/user/w55/Grpc/base/src/protobuf-net.Grpc/Internal/Reshape.cs:line 938
+  Standard Output Messages:
+ 10/25/2026 15:30:08:starting producer
+ 10/25/2026 15:30:08:server checking scenario
+ 10/25/2026 15:30:08:server yielding response headers
+ 10/25/2026 15:30:08:server setting response status in advance
+ 10/25/2026 15:30:08:server faulting with success
+ 10/25/2026 15:30:08:producer yielding 0
+ 10/25/2026 15:30:08:exiting producer
+
+
+[xUnit.net 00:00:11.05]     protobuf_net.Grpc.Test.Integration.ManagedStreamTests.DuplexEcho(scenario: FaultSuccessBadProducer, expectedCount: 0, flags: None, expectBrittle: False) [FAIL]
+  Failed protobuf_net.Grpc.Test.Integration.ManagedStreamTests.DuplexEcho(scenario: FaultSuccessBadProducer, expectedCount: 0, flags: None, expectBrittle: False) [90 ms]
+  Error Message:
+   ProtoBuf.Grpc.Internal.IncompleteSendRpcException : A message could not be sent because the server had already terminated the connection; this exception can be suppressed by specifying the IgnoreStreamTermination flag when creating the CallContext
+---- Grpc.Core.RpcException : Status(StatusCode="Cancelled", Detail="", DebugException="System.OperationCanceledException: A task was canceled.")
+-------- System.OperationCanceledException : A task was canceled.
+------------ System.Threading.Tasks.TaskCanceledException : A task was canceled.
+  Stack Trace:
+     at ProtoBuf.Grpc.Internal.Reshape.SendAll[T](IClientStreamWriter`1 output, IAsyncEnumerable`1 request, CancellationTokenSource allDone, Boolean ignoreStreamTermination) in /home/user/w55/Grpc/base/src/protobuf-net.Grpc/Internal/Reshape.cs:line 943
+   at ProtoBuf.Grpc.Internal.Reshape.SendAll[T](IClientStreamWriter`1 output, IAsyncEnumerable`1 request, CancellationTokenSource allDone, Boolean ignoreStreamTermination) in /home/user/w55/Grpc/base/src/protobuf-net.Grpc/Internal/Reshape.cs:line 933
+   at ProtoBuf.Grpc.Internal.Reshape.DuplexAsyncImpl[TRequest,TResponse](AsyncDuplexStreamingCall`2 call, MetadataContext metadata, Boolean ignoreStreamTermination, IAsyncEnumerable`1 request, CancellationToken contextCancel, CancellationToken consumerCancel)+MoveNext() in /home/user/w55/Grpc/base/src/protobuf-net.Grpc/Internal/Reshape.cs:line 879
+   at ProtoBuf.Grpc.Internal.Reshape.DuplexAsyncImpl[TRequest,TResponse](AsyncDuplexStreamingCall`2 call, MetadataContext metadata, Boolean ignoreStreamTermination, IAsyncEnumerable`1 request, CancellationToken contextCancel, CancellationToken consumerCancel)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()
+   at protobuf_net.Grpc.Test.Integration.StreamTests.DuplexEcho(Scenario scenario, Int32 expectedCount, CallContextFlags flags, Boolean expectBrittle) in /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/StreamTests.cs:line 634
+   at protobuf_net.Grpc.Test.Integration.StreamTests.DuplexEcho(Scenario scenario, Int32 expectedCount, CallContextFlags flags, Boolean expectBrittle) in /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/StreamTests.cs:line 634
+   at protobuf_net.Grpc.Test.Integration.StreamTests.DuplexEcho(Scenario scenario, Int32 expectedCount, CallContextFlags flags, Boolean expectBrittle) in /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/StreamTests.cs:line 667
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Grpc.Net.Client.Internal.HttpContentClientStreamWriter`2.WriteAsyncCore[TState](Func`5 writeFunc, TState state, CancellationToken cancellationToken)
+   at Grpc.Net.Client.Internal.HttpContentClientStreamWriter`2.WriteCoreAsync(TRequest message, CancellationToken cancellationToken)
+   at ProtoBuf.Grpc.Internal.Reshape.SendAll[T](IClientStreamWriter`1 output, IAsyncEnumerable`1 request, CancellationTokenSource allDone, Boolean ignoreStreamTermination) in /home/user/w55/Grpc/base/src/protobuf-net.Grpc/Internal/Reshape.cs:line 938
+----- Inner Stack Trace -----
+   at Grpc.Net.Client.Internal.HttpContentClientStreamWriter`2.WriteAsyncCore[TState](Func`5 writeFunc, TState state, CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.ExecutionContextCallback(Object s)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)
+   at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext()
+   at System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(IAsyncStateMachineBox box, Boolean allowInlining)
+   at System.Threading.Tasks.Task.RunContinuations(Object continuationObject)
+   at System.Threading.Tasks.Task.TrySetCanceled(CancellationToken tokenToRecord, Object cancellationException)
+   at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.SetException(Exception exception, Task`1& taskField)
+   at Grpc.Net.Client.Internal.StreamExtensions.WriteMessageAsync[TMessage](Stream stream, GrpcCall call, TMessage message, Action`2 serializer, CallOptions callOptions)
+   at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.ExecutionContextCallback(Object s)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)
+   at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext()
+   at System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(IAsyncStateMachineBox box, Boolean allowInlining)
+   at System.Threading.Tasks.Task.RunContinuations(Object continuationObject)
+   at System.Threading.Tasks.Task.TrySetCanceled(CancellationToken tokenToRecord, Object cancellationException)
+   at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.SetException(Exception exception, Task`1& taskField)
+   at System.Net.Http.Http2Connection.Http2Stream.SendDataAsync(ReadOnlyMemory`1 buffer, CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.ExecutionContextCallback(Object s)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)
+   at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext()
+   at System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(IAsyncStateMachineBox box, Boolean allowInlining)
+   at System.Threading.Tasks.Task.RunContinuations(Object continuationObject)
+   at System.Threading.Tasks.Task.TrySetCanceled(CancellationToken tokenToRecord, Object cancellationException)
+   at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.SetException(Exception exception, Task`1& taskField)
+   at System.Net.Http.Http2Connection.SendStreamDataAsync(Int32 streamId, ReadOnlyMemory`1 buffer, Boolean finalFlush, CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.ExecutionContextCallback(Object s)
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)
+   at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.ExecuteFromThreadPool(Thread threadPoolThread)
+   at System.Threading.ThreadPoolWorkQueue.Dispatch()
+   at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+   at System.Threading.Thread.StartCallback()
+--- End of stack trace from previous location ---
+
+----- Inner Stack Trace -----
+   at System.Net.Http.Http2Connection.SendStreamDataAsync(Int32 streamId, ReadOnlyMemory`1 buffer, Boolean finalFlush, CancellationToken cancellationToken)
+   at System.Net.Http.Http2Connection.Http2Stream.SendDataAsync(ReadOnlyMemory`1 buffer, CancellationToken cancellationToken)
+   at Grpc.Net.Client.Internal.StreamExtensions.WriteMessageAsync[TMessage](Stream stream, GrpcCall call, TMessage message, Action`2 serializer, CallOptions callOptions)
+   at Grpc.Net.Client.Internal.HttpContentClientStreamWriter`2.WriteAsyncCore[TState](Func`5 writeFunc, TState state, CancellationToken cancellationToken)
+  Standard Output Messages:
+ 10/25/2026 15:30:10:starting producer
+ 10/25/2026 15:30:10:server checking scenario
+ 10/25/2026 15:30:10:server yielding response headers
+ 10/25/2026 15:30:10:server setting response status in advance
+ 10/25/2026 15:30:10:server faulting with success
+ 10/25/2026 15:30:10:producer yielding 0
+ 10/25/2026 15:30:10:exiting producer
+
+
+[xUnit.net 00:00:13.53]     protobuf_net.Grpc.Test.Integration.ManagedStreamTests.DuplexEcho(scenario: FaultSuccessBadProducer, expectedCount: 0, flags: None, expectBrittle: False) [FAIL]
+  Failed protobuf_net.Grpc.Test.Integration.ManagedStreamTests.DuplexEcho(scenario: FaultSuccessBadProducer, expectedCount: 0, flags: None, expectBrittle: False) [16 ms]
+  Error Message:
+   ProtoBuf.Grpc.Internal.IncompleteSendRpcException : A message could not be sent because the server had already terminated the connection; this exception can be suppressed by specifying the IgnoreStreamTermination flag when creating the CallContext
+---- Grpc.Core.RpcException : Status(StatusCode="OK", Detail="")
+  Stack Trace:
+     at ProtoBuf.Grpc.Internal.Reshape.SendAll[T](IClientStreamWriter`1 output, IAsyncEnumerable`1 request, CancellationTokenSource allDone, Boolean ignoreStreamTermination) in /home/user/w55/Grpc/base/src/protobuf-net.Grpc/Internal/Reshape.cs:line 943
+   at ProtoBuf.Grpc.Internal.Reshape.SendAll[T](IClientStreamWriter`1 output, IAsyncEnumerable`1 request, CancellationTokenSource allDone, Boolean ignoreStreamTermination) in /home/user/w55/Grpc/base/src/protobuf-net.Grpc/Internal/Reshape.cs:line 933
+   at ProtoBuf.Grpc.Internal.Reshape.DuplexAsyncImpl[TRequest,TResponse](AsyncDuplexStreamingCall`2 call, MetadataContext metadata, Boolean ignoreStreamTermination, IAsyncEnumerable`1 request, CancellationToken contextCancel, CancellationToken consumerCancel)+MoveNext() in /home/user/w55/Grpc/base/src/protobuf-net.Grpc/Internal/Reshape.cs:line 879
+   at ProtoBuf.Grpc.Internal.Reshape.DuplexAsyncImpl[TRequest,TResponse](AsyncDuplexStreamingCall`2 call, MetadataContext metadata, Boolean ignoreStreamTermination, IAsyncEnumerable`1 request, CancellationToken contextCancel, CancellationToken consumerCancel)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()
+   at protobuf_net.Grpc.Test.Integration.StreamTests.DuplexEcho(Scenario scenario, Int32 expectedCount, CallContextFlags flags, Boolean expectBrittle) in /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/StreamTests.cs:line 634
+   at protobuf_net.Grpc.Test.Integration.StreamTests.DuplexEcho(Scenario scenario, Int32 expectedCount, CallContextFlags flags, Boolean expectBrittle) in /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/StreamTests.cs:line 634
+   at protobuf_net.Grpc.Test.Integration.StreamTests.DuplexEcho(Scenario scenario, Int32 expectedCount, CallContextFlags flags, Boolean expectBrittle) in /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/StreamTests.cs:line 667
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Grpc.Net.Client.Internal.StreamExtensions.WriteMessageAsync[TMessage](Stream stream, GrpcCall call, TMessage message, Action`2 serializer, CallOptions callOptions)
+   at Grpc.Net.Client.Internal.HttpContentClientStreamWriter`2.WriteAsyncCore[TState](Func`5 writeFunc, TState state, CancellationToken cancellationToken)
+   at Grpc.Net.Client.Internal.HttpContentClientStreamWriter`2.WriteCoreAsync(TRequest message, CancellationToken cancellationToken)
+   at ProtoBuf.Grpc.Internal.Reshape.SendAll[T](IClientStreamWriter`1 output, IAsyncEnumerable`1 request, CancellationTokenSource allDone, Boolean ignoreStreamTermination) in /home/user/w55/Grpc/base/src/protobuf-net.Grpc/Internal/Reshape.cs:line 938
+  Standard Output Messages:
+ 10/25/2026 15:30:11:starting producer
+ 10/25/2026 15:30:11:server checking scenario
+ 10/25/2026 15:30:11:server yielding response headers
+ 10/25/2026 15:30:11:server setting response status in advance
+ 10/25/2026 15:30:11:server faulting with success
+ 10/25/2026 15:30:11:producer yielding 0
+ 10/25/2026 15:30:11:exiting producer
+
+
+
+Failed!  - Failed:     2, Passed:   182, Skipped:     1, Total:   185, Duration: 16 s - protobuf-net.Grpc.Test.IntegrationUpLevel.dll (net8.0)
+
+Failed!  - Failed:     2, Passed:   181, Skipped:     1, Total:   184, Duration: 16 s - protobuf-net.Grpc.Test.IntegrationUpLevel.dll (net10.0)
+  protobuf-net.Grpc.Test.Integration -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/bin/Debug/net10.0/protobuf-net.Grpc.Test.Integration.dll
+Test run for /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/bin/Debug/net10.0/protobuf-net.Grpc.Test.Integration.dll (.NETCoreApp,Version=v10.0)
+Test run for /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/bin/Debug/net8.0/protobuf-net.Grpc.Test.Integration.dll (.NETCoreApp,Version=v8.0)
+Test run for /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/bin/Debug/net472/protobuf-net.Grpc.Test.Integration.exe (.NETFramework,Version=v4.7.2)
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+System.IO.FileNotFoundException: Could not find 'mono' host. Make sure that 'mono' is installed on the machine and is available in PATH environment variable.
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Helpers.DotnetHostHelper.GetMonoPath() in /_/src/vstest/src/Microsoft.TestPlatform.CoreUtilities/Helpers/DotnetHostHelper.cs:line 100
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Hosting.DefaultTestHostManager.GetTestHostProcessStartInfo(IEnumerable`1 sources, IDictionary`2 environmentVariables, TestRunnerConnectionInfo connectionInfo) in /_/src/vstest/src/Microsoft.TestPlatform.TestHostProvider/Hosting/DefaultTestHostManager.cs:line 219
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Client.ProxyOperationManager.SetupChannel(IEnumerable`1 sources, String runSettings) in /_/src/vstest/src/Microsoft.TestPlatform.CrossPlatEngine/Client/ProxyOperationManager.cs:line 229
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Client.ProxyExecutionManager.InitializeTestRun(TestRunCriteria testRunCriteria, IInternalTestRunEventsHandler eventHandler) in /_/src/vstest/src/Microsoft.TestPlatform.CrossPlatEngine/Client/ProxyExecutionManager.cs:line 184
+A total of 1 test files matched the specified pattern.
+
+Test Run Aborted.
+[xUnit.net 00:00:02.44]     protobuf_net.Grpc.Test.Integration.Issues.Issue109.Issue_109 [SKIP]
+  Skipped protobuf_net.Grpc.Test.Integration.Issues.Issue109.Issue_109 [1 ms]
+[xUnit.net 00:00:02.66]     protobuf_net.Grpc.Test.Integration.Issues.Issue109.Issue_109 [SKIP]
+  Skipped protobuf_net.Grpc.Test.Integration.Issues.Issue109.Issue_109 [1 ms]
+[xUnit.net 00:00:03.15]     protobuf_net.Grpc.Test.Integration.ManagedStreamTests.DuplexEcho(scenario: FaultSuccessGoodProducer, expectedCount: 0, flags: CaptureMetadata, expectBrittle: False) [FAIL]
+  Failed protobuf_net.Grpc.Test.Integration.ManagedStreamTests.DuplexEcho(scenario: FaultSuccessGoodProducer, expectedCount: 0, flags: CaptureMetadata, expectBrittle: False) [18 ms]
+  Error Message:
+   ProtoBuf.Grpc.Internal.IncompleteSendRpcException : A message could not be sent because the server had already terminated the connection; this exception can be suppressed by specifying the IgnoreStreamTermination flag when creating the CallContext
+---- Grpc.Core.RpcException : Status(StatusCode="OK", Detail="")
+  Stack Trace:
+     at ProtoBuf.Grpc.Internal.Reshape.SendAll[T](IClientStreamWriter`1 output, IAsyncEnumerable`1 request, CancellationTokenSource allDone, Boolean ignoreStreamTermination) in /home/user/w55/Grpc/base/src/protobuf-net.Grpc/Internal/Reshape.cs:line 943
+   at ProtoBuf.Grpc.Internal.Reshape.SendAll[T](IClientStreamWriter`1 output, IAsyncEnumerable`1 request, CancellationTokenSource allDone, Boolean ignoreStreamTermination) in /home/user/w55/Grpc/base/src/protobuf-net.Grpc/Internal/Reshape.cs:line 933
+   at ProtoBuf.Grpc.Internal.Reshape.DuplexAsyncImpl[TRequest,TResponse](AsyncDuplexStreamingCall`2 call, MetadataContext metadata, Boolean ignoreStreamTermination, IAsyncEnumerable`1 request, CancellationToken contextCancel, CancellationToken consumerCancel)+MoveNext() in /home/user/w55/Grpc/base/src/protobuf-net.Grpc/Internal/Reshape.cs:line 879
+   at ProtoBuf.Grpc.Internal.Reshape.DuplexAsyncImpl[TRequest,TResponse](AsyncDuplexStreamingCall`2 call, MetadataContext metadata, Boolean ignoreStreamTermination, IAsyncEnumerable`1 request, CancellationToken contextCancel, CancellationToken consumerCancel)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()
+   at protobuf_net.Grpc.Test.Integration.StreamTests.DuplexEcho(Scenario scenario, Int32 expectedCount, CallContextFlags flags, Boolean expectBrittle) in /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/StreamTests.cs:line 634
+   at protobuf_net.Grpc.Test.Integration.StreamTests.DuplexEcho(Scenario scenario, Int32 expectedCount, CallContextFlags flags, Boolean expectBrittle) in /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/StreamTests.cs:line 634
+   at protobuf_net.Grpc.Test.Integration.StreamTests.DuplexEcho(Scenario scenario, Int32 expectedCount, CallContextFlags flags, Boolean expectBrittle) in /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test.Integration/StreamTests.cs:line 667
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Grpc.Net.Client.Internal.HttpContentClientStreamWriter`2.WriteCoreAsync(TRequest message, CancellationToken cancellationToken)
+   at ProtoBuf.Grpc.Internal.Reshape.SendAll[T](IClientStreamWriter`1 output, IAsyncEnumerable`1 request, CancellationTokenSource allDone, Boolean ignoreStreamTermination) in /home/user/w55/Grpc/base/src/protobuf-net.Grpc/Internal/Reshape.cs:line 938
+  Standard Output Messages:
+ 10/25/2026 15:30:25:starting producer
+ 10/25/2026 15:30:25:server checking scenario
+ 10/25/2026 15:30:25:server yielding response headers
+ 10/25/2026 15:30:25:server setting response status in advance
+ 10/25/2026 15:30:25:server faulting with success
+ 10/25/2026 15:30:25:producer yielding 0
+ 10/25/2026 15:30:25:exiting producer
+
+
+
+Passed!  - Failed:     0, Passed:   183, Skipped:     1, Total:   184, Duration: 13 s - protobuf-net.Grpc.Test.Integration.dll (net10.0)
+  protobuf-net.Grpc.Test -> /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test/bin/Debug/net10.0/protobuf-net.Grpc.Test.dll
+Test run for /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test/bin/Debug/net8.0/protobuf-net.Grpc.Test.dll (.NETCoreApp,Version=v8.0)
+Test run for /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test/bin/Debug/net10.0/protobuf-net.Grpc.Test.dll (.NETCoreApp,Version=v10.0)
+Test run for /home/user/w55/Grpc/base/tests/protobuf-net.Grpc.Test/bin/Debug/net472/protobuf-net.Grpc.Test.exe (.NETFramework,Version=v4.7.2)
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+VSTest version 18.0.2 (x64)
+
+
+
+Failed!  - Failed:     1, Passed:   183, Skipped:     1, Total:   185, Duration: 13 s - protobuf-net.Grpc.Test.Integration.dll (net8.0)
+Starting test execution, please wait...
+Starting test execution, please wait...
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+System.IO.FileNotFoundException: Could not find 'mono' host. Make sure that 'mono' is installed on the machine and is available in PATH environment variable.
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Helpers.DotnetHostHelper.GetMonoPath() in /_/src/vstest/src/Microsoft.TestPlatform.CoreUtilities/Helpers/DotnetHostHelper.cs:line 100
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Hosting.DefaultTestHostManager.GetTestHostProcessStartInfo(IEnumerable`1 sources, IDictionary`2 environmentVariables, TestRunnerConnectionInfo connectionInfo) in /_/src/vstest/src/Microsoft.TestPlatform.TestHostProvider/Hosting/DefaultTestHostManager.cs:line 219
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Client.ProxyOperationManager.SetupChannel(IEnumerable`1 sources, String runSettings) in /_/src/vstest/src/Microsoft.TestPlatform.CrossPlatEngine/Client/ProxyOperationManager.cs:line 229
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Client.ProxyExecutionManager.InitializeTestRun(TestRunCriteria testRunCriteria, IInternalTestRunEventsHandler eventHandler) in /_/src/vstest/src/Microsoft.TestPlatform.CrossPlatEngine/Client/ProxyExecutionManager.cs:line 184
+
+Test Run Aborted.
+
+Passed!  - Failed:     0, Passed:   216, Skipped:     0, Total:   216, Duration: 2 s - protobuf-net.Grpc.Test.dll (net8.0)
+
+Passed!  - Failed:     0, Passed:   216, Skipped:     0, Total:   216, Duration: 2 s - protobuf-net.Grpc.Test.dll (net10.0)

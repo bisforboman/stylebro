@@ -1,0 +1,6 @@
+build	0	75s	dotnet build protobuf-net.Grpc.slnx -c Debug
+twae-Debug	1	29s	twae Debug
+test-Debug	1	94s	env CFG=Debug bash -c dotnet test protobuf-net.Grpc.slnx -c $CFG
+twae-Release	1	60s	twae Release
+test-Release	1	51s	env CFG=Release bash -c dotnet test protobuf-net.Grpc.slnx -c $CFG
+DONE

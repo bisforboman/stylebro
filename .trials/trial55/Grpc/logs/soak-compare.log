@@ -1,0 +1,70 @@
+Note: switching to '534643f0287186a4b1e94926504ec901d035b927'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+Note: switching to '534643f0287186a4b1e94926504ec901d035b927'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+== soak-src: dotnet-format check
+== soak-src: host check
+== soak-src: dotnet-format format
+== soak-src: host format
+== soak-src: dotnet-format recheck
+== soak-src: host recheck
+Times (soak-src):
+  dotnet-format check       760.2 s
+  host check                257.7 s
+  dotnet-format format      715.7 s
+  host format               291.2 s
+  dotnet-format recheck     300.2 s
+  host recheck              138.3 s
+DIFFERENT (soak-src):
+  check output differs (/home/user/w55/Grpc/parity/soak-src-dotnet-format-check.txt vs /home/user/w55/Grpc/parity/soak-src-host-check.txt):
+  => <root>/src/protobuf-net.Grpc/CallContext.Streaming.cs(49,1): warning IDE0055: Fix formatting [<root>/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj]
+  <= <root>/src/protobuf-net.Grpc/ChannelAsyncEnumerableExtensions.cs(25,170): error WHITESPACE: Fix whitespace formatting. Replace 13 characters with '\n\s\s\s\s\s\s\s\s\s\s\s\s'. [<root>/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj]
+  => <root>/src/protobuf-net.Grpc/ChannelAsyncEnumerableExtensions.cs(25,170): error WHITESPACE: Fix whitespace formatting. Replace 13 characters with '\n\s\s\s\s\s\s\s\s\s\s\s\s'. [<root>/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj]
+  <= <root>/src/protobuf-net.Grpc/ChannelAsyncEnumerableExtensions.cs(26,119): error WHITESPACE: Fix whitespace formatting. Replace 13 characters with '\n\s\s\s\s\s\s\s\s\s\s\s\s'. [<root>/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj]
+  => <root>/src/protobuf-net.Grpc/ChannelAsyncEnumerableExtensions.cs(26,119): error WHITESPACE: Fix whitespace formatting. Replace 13 characters with '\n\s\s\s\s\s\s\s\s\s\s\s\s'. [<root>/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj]
+  <= <root>/src/protobuf-net.Grpc/ChannelAsyncEnumerableExtensions.cs(26,13): warning BRO1504: Add a blank line before the comment [<root>/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj]
+  => <root>/src/protobuf-net.Grpc/ChannelAsyncEnumerableExtensions.cs(26,13): warning BRO1504: Add a blank line before the comment [<root>/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj]
+  <= <root>/src/protobuf-net.Grpc/ChannelAsyncEnumerableExtensions.cs(90,103): error WHITESPACE: Fix whitespace formatting. Replace 1 characters with '\n\s\s\s\s\s\s\s\s'. [<root>/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj]
+  => <root>/src/protobuf-net.Grpc/ChannelAsyncEnumerableExtensions.cs(90,103): error WHITESPACE: Fix whitespace formatting. Replace 1 characters with '\n\s\s\s\s\s\s\s\s'. [<root>/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj]
+  <= <root>/src/protobuf-net.Grpc/ChannelAsyncEnumerableExtensions.cs(91,50): error WHITESPACE: Fix whitespace formatting. Replace 1 characters with '\n\s\s\s\s\s\s\s\s\s\s\s\s'. [<root>/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj]
+  => <root>/src/protobuf-net.Grpc/ChannelAsyncEnumerableExtensions.cs(90,103): warning IDE0055: Fix formatting [<root>/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj]
+  <= <root>/src/protobuf-net.Grpc/ChannelAsyncEnumerableExtensions.cs(91,71): error WHITESPACE: Fix whitespace formatting. Replace 1 characters with '\n\s\s\s\s\s\s\s\s\s\s\s\s'. [<root>/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj]
+  => <root>/src/protobuf-net.Grpc/ChannelAsyncEnumerableExtensions.cs(91,50): error WHITESPACE: Fix whitespace formatting. Replace 1 characters with '\n\s\s\s\s\s\s\s\s\s\s\s\s'. [<root>/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj]
+  <= <root>/src/protobuf-net.Grpc/ChannelAsyncEnumerableExtensions.cs(91,91): error WHITESPACE: Fix whitespace formatting. Replace 1 characters with '\n\s\s\s\s\s\s\s\s'. [<root>/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj]
+  => <root>/src/protobuf-net.Grpc/ChannelAsyncEnumerableExtensions.cs(91,50): warning IDE0055: Fix formatting [<root>/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj]
+  <= <root>/src/protobuf-net.Grpc/ChannelAsyncEnumerableExtensions.cs(99,41): error WHITESPACE: Fix whitespace formatting. Delete 1 characters. [<root>/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj]
+  => <root>/src/protobuf-net.Grpc/ChannelAsyncEnumerableExtensions.cs(91,71): error WHITESPACE: Fix whitespace formatting. Replace 1 characters with '\n\s\s\s\s\s\s\s\s\s\s\s\s'. [<root>/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj]
+  <= <root>/src/protobuf-net.Grpc/Client/GrpcClient.cs(127,9): warning BRO1513: Add a blank line before the documentation [<root>/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj]
+  => <root>/src/protobuf-net.Grpc/ChannelAsyncEnumerableExtensions.cs(91,71): warning IDE0055: Fix formatting [<root>/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj]
+  <= <root>/src/protobuf-net.Grpc/Client/GrpcClient.cs(134,9): warning BRO1513: Add a blank line before the documentation [<root>/src/protobuf-net.Grpc/protobuf-net.Grpc.csproj]
+  format --json report differs (/home/user/w55/Grpc/parity/soak-src-dotnet-format-format.json vs /home/user/w55/Grpc/parity/soak-src-host-format.json)

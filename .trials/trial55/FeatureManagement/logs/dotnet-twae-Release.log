@@ -1,0 +1,31 @@
+  Determining projects to restore...
+  Restored /home/user/w55/FeatureManagement/dotnet/examples/FeatureFlagDemo/FeatureFlagDemo.csproj (in 536 ms).
+  Restored /home/user/w55/FeatureManagement/dotnet/examples/BlazorServerApp/BlazorServerApp.csproj (in 537 ms).
+  Restored /home/user/w55/FeatureManagement/dotnet/examples/VariantAndTelemetryDemo/VariantAndTelemetryDemo.csproj (in 536 ms).
+  Restored /home/user/w55/FeatureManagement/dotnet/src/Microsoft.FeatureManagement.Telemetry.ApplicationInsights/Microsoft.FeatureManagement.Telemetry.ApplicationInsights.csproj (in 528 ms).
+  Restored /home/user/w55/FeatureManagement/dotnet/examples/ConsoleApp/ConsoleApp.csproj (in 12 ms).
+  Restored /home/user/w55/FeatureManagement/dotnet/src/Microsoft.FeatureManagement/Microsoft.FeatureManagement.csproj (in 31 ms).
+/home/user/w55/FeatureManagement/dotnet/tests/Tests.FeatureManagement/Tests.FeatureManagement.csproj : error NU1510: Warning As Error: PackageReference System.Text.Json will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [/home/user/w55/FeatureManagement/dotnet/Microsoft.FeatureManagement.sln]
+/home/user/w55/FeatureManagement/dotnet/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj : error NU1510: Warning As Error: PackageReference Microsoft.Extensions.Configuration.Json will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [/home/user/w55/FeatureManagement/dotnet/Microsoft.FeatureManagement.sln]
+/home/user/w55/FeatureManagement/dotnet/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj : error NU1510: Warning As Error: PackageReference System.Text.Json will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [/home/user/w55/FeatureManagement/dotnet/Microsoft.FeatureManagement.sln]
+/home/user/w55/FeatureManagement/dotnet/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj : error NU1510: Warning As Error: PackageReference Microsoft.Extensions.DependencyInjection will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [/home/user/w55/FeatureManagement/dotnet/Microsoft.FeatureManagement.sln]
+  Restored /home/user/w55/FeatureManagement/dotnet/tests/Tests.FeatureManagement.Telemetry.OpenTelemetry/Tests.FeatureManagement.Telemetry.OpenTelemetry.csproj (in 143 ms).
+  Restored /home/user/w55/FeatureManagement/dotnet/src/Microsoft.FeatureManagement.Telemetry.OpenTelemetry/Microsoft.FeatureManagement.Telemetry.OpenTelemetry.csproj (in 118 ms).
+  Restored /home/user/w55/FeatureManagement/dotnet/src/Microsoft.FeatureManagement.AspNetCore/Microsoft.FeatureManagement.AspNetCore.csproj (in 70 ms).
+  Failed to restore /home/user/w55/FeatureManagement/dotnet/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj (in 260 ms).
+  Restored /home/user/w55/FeatureManagement/dotnet/examples/TargetingConsoleApp/TargetingConsoleApp.csproj (in 4 ms).
+  Restored /home/user/w55/FeatureManagement/dotnet/examples/RazorPages/RazorPages.csproj (in 48 ms).
+  Restored /home/user/w55/FeatureManagement/dotnet/examples/VariantServiceDemo/VariantServiceDemo.csproj (in 72 ms).
+  Restored /home/user/w55/FeatureManagement/dotnet/examples/OpenTelemetryDemo/OpenTelemetryDemo.csproj (in 135 ms).
+  Failed to restore /home/user/w55/FeatureManagement/dotnet/tests/Tests.FeatureManagement/Tests.FeatureManagement.csproj (in 583 ms).
+
+Build FAILED.
+
+/home/user/w55/FeatureManagement/dotnet/tests/Tests.FeatureManagement/Tests.FeatureManagement.csproj : error NU1510: Warning As Error: PackageReference System.Text.Json will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [/home/user/w55/FeatureManagement/dotnet/Microsoft.FeatureManagement.sln]
+/home/user/w55/FeatureManagement/dotnet/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj : error NU1510: Warning As Error: PackageReference Microsoft.Extensions.Configuration.Json will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [/home/user/w55/FeatureManagement/dotnet/Microsoft.FeatureManagement.sln]
+/home/user/w55/FeatureManagement/dotnet/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj : error NU1510: Warning As Error: PackageReference System.Text.Json will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [/home/user/w55/FeatureManagement/dotnet/Microsoft.FeatureManagement.sln]
+/home/user/w55/FeatureManagement/dotnet/tests/Tests.FeatureManagement.AspNetCore/Tests.FeatureManagement.AspNetCore.csproj : error NU1510: Warning As Error: PackageReference Microsoft.Extensions.DependencyInjection will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [/home/user/w55/FeatureManagement/dotnet/Microsoft.FeatureManagement.sln]
+    0 Warning(s)
+    4 Error(s)
+
+Time Elapsed 00:00:04.13

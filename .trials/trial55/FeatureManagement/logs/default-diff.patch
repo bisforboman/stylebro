@@ -1,0 +1,1446 @@
+diff --git a/.editorconfig b/.editorconfig
+index 233e612..d11d2c7 100644
+--- a/.editorconfig
++++ b/.editorconfig
+@@ -36,4 +36,68 @@ indent_size = 2
+ charset = utf-8
+ 
+ [*.json]
+-indent_size = 2
+\ No newline at end of file
++indent_size = 2
++
++# BEGIN stylebro-migrate (stylebro-migrate init: built-in .NET rules for StyleBro's preset; edits inside are replaced)
++[*.cs]
++# Built-in .NET rules that cover StyleCop rules, at the preset's severities. Their options (brace placement, modifier
++# order, ...) come from StyleBro's preset. The severities have to be here: 'dotnet format' ignores rule severities in a
++# package's global config. Add <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> to report them on build too.
++
++# Braces (SA1503, SA1519, SA1520) are StyleBro's BRO1514-BRO1516: IDE0011's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0011.severity = none
++# Access modifiers (SA1400, SA1205) are StyleBro's BRO1404/BRO1007: IDE0040's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0040.severity = none
++# Modifier order: access modifier first, then static (SA1206, SA1207)
++dotnet_diagnostic.IDE0036.severity = warning
++# 'int' instead of 'Int32' (SA1121)
++dotnet_diagnostic.IDE0049.severity = warning
++# Unnecessary parentheses (SA1119) are StyleBro's BRO1405: IDE0047's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0047.severity = none
++# Parentheses that show precedence (SA1407, SA1408) are StyleBro's BRO1406/BRO1407: IDE0048's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0048.severity = none
++# Using placement (SA1200) is StyleBro's BRO1008: IDE0065's fix can change what names bind to (CS0104, CS0118)
++dotnet_diagnostic.IDE0065.severity = none
++# Blank lines (SA1507, SA1508, SA1513) are StyleBro's BRO1517-BRO1519: the SDK's fixes break multi-targeted projects
++dotnet_diagnostic.IDE2000.severity = none
++dotnet_diagnostic.IDE2002.severity = none
++dotnet_diagnostic.IDE2003.severity = none
++# 'this.' qualification isn't required (SA1101 is off in the preset)
++dotnet_diagnostic.IDE0009.severity = none
++
++# Conventions in this repository's code (stylebro-migrate init counted them; delete a line to have it counted again)
++# init: private fields: named '_field' in 96 of 96 places in your code
++stylebro_private_field_naming = _camelCase
++# init: operators where a line wraps: your code mixes both forms (31 at the start of the line, 35 at the end of the line), so BRO1520 is off. To choose one: set dotnet_style_operator_placement_when_wrapping and remove the next line.
++dotnet_diagnostic.BRO1520.severity = none
++# init: '=>' where a line wraps: at the start of the line in 4 of 4 places in your code
++stylebro_arrow_placement_when_wrapping = beginning_of_line
++# init: multi-line initializers: without a trailing comma in 488 of 501 places in your code
++stylebro_trailing_comma = omit
++# init: empty strings: your code mixes both forms (2 string.Empty, 5 ""), so BRO1106 is off. To choose one: set stylebro_empty_string_style and remove the next line.
++dotnet_diagnostic.BRO1106.severity = none
++# init: null checks: '== null' in 177 of 177 places in your code
++stylebro_null_check_style = equality_operator
++# init: default values: 'default' in 17 of 18 places in your code
++csharp_prefer_simple_default_expression = true
++# init: 'where' constraints: on the declaration's line in 17 of 21 places in your code
++stylebro_constraint_placement = same_line
++# init: 'new T { ... }' with an initializer: your code mixes both forms (177 without '()', 394 with '()'), so BRO1141 is off. To choose one: set stylebro_object_creation_parentheses and remove the next line.
++dotnet_diagnostic.BRO1141.severity = none
++# init: switch sections: your code mixes both forms (18 after a blank line, 12 without a blank line), so BRO1526 is off. To choose one: set stylebro_blank_line_between_switch_sections and remove the next line.
++dotnet_diagnostic.BRO1526.severity = none
++# init: overrides/interface implementations: your code mixes both forms (28 with a doc comment, 14 without a doc comment), so BRO1601 is off. To choose one: set dotnet_diagnostic.BRO1601.severity and remove the next line.
++dotnet_diagnostic.BRO1601.severity = none
++# init: types' members: your code mixes both forms (72 in BRO1001's order, 25 in another order), so BRO1001 is off. To choose one: set dotnet_diagnostic.BRO1001.severity and remove the next line.
++dotnet_diagnostic.BRO1001.severity = none
++# init: internal-by-default types: 52 of 65 in your code are without an access modifier, so BRO1404 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1404.severity = none
++# init: property summaries: 93 of 93 in your code are in their own words, so BRO1604 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1604.severity = none
++# init: C# files' line endings: LF in 192 of 192 files in your code
++end_of_line = lf
++# init: nested ifs BRO1149 would merge: kept, because your code has some (3 nested ifs; any 3 keep them: BRO1149 would merge each), so BRO1149 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1149.severity = none
++# init: file headers: 164 of 164 file headers start or end with an empty '//' line; BRO1120 would remove those lines, so it is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1120.severity = none
++# END stylebro-migrate
+diff --git a/Directory.Build.props b/Directory.Build.props
+index e1220a8..0e3e32f 100644
+--- a/Directory.Build.props
++++ b/Directory.Build.props
+@@ -1,7 +1,11 @@
+ <Project>
+ 
+    <PropertyGroup>
++      <StyleBroPreset>1.0</StyleBroPreset>
+       <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+    </PropertyGroup>
+ 
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial55.1" PrivateAssets="all" />
++  </ItemGroup>
+ </Project>
+\ No newline at end of file
+diff --git a/examples/FeatureFlagDemo/Startup.cs b/examples/FeatureFlagDemo/Startup.cs
+index 0a7b7ec..6e5b683 100644
+--- a/examples/FeatureFlagDemo/Startup.cs
++++ b/examples/FeatureFlagDemo/Startup.cs
+@@ -53,7 +53,6 @@ namespace FeatureFlagDemo
+             services.AddMvc(o =>
+             {
+                 o.Filters.AddForFeature<ThirdPartyActionFilter>(MyFeatureFlags.EnhancedPipeline);
+-
+             });
+         }
+ 
+diff --git a/examples/FeatureFlagDemo/ThirdPartyMiddleware.cs b/examples/FeatureFlagDemo/ThirdPartyMiddleware.cs
+index 52bdedd..ca186fd 100644
+--- a/examples/FeatureFlagDemo/ThirdPartyMiddleware.cs
++++ b/examples/FeatureFlagDemo/ThirdPartyMiddleware.cs
+@@ -18,13 +18,13 @@ namespace FeatureFlagDemo
+ 
+         public async Task Invoke(HttpContext httpContext)
+         {
+-            _logger.LogInformation($"Third party middleware inward path.");
++            _logger.LogInformation("Third party middleware inward path.");
+ 
+             //
+             // Call the next middleware delegate in the pipeline 
+             await _next.Invoke(httpContext);
+ 
+-            _logger.LogInformation($"Third party middleware outward path.");
++            _logger.LogInformation("Third party middleware outward path.");
+         }
+     }
+ }
+diff --git a/examples/OpenTelemetryDemo/LoggerExtensions.cs b/examples/OpenTelemetryDemo/LoggerExtensions.cs
+index 95f6469..9cfdc85 100644
+--- a/examples/OpenTelemetryDemo/LoggerExtensions.cs
++++ b/examples/OpenTelemetryDemo/LoggerExtensions.cs
+@@ -16,24 +16,24 @@ namespace OpenTelemetryDemo
+     {
+         private const string AzureMonitorCustomEventNameKey = "microsoft.custom_event.name";
+ 
+-        private static readonly Action<ILogger, string, int, Exception> _vote = LoggerMessage.Define<string, int>(
++        private static readonly Action<ILogger, string, int, Exception> Vote = LoggerMessage.Define<string, int>(
+             LogLevel.Information,
+             new EventId(1, AzureMonitorCustomEventNameKey),
+             "{" + AzureMonitorCustomEventNameKey + "} {ImageRating}");
+ 
+-        private static readonly Action<ILogger, string, string, long, Exception> _checkout = LoggerMessage.Define<string, string, long>(
++        private static readonly Action<ILogger, string, string, long, Exception> Checkout = LoggerMessage.Define<string, string, long>(
+             LogLevel.Information,
+             new EventId(2, AzureMonitorCustomEventNameKey),
+             "{" + AzureMonitorCustomEventNameKey + "} {success} {checkoutAmount}");
+ 
+         public static void LogVote(this ILogger logger, int rating)
+         {
+-            _vote(logger, "Vote", rating, null);
++            Vote(logger, "Vote", rating, null);
+         }
+ 
+         public static void LogCheckout(this ILogger logger, long amount)
+         {
+-            _checkout(logger, "checkout", "yes", amount, null);
++            Checkout(logger, "checkout", "yes", amount, null);
+         }
+     }
+ }
+diff --git a/examples/OpenTelemetryDemo/Pages/Checkout.cshtml.cs b/examples/OpenTelemetryDemo/Pages/Checkout.cshtml.cs
+index 16f70c1..d7109b8 100644
+--- a/examples/OpenTelemetryDemo/Pages/Checkout.cshtml.cs
++++ b/examples/OpenTelemetryDemo/Pages/Checkout.cshtml.cs
+@@ -1,9 +1,9 @@
+ // Copyright (c) Microsoft Corporation.
+ // Licensed under the MIT license.
+ //
+-using System.Diagnostics.Metrics;
+ using Microsoft.AspNetCore.Mvc.RazorPages;
+ using Microsoft.Extensions.Logging;
++using System.Diagnostics.Metrics;
+ 
+ namespace OpenTelemetryDemo.Pages
+ {
+diff --git a/examples/OpenTelemetryDemo/Pages/Index.cshtml.cs b/examples/OpenTelemetryDemo/Pages/Index.cshtml.cs
+index dc0a5e2..3057eb8 100644
+--- a/examples/OpenTelemetryDemo/Pages/Index.cshtml.cs
++++ b/examples/OpenTelemetryDemo/Pages/Index.cshtml.cs
+@@ -1,11 +1,11 @@
+ // Copyright (c) Microsoft Corporation.
+ // Licensed under the MIT license.
+ //
+-using System.Diagnostics.Metrics;
+ using Microsoft.AspNetCore.Mvc;
+ using Microsoft.AspNetCore.Mvc.RazorPages;
+ using Microsoft.Extensions.Logging;
+ using Microsoft.FeatureManagement;
++using System.Diagnostics.Metrics;
+ 
+ namespace OpenTelemetryDemo.Pages
+ {
+diff --git a/examples/RazorPages/Pages/Index.cshtml.cs b/examples/RazorPages/Pages/Index.cshtml.cs
+index 55bed03..e73e544 100644
+--- a/examples/RazorPages/Pages/Index.cshtml.cs
++++ b/examples/RazorPages/Pages/Index.cshtml.cs
+@@ -15,7 +15,6 @@ namespace RazorPages.Pages
+ 
+         public void OnGet()
+         {
+-
+         }
+     }
+ }
+diff --git a/examples/RazorPages/Program.cs b/examples/RazorPages/Program.cs
+index 624312e..9fd8840 100644
+--- a/examples/RazorPages/Program.cs
++++ b/examples/RazorPages/Program.cs
+@@ -12,6 +12,7 @@ var app = builder.Build();
+ if (!app.Environment.IsDevelopment())
+ {
+     app.UseExceptionHandler("/Error");
++
+     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+     app.UseHsts();
+ }
+diff --git a/examples/TargetingConsoleApp/Identity/InMemoryUserRepository.cs b/examples/TargetingConsoleApp/Identity/InMemoryUserRepository.cs
+index 1159bda..2f79345 100644
+--- a/examples/TargetingConsoleApp/Identity/InMemoryUserRepository.cs
++++ b/examples/TargetingConsoleApp/Identity/InMemoryUserRepository.cs
+@@ -82,7 +82,7 @@ namespace TargetingConsoleApp.Identity
+                 {
+                     "Contractor"
+                 }
+-            },
++            }
+         };
+ 
+         public Task<User> GetUser(string id)
+diff --git a/src/Microsoft.FeatureManagement.AspNetCore/DefaultHttpTargetingContextAccessor.cs b/src/Microsoft.FeatureManagement.AspNetCore/DefaultHttpTargetingContextAccessor.cs
+index 11da253..78ac65c 100644
+--- a/src/Microsoft.FeatureManagement.AspNetCore/DefaultHttpTargetingContextAccessor.cs
++++ b/src/Microsoft.FeatureManagement.AspNetCore/DefaultHttpTargetingContextAccessor.cs
+@@ -24,7 +24,7 @@ namespace Microsoft.FeatureManagement
+         private readonly IHttpContextAccessor _httpContextAccessor;
+ 
+         /// <summary>
+-        /// Creates an instance of the DefaultHttpTargetingContextAccessor
++        /// Initializes a new instance of the <see cref="DefaultHttpTargetingContextAccessor"/> class.
+         /// </summary>
+         public DefaultHttpTargetingContextAccessor(IHttpContextAccessor httpContextAccessor)
+         {
+diff --git a/src/Microsoft.FeatureManagement.AspNetCore/FeatureGateEndpointFilter.cs b/src/Microsoft.FeatureManagement.AspNetCore/FeatureGateEndpointFilter.cs
+index fef839f..935f455 100644
+--- a/src/Microsoft.FeatureManagement.AspNetCore/FeatureGateEndpointFilter.cs
++++ b/src/Microsoft.FeatureManagement.AspNetCore/FeatureGateEndpointFilter.cs
+@@ -43,7 +43,7 @@ namespace Microsoft.FeatureManagement.AspNetCore
+         }
+ 
+         /// <summary>
+-        /// Creates a new instance of the <see cref="FeatureGateEndpointFilter"/> class.
++        /// Initializes a new instance of the <see cref="FeatureGateEndpointFilter"/> class.
+         /// </summary>
+         /// <param name="requirementType">Specifies whether all or any of the provided features should be enabled in order to pass.</param>
+         /// <param name="features">The collection of feature flags to evaluate.</param>
+@@ -54,7 +54,7 @@ namespace Microsoft.FeatureManagement.AspNetCore
+         }
+ 
+         /// <summary>
+-        /// Creates a new instance of the <see cref="FeatureGateEndpointFilter"/> class.
++        /// Initializes a new instance of the <see cref="FeatureGateEndpointFilter"/> class.
+         /// </summary>
+         /// <param name="requirementType">Specifies whether all or any of the provided features should be enabled in order to pass.</param>
+         /// <param name="negate">Specifies whether the feature evaluation result should be negated.</param>
+diff --git a/src/Microsoft.FeatureManagement.AspNetCore/TargetingHttpContextMiddleware.cs b/src/Microsoft.FeatureManagement.AspNetCore/TargetingHttpContextMiddleware.cs
+index c86ac7d..d4f1c07 100644
+--- a/src/Microsoft.FeatureManagement.AspNetCore/TargetingHttpContextMiddleware.cs
++++ b/src/Microsoft.FeatureManagement.AspNetCore/TargetingHttpContextMiddleware.cs
+@@ -22,7 +22,7 @@ namespace Microsoft.FeatureManagement
+         private const string TargetingIdKey = "TargetingId";
+ 
+         /// <summary>
+-        /// Creates an instance of the TargetingHttpContextMiddleware
++        /// Initializes a new instance of the <see cref="TargetingHttpContextMiddleware"/> class.
+         /// </summary>
+         public TargetingHttpContextMiddleware(RequestDelegate next, ILoggerFactory loggerFactory)
+         {
+diff --git a/src/Microsoft.FeatureManagement.AspNetCore/UseForFeatureExtensions.cs b/src/Microsoft.FeatureManagement.AspNetCore/UseForFeatureExtensions.cs
+index 4774ee9..37e8c09 100644
+--- a/src/Microsoft.FeatureManagement.AspNetCore/UseForFeatureExtensions.cs
++++ b/src/Microsoft.FeatureManagement.AspNetCore/UseForFeatureExtensions.cs
+@@ -17,8 +17,8 @@ namespace Microsoft.FeatureManagement
+         /// Conditionally creates a branch in the request pipeline that is rejoined to the main pipeline.
+         /// </summary>
+         /// <param name="app"></param>
+-        /// <param name="featureName">The feature that is required to be enabled to take use this application branch</param>
+-        /// <param name="configuration">Configures a branch to take</param>
++        /// <param name="featureName">The feature that is required to be enabled to take use this application branch.</param>
++        /// <param name="configuration">Configures a branch to take.</param>
+         /// <returns></returns>
+         public static IApplicationBuilder UseForFeature(this IApplicationBuilder app, string featureName, Action<IApplicationBuilder> configuration)
+         {
+@@ -53,7 +53,7 @@ namespace Microsoft.FeatureManagement
+ 
+                 RequestDelegate branch = branchBuilder.Build();
+ 
+-                return async (context) =>
++                return async context =>
+                 {
+                     IFeatureManager fm = context.RequestServices.GetRequiredService<IFeatureManagerSnapshot>();
+ 
+diff --git a/src/Microsoft.FeatureManagement.Telemetry.ApplicationInsights/ApplicationInsightsEventPublisher.cs b/src/Microsoft.FeatureManagement.Telemetry.ApplicationInsights/ApplicationInsightsEventPublisher.cs
+index 594b04e..e345017 100644
+--- a/src/Microsoft.FeatureManagement.Telemetry.ApplicationInsights/ApplicationInsightsEventPublisher.cs
++++ b/src/Microsoft.FeatureManagement.Telemetry.ApplicationInsights/ApplicationInsightsEventPublisher.cs
+@@ -21,11 +21,11 @@ namespace Microsoft.FeatureManagement.Telemetry.ApplicationInsights
+ 
+             _activityListener = new ActivityListener
+             {
+-                ShouldListenTo = (activitySource) => activitySource.Name == "Microsoft.FeatureManagement",
++                ShouldListenTo = activitySource => activitySource.Name == "Microsoft.FeatureManagement",
+                 Sample = (ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.AllData,
+-                ActivityStopped = (activity) =>
++                ActivityStopped = activity =>
+                 {
+-                    ActivityEvent? evaluationEvent = activity.Events.FirstOrDefault((activityEvent) => activityEvent.Name == "FeatureFlag");
++                    ActivityEvent? evaluationEvent = activity.Events.FirstOrDefault(activityEvent => activityEvent.Name == "FeatureFlag");
+ 
+                     if (evaluationEvent.HasValue && evaluationEvent.Value.Tags.Any())
+                     {
+diff --git a/src/Microsoft.FeatureManagement.Telemetry.ApplicationInsights/ApplicationInsightsHostedService.cs b/src/Microsoft.FeatureManagement.Telemetry.ApplicationInsights/ApplicationInsightsHostedService.cs
+index 8edc8be..d08b83b 100644
+--- a/src/Microsoft.FeatureManagement.Telemetry.ApplicationInsights/ApplicationInsightsHostedService.cs
++++ b/src/Microsoft.FeatureManagement.Telemetry.ApplicationInsights/ApplicationInsightsHostedService.cs
+@@ -4,7 +4,7 @@ using Microsoft.Extensions.Hosting;
+ namespace Microsoft.FeatureManagement.Telemetry.ApplicationInsights
+ {
+     /// <summary>
+-    /// A hosted service used to construct and dispose the <see cref="ApplicationInsightsEventPublisher"/>
++    /// A hosted service used to construct and dispose the <see cref="ApplicationInsightsEventPublisher"/>.
+     /// </summary>
+     internal sealed class ApplicationInsightsHostedService : IHostedService
+     {
+diff --git a/src/Microsoft.FeatureManagement.Telemetry.ApplicationInsights/FeatureManagementBuilderExtensions.cs b/src/Microsoft.FeatureManagement.Telemetry.ApplicationInsights/FeatureManagementBuilderExtensions.cs
+index 272f3f3..26f396d 100644
+--- a/src/Microsoft.FeatureManagement.Telemetry.ApplicationInsights/FeatureManagementBuilderExtensions.cs
++++ b/src/Microsoft.FeatureManagement.Telemetry.ApplicationInsights/FeatureManagementBuilderExtensions.cs
+@@ -27,7 +27,7 @@ namespace Microsoft.FeatureManagement
+ 
+             if (builder.Services == null)
+             {
+-                throw new ArgumentException($"The provided builder's services must not be null.", nameof(builder));
++                throw new ArgumentException("The provided builder's services must not be null.", nameof(builder));
+             }
+ 
+             builder.Services.AddSingleton<ITelemetryInitializer, TargetingTelemetryInitializer>();
+diff --git a/src/Microsoft.FeatureManagement.Telemetry.OpenTelemetry/FeatureEvaluationEventPublisher.cs b/src/Microsoft.FeatureManagement.Telemetry.OpenTelemetry/FeatureEvaluationEventPublisher.cs
+index 9c9ef5e..bd6a9a4 100644
+--- a/src/Microsoft.FeatureManagement.Telemetry.OpenTelemetry/FeatureEvaluationEventPublisher.cs
++++ b/src/Microsoft.FeatureManagement.Telemetry.OpenTelemetry/FeatureEvaluationEventPublisher.cs
+@@ -29,11 +29,11 @@ namespace Microsoft.FeatureManagement.Telemetry.OpenTelemetry
+ 
+             _activityListener = new ActivityListener
+             {
+-                ShouldListenTo = (activitySource) => activitySource.Name == FeatureManagementActivitySourceName,
++                ShouldListenTo = activitySource => activitySource.Name == FeatureManagementActivitySourceName,
+                 Sample = (ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.AllDataAndRecorded,
+-                ActivityStopped = (activity) =>
++                ActivityStopped = activity =>
+                 {
+-                    ActivityEvent? evaluationEvent = activity.Events.FirstOrDefault((activityEvent) => activityEvent.Name == FeatureFlagActivityEventName);
++                    ActivityEvent? evaluationEvent = activity.Events.FirstOrDefault(activityEvent => activityEvent.Name == FeatureFlagActivityEventName);
+ 
+                     if (evaluationEvent.HasValue && evaluationEvent.Value.Tags.Any())
+                     {
+diff --git a/src/Microsoft.FeatureManagement.Telemetry.OpenTelemetry/FeatureEvaluationEventPublisherHostedService.cs b/src/Microsoft.FeatureManagement.Telemetry.OpenTelemetry/FeatureEvaluationEventPublisherHostedService.cs
+index 5e81af6..dd43200 100644
+--- a/src/Microsoft.FeatureManagement.Telemetry.OpenTelemetry/FeatureEvaluationEventPublisherHostedService.cs
++++ b/src/Microsoft.FeatureManagement.Telemetry.OpenTelemetry/FeatureEvaluationEventPublisherHostedService.cs
+@@ -7,7 +7,7 @@ using Microsoft.Extensions.Hosting;
+ namespace Microsoft.FeatureManagement.Telemetry.OpenTelemetry
+ {
+     /// <summary>
+-    /// A hosted service used to construct and dispose the <see cref="FeatureEvaluationEventPublisher"/>
++    /// A hosted service used to construct and dispose the <see cref="FeatureEvaluationEventPublisher"/>.
+     /// </summary>
+     internal sealed class FeatureEvaluationEventPublisherHostedService : IHostedService
+     {
+diff --git a/src/Microsoft.FeatureManagement.Telemetry.OpenTelemetry/OpenTelemetryBuilderExtensions.cs b/src/Microsoft.FeatureManagement.Telemetry.OpenTelemetry/OpenTelemetryBuilderExtensions.cs
+index 3ab42f7..14c12a0 100644
+--- a/src/Microsoft.FeatureManagement.Telemetry.OpenTelemetry/OpenTelemetryBuilderExtensions.cs
++++ b/src/Microsoft.FeatureManagement.Telemetry.OpenTelemetry/OpenTelemetryBuilderExtensions.cs
+@@ -19,6 +19,8 @@ namespace Microsoft.FeatureManagement
+         /// <summary>
+         /// Adds feature evaluation event publishing and targeting enrichment to OpenTelemetry.
+         /// </summary>
++        /// <param name="builder">The OpenTelemetry builder.</param>
++        /// <returns>The supplied OpenTelemetry builder.</returns>
+         /// <remarks>
+         /// Automatically registers <see cref="TargetingActivityProcessor"/> and <see cref="TargetingLogProcessor"/>
+         /// to enrich spans and logs with <c>TargetingId</c> from activity baggage.
+@@ -26,8 +28,6 @@ namespace Microsoft.FeatureManagement
+         /// or <c>UseAzureMonitorExporter()</c>.
+         /// Repeated calls for the same service collection have no effect.
+         /// </remarks>
+-        /// <param name="builder">The OpenTelemetry builder.</param>
+-        /// <returns>The supplied OpenTelemetry builder.</returns>
+         public static IOpenTelemetryBuilder AddFeatureManagementProcessors(this IOpenTelemetryBuilder builder)
+         {
+             if (builder == null)
+@@ -37,7 +37,7 @@ namespace Microsoft.FeatureManagement
+ 
+             if (builder.Services == null)
+             {
+-                throw new ArgumentException($"The provided builder's services must not be null.", nameof(builder));
++                throw new ArgumentException("The provided builder's services must not be null.", nameof(builder));
+             }
+ 
+             if (builder.Services.Any(d => d.ServiceType == typeof(IHostedService) && d.ImplementationType == typeof(FeatureEvaluationEventPublisherHostedService)))
+diff --git a/src/Microsoft.FeatureManagement/ConfigurationFeatureDefinitionProvider.cs b/src/Microsoft.FeatureManagement/ConfigurationFeatureDefinitionProvider.cs
+index c71a7ed..123b28a 100644
+--- a/src/Microsoft.FeatureManagement/ConfigurationFeatureDefinitionProvider.cs
++++ b/src/Microsoft.FeatureManagement/ConfigurationFeatureDefinitionProvider.cs
+@@ -49,7 +49,8 @@ namespace Microsoft.FeatureManagement
+         /// Creates a configuration feature definition provider.
+         /// </summary>
+         /// <param name="configuration">The configuration of feature definitions.</param>
+-        public ConfigurationFeatureDefinitionProvider(IConfiguration configuration) : this(configuration, null)
++        public ConfigurationFeatureDefinitionProvider(IConfiguration configuration)
++            : this(configuration, null)
+         {
+         }
+ 
+@@ -70,7 +71,7 @@ namespace Microsoft.FeatureManagement
+                 () => _configuration.GetReloadToken(),
+                 () => _stale = 1);
+ 
+-            _getFeatureDefinitionFunc = (featureName) =>
++            _getFeatureDefinitionFunc = featureName =>
+             {
+                 return Task.FromResult(GetFeatureDefinition(featureName));
+             };
+@@ -339,11 +340,11 @@ namespace Microsoft.FeatureManagement
+             if (!string.IsNullOrEmpty(val) && bool.TryParse(val, out bool result) && result)
+             {
+                 //
+-                //myAlwaysEnabledFeature: true
++                // myAlwaysEnabledFeature: true
+                 // OR
+-                //myAlwaysEnabledFeature: {
++                // myAlwaysEnabledFeature: {
+                 //  enabledFor: true
+-                //}
++                // }
+                 enabledFor.Add(new FeatureFilterConfiguration
+                 {
+                     Name = "AlwaysOn"
+@@ -599,8 +600,7 @@ namespace Microsoft.FeatureManagement
+             };
+         }
+ 
+-        private static T ParseEnum<T>(string feature, string rawValue, string fieldKeyword)
+-            where T : struct, Enum
++        private static T ParseEnum<T>(string feature, string rawValue, string fieldKeyword) where T : struct, Enum
+         {
+             Debug.Assert(!string.IsNullOrEmpty(rawValue));
+ 
+diff --git a/src/Microsoft.FeatureManagement/ConfigurationFeatureDefinitionProviderOptions.cs b/src/Microsoft.FeatureManagement/ConfigurationFeatureDefinitionProviderOptions.cs
+index 13bfa75..1be0251 100644
+--- a/src/Microsoft.FeatureManagement/ConfigurationFeatureDefinitionProviderOptions.cs
++++ b/src/Microsoft.FeatureManagement/ConfigurationFeatureDefinitionProviderOptions.cs
+@@ -59,7 +59,7 @@ namespace Microsoft.FeatureManagement
+         /// 
+         /// With native .NET merging:
+         /// - feature1 would be overwritten by feature2 from source 2 (index-based merging, e.g. feature_flags:0:id)
+-        /// - feature2: enabled = false (from source 1, index 1)
++        /// - feature2: enabled = false (from source 1, index 1).
+         /// </remarks>
+         public bool CustomConfigurationMergingEnabled { get; set; }
+     }
+diff --git a/src/Microsoft.FeatureManagement/ContextualFeatureFilterEvaluator.cs b/src/Microsoft.FeatureManagement/ContextualFeatureFilterEvaluator.cs
+index baf9220..716f839 100644
+--- a/src/Microsoft.FeatureManagement/ContextualFeatureFilterEvaluator.cs
++++ b/src/Microsoft.FeatureManagement/ContextualFeatureFilterEvaluator.cs
+@@ -76,13 +76,14 @@ namespace Microsoft.FeatureManagement
+         {
+             //
+             // Get the generic version of the evaluation helper method
+-            MethodInfo genericHelper = typeof(ContextualFeatureFilterEvaluator).GetMethod(nameof(GenericTypeAgnosticEvaluate),
++            MethodInfo genericHelper = typeof(ContextualFeatureFilterEvaluator).GetMethod(
++                nameof(GenericTypeAgnosticEvaluate),
+                 BindingFlags.Static | BindingFlags.NonPublic);
+ 
+             //
+             // Create a type specific version of the evaluation helper method
+-            MethodInfo constructedHelper = genericHelper.MakeGenericMethod
+-                (filterType, method.GetParameters()[0].ParameterType, method.GetParameters()[1].ParameterType, method.ReturnType);
++            MethodInfo constructedHelper = genericHelper.MakeGenericMethod(
++                filterType, method.GetParameters()[0].ParameterType, method.GetParameters()[1].ParameterType, method.ReturnType);
+ 
+             //
+             // Invoke the method to get the func
+@@ -93,8 +94,8 @@ namespace Microsoft.FeatureManagement
+ 
+         private static Func<object, FeatureFilterEvaluationContext, object, Task<bool>> GenericTypeAgnosticEvaluate<TTarget, TParam1, TParam2, TReturn>(MethodInfo method)
+         {
+-            Func<TTarget, FeatureFilterEvaluationContext, TParam2, Task<bool>> func = (Func<TTarget, FeatureFilterEvaluationContext, TParam2, Task<bool>>)Delegate.CreateDelegate
+-                (typeof(Func<TTarget, FeatureFilterEvaluationContext, TParam2, Task<bool>>), method);
++            Func<TTarget, FeatureFilterEvaluationContext, TParam2, Task<bool>> func = (Func<TTarget, FeatureFilterEvaluationContext, TParam2, Task<bool>>)Delegate.CreateDelegate(
++                typeof(Func<TTarget, FeatureFilterEvaluationContext, TParam2, Task<bool>>), method);
+ 
+             Func<object, FeatureFilterEvaluationContext, object, Task<bool>> genericDelegate = (object target, FeatureFilterEvaluationContext param1, object param2) => func((TTarget)target, param1, (TParam2)param2);
+ 
+diff --git a/src/Microsoft.FeatureManagement/FeatureFilters/Recurrence/Recurrence.cs b/src/Microsoft.FeatureManagement/FeatureFilters/Recurrence/Recurrence.cs
+index 7a63b6b..bd216b1 100644
+--- a/src/Microsoft.FeatureManagement/FeatureFilters/Recurrence/Recurrence.cs
++++ b/src/Microsoft.FeatureManagement/FeatureFilters/Recurrence/Recurrence.cs
+@@ -4,17 +4,17 @@
+ namespace Microsoft.FeatureManagement.FeatureFilters
+ {
+     /// <summary>
+-    /// A recurrence definition describing how time window recurs
++    /// A recurrence definition describing how time window recurs.
+     /// </summary>
+     public class Recurrence
+     {
+         /// <summary>
+-        /// The recurrence pattern specifying how often the time window repeats
++        /// The recurrence pattern specifying how often the time window repeats.
+         /// </summary>
+         public RecurrencePattern Pattern { get; set; }
+ 
+         /// <summary>
+-        /// The recurrence range specifying how long the recurrence pattern repeats
++        /// The recurrence range specifying how long the recurrence pattern repeats.
+         /// </summary>
+         public RecurrenceRange Range { get; set; }
+     }
+diff --git a/src/Microsoft.FeatureManagement/FeatureFilters/Recurrence/RecurrenceEvaluator.cs b/src/Microsoft.FeatureManagement/FeatureFilters/Recurrence/RecurrenceEvaluator.cs
+index 200910c..48ce2db 100644
+--- a/src/Microsoft.FeatureManagement/FeatureFilters/Recurrence/RecurrenceEvaluator.cs
++++ b/src/Microsoft.FeatureManagement/FeatureFilters/Recurrence/RecurrenceEvaluator.cs
+@@ -241,7 +241,7 @@ namespace Microsoft.FeatureManagement.FeatureFilters
+ 
+             //
+             // Subtract the days before the start in the first week.
+-            numberOfOccurrences = numberOfInterval * sortedDaysOfWeek.Count - sortedDaysOfWeek.IndexOf(start.DayOfWeek);
++            numberOfOccurrences = (numberOfInterval * sortedDaysOfWeek.Count) - sortedDaysOfWeek.IndexOf(start.DayOfWeek);
+ 
+             //
+             // The current time is not within the most recent occurring week.
+@@ -325,14 +325,14 @@ namespace Microsoft.FeatureManagement.FeatureFilters
+             }
+ 
+             return previousOccurrence.AddDays(
+-                pattern.Interval * DaysPerWeek - CalculateWeeklyDayOffset(previousOccurrence.DayOfWeek, sortedDaysOfWeek.First()));
++                (pattern.Interval * DaysPerWeek) - CalculateWeeklyDayOffset(previousOccurrence.DayOfWeek, sortedDaysOfWeek.First()));
+         }
+ 
+         /// <summary>
+         /// Calculates the offset in days between two given days of the week.
+         /// <param name="day1">A day of week.</param>
+         /// <param name="day2">A day of week.</param>
+-        /// <returns>The number of days to be added to day2 to reach day1</returns>
++        /// <returns>The number of days to be added to day2 to reach day1.</returns>
+         /// </summary>
+         private static int CalculateWeeklyDayOffset(DayOfWeek day1, DayOfWeek day2)
+         {
+diff --git a/src/Microsoft.FeatureManagement/FeatureFilters/Recurrence/RecurrenceValidator.cs b/src/Microsoft.FeatureManagement/FeatureFilters/Recurrence/RecurrenceValidator.cs
+index 54b31e1..bc473af 100644
+--- a/src/Microsoft.FeatureManagement/FeatureFilters/Recurrence/RecurrenceValidator.cs
++++ b/src/Microsoft.FeatureManagement/FeatureFilters/Recurrence/RecurrenceValidator.cs
+@@ -356,8 +356,9 @@ namespace Microsoft.FeatureManagement.FeatureFilters
+ 
+             TimeSpan minGap = TimeSpan.FromDays(DaysPerWeek);
+ 
+-            for (int i = 1; i < sortedDaysOfWeek.Count(); i++) // start from the second day to calculate the gap
++            for (int i = 1; i < sortedDaysOfWeek.Count(); i++)
+             {
++                // start from the second day to calculate the gap
+                 DayOfWeek dayOfWeek = sortedDaysOfWeek[i];
+ 
+                 TimeSpan gap = TimeSpan.FromDays(CalculateWeeklyDayOffset(dayOfWeek, prev));
+@@ -389,7 +390,7 @@ namespace Microsoft.FeatureManagement.FeatureFilters
+         /// Calculates the offset in days between two given days of the week.
+         /// <param name="day1">A day of week.</param>
+         /// <param name="day2">A day of week.</param>
+-        /// <returns>The number of days to be added to day2 to reach day1</returns>
++        /// <returns>The number of days to be added to day2 to reach day1.</returns>
+         /// </summary>
+         private static int CalculateWeeklyDayOffset(DayOfWeek day1, DayOfWeek day2)
+         {
+diff --git a/src/Microsoft.FeatureManagement/FeatureFilters/TimeWindowFilter.cs b/src/Microsoft.FeatureManagement/FeatureFilters/TimeWindowFilter.cs
+index 68cd328..7054a2b 100644
+--- a/src/Microsoft.FeatureManagement/FeatureFilters/TimeWindowFilter.cs
++++ b/src/Microsoft.FeatureManagement/FeatureFilters/TimeWindowFilter.cs
+@@ -16,8 +16,8 @@ namespace Microsoft.FeatureManagement.FeatureFilters
+     [FilterAlias(Alias)]
+     public class TimeWindowFilter : IFeatureFilter, IFilterParametersBinder
+     {
+-        private readonly TimeSpan CacheSlidingExpiration = TimeSpan.FromMinutes(5);
+-        private readonly TimeSpan CacheAbsoluteExpirationRelativeToNow = TimeSpan.FromDays(1);
++        private readonly TimeSpan _cacheSlidingExpiration = TimeSpan.FromMinutes(5);
++        private readonly TimeSpan _cacheAbsoluteExpirationRelativeToNow = TimeSpan.FromDays(1);
+ 
+         private const string Alias = "Microsoft.TimeWindow";
+         private readonly ILogger _logger;
+@@ -145,8 +145,8 @@ namespace Microsoft.FeatureManagement.FeatureFilters
+                 closestStart,
+                 new MemoryCacheEntryOptions
+                 {
+-                    SlidingExpiration = CacheSlidingExpiration,
+-                    AbsoluteExpirationRelativeToNow = CacheAbsoluteExpirationRelativeToNow,
++                    SlidingExpiration = _cacheSlidingExpiration,
++                    AbsoluteExpirationRelativeToNow = _cacheAbsoluteExpirationRelativeToNow,
+                     Size = 1
+                 });
+ 
+diff --git a/src/Microsoft.FeatureManagement/FeatureManagementBuilder.cs b/src/Microsoft.FeatureManagement/FeatureManagementBuilder.cs
+index ab07a59..423d446 100644
+--- a/src/Microsoft.FeatureManagement/FeatureManagementBuilder.cs
++++ b/src/Microsoft.FeatureManagement/FeatureManagementBuilder.cs
+@@ -40,7 +40,7 @@ namespace Microsoft.FeatureManagement
+ 
+             if (featureFilterImplementations.Count() > 1)
+             {
+-                throw new ArgumentException($"A single feature filter cannot implement more than one feature filter interface.", nameof(T));
++                throw new ArgumentException("A single feature filter cannot implement more than one feature filter interface.", nameof(T));
+             }
+ 
+             if (!Services.Any(descriptor => descriptor.ServiceType == serviceType && descriptor.ImplementationType == implementationType))
+@@ -72,7 +72,7 @@ namespace Microsoft.FeatureManagement
+ 
+             if (featureFilterImplementations.Count() > 1)
+             {
+-                throw new ArgumentException($"A single feature filter cannot implement more than one feature filter interface.", nameof(T));
++                throw new ArgumentException("A single feature filter cannot implement more than one feature filter interface.", nameof(T));
+             }
+ 
+             if (!Services.Any(descriptor => descriptor.ServiceType == serviceType && descriptor.ImplementationType == implementationType))
+diff --git a/src/Microsoft.FeatureManagement/FeatureManagementBuilderExtensions.cs b/src/Microsoft.FeatureManagement/FeatureManagementBuilderExtensions.cs
+index d057e7a..e0630f7 100644
+--- a/src/Microsoft.FeatureManagement/FeatureManagementBuilderExtensions.cs
++++ b/src/Microsoft.FeatureManagement/FeatureManagementBuilderExtensions.cs
+@@ -58,10 +58,7 @@ namespace Microsoft.FeatureManagement
+         /// <returns>A <see cref="IFeatureManagementBuilder"/> that can be used to customize feature management functionality.</returns>
+         /// <exception cref="ArgumentNullException">Thrown if feature name parameter is null.</exception>
+         /// <exception cref="InvalidOperationException">Thrown if a variant service of the type has already been added.</exception>
+-        public static IFeatureManagementBuilder WithVariantService<TService, TEnabled, TDisabled>(this IFeatureManagementBuilder builder, string featureName)
+-            where TService : class
+-            where TEnabled : class, TService
+-            where TDisabled : class, TService
++        public static IFeatureManagementBuilder WithVariantService<TService, TEnabled, TDisabled>(this IFeatureManagementBuilder builder, string featureName) where TService : class where TEnabled : class, TService where TDisabled : class, TService
+         {
+             return builder.AddVariantService<TService>(featureName, typeof(TEnabled), typeof(TDisabled));
+         }
+diff --git a/src/Microsoft.FeatureManagement/FeatureManager.cs b/src/Microsoft.FeatureManagement/FeatureManager.cs
+index f7bca84..e0f239e 100644
+--- a/src/Microsoft.FeatureManagement/FeatureManager.cs
++++ b/src/Microsoft.FeatureManagement/FeatureManager.cs
+@@ -30,8 +30,8 @@ namespace Microsoft.FeatureManagement
+         private const string OnFilterName = "On";
+         private const string FilterSuffix = "filter";
+ 
+-        private readonly TimeSpan ParametersCacheSlidingExpiration = TimeSpan.FromMinutes(5);
+-        private readonly TimeSpan ParametersCacheAbsoluteExpirationRelativeToNow = TimeSpan.FromDays(1);
++        private readonly TimeSpan _parametersCacheSlidingExpiration = TimeSpan.FromMinutes(5);
++        private readonly TimeSpan _parametersCacheAbsoluteExpirationRelativeToNow = TimeSpan.FromDays(1);
+ 
+         private readonly IFeatureDefinitionProvider _featureDefinitionProvider;
+         private readonly ConcurrentDictionary<string, IFeatureFilterMetadata> _filterMetadataCache;
+@@ -727,8 +727,8 @@ namespace Microsoft.FeatureManagement
+                     },
+                     new MemoryCacheEntryOptions
+                     {
+-                        SlidingExpiration = ParametersCacheSlidingExpiration,
+-                        AbsoluteExpirationRelativeToNow = ParametersCacheAbsoluteExpirationRelativeToNow,
++                        SlidingExpiration = _parametersCacheSlidingExpiration,
++                        AbsoluteExpirationRelativeToNow = _parametersCacheAbsoluteExpirationRelativeToNow,
+                         Size = 1
+                     });
+             }
+@@ -744,9 +744,8 @@ namespace Microsoft.FeatureManagement
+         {
+             IFeatureFilterMetadata filter = _filterMetadataCache.GetOrAdd(
+                 $"{filterName}{Environment.NewLine}{appContextType?.FullName}",
+-                (_) =>
++                _ =>
+                 {
+-
+                     IEnumerable<IFeatureFilterMetadata> matchingFilters = _featureFilters.Where(f =>
+                     {
+                         Type filterType = f.GetType();
+@@ -758,7 +757,7 @@ namespace Microsoft.FeatureManagement
+ 
+                         if (appContextType == null)
+                         {
+-                            return (f is IFeatureFilter);
++                            return f is IFeatureFilter;
+                         }
+ 
+                         return ContextualFeatureFilterEvaluator.IsContextualFilter(f, appContextType);
+@@ -777,8 +776,7 @@ namespace Microsoft.FeatureManagement
+                     }
+ 
+                     return matchingFilters.FirstOrDefault();
+-                }
+-            );
++                });
+ 
+             return filter;
+         }
+@@ -821,9 +819,8 @@ namespace Microsoft.FeatureManagement
+ 
+             ContextualFeatureFilterEvaluator filter = _contextualFeatureFilterCache.GetOrAdd(
+                 $"{filterName}{Environment.NewLine}{appContextType.FullName}",
+-                (_) =>
++                _ =>
+                 {
+-
+                     IFeatureFilterMetadata metadata = GetFeatureFilterMetadata(filterName, appContextType);
+ 
+                     if (metadata == null)
+@@ -832,8 +829,7 @@ namespace Microsoft.FeatureManagement
+                     }
+ 
+                     return new ContextualFeatureFilterEvaluator(metadata, appContextType);
+-                }
+-            );
++                });
+ 
+             return filter;
+         }
+diff --git a/src/Microsoft.FeatureManagement/FeatureManagerSnapshot.cs b/src/Microsoft.FeatureManagement/FeatureManagerSnapshot.cs
+index 3c04315..615be70 100644
+--- a/src/Microsoft.FeatureManagement/FeatureManagerSnapshot.cs
++++ b/src/Microsoft.FeatureManagement/FeatureManagerSnapshot.cs
+@@ -73,28 +73,28 @@ namespace Microsoft.FeatureManagement
+         {
+             return _flagCache.GetOrAdd(
+                 feature,
+-                (key) => new ValueTask<bool>(_featureManager.IsEnabledAsync(key))).AsTask();
++                key => new ValueTask<bool>(_featureManager.IsEnabledAsync(key))).AsTask();
+         }
+ 
+         public Task<bool> IsEnabledAsync<TContext>(string feature, TContext context)
+         {
+             return _flagCache.GetOrAdd(
+                 feature,
+-                (key) => new ValueTask<bool>(_featureManager.IsEnabledAsync(key, context))).AsTask();
++                key => new ValueTask<bool>(_featureManager.IsEnabledAsync(key, context))).AsTask();
+         }
+ 
+         public ValueTask<bool> IsEnabledAsync(string feature, CancellationToken cancellationToken)
+         {
+             return _flagCache.GetOrAdd(
+                 feature,
+-                (key) => _variantFeatureManager.IsEnabledAsync(key, cancellationToken));
++                key => _variantFeatureManager.IsEnabledAsync(key, cancellationToken));
+         }
+ 
+         public ValueTask<bool> IsEnabledAsync<TContext>(string feature, TContext context, CancellationToken cancellationToken)
+         {
+             return _flagCache.GetOrAdd(
+                 feature,
+-                (key) => _variantFeatureManager.IsEnabledAsync(key, context, cancellationToken));
++                key => _variantFeatureManager.IsEnabledAsync(key, context, cancellationToken));
+         }
+ 
+         public async ValueTask<Variant> GetVariantAsync(string feature, CancellationToken cancellationToken)
+diff --git a/src/Microsoft.FeatureManagement/IContextualVariantServiceProvider.cs b/src/Microsoft.FeatureManagement/IContextualVariantServiceProvider.cs
+index 609f6e0..1d0152a 100644
+--- a/src/Microsoft.FeatureManagement/IContextualVariantServiceProvider.cs
++++ b/src/Microsoft.FeatureManagement/IContextualVariantServiceProvider.cs
+@@ -17,7 +17,7 @@ namespace Microsoft.FeatureManagement
+         /// <typeparam name="TContext">The type of the context.</typeparam>
+         /// <param name="context">A context used to evaluate contextual feature filters and, when applicable, to determine which variant will be assigned.</param>
+         /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
+-        /// <returns>An implementation of TService, or null if no matching implementation is registered</returns>
++        /// <returns>An implementation of TService, or null if no matching implementation is registered.</returns>
+         ValueTask<TService> GetServiceAsync<TContext>(TContext context, CancellationToken cancellationToken);
+     }
+ }
+diff --git a/src/Microsoft.FeatureManagement/IFeatureFilterMetadata.cs b/src/Microsoft.FeatureManagement/IFeatureFilterMetadata.cs
+index bfa75a0..11a6328 100644
+--- a/src/Microsoft.FeatureManagement/IFeatureFilterMetadata.cs
++++ b/src/Microsoft.FeatureManagement/IFeatureFilterMetadata.cs
+@@ -4,7 +4,7 @@
+ namespace Microsoft.FeatureManagement
+ {
+     /// <summary>
+-    /// Marker interface for feature filters used to evaluate the state of a feature
++    /// Marker interface for feature filters used to evaluate the state of a feature.
+     /// </summary>
+     public interface IFeatureFilterMetadata
+     {
+diff --git a/src/Microsoft.FeatureManagement/IFeatureManagementBuilder.cs b/src/Microsoft.FeatureManagement/IFeatureManagementBuilder.cs
+index 6365c09..f2da7f0 100644
+--- a/src/Microsoft.FeatureManagement/IFeatureManagementBuilder.cs
++++ b/src/Microsoft.FeatureManagement/IFeatureManagementBuilder.cs
+@@ -27,7 +27,7 @@ namespace Microsoft.FeatureManagement
+         /// <summary>
+         /// Adds an <see cref="ISessionManager"/> to be used for storing feature state in a session.
+         /// </summary>
+-        /// <typeparam name="T">An implementation of <see cref="ISessionManager"/></typeparam>
++        /// <typeparam name="T">An implementation of <see cref="ISessionManager"/>.</typeparam>
+         /// <returns>The feature management builder.</returns>
+         IFeatureManagementBuilder AddSessionManager<T>() where T : ISessionManager;
+     }
+diff --git a/src/Microsoft.FeatureManagement/IFilterParametersBinder.cs b/src/Microsoft.FeatureManagement/IFilterParametersBinder.cs
+index fe88989..b8a0a34 100644
+--- a/src/Microsoft.FeatureManagement/IFilterParametersBinder.cs
++++ b/src/Microsoft.FeatureManagement/IFilterParametersBinder.cs
+@@ -14,7 +14,7 @@ namespace Microsoft.FeatureManagement
+         /// <summary>
+         /// Binds a set of feature filter parameters to a settings object.
+         /// </summary>
+-        /// <param name="parameters">The configuration representing filter parameters to bind to a settings object</param>
++        /// <param name="parameters">The configuration representing filter parameters to bind to a settings object.</param>
+         /// <returns>A settings object that is understood by the implementer of <see cref="IFilterParametersBinder"/>.</returns>
+         object BindParameters(IConfiguration parameters);
+     }
+diff --git a/src/Microsoft.FeatureManagement/OnDemandConfigurationProvider.cs b/src/Microsoft.FeatureManagement/OnDemandConfigurationProvider.cs
+index 1170e63..7437f64 100644
+--- a/src/Microsoft.FeatureManagement/OnDemandConfigurationProvider.cs
++++ b/src/Microsoft.FeatureManagement/OnDemandConfigurationProvider.cs
+@@ -6,11 +6,11 @@ namespace Microsoft.FeatureManagement
+ {
+     internal class OnDemandConfigurationProvider : ConfigurationProvider
+     {
+-        private static readonly PropertyInfo _DataProperty = typeof(ConfigurationProvider).GetProperty(nameof(Data), BindingFlags.NonPublic | BindingFlags.Instance);
++        private static readonly PropertyInfo DataProperty = typeof(ConfigurationProvider).GetProperty(nameof(Data), BindingFlags.NonPublic | BindingFlags.Instance);
+ 
+         public OnDemandConfigurationProvider(ConfigurationProvider configurationProvider)
+         {
+-            var data = _DataProperty.GetValue(configurationProvider) as IDictionary<string, string>;
++            var data = DataProperty.GetValue(configurationProvider) as IDictionary<string, string>;
+ 
+             Data = data;
+         }
+diff --git a/src/Microsoft.FeatureManagement/RequirementType.cs b/src/Microsoft.FeatureManagement/RequirementType.cs
+index d6fd811..4b3da2e 100644
+--- a/src/Microsoft.FeatureManagement/RequirementType.cs
++++ b/src/Microsoft.FeatureManagement/RequirementType.cs
+@@ -12,6 +12,7 @@ namespace Microsoft.FeatureManagement
+         /// The set of conditions will be evaluated as true if any condition in the set is true.
+         /// </summary>
+         Any,
++
+         /// <summary>
+         /// The set of conditions will be evaluated as true if all the conditions in the set are true.
+         /// </summary>
+diff --git a/src/Microsoft.FeatureManagement/ServiceCollectionExtensions.cs b/src/Microsoft.FeatureManagement/ServiceCollectionExtensions.cs
+index db43e8c..4b23848 100644
+--- a/src/Microsoft.FeatureManagement/ServiceCollectionExtensions.cs
++++ b/src/Microsoft.FeatureManagement/ServiceCollectionExtensions.cs
+@@ -154,8 +154,7 @@ namespace Microsoft.FeatureManagement
+             services.TryAddSingleton<IFeatureDefinitionProvider>(sp =>
+                 new ConfigurationFeatureDefinitionProvider(
+                     sp.GetRequiredService<IConfiguration>(),
+-                    sp.GetRequiredService<IOptions<ConfigurationFeatureDefinitionProviderOptions>>().Value)
+-            );
++                    sp.GetRequiredService<IOptions<ConfigurationFeatureDefinitionProviderOptions>>().Value));
+ 
+             services.AddScoped<FeatureManagerSnapshot>();
+ 
+@@ -176,7 +175,7 @@ namespace Microsoft.FeatureManagement
+                 new TimeWindowFilter()
+                 {
+                     Cache = sp.GetRequiredService<IMemoryCache>(),
+-                    SystemClock = sp.GetService<TimeProvider>() ?? TimeProvider.System,
++                    SystemClock = sp.GetService<TimeProvider>() ?? TimeProvider.System
+                 });
+ 
+             builder.AddFeatureFilter<ContextualTargetingFilter>();
+diff --git a/src/Microsoft.FeatureManagement/Targeting/ContextualTargetingFilter.cs b/src/Microsoft.FeatureManagement/Targeting/ContextualTargetingFilter.cs
+index bc592a3..7d85cac 100644
+--- a/src/Microsoft.FeatureManagement/Targeting/ContextualTargetingFilter.cs
++++ b/src/Microsoft.FeatureManagement/Targeting/ContextualTargetingFilter.cs
+@@ -53,8 +53,8 @@ namespace Microsoft.FeatureManagement.FeatureFilters
+         /// </summary>
+         /// <param name="context">The feature evaluation context.</param>
+         /// <param name="targetingContext">The targeting context to use during targeting evaluation.</param>
+-        /// <exception cref="ArgumentNullException">Thrown if either <paramref name="context"/> or <paramref name="targetingContext"/> is null.</exception>
+         /// <returns>True if the feature is enabled, false otherwise.</returns>
++        /// <exception cref="ArgumentNullException">Thrown if either <paramref name="context"/> or <paramref name="targetingContext"/> is null.</exception>
+         public Task<bool> EvaluateAsync(FeatureFilterEvaluationContext context, ITargetingContext targetingContext)
+         {
+             if (context == null)
+diff --git a/src/Microsoft.FeatureManagement/Targeting/TargetingEvaluator.cs b/src/Microsoft.FeatureManagement/Targeting/TargetingEvaluator.cs
+index 9051d76..8fd5ed5 100644
+--- a/src/Microsoft.FeatureManagement/Targeting/TargetingEvaluator.cs
++++ b/src/Microsoft.FeatureManagement/Targeting/TargetingEvaluator.cs
+@@ -153,7 +153,7 @@ namespace Microsoft.FeatureManagement.Targeting
+         }
+ 
+         /// <summary>
+-        /// Determines if a targeting context is targeted by presence in a list of users
++        /// Determines if a targeting context is targeted by presence in a list of users.
+         /// </summary>
+         public static bool IsTargeted(
+             string userId,
+@@ -175,7 +175,7 @@ namespace Microsoft.FeatureManagement.Targeting
+         }
+ 
+         /// <summary>
+-        /// Determines if targeting context is targeted by presence in a list of groups
++        /// Determines if targeting context is targeted by presence in a list of groups.
+         /// </summary>
+         public static bool IsTargeted(
+             IEnumerable<string> sourceGroups,
+@@ -208,7 +208,7 @@ namespace Microsoft.FeatureManagement.Targeting
+         }
+ 
+         /// <summary>
+-        /// Determine if a targeting context is targeted by presence in a group and its rollout percentage
++        /// Determine if a targeting context is targeted by presence in a group and its rollout percentage.
+         /// </summary>
+         public static bool IsTargeted(
+             ITargetingContext targetingContext,
+@@ -289,7 +289,7 @@ namespace Microsoft.FeatureManagement.Targeting
+         }
+ 
+         /// <summary>
+-        /// Determines if a given context id should be targeted based off the provided percentage range
++        /// Determines if a given context id should be targeted based off the provided percentage range.
+         /// </summary>
+         public static bool IsTargeted(ITargetingContext targetingContext, double from, double to, bool ignoreCase, string hint)
+         {
+@@ -328,12 +328,12 @@ namespace Microsoft.FeatureManagement.Targeting
+         }
+ 
+         /// <summary>
+-        /// Determines if a given context id should be targeted based off the provided percentage
++        /// Determines if a given context id should be targeted based off the provided percentage.
+         /// </summary>
+-        /// <param name="contextId">A context identifier that determines what the percentage is applicable for</param>
+-        /// <param name="from">The lower bound of the percentage for which the context identifier will be targeted</param>
+-        /// <param name="to">The upper bound of the percentage for which the context identifier will be targeted</param>
+-        /// <returns>A boolean representing if the context identifier should be targeted</returns>
++        /// <param name="contextId">A context identifier that determines what the percentage is applicable for.</param>
++        /// <param name="from">The lower bound of the percentage for which the context identifier will be targeted.</param>
++        /// <param name="to">The upper bound of the percentage for which the context identifier will be targeted.</param>
++        /// <returns>A boolean representing if the context identifier should be targeted.</returns>
+         private static bool IsTargeted(string contextId, double from, double to)
+         {
+             byte[] hash;
+diff --git a/src/Microsoft.FeatureManagement/Targeting/TargetingFilter.cs b/src/Microsoft.FeatureManagement/Targeting/TargetingFilter.cs
+index 0a07b53..b73beb5 100644
+--- a/src/Microsoft.FeatureManagement/Targeting/TargetingFilter.cs
++++ b/src/Microsoft.FeatureManagement/Targeting/TargetingFilter.cs
+@@ -55,8 +55,8 @@ namespace Microsoft.FeatureManagement.FeatureFilters
+         /// Performs a targeting evaluation using the current <see cref="TargetingContext"/> to determine if a feature should be enabled.
+         /// </summary>
+         /// <param name="context">The feature evaluation context.</param>
+-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="context"/> is null.</exception>
+         /// <returns>True if the feature is enabled, false otherwise.</returns>
++        /// <exception cref="ArgumentNullException">Thrown if <paramref name="context"/> is null.</exception>
+         public async Task<bool> EvaluateAsync(FeatureFilterEvaluationContext context)
+         {
+             if (context == null)
+diff --git a/src/Microsoft.FeatureManagement/Telemetry/FeatureEvaluationTelemetry.cs b/src/Microsoft.FeatureManagement/Telemetry/FeatureEvaluationTelemetry.cs
+index 26952ca..8bfec34 100644
+--- a/src/Microsoft.FeatureManagement/Telemetry/FeatureEvaluationTelemetry.cs
++++ b/src/Microsoft.FeatureManagement/Telemetry/FeatureEvaluationTelemetry.cs
+@@ -13,8 +13,8 @@ namespace Microsoft.FeatureManagement.Telemetry
+         /// <summary>
+         /// Handles an evaluation event by adding it as an activity event to the current Activity.
+         /// </summary>
+-        /// <param name="evaluationEvent">The <see cref="EvaluationEvent"/> to publish as an <see cref="ActivityEvent"/></param>
+-        /// <param name="logger">Optional logger to log warnings to</param>
++        /// <param name="evaluationEvent">The <see cref="EvaluationEvent"/> to publish as an <see cref="ActivityEvent"/>.</param>
++        /// <param name="logger">Optional logger to log warnings to.</param>
+         public static void Publish(EvaluationEvent evaluationEvent, ILogger logger)
+         {
+             if (Activity.Current == null)
+diff --git a/tests/Tests.FeatureManagement.AspNetCore/FeatureGateEndpoint.cs b/tests/Tests.FeatureManagement.AspNetCore/FeatureGateEndpoint.cs
+index 91f4370..0eed8db 100644
+--- a/tests/Tests.FeatureManagement.AspNetCore/FeatureGateEndpoint.cs
++++ b/tests/Tests.FeatureManagement.AspNetCore/FeatureGateEndpoint.cs
+@@ -292,17 +292,15 @@ namespace Tests.FeatureManagement.AspNetCore
+                 ["FeatureManagement:TestFeatureWithTargeting:EnabledFor:0:Name"] = "Targeting",
+                 ["FeatureManagement:TestFeatureWithTargeting:EnabledFor:0:Parameters:Audience:Users:0"] = "targetUser",
+                 ["FeatureManagement:TestFeature:EnabledFor:0:Parameters:Audience:Groups:0:Name"] = "targetGroup",
+-                ["FeatureManagement:TestFeature:EnabledFor:0:Parameters:Audience:Groups:0:RolloutPercentage"] = "100",
++                ["FeatureManagement:TestFeature:EnabledFor:0:Parameters:Audience:Groups:0:RolloutPercentage"] = "100"
+             };
+ 
+             var targetingAccessor = new TestTargetingContextAccessor(
+                 userId: "targetUser",
+-                groups: new[] { "targetGroup" }
+-            );
++                groups: new[] { "targetGroup" });
+             using var server = new FeatureTestServer(
+                 featureSettings: settings,
+-                targetingContextAccessor: targetingAccessor
+-            );
++                targetingContextAccessor: targetingAccessor);
+             var response = await server.Client.GetAsync("/test-targeting");
+             Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+         }
+@@ -315,17 +313,15 @@ namespace Tests.FeatureManagement.AspNetCore
+                 ["FeatureManagement:TestFeatureWithTargeting:EnabledFor:0:Name"] = "Targeting",
+                 ["FeatureManagement:TestFeatureWithTargeting:EnabledFor:0:Parameters:Audience:Users:0"] = "targetUser",
+                 ["FeatureManagement:TestFeature:EnabledFor:0:Parameters:Audience:Groups:0:Name"] = "targetGroup",
+-                ["FeatureManagement:TestFeature:EnabledFor:0:Parameters:Audience:Groups:0:RolloutPercentage"] = "100",
++                ["FeatureManagement:TestFeature:EnabledFor:0:Parameters:Audience:Groups:0:RolloutPercentage"] = "100"
+             };
+ 
+             var targetingAccessor = new TestTargetingContextAccessor(
+                 userId: "nonTargetUser",
+-                groups: new[] { "nonTargetGroup" }
+-            );
++                groups: new[] { "nonTargetGroup" });
+             using var server = new FeatureTestServer(
+                 featureSettings: settings,
+-                targetingContextAccessor: targetingAccessor
+-            );
++                targetingContextAccessor: targetingAccessor);
+             var response = await server.Client.GetAsync("/test-targeting");
+             Assert.Equal(System.Net.HttpStatusCode.NotFound, response.StatusCode);
+         }
+diff --git a/tests/Tests.FeatureManagement.Telemetry.OpenTelemetry/TargetingActivityProcessorTests.cs b/tests/Tests.FeatureManagement.Telemetry.OpenTelemetry/TargetingActivityProcessorTests.cs
+index 9085575..0bf9df0 100644
+--- a/tests/Tests.FeatureManagement.Telemetry.OpenTelemetry/TargetingActivityProcessorTests.cs
++++ b/tests/Tests.FeatureManagement.Telemetry.OpenTelemetry/TargetingActivityProcessorTests.cs
+@@ -123,7 +123,7 @@ namespace Tests.FeatureManagement.Telemetry.OpenTelemetry
+             var listener = new ActivityListener
+             {
+                 ShouldListenTo = source => source.Name == activitySource.Name,
+-                Sample = (ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.AllData,
++                Sample = (ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.AllData
+             };
+ 
+             ActivitySource.AddActivityListener(listener);
+diff --git a/tests/Tests.FeatureManagement/FeatureManagementTest.cs b/tests/Tests.FeatureManagement/FeatureManagementTest.cs
+index 701e5c8..00a6205 100644
+--- a/tests/Tests.FeatureManagement/FeatureManagementTest.cs
++++ b/tests/Tests.FeatureManagement/FeatureManagementTest.cs
+@@ -48,7 +48,7 @@ namespace Tests.FeatureManagement
+ 
+             bool called = false;
+ 
+-            testFeatureFilter.Callback = (evaluationContext) =>
++            testFeatureFilter.Callback = evaluationContext =>
+             {
+                 called = true;
+ 
+@@ -80,7 +80,7 @@ namespace Tests.FeatureManagement
+         [InlineData(true)]
+         public async Task ReadsTopLevelConfiguration(bool customMergingEnabled)
+         {
+-            var stream = new MemoryStream(Encoding.UTF8.GetBytes($"{{\"AllowedHosts\": \"*\", \"FeatureFlags\": {{\"FeatureX\": true}}}}"));
++            var stream = new MemoryStream(Encoding.UTF8.GetBytes("{\"AllowedHosts\": \"*\", \"FeatureFlags\": {\"FeatureX\": true}}"));
+ 
+             IConfiguration config = new ConfigurationBuilder().AddJsonStream(stream).Build();
+ 
+@@ -162,7 +162,7 @@ namespace Tests.FeatureManagement
+ 
+             bool called = false;
+ 
+-            testFeatureFilter.Callback = (evaluationContext) =>
++            testFeatureFilter.Callback = evaluationContext =>
+             {
+                 called = true;
+ 
+@@ -797,7 +797,7 @@ namespace Tests.FeatureManagement
+ 
+             bool called = false;
+ 
+-            testFeatureFilter.Callback = async (evaluationContext) =>
++            testFeatureFilter.Callback = async evaluationContext =>
+             {
+                 called = true;
+ 
+@@ -850,7 +850,7 @@ namespace Tests.FeatureManagement
+             int callCount = 0;
+             bool filterEnabled = true;
+ 
+-            testFeatureFilter.Callback = (evaluationContext) =>
++            testFeatureFilter.Callback = evaluationContext =>
+             {
+                 callCount++;
+                 return Task.FromResult(filterEnabled);
+@@ -914,7 +914,7 @@ namespace Tests.FeatureManagement
+                     services.AddFeatureManagement();
+                 });
+ 
+-            Assert.Equal($"Scoped feature management has been registered.", ex.Message);
++            Assert.Equal("Scoped feature management has been registered.", ex.Message);
+ 
+             services = new ServiceCollection();
+ 
+@@ -926,7 +926,7 @@ namespace Tests.FeatureManagement
+                     services.AddScopedFeatureManagement();
+                 });
+ 
+-            Assert.Equal($"Singleton feature management has been registered.", ex.Message);
++            Assert.Equal("Singleton feature management has been registered.", ex.Message);
+         }
+ 
+         [Fact]
+@@ -1010,7 +1010,7 @@ namespace Tests.FeatureManagement
+                 .AddInMemoryCollection(new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                 {
+                     ["feature_management:feature_flags:0:enabled"] = bool.FalseString,
+-                    ["feature_management:feature_flags:1:enabled"] = bool.FalseString,
++                    ["feature_management:feature_flags:1:enabled"] = bool.FalseString
+                 })
+                 .Build();
+             var featureManager4 = new FeatureManager(new ConfigurationFeatureDefinitionProvider(configuration3));
+@@ -1407,7 +1407,7 @@ namespace Tests.FeatureManagement
+                 Name = "Test",
+                 Parameters = new ConfigurationWrapper(new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string>()
+                 {
+-                    { "P1", "V1" },
++                    { "P1", "V1" }
+                 }).Build())
+             };
+ 
+@@ -1445,14 +1445,14 @@ namespace Tests.FeatureManagement
+ 
+             bool called = false;
+ 
+-            testFeatureFilter.ParametersBinderCallback = (parameters) =>
++            testFeatureFilter.ParametersBinderCallback = parameters =>
+             {
+                 binderCalled = true;
+ 
+                 return parameters;
+             };
+ 
+-            testFeatureFilter.Callback = (evaluationContext) =>
++            testFeatureFilter.Callback = evaluationContext =>
+             {
+                 called = true;
+ 
+@@ -1529,7 +1529,7 @@ namespace Tests.FeatureManagement
+ 
+             TestFilter testFeatureFilter = (TestFilter)featureFilters.First(f => f is TestFilter);
+ 
+-            testFeatureFilter.Callback = (evaluationContext) =>
++            testFeatureFilter.Callback = evaluationContext =>
+             {
+                 //
+                 // When ParametersObject is set, it should be available on the context via settings
+@@ -1583,14 +1583,14 @@ namespace Tests.FeatureManagement
+ 
+             bool binderCalled = false;
+ 
+-            testFeatureFilter.ParametersBinderCallback = (parameters) =>
++            testFeatureFilter.ParametersBinderCallback = parameters =>
+             {
+                 binderCalled = true;
+ 
+                 return parameters;
+             };
+ 
+-            testFeatureFilter.Callback = (evaluationContext) =>
++            testFeatureFilter.Callback = evaluationContext =>
+             {
+                 //
+                 // When ParametersObject is null, Settings should be populated
+@@ -1621,25 +1621,25 @@ namespace Tests.FeatureManagement
+             const string feature6 = "feature6";
+             const string feature7 = "feature7";
+ 
+-            Environment.SetEnvironmentVariable($"feature_management:feature_flags:0:id", feature1);
+-            Environment.SetEnvironmentVariable($"feature_management:feature_flags:0:enabled", "true");
+-            Environment.SetEnvironmentVariable($"feature_management:feature_flags:0:conditions:client_filters:0:name", "TimeWindow");
+-            Environment.SetEnvironmentVariable($"feature_management:feature_flags:0:conditions:client_filters:0:parameters:End", DateTimeOffset.UtcNow.AddDays(1).ToString("r"));
++            Environment.SetEnvironmentVariable("feature_management:feature_flags:0:id", feature1);
++            Environment.SetEnvironmentVariable("feature_management:feature_flags:0:enabled", "true");
++            Environment.SetEnvironmentVariable("feature_management:feature_flags:0:conditions:client_filters:0:name", "TimeWindow");
++            Environment.SetEnvironmentVariable("feature_management:feature_flags:0:conditions:client_filters:0:parameters:End", DateTimeOffset.UtcNow.AddDays(1).ToString("r"));
+ 
+-            Environment.SetEnvironmentVariable($"feature_management:feature_flags:1:id", feature2);
+-            Environment.SetEnvironmentVariable($"feature_management:feature_flags:1:enabled", "true");
+-            Environment.SetEnvironmentVariable($"feature_management:feature_flags:1:conditions:client_filters:0:name", "TimeWindow");
+-            Environment.SetEnvironmentVariable($"feature_management:feature_flags:1:conditions:client_filters:0:parameters:End", DateTimeOffset.UtcNow.ToString("r"));
++            Environment.SetEnvironmentVariable("feature_management:feature_flags:1:id", feature2);
++            Environment.SetEnvironmentVariable("feature_management:feature_flags:1:enabled", "true");
++            Environment.SetEnvironmentVariable("feature_management:feature_flags:1:conditions:client_filters:0:name", "TimeWindow");
++            Environment.SetEnvironmentVariable("feature_management:feature_flags:1:conditions:client_filters:0:parameters:End", DateTimeOffset.UtcNow.ToString("r"));
+ 
+-            Environment.SetEnvironmentVariable($"feature_management:feature_flags:2:id", feature3);
+-            Environment.SetEnvironmentVariable($"feature_management:feature_flags:2:enabled", "true");
+-            Environment.SetEnvironmentVariable($"feature_management:feature_flags:2:conditions:client_filters:0:name", "TimeWindow");
+-            Environment.SetEnvironmentVariable($"feature_management:feature_flags:2:conditions:client_filters:0:parameters:Start", DateTimeOffset.UtcNow.ToString("r"));
++            Environment.SetEnvironmentVariable("feature_management:feature_flags:2:id", feature3);
++            Environment.SetEnvironmentVariable("feature_management:feature_flags:2:enabled", "true");
++            Environment.SetEnvironmentVariable("feature_management:feature_flags:2:conditions:client_filters:0:name", "TimeWindow");
++            Environment.SetEnvironmentVariable("feature_management:feature_flags:2:conditions:client_filters:0:parameters:Start", DateTimeOffset.UtcNow.ToString("r"));
+ 
+-            Environment.SetEnvironmentVariable($"feature_management:feature_flags:3:id", feature4);
+-            Environment.SetEnvironmentVariable($"feature_management:feature_flags:3:enabled", "true");
+-            Environment.SetEnvironmentVariable($"feature_management:feature_flags:3:conditions:client_filters:0:name", "TimeWindow");
+-            Environment.SetEnvironmentVariable($"feature_management:feature_flags:3:conditions:client_filters:0:parameters:Start", DateTimeOffset.UtcNow.AddDays(1).ToString("r"));
++            Environment.SetEnvironmentVariable("feature_management:feature_flags:3:id", feature4);
++            Environment.SetEnvironmentVariable("feature_management:feature_flags:3:enabled", "true");
++            Environment.SetEnvironmentVariable("feature_management:feature_flags:3:conditions:client_filters:0:name", "TimeWindow");
++            Environment.SetEnvironmentVariable("feature_management:feature_flags:3:conditions:client_filters:0:parameters:Start", DateTimeOffset.UtcNow.AddDays(1).ToString("r"));
+ 
+             Environment.SetEnvironmentVariable("feature_management:feature_flags:4:id", feature5);
+             Environment.SetEnvironmentVariable("feature_management:feature_flags:4:enabled", "true");
+@@ -1704,10 +1704,10 @@ namespace Tests.FeatureManagement
+         {
+             const string feature = "feature";
+ 
+-            Environment.SetEnvironmentVariable($"feature_management:feature_flags:0:id", feature);
+-            Environment.SetEnvironmentVariable($"feature_management:feature_flags:0:enabled", "true");
+-            Environment.SetEnvironmentVariable($"feature_management:feature_flags:0:conditions:client_filters:0:name", "Percentage");
+-            Environment.SetEnvironmentVariable($"feature_management:feature_flags:0:conditions:client_filters:0:parameters:Value", "50");
++            Environment.SetEnvironmentVariable("feature_management:feature_flags:0:id", feature);
++            Environment.SetEnvironmentVariable("feature_management:feature_flags:0:enabled", "true");
++            Environment.SetEnvironmentVariable("feature_management:feature_flags:0:conditions:client_filters:0:name", "Percentage");
++            Environment.SetEnvironmentVariable("feature_management:feature_flags:0:conditions:client_filters:0:parameters:Value", "50");
+ 
+             IConfiguration config = new ConfigurationBuilder().AddEnvironmentVariables().Build();
+ 
+@@ -2019,7 +2019,7 @@ namespace Tests.FeatureManagement
+                         Name = "Test",
+                         Parameters = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string>()
+                         {
+-                           { "P1", "V1" },
++                           { "P1", "V1" }
+                         }).Build()
+                     }
+                 }
+@@ -2043,7 +2043,7 @@ namespace Tests.FeatureManagement
+ 
+             bool called = false;
+ 
+-            testFeatureFilter.Callback = (evaluationContext) =>
++            testFeatureFilter.Callback = evaluationContext =>
+             {
+                 called = true;
+ 
+@@ -2083,7 +2083,7 @@ namespace Tests.FeatureManagement
+ 
+             bool called = false;
+ 
+-            testFeatureFilter.Callback = async (evaluationContext) =>
++            testFeatureFilter.Callback = async evaluationContext =>
+             {
+                 called = true;
+ 
+@@ -2669,9 +2669,9 @@ namespace Tests.FeatureManagement
+             // Start listener
+             using ActivityListener activityListener = new ActivityListener
+             {
+-                ShouldListenTo = (activitySource) => activitySource.Name == "Microsoft.FeatureManagement",
++                ShouldListenTo = activitySource => activitySource.Name == "Microsoft.FeatureManagement",
+                 Sample = (ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.AllData,
+-                ActivityStopped = (activity) =>
++                ActivityStopped = activity =>
+                 {
+                     // Stop other tests from asserting
+                     if (activity.ParentId != testActivity.Id)
+@@ -2679,7 +2679,7 @@ namespace Tests.FeatureManagement
+                         return;
+                     }
+ 
+-                    ActivityEvent? evaluationEventNullable = activity.Events.FirstOrDefault((activityEvent) => activityEvent.Name == "FeatureFlag");
++                    ActivityEvent? evaluationEventNullable = activity.Events.FirstOrDefault(activityEvent => activityEvent.Name == "FeatureFlag");
+ 
+                     if (evaluationEventNullable != null && evaluationEventNullable.Value.Tags.Any())
+                     {
+@@ -2960,7 +2960,7 @@ namespace Tests.FeatureManagement
+                         Name = "Test",
+                         Parameters = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string>()
+                         {
+-                           { "P1", "V1" },
++                           { "P1", "V1" }
+                         }).Build()
+                     }
+                 }
+@@ -2984,7 +2984,7 @@ namespace Tests.FeatureManagement
+ 
+             bool called = false;
+ 
+-            testFeatureFilter.Callback = (evaluationContext) =>
++            testFeatureFilter.Callback = evaluationContext =>
+             {
+                 called = true;
+ 
+diff --git a/tests/Tests.FeatureManagement/RecurrenceEvaluation.cs b/tests/Tests.FeatureManagement/RecurrenceEvaluation.cs
+index 498abf8..1cf50df 100644
+--- a/tests/Tests.FeatureManagement/RecurrenceEvaluation.cs
++++ b/tests/Tests.FeatureManagement/RecurrenceEvaluation.cs
+@@ -42,7 +42,7 @@ namespace Tests.FeatureManagement
+ 
+     public class RecurrenceValidatorTest
+     {
+-        private static void ConsumeValidationTestData(List<ValueTuple<TimeWindowFilterSettings, string, string>> testData)
++        private static void ConsumeValidationTestData(List<(TimeWindowFilterSettings, string, string)> testData)
+         {
+             foreach ((TimeWindowFilterSettings settings, string paramNameRef, string errorMessageRef) in testData)
+             {
+@@ -56,7 +56,7 @@ namespace Tests.FeatureManagement
+         [Fact]
+         public void GeneralRequiredParameterTest()
+         {
+-            var testData = new List<ValueTuple<TimeWindowFilterSettings, string, string>>()
++            var testData = new List<(TimeWindowFilterSettings, string, string)>()
+             {
+                 ( new TimeWindowFilterSettings()
+                 {
+@@ -109,7 +109,7 @@ namespace Tests.FeatureManagement
+         [Fact]
+         public void InvalidValueTest()
+         {
+-            var testData = new List<ValueTuple<TimeWindowFilterSettings, string, string>>()
++            var testData = new List<(TimeWindowFilterSettings, string, string)>()
+             {
+                 ( new TimeWindowFilterSettings()
+                 {
+@@ -168,7 +168,7 @@ namespace Tests.FeatureManagement
+         [Fact]
+         public void InvalidTimeWindowTest()
+         {
+-            var testData = new List<ValueTuple<TimeWindowFilterSettings, string, string>>()
++            var testData = new List<(TimeWindowFilterSettings, string, string)>()
+             {
+                 ( new TimeWindowFilterSettings()
+                 {
+@@ -390,7 +390,7 @@ namespace Tests.FeatureManagement
+         [Fact]
+         public void WeeklyPatternRequiredParameterTest()
+         {
+-            var testData = new List<ValueTuple<TimeWindowFilterSettings, string, string>>()
++            var testData = new List<(TimeWindowFilterSettings, string, string)>()
+             {
+                 ( new TimeWindowFilterSettings()
+                 {
+@@ -416,7 +416,7 @@ namespace Tests.FeatureManagement
+         [Fact]
+         public void WeeklyPatternStartNotMatchedTest()
+         {
+-            var testData = new List<ValueTuple<TimeWindowFilterSettings, string, string>>()
++            var testData = new List<(TimeWindowFilterSettings, string, string)>()
+             {
+                 ( new TimeWindowFilterSettings()
+                 {
+@@ -442,7 +442,7 @@ namespace Tests.FeatureManagement
+ 
+     public class RecurrenceEvaluatorTest
+     {
+-        private static void ConsumeEvaluationTestData(List<ValueTuple<DateTimeOffset, TimeWindowFilterSettings, bool>> testData)
++        private static void ConsumeEvaluationTestData(List<(DateTimeOffset, TimeWindowFilterSettings, bool)> testData)
+         {
+             foreach ((DateTimeOffset time, TimeWindowFilterSettings settings, bool expected) in testData)
+             {
+@@ -450,7 +450,7 @@ namespace Tests.FeatureManagement
+             }
+         }
+ 
+-        private static void ConsumeEvalutationTestData(List<ValueTuple<DateTimeOffset, TimeWindowFilterSettings, DateTimeOffset?>> testData)
++        private static void ConsumeEvalutationTestData(List<(DateTimeOffset, TimeWindowFilterSettings, DateTimeOffset?)> testData)
+         {
+             foreach ((DateTimeOffset time, TimeWindowFilterSettings settings, DateTimeOffset? expected) in testData)
+             {
+@@ -463,7 +463,7 @@ namespace Tests.FeatureManagement
+         [Fact]
+         public void MatchDailyRecurrenceTest()
+         {
+-            var testData = new List<ValueTuple<DateTimeOffset, TimeWindowFilterSettings, bool>>()
++            var testData = new List<(DateTimeOffset, TimeWindowFilterSettings, bool)>()
+             {
+                 ( DateTimeOffset.Parse("2023-9-2T00:00:00+08:00"),
+                 new TimeWindowFilterSettings()
+@@ -647,7 +647,7 @@ namespace Tests.FeatureManagement
+         [Fact]
+         public void MatchWeeklyRecurrenceTest()
+         {
+-            var testData = new List<ValueTuple<DateTimeOffset, TimeWindowFilterSettings, bool>>()
++            var testData = new List<(DateTimeOffset, TimeWindowFilterSettings, bool)>()
+             {
+                 ( DateTimeOffset.Parse("2023-9-4T00:00:00+08:00"), // Monday in the 2nd week after the Start date
+                 new TimeWindowFilterSettings()
+@@ -1189,7 +1189,7 @@ namespace Tests.FeatureManagement
+         [Fact]
+         public void FindDailyClosestStartTest()
+         {
+-            var testData = new List<ValueTuple<DateTimeOffset, TimeWindowFilterSettings, DateTimeOffset?>>()
++            var testData = new List<(DateTimeOffset, TimeWindowFilterSettings, DateTimeOffset?)>()
+             {
+                 ( DateTimeOffset.Parse("2024-2-28T00:00:00+08:00"),
+                 new TimeWindowFilterSettings()
+@@ -1266,7 +1266,7 @@ namespace Tests.FeatureManagement
+                     {
+                         Pattern = new RecurrencePattern()
+                         {
+-                            Type = RecurrencePatternType.Daily,
++                            Type = RecurrencePatternType.Daily
+                         },
+                         Range = new RecurrenceRange()
+                         {
+@@ -1286,7 +1286,7 @@ namespace Tests.FeatureManagement
+                     {
+                         Pattern = new RecurrencePattern()
+                         {
+-                            Type = RecurrencePatternType.Daily,
++                            Type = RecurrencePatternType.Daily
+                         },
+                         Range = new RecurrenceRange()
+                         {
+@@ -1306,7 +1306,7 @@ namespace Tests.FeatureManagement
+                     {
+                         Pattern = new RecurrencePattern()
+                         {
+-                            Type = RecurrencePatternType.Daily,
++                            Type = RecurrencePatternType.Daily
+                         },
+                         Range = new RecurrenceRange()
+                         {
+@@ -1326,7 +1326,7 @@ namespace Tests.FeatureManagement
+                     {
+                         Pattern = new RecurrencePattern()
+                         {
+-                            Type = RecurrencePatternType.Daily,
++                            Type = RecurrencePatternType.Daily
+                         },
+                         Range = new RecurrenceRange()
+                         {
+@@ -1344,7 +1344,7 @@ namespace Tests.FeatureManagement
+         [Fact]
+         public void FindWeeklyClosestStartTest()
+         {
+-            var testData = new List<ValueTuple<DateTimeOffset, TimeWindowFilterSettings, DateTimeOffset?>>()
++            var testData = new List<(DateTimeOffset, TimeWindowFilterSettings, DateTimeOffset?)>()
+             {
+                 ( DateTimeOffset.Parse("2024-2-1T00:00:00+08:00"),
+                 new TimeWindowFilterSettings()
+diff --git a/tests/Tests.FeatureManagement/VariantServiceProviderTest.cs b/tests/Tests.FeatureManagement/VariantServiceProviderTest.cs
+index 4e3877d..57cd38c 100644
+--- a/tests/Tests.FeatureManagement/VariantServiceProviderTest.cs
++++ b/tests/Tests.FeatureManagement/VariantServiceProviderTest.cs
+@@ -87,8 +87,7 @@ namespace Tests.FeatureManagement
+                     services.AddFeatureManagement()
+                         .WithVariantService<IAlgorithm>("DummyFeature1")
+                         .WithVariantService<IAlgorithm>("DummyFeature2");
+-                }
+-            );
++                });
+         }
+ 
+         [Fact]
+diff --git a/tests/Tests.FeatureManagement/VariantServices.cs b/tests/Tests.FeatureManagement/VariantServices.cs
+index d07c039..6548ed1 100644
+--- a/tests/Tests.FeatureManagement/VariantServices.cs
++++ b/tests/Tests.FeatureManagement/VariantServices.cs
+@@ -49,4 +49,4 @@ namespace Tests.FeatureManagement
+     {
+         public string Style { get; } = "Small";
+     }
+-}
+\ No newline at end of file
++}

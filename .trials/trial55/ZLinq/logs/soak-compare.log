@@ -1,0 +1,55 @@
+Note: switching to '0f650d6db66b27472d7ce3587abf669721a37561'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+Note: switching to '0f650d6db66b27472d7ce3587abf669721a37561'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+== soak-src: dotnet-format check
+== soak-src: host check
+== soak-src: dotnet-format format
+== soak-src: host format
+== soak-src: dotnet-format recheck
+== soak-src: host recheck
+Times (soak-src):
+  dotnet-format check      1193.2 s
+  host check                764.8 s
+  dotnet-format format     1288.8 s
+  host format               593.4 s
+  dotnet-format recheck     214.1 s
+  host recheck              134.5 s
+DIFFERENT (soak-src):
+  check output differs (/home/user/w55/ZLinq/parity/soak-src-dotnet-format-check.txt vs /home/user/w55/ZLinq/parity/soak-src-host-check.txt):
+  => Formatting a copy: net6.0, part 2 of 2 (1 project(s), 69 files with findings)
+  <= Formatting a copy: net6.0, part 2 of 2 (1 project(s), 71 files with findings)
+  => Formatting a copy: net8.0 (4 project(s), 218 files with findings)
+  <= Formatting a copy: net8.0 (4 project(s), 220 files with findings)
+  => Formatting a copy: net9.0 (4 project(s), 218 files with findings)
+  <= Formatting a copy: net9.0 (4 project(s), 220 files with findings)

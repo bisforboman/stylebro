@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "command": "format",
+  "previewOf": null,
+  "path": "/home/user/w55/Grpc/default",
+  "write": false,
+  "settings": [],
+  "conventions": [],
+  "sonar": null,
+  "agentsMd": null,
+  "runs": [
+    {
+      "run": 1,
+      "filesChanged": [],
+      "changesPerRule": {}
+    }
+  ],
+  "changesPerRule": {},
+  "filesPerRule": null,
+  "keptFindings": [
+    {
+      "path": "src/protobuf-net.Grpc/Internal/ContractOperation.cs",
+      "line": 264,
+      "column": 38,
+      "rule": "BRO1311",
+      "reason": "KeptWithOtherElement",
+      "reasonText": "another element of the same tuple type keeps its name, and a tuple type's elements are renamed together",
+      "message": "Rename tuple element 'category' to 'Category'"
+    },
+    {
+      "path": "src/protobuf-net.Grpc/Internal/ContractOperation.cs",
+      "line": 277,
+      "column": 62,
+      "rule": "BRO1311",
+      "reason": "KeptWithOtherElement",
+      "reasonText": "another element of the same tuple type keeps its name, and a tuple type's elements are renamed together",
+      "message": "Rename tuple element 'category' to 'Category'"
+    }
+  ],
+  "patch": null,
+  "clean": false,
+  "exitCode": 3,
+  "notChecked": [
+    "xunit.analyzers' rules: xunit.analyzers 1.27.0's fixes have no Fix All, so 'dotnet format' can't apply or check them (a note: the build still reports their warnings; the verdict doesn't count them)",
+    "IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)"
+  ]
+}
