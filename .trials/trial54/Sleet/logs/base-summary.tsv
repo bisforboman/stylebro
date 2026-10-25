@@ -1,0 +1,6 @@
+build	0	64s	dotnet build Sleet.slnx -c Debug
+twae-Debug	0	41s	twae Debug
+test-Debug	2	51s	env CFG=Debug bash -c dotnet test --solution Sleet.slnx -c $CFG
+twae-Release	0	32s	twae Release
+test-Release	2	45s	env CFG=Release bash -c dotnet test --solution Sleet.slnx -c $CFG
+DONE

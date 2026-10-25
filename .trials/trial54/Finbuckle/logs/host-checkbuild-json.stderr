@@ -1,0 +1,5 @@
+Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+Building Finbuckle.MultiTenant.slnx in Debug, Release with warnings as errors, and a copy of HEAD to compare...
+Debug: no findings, no new errors.
+Release: no findings, no new errors.
+Clean.

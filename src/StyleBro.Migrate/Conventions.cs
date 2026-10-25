@@ -3288,6 +3288,19 @@ internal static class Conventions
         new[] { RuleOf(convention.Key), convention.Off is { } off ? RuleOf(off) : null }.OfType<string>()
             .Any(rule => style.TryGetValue($"dotnet_diagnostic.{rule}.severity", out var severity) && severity == "none");
 
+    /// <summary>
+    /// The summary's 'RULE (what)' entries with one entry per rule: a rule two conventions turn off (BRO1306 for non-private
+    /// fields and for private constants) is one rule, its whats joined with '; ' (trial 54: "Turned 13 rules off" listed
+    /// BRO1306 twice).
+    /// </summary>
+    private static List<string> ByRule(IEnumerable<string> entries) =>
+        entries.Select(e => e.IndexOf(" (", StringComparison.Ordinal) is var at and > 0 && e.EndsWith(")", StringComparison.Ordinal)
+                ? (Rule: e.Substring(0, at), What: e.Substring(at + 2, e.Length - at - 3))
+                : (Rule: e, What: (string?)null))
+            .GroupBy(e => e.Rule)
+            .Select(g => g.Select(e => e.What).OfType<string>().ToList() is { Count: > 0 } whats ? $"{g.Key} ({string.Join("; ", whats)})" : g.Key)
+            .ToList();
+
     /// <summary>Splits a line longer than <see cref="Width"/> after the last ', ' that fits (else a space); later parts are indented.</summary>
     private static IEnumerable<string> Wrap(string line)
     {
@@ -3329,14 +3342,15 @@ internal static class Conventions
             yield return $"  Allowed both forms for {Plural(lists.BothAllowed.Count, "setting")} because your code mixes them: {string.Join(", ", lists.BothAllowed)}.";
         }
 
-        if (lists.TurnedOff.Count > 0)
+        var (turnedOff, unfollowed) = (ByRule(lists.TurnedOff), ByRule(lists.Unfollowed));
+        if (turnedOff.Count > 0)
         {
-            yield return $"  Turned {Plural(lists.TurnedOff.Count, "rule")} off because your code mixes both forms: {string.Join(", ", lists.TurnedOff)}.";
+            yield return $"  Turned {Plural(turnedOff.Count, "rule")} off because your code mixes both forms: {string.Join(", ", turnedOff)}.";
         }
 
-        if (lists.Unfollowed.Count > 0)
+        if (unfollowed.Count > 0)
         {
-            yield return $"  Turned {Plural(lists.Unfollowed.Count, "rule")} off because your code doesn't do what {(lists.Unfollowed.Count == 1 ? "it enforces" : "they enforce")}: {string.Join(", ", lists.Unfollowed)}.";
+            yield return $"  Turned {Plural(unfollowed.Count, "rule")} off because your code doesn't do what {(unfollowed.Count == 1 ? "it enforces" : "they enforce")}: {string.Join(", ", unfollowed)}.";
         }
 
         if (lists.TurnedOff.Count + lists.Unfollowed.Count + lists.BothAllowed.Count > 0)

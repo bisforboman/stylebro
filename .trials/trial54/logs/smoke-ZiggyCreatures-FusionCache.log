@@ -1,0 +1,44 @@
+== build
+  ZiggyCreatures.FusionCache.Locking.AsyncKeyed -> /home/user/cand/new/ZiggyCreatures-FusionCache/src/ZiggyCreatures.FusionCache.Locking.AsyncKeyed/bin/Debug/netstandard2.0/ZiggyCreatures.FusionCache.Locking.AsyncKeyed.dll
+  ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack -> /home/user/cand/new/ZiggyCreatures-FusionCache/src/ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack/bin/Debug/net8.0/ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack.dll
+  ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis -> /home/user/cand/new/ZiggyCreatures-FusionCache/src/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis/bin/Debug/net10.0/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis.dll
+  ZiggyCreatures.FusionCache.Simulator -> /home/user/cand/new/ZiggyCreatures-FusionCache/tests/ZiggyCreatures.FusionCache.Simulator/bin/Debug/net10.0/ZiggyCreatures.FusionCache.Simulator.dll
+  ZiggyCreatures.FusionCache.Playground -> /home/user/cand/new/ZiggyCreatures-FusionCache/tests/ZiggyCreatures.FusionCache.Playground/bin/Debug/net10.0/ZiggyCreatures.FusionCache.Playground.dll
+  WebAppTest -> /home/user/cand/new/ZiggyCreatures-FusionCache/tests/WebAppTest/bin/Debug/net10.0/WebAppTest.dll
+  AOTTester -> /home/user/cand/new/ZiggyCreatures-FusionCache/tests/AOTTester/bin/Debug/net10.0/linux-x64/AOTTester.dll
+  ZiggyCreatures.FusionCache.Benchmarks -> /home/user/cand/new/ZiggyCreatures-FusionCache/benchmarks/ZiggyCreatures.FusionCache.Benchmarks/bin/Debug/net10.0/ZiggyCreatures.FusionCache.Benchmarks.dll
+  ZiggyCreatures.FusionCache.Tests -> /home/user/cand/new/ZiggyCreatures-FusionCache/tests/ZiggyCreatures.FusionCache.Tests/bin/Debug/net10.0/ZiggyCreatures.FusionCache.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:43.49
+build rc 0
+== test
+    WARN 2026-10-25T00:31:31.484Z: FUSION [N=FusionCache I=0HNPI5SRIU4Q0] (O=0HNPI5SRIU4SE K=MyCache:foo): [DC] an error occurred while setting entry in distributed (background)
+    WARN 2026-10-25T00:31:31.484Z: FUSION [N=FusionCache I=0HNPI5SRIU4Q0] (O=0HNPI5SRIU4SE K=MyCache:foo): stopped auto-recovery because of an error after 1 processed items
+    WARN 2026-10-25T00:31:31.734Z: FUSION [N=FusionCache I=0HNPI5SRIU4PV] (O=0HNPI5SRIU4SS K=MyCache:__fc:t:*): [DC] an error occurred while getting entry from distributed
+failed FusionCacheTests.L1Tests.EagerRefreshDoesNotBreakStampedeProtection (2s 004ms)
+failed FusionCacheTests.AutoRecoveryTests.CanHandleDistributedCacheErrorsWithBackplaneRetry(serializerType: ServiceStackJson) (4s 600ms)
+    WARN 2026-10-25T00:31:36.827Z: FUSION [N=FusionCache I=0HNPI5SRIU4U7] (O=0HNPI5SRIU6PK K=MyCache:foo): [DC] an error occurred while setting entry in distributed
+    WARN 2026-10-25T00:31:36.830Z: FUSION [N=FusionCache I=0HNPI5SRIU4U6] (O=0HNPI5SRIU6Q7 K=MyCache:__fc:t:!): [DC] an error occurred while getting entry from distributed
+    WARN 2026-10-25T00:31:36.833Z: FUSION [N=FusionCache I=0HNPI5SRIU4U6] (O=0HNPI5SRIU6R6 K=MyCache:__fc:t:*): [DC] an error occurred while getting entry from distributed
+failed FusionCacheTests.AutoRecoveryTests.CanHandleIssuesWithBothDistributedCacheAndBackplane(serializerType: ProtoBufNet) (2s 312ms)
+    WARN 2026-10-25T00:31:45.177Z: FUSION [N=FusionCache I=0HNPI5SRIUBVC] (O=0HNPI5SRIUC0R K=MyCache:foo): [DC] an error occurred while setting entry in distributed
+    WARN 2026-10-25T00:31:45.179Z: FUSION [N=FusionCache I=0HNPI5SRIUBVB] (O=0HNPI5SRIUC0T K=MyCache:__fc:t:!): [DC] an error occurred while getting entry from distributed
+    WARN 2026-10-25T00:31:45.180Z: FUSION [N=FusionCache I=0HNPI5SRIUBVB] (O=0HNPI5SRIUC0U K=MyCache:__fc:t:*): [DC] an error occurred while getting entry from distributed
+failed FusionCacheTests.L1Tests.CanEagerRefreshNoCancellationAsync(memoryLockerType: Standard) (9s 180ms)
+failed FusionCacheTests.AutoRecoveryTests.CanHandleIssuesWithBothDistributedCacheAndBackplane(serializerType: NeueccMessagePack) (6s 887ms)
+    WARN 2026-10-25T00:31:52.028Z: FUSION [N=FusionCache I=0HNPI5SRIUCE1] (O=0HNPI5SRIUCF7 K=MyCache:foo): [DC] an error occurred while setting entry in distributed
+    WARN 2026-10-25T00:31:52.034Z: FUSION [N=FusionCache I=0HNPI5SRIUCE0] (O=0HNPI5SRIUCHU K=MyCache:__fc:t:!): [DC] an error occurred while getting entry from distributed
+    WARN 2026-10-25T00:31:52.067Z: FUSION [N=FusionCache I=0HNPI5SRIUCE0] (O=0HNPI5SRIUDRU K=MyCache:__fc:t:*): [DC] an error occurred while getting entry from distributed
+failed FusionCacheTests.L1L2Tests.AppliesDistributedCacheSoftTimeout(serializerType: SystemTextJson) (3s 265ms)
+    WARN 2026-10-25T00:50:08.925Z: FUSION [N=FusionCache I=0HNPI5SRJDRGG] (O=0HNPI5SRJDRGI K=MyCache:foo_c3ea88b6bc894afd895c29be0f2f53d8): an error occurred while calling the factory
+failed FusionCacheTests.L1L2Tests.DistributedLockerWorks(serializerType: CysharpMemoryPack) (5s 002ms)
+/home/user/cand/new/ZiggyCreatures-FusionCache/tests/ZiggyCreatures.FusionCache.Tests/bin/Debug/net10.0/ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64) failed with 11 error(s) (20m 09s 569ms)
+Test run summary: Failed!
+  failed: 11
+  succeeded: 1614
+  skipped: 0
+test rc 2

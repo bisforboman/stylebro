@@ -1,0 +1,1342 @@
+{
+  "schemaVersion": 1,
+  "command": "format",
+  "previewOf": null,
+  "path": "/home/user/w54/Flurl/host",
+  "write": false,
+  "settings": [],
+  "conventions": [],
+  "sonar": null,
+  "agentsMd": null,
+  "runs": [
+    {
+      "run": 1,
+      "filesChanged": [],
+      "changesPerRule": {}
+    }
+  ],
+  "changesPerRule": {},
+  "filesPerRule": null,
+  "keptFindings": [
+    {
+      "path": "src/Flurl.Http.Newtonsoft/GeneratedExtensions.cs",
+      "line": 18,
+      "column": 47,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http.Newtonsoft/GeneratedExtensions.cs",
+      "line": 29,
+      "column": 47,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 21,
+      "column": 47,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 36,
+      "column": 47,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 51,
+      "column": 47,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 66,
+      "column": 47,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 77,
+      "column": 47,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 88,
+      "column": 47,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 99,
+      "column": 47,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 110,
+      "column": 47,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 121,
+      "column": 47,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 133,
+      "column": 47,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 147,
+      "column": 47,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 161,
+      "column": 47,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 175,
+      "column": 47,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 186,
+      "column": 47,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 198,
+      "column": 47,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 212,
+      "column": 47,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 226,
+      "column": 47,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 237,
+      "column": 47,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 249,
+      "column": 47,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 263,
+      "column": 47,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 277,
+      "column": 47,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 689,
+      "column": 74,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 1208,
+      "column": 74,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/GeneratedExtensions.cs",
+      "line": 1727,
+      "column": 74,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/ISettingsContainer.cs",
+      "line": 61,
+      "column": 74,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 15,
+      "column": 50,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 17,
+      "column": 34,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 28,
+      "column": 52,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 29,
+      "column": 34,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 39,
+      "column": 52,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 40,
+      "column": 34,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 50,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 51,
+      "column": 51,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 52,
+      "column": 109,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 53,
+      "column": 34,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 63,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 64,
+      "column": 51,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 66,
+      "column": 109,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 67,
+      "column": 34,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 78,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 79,
+      "column": 34,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 90,
+      "column": 109,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 91,
+      "column": 34,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 102,
+      "column": 34,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 112,
+      "column": 52,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 113,
+      "column": 34,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 123,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 124,
+      "column": 51,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 125,
+      "column": 109,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 126,
+      "column": 34,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 136,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 137,
+      "column": 51,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 139,
+      "column": 109,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 140,
+      "column": 34,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 151,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 152,
+      "column": 34,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 163,
+      "column": 109,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 164,
+      "column": 34,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 175,
+      "column": 34,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 185,
+      "column": 52,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 186,
+      "column": 34,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 196,
+      "column": 63,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 197,
+      "column": 34,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 207,
+      "column": 65,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 208,
+      "column": 34,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 218,
+      "column": 65,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 219,
+      "column": 34,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 230,
+      "column": 34,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl.Http/UrlBuilderExtensions.cs",
+      "line": 240,
+      "column": 34,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 16,
+      "column": 50,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 27,
+      "column": 52,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 37,
+      "column": 52,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 65,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 66,
+      "column": 51,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 67,
+      "column": 109,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 77,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 78,
+      "column": 51,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 90,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 101,
+      "column": 109,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 121,
+      "column": 52,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 131,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 132,
+      "column": 51,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 133,
+      "column": 109,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 143,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 144,
+      "column": 51,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 156,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 167,
+      "column": 109,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 187,
+      "column": 52,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 197,
+      "column": 63,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 207,
+      "column": 65,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 217,
+      "column": 65,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 264,
+      "column": 50,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 275,
+      "column": 52,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 285,
+      "column": 52,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 313,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 314,
+      "column": 51,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 315,
+      "column": 109,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 325,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 326,
+      "column": 51,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 338,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 349,
+      "column": 109,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 369,
+      "column": 52,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 379,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 380,
+      "column": 51,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 381,
+      "column": 109,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 391,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 392,
+      "column": 51,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 404,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 415,
+      "column": 109,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 435,
+      "column": 52,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 445,
+      "column": 63,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 455,
+      "column": 65,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/GeneratedExtensions.cs",
+      "line": 465,
+      "column": 65,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 261,
+      "column": 50,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 289,
+      "column": 52,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 301,
+      "column": 52,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 333,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 334,
+      "column": 51,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 335,
+      "column": 109,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 345,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 346,
+      "column": 51,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 348,
+      "column": 109,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 359,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 370,
+      "column": 109,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 408,
+      "column": 52,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 415,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 416,
+      "column": 51,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 417,
+      "column": 109,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 427,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 428,
+      "column": 51,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 430,
+      "column": 109,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 441,
+      "column": 49,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 452,
+      "column": 109,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 485,
+      "column": 52,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 492,
+      "column": 63,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 502,
+      "column": 65,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/Flurl/Url.cs",
+      "line": 513,
+      "column": 65,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "test/Flurl.Test/Http/PostTests.cs",
+      "line": 92,
+      "column": 15,
+      "rule": "BRO1309",
+      "reason": "UsedThroughDynamic",
+      "reasonText": "code uses the name through 'dynamic', which binds it by name at run time",
+      "message": "Rename 'id' to 'Id'"
+    },
+    {
+      "path": "test/Flurl.Test/Http/PostTests.cs",
+      "line": 93,
+      "column": 18,
+      "rule": "BRO1309",
+      "reason": "UsedThroughDynamic",
+      "reasonText": "code uses the name through 'dynamic', which binds it by name at run time",
+      "message": "Rename 'name' to 'Name'"
+    },
+    {
+      "path": "test/Flurl.Test/Http/RealHttpTests.cs",
+      "line": 392,
+      "column": 43,
+      "rule": "BRO1309",
+      "reason": "NameInString",
+      "reasonText": "the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time",
+      "message": "Rename 'json' to 'Json'"
+    },
+    {
+      "path": "test/Flurl.Test/Http/RealHttpTests.cs",
+      "line": 393,
+      "column": 38,
+      "rule": "BRO1309",
+      "reason": "OtherPropertyKept",
+      "reasonText": "another property of the type keeps its name (it's in a string, a snapshot file or a XAML file, or it's snake_case), so all of them keep theirs",
+      "message": "Rename 'args' to 'Args'"
+    },
+    {
+      "path": "test/Flurl.Test/Http/RealHttpTests.cs",
+      "line": 394,
+      "column": 38,
+      "rule": "BRO1309",
+      "reason": "NameInString",
+      "reasonText": "the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time",
+      "message": "Rename 'form' to 'Form'"
+    },
+    {
+      "path": "test/Flurl.Test/Http/RealHttpTests.cs",
+      "line": 395,
+      "column": 38,
+      "rule": "BRO1309",
+      "reason": "NameInString",
+      "reasonText": "the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time",
+      "message": "Rename 'cookies' to 'Cookies'"
+    },
+    {
+      "path": "test/Flurl.Test/Http/RealHttpTests.cs",
+      "line": 396,
+      "column": 38,
+      "rule": "BRO1309",
+      "reason": "OtherPropertyKept",
+      "reasonText": "another property of the type keeps its name (it's in a string, a snapshot file or a XAML file, or it's snake_case), so all of them keep theirs",
+      "message": "Rename 'files' to 'Files'"
+    }
+  ],
+  "patch": null,
+  "clean": true,
+  "exitCode": 0,
+  "notChecked": [
+    "IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)"
+  ]
+}

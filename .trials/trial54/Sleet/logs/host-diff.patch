@@ -1,0 +1,3950 @@
+diff --git a/.editorconfig b/.editorconfig
+index f09a75d..26e8244 100644
+--- a/.editorconfig
++++ b/.editorconfig
+@@ -86,3 +86,61 @@ csharp_new_line_before_catch = true
+ csharp_new_line_before_finally = true
+ csharp_new_line_before_members_in_object_initializers = true
+ csharp_new_line_before_members_in_anonymous_types = true
++
++# BEGIN stylebro-migrate (stylebro-migrate init: built-in .NET rules for StyleBro's preset; edits inside are replaced)
++[*.cs]
++# Built-in .NET rules that cover StyleCop rules, at the preset's severities. Their options (brace placement, modifier
++# order, ...) come from StyleBro's preset. The severities have to be here: 'dotnet format' ignores rule severities in a
++# package's global config. Add <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> to report them on build too.
++
++# Braces (SA1503, SA1519, SA1520) are StyleBro's BRO1514-BRO1516: IDE0011's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0011.severity = none
++# Formatting: spacing, indentation, line breaks (SA1000-SA1028, SA1107, SA1134, SA1137, SA1500)
++dotnet_diagnostic.IDE0055.severity = warning
++# Access modifiers (SA1400, SA1205) are StyleBro's BRO1404/BRO1007: IDE0040's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0040.severity = none
++# Modifier order: access modifier first, then static (SA1206, SA1207)
++dotnet_diagnostic.IDE0036.severity = warning
++# 'int' instead of 'Int32' (SA1121)
++dotnet_diagnostic.IDE0049.severity = warning
++# Unnecessary parentheses (SA1119) are StyleBro's BRO1405: IDE0047's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0047.severity = none
++# Parentheses that show precedence (SA1407, SA1408) are StyleBro's BRO1406/BRO1407: IDE0048's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0048.severity = none
++# Using placement (SA1200) is StyleBro's BRO1008: IDE0065's fix can change what names bind to (CS0104, CS0118)
++dotnet_diagnostic.IDE0065.severity = none
++# Blank lines (SA1507, SA1508, SA1513) are StyleBro's BRO1517-BRO1519: the SDK's fixes break multi-targeted projects
++dotnet_diagnostic.IDE2000.severity = none
++dotnet_diagnostic.IDE2002.severity = none
++dotnet_diagnostic.IDE2003.severity = none
++# 'this.' qualification isn't required (SA1101 is off in the preset)
++dotnet_diagnostic.IDE0009.severity = none
++
++# Conventions in this repository's code (stylebro-migrate init counted them; delete a line to have it counted again)
++# init: private fields: named '_field' in 54 of 69 places in your code
++stylebro_private_field_naming = _camelCase
++# init: multi-line initializers: without a trailing comma in 348 of 406 places in your code
++stylebro_trailing_comma = omit
++# init: empty strings: your code mixes both forms (65 string.Empty, 22 ""), so BRO1106 is off. To choose one: set stylebro_empty_string_style and remove the next line.
++dotnet_diagnostic.BRO1106.severity = none
++# init: null checks: '== null' in 144 of 173 places in your code
++stylebro_null_check_style = equality_operator
++# init: split lists: your code mixes both forms (172 first item on the next line, 74 first item after '('), so BRO1107 is off. To choose one: set stylebro_split_list_first_item and remove the next line.
++dotnet_diagnostic.BRO1107.severity = none
++# init: 'new T { ... }' with an initializer: your code mixes both forms (158 without '()', 419 with '()'), so BRO1141 is off. To choose one: set stylebro_object_creation_parentheses and remove the next line.
++dotnet_diagnostic.BRO1141.severity = none
++# init: switch sections: without a blank line in 26 of 27 places in your code
++stylebro_blank_line_between_switch_sections = omit
++# init: overrides/interface implementations: 167 of 198 in your code are without a doc comment, so BRO1601 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1601.severity = none
++# init: types' members: your code mixes both forms (87 in BRO1001's order, 51 in another order), so BRO1001 is off. To choose one: set dotnet_diagnostic.BRO1001.severity and remove the next line.
++dotnet_diagnostic.BRO1001.severity = none
++# init: lambda-first calls: your code mixes both forms (2 one argument per line, 1 rest on the lambda's last line), so both are allowed. To choose one argument per line: change the next line to stylebro_allow_leading_multiline_lambda = false.
++stylebro_allow_leading_multiline_lambda = true
++# init: property summaries: 94 of 94 in your code are in their own words, so BRO1604 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1604.severity = none
++# init: C# files' line endings: LF in 228 of 228 files in your code
++end_of_line = lf
++# init: nested ifs BRO1149 would merge: kept, because your code has some (3 nested ifs; any 3 keep them: BRO1149 would merge each), so BRO1149 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1149.severity = none
++# END stylebro-migrate
+diff --git a/Directory.Packages.props b/Directory.Packages.props
+index 6ac81f1..3b2a758 100644
+--- a/Directory.Packages.props
++++ b/Directory.Packages.props
+@@ -37,4 +37,7 @@
+     <PackageVersion Include="xunit.v3.assert" Version="4.0.2" />
+     <PackageVersion Include="xunit.v3.extensibility.core" Version="4.0.2" />
+   </ItemGroup>
++  <ItemGroup>
++    <PackageVersion Include="StyleBro.Analyzers" Version="0.8.0-trial54.1" />
++  </ItemGroup>
+ </Project>
+diff --git a/build/common.props b/build/common.props
+index 13823a2..2f968eb 100644
+--- a/build/common.props
++++ b/build/common.props
+@@ -39,4 +39,7 @@
+ 
+   <!-- Written by version.proj -->
+   <Import Project="$(ArtifactsPath)\obj\git.props" Condition="Exists('$(ArtifactsPath)\obj\git.props')" />
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" PrivateAssets="all" />
++  </ItemGroup>
+ </Project>
+diff --git a/src/Sleet/Common/CmdUtils.cs b/src/Sleet/Common/CmdUtils.cs
+index 036430a..4fe8367 100644
+--- a/src/Sleet/Common/CmdUtils.cs
++++ b/src/Sleet/Common/CmdUtils.cs
+@@ -20,7 +20,7 @@ public static List<string> FilterNullValues(IEnumerable<string?> values)
+             return values.Where(v => v != null).Select(v => v!).ToList();
+         }
+ 
+-        private static readonly object _consoleLock = new object();
++        private static readonly object ConsoleLock = new object();
+ 
+         /// <summary>
+         /// Throw if a required option does not exist.
+@@ -86,7 +86,7 @@ internal static void LogToConsole(LogLevel level, string message)
+ 
+             var color = GetColor(level);
+ 
+-            lock (_consoleLock)
++            lock (ConsoleLock)
+             {
+                 // Colorize
+                 if (color.HasValue)
+@@ -121,7 +121,7 @@ internal static void LogToConsole(LogLevel level, string message)
+         }
+ 
+         /// <summary>
+-        /// True if ASSEMBLY_DEBUG is 1
++        /// True if ASSEMBLY_DEBUG is 1.
+         /// </summary>
+         internal static bool IsDebugModeEnabled()
+         {
+diff --git a/src/Sleet/Common/ExceptionUtils.cs b/src/Sleet/Common/ExceptionUtils.cs
+index dcc91bb..f382ce6 100644
+--- a/src/Sleet/Common/ExceptionUtils.cs
++++ b/src/Sleet/Common/ExceptionUtils.cs
+@@ -13,7 +13,7 @@ public static class ExceptionUtils
+     {
+         /// <summary>
+         /// [Type] Exception message
+-        /// [Type] Exception message
++        /// [Type] Exception message.
+         /// </summary>
+         internal static void LogException(Exception ex, ILogger logger)
+         {
+@@ -22,7 +22,7 @@ internal static void LogException(Exception ex, ILogger logger)
+ 
+         /// <summary>
+         /// [Type] Exception message
+-        /// [Type] Exception message
++        /// [Type] Exception message.
+         /// </summary>
+         internal static void LogException(Exception ex, ILogger logger, LogLevel logLevel)
+         {
+@@ -31,7 +31,7 @@ internal static void LogException(Exception ex, ILogger logger, LogLevel logLeve
+ 
+         /// <summary>
+         /// [Type] Exception message
+-        /// [Type] Exception message
++        /// [Type] Exception message.
+         /// </summary>
+         internal static void LogException(Exception ex, ILogger logger, LogLevel logLevel, bool showType)
+         {
+@@ -41,7 +41,7 @@ internal static void LogException(Exception ex, ILogger logger, LogLevel logLeve
+         /// <summary>
+         /// Message
+         ///   [Type] Exception message
+-        ///   [Type] Exception message
++        ///   [Type] Exception message.
+         /// </summary>
+         internal static void LogException(Exception ex, ILogger logger, LogLevel logLevel, bool showType, string message)
+         {
+@@ -60,7 +60,7 @@ internal static void LogException(Exception ex, ILogger logger, LogLevel logLeve
+ 
+         /// <summary>
+         /// [Type] Exception message
+-        /// [Type] Exception message
++        /// [Type] Exception message.
+         /// </summary>
+         internal static string GetExceptionMessage(Exception ex)
+         {
+@@ -69,7 +69,7 @@ internal static string GetExceptionMessage(Exception ex)
+ 
+         /// <summary>
+         /// [Type] Exception message
+-        /// [Type] Exception message
++        /// [Type] Exception message.
+         /// </summary>
+         internal static string GetExceptionMessage(Exception ex, bool showType)
+         {
+@@ -79,7 +79,7 @@ internal static string GetExceptionMessage(Exception ex, bool showType)
+         /// <summary>
+         /// Message
+         ///   - [Type] Exception message
+-        ///   - [Type] Exception message
++        ///   - [Type] Exception message.
+         /// </summary>
+         /// <remarks>Displays exceptions top level if no message is given.</remarks>
+         internal static string GetExceptionMessage(Exception ex, bool showType, string message)
+@@ -122,7 +122,7 @@ internal static string GetExceptionMessage(Exception ex, bool showType, string m
+         }
+ 
+         /// <summary>
+-        /// [Type] Message
++        /// [Type] Message.
+         /// </summary>
+         internal static string FormatExceptionWithName(Exception ex)
+         {
+@@ -132,7 +132,7 @@ internal static string FormatExceptionWithName(Exception ex)
+         }
+ 
+         /// <summary>
+-        /// Flatten AggregateExceptions
++        /// Flatten AggregateExceptions.
+         /// </summary>
+         internal static IEnumerable<Exception> GetExceptions(Exception ex, bool includeInner)
+         {
+@@ -153,6 +153,7 @@ internal static IEnumerable<Exception> GetExceptions(Exception ex, bool includeI
+                     {
+                         exceptions.AddRange(GetExceptions(ex.InnerException, includeInner));
+                     }
++
+                     return exceptions;
+                 }
+             }
+diff --git a/src/Sleet/ConsoleLogger.cs b/src/Sleet/ConsoleLogger.cs
+index 4fe210c..f6975c2 100644
+--- a/src/Sleet/ConsoleLogger.cs
++++ b/src/Sleet/ConsoleLogger.cs
+@@ -6,8 +6,8 @@ namespace Sleet
+ {
+     public class ConsoleLogger : LoggerBase, IDisposable
+     {
+-        private static readonly object _lockObj = new object();
+-        private static readonly Lazy<bool> _isCITrue = new Lazy<bool>(IsCIMode);
++        private static readonly object LockObj = new object();
++        private static readonly Lazy<bool> IsCITrue = new Lazy<bool>(IsCIMode);
+ 
+         /// <summary>
+         /// Collapse all messages below the minimal level.
+@@ -34,7 +34,7 @@ public override void Log(ILogMessage message)
+                 // Break up multi-line messages
+                 var messages = SplitMessages(message.Message);
+ 
+-                lock (_lockObj)
++                lock (LockObj)
+                 {
+                     for (var i = 0; i < messages.Length; i++)
+                     {
+diff --git a/src/Sleet/CreateConfigAppCommand.cs b/src/Sleet/CreateConfigAppCommand.cs
+index a15be55..7d9c4e0 100644
+--- a/src/Sleet/CreateConfigAppCommand.cs
++++ b/src/Sleet/CreateConfigAppCommand.cs
+@@ -14,19 +14,24 @@ private static void Run(CommandLineApplication cmd, ILogger log)
+         {
+             cmd.Description = "Create a new sleet.json config file.";
+ 
+-            var awss3 = cmd.Option("--s3", "Add a template entry for an Amazon S3 storage feed.",
++            var awss3 = cmd.Option("--s3",
++                "Add a template entry for an Amazon S3 storage feed.",
+                 CommandOptionType.NoValue);
+ 
+-            var provider = cmd.Option("--provider", "S3 compatible service for the --s3 template: aws (default), r2, self-hosted. Implies --s3.",
++            var provider = cmd.Option("--provider",
++                "S3 compatible service for the --s3 template: aws (default), r2, self-hosted. Implies --s3.",
+                 CommandOptionType.SingleValue);
+ 
+-            var azure = cmd.Option("--azure", "Add a template entry for an azure storage feed.",
++            var azure = cmd.Option("--azure",
++                "Add a template entry for an azure storage feed.",
+                 CommandOptionType.NoValue);
+ 
+-            var folder = cmd.Option("--local", "Add a template entry for a local folder feed.",
++            var folder = cmd.Option("--local",
++                "Add a template entry for a local folder feed.",
+                 CommandOptionType.NoValue);
+ 
+-            var output = cmd.Option("--output", "Output path. If not specified the file will be created in the working directory.",
++            var output = cmd.Option("--output",
++                "Output path. If not specified the file will be created in the working directory.",
+                 CommandOptionType.SingleValue);
+ 
+             var verbose = cmd.Option(Constants.VerboseOption, Constants.VerboseDesc, CommandOptionType.NoValue);
+@@ -46,10 +51,10 @@ private static void Run(CommandLineApplication cmd, ILogger log)
+ 
+                 var outputPath = output.HasValue() ? output.Value() : null;
+ 
+-                var storageType = awss3.HasValue() || provider.HasValue() ? FileSystemStorageType.S3 :
+-                    azure.HasValue() ? FileSystemStorageType.Azure :
+-                    folder.HasValue() ? FileSystemStorageType.Local :
+-                    FileSystemStorageType.Unspecified;
++                var storageType = awss3.HasValue() || provider.HasValue() ? FileSystemStorageType.S3
++                    : azure.HasValue() ? FileSystemStorageType.Azure
++                    : folder.HasValue() ? FileSystemStorageType.Local
++                    : FileSystemStorageType.Unspecified;
+                 var success = await CreateConfigCommand.RunAsync(storageType, outputPath, provider.Value(), log);
+ 
+                 return success ? 0 : 1;
+diff --git a/src/Sleet/DeleteAppCommand.cs b/src/Sleet/DeleteAppCommand.cs
+index 4bc7f3d..0dfd74f 100644
+--- a/src/Sleet/DeleteAppCommand.cs
++++ b/src/Sleet/DeleteAppCommand.cs
+@@ -15,16 +15,20 @@ private static void Run(CommandLineApplication cmd, ILogger log)
+         {
+             cmd.Description = "Delete a package or packages from a feed.";
+ 
+-            var optionConfigFile = cmd.Option(Constants.ConfigOption, Constants.ConfigDesc,
++            var optionConfigFile = cmd.Option(Constants.ConfigOption,
++                Constants.ConfigDesc,
+                 CommandOptionType.SingleValue);
+ 
+-            var sourceName = cmd.Option(Constants.SourceOption, Constants.SourceDesc,
++            var sourceName = cmd.Option(Constants.SourceOption,
++                Constants.SourceDesc,
+                 CommandOptionType.SingleValue);
+ 
+-            var packageId = cmd.Option("-i|--id", "Package id.",
++            var packageId = cmd.Option("-i|--id",
++                "Package id.",
+                 CommandOptionType.SingleValue);
+ 
+-            var version = cmd.Option("-v|--version", "Package version. If this is not specified all versions will be deleted.",
++            var version = cmd.Option("-v|--version",
++                "Package version. If this is not specified all versions will be deleted.",
+                 CommandOptionType.SingleValue);
+ 
+             var reason = cmd.Option("-r|--reason", "Reason for deleting the package.", CommandOptionType.SingleValue);
+diff --git a/src/Sleet/DestroyAppCommand.cs b/src/Sleet/DestroyAppCommand.cs
+index f234cce..4d376dc 100644
+--- a/src/Sleet/DestroyAppCommand.cs
++++ b/src/Sleet/DestroyAppCommand.cs
+@@ -15,10 +15,12 @@ private static void Run(CommandLineApplication cmd, ILogger log)
+         {
+             cmd.Description = "Delete all files from a feed.";
+ 
+-            var optionConfigFile = cmd.Option(Constants.ConfigOption, Constants.ConfigDesc,
++            var optionConfigFile = cmd.Option(Constants.ConfigOption,
++                Constants.ConfigDesc,
+                 CommandOptionType.SingleValue);
+ 
+-            var sourceName = cmd.Option(Constants.SourceOption, Constants.SourceDesc,
++            var sourceName = cmd.Option(Constants.SourceOption,
++                Constants.SourceDesc,
+                 CommandOptionType.SingleValue);
+ 
+             var verbose = cmd.Option(Constants.VerboseOption, Constants.VerboseDesc, CommandOptionType.NoValue);
+diff --git a/src/Sleet/DownloadAppCommand.cs b/src/Sleet/DownloadAppCommand.cs
+index 6e575e5..04add07 100644
+--- a/src/Sleet/DownloadAppCommand.cs
++++ b/src/Sleet/DownloadAppCommand.cs
+@@ -15,10 +15,12 @@ private static void Run(CommandLineApplication cmd, ILogger log)
+         {
+             cmd.Description = "Download packages from a feed to a local folder.";
+ 
+-            var optionConfigFile = cmd.Option(Constants.ConfigOption, Constants.ConfigDesc,
++            var optionConfigFile = cmd.Option(Constants.ConfigOption,
++                Constants.ConfigDesc,
+                 CommandOptionType.SingleValue);
+ 
+-            var sourceName = cmd.Option(Constants.SourceOption, Constants.SourceDesc,
++            var sourceName = cmd.Option(Constants.SourceOption,
++                Constants.SourceDesc,
+                 CommandOptionType.SingleValue);
+ 
+             var verbose = cmd.Option(Constants.VerboseOption, Constants.VerboseDesc, CommandOptionType.NoValue);
+diff --git a/src/Sleet/FeedSettingsAppCommand.cs b/src/Sleet/FeedSettingsAppCommand.cs
+index 29f3391..99aed03 100644
+--- a/src/Sleet/FeedSettingsAppCommand.cs
++++ b/src/Sleet/FeedSettingsAppCommand.cs
+@@ -16,10 +16,12 @@ private static void Run(CommandLineApplication cmd, ILogger log)
+         {
+             cmd.Description = "Read or modify feed settings stored in sleet.settings.json for the feed.";
+ 
+-            var optionConfigFile = cmd.Option(Constants.ConfigOption, Constants.ConfigDesc,
++            var optionConfigFile = cmd.Option(Constants.ConfigOption,
++                Constants.ConfigDesc,
+                 CommandOptionType.SingleValue);
+ 
+-            var sourceName = cmd.Option(Constants.SourceOption, Constants.SourceDesc,
++            var sourceName = cmd.Option(Constants.SourceOption,
++                Constants.SourceDesc,
+                 CommandOptionType.SingleValue);
+ 
+             var verbose = cmd.Option(Constants.VerboseOption, Constants.VerboseDesc, CommandOptionType.NoValue);
+diff --git a/src/Sleet/InitAppCommand.cs b/src/Sleet/InitAppCommand.cs
+index d495d34..8b032ec 100644
+--- a/src/Sleet/InitAppCommand.cs
++++ b/src/Sleet/InitAppCommand.cs
+@@ -17,10 +17,12 @@ private static void Run(CommandLineApplication cmd, ILogger log)
+         {
+             cmd.Description = "Initialize a new sleet feed.";
+ 
+-            var optionConfigFile = cmd.Option(Constants.ConfigOption, Constants.ConfigDesc,
++            var optionConfigFile = cmd.Option(Constants.ConfigOption,
++                Constants.ConfigDesc,
+                 CommandOptionType.SingleValue);
+ 
+-            var sourceName = cmd.Option(Constants.SourceOption, Constants.SourceDesc,
++            var sourceName = cmd.Option(Constants.SourceOption,
++                Constants.SourceDesc,
+                 CommandOptionType.SingleValue);
+ 
+             var verbose = cmd.Option(Constants.VerboseOption, Constants.VerboseDesc, CommandOptionType.NoValue);
+diff --git a/src/Sleet/PushAppCommand.cs b/src/Sleet/PushAppCommand.cs
+index 0abbc78..9444afd 100644
+--- a/src/Sleet/PushAppCommand.cs
++++ b/src/Sleet/PushAppCommand.cs
+@@ -22,17 +22,20 @@ private static void Run(CommandLineApplication cmd, ILogger log)
+         {
+             cmd.Description = "Push a package to a feed.";
+ 
+-            var optionConfigFile = cmd.Option(Constants.ConfigOption, Constants.ConfigDesc,
++            var optionConfigFile = cmd.Option(Constants.ConfigOption,
++                Constants.ConfigDesc,
+                 CommandOptionType.SingleValue);
+ 
+-            var sourceName = cmd.Option(Constants.SourceOption, Constants.SourceDesc,
++            var sourceName = cmd.Option(Constants.SourceOption,
++                Constants.SourceDesc,
+                 CommandOptionType.SingleValue);
+ 
+             var verbose = cmd.Option(Constants.VerboseOption, Constants.VerboseDesc, CommandOptionType.NoValue);
+             verbose.ShowInHelpText = false;
+             var verbosity = cmd.Option(Constants.VerbosityOption, Constants.VerbosityDesc, CommandOptionType.SingleValue);
+ 
+-            var forceName = cmd.Option("-f|--force", "Overwrite existing packages.",
++            var forceName = cmd.Option("-f|--force",
++                            "Overwrite existing packages.",
+                             CommandOptionType.NoValue);
+ 
+             var skipExisting = cmd.Option("--skip-existing", "Skip packages that already exist on the feed.", CommandOptionType.NoValue);
+diff --git a/src/Sleet/RecreateAppCommand.cs b/src/Sleet/RecreateAppCommand.cs
+index 07eaa95..6c0d2a6 100644
+--- a/src/Sleet/RecreateAppCommand.cs
++++ b/src/Sleet/RecreateAppCommand.cs
+@@ -15,10 +15,12 @@ private static void Run(CommandLineApplication cmd, ILogger log)
+         {
+             cmd.Description = "Recreate a feed. This downloads all packages, deletes the feed, and then creates a new feed from the existing packages. This may be used to fix feed problems or to upgrade between Sleet versions.";
+ 
+-            var optionConfigFile = cmd.Option(Constants.ConfigOption, Constants.ConfigDesc,
++            var optionConfigFile = cmd.Option(Constants.ConfigOption,
++                Constants.ConfigDesc,
+                 CommandOptionType.SingleValue);
+ 
+-            var sourceName = cmd.Option(Constants.SourceOption, Constants.SourceDesc,
++            var sourceName = cmd.Option(Constants.SourceOption,
++                Constants.SourceDesc,
+                 CommandOptionType.SingleValue);
+ 
+             var verbose = cmd.Option(Constants.VerboseOption, Constants.VerboseDesc, CommandOptionType.NoValue);
+diff --git a/src/Sleet/RetentionPruneAppCommand.cs b/src/Sleet/RetentionPruneAppCommand.cs
+index be7cd0c..c6951ae 100644
+--- a/src/Sleet/RetentionPruneAppCommand.cs
++++ b/src/Sleet/RetentionPruneAppCommand.cs
+@@ -16,10 +16,12 @@ private static void Run(CommandLineApplication cmd, ILogger log)
+         {
+             cmd.Description = "Prune feed packages.";
+ 
+-            var optionConfigFile = cmd.Option(Constants.ConfigOption, Constants.ConfigDesc,
++            var optionConfigFile = cmd.Option(Constants.ConfigOption,
++                Constants.ConfigDesc,
+                 CommandOptionType.SingleValue);
+ 
+-            var sourceName = cmd.Option(Constants.SourceOption, Constants.SourceDesc,
++            var sourceName = cmd.Option(Constants.SourceOption,
++                Constants.SourceDesc,
+                 CommandOptionType.SingleValue);
+ 
+             var verbose = cmd.Option(Constants.VerboseOption, Constants.VerboseDesc, CommandOptionType.NoValue);
+@@ -59,7 +61,7 @@ private static void Run(CommandLineApplication cmd, ILogger log)
+                         DryRun = dryRun.HasValue(),
+                         StableVersionMax = stableVersions.HasValue() ? (int?)int.Parse(stableVersions.Value()!, CultureInfo.InvariantCulture) : null,
+                         PrereleaseVersionMax = prereleaseVersions.HasValue() ? (int?)int.Parse(prereleaseVersions.Value()!, CultureInfo.InvariantCulture) : null,
+-                        GroupByFirstPrereleaseLabelCount = releaseLabelsValue.HasValue() ? (int?)int.Parse(releaseLabelsValue.Value()!, CultureInfo.InvariantCulture) : null,
++                        GroupByFirstPrereleaseLabelCount = releaseLabelsValue.HasValue() ? (int?)int.Parse(releaseLabelsValue.Value()!, CultureInfo.InvariantCulture) : null
+                     };
+ 
+                     if (packageIds.HasValue())
+diff --git a/src/Sleet/RetentionSettingsAppCommand.cs b/src/Sleet/RetentionSettingsAppCommand.cs
+index ebe4f03..ad45e07 100644
+--- a/src/Sleet/RetentionSettingsAppCommand.cs
++++ b/src/Sleet/RetentionSettingsAppCommand.cs
+@@ -16,10 +16,12 @@ private static void Run(CommandLineApplication cmd, ILogger log)
+         {
+             cmd.Description = "Modify feed settings to automatically prune packages on push.";
+ 
+-            var optionConfigFile = cmd.Option(Constants.ConfigOption, Constants.ConfigDesc,
++            var optionConfigFile = cmd.Option(Constants.ConfigOption,
++                Constants.ConfigDesc,
+                 CommandOptionType.SingleValue);
+ 
+-            var sourceName = cmd.Option(Constants.SourceOption, Constants.SourceDesc,
++            var sourceName = cmd.Option(Constants.SourceOption,
++                Constants.SourceDesc,
+                 CommandOptionType.SingleValue);
+ 
+             var verbose = cmd.Option(Constants.VerboseOption, Constants.VerboseDesc, CommandOptionType.NoValue);
+diff --git a/src/Sleet/StatsAppCommand.cs b/src/Sleet/StatsAppCommand.cs
+index 10e0e88..e3edc2c 100644
+--- a/src/Sleet/StatsAppCommand.cs
++++ b/src/Sleet/StatsAppCommand.cs
+@@ -16,10 +16,12 @@ private static void Run(CommandLineApplication cmd, ILogger log)
+         {
+             cmd.Description = "Report feed statistics.";
+ 
+-            var optionConfigFile = cmd.Option(Constants.ConfigOption, Constants.ConfigDesc,
++            var optionConfigFile = cmd.Option(Constants.ConfigOption,
++                Constants.ConfigDesc,
+                 CommandOptionType.SingleValue);
+ 
+-            var sourceName = cmd.Option(Constants.SourceOption, Constants.SourceDesc,
++            var sourceName = cmd.Option(Constants.SourceOption,
++                Constants.SourceDesc,
+                 CommandOptionType.SingleValue);
+ 
+             var verbose = cmd.Option(Constants.VerboseOption, Constants.VerboseDesc, CommandOptionType.NoValue);
+diff --git a/src/Sleet/ValidateAppCommand.cs b/src/Sleet/ValidateAppCommand.cs
+index 537cd7d..3f4d352 100644
+--- a/src/Sleet/ValidateAppCommand.cs
++++ b/src/Sleet/ValidateAppCommand.cs
+@@ -16,10 +16,12 @@ private static void Run(CommandLineApplication cmd, ILogger log)
+         {
+             cmd.Description = "Validate a feed.";
+ 
+-            var optionConfigFile = cmd.Option(Constants.ConfigOption, Constants.ConfigDesc,
++            var optionConfigFile = cmd.Option(Constants.ConfigOption,
++                Constants.ConfigDesc,
+                 CommandOptionType.SingleValue);
+ 
+-            var sourceName = cmd.Option(Constants.SourceOption, Constants.SourceDesc,
++            var sourceName = cmd.Option(Constants.SourceOption,
++                Constants.SourceDesc,
+                 CommandOptionType.SingleValue);
+ 
+             var verbose = cmd.Option(Constants.VerboseOption, Constants.VerboseDesc, CommandOptionType.NoValue);
+diff --git a/src/SleetLib/CatalogIndexEntry.cs b/src/SleetLib/CatalogIndexEntry.cs
+index 569c162..72d4ca3 100644
+--- a/src/SleetLib/CatalogIndexEntry.cs
++++ b/src/SleetLib/CatalogIndexEntry.cs
+@@ -6,7 +6,7 @@ namespace Sleet
+ {
+     /// <summary>
+     /// Unique by Id/Version
+-    /// Sorts by commit time
++    /// Sorts by commit time.
+     /// </summary>
+     public class CatalogIndexEntry : IEquatable<CatalogIndexEntry>, IComparable<CatalogIndexEntry>
+     {
+@@ -85,6 +85,7 @@ public override string ToString()
+             {
+                 return right is null;
+             }
++
+             return left.Equals(right);
+         }
+ 
+diff --git a/src/SleetLib/Commands/CreateConfigCommand.cs b/src/SleetLib/Commands/CreateConfigCommand.cs
+index dfcedc9..5662196 100644
+--- a/src/SleetLib/Commands/CreateConfigCommand.cs
++++ b/src/SleetLib/Commands/CreateConfigCommand.cs
+@@ -41,7 +41,7 @@ public static async Task<bool> RunAsync(FileSystemStorageType storageType, strin
+             }
+ 
+             var outputDir = Path.GetDirectoryName(outputPath);
+-            if (outputDir is null || !Directory.Exists(outputDir))
++            if (outputDir == null || !Directory.Exists(outputDir))
+             {
+                 log.LogError($"Directory does not exist {outputDir}");
+                 return false;
+@@ -91,7 +91,9 @@ public static async Task<bool> RunAsync(FileSystemStorageType storageType, strin
+             }
+ 
+             if (storageTemplateJson != null)
++            {
+                 sourcesArray.Add(storageTemplateJson);
++            }
+ 
+             await log.LogAsync(LogLevel.Minimal, $"Writing config template to {outputPath}");
+             File.WriteAllText(outputPath, json.ToString());
+diff --git a/src/SleetLib/Commands/DeleteCommand.cs b/src/SleetLib/Commands/DeleteCommand.cs
+index 12aa7bf..612d153 100644
+--- a/src/SleetLib/Commands/DeleteCommand.cs
++++ b/src/SleetLib/Commands/DeleteCommand.cs
+@@ -76,11 +76,11 @@ public static async Task<bool> RunAsync(LocalSettings settings, ISleetFileSystem
+ 
+             if (success)
+             {
+-                log.LogMinimal($"Successfully deleted packages.");
++                log.LogMinimal("Successfully deleted packages.");
+             }
+             else
+             {
+-                log.LogError($"Failed to delete packages.");
++                log.LogError("Failed to delete packages.");
+             }
+ 
+             return success;
+@@ -136,11 +136,11 @@ public static async Task<bool> DeletePackagesAsync(LocalSettings settings, ISlee
+ 
+             if (success)
+             {
+-                log.LogMinimal($"Successfully deleted packages.");
++                log.LogMinimal("Successfully deleted packages.");
+             }
+             else
+             {
+-                log.LogError($"Failed to delete packages.");
++                log.LogError("Failed to delete packages.");
+             }
+ 
+             return success;
+diff --git a/src/SleetLib/Commands/DownloadCommand.cs b/src/SleetLib/Commands/DownloadCommand.cs
+index 0350903..0821cd0 100644
+--- a/src/SleetLib/Commands/DownloadCommand.cs
++++ b/src/SleetLib/Commands/DownloadCommand.cs
+@@ -55,7 +55,6 @@ public static async Task<bool> RunAsync(LocalSettings settings, ISleetFileSystem
+             return success;
+         }
+ 
+-
+         /// <summary>
+         /// Download packages. This method does not lock the feed or verify the client version.
+         /// </summary>
+@@ -126,7 +125,7 @@ public static async Task<bool> DownloadPackages(LocalSettings settings, ISleetFi
+             }
+             else
+             {
+-                var message = $"Failed to download all packages!";
++                var message = "Failed to download all packages!";
+ 
+                 if (ignoreErrors)
+                 {
+diff --git a/src/SleetLib/Commands/FeedSettingsCommand.cs b/src/SleetLib/Commands/FeedSettingsCommand.cs
+index 0b97cb1..c05c632 100644
+--- a/src/SleetLib/Commands/FeedSettingsCommand.cs
++++ b/src/SleetLib/Commands/FeedSettingsCommand.cs
+@@ -11,7 +11,7 @@ namespace Sleet
+     /// --unset-all
+     /// --get
+     /// --get-all
+-    /// --set
++    /// --set.
+     /// </summary>
+     public static class FeedSettingsCommand
+     {
+@@ -51,7 +51,7 @@ public static class FeedSettingsCommand
+ 
+                 var success = await ApplySettingsAsync(context, unsetAll, getAll, getSettings, unsetSettings, setSettings);
+ 
+-                log.LogMinimal($"Run 'recreate' to rebuild the feed with the new settings.");
++                log.LogMinimal("Run 'recreate' to rebuild the feed with the new settings.");
+ 
+                 return success;
+             }
+@@ -165,7 +165,7 @@ public static class FeedSettingsCommand
+             {
+                 FeedSettingsUtility.Set(feedSettingsJson, settings);
+ 
+-                log.LogMinimal($"Updating settings");
++                log.LogMinimal("Updating settings");
+ 
+                 await feedSettings.Write(feedSettingsJson, log, token);
+ 
+diff --git a/src/SleetLib/Commands/PushCommand.cs b/src/SleetLib/Commands/PushCommand.cs
+index 1446535..71ea797 100644
+--- a/src/SleetLib/Commands/PushCommand.cs
++++ b/src/SleetLib/Commands/PushCommand.cs
+@@ -162,10 +162,13 @@ private static async Task PrunePackages(List<PackageInput> packages, SleetContex
+             {
+                 // Prune if prune is enabled for the feed
+                 var pruneContext = new RetentionPruneCommandContext();
++
+                 // Do not prune packages that were just pushed
+                 pruneContext.PinnedPackages.UnionWith(packages.Select(e => e.Identity));
++
+                 // Only prune package ids that were pushed
+                 pruneContext.PackageIds.UnionWith(packages.Select(e => e.Identity.Id));
++
+                 // Run prune against the local files
+                 await RetentionPruneCommand.PrunePackagesNoCommit(context, pruneContext);
+             }
+@@ -230,7 +233,7 @@ private static async Task PushPackages(List<PackageInput> packageInputs, SleetCo
+                 toAdd.Add(package);
+             }
+ 
+-            await log.LogAsync(LogLevel.Information, $"Processing feed changes");
++            await log.LogAsync(LogLevel.Information, "Processing feed changes");
+ 
+             // Add/Remove packages
+             var changeContext = SleetOperations.Create(existingPackageSets, toAdd, toRemove);
+diff --git a/src/SleetLib/Commands/RecreateCommand.cs b/src/SleetLib/Commands/RecreateCommand.cs
+index 9db3e8c..fe96ad1 100644
+--- a/src/SleetLib/Commands/RecreateCommand.cs
++++ b/src/SleetLib/Commands/RecreateCommand.cs
+@@ -129,7 +129,7 @@ public static async Task<bool> RunAsync(LocalSettings settings, ISleetFileSystem
+         }
+ 
+         /// <summary>
+-        /// Apply setting handlers
++        /// Apply setting handlers.
+         /// </summary>
+         private static async Task ApplySettingHandlers(LocalSettings settings, ISleetFileSystem source, ILogger log, FeedSettings feedSettings, CancellationToken token)
+         {
+diff --git a/src/SleetLib/Commands/RetentionPruneCommand.cs b/src/SleetLib/Commands/RetentionPruneCommand.cs
+index e8e5b6c..f641976 100644
+--- a/src/SleetLib/Commands/RetentionPruneCommand.cs
++++ b/src/SleetLib/Commands/RetentionPruneCommand.cs
+@@ -14,7 +14,7 @@ public static class RetentionPruneCommand
+         /// 1. Lock the feed
+         /// 2. Verify client compat
+         /// 3. Prune packges
+-        /// 4. Commit
++        /// 4. Commit.
+         /// </summary>
+         public static async Task<bool> RunAsync(LocalSettings settings, ISleetFileSystem source, RetentionPruneCommandContext pruneContext, ILogger log)
+         {
+@@ -49,7 +49,7 @@ public static async Task<bool> RunAsync(LocalSettings settings, ISleetFileSystem
+         }
+ 
+         /// <summary>
+-        /// Prune feed packages and commit to source
++        /// Prune feed packages and commit to source.
+         /// </summary>
+         public static async Task<bool> PrunePackages(SleetContext context, RetentionPruneCommandContext pruneContext)
+         {
+@@ -75,7 +75,7 @@ public static async Task<bool> PrunePackages(SleetContext context, RetentionPrun
+         }
+ 
+         /// <summary>
+-        /// Prune feed packages without committing 
++        /// Prune feed packages without committing.
+         /// </summary>
+         public static async Task<HashSet<PackageIdentity>> PrunePackagesNoCommit(SleetContext context, RetentionPruneCommandContext pruneContext)
+         {
+@@ -110,7 +110,7 @@ public static async Task<HashSet<PackageIdentity>> PrunePackagesNoCommit(SleetCo
+         }
+ 
+         /// <summary>
+-        /// Remove packages from feed without committing
++        /// Remove packages from feed without committing.
+         /// </summary>
+         private static async Task RemovePackages(SleetContext context, PackageSets existingPackageSets, HashSet<PackageIdentity> packagesToRemove, bool dryRun, ILogger log)
+         {
+@@ -140,7 +140,7 @@ private static async Task RemovePackages(SleetContext context, PackageSets exist
+ 
+             if (toRemove.Count < 1 && toRemoveSymbols.Count < 1)
+             {
+-                await log.LogAsync(LogLevel.Minimal, $"No packages need pruning.");
++                await log.LogAsync(LogLevel.Minimal, "No packages need pruning.");
+             }
+             else if (!dryRun)
+             {
+diff --git a/src/SleetLib/Commands/RetentionSettingsCommand.cs b/src/SleetLib/Commands/RetentionSettingsCommand.cs
+index fb7aef0..bca9876 100644
+--- a/src/SleetLib/Commands/RetentionSettingsCommand.cs
++++ b/src/SleetLib/Commands/RetentionSettingsCommand.cs
+@@ -6,9 +6,8 @@ namespace Sleet
+ {
+     public static class RetentionSettingsCommand
+     {
+-
+         /// <summary>
+-        /// Enable/Disable retention and commit
++        /// Enable/Disable retention and commit.
+         /// </summary>
+         public static Task<bool> RunAsync(LocalSettings settings, ISleetFileSystem source, int stableVersionMax, int prereleaseVersionMax, bool disableRetention, ILogger log)
+         {
+@@ -16,7 +15,7 @@ public static Task<bool> RunAsync(LocalSettings settings, ISleetFileSystem sourc
+         }
+ 
+         /// <summary>
+-        /// Enable/Disable retention and commit
++        /// Enable/Disable retention and commit.
+         /// </summary>
+         public static async Task<bool> RunAsync(LocalSettings settings, ISleetFileSystem source, int stableVersionMax, int prereleaseVersionMax, int? releaseLabelCount, bool disableRetention, ILogger log)
+         {
+@@ -83,7 +82,7 @@ public static async Task<bool> UpdateRetentionSettings(SleetContext context, int
+ 
+                 await log.LogAsync(LogLevel.Minimal, $"Successfully updated package retention settings. Stable: {stableVersionMax} Prerelease: {prereleaseVersionMax}{releaseLabelsMessage}");
+ 
+-                await log.LogAsync(LogLevel.Minimal, $"Run prune to apply the new settings and remove packages from the feed.");
++                await log.LogAsync(LogLevel.Minimal, "Run prune to apply the new settings and remove packages from the feed.");
+             }
+             else
+             {
+diff --git a/src/SleetLib/Commands/StatsCommand.cs b/src/SleetLib/Commands/StatsCommand.cs
+index 9572cff..ec40042 100644
+--- a/src/SleetLib/Commands/StatsCommand.cs
++++ b/src/SleetLib/Commands/StatsCommand.cs
+@@ -40,7 +40,8 @@ public static async Task<bool> RunAsync(LocalSettings settings, ISleetFileSystem
+ 
+                 var uniqueIds = existingPackageSets.Packages.Index
+                     .Concat(existingPackageSets.Symbols.Index)
+-                    .Select(e => e.Id).Distinct(StringComparer.OrdinalIgnoreCase);
++                    .Select(e => e.Id)
++                    .Distinct(StringComparer.OrdinalIgnoreCase);
+ 
+                 log.LogMinimal($"Packages: {existingPackageSets.Packages.Index.Count}");
+                 log.LogMinimal($"Symbols Packages: {existingPackageSets.Symbols.Index.Count}");
+diff --git a/src/SleetLib/Commands/ValidateCommand.cs b/src/SleetLib/Commands/ValidateCommand.cs
+index f5085dc..7420d4b 100644
+--- a/src/SleetLib/Commands/ValidateCommand.cs
++++ b/src/SleetLib/Commands/ValidateCommand.cs
+@@ -195,11 +195,11 @@ public static async Task<bool> Validate(LocalSettings settings, ISleetFileSystem
+ 
+             if (success)
+             {
+-                log.LogMinimal($"Feed valid");
++                log.LogMinimal("Feed valid");
+             }
+             else
+             {
+-                log.LogError($"Feed invalid!");
++                log.LogError("Feed invalid!");
+             }
+ 
+             return success;
+diff --git a/src/SleetLib/Common/ExceptionUtilsSleetLib.cs b/src/SleetLib/Common/ExceptionUtilsSleetLib.cs
+index 2741e0b..a46df94 100644
+--- a/src/SleetLib/Common/ExceptionUtilsSleetLib.cs
++++ b/src/SleetLib/Common/ExceptionUtilsSleetLib.cs
+@@ -12,7 +12,7 @@ namespace Sleet
+     public static class ExceptionUtilsSleetLib
+     {
+         /// <summary>
+-        /// [Type] Exception message
++        /// [Type] Exception message.
+         /// </summary>
+         internal static void LogException(Exception ex, ILogger logger)
+         {
+@@ -20,7 +20,7 @@ internal static void LogException(Exception ex, ILogger logger)
+         }
+ 
+         /// <summary>
+-        /// [Type] Exception message
++        /// [Type] Exception message.
+         /// </summary>
+         internal static void LogException(Exception ex, ILogger logger, LogLevel logLevel)
+         {
+@@ -28,7 +28,7 @@ internal static void LogException(Exception ex, ILogger logger, LogLevel logLeve
+         }
+ 
+         /// <summary>
+-        /// [Type] Exception message
++        /// [Type] Exception message.
+         /// </summary>
+         internal static void LogException(Exception ex, ILogger logger, LogLevel logLevel, bool showType)
+         {
+@@ -37,7 +37,7 @@ internal static void LogException(Exception ex, ILogger logger, LogLevel logLeve
+ 
+         /// <summary>
+         /// Message
+-        ///   [Type] Exception message
++        ///   [Type] Exception message.
+         /// </summary>
+         internal static void LogException(Exception ex, ILogger logger, LogLevel logLevel, bool showType, string message)
+         {
+@@ -55,7 +55,7 @@ internal static void LogException(Exception ex, ILogger logger, LogLevel logLeve
+         }
+ 
+         /// <summary>
+-        /// [Type] Exception message
++        /// [Type] Exception message.
+         /// </summary>
+         internal static string GetExceptionMessage(Exception ex)
+         {
+@@ -63,7 +63,7 @@ internal static string GetExceptionMessage(Exception ex)
+         }
+ 
+         /// <summary>
+-        /// [Type] Exception message
++        /// [Type] Exception message.
+         /// </summary>
+         internal static string GetExceptionMessage(Exception ex, bool showType)
+         {
+@@ -72,7 +72,7 @@ internal static string GetExceptionMessage(Exception ex, bool showType)
+ 
+         /// <summary>
+         /// Message
+-        ///   - [Type] Exception message
++        ///   - [Type] Exception message.
+         /// </summary>
+         /// <remarks>Displays exceptions top level if no message is given.</remarks>
+         internal static string GetExceptionMessage(Exception ex, bool showType, string message)
+@@ -115,7 +115,7 @@ internal static string GetExceptionMessage(Exception ex, bool showType, string m
+         }
+ 
+         /// <summary>
+-        /// [Type] Message
++        /// [Type] Message.
+         /// </summary>
+         internal static string FormatExceptionWithName(Exception ex)
+         {
+@@ -125,7 +125,7 @@ internal static string FormatExceptionWithName(Exception ex)
+         }
+ 
+         /// <summary>
+-        /// Flatten AggregateExceptions
++        /// Flatten AggregateExceptions.
+         /// </summary>
+         internal static IEnumerable<Exception> GetExceptions(Exception? ex, bool includeInner)
+         {
+@@ -146,6 +146,7 @@ internal static IEnumerable<Exception> GetExceptions(Exception? ex, bool include
+                     {
+                         exceptions.AddRange(GetExceptions(ex.InnerException, includeInner));
+                     }
++
+                     return exceptions;
+                 }
+             }
+diff --git a/src/SleetLib/Common/JsonLDTokenComparer.cs b/src/SleetLib/Common/JsonLDTokenComparer.cs
+index 16de907..18b9679 100644
+--- a/src/SleetLib/Common/JsonLDTokenComparer.cs
++++ b/src/SleetLib/Common/JsonLDTokenComparer.cs
+@@ -6,7 +6,7 @@
+ namespace Sleet
+ {
+     /// <summary>
+-    /// Matches the json sort order of nuget.org
++    /// Matches the json sort order of nuget.org.
+     /// </summary>
+     public class JsonLDTokenComparer : IComparer<JToken>
+     {
+@@ -18,7 +18,7 @@ public class JsonLDTokenComparer : IComparer<JToken>
+         public static JsonLDTokenComparer Instance { get; } = new JsonLDTokenComparer();
+ 
+         /// <summary>
+-        /// Apply json-ld formatting
++        /// Apply json-ld formatting.
+         /// </summary>
+         public static JObject Format(JObject json, bool recurse = true)
+         {
+@@ -49,10 +49,12 @@ public int Compare(JToken? x, JToken? y)
+             {
+                 return 0;
+             }
++
+             if (x == null)
+             {
+                 return -1;
+             }
++
+             if (y == null)
+             {
+                 return 1;
+diff --git a/src/SleetLib/Common/PackageSets.cs b/src/SleetLib/Common/PackageSets.cs
+index c2c220c..c777fbd 100644
+--- a/src/SleetLib/Common/PackageSets.cs
++++ b/src/SleetLib/Common/PackageSets.cs
+@@ -5,7 +5,7 @@
+ namespace Sleet
+ {
+     /// <summary>
+-    /// Represents all entries in PackageIndexFile
++    /// Represents all entries in PackageIndexFile.
+     /// </summary>
+     public class PackageSets
+     {
+diff --git a/src/SleetLib/Common/SleetFileComparer.cs b/src/SleetLib/Common/SleetFileComparer.cs
+index d3ac26f..ff083b2 100644
+--- a/src/SleetLib/Common/SleetFileComparer.cs
++++ b/src/SleetLib/Common/SleetFileComparer.cs
+@@ -13,7 +13,7 @@ namespace Sleet
+     /// 1) Nupkg/nuspec files, these are usually the largest and slowest files
+     /// 2) Misc files such as package details pages and catalog entry pages.
+     /// 3) index.json files
+-    /// 4) Search page
++    /// 4) Search page.
+     ///
+     /// </summary>
+     public class SleetFileComparer : IComparer<ISleetFile>
+diff --git a/src/SleetLib/Common/TaskUtils.cs b/src/SleetLib/Common/TaskUtils.cs
+index ae652ee..0ea3e1e 100644
+--- a/src/SleetLib/Common/TaskUtils.cs
++++ b/src/SleetLib/Common/TaskUtils.cs
+@@ -79,7 +79,6 @@ public static Task<T[]> RunAsync<T>(IEnumerable<Func<Task<T>>> tasks)
+             return RunAsync(tasks, CancellationToken.None);
+         }
+ 
+-
+         /// <summary>
+         /// Run tasks in parallel and returns the results in the original order.
+         /// </summary>
+@@ -109,7 +108,7 @@ public static Task<T[]> RunAsync<T>(IEnumerable<Func<Task<T>>> tasks, bool useTa
+         /// <summary>
+         /// Run tasks in parallel and returns the results in the original order.
+         /// </summary>
+-        public async static Task<R[]> RunAsync<T, R>(IEnumerable<Func<Task<T>>> tasks, bool useTaskRun, int maxThreads, Func<Task<T>, Task<R>> process, CancellationToken token)
++        public static async Task<TR[]> RunAsync<T, TR>(IEnumerable<Func<Task<T>>> tasks, bool useTaskRun, int maxThreads, Func<Task<T>, Task<TR>> process, CancellationToken token)
+         {
+             var toRun = new ConcurrentQueue<WorkItem<T>>();
+ 
+@@ -124,7 +123,7 @@ public static Task<T[]> RunAsync<T>(IEnumerable<Func<Task<T>>> tasks, bool useTa
+             var totalCount = index;
+ 
+             // Create an array for the results, at this point index is the count.
+-            var results = new R[totalCount];
++            var results = new TR[totalCount];
+ 
+             List<Task>? threads = null;
+             var taskCount = GetAdditionalThreadCount(maxThreads, totalCount);
+@@ -182,7 +181,7 @@ private static int GetAdditionalThreadCount(int maxThreads, int index)
+         /// <summary>
+         /// Run tasks on a single thread.
+         /// </summary>
+-        private static async Task RunTaskAsync<T, R>(ConcurrentQueue<WorkItem<T>> toRun, R[] results, Func<Task<T>, Task<R>> process, CancellationToken token)
++        private static async Task RunTaskAsync<T, TR>(ConcurrentQueue<WorkItem<T>> toRun, TR[] results, Func<Task<T>, Task<TR>> process, CancellationToken token)
+         {
+             // Run until cancelled or we are out of work.
+             while (!token.IsCancellationRequested && toRun.TryDequeue(out var item))
+diff --git a/src/SleetLib/ExternalSearchHandler.cs b/src/SleetLib/ExternalSearchHandler.cs
+index 362c269..0ed6451 100644
+--- a/src/SleetLib/ExternalSearchHandler.cs
++++ b/src/SleetLib/ExternalSearchHandler.cs
+@@ -6,7 +6,7 @@
+ namespace Sleet
+ {
+     /// <summary>
+-    /// Updates search URI in index.json based on externalsearch
++    /// Updates search URI in index.json based on externalsearch.
+     /// </summary>
+     public class ExternalSearchHandler : IFeedSettingHandler
+     {
+diff --git a/src/SleetLib/FileSystem/AmazonS3File.cs b/src/SleetLib/FileSystem/AmazonS3File.cs
+index cbc4107..8688aac 100644
+--- a/src/SleetLib/FileSystem/AmazonS3File.cs
++++ b/src/SleetLib/FileSystem/AmazonS3File.cs
+@@ -11,15 +11,15 @@ namespace Sleet
+ {
+     public class AmazonS3File : FileBase
+     {
+-        private readonly IAmazonS3 client;
+-        private readonly string bucketName;
+-        private readonly string key;
+-        private readonly bool compress = true;
+-        private readonly ServerSideEncryptionMethod serverSideEncryptionMethod;
+-        private readonly S3CannedACL? acl;
+-        private readonly bool disablePayloadSigning;
+-        private readonly string immutableCacheControl;
+-        private readonly string mutableCacheControl;
++        private readonly IAmazonS3 _client;
++        private readonly string _bucketName;
++        private readonly string _key;
++        private readonly bool _compress = true;
++        private readonly ServerSideEncryptionMethod _serverSideEncryptionMethod;
++        private readonly S3CannedACL? _acl;
++        private readonly bool _disablePayloadSigning;
++        private readonly string _immutableCacheControl;
++        private readonly string _mutableCacheControl;
+ 
+         internal AmazonS3File(
+             AmazonS3FileSystem fileSystem,
+@@ -37,22 +37,24 @@ public class AmazonS3File : FileBase
+             string? mutableCacheControl = null)
+             : base(fileSystem, rootPath, displayPath, localCacheFile, fileSystem.LocalCache.PerfTracker)
+         {
+-            this.client = client;
+-            this.bucketName = bucketName;
+-            this.key = key;
+-            this.compress = compress;
+-            this.serverSideEncryptionMethod = serverSideEncryptionMethod;
+-            this.acl = acl;
+-            this.disablePayloadSigning = disablePayloadSigning;
+-            this.immutableCacheControl = immutableCacheControl ?? "no-store";
+-            this.mutableCacheControl = mutableCacheControl ?? "no-store";
++            _client = client;
++            _bucketName = bucketName;
++            _key = key;
++            _compress = compress;
++            _serverSideEncryptionMethod = serverSideEncryptionMethod;
++            _acl = acl;
++            _disablePayloadSigning = disablePayloadSigning;
++            _immutableCacheControl = immutableCacheControl ?? "no-store";
++            _mutableCacheControl = mutableCacheControl ?? "no-store";
+         }
+ 
+         protected override async Task CopyFromSource(ILogger log, CancellationToken token)
+         {
+             var absoluteUri = RootPath;
+-            if (!await FileExistsAsync(client, bucketName, key, token).ConfigureAwait(false))
++            if (!await FileExistsAsync(_client, _bucketName, _key, token).ConfigureAwait(false))
++            {
+                 return;
++            }
+ 
+             log.LogVerbose($"GET {absoluteUri}");
+ 
+@@ -61,7 +63,7 @@ protected override async Task CopyFromSource(ILogger log, CancellationToken toke
+             string contentEncoding;
+             using (var cache = File.OpenWrite(LocalCacheFile.FullName))
+             {
+-                contentEncoding = await DownloadFileAsync(client, bucketName, key, cache, token).ConfigureAwait(false);
++                contentEncoding = await DownloadFileAsync(_client, _bucketName, _key, cache, token).ConfigureAwait(false);
+             }
+ 
+             if (contentEncoding?.Equals("gzip", StringComparison.OrdinalIgnoreCase) == true)
+@@ -87,10 +89,10 @@ protected override async Task CopyToSource(ILogger log, CancellationToken token)
+             var absoluteUri = RootPath;
+             if (!File.Exists(LocalCacheFile.FullName))
+             {
+-                if (await FileExistsAsync(client, bucketName, key, token).ConfigureAwait(false))
++                if (await FileExistsAsync(_client, _bucketName, _key, token).ConfigureAwait(false))
+                 {
+                     log.LogVerbose($"Removing {absoluteUri}");
+-                    await RemoveFileAsync(client, bucketName, key, token).ConfigureAwait(false);
++                    await RemoveFileAsync(_client, _bucketName, _key, token).ConfigureAwait(false);
+                 }
+                 else
+                 {
+@@ -108,48 +110,48 @@ protected override async Task CopyToSource(ILogger log, CancellationToken token)
+                 string? contentType = null, contentEncoding = null, cacheControl = "no-store";
+                 var disposeWriteStream = false;
+ 
+-                if (key.EndsWith(".nupkg", StringComparison.OrdinalIgnoreCase))
++                if (_key.EndsWith(".nupkg", StringComparison.OrdinalIgnoreCase))
+                 {
+                     contentType = "application/zip";
+-                    cacheControl = immutableCacheControl;
++                    cacheControl = _immutableCacheControl;
+                 }
+-                else if (key.EndsWith(".xml", StringComparison.OrdinalIgnoreCase)
+-                         || key.EndsWith(".nuspec", StringComparison.OrdinalIgnoreCase))
++                else if (_key.EndsWith(".xml", StringComparison.OrdinalIgnoreCase)
++                         || _key.EndsWith(".nuspec", StringComparison.OrdinalIgnoreCase))
+                 {
+                     contentType = "application/xml";
+-                    cacheControl = immutableCacheControl;
++                    cacheControl = _immutableCacheControl;
+                 }
+-                else if (key.EndsWith(".svg", StringComparison.OrdinalIgnoreCase))
++                else if (_key.EndsWith(".svg", StringComparison.OrdinalIgnoreCase))
+                 {
+                     contentType = "image/svg+xml";
+-                    cacheControl = mutableCacheControl;
++                    cacheControl = _mutableCacheControl;
+                 }
+                 else if (absoluteUri.AbsoluteUri.EndsWith("/icon", StringComparison.Ordinal))
+                 {
+                     contentType = "image/png";
+-                    cacheControl = immutableCacheControl;
++                    cacheControl = _immutableCacheControl;
+                 }
+                 else if (absoluteUri.AbsoluteUri.EndsWith("/readme", StringComparison.Ordinal))
+                 {
+                     contentType = "text/markdown";
+-                    cacheControl = immutableCacheControl;
++                    cacheControl = _immutableCacheControl;
+                 }
+-                else if (key.EndsWith(".json", StringComparison.OrdinalIgnoreCase)
++                else if (_key.EndsWith(".json", StringComparison.OrdinalIgnoreCase)
+                          || await JsonUtility.IsJsonAsync(LocalCacheFile.FullName))
+                 {
+-                    cacheControl = mutableCacheControl;
++                    cacheControl = _mutableCacheControl;
+                     contentType = "application/json";
+-                    if (compress && !SkipCompress())
++                    if (_compress && !SkipCompress())
+                     {
+                         contentEncoding = "gzip";
+                         writeStream = await JsonUtility.GZipAndMinifyAsync(cache);
+                         disposeWriteStream = true;
+                     }
+                 }
+-                else if (key.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)
+-                         || key.EndsWith(".pdb", StringComparison.OrdinalIgnoreCase))
++                else if (_key.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)
++                         || _key.EndsWith(".pdb", StringComparison.OrdinalIgnoreCase))
+                 {
+-                    cacheControl = immutableCacheControl;
++                    cacheControl = _immutableCacheControl;
+                     contentType = "application/octet-stream";
+                 }
+                 else
+@@ -159,7 +161,7 @@ protected override async Task CopyToSource(ILogger log, CancellationToken token)
+ 
+                 try
+                 {
+-                    await UploadFileAsync(client, bucketName, key, contentType, contentEncoding, writeStream, serverSideEncryptionMethod, acl, disablePayloadSigning, cacheControl, token)
++                    await UploadFileAsync(_client, _bucketName, _key, contentType, contentEncoding, writeStream, _serverSideEncryptionMethod, _acl, _disablePayloadSigning, cacheControl, token)
+                         .ConfigureAwait(false);
+                 }
+                 finally
+@@ -174,7 +176,7 @@ await UploadFileAsync(client, bucketName, key, contentType, contentEncoding, wri
+ 
+         protected override Task<bool> RemoteExists(ILogger log, CancellationToken token)
+         {
+-            return FileExistsAsync(client, bucketName, key, token);
++            return FileExistsAsync(_client, _bucketName, _key, token);
+         }
+     }
+ }
+diff --git a/src/SleetLib/FileSystem/AmazonS3FileSystem.cs b/src/SleetLib/FileSystem/AmazonS3FileSystem.cs
+index 68f8f4c..f1ca74f 100644
+--- a/src/SleetLib/FileSystem/AmazonS3FileSystem.cs
++++ b/src/SleetLib/FileSystem/AmazonS3FileSystem.cs
+@@ -20,7 +20,6 @@ public class AmazonS3FileSystem : FileSystemBase
+ 
+         private bool? _hasBucket;
+ 
+-
+         public AmazonS3FileSystem(LocalCache cache, Uri root, IAmazonS3 client, string bucketName, string acl, bool disablePayloadSigning = false)
+             : this(cache, root, root, client, bucketName, ServerSideEncryptionMethod.None, acl: acl, disablePayloadSigning: disablePayloadSigning)
+         {
+@@ -69,8 +68,8 @@ public override async Task<bool> Validate(ILogger log, CancellationToken token)
+             if (!isBucketFound)
+             {
+                 log.LogError(
+-                    $"Unable to find {_bucketName}. Verify that the Amazon account and bucket exists. The bucket " +
+-                    "must be created manually before using this feed.");
++                    $"Unable to find {_bucketName}. Verify that the Amazon account and bucket exists. The bucket "
++                    + "must be created manually before using this feed.");
+             }
+ 
+             return isBucketFound;
+@@ -85,7 +84,7 @@ public override ISleetFile Get(Uri path)
+         {
+             return GetOrAddFile(path,
+                 caseSensitive: true,
+-                createFile: (pair) => CreateAmazonS3File(pair));
++                createFile: pair => CreateAmazonS3File(pair));
+         }
+ 
+         public override async Task<IReadOnlyList<ISleetFile>> GetFiles(ILogger log, CancellationToken token)
+@@ -171,7 +170,6 @@ private async Task<bool> BucketExists(CancellationToken token)
+ 
+         public override async Task CreateBucket(ILogger log, CancellationToken token)
+         {
+-
+             if (!await HasBucket(log, token))
+             {
+                 log.LogInformation($"Creating new bucket: {_bucketName}");
+@@ -240,6 +238,7 @@ public override async Task DeleteBucket(ILogger log, CancellationToken token)
+                     log.LogWarning($"Transient error may happen during deletion. S3 bucket does not exist any more: {ex.Message}.");
+                 }
+             }
++
+             _hasBucket = false;
+         }
+ 
+@@ -299,10 +298,9 @@ private Task SetBucketPolicy(ILogger log, CancellationToken token)
+             var policyRequest = new PutBucketPolicyRequest()
+             {
+                 BucketName = _bucketName,
+-                Policy = GetReadOnlyPolicy(_bucketName).ToString(),
++                Policy = GetReadOnlyPolicy(_bucketName).ToString()
+             };
+ 
+-
+             return _client.PutBucketPolicyAsync(policyRequest, token);
+         }
+ 
+@@ -425,8 +423,7 @@ private static JObject GetReadOnlyPolicy(string bucketName)
+                             new JProperty("Effect", "Allow"),
+                             new JProperty("Principal", "*"),
+                             new JProperty("Action", new JArray("s3:GetObject")),
+-                            new JProperty("Resource", new JArray($"arn:aws:s3:::{bucketName}/*"))
+-                        ))));
++                            new JProperty("Resource", new JArray($"arn:aws:s3:::{bucketName}/*"))))));
+         }
+     }
+ }
+diff --git a/src/SleetLib/FileSystem/AmazonS3FileSystemAbstraction.cs b/src/SleetLib/FileSystem/AmazonS3FileSystemAbstraction.cs
+index ce8a4be..ce11e7a 100644
+--- a/src/SleetLib/FileSystem/AmazonS3FileSystemAbstraction.cs
++++ b/src/SleetLib/FileSystem/AmazonS3FileSystemAbstraction.cs
+@@ -66,7 +66,7 @@ public static class AmazonS3FileSystemAbstraction
+             var listObjectsRequest = new ListObjectsV2Request
+             {
+                 BucketName = bucketName,
+-                Prefix = key,
++                Prefix = key
+             };
+             var listObjectsResponse = await client
+                 .ListObjectsV2Async(listObjectsRequest, token)
+@@ -85,7 +85,7 @@ public static class AmazonS3FileSystemAbstraction
+             var listObjectsRequest = new ListObjectsV2Request
+             {
+                 BucketName = bucketName,
+-                MaxKeys = MaximumNumberOfObjectsToFetch,
++                MaxKeys = MaximumNumberOfObjectsToFetch
+             };
+ 
+             ListObjectsV2Response listObjectsResponse;
+@@ -113,7 +113,7 @@ public static Task RemoveFileAsync(IAmazonS3 client, string bucketName, string k
+             var request = new DeleteObjectsRequest
+             {
+                 BucketName = bucketName,
+-                Objects = objects.ToList(),
++                Objects = objects.ToList()
+             };
+ 
+             return request.Objects.Count == 0
+@@ -158,7 +158,9 @@ public static Task RemoveFileAsync(IAmazonS3 client, string bucketName, string k
+             }
+ 
+             if (contentEncoding != null)
++            {
+                 request.Headers.ContentEncoding = contentEncoding;
++            }
+ 
+             if (acl != null)
+             {
+@@ -166,7 +168,9 @@ public static Task RemoveFileAsync(IAmazonS3 client, string bucketName, string k
+             }
+ 
+             using (transferUtility)
++            {
+                 await transferUtility.UploadAsync(request, token).ConfigureAwait(false);
++            }
+         }
+ 
+         /// <summary>
+diff --git a/src/SleetLib/FileSystem/AmazonS3FileSystemLock.cs b/src/SleetLib/FileSystem/AmazonS3FileSystemLock.cs
+index 7970cd1..e5dc9e9 100644
+--- a/src/SleetLib/FileSystem/AmazonS3FileSystemLock.cs
++++ b/src/SleetLib/FileSystem/AmazonS3FileSystemLock.cs
+@@ -14,18 +14,18 @@ public class AmazonS3FileSystemLock : FileSystemLockBase
+     {
+         public const string LockFile = ".feedlock";
+ 
+-        private readonly string bucketName;
+-        private readonly IAmazonS3 client;
+-        private readonly ServerSideEncryptionMethod serverSideEncryptionMethod;
+-        private readonly bool disablePayloadSigning;
++        private readonly string _bucketName;
++        private readonly IAmazonS3 _client;
++        private readonly ServerSideEncryptionMethod _serverSideEncryptionMethod;
++        private readonly bool _disablePayloadSigning;
+ 
+         public AmazonS3FileSystemLock(IAmazonS3 client, string bucketName, ServerSideEncryptionMethod serverSideEncryptionMethod, bool disablePayloadSigning, ILogger log)
+             : base(log)
+         {
+-            this.client = client;
+-            this.bucketName = bucketName;
+-            this.serverSideEncryptionMethod = serverSideEncryptionMethod;
+-            this.disablePayloadSigning = disablePayloadSigning;
++            _client = client;
++            _bucketName = bucketName;
++            _serverSideEncryptionMethod = serverSideEncryptionMethod;
++            _disablePayloadSigning = disablePayloadSigning;
+         }
+ 
+         protected override async Task<Tuple<bool, JObject>> TryObtainLockAsync(string lockMessage, CancellationToken token)
+@@ -35,7 +35,7 @@ public AmazonS3FileSystemLock(IAmazonS3 client, string bucketName, ServerSideEnc
+ 
+             try
+             {
+-                if (await FileExistsAsync(client, bucketName, LockFile, token).ConfigureAwait(false))
++                if (await FileExistsAsync(_client, _bucketName, LockFile, token).ConfigureAwait(false))
+                 {
+                     // Read the existing message
+                     json = await GetExistingMessage(json, token);
+@@ -45,7 +45,7 @@ public AmazonS3FileSystemLock(IAmazonS3 client, string bucketName, ServerSideEnc
+                     // Create a new lock
+                     json = GetMessageJson(lockMessage);
+ 
+-                    await CreateFileAsync(client, bucketName, LockFile, json.ToString(), serverSideEncryptionMethod, disablePayloadSigning, token).ConfigureAwait(false);
++                    await CreateFileAsync(_client, _bucketName, LockFile, json.ToString(), _serverSideEncryptionMethod, _disablePayloadSigning, token).ConfigureAwait(false);
+ 
+                     result = true;
+                 }
+@@ -66,7 +66,7 @@ private async Task<JObject> GetExistingMessage(JObject json, CancellationToken t
+         {
+             using (var ms = new MemoryStream())
+             {
+-                await DownloadFileAsync(client, bucketName, LockFile, ms, token);
++                await DownloadFileAsync(_client, _bucketName, LockFile, ms, token);
+                 ms.Position = 0;
+                 json = await JsonUtility.LoadJsonAsync(ms);
+             }
+@@ -79,7 +79,7 @@ public override void Release()
+             ReleaseAsync(default(CancellationToken)).Wait();
+         }
+ 
+-        protected override string ManualUnlockInstructions => $"Delete {bucketName}/{LockFile} to forcibly unlock the feed.";
++        protected override string ManualUnlockInstructions => $"Delete {_bucketName}/{LockFile} to forcibly unlock the feed.";
+ 
+         public async Task ReleaseAsync(CancellationToken token)
+         {
+@@ -87,18 +87,17 @@ public async Task ReleaseAsync(CancellationToken token)
+             {
+                 try
+                 {
+-                    if (await FileExistsAsync(client, bucketName, LockFile, token).ConfigureAwait(false))
++                    if (await FileExistsAsync(_client, _bucketName, LockFile, token).ConfigureAwait(false))
+                     {
+-                        await RemoveFileAsync(client, bucketName, LockFile, token).ConfigureAwait(false);
++                        await RemoveFileAsync(_client, _bucketName, LockFile, token).ConfigureAwait(false);
+                         IsLocked = false;
+                     }
+                 }
+                 catch (Exception ex)
+                 {
+-                    Log.LogWarning($"Unable to clean up lock: {bucketName}/{LockFile} due to: {ex.Message}");
++                    Log.LogWarning($"Unable to clean up lock: {_bucketName}/{LockFile} due to: {ex.Message}");
+                 }
+             }
+         }
+-
+     }
+ }
+\ No newline at end of file
+diff --git a/src/SleetLib/FileSystem/AzureBlobLease.cs b/src/SleetLib/FileSystem/AzureBlobLease.cs
+index 184f8e4..aea08cd 100644
+--- a/src/SleetLib/FileSystem/AzureBlobLease.cs
++++ b/src/SleetLib/FileSystem/AzureBlobLease.cs
+@@ -1,12 +1,12 @@
+-using Azure.Storage.Blobs.Specialized;
+-using Azure.Storage.Blobs;
+ using System.Diagnostics;
++using Azure.Storage.Blobs;
++using Azure.Storage.Blobs.Specialized;
+ 
+ namespace Sleet
+ {
+     public class AzureBlobLease : IDisposable
+     {
+-        private static readonly TimeSpan _leaseTime = new TimeSpan(0, 1, 0);
++        private static readonly TimeSpan LeaseTime = new TimeSpan(0, 1, 0);
+         private readonly BlobClient _blob;
+ 
+         public AzureBlobLease(BlobClient blob)
+@@ -27,7 +27,7 @@ public async Task<bool> GetLease()
+ 
+             try
+             {
+-                actualLease = (await _blob.GetBlobLeaseClient(LeaseId).AcquireAsync(_leaseTime)).Value.LeaseId;
++                actualLease = (await _blob.GetBlobLeaseClient(LeaseId).AcquireAsync(LeaseTime)).Value.LeaseId;
+             }
+             catch (Exception ex)
+             {
+@@ -61,7 +61,6 @@ public void Release()
+         {
+             try
+             {
+-
+                 _blob.GetBlobLeaseClient(LeaseId).ReleaseAsync().Wait(TimeSpan.FromSeconds(60));
+             }
+             catch (Exception ex)
+diff --git a/src/SleetLib/FileSystem/AzureFile.cs b/src/SleetLib/FileSystem/AzureFile.cs
+index 6365fa8..94766ae 100644
+--- a/src/SleetLib/FileSystem/AzureFile.cs
++++ b/src/SleetLib/FileSystem/AzureFile.cs
+@@ -1,7 +1,7 @@
+-using Azure.Storage.Blobs.Models;
++using System.IO.Compression;
+ using Azure.Storage.Blobs;
++using Azure.Storage.Blobs.Models;
+ using NuGet.Common;
+-using System.IO.Compression;
+ 
+ namespace Sleet
+ {
+diff --git a/src/SleetLib/FileSystem/AzureFileSystem.cs b/src/SleetLib/FileSystem/AzureFileSystem.cs
+index 05b35c3..d562591 100644
+--- a/src/SleetLib/FileSystem/AzureFileSystem.cs
++++ b/src/SleetLib/FileSystem/AzureFileSystem.cs
+@@ -1,6 +1,6 @@
+ using Azure.Storage.Blobs;
+-using NuGet.Common;
+ using Azure.Storage.Blobs.Models;
++using NuGet.Common;
+ 
+ namespace Sleet
+ {
+@@ -52,8 +52,9 @@ public AzureFileSystem(LocalCache cache, Uri root, Uri baseUri, BlobServiceClien
+ 
+         public override ISleetFile Get(Uri path)
+         {
+-            return GetOrAddFile(path, caseSensitive: true,
+-                createFile: (pair) => new AzureFile(
++            return GetOrAddFile(path,
++                caseSensitive: true,
++                createFile: pair => new AzureFile(
+                     this,
+                     pair.Root,
+                     pair.BaseURI,
+@@ -101,11 +102,10 @@ await foreach (var page in pages)
+                     page.Values
+                         .Where(item => !item.Name.EndsWith(AzureFileSystemLock.LockFile, StringComparison.Ordinal))
+                         .Where(item =>
+-                            string.IsNullOrEmpty(FeedSubPath) ||
+-                            item.Name.StartsWith(FeedSubPath, StringComparison.Ordinal))
++                            string.IsNullOrEmpty(FeedSubPath)
++                            || item.Name.StartsWith(FeedSubPath, StringComparison.Ordinal))
+                         .Select(item =>
+-                            Get(new BlobUriBuilder(_container.Uri) { BlobName = item.Name }.ToUri())
+-                            ));
++                            Get(new BlobUriBuilder(_container.Uri) { BlobName = item.Name }.ToUri())));
+             }
+ 
+             return blobs;
+diff --git a/src/SleetLib/FileSystem/FileBase.cs b/src/SleetLib/FileSystem/FileBase.cs
+index 28f5a43..a563b71 100644
+--- a/src/SleetLib/FileSystem/FileBase.cs
++++ b/src/SleetLib/FileSystem/FileBase.cs
+@@ -421,10 +421,7 @@ public void Invalidate()
+         /// <summary>
+         /// True if the file is tracked by the file system.
+         /// </summary>
+-        protected bool HasBeenInvalidated
+-        {
+-            get; set;
+-        }
++        protected bool HasBeenInvalidated { get; set; }
+ 
+         /// <summary>
+         /// Throw if the file is no longer tracked by the file system.
+diff --git a/src/SleetLib/FileSystem/FileSystemBase.cs b/src/SleetLib/FileSystem/FileSystemBase.cs
+index c7443e6..b0f356e 100644
+--- a/src/SleetLib/FileSystem/FileSystemBase.cs
++++ b/src/SleetLib/FileSystem/FileSystemBase.cs
+@@ -19,7 +19,7 @@ public abstract class FileSystemBase : ISleetFileSystem
+         public Uri BaseURI { get; private set; }
+ 
+         /// <summary>
+-        /// Actual URI
++        /// Actual URI.
+         /// </summary>
+         public Uri Root { get; private set; }
+ 
+@@ -47,7 +47,7 @@ protected FileSystemBase(LocalCache cache, Uri root, Uri baseUri, string? feedSu
+             Root = UriUtility.EnsureTrailingSlash(Root);
+ 
+             // Ensure the longest root is first to avoid conflicts in StartsWith
+-            _roots = (new[] { BaseURI.AbsoluteUri, Root.AbsoluteUri })
++            _roots = new[] { BaseURI.AbsoluteUri, Root.AbsoluteUri }
+                 .Distinct(StringComparer.Ordinal)
+                 .OrderByDescending(e => e.Length)
+                 .ThenBy(e => e, StringComparer.Ordinal)
+@@ -157,13 +157,13 @@ public virtual string GetRelativePath(Uri uri)
+         }
+ 
+         /// <summary>
+-        /// Create a file and add it to Files
++        /// Create a file and add it to Files.
+         /// </summary>
+         protected ISleetFile GetOrAddFile(Uri path, bool caseSensitive, Func<SleetUriPair, ISleetFile> createFile)
+         {
+             ArgumentNullException.ThrowIfNull(path);
+ 
+-            var file = Files.GetOrAdd(path, (uri) =>
++            var file = Files.GetOrAdd(path, uri =>
+             {
+                 return createFile(GetUriPair(path, caseSensitive));
+             });
+@@ -172,7 +172,7 @@ protected ISleetFile GetOrAddFile(Uri path, bool caseSensitive, Func<SleetUriPai
+         }
+ 
+         /// <summary>
+-        /// Inspect a URI and determine the correct root and display URIs
++        /// Inspect a URI and determine the correct root and display URIs.
+         /// </summary>
+         protected SleetUriPair GetUriPair(Uri path, bool caseSensitive)
+         {
+@@ -206,7 +206,7 @@ protected SleetUriPair GetUriPair(Uri path, bool caseSensitive)
+         }
+ 
+         /// <summary>
+-        /// Clear all tracked files
++        /// Clear all tracked files.
+         /// </summary>
+         public void Reset()
+         {
+diff --git a/src/SleetLib/FileSystem/FileSystemFactory.cs b/src/SleetLib/FileSystem/FileSystemFactory.cs
+index 21600bc..4f153e8 100644
+--- a/src/SleetLib/FileSystem/FileSystemFactory.cs
++++ b/src/SleetLib/FileSystem/FileSystemFactory.cs
+@@ -1,19 +1,18 @@
+-using Amazon.Runtime.CredentialManagement;
++using System.Net;
++using Amazon;
+ using Amazon.Runtime;
++using Amazon.Runtime.CredentialManagement;
+ using Amazon.S3;
+-using Amazon.SecurityToken.Model;
+ using Amazon.SecurityToken;
+-using Amazon;
++using Amazon.SecurityToken.Model;
+ using Azure.Identity;
+ using Azure.Storage.Blobs;
+ using Newtonsoft.Json.Linq;
+ using NuGet.Common;
+-using System.Net;
+ using NuGetUriUtility = NuGet.Common.UriUtility;
+ 
+ namespace Sleet
+ {
+-
+     public static class FileSystemFactory
+     {
+         /// <summary>
+@@ -119,13 +118,13 @@ public static class FileSystemFactory
+                         {
+                             immutableCacheControl = "no-store";
+                         }
++
+                         var mutableCacheControl = JsonUtility.GetValueCaseInsensitive(sourceEntry, "mutableCacheControl");
+                         if (string.IsNullOrWhiteSpace(mutableCacheControl))
+                         {
+                             mutableCacheControl = "no-store";
+                         }
+ 
+-
+                         if (string.IsNullOrEmpty(bucketName))
+                         {
+                             throw new ArgumentException($"Missing bucketName for {provider.DisplayName} account.");
+@@ -220,20 +219,23 @@ public static class FileSystemFactory
+                                 throw new ArgumentException($"The specified AWS profileName {profileName} could not be found. The feed must specify a valid profileName for an AWS credentials file. For help on credential files see: https://docs.aws.amazon.com/sdk-for-net/v2/developer-guide/net-dg-config-creds.html#creds-file");
+                             }
+                         }
++
+                         // Load credentials explicitly with an accessKey and secretKey
+                         else if (
+-                            !string.IsNullOrWhiteSpace(accessKeyId) &&
+-                            !string.IsNullOrWhiteSpace(secretAccessKey))
++                            !string.IsNullOrWhiteSpace(accessKeyId)
++                            && !string.IsNullOrWhiteSpace(secretAccessKey))
+                         {
+                             amazonS3Client = new AmazonS3Client(new BasicAWSCredentials(accessKeyId, secretAccessKey), config);
+                         }
++
+                         // Load credentials from Environment Variables
+                         else if (
+-                            !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(EnvironmentVariablesAWSCredentials.ENVIRONMENT_VARIABLE_ACCESSKEY)) &&
+-                            !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(EnvironmentVariablesAWSCredentials.ENVIRONMENT_VARIABLE_SECRETKEY)))
++                            !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(EnvironmentVariablesAWSCredentials.ENVIRONMENT_VARIABLE_ACCESSKEY))
++                            && !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(EnvironmentVariablesAWSCredentials.ENVIRONMENT_VARIABLE_SECRETKEY)))
+                         {
+                             amazonS3Client = new AmazonS3Client(new EnvironmentVariablesAWSCredentials(), config);
+                         }
++
+                         // Load credentials from an ECS docker container
+                         // Check if the env var GenericContainerCredentials.RelativeURIEnvVariable exists
+                         // Previously this used ECSTaskCredentials.RelativeURIEnvVariable but that was
+@@ -243,6 +245,7 @@ public static class FileSystemFactory
+                         {
+                             amazonS3Client = new AmazonS3Client(new GenericContainerCredentials(), config);
+                         }
++
+                         // Assume IAM role
+                         else
+                         {
+@@ -258,8 +261,9 @@ public static class FileSystemFactory
+                                     catch (Exception ex)
+                                     {
+                                         throw new ArgumentException(
+-                                            "Failed to determine AWS identity - ensure you have an IAM " +
+-                                            "role set, have set up default credentials or have specified a profile/key pair.", ex);
++                                            "Failed to determine AWS identity - ensure you have an IAM "
++                                            + "role set, have set up default credentials or have specified a profile/key pair.",
++                                            ex);
+                                     }
+                                 }
+                             }
+@@ -292,8 +296,7 @@ public static class FileSystemFactory
+                             resolvedAcl,
+                             disablePayloadSigning,
+                             immutableCacheControl,
+-                            mutableCacheControl
+-                        )
++                            mutableCacheControl)
+                         {
+                             Provider = provider
+                         };
+@@ -335,7 +338,7 @@ public static class FileSystemFactory
+         {
+             // Path can be used with a connection string.
+             // If the path is set and the connection string is not, use the default creds.
+-            if (pathUri is not null && connectionString is null)
++            if (pathUri != null && connectionString == null)
+             {
+                 return new BlobServiceClient(new Uri(pathUri.GetLeftPart(UriPartial.Authority)), new DefaultAzureCredential());
+             }
+@@ -357,8 +360,8 @@ public static class FileSystemFactory
+             }
+ 
+             await log.LogAsync(LogLevel.Verbose,
+-                "connectionString (with access key) is not recommended for azure account. More information here: https://learn.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal#protect-your-access-keys" + Environment.NewLine +
+-                "Use path instead.");
++                "connectionString (with access key) is not recommended for azure account. More information here: https://learn.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal#protect-your-access-keys" + Environment.NewLine
++                + "Use path instead.");
+ 
+             return new BlobServiceClient(connectionString);
+         }
+diff --git a/src/SleetLib/FileSystem/FileSystemLockBase.cs b/src/SleetLib/FileSystem/FileSystemLockBase.cs
+index 69b89c6..714cf4c 100644
+--- a/src/SleetLib/FileSystem/FileSystemLockBase.cs
++++ b/src/SleetLib/FileSystem/FileSystemLockBase.cs
+@@ -57,7 +57,7 @@ public async Task<bool> GetLock(TimeSpan wait, string lockMessage, CancellationT
+                     {
+                         if (lastNotify.Elapsed >= notifyDelay || firstLoop)
+                         {
+-                            var message = $"Waiting to obtain feed lock.";
++                            var message = "Waiting to obtain feed lock.";
+ 
+                             // Print out a message describing how currently has the feed locked.
+                             var messageJson = tryResult.Item2 ?? new JObject();
+@@ -86,7 +86,7 @@ public async Task<bool> GetLock(TimeSpan wait, string lockMessage, CancellationT
+ 
+                 if (!result)
+                 {
+-                    Log.LogError($"Unable to obtain a lock on the feed. Try again later. " + ManualUnlockInstructions);
++                    Log.LogError("Unable to obtain a lock on the feed. Try again later. " + ManualUnlockInstructions);
+                 }
+ 
+                 _isLocked = result;
+@@ -119,6 +119,5 @@ public virtual void Dispose()
+             GC.SuppressFinalize(this);
+             Release();
+         }
+-
+     }
+ }
+diff --git a/src/SleetLib/FileSystem/FileSystemStorageType.cs b/src/SleetLib/FileSystem/FileSystemStorageType.cs
+index 389221b..d2da832 100644
+--- a/src/SleetLib/FileSystem/FileSystemStorageType.cs
++++ b/src/SleetLib/FileSystem/FileSystemStorageType.cs
+@@ -5,6 +5,6 @@ public enum FileSystemStorageType
+         Unspecified,
+         Local,
+         Azure,
+-        S3,
++        S3
+     }
+ }
+\ No newline at end of file
+diff --git a/src/SleetLib/FileSystem/ISleetFile.cs b/src/SleetLib/FileSystem/ISleetFile.cs
+index 983dde9..5547547 100644
+--- a/src/SleetLib/FileSystem/ISleetFile.cs
++++ b/src/SleetLib/FileSystem/ISleetFile.cs
+@@ -10,12 +10,12 @@ namespace Sleet
+     public interface ISleetFile
+     {
+         /// <summary>
+-        /// Actual path
++        /// Actual path.
+         /// </summary>
+         Uri RootPath { get; }
+ 
+         /// <summary>
+-        /// Full URI used for @ids
++        /// Full URI used for @ids.
+         /// </summary>
+         Uri EntityUri { get; }
+ 
+@@ -25,12 +25,12 @@ public interface ISleetFile
+         Task Write(Stream stream, ILogger log, CancellationToken token);
+ 
+         /// <summary>
+-        /// Save file
++        /// Save file.
+         /// </summary>
+         Task Push(ILogger log, CancellationToken token);
+ 
+         /// <summary>
+-        /// True if the file exists remotely
++        /// True if the file exists remotely.
+         /// </summary>
+         Task<bool> Exists(ILogger log, CancellationToken token);
+ 
+diff --git a/src/SleetLib/FileSystem/LocalCache.cs b/src/SleetLib/FileSystem/LocalCache.cs
+index a5b0165..fce8f74 100644
+--- a/src/SleetLib/FileSystem/LocalCache.cs
++++ b/src/SleetLib/FileSystem/LocalCache.cs
+@@ -30,7 +30,7 @@ public LocalCache(string path, IPerfTracker perfTracker)
+         public DirectoryInfo Root { get; }
+ 
+         /// <summary>
+-        /// Performance related tracking
++        /// Performance related tracking.
+         /// </summary>
+         public IPerfTracker PerfTracker { get; }
+ 
+diff --git a/src/SleetLib/FileSystem/PhysicalFile.cs b/src/SleetLib/FileSystem/PhysicalFile.cs
+index d1c19e6..f0a3378 100644
+--- a/src/SleetLib/FileSystem/PhysicalFile.cs
++++ b/src/SleetLib/FileSystem/PhysicalFile.cs
+@@ -60,7 +60,7 @@ protected override Task CopyToSource(ILogger log, CancellationToken token)
+                 _sourceFile.Delete();
+ 
+                 var directoryName = _sourceFile.DirectoryName;
+-                if (directoryName is not null
++                if (directoryName != null
+                     && !Directory.EnumerateFiles(directoryName).Any()
+                     && !Directory.EnumerateDirectories(directoryName).Any())
+                 {
+diff --git a/src/SleetLib/FileSystem/PhysicalFileSystem.cs b/src/SleetLib/FileSystem/PhysicalFileSystem.cs
+index 94edb1c..4c0f576 100644
+--- a/src/SleetLib/FileSystem/PhysicalFileSystem.cs
++++ b/src/SleetLib/FileSystem/PhysicalFileSystem.cs
+@@ -11,7 +11,7 @@ namespace Sleet
+     public class PhysicalFileSystem : FileSystemBase
+     {
+         /// <summary>
+-        /// Local root with trailing slash
++        /// Local root with trailing slash.
+         /// </summary>
+         public string LocalRoot
+         {
+@@ -44,8 +44,9 @@ private static void EnsureLocalRoot(Uri uri)
+ 
+         public override ISleetFile Get(Uri path)
+         {
+-            return GetOrAddFile(path, caseSensitive: false,
+-                createFile: (pair) => new PhysicalFile(
++            return GetOrAddFile(path,
++                caseSensitive: false,
++                createFile: pair => new PhysicalFile(
+                     this,
+                     pair.Root,
+                     pair.BaseURI,
+diff --git a/src/SleetLib/FileSystem/PhysicalFileSystemLock.cs b/src/SleetLib/FileSystem/PhysicalFileSystemLock.cs
+index eb73c22..479ba4d 100644
+--- a/src/SleetLib/FileSystem/PhysicalFileSystemLock.cs
++++ b/src/SleetLib/FileSystem/PhysicalFileSystemLock.cs
+@@ -42,7 +42,7 @@ public PhysicalFileSystemLock(string path, ILogger log)
+                 {
+                     // Obtain the lock
+                     var lockDir = Path.GetDirectoryName(LockPath);
+-                    if (lockDir is not null)
++                    if (lockDir != null)
+                     {
+                         Directory.CreateDirectory(lockDir);
+                     }
+diff --git a/src/SleetLib/FileSystem/SleetUriPair.cs b/src/SleetLib/FileSystem/SleetUriPair.cs
+index bc01c5d..717da12 100644
+--- a/src/SleetLib/FileSystem/SleetUriPair.cs
++++ b/src/SleetLib/FileSystem/SleetUriPair.cs
+@@ -5,12 +5,12 @@ namespace Sleet
+     public class SleetUriPair
+     {
+         /// <summary>
+-        /// Actual root URI in container or on local disk
++        /// Actual root URI in container or on local disk.
+         /// </summary>
+         public Uri Root { get; set; } = null!;
+ 
+         /// <summary>
+-        /// Display URI
++        /// Display URI.
+         /// </summary>
+         public Uri BaseURI { get; set; } = null!;
+     }
+diff --git a/src/SleetLib/LocalSettings.cs b/src/SleetLib/LocalSettings.cs
+index a577752..5cf12a3 100644
+--- a/src/SleetLib/LocalSettings.cs
++++ b/src/SleetLib/LocalSettings.cs
+@@ -16,7 +16,7 @@ public class LocalSettings
+         public JObject Json { get; set; } = new JObject();
+ 
+         /// <summary>
+-        /// Absolute path of the sleet.json file
++        /// Absolute path of the sleet.json file.
+         /// </summary>
+         public string? Path { get; set; }
+ 
+@@ -67,20 +67,31 @@ public static LocalSettings Load(string? path, Dictionary<string, string>? mappi
+ 
+                     return Load(json, resolvedPath);
+                 }
+-                else if ((path == null || path.EndsWith(".netconfig", StringComparison.Ordinal)) &&
+-                    Config.Build(path) is Config config && config.GetRegex("sleet").Any())
++                else if ((path == null || path.EndsWith(".netconfig", StringComparison.Ordinal))
++                    && Config.Build(path) is Config config && config.GetRegex("sleet").Any())
+                 {
+                     // Use .netconfig only if at least one sleet setting is found.
+ 
+                     json = new JObject(new JProperty("config", new JObject()));
+                     if (config.TryGetString("sleet", "username", out var username))
++                    {
+                         json["username"] = username;
++                    }
++
+                     if (config.TryGetString("sleet", "useremail", out var useremail))
++                    {
+                         json["useremail"] = useremail;
++                    }
++
+                     if (config.TryGetNumber("sleet", "feedLockTimeoutMinutes", out var feedLockTimeoutMinutes))
++                    {
+                         json["config"]!["feedLockTimeoutMinutes"] = feedLockTimeoutMinutes;
++                    }
++
+                     if (config.TryGetBoolean("sleet", "proxy-useDefaultCredentials", out var useDefaultCredentials))
++                    {
+                         json["proxy"] = new JObject(new JProperty("useDefaultCredentials", useDefaultCredentials));
++                    }
+ 
+                     var sources = new JArray();
+                     json.Add("sources", sources);
+@@ -118,7 +129,7 @@ public static LocalSettings Load(string? path, Dictionary<string, string>? mappi
+                 return Load(json);
+             }
+ 
+-            throw new InvalidOperationException($"Unable to find source settings. Specify the path to a sleet.json settings file.");
++            throw new InvalidOperationException("Unable to find source settings. Specify the path to a sleet.json settings file.");
+         }
+ 
+         public static LocalSettings Load(string? path)
+@@ -166,7 +177,5 @@ internal static JObject GetSourceSettings(LocalSettings settings, string sourceN
+ 
+             return new JObject();
+         }
+-
+-
+     }
+ }
+diff --git a/src/SleetLib/Logging/IPerfTracker.cs b/src/SleetLib/Logging/IPerfTracker.cs
+index 1060a6f..c25d003 100644
+--- a/src/SleetLib/Logging/IPerfTracker.cs
++++ b/src/SleetLib/Logging/IPerfTracker.cs
+@@ -6,7 +6,7 @@ namespace Sleet
+     public interface IPerfTracker
+     {
+         /// <summary>
+-        /// Add a perf entry
++        /// Add a perf entry.
+         /// </summary>
+         /// <param name="entry"></param>
+         void Add(PerfEntryBase entry);
+diff --git a/src/SleetLib/Logging/PerfEntryBase.cs b/src/SleetLib/Logging/PerfEntryBase.cs
+index f7595e0..1b3ee45 100644
+--- a/src/SleetLib/Logging/PerfEntryBase.cs
++++ b/src/SleetLib/Logging/PerfEntryBase.cs
+@@ -3,7 +3,7 @@
+ namespace Sleet
+ {
+     /// <summary>
+-    /// Performance log message
++    /// Performance log message.
+     /// </summary>
+     public abstract class PerfEntryBase : IComparable<PerfEntryBase>
+     {
+@@ -31,10 +31,7 @@ public PerfEntryBase(TimeSpan elapsedTime, TimeSpan minTimeToShow)
+         /// <summary>
+         /// Key to merge on.
+         /// </summary>
+-        public abstract string Key
+-        {
+-            get;
+-        }
++        public abstract string Key { get; }
+ 
+         /// <summary>
+         /// True if the event took long enough that it should be displayed.
+@@ -55,6 +52,7 @@ public int CompareTo(PerfEntryBase? other)
+             {
+                 return 1;
+             }
++
+             return ElapsedTime.CompareTo(other.ElapsedTime);
+         }
+ 
+@@ -64,6 +62,7 @@ public override bool Equals(object? obj)
+             {
+                 return ElapsedTime == other.ElapsedTime && Key == other.Key;
+             }
++
+             return false;
+         }
+ 
+@@ -78,6 +77,7 @@ public override int GetHashCode()
+             {
+                 return right is null;
+             }
++
+             return left.Equals(right);
+         }
+ 
+diff --git a/src/SleetLib/Logging/PerfEntryWrapper.cs b/src/SleetLib/Logging/PerfEntryWrapper.cs
+index f5449e7..442d988 100644
+--- a/src/SleetLib/Logging/PerfEntryWrapper.cs
++++ b/src/SleetLib/Logging/PerfEntryWrapper.cs
+@@ -17,24 +17,25 @@ public static PerfEntryWrapper<PerfFileEntry> CreateModifyTimer(ISleetFile file,
+ 
+         public static PerfEntryWrapper<PerfFileEntry> CreateFileTimer(ISleetFile file, IPerfTracker tracker, PerfFileEntry.FileOperation operation)
+         {
+-            return new PerfEntryWrapper<PerfFileEntry>(tracker, (time) => new PerfFileEntry(time, file.EntityUri, operation));
++            return new PerfEntryWrapper<PerfFileEntry>(tracker, time => new PerfFileEntry(time, file.EntityUri, operation));
+         }
+ 
+         public static PerfEntryWrapper<PerfSummaryEntry> CreateSummaryTimer(string message, IPerfTracker tracker)
+         {
+-            return new PerfEntryWrapper<PerfSummaryEntry>(tracker, (time) => new PerfSummaryEntry(time, message));
++            return new PerfEntryWrapper<PerfSummaryEntry>(tracker, time => new PerfSummaryEntry(time, message));
+         }
+ 
+         public static PerfEntryWrapper<PerfSummaryEntry> CreateSummaryTimer(string message, IPerfTracker tracker, TimeSpan minTimeToShow)
+         {
+-            return new PerfEntryWrapper<PerfSummaryEntry>(tracker, (time) => new PerfSummaryEntry(time, message, minTimeToShow));
++            return new PerfEntryWrapper<PerfSummaryEntry>(tracker, time => new PerfSummaryEntry(time, message, minTimeToShow));
+         }
+     }
+ 
+     /// <summary>
+     /// Time an action and log the result to the perf tracker.
+     /// </summary>
+-    public class PerfEntryWrapper<T> : IDisposable where T : PerfEntryBase
++    public class PerfEntryWrapper<T> : IDisposable
++        where T : PerfEntryBase
+     {
+         private readonly IPerfTracker _tracker;
+         private readonly Func<TimeSpan, T> _getEntry;
+@@ -49,6 +50,7 @@ public PerfEntryWrapper(IPerfTracker tracker, Func<TimeSpan, T> getEntry)
+         public void Dispose()
+         {
+             GC.SuppressFinalize(this);
++
+             // Log the event
+             _timer.Stop();
+             _tracker.Add(_getEntry(_timer.Elapsed));
+diff --git a/src/SleetLib/Logging/PerfFileEntry.cs b/src/SleetLib/Logging/PerfFileEntry.cs
+index 5577948..8e4aa0b 100644
+--- a/src/SleetLib/Logging/PerfFileEntry.cs
++++ b/src/SleetLib/Logging/PerfFileEntry.cs
+@@ -6,7 +6,7 @@
+ namespace Sleet
+ {
+     /// <summary>
+-    /// Perf stats for a specific URI
++    /// Perf stats for a specific URI.
+     /// </summary>
+     public class PerfFileEntry : PerfEntryBase
+     {
+@@ -67,7 +67,7 @@ public enum FileOperation
+             Put = 2,
+ 
+             // Write to disk
+-            LocalWrite = 3,
++            LocalWrite = 3
+         }
+     }
+ }
+diff --git a/src/SleetLib/Logging/PerfTracker.cs b/src/SleetLib/Logging/PerfTracker.cs
+index 53f6ef8..026f9cf 100644
+--- a/src/SleetLib/Logging/PerfTracker.cs
++++ b/src/SleetLib/Logging/PerfTracker.cs
+@@ -53,7 +53,8 @@ public async Task LogSummary(ILogger log)
+             }
+         }
+ 
+-        private static Dictionary<string, List<T>> GetDictionary<T>(IEnumerable<T> entries) where T : PerfEntryBase
++        private static Dictionary<string, List<T>> GetDictionary<T>(IEnumerable<T> entries)
++            where T : PerfEntryBase
+         {
+             var dict = new Dictionary<string, List<T>>(StringComparer.Ordinal);
+ 
+diff --git a/src/SleetLib/PackageInput.cs b/src/SleetLib/PackageInput.cs
+index 1d0941c..545a1f3 100644
+--- a/src/SleetLib/PackageInput.cs
++++ b/src/SleetLib/PackageInput.cs
+@@ -22,7 +22,7 @@ public class PackageInput : IComparable<PackageInput>, IEquatable<PackageInput>
+         public Uri RegistrationUri { get; set; } = null!;
+ 
+         /// <summary>
+-        /// True if the package is a .symbols.nupkg
++        /// True if the package is a .symbols.nupkg.
+         /// </summary>
+         public bool IsSymbolsPackage { get; }
+ 
+diff --git a/src/SleetLib/Services/AssetIndexEntry.cs b/src/SleetLib/Services/AssetIndexEntry.cs
+index cf4c5a1..b06e4f8 100644
+--- a/src/SleetLib/Services/AssetIndexEntry.cs
++++ b/src/SleetLib/Services/AssetIndexEntry.cs
+@@ -55,6 +55,7 @@ public int CompareTo(AssetIndexEntry? other)
+             {
+                 return 1;
+             }
++
+             return StringComparer.Ordinal.Compare(Asset.AbsoluteUri, other.Asset.AbsoluteUri);
+         }
+ 
+@@ -69,6 +70,7 @@ public override string ToString()
+             {
+                 return right is null;
+             }
++
+             return left.Equals(right);
+         }
+ 
+diff --git a/src/SleetLib/Services/AssetIndexFile.cs b/src/SleetLib/Services/AssetIndexFile.cs
+index 172946b..37bceff 100644
+--- a/src/SleetLib/Services/AssetIndexFile.cs
++++ b/src/SleetLib/Services/AssetIndexFile.cs
+@@ -106,7 +106,7 @@ private Task Save(PackageSets index)
+             // Create updated index
+             var json = CreateJson(index);
+ 
+-            var isEmpty = (index.Packages.Count < 1 && index.Symbols.Count < 1);
++            var isEmpty = index.Packages.Count < 1 && index.Symbols.Count < 1;
+             return SaveAsync(json, isEmpty);
+         }
+ 
+diff --git a/src/SleetLib/Services/Catalog.cs b/src/SleetLib/Services/Catalog.cs
+index 5856af9..99f1c74 100644
+--- a/src/SleetLib/Services/Catalog.cs
++++ b/src/SleetLib/Services/Catalog.cs
+@@ -30,7 +30,7 @@ public string RootIndex
+         }
+ 
+         /// <summary>
+-        /// Catalog index.json file
++        /// Catalog index.json file.
+         /// </summary>
+         public ISleetFile RootIndexFile => _context.Source.Get(RootIndex);
+ 
+@@ -180,7 +180,7 @@ public async Task<List<JObject>> GetPagesAsync()
+                     {
+                         var itemUrl = item["@id"]!.ToObject<Uri>()!;
+ 
+-                    var itemFile = _context.Source.Get(itemUrl);
++                        var itemFile = _context.Source.Get(itemUrl);
+ 
+                         pageTasks.Add(itemFile.GetJson(_context.Log, _context.Token));
+                     }
+@@ -219,7 +219,7 @@ public async Task<ISet<PackageIdentity>> GetPackagesByIdAsync(string packageId)
+         {
+             var entries = await GetRolledUpIndexAsync();
+ 
+-            return entries.Where(e => e.PackageIdentity.Equals(package)).FirstOrDefault();
++            return entries.FirstOrDefault(e => e.PackageIdentity.Equals(package));
+         }
+ 
+         /// <summary>
+@@ -313,7 +313,6 @@ private static SleetOperation GetOperation(JObject json)
+             {
+                 case "add":
+                     return SleetOperation.Add;
+-
+                 case "remove":
+                     return SleetOperation.Remove;
+             }
+diff --git a/src/SleetLib/Services/PackageIndexFile.cs b/src/SleetLib/Services/PackageIndexFile.cs
+index 3f26c44..8100542 100644
+--- a/src/SleetLib/Services/PackageIndexFile.cs
++++ b/src/SleetLib/Services/PackageIndexFile.cs
+@@ -96,7 +96,7 @@ public async Task RemoveSymbolsPackageAsync(PackageIdentity package)
+         }
+ 
+         /// <summary>
+-        /// Creates a set of all indexed packages
++        /// Creates a set of all indexed packages.
+         /// </summary>
+         public async Task<ISet<PackageIdentity>> GetPackagesAsync()
+         {
+@@ -133,7 +133,7 @@ public async Task<ISet<NuGetVersion>> GetSymbolsPackageVersions(string packageId
+ 
+         /// <summary>
+         /// Returns all packages in the feed.
+-        /// Id -> Version
++        /// Id -> Version.
+         /// </summary>
+         public async Task<PackageSets> GetPackageSetsAsync()
+         {
+diff --git a/src/SleetLib/Services/Registrations.cs b/src/SleetLib/Services/Registrations.cs
+index 1b6e006..b6931e1 100644
+--- a/src/SleetLib/Services/Registrations.cs
++++ b/src/SleetLib/Services/Registrations.cs
+@@ -192,7 +192,7 @@ private async Task RemovePackagesFromIndexAsync(string packageId, HashSet<NuGetV
+         }
+ 
+         /// <summary>
+-        /// Get all package details from all pages
++        /// Get all package details from all pages.
+         /// </summary>
+         public static Task<List<JObject>> GetPackageDetails(JObject json)
+         {
+@@ -331,7 +331,7 @@ public async Task<JObject> CreatePackageBlobAsync(PackageInput packageInput)
+             var copyProperties = new List<string>()
+             {
+                 "listed",
+-                "published",
++                "published"
+             };
+ 
+             JsonUtility.CopyProperties(packageInput.PackageDetails, json, copyProperties, skipEmpty: true);
+diff --git a/src/SleetLib/Services/Search.cs b/src/SleetLib/Services/Search.cs
+index 97e49fd..ea3904a 100644
+--- a/src/SleetLib/Services/Search.cs
++++ b/src/SleetLib/Services/Search.cs
+@@ -32,6 +32,7 @@ public class Search : ISleetService, IRootIndex, IPackagesLookup, IApplyOperatio
+         private static readonly string[] RequireArrayFields = ["tags", "authors"];
+ 
+         private readonly SleetContext _context;
++
+         public string RootIndex { get; } = "search/query";
+ 
+         public string Name { get; } = nameof(Search);
+diff --git a/src/SleetLib/Services/Symbols.cs b/src/SleetLib/Services/Symbols.cs
+index 2cb6e44..68abfeb 100644
+--- a/src/SleetLib/Services/Symbols.cs
++++ b/src/SleetLib/Services/Symbols.cs
+@@ -243,7 +243,7 @@ private ISleetFile GetFile(string fileName, string hash)
+         }
+ 
+         /// <summary>
+-        /// file/hash/index -> package
++        /// file/hash/index -> package.
+         /// </summary>
+         private Task AddAssemblyToPackageIndexAsync(PackageInput package, ISleetFile indexFile, bool isSymbolsPackage)
+         {
+@@ -260,7 +260,7 @@ private Task AddAssemblyToPackageIndexAsync(PackageInput package, ISleetFile ind
+         }
+ 
+         /// <summary>
+-        /// Assembly asset -> Package index
++        /// Assembly asset -> Package index.
+         /// </summary>
+         public PackageIndexFile GetAssemblyToPackageIndex(Uri packageIndexUri)
+         {
+@@ -625,7 +625,7 @@ public Task PreLoadAsync(SleetOperations operations)
+         }
+ 
+         /// <summary>
+-        /// dll or pdb file
++        /// dll or pdb file.
+         /// </summary>
+         private sealed class PackageFile : IDisposable
+         {
+diff --git a/src/SleetLib/Services/VirtualCatalog.cs b/src/SleetLib/Services/VirtualCatalog.cs
+index 4986596..19f0fc1 100644
+--- a/src/SleetLib/Services/VirtualCatalog.cs
++++ b/src/SleetLib/Services/VirtualCatalog.cs
+@@ -30,7 +30,7 @@ public string RootIndex
+         }
+ 
+         /// <summary>
+-        /// Catalog index.json file
++        /// Catalog index.json file.
+         /// </summary>
+         public ISleetFile RootIndexFile => _context.Source.Get(RootIndex);
+ 
+diff --git a/src/SleetLib/SourceSettings.cs b/src/SleetLib/SourceSettings.cs
+index 9bd8eae..c1d94cb 100644
+--- a/src/SleetLib/SourceSettings.cs
++++ b/src/SleetLib/SourceSettings.cs
+@@ -18,19 +18,19 @@ public class FeedSettings
+         public bool SymbolsEnabled { get; set; }
+ 
+         /// <summary>
+-        /// Package retention - Maximum number of stable versions
++        /// Package retention - Maximum number of stable versions.
+         /// </summary>
+         public int? RetentionMaxStableVersions { get; set; }
+ 
+         /// <summary>
+-        /// Package retention - Maximum number of prerelease versions
++        /// Package retention - Maximum number of prerelease versions.
+         /// </summary>
+         public int? RetentionMaxPrereleaseVersions { get; set; }
+ 
+         /// <summary>
+         /// Package retention - Number of prelease labels to take when grouping packages.
+         /// Ex: 1.0.0-beta.branch.fox.build.2344 using a count of 3 will allow RetentionMaxPrereleaseVersions
+-        /// for all 1.0.0-beta.branch.fox.* packages
++        /// for all 1.0.0-beta.branch.fox.* packages.
+         /// </summary>
+         public int? RetentionGroupByFirstPrereleaseLabelCount { get; set; }
+ 
+@@ -40,7 +40,7 @@ public class FeedSettings
+         public bool BadgesEnabled { get; set; }
+ 
+         /// <summary>
+-        /// External search URI
++        /// External search URI.
+         /// </summary>
+         public string? ExternalSearch { get; set; }
+     }
+diff --git a/src/SleetLib/Utility/BadgeUtility.cs b/src/SleetLib/Utility/BadgeUtility.cs
+index 5345125..6896b46 100644
+--- a/src/SleetLib/Utility/BadgeUtility.cs
++++ b/src/SleetLib/Utility/BadgeUtility.cs
+@@ -15,7 +15,7 @@ public static class BadgeUtility
+         private const string LABEL = "nuget";
+ 
+         /// <summary>
+-        /// Update all feed badges
++        /// Update all feed badges.
+         /// </summary>
+         public static Task UpdateBadges(SleetContext context, ISet<PackageIdentity> before, ISet<PackageIdentity> after)
+         {
+@@ -26,7 +26,7 @@ public static Task UpdateBadges(SleetContext context, ISet<PackageIdentity> befo
+         }
+ 
+         /// <summary>
+-        /// Update feed badges for stable or prerelease
++        /// Update feed badges for stable or prerelease.
+         /// </summary>
+         public static Task UpdateBadges(SleetContext context, ISet<PackageIdentity> updates, bool preRel)
+         {
+diff --git a/src/SleetLib/Utility/CatalogUtility.cs b/src/SleetLib/Utility/CatalogUtility.cs
+index 5d62fc4..4d48bdc 100644
+--- a/src/SleetLib/Utility/CatalogUtility.cs
++++ b/src/SleetLib/Utility/CatalogUtility.cs
+@@ -20,7 +20,7 @@ public static class CatalogUtility
+         private static readonly char[] TagsSeparator = [' '];
+ 
+         /// <summary>
+-        /// Create PackageDetails for a delete
++        /// Create PackageDetails for a delete.
+         /// </summary>
+         public static async Task<JObject> CreateDeleteDetailsAsync(PackageIdentity package, string reason, Uri catalogBaseURI, Guid commitId)
+         {
+@@ -318,7 +318,7 @@ public static void UpdatePageIndex(JObject catalogIndexJson, JObject currentPage
+             var currentPageUri = JsonUtility.GetIdUri(currentPageJson);
+             var pageCommits = JsonUtility.GetItems(currentPageJson);
+ 
+-            var pageEntry = pages.Where(e => JsonUtility.GetIdUri(e).Equals(currentPageUri)).Single();
++            var pageEntry = pages.Single(e => JsonUtility.GetIdUri(e).Equals(currentPageUri));
+             pageEntry["commitId"] = commitId.ToString().ToLowerInvariant();
+             pageEntry["commitTimeStamp"] = DateTimeOffset.UtcNow.GetDateString();
+             pageEntry["count"] = pageCommits.Count;
+@@ -335,8 +335,7 @@ private static JProperty CreateProperty(string catalogName, string nuspecName, N
+         private static string GetEntry(NuspecReader reader, string property)
+         {
+             return reader.GetMetadata()
+-                .Where(pair => StringComparer.OrdinalIgnoreCase.Equals(pair.Key, property))
+-                .FirstOrDefault()
++                .FirstOrDefault(pair => StringComparer.OrdinalIgnoreCase.Equals(pair.Key, property))
+                 .Value ?? string.Empty;
+         }
+     }
+diff --git a/src/SleetLib/Utility/Extensions.cs b/src/SleetLib/Utility/Extensions.cs
+index 8d90305..7d319ad 100644
+--- a/src/SleetLib/Utility/Extensions.cs
++++ b/src/SleetLib/Utility/Extensions.cs
+@@ -51,16 +51,16 @@ public static string ToFullVersionString(this SemanticVersion version)
+             }
+ 
+             // TODO: re-add this once NuGet properly supports SemVer 2.0.0 metadata.
+-            //if (version.HasMetadata)
+-            //{
++            // if (version.HasMetadata)
++            // {
+             //    format += "+M";
+-            //}
++            // }
+ 
+             return version.ToString(format, formatter);
+         }
+ 
+         /// <summary>
+-        /// Read the version property as a NuGetVersion
++        /// Read the version property as a NuGetVersion.
+         /// </summary>
+         public static NuGetVersion GetVersion(this JToken json)
+         {
+@@ -68,7 +68,7 @@ public static NuGetVersion GetVersion(this JToken json)
+         }
+ 
+         /// <summary>
+-        /// Read the id property
++        /// Read the id property.
+         /// </summary>
+         public static string GetId(this JToken json)
+         {
+@@ -84,7 +84,7 @@ public static PackageIdentity GetIdentity(this JToken json)
+         }
+ 
+         /// <summary>
+-        /// Read the json-ld @id as a Uri
++        /// Read the json-ld @id as a Uri.
+         /// </summary>
+         public static Uri GetEntityId(this JToken json)
+         {
+@@ -100,7 +100,7 @@ public static Uri GetEntityId(this JToken json)
+         }
+ 
+         /// <summary>
+-        /// Retrieve an array of JObjects
++        /// Retrieve an array of JObjects.
+         /// </summary>
+         public static JObject[] GetJObjectArray(this JToken json, string propertyName)
+         {
+@@ -121,7 +121,7 @@ public static JObject[] GetJObjectArray(this JToken json, string propertyName)
+         }
+ 
+         /// <summary>
+-        /// Returns the @id as a URI
++        /// Returns the @id as a URI.
+         /// </summary>
+         public static Uri GetIdUri(this JObject json)
+         {
+diff --git a/src/SleetLib/Utility/FeedSettingsUtility.cs b/src/SleetLib/Utility/FeedSettingsUtility.cs
+index 157adf0..d9d8889 100644
+--- a/src/SleetLib/Utility/FeedSettingsUtility.cs
++++ b/src/SleetLib/Utility/FeedSettingsUtility.cs
+@@ -10,7 +10,7 @@
+ namespace Sleet
+ {
+     /// <summary>
+-    /// Read/Write sleet.settings.json
++    /// Read/Write sleet.settings.json.
+     /// </summary>
+     public static class FeedSettingsUtility
+     {
+diff --git a/src/SleetLib/Utility/JsonUtility.cs b/src/SleetLib/Utility/JsonUtility.cs
+index 9006a4f..dfb8598 100644
+--- a/src/SleetLib/Utility/JsonUtility.cs
++++ b/src/SleetLib/Utility/JsonUtility.cs
+@@ -17,10 +17,10 @@ public static class JsonUtility
+         // https://tools.ietf.org/html/rfc7159#section-8.1
+         private static readonly UTF8Encoding JsonEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+ 
+-        private static readonly JsonLoadSettings _jsonLoadSettings = new JsonLoadSettings()
++        private static readonly JsonLoadSettings JsonLoadSettings = new JsonLoadSettings()
+         {
+             LineInfoHandling = LineInfoHandling.Ignore,
+-            CommentHandling = CommentHandling.Ignore,
++            CommentHandling = CommentHandling.Ignore
+         };
+ 
+         public static JObject Create(Uri rootId, string subId, string type)
+@@ -69,7 +69,7 @@ public static JObject Create(Uri id, IEnumerable<string> types)
+         }
+ 
+         /// <summary>
+-        /// Compress and remove indentation for json data
++        /// Compress and remove indentation for json data.
+         /// </summary>
+         public static async Task<MemoryStream> GZipAndMinifyAsync(Stream input)
+         {
+@@ -165,7 +165,7 @@ public static async Task<JObject> LoadJsonAsync(Stream stream)
+             using (var jsonReader = new JsonTextReader(reader))
+             {
+                 jsonReader.DateParseHandling = DateParseHandling.None;
+-                var json = await JObject.LoadAsync(jsonReader, _jsonLoadSettings);
++                var json = await JObject.LoadAsync(jsonReader, JsonLoadSettings);
+                 return json;
+             }
+         }
+@@ -220,7 +220,7 @@ public static void CopyDelimitedProperties(JObject source, JObject destination,
+         }
+ 
+         /// <summary>
+-        /// Add an array with an empty item to all properties if they do not exist
++        /// Add an array with an empty item to all properties if they do not exist.
+         /// </summary>
+         public static void RequireArrayWithEmptyString(JObject json, IEnumerable<string> properties)
+         {
+diff --git a/src/SleetLib/Utility/OperationsUtility.cs b/src/SleetLib/Utility/OperationsUtility.cs
+index 33f1f98..da7a6a1 100644
+--- a/src/SleetLib/Utility/OperationsUtility.cs
++++ b/src/SleetLib/Utility/OperationsUtility.cs
+@@ -9,7 +9,6 @@ namespace Sleet
+ {
+     public static class OperationsUtility
+     {
+-
+         /// <summary>
+         /// Add/Remove all non-symbols packages.
+         /// </summary>
+diff --git a/src/SleetLib/Utility/PrintUtility.cs b/src/SleetLib/Utility/PrintUtility.cs
+index ac977e6..0d269f2 100644
+--- a/src/SleetLib/Utility/PrintUtility.cs
++++ b/src/SleetLib/Utility/PrintUtility.cs
+@@ -8,10 +8,10 @@ public static string GetBytesString(long bytes)
+         {
+             if (bytes > (1024 * 1024))
+             {
+-                return $"{Math.Round((bytes / 1024f / 1024f), 2)} MB";
++                return $"{Math.Round(bytes / 1024f / 1024f, 2)} MB";
+             }
+ 
+-            return $"{Math.Round((bytes / 1024f), 2)} KB";
++            return $"{Math.Round(bytes / 1024f, 2)} KB";
+         }
+ 
+         public static string GetTimeString(TimeSpan span)
+diff --git a/src/SleetLib/Utility/SettingsUtility.cs b/src/SleetLib/Utility/SettingsUtility.cs
+index 0228e0f..388eed1 100644
+--- a/src/SleetLib/Utility/SettingsUtility.cs
++++ b/src/SleetLib/Utility/SettingsUtility.cs
+@@ -76,7 +76,9 @@ public static class SettingsUtility
+                 // prefer mappings over env vars
+                 var entries = GetSleetEnvVars();
+                 if (mappings != null)
++                {
+                     entries = entries.Concat(mappings);
++                }
+ 
+                 foreach (var pair in entries)
+                 {
+@@ -194,6 +196,7 @@ public static string ResolveToken(string input, Dictionary<string, string>? mapp
+             }
+ 
+             depth++;
++
+             // Use nuget's tokenizer for .pp files
+             var tokenizer = new Tokenizer(input);
+             var result = new StringBuilder(input.Length);
+diff --git a/src/SleetLib/Utility/SleetUtility.cs b/src/SleetLib/Utility/SleetUtility.cs
+index 87c384c..bdf6207 100644
+--- a/src/SleetLib/Utility/SleetUtility.cs
++++ b/src/SleetLib/Utility/SleetUtility.cs
+@@ -35,7 +35,7 @@ public static ServiceNames GetServiceName(ISleetFile file)
+         }
+ 
+         /// <summary>
+-        /// Get the relative path of a file
++        /// Get the relative path of a file.
+         /// </summary>
+         public static string GetRelativePath(ISleetFile file)
+         {
+@@ -54,7 +54,7 @@ public static string GetRelativePath(ISleetFile file)
+         }
+ 
+         /// <summary>
+-        /// Create a dictionary of packages by id
++        /// Create a dictionary of packages by id.
+         /// </summary>
+         public static Dictionary<string, List<T>> GetPackageSetsById<T>(IEnumerable<T> packages, Func<T, string> getId)
+         {
+@@ -131,7 +131,7 @@ private static List<SleetStep> GetSteps(SleetContext context)
+         }
+ 
+         /// <summary>
+-        /// PreLoad, Wait for dependencies, Run
++        /// PreLoad, Wait for dependencies, Run.
+         /// </summary>
+         private sealed class SleetStep
+         {
+diff --git a/src/SleetLib/Utility/SourceUtility.cs b/src/SleetLib/Utility/SourceUtility.cs
+index 8a313fe..4ac4d84 100644
+--- a/src/SleetLib/Utility/SourceUtility.cs
++++ b/src/SleetLib/Utility/SourceUtility.cs
+@@ -118,7 +118,7 @@ public static async Task EnsureBucketOrThrow(ISleetFileSystem fileSystem, bool a
+                 var exists = await fileSystem.Validate(log, token);
+                 if (!exists)
+                 {
+-                    throw new InvalidOperationException($"Unable to use feed. Create the appropriate feed folder/container/bucket to continue.");
++                    throw new InvalidOperationException("Unable to use feed. Create the appropriate feed folder/container/bucket to continue.");
+                 }
+             }
+         }
+diff --git a/src/SleetLib/Utility/SymbolsIndexUtility.cs b/src/SleetLib/Utility/SymbolsIndexUtility.cs
+index bbddd80..a9acaae 100644
+--- a/src/SleetLib/Utility/SymbolsIndexUtility.cs
++++ b/src/SleetLib/Utility/SymbolsIndexUtility.cs
+@@ -60,7 +60,7 @@ public static string GetSymbolsNupkgFileName(PackageIdentity identity)
+         /// </summary>
+         public static string GetPackageIndexPath(PackageIdentity identity)
+         {
+-            return $"/symbols/packages/index.json";
++            return "/symbols/packages/index.json";
+         }
+ 
+         /// <summary>
+diff --git a/src/SleetLib/Utility/UpgradeUtility.cs b/src/SleetLib/Utility/UpgradeUtility.cs
+index f721207..de3413b 100644
+--- a/src/SleetLib/Utility/UpgradeUtility.cs
++++ b/src/SleetLib/Utility/UpgradeUtility.cs
+@@ -10,8 +10,6 @@ namespace Sleet
+ {
+     public static class UpgradeUtility
+     {
+-
+-
+         /// <summary>
+         /// Currently supported capabilities. New optional features can be added here if they need to block older clients.
+         /// This is an alternative to blocking all older versions of Sleet from a feed with requiredVersion.
+@@ -21,7 +19,6 @@ public static class UpgradeUtility
+             FeedCapability.Parse("schema:1.0.0")
+         };
+ 
+-
+         /// <summary>
+         /// Read the assembly version.
+         /// </summary>
+@@ -99,7 +96,7 @@ public static async Task EnsureCompatibility(ISleetFileSystem fileSystem, ILogge
+         /// <summary>
+         /// -1 if the client needs to upgrade (supported caps are lower)
+         /// 0 if the client and feed can work together.
+-        /// 1 if the feed requires an upgrade due to being incompatible with the newer client
++        /// 1 if the feed requires an upgrade due to being incompatible with the newer client.
+         /// </summary>
+         private static int CompareCapabilities(List<FeedCapability> supportedCaps, List<FeedCapability> requiredCaps)
+         {
+diff --git a/src/SleetLib/Utility/UriUtility.cs b/src/SleetLib/Utility/UriUtility.cs
+index 215e78d..8ba6e79 100644
+--- a/src/SleetLib/Utility/UriUtility.cs
++++ b/src/SleetLib/Utility/UriUtility.cs
+@@ -8,10 +8,10 @@ namespace Sleet
+ {
+     public static class UriUtility
+     {
+-        private static readonly char[] _dirChars = new char[] { '\\', '/' };
++        private static readonly char[] DirChars = new char[] { '\\', '/' };
+ 
+         /// <summary>
+-        /// Check if the URI has the expected root
++        /// Check if the URI has the expected root.
+         /// </summary>
+         public static bool HasRoot(Uri expectedRoot, Uri fullPath, bool caseSensitive)
+         {
+@@ -31,7 +31,7 @@ public static Uri ChangeRoot(Uri origRoot, Uri destRoot, Uri origPath)
+         }
+ 
+         /// <summary>
+-        /// Combine a root and relative path
++        /// Combine a root and relative path.
+         /// </summary>
+         public static Uri GetPath(Uri root, params string[] relativePaths)
+         {
+@@ -50,13 +50,14 @@ public static Uri GetPath(Uri root, params string[] relativePaths)
+                 if ((i + 1) == relativePaths.Length)
+                 {
+                     // Leaving trailing slashes on the final piece
+-                    parts.Add(relativePaths[i].TrimStart(_dirChars));
++                    parts.Add(relativePaths[i].TrimStart(DirChars));
+                 }
+                 else
+                 {
+-                    parts.Add(relativePaths[i].Trim(_dirChars));
++                    parts.Add(relativePaths[i].Trim(DirChars));
+                 }
+             }
++
+             var combined = new Uri(EnsureTrailingSlash(root), string.Join("/", parts));
+             return combined;
+         }
+@@ -109,7 +110,7 @@ public static Uri CreateUri(string path, bool ensureTrailingSlash)
+             if (ensureTrailingSlash)
+             {
+                 uri = EnsureTrailingSlash(uri);
+-            };
++            }
+ 
+             return uri;
+         }
+@@ -148,8 +149,8 @@ public static Uri RemoveTrailingSlash(Uri uri)
+ 
+         public static bool IsHttp(Uri uri)
+         {
+-            return (uri.AbsoluteUri.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+-                || uri.AbsoluteUri.StartsWith("https://", StringComparison.OrdinalIgnoreCase));
++            return uri.AbsoluteUri.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
++                || uri.AbsoluteUri.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
+         }
+ 
+         /// <summary>
+diff --git a/src/SleetLib/Utility/Utility.cs b/src/SleetLib/Utility/Utility.cs
+index 796e9cf..67b8b39 100644
+--- a/src/SleetLib/Utility/Utility.cs
++++ b/src/SleetLib/Utility/Utility.cs
+@@ -5,12 +5,12 @@
+ namespace Sleet
+ {
+     /// <summary>
+-    /// Misc utils
++    /// Misc utils.
+     /// </summary>
+     public static class Utility
+     {
+         /// <summary>
+-        /// Compress string
++        /// Compress string.
+         /// </summary>
+         public static async Task<MemoryStream> GZipAsync(string s)
+         {
+@@ -30,7 +30,7 @@ public static async Task<MemoryStream> GZipAsync(string s)
+         }
+ 
+         /// <summary>
+-        /// Compress string
++        /// Compress string.
+         /// </summary>
+         public static async Task<MemoryStream> GZipAsync(Stream input)
+         {
+diff --git a/src/SleetLib/def/IFeedSettingHandler.cs b/src/SleetLib/def/IFeedSettingHandler.cs
+index 8ea19e0..4607b47 100644
+--- a/src/SleetLib/def/IFeedSettingHandler.cs
++++ b/src/SleetLib/def/IFeedSettingHandler.cs
+@@ -10,7 +10,7 @@ namespace Sleet
+     public interface IFeedSettingHandler
+     {
+         /// <summary>
+-        /// Name in sleet.settings.json
++        /// Name in sleet.settings.json.
+         /// </summary>
+         string Name { get; }
+ 
+diff --git a/src/SleetLib/def/IRootIndex.cs b/src/SleetLib/def/IRootIndex.cs
+index 637112e..69c845f 100644
+--- a/src/SleetLib/def/IRootIndex.cs
++++ b/src/SleetLib/def/IRootIndex.cs
+@@ -5,7 +5,7 @@ public interface IRootIndex
+         /// <summary>
+         /// Root index file path.
+         /// </summary>
+-        /// <remarks>Relative path</remarks>
++        /// <remarks>Relative path.</remarks>
+         string RootIndex { get; }
+ 
+         /// <summary>
+diff --git a/src/SleetLib/def/ISleetService.cs b/src/SleetLib/def/ISleetService.cs
+index 257ae63..fa0e1c8 100644
+--- a/src/SleetLib/def/ISleetService.cs
++++ b/src/SleetLib/def/ISleetService.cs
+@@ -6,7 +6,7 @@ namespace Sleet
+     public interface ISleetService : IApplyOperations
+     {
+         /// <summary>
+-        /// Service name
++        /// Service name.
+         /// </summary>
+         string Name { get; }
+     }
+diff --git a/test/Sleet.AmazonS3.Tests/AmazonS3FileSystemTests.cs b/test/Sleet.AmazonS3.Tests/AmazonS3FileSystemTests.cs
+index 0da78e7..233d04b 100644
+--- a/test/Sleet.AmazonS3.Tests/AmazonS3FileSystemTests.cs
++++ b/test/Sleet.AmazonS3.Tests/AmazonS3FileSystemTests.cs
+@@ -25,9 +25,9 @@ await using (var testContext = new AmazonS3TestContext())
+                 // Create
+                 await testContext.FileSystem.CreateBucket(testContext.Logger, CancellationToken.None);
+ 
+-                var hasBucket = (await testContext.FileSystem.HasBucket(testContext.Logger, CancellationToken.None));
++                var hasBucket = await testContext.FileSystem.HasBucket(testContext.Logger, CancellationToken.None);
+                 hasBucket.Should().BeTrue("HasBucket should return true after");
+-                var valid = (await testContext.FileSystem.Validate(testContext.Logger, CancellationToken.None));
++                var valid = await testContext.FileSystem.Validate(testContext.Logger, CancellationToken.None);
+                 valid.Should().BeTrue("Validate should be true after");
+ 
+                 // Delete
+@@ -39,6 +39,5 @@ await using (var testContext = new AmazonS3TestContext())
+                 await testContext.CleanupAsync();
+             }
+         }
+-
+     }
+ }
+\ No newline at end of file
+diff --git a/test/Sleet.AmazonS3.Tests/AmazonS3TestContext.cs b/test/Sleet.AmazonS3.Tests/AmazonS3TestContext.cs
+index 2d7c37d..9566b3a 100644
+--- a/test/Sleet.AmazonS3.Tests/AmazonS3TestContext.cs
++++ b/test/Sleet.AmazonS3.Tests/AmazonS3TestContext.cs
+@@ -34,7 +34,7 @@ public class AmazonS3TestContext : IAsyncDisposable
+         public const string LocalEnvCredential = "rustfsadmin";
+ 
+         private readonly string acl;
+-        private bool cleanupDone = false;
++        private bool _cleanupDone = false;
+ 
+         public AmazonS3TestContext(string acl = null)
+         {
+@@ -210,7 +210,7 @@ public Task<AmazonS3FileSystem> CreateSubFeedFileSystemAsync(string feedSubPath)
+ 
+         public async Task CleanupAsync()
+         {
+-            cleanupDone = true;
++            _cleanupDone = true;
+ 
+             try
+             {
+@@ -241,7 +241,7 @@ public async ValueTask DisposeAsync()
+             GC.SuppressFinalize(this);
+             LocalCache.Dispose();
+ 
+-            if (!cleanupDone)
++            if (!_cleanupDone)
+             {
+                 await CleanupAsync();
+             }
+diff --git a/test/Sleet.AmazonS3.Tests/CacheControlTests.cs b/test/Sleet.AmazonS3.Tests/CacheControlTests.cs
+index 9c21273..fc25fe9 100644
+--- a/test/Sleet.AmazonS3.Tests/CacheControlTests.cs
++++ b/test/Sleet.AmazonS3.Tests/CacheControlTests.cs
+@@ -1,6 +1,6 @@
++using System.Net.Http.Headers;
+ using AwesomeAssertions;
+ using NuGet.Test.Helpers;
+-using System.Net.Http.Headers;
+ 
+ namespace Sleet.AmazonS3.Tests
+ {
+diff --git a/test/Sleet.Azure.Tests/AzureTestContext.cs b/test/Sleet.Azure.Tests/AzureTestContext.cs
+index 83e882f..31fadba 100644
+--- a/test/Sleet.Azure.Tests/AzureTestContext.cs
++++ b/test/Sleet.Azure.Tests/AzureTestContext.cs
+@@ -5,7 +5,6 @@
+ 
+ namespace Sleet.Azure.Tests
+ {
+-
+     public class AzureTestContext : IAsyncDisposable
+     {
+         public LocalSettings LocalSettings { get; }
+@@ -46,6 +45,7 @@ public async Task InitAsync()
+         }
+ 
+         private bool _cleanupDone = false;
++
+         public async Task CleanupAsync()
+         {
+             _cleanupDone = true;
+diff --git a/test/Sleet.Azure.Tests/CacheControlTests.cs b/test/Sleet.Azure.Tests/CacheControlTests.cs
+index 5100930..e108f02 100644
+--- a/test/Sleet.Azure.Tests/CacheControlTests.cs
++++ b/test/Sleet.Azure.Tests/CacheControlTests.cs
+@@ -1,7 +1,7 @@
++using System.Net.Http.Headers;
+ using AwesomeAssertions;
+ using Newtonsoft.Json.Linq;
+ using NuGet.Test.Helpers;
+-using System.Net.Http.Headers;
+ 
+ namespace Sleet.Azure.Tests
+ {
+diff --git a/test/Sleet.Azure.Tests/SubFeedTests.cs b/test/Sleet.Azure.Tests/SubFeedTests.cs
+index 9afb8a1..58b725c 100644
+--- a/test/Sleet.Azure.Tests/SubFeedTests.cs
++++ b/test/Sleet.Azure.Tests/SubFeedTests.cs
+@@ -1,5 +1,5 @@
+-using Azure.Storage.Blobs;
+ using AwesomeAssertions;
++using Azure.Storage.Blobs;
+ using NuGet.Test.Helpers;
+ 
+ namespace Sleet.Azure.Tests
+@@ -51,7 +51,6 @@ await using (var testContext2 = new AzureTestContext())
+                     testContext.FileSystem,
+                     testContext.Logger);
+ 
+-
+                 result.Should().BeTrue();
+ 
+                 await testContext.CleanupAsync();
+@@ -180,8 +179,7 @@ await foreach (var page in pages)
+                 blobs.AddRange(
+                     page.Values
+                         .Select(item =>
+-                            new BlobUriBuilder(container.Uri) { BlobName = item.Name }.ToUri())
+-                        );
++                            new BlobUriBuilder(container.Uri) { BlobName = item.Name }.ToUri()));
+             }
+ 
+             return blobs;
+diff --git a/test/Sleet.CliTool.Tests/BasicTests.cs b/test/Sleet.CliTool.Tests/BasicTests.cs
+index 30f8483..04defab 100644
+--- a/test/Sleet.CliTool.Tests/BasicTests.cs
++++ b/test/Sleet.CliTool.Tests/BasicTests.cs
+@@ -18,7 +18,7 @@ namespace Sleet.CliTool.Tests
+     public class BasicTests
+     {
+         /// <summary>
+-        /// Dotnet install sleet from the nupkg created by build.ps1 or build.sh
++        /// Dotnet install sleet from the nupkg created by build.ps1 or build.sh.
+         /// </summary>
+         [Fact]
+         public async Task InstallToolVerifySuccess()
+@@ -82,7 +82,6 @@ private static void Delete(DirectoryInfo dir)
+             {
+                 foreach (var subDir in dir.EnumerateDirectories())
+                 {
+-
+                     Delete(subDir);
+                 }
+ 
+diff --git a/test/Sleet.CmdExe.Tests/DynamicSettingsTests.cs b/test/Sleet.CmdExe.Tests/DynamicSettingsTests.cs
+index 6b2a560..ee96310 100644
+--- a/test/Sleet.CmdExe.Tests/DynamicSettingsTests.cs
++++ b/test/Sleet.CmdExe.Tests/DynamicSettingsTests.cs
+@@ -3,8 +3,8 @@
+ using System.IO;
+ using System.Text;
+ using System.Threading.Tasks;
+-using DotNetConfig;
+ using AwesomeAssertions;
++using DotNetConfig;
+ using NuGet.Test.Helpers;
+ using Sleet.Test.Common;
+ using Xunit;
+@@ -19,7 +19,7 @@ public async Task InitWithEnvVarsWithNonSleetNetConfigVerifyFeedOutput()
+             using (var testContext = new SleetTestContext())
+             {
+                 var dir = Path.Combine(testContext.Root, "sub");
+-                var args = $"init -c none";
++                var args = "init -c none";
+ 
+                 Directory.CreateDirectory(dir);
+ 
+@@ -47,7 +47,7 @@ public async Task InitWithEnvVarsVerifyFeedOutput()
+             using (var testContext = new SleetTestContext())
+             {
+                 var dir = Path.Combine(testContext.Root, "sub");
+-                var args = $"init -c none";
++                var args = "init -c none";
+ 
+                 Directory.CreateDirectory(dir);
+ 
+@@ -102,25 +102,25 @@ public async Task RunAllCommandsWithInputProperties()
+                 result = await CmdRunner.RunAsync(ExeUtils.SleetExePath, dir, $"push {zipFile.FullName} " + extraArgs);
+                 result.Success.Should().BeTrue();
+ 
+-                result = await CmdRunner.RunAsync(ExeUtils.SleetExePath, dir, $"delete -i packageA " + extraArgs);
++                result = await CmdRunner.RunAsync(ExeUtils.SleetExePath, dir, "delete -i packageA " + extraArgs);
+                 result.Success.Should().BeTrue();
+ 
+                 result = await CmdRunner.RunAsync(ExeUtils.SleetExePath, dir, $"download -o {output} " + extraArgs);
+                 result.Success.Should().BeTrue();
+ 
+-                result = await CmdRunner.RunAsync(ExeUtils.SleetExePath, dir, $"stats" + extraArgs);
++                result = await CmdRunner.RunAsync(ExeUtils.SleetExePath, dir, "stats" + extraArgs);
+                 result.Success.Should().BeTrue();
+ 
+-                result = await CmdRunner.RunAsync(ExeUtils.SleetExePath, dir, $"validate" + extraArgs);
++                result = await CmdRunner.RunAsync(ExeUtils.SleetExePath, dir, "validate" + extraArgs);
+                 result.Success.Should().BeTrue();
+ 
+-                result = await CmdRunner.RunAsync(ExeUtils.SleetExePath, dir, $"recreate" + extraArgs);
++                result = await CmdRunner.RunAsync(ExeUtils.SleetExePath, dir, "recreate" + extraArgs);
+                 result.Success.Should().BeTrue();
+ 
+-                result = await CmdRunner.RunAsync(ExeUtils.SleetExePath, dir, $"feed-settings --get-all" + extraArgs);
++                result = await CmdRunner.RunAsync(ExeUtils.SleetExePath, dir, "feed-settings --get-all" + extraArgs);
+                 result.Success.Should().BeTrue();
+ 
+-                result = await CmdRunner.RunAsync(ExeUtils.SleetExePath, dir, $"destroy" + extraArgs);
++                result = await CmdRunner.RunAsync(ExeUtils.SleetExePath, dir, "destroy" + extraArgs);
+                 result.Success.Should().BeTrue();
+             }
+         }
+diff --git a/test/Sleet.CmdExe.Tests/ExeUtils.cs b/test/Sleet.CmdExe.Tests/ExeUtils.cs
+index 0da9e31..b3c1590 100644
+--- a/test/Sleet.CmdExe.Tests/ExeUtils.cs
++++ b/test/Sleet.CmdExe.Tests/ExeUtils.cs
+@@ -5,8 +5,8 @@ namespace Sleet.CmdExe.Tests
+ {
+     public static class ExeUtils
+     {
+-        private static readonly Lazy<string> _getExe = new Lazy<string>(() => CmdRunner.GetPath("artifacts/publish/Sleet.exe"));
++        private static readonly Lazy<string> GetExe = new Lazy<string>(() => CmdRunner.GetPath("artifacts/publish/Sleet.exe"));
+ 
+-        public static string SleetExePath => _getExe.Value;
++        public static string SleetExePath => GetExe.Value;
+     }
+ }
+diff --git a/test/Sleet.Integration.Tests/LocalFeedTests.cs b/test/Sleet.Integration.Tests/LocalFeedTests.cs
+index 6d03ec0..40aacf2 100644
+--- a/test/Sleet.Integration.Tests/LocalFeedTests.cs
++++ b/test/Sleet.Integration.Tests/LocalFeedTests.cs
+@@ -53,7 +53,6 @@ public async Task LocalFeed_RelativePath_DefaultSleetJson()
+                 var sleetConfigPath = Path.Combine(target.Root, "sleet.json");
+                 await JsonUtility.SaveJsonAsync(new FileInfo(sleetConfigPath), sleetConfig);
+ 
+-
+                 try
+                 {
+                     Directory.SetCurrentDirectory(target.Root);
+@@ -62,13 +61,12 @@ public async Task LocalFeed_RelativePath_DefaultSleetJson()
+                     // so GetCurrentDirectory() returns the resolved /private/var/... path after SetCurrentDirectory).
+                     var resolvedRoot = Directory.GetCurrentDirectory();
+ 
+-                    //Load sleet.json file from working directory
++                    // Load sleet.json file from working directory
+                     var settings = LocalSettings.Load(path: null);
+                     var fileSystem = await FileSystemFactory.CreateFileSystemAsync(settings, cache, "local", log) as PhysicalFileSystem;
+ 
+                     fileSystem.Should().NotBeNull();
+                     fileSystem.LocalRoot.Should().Be(Path.Combine(resolvedRoot, "output") + Path.DirectorySeparatorChar);
+-
+                 }
+                 finally
+                 {
+diff --git a/test/Sleet.Integration.Tests/TestHttpSourceResourceProvider.cs b/test/Sleet.Integration.Tests/TestHttpSourceResourceProvider.cs
+index e623e17..e1f853a 100644
+--- a/test/Sleet.Integration.Tests/TestHttpSourceResourceProvider.cs
++++ b/test/Sleet.Integration.Tests/TestHttpSourceResourceProvider.cs
+@@ -13,12 +13,12 @@
+ namespace Sleet.Integration.Test
+ {
+     /// <summary>
+-    /// HttpSource -> PhysicalFileSystem adapter
++    /// HttpSource -> PhysicalFileSystem adapter.
+     /// </summary>
+     public class TestHttpSourceResourceProvider : ResourceProvider
+     {
+-        private readonly ConcurrentDictionary<PackageSource, HttpSourceResource> _cache
+-                = new ConcurrentDictionary<PackageSource, HttpSourceResource>();
++        private readonly ConcurrentDictionary<PackageSource, HttpSourceResource> _cache =
++                new ConcurrentDictionary<PackageSource, HttpSourceResource>();
+ 
+         private readonly PhysicalFileSystem _fileSystem;
+ 
+@@ -37,7 +37,7 @@ public TestHttpSourceResourceProvider(PhysicalFileSystem fileSystem)
+             if (source.PackageSource.IsHttp)
+             {
+                 curResource = _cache.GetOrAdd(source.PackageSource,
+-                    (packageSource) => new HttpSourceResource(CreateSource(source, _fileSystem)));
++                    packageSource => new HttpSourceResource(CreateSource(source, _fileSystem)));
+             }
+ 
+             return Task.FromResult(new Tuple<bool, INuGetResource>(curResource != null, curResource));
+diff --git a/test/Sleet.Test.Common/BaseURITestUtil.cs b/test/Sleet.Test.Common/BaseURITestUtil.cs
+index ac51e0a..0162db6 100644
+--- a/test/Sleet.Test.Common/BaseURITestUtil.cs
++++ b/test/Sleet.Test.Common/BaseURITestUtil.cs
+@@ -55,7 +55,7 @@ public static async Task VerifyBaseUris(IEnumerable<ISleetFile> files, Uri baseU
+         }
+ 
+         /// <summary>
+-        /// Get all instances of @id outside of any @context
++        /// Get all instances of @id outside of any @context.
+         /// </summary>
+         public static IEnumerable<string> GetEntityIds(JToken json)
+         {
+diff --git a/test/Sleet.Test.Common/CmdRunner.cs b/test/Sleet.Test.Common/CmdRunner.cs
+index a703aff..066fab8 100644
+--- a/test/Sleet.Test.Common/CmdRunner.cs
++++ b/test/Sleet.Test.Common/CmdRunner.cs
+@@ -9,14 +9,14 @@
+ namespace Sleet.Test.Common
+ {
+     /// <summary>
+-    /// Run an external exe
++    /// Run an external exe.
+     /// </summary>
+     public static class CmdRunner
+     {
+         /// <summary>
+         /// Search the test output directory and its parents for a relative path.
+         /// </summary>
+-        /// <remarks>throws if not found</remarks>
++        /// <remarks>throws if not found.</remarks>
+         public static string GetPath(string relativePath)
+         {
+             relativePath = relativePath.Replace('/', Path.DirectorySeparatorChar);
+@@ -78,7 +78,7 @@ public static string GetPath(string relativePath)
+                 UseShellExecute = false,
+                 CreateNoWindow = true,
+                 RedirectStandardError = true,
+-                RedirectStandardOutput = true,
++                RedirectStandardOutput = true
+             };
+ 
+             SetEnvVarsOnProcess(envVars, processInfo);
+@@ -125,14 +125,14 @@ private static async Task ReadStreamAsync(StreamReader streamReader, StringBuild
+                 }
+ 
+                 lines.AppendLine(currentLine);
+-            };
++            }
+         }
+     }
+ 
+     public class CmdRunnerResult
+     {
+         /// <summary>
+-        /// Process exit code
++        /// Process exit code.
+         /// </summary>
+         public int ExitCode { get; }
+ 
+diff --git a/test/Sleet.Test.Common/SleetTestContext.cs b/test/Sleet.Test.Common/SleetTestContext.cs
+index 570e6c0..0e39998 100644
+--- a/test/Sleet.Test.Common/SleetTestContext.cs
++++ b/test/Sleet.Test.Common/SleetTestContext.cs
+@@ -11,22 +11,22 @@ namespace Sleet.Test.Common
+     public class SleetTestContext : IDisposable
+     {
+         /// <summary>
+-        /// Root directory
++        /// Root directory.
+         /// </summary>
+         public TestFolder Root { get; } = new TestFolder();
+ 
+         /// <summary>
+-        /// Package inputs
++        /// Package inputs.
+         /// </summary>
+         public string Packages { get; }
+ 
+         /// <summary>
+-        /// Target feed
++        /// Target feed.
+         /// </summary>
+         public string Target { get; }
+ 
+         /// <summary>
+-        /// Sleet Context
++        /// Sleet Context.
+         /// </summary>
+         public SleetContext SleetContext { get; }
+ 
+@@ -49,7 +49,7 @@ public SleetTestContext()
+                 SourceSettings = new FeedSettings()
+                 {
+                     CatalogEnabled = false,
+-                    SymbolsEnabled = false,
++                    SymbolsEnabled = false
+                 }
+             };
+         }
+diff --git a/test/Sleet.Tests/MainCoreCommandTests.cs b/test/Sleet.Tests/MainCoreCommandTests.cs
+index 878b127..1d3dc56 100644
+--- a/test/Sleet.Tests/MainCoreCommandTests.cs
++++ b/test/Sleet.Tests/MainCoreCommandTests.cs
+@@ -64,7 +64,8 @@ public async Task MainCore_RunLocalFeedLifecycle_ExercisesCommands()
+                 (await RunAsync(log, "download", "--config", config, "--output-path", download.Root)).Should().Be(0);
+                 Directory.GetFiles(download.Root, "*.nupkg", SearchOption.AllDirectories)
+                     .Select(Path.GetFileName)
+-                    .Should().BeEquivalentTo(new[] { "a.2.0.0.nupkg", "b.1.0.0-beta.nupkg" });
++                    .Should()
++                    .BeEquivalentTo(new[] { "a.2.0.0.nupkg", "b.1.0.0-beta.nupkg" });
+ 
+                 (await RunAsync(log, "delete", "--config", config, "--id", "b", "--version", "1.0.0-beta")).Should().Be(0);
+                 var packagesAfterDelete = await GetPackagesAsync(config, feed);
+@@ -291,6 +292,7 @@ private static void WriteLocalConfig(string configPath, params (string Name, str
+                     { "baseURI", UriUtility.CreateUri(source.Path).AbsoluteUri }
+                 });
+             }
++
+             json.Add("sources", sourceArray);
+             File.WriteAllText(configPath, json.ToString());
+         }
+diff --git a/test/Sleet.Tests/MainCoreConsoleTests.cs b/test/Sleet.Tests/MainCoreConsoleTests.cs
+index eede82d..3c9e9db 100644
+--- a/test/Sleet.Tests/MainCoreConsoleTests.cs
++++ b/test/Sleet.Tests/MainCoreConsoleTests.cs
+@@ -76,6 +76,7 @@ public async Task MainCore_SetVerbosity_UsesExpectedPrecedence(string debugValue
+                         {
+                             args.Add("--verbose");
+                         }
++
+                         if (verbosity != null)
+                         {
+                             args.Add("--verbosity");
+diff --git a/test/SleetLib.Tests/AmazonS3FileSystemAbstractionTests.cs b/test/SleetLib.Tests/AmazonS3FileSystemAbstractionTests.cs
+index 8ce4817..283d362 100644
+--- a/test/SleetLib.Tests/AmazonS3FileSystemAbstractionTests.cs
++++ b/test/SleetLib.Tests/AmazonS3FileSystemAbstractionTests.cs
+@@ -57,6 +57,7 @@ public async Task AmazonS3FileSystemAbstraction_GetFilesAsync_FollowsPaging()
+                 new ListObjectsV2Response { IsTruncated = true, NextContinuationToken = "next", S3Objects = new List<S3Object> { new S3Object { Key = "a" } } },
+                 new ListObjectsV2Response { S3Objects = new List<S3Object> { new S3Object { Key = "b" } } }
+             });
++
+             // The same request object is reused for each page, so the continuation token is recorded per call.
+             client.Setup(c => c.ListObjectsV2Async(It.IsAny<ListObjectsV2Request>(), It.IsAny<CancellationToken>()))
+                 .Callback<ListObjectsV2Request, CancellationToken>((r, _) =>
+diff --git a/test/SleetLib.Tests/AmazonS3FileSystemTests.cs b/test/SleetLib.Tests/AmazonS3FileSystemTests.cs
+index ae12d12..233d3d1 100644
+--- a/test/SleetLib.Tests/AmazonS3FileSystemTests.cs
++++ b/test/SleetLib.Tests/AmazonS3FileSystemTests.cs
+@@ -5,9 +5,9 @@
+ using System.Reflection;
+ using System.Threading;
+ using System.Threading.Tasks;
++using Amazon.Runtime.SharedInterfaces;
+ using Amazon.S3;
+ using Amazon.S3.Model;
+-using Amazon.Runtime.SharedInterfaces;
+ using AwesomeAssertions;
+ using Moq;
+ using NuGet.Common;
+@@ -80,6 +80,7 @@ public async Task AmazonS3FileSystem_GetFiles_FiltersSubPathStripsItSkipsLockAnd
+                         }
+                     }
+                 });
++
+                 // The same request object is reused for each page, so the continuation token is recorded per call.
+                 client.Setup(c => c.ListObjectsV2Async(It.IsAny<ListObjectsV2Request>(), It.IsAny<CancellationToken>()))
+                     .Callback<ListObjectsV2Request, CancellationToken>((r, _) =>
+@@ -361,6 +362,7 @@ public async Task AmazonS3FileSystem_DeleteBucket_IgnoresNotFoundAndClearsCached
+         private static Mock<IAmazonS3> CreateClientWithMissingBucket()
+         {
+             var client = AmazonS3TestUtility.CreateClient();
++
+             // EnsureBucketExistsAsync goes through ICoreAmazonS3, which must be added before the mock object is created.
+             client.As<ICoreAmazonS3>();
+             client.Setup(c => c.HeadBucketAsync(It.IsAny<HeadBucketRequest>(), It.IsAny<CancellationToken>()))
+diff --git a/test/SleetLib.Tests/AzureFileSystemLockTests.cs b/test/SleetLib.Tests/AzureFileSystemLockTests.cs
+index ee001b1..6fc87fe 100644
+--- a/test/SleetLib.Tests/AzureFileSystemLockTests.cs
++++ b/test/SleetLib.Tests/AzureFileSystemLockTests.cs
+@@ -2,11 +2,11 @@
+ using System.Linq;
+ using System.Threading;
+ using System.Threading.Tasks;
++using AwesomeAssertions;
+ using Azure;
+ using Azure.Storage.Blobs;
+ using Azure.Storage.Blobs.Models;
+ using Azure.Storage.Blobs.Specialized;
+-using AwesomeAssertions;
+ using Moq;
+ using Newtonsoft.Json.Linq;
+ using NuGet.Test.Helpers;
+@@ -28,6 +28,7 @@ public async Task AzureFileSystemLock_TryObtainLockAsync_AcquiresLeaseAndWritesM
+             AzureUnitTestUtility.ConfigureSuccessfulLease(blob, leaseClient);
+             blob.Setup(b => b.ExistsAsync(It.IsAny<CancellationToken>()))
+                 .ReturnsAsync(Response.FromValue(false, AzureUnitTestUtility.Response));
++
+             // AzureFileSystemLock creates the lock blob with the overload without a cancellation token.
+ #pragma warning disable xUnit1051
+             blob.Setup(b => b.UploadAsync(It.IsAny<BinaryData>()))
+@@ -73,6 +74,7 @@ public async Task AzureFileSystemLock_TryObtainLockAsync_WhenLeaseIsHeldReturnsF
+                 .ReturnsAsync(Response.FromValue(
+                     BlobsModelFactory.BlobLease(new ETag("\"etag\""), DateTimeOffset.UtcNow, "another-lease"),
+                     AzureUnitTestUtility.Response));
++
+             // AzureFileSystemLock calls the overload without a cancellation token.
+ #pragma warning disable xUnit1051
+             messageBlob.Setup(b => b.DownloadContentAsync())
+diff --git a/test/SleetLib.Tests/AzureFileSystemTests.cs b/test/SleetLib.Tests/AzureFileSystemTests.cs
+index 0099eb0..bd9f7a4 100644
+--- a/test/SleetLib.Tests/AzureFileSystemTests.cs
++++ b/test/SleetLib.Tests/AzureFileSystemTests.cs
+@@ -1,10 +1,10 @@
+ using System;
+ using System.Linq;
+ using System.Threading.Tasks;
++using AwesomeAssertions;
+ using Azure;
+ using Azure.Storage.Blobs;
+ using Azure.Storage.Blobs.Models;
+-using AwesomeAssertions;
+ using Moq;
+ using NuGet.Common;
+ using NuGet.Test.Helpers;
+diff --git a/test/SleetLib.Tests/AzureFileTests.cs b/test/SleetLib.Tests/AzureFileTests.cs
+index ca61908..b6ce6f4 100644
+--- a/test/SleetLib.Tests/AzureFileTests.cs
++++ b/test/SleetLib.Tests/AzureFileTests.cs
+@@ -3,10 +3,10 @@
+ using System.Linq;
+ using System.Text;
+ using System.Threading.Tasks;
++using AwesomeAssertions;
+ using Azure;
+ using Azure.Storage.Blobs;
+ using Azure.Storage.Blobs.Models;
+-using AwesomeAssertions;
+ using Moq;
+ using Newtonsoft.Json.Linq;
+ using NuGet.Common;
+diff --git a/test/SleetLib.Tests/BadgeFileTests.cs b/test/SleetLib.Tests/BadgeFileTests.cs
+index 0ccd1c7..73ac712 100644
+--- a/test/SleetLib.Tests/BadgeFileTests.cs
++++ b/test/SleetLib.Tests/BadgeFileTests.cs
+@@ -41,7 +41,6 @@ public async Task BadgeFile_VerifyBadgeForPackage()
+                 var identities = new HashSet<PackageIdentity>()
+                 {
+                     new PackageIdentity("a", NuGetVersion.Parse("1.0.0-a"))
+-
+                 };
+ 
+                 foreach (var id in identities)
+diff --git a/test/SleetLib.Tests/BadgeUtilityTests.cs b/test/SleetLib.Tests/BadgeUtilityTests.cs
+index bba1e42..e287c23 100644
+--- a/test/SleetLib.Tests/BadgeUtilityTests.cs
++++ b/test/SleetLib.Tests/BadgeUtilityTests.cs
+@@ -19,7 +19,6 @@ public void BadgeUtility_GetChanges_EmptySets()
+             var before = new HashSet<PackageIdentity>();
+             var after = new HashSet<PackageIdentity>();
+ 
+-
+             BadgeUtility.GetChanges(before, after, preRel: false).Should().BeEmpty();
+         }
+ 
+diff --git a/test/SleetLib.Tests/BaseUriTests.cs b/test/SleetLib.Tests/BaseUriTests.cs
+index f5c27b6..95ef0de 100644
+--- a/test/SleetLib.Tests/BaseUriTests.cs
++++ b/test/SleetLib.Tests/BaseUriTests.cs
+@@ -40,7 +40,6 @@ public async Task BaseUri_VerifyBaseUriIsSetForAllFilesAsync()
+                 var initSuccess = await InitCommand.RunAsync(settings, fileSystem, log);
+                 var pushSuccess = await PushCommand.RunAsync(settings, fileSystem, new List<string>() { zipFile.FullName }, false, false, log);
+ 
+-
+                 // Assert
+                 Assert.True(initSuccess, log.ToString());
+                 Assert.True(pushSuccess, log.ToString());
+diff --git a/test/SleetLib.Tests/CatalogTests.cs b/test/SleetLib.Tests/CatalogTests.cs
+index acae226..179b845 100644
+--- a/test/SleetLib.Tests/CatalogTests.cs
++++ b/test/SleetLib.Tests/CatalogTests.cs
+@@ -75,8 +75,8 @@ public async Task CatalogTest_CreatePackageDetails()
+                             new PackageDependencyGroup(NuGetFramework.Parse("net45"), new List<PackageDependency>()
+                             {
+                                 new PackageDependency("packageAll"),
+-                                new PackageDependency("packageExact", VersionRange.Parse("[2.0.0]")),
+-                            }),
++                                new PackageDependency("packageExact", VersionRange.Parse("[2.0.0]"))
++                            })
+                         },
+                         FrameworkAssemblies = new List<KeyValuePair<string, List<NuGetFramework>>>()
+                         {
+@@ -92,7 +92,7 @@ public async Task CatalogTest_CreatePackageDetails()
+                             new KeyValuePair<string, List<NuGetFramework>>("System.All", new List<NuGetFramework>()
+                             {
+                             })
+-                        },
++                        }
+                     }
+                 };
+ 
+@@ -235,7 +235,7 @@ public async Task CatalogTest_AddPackageAsync_SupportsWritingMultiplePages()
+                     SourceSettings = new FeedSettings()
+                     {
+                         CatalogEnabled = true,
+-                        CatalogPageSize = 1,
++                        CatalogPageSize = 1
+                     }
+                 };
+ 
+diff --git a/test/SleetLib.Tests/ConfigTests.cs b/test/SleetLib.Tests/ConfigTests.cs
+index eed152c..90e3047 100644
+--- a/test/SleetLib.Tests/ConfigTests.cs
++++ b/test/SleetLib.Tests/ConfigTests.cs
+@@ -83,7 +83,6 @@ public void GivenConfigSpecifiedWithNoSettingsThenThrows()
+     editor = code
+ ");
+ 
+-
+             Assert.Throws<ArgumentException>(() => LocalSettings.Load(file));
+         }
+     }
+diff --git a/test/SleetLib.Tests/CreateConfigCommandTests.cs b/test/SleetLib.Tests/CreateConfigCommandTests.cs
+index 01c9b14..6b28738 100644
+--- a/test/SleetLib.Tests/CreateConfigCommandTests.cs
++++ b/test/SleetLib.Tests/CreateConfigCommandTests.cs
+@@ -192,7 +192,7 @@ public async Task CreateConfigCommand_WithExistingFile_ReturnsFalse()
+         public async Task CreateConfigCommand_WithNonExistentDirectory_ReturnsFalse()
+         {
+             var nonExistentPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "config.json");
+-            
++
+             var result = await CreateConfigCommand.RunAsync(FileSystemStorageType.Local, nonExistentPath, NullLogger.Instance);
+ 
+             result.Should().BeFalse();
+diff --git a/test/SleetLib.Tests/ExtensionsTests.cs b/test/SleetLib.Tests/ExtensionsTests.cs
+index e410850..da3e936 100644
+--- a/test/SleetLib.Tests/ExtensionsTests.cs
++++ b/test/SleetLib.Tests/ExtensionsTests.cs
+@@ -243,6 +243,5 @@ public async Task AsMemoryStreamAsync_WithSeekableStream_ResetsPosition()
+             var content = Encoding.UTF8.GetString(result.ToArray());
+             content.Should().Be(originalContent); // Should get full content, not from position 5
+         }
+-
+     }
+ }
+\ No newline at end of file
+diff --git a/test/SleetLib.Tests/FeedSettingsUtilityTests.cs b/test/SleetLib.Tests/FeedSettingsUtilityTests.cs
+index a1b0c0f..a8b5142 100644
+--- a/test/SleetLib.Tests/FeedSettingsUtilityTests.cs
++++ b/test/SleetLib.Tests/FeedSettingsUtilityTests.cs
+@@ -28,7 +28,7 @@ public void GivenThatICallLoadSettingsVerifyValues()
+             {
+                 { "catalogenabled", "false" },
+                 { "symbolsfeedenabled", "false" },
+-                { "catalogpagesize", "5" },
++                { "catalogpagesize", "5" }
+             };
+ 
+             var settings = FeedSettingsUtility.LoadSettings(values);
+@@ -45,7 +45,7 @@ public void GivenThatICallLoadSettingsWithUnknownSettingsVerifyValues()
+             {
+                 { "a", "1" },
+                 { "b", "2" },
+-                { "c", "3" },
++                { "c", "3" }
+             };
+ 
+             var settings = FeedSettingsUtility.LoadSettings(values);
+@@ -63,7 +63,7 @@ public void GivenThatICallLoadSettingsWithPageSizeOutRangeVerifyValues()
+             {
+                 { "catalogpagesize", "0" },
+                 { "catalogenabled", "x" },
+-                { "symbolsfeedenabled", "asf" },
++                { "symbolsfeedenabled", "asf" }
+             };
+ 
+             var settings = FeedSettingsUtility.LoadSettings(values);
+@@ -81,7 +81,7 @@ public void GivenThatICallLoadFeedSettingsVerifyValues()
+                 CatalogEnabled = false,
+                 CatalogPageSize = 5,
+                 SymbolsEnabled = false,
+-                BadgesEnabled = false,
++                BadgesEnabled = false
+             };
+ 
+             var values = FeedSettingsUtility.LoadSettings(settings);
+@@ -91,7 +91,7 @@ public void GivenThatICallLoadFeedSettingsVerifyValues()
+                 { "catalogenabled", "false" },
+                 { "symbolsfeedenabled", "false" },
+                 { "catalogpagesize", "5" },
+-                { "badgesenabled", "false" },
++                { "badgesenabled", "false" }
+             };
+ 
+             values.Should().BeEquivalentTo(expected);
+@@ -115,7 +115,7 @@ public void GivenThatICallLoadFeedSettingsVerifyReverseValues()
+                 { "catalogenabled", "true" },
+                 { "symbolsfeedenabled", "true" },
+                 { "catalogpagesize", "10" },
+-                { "badgesenabled", "true" },
++                { "badgesenabled", "true" }
+             };
+ 
+             values.Should().BeEquivalentTo(expected);
+@@ -143,7 +143,7 @@ public void GivenThatIWriteSettingsVerifyTheyPersist()
+                 { "catalogenabled", "true" },
+                 { "symbolsfeedenabled", "true" },
+                 { "catalogpagesize", "10" },
+-                { "badgesenabled", "true" },
++                { "badgesenabled", "true" }
+             };
+ 
+             FeedSettingsUtility.Set(json, values);
+@@ -162,7 +162,7 @@ public void GivenThatIWriteSettingsVerifyTheyPersistForUnknownValues()
+             {
+                 { "a", "1" },
+                 { "b", "2" },
+-                { "c", "3" },
++                { "c", "3" }
+             };
+ 
+             FeedSettingsUtility.Set(json, values);
+@@ -181,7 +181,7 @@ public void GivenThatIUnsetAllVerifyNoSettings()
+             {
+                 { "a", "1" },
+                 { "b", "2" },
+-                { "c", "3" },
++                { "c", "3" }
+             };
+ 
+             FeedSettingsUtility.Set(json, values);
+@@ -202,13 +202,13 @@ public void GivenThatIUnsetASingleValueVerifyItIsGone()
+             {
+                 { "a", "1" },
+                 { "b", "2" },
+-                { "c", "3" },
++                { "c", "3" }
+             };
+ 
+             var values2 = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+             {
+                 { "a", "1" },
+-                { "c", "3" },
++                { "c", "3" }
+             };
+ 
+             FeedSettingsUtility.Set(json, values);
+diff --git a/test/SleetLib.Tests/FeedTests.cs b/test/SleetLib.Tests/FeedTests.cs
+index 9fa68d7..d868096 100644
+--- a/test/SleetLib.Tests/FeedTests.cs
++++ b/test/SleetLib.Tests/FeedTests.cs
+@@ -111,21 +111,21 @@ public async Task Feed_VerifyBaseUriIsAppliedToLocal(string baseUriString)
+ 
+         [WindowsTheory]
+         [InlineData(@"c:\configPath\sleet.json", @".\", @"c:\configPath\")]
+-        [InlineData(@"c:\configPath\sleet.json", @".", @"c:\configPath\")]
++        [InlineData(@"c:\configPath\sleet.json", ".", @"c:\configPath\")]
+         [InlineData(@"c:\configPath\sleet.json", @"", @"c:\configPath\")]
+-        [InlineData(@"c:\configPath\sleet.json", @"singleSubFolder", @"c:\configPath\singleSubFolder\")]
++        [InlineData(@"c:\configPath\sleet.json", "singleSubFolder", @"c:\configPath\singleSubFolder\")]
+         [InlineData(@"c:\configPath\sleet.json", @"nestedSubFolder\a", @"c:\configPath\nestedSubFolder\a\")]
+         [InlineData(@"c:\configPath\sleet.json", @"c:\absolutePath", @"c:\absolutePath\")]
+-        [InlineData(@"\\some-network-share\share\sleet.json", @"singleSubFolder", @"\\some-network-share\share\singleSubFolder\")]
++        [InlineData(@"\\some-network-share\share\sleet.json", "singleSubFolder", @"\\some-network-share\share\singleSubFolder\")]
+         [InlineData(@"\\some-network-share\share\sleet.json", @"nestedSubFolder\a", @"\\some-network-share\share\nestedSubFolder\a\")]
+         [InlineData(@"\\some-network-share\share\sleet.json", @".\", @"\\some-network-share\share\")]
+-        [InlineData(@"file:///c:/configPath/sleet.json", @"", @"c:\configPath\")]
+-        [InlineData(@"file:///c:/configPath/sleet.json", @"singleSubFolder", @"c:\configPath\singleSubFolder\")]
+-        [InlineData(@"file:///c:/configPath/sleet.json", @"nestedSubFolder\a", @"c:\configPath\nestedSubFolder\a\")]
+-        [InlineData(@"sleet.json", @"", @"{workingDir}\")]
+-        [InlineData(@"sleet.json", @".\", @"{workingDir}\")]
+-        [InlineData(@"sleet.json", @"singleSubFolder", @"{workingDir}\singleSubFolder\")]
+-        [InlineData(@"sleet.json", @"nestedSubFolder\a", @"{workingDir}\nestedSubFolder\a\")]
++        [InlineData("file:///c:/configPath/sleet.json", @"", @"c:\configPath\")]
++        [InlineData("file:///c:/configPath/sleet.json", "singleSubFolder", @"c:\configPath\singleSubFolder\")]
++        [InlineData("file:///c:/configPath/sleet.json", @"nestedSubFolder\a", @"c:\configPath\nestedSubFolder\a\")]
++        [InlineData("sleet.json", @"", @"{workingDir}\")]
++        [InlineData("sleet.json", @".\", @"{workingDir}\")]
++        [InlineData("sleet.json", "singleSubFolder", @"{workingDir}\singleSubFolder\")]
++        [InlineData("sleet.json", @"nestedSubFolder\a", @"{workingDir}\nestedSubFolder\a\")]
+         public async Task Feed_LocalTypeSupportsRelativePath(string configPath, string outputPath, string expected)
+         {
+             var expectedFull = expected.Replace("{workingDir}", Directory.GetCurrentDirectory());
+diff --git a/test/SleetLib.Tests/FileBaseTests.cs b/test/SleetLib.Tests/FileBaseTests.cs
+index 7e6288b..f217770 100644
+--- a/test/SleetLib.Tests/FileBaseTests.cs
++++ b/test/SleetLib.Tests/FileBaseTests.cs
+@@ -32,6 +32,7 @@ public async Task Push_WhenUploadFailsThenSucceeds_RetriesLogsWarningAndClearsCh
+                     {
+                         throw new InvalidOperationException("try again");
+                     }
++
+                     return Task.CompletedTask;
+                 };
+                 await file.Write(new JObject { { "id", "PackageA" } }, log, TestContext.Current.CancellationToken);
+@@ -187,6 +188,7 @@ public async Task ExistsWithFetch_WhenDownloadFailsThenSucceeds_RetriesAndLogsWa
+                     {
+                         throw new InvalidOperationException("try again");
+                     }
++
+                     file.WriteLocal("{\"id\":\"PackageA\"}");
+                     return Task.CompletedTask;
+                 };
+@@ -357,19 +359,32 @@ public PureFileSystem(LocalCache localCache, Uri baseUri)
+             public LocalCache LocalCache { get; }
+             public ConcurrentDictionary<Uri, ISleetFile> Files { get; } = new ConcurrentDictionary<Uri, ISleetFile>();
+             public string FeedSubPath => null;
++
+             public ISleetFile Get(Uri path) => throw new NotImplementedException();
++
+             public ISleetFile Get(string relativePath) => throw new NotImplementedException();
++
+             public Task<IReadOnlyList<ISleetFile>> GetFiles(ILogger log, CancellationToken token) => throw new NotImplementedException();
++
+             public Uri GetPath(string relativePath) => new Uri(BaseURI, relativePath);
++
+             public Task<bool> Commit(ILogger log, CancellationToken token) => throw new NotImplementedException();
++
+             public Task<bool> Validate(ILogger log, CancellationToken token) => throw new NotImplementedException();
++
+             public ISleetFileSystemLock CreateLock(ILogger log) => throw new NotImplementedException();
++
+             public Task<bool> Destroy(ILogger log, CancellationToken token) => throw new NotImplementedException();
++
+             public void Reset() => Files.Clear();
++
+             public Task<bool> HasBucket(ILogger log, CancellationToken token) => throw new NotImplementedException();
++
+             public Task CreateBucket(ILogger log, CancellationToken token) => throw new NotImplementedException();
++
+             public Task DeleteBucket(ILogger log, CancellationToken token) => throw new NotImplementedException();
+         }
++
+         private sealed class PureFileBase : FileBase
+         {
+             public PureFileBase(ISleetFileSystem fileSystem, Uri uri, FileInfo localCacheFile)
+diff --git a/test/SleetLib.Tests/PhysicalFileSystemTests.cs b/test/SleetLib.Tests/PhysicalFileSystemTests.cs
+index cb8dfea..026dd3a 100644
+--- a/test/SleetLib.Tests/PhysicalFileSystemTests.cs
++++ b/test/SleetLib.Tests/PhysicalFileSystemTests.cs
+@@ -153,7 +153,7 @@ public async Task GivenAFileWriteVerifyGetAfter()
+ 
+                 a.HasChanges.Should().BeTrue();
+                 cache.Root.GetFiles().Length.Should().Be(1);
+-                json.ToString().Should().Be((new JObject()).ToString());
++                json.ToString().Should().Be(new JObject().ToString());
+             }
+         }
+ 
+@@ -397,7 +397,6 @@ public async Task GivenALinkedFileDeleteAndRecreateVerifyFile()
+                 await a.Write(jsonInput2, log, CancellationToken.None);
+                 var json = await a.GetJson(log, CancellationToken.None);
+ 
+-
+                 json.ToString().Should().Be(jsonInput2.ToString());
+                 a.HasChanges.Should().BeTrue();
+                 File.Exists(extFile.FullName).Should().BeTrue("The original file should not be removed");
+diff --git a/test/SleetLib.Tests/PushCommandTests.cs b/test/SleetLib.Tests/PushCommandTests.cs
+index 96c69f8..cc5f7a3 100644
+--- a/test/SleetLib.Tests/PushCommandTests.cs
++++ b/test/SleetLib.Tests/PushCommandTests.cs
+@@ -53,6 +53,7 @@ public async Task PushCommand_GivenADifferentNuspecCasingVerifyPush()
+                         {
+                             nuspecStream.CopyTo(ms);
+                         }
++
+                         ms.Position = 0;
+ 
+                         nuspec.Delete();
+diff --git a/test/SleetLib.Tests/RetentionPruneCommandTests.cs b/test/SleetLib.Tests/RetentionPruneCommandTests.cs
+index d268569..fde1c82 100644
+--- a/test/SleetLib.Tests/RetentionPruneCommandTests.cs
++++ b/test/SleetLib.Tests/RetentionPruneCommandTests.cs
+@@ -44,7 +44,7 @@ public async Task RetentionPruneCommand_RemovesAdditionalPackages()
+                     new PackageIdentity("a", NuGetVersion.Parse("2.0.0")),
+                     new PackageIdentity("a", NuGetVersion.Parse("3.0.0")),
+                     new PackageIdentity("a", NuGetVersion.Parse("4.0.0")),
+-                    new PackageIdentity("a", NuGetVersion.Parse("5.0.0")),
++                    new PackageIdentity("a", NuGetVersion.Parse("5.0.0"))
+                 };
+ 
+                 foreach (var id in identities)
+@@ -111,7 +111,7 @@ public async Task RetentionPruneCommand_NoopsWhenNoPackagesNeedToBeRemoved()
+                     new PackageIdentity("a", NuGetVersion.Parse("2.0.0")),
+                     new PackageIdentity("a", NuGetVersion.Parse("3.0.0")),
+                     new PackageIdentity("a", NuGetVersion.Parse("4.0.0")),
+-                    new PackageIdentity("a", NuGetVersion.Parse("5.0.0")),
++                    new PackageIdentity("a", NuGetVersion.Parse("5.0.0"))
+                 };
+ 
+                 foreach (var id in identities)
+@@ -165,7 +165,7 @@ public async Task RetentionPruneCommand_DoesNotRemovePackagesOnDryRun()
+                     SourceSettings = new FeedSettings()
+                     {
+                         CatalogEnabled = true,
+-                        SymbolsEnabled = true,
++                        SymbolsEnabled = true
+                     }
+                 };
+ 
+@@ -175,7 +175,7 @@ public async Task RetentionPruneCommand_DoesNotRemovePackagesOnDryRun()
+                     new PackageIdentity("a", NuGetVersion.Parse("2.0.0")),
+                     new PackageIdentity("a", NuGetVersion.Parse("3.0.0")),
+                     new PackageIdentity("a", NuGetVersion.Parse("4.0.0")),
+-                    new PackageIdentity("a", NuGetVersion.Parse("5.0.0")),
++                    new PackageIdentity("a", NuGetVersion.Parse("5.0.0"))
+                 };
+ 
+                 foreach (var id in identities)
+@@ -245,8 +245,7 @@ public async Task RetentionPruneCommand_PrunesOnPush()
+                     new PackageIdentity("a", NuGetVersion.Parse("3.0.0")),
+                     new PackageIdentity("b", NuGetVersion.Parse("1.0.0")),
+                     new PackageIdentity("b", NuGetVersion.Parse("2.0.0")),
+-                    new PackageIdentity("b", NuGetVersion.Parse("3.0.0")),
+-
++                    new PackageIdentity("b", NuGetVersion.Parse("3.0.0"))
+                 };
+ 
+                 foreach (var id in identities)
+@@ -262,7 +261,7 @@ public async Task RetentionPruneCommand_PrunesOnPush()
+                 // Initial packages
+                 identities = new HashSet<PackageIdentity>()
+                 {
+-                    new PackageIdentity("a", NuGetVersion.Parse("4.0.0")),
++                    new PackageIdentity("a", NuGetVersion.Parse("4.0.0"))
+                 };
+ 
+                 foreach (var id in identities)
+@@ -282,8 +281,10 @@ public async Task RetentionPruneCommand_PrunesOnPush()
+ 
+                 // Assert
+                 indexPackages.Count().Should().Be(5);
++
+                 // new package should exist
+                 indexPackages.Contains(new PackageIdentity("a", NuGetVersion.Parse("4.0.0"))).Should().BeTrue();
++
+                 // a max of 2 a's should exist
+                 indexPackages.Contains(new PackageIdentity("a", NuGetVersion.Parse("3.0.0"))).Should().BeTrue();
+ 
+@@ -331,8 +332,7 @@ public async Task RetentionPruneCommand_PruneWithFeedOptions()
+                     new PackageIdentity("a", NuGetVersion.Parse("4.0.0")),
+                     new PackageIdentity("b", NuGetVersion.Parse("1.0.0")),
+                     new PackageIdentity("b", NuGetVersion.Parse("2.0.0")),
+-                    new PackageIdentity("b", NuGetVersion.Parse("3.0.0")),
+-
++                    new PackageIdentity("b", NuGetVersion.Parse("3.0.0"))
+                 };
+ 
+                 foreach (var id in identities)
+@@ -399,7 +399,6 @@ public async Task RetentionPruneCommand_PrunesShouldNotRemoveThePushedPackage()
+                 {
+                     new PackageIdentity("a", NuGetVersion.Parse("2.0.0")),
+                     new PackageIdentity("a", NuGetVersion.Parse("3.0.0"))
+-
+                 };
+ 
+                 foreach (var id in identities)
+@@ -415,7 +414,7 @@ public async Task RetentionPruneCommand_PrunesShouldNotRemoveThePushedPackage()
+                 // Initial packages
+                 identities = new HashSet<PackageIdentity>()
+                 {
+-                    new PackageIdentity("a", NuGetVersion.Parse("1.0.0")),
++                    new PackageIdentity("a", NuGetVersion.Parse("1.0.0"))
+                 };
+ 
+                 foreach (var id in identities)
+@@ -435,6 +434,7 @@ public async Task RetentionPruneCommand_PrunesShouldNotRemoveThePushedPackage()
+ 
+                 // Assert
+                 indexPackages.Count().Should().Be(3);
++
+                 // new package should exist
+                 indexPackages.Contains(new PackageIdentity("a", NuGetVersion.Parse("1.0.0"))).Should().BeTrue();
+             }
+@@ -493,8 +493,7 @@ public async Task RetentionPruneCommand_PrunesOnPushWithMultiplePushes()
+ 
+                     new PackageIdentity("b", NuGetVersion.Parse("3.0.0-alpha")),
+                     new PackageIdentity("b", NuGetVersion.Parse("3.0.0-beta")),
+-                    new PackageIdentity("b", NuGetVersion.Parse("3.0.0")),
+-
++                    new PackageIdentity("b", NuGetVersion.Parse("3.0.0"))
+                 };
+ 
+                 await InitCommand.InitAsync(context);
+@@ -556,7 +555,7 @@ public async Task RetentionPruneCommand_RemovesAdditionalPackages_BasedOnRelease
+                     new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta.a.1")),
+                     new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta.a.2")),
+                     new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta.b.1")),
+-                    new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta.b.2")),
++                    new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta.b.2"))
+                 };
+ 
+                 foreach (var id in identities)
+diff --git a/test/SleetLib.Tests/RetentionUtilityTests.cs b/test/SleetLib.Tests/RetentionUtilityTests.cs
+index b19ee3d..451c002 100644
+--- a/test/SleetLib.Tests/RetentionUtilityTests.cs
++++ b/test/SleetLib.Tests/RetentionUtilityTests.cs
+@@ -19,7 +19,7 @@ public void RetentionUtility_PruneSinglePackage()
+                 new PackageIdentity("a", NuGetVersion.Parse("2.0.0")),
+                 new PackageIdentity("a", NuGetVersion.Parse("3.0.0")),
+                 new PackageIdentity("a", NuGetVersion.Parse("4.0.0")),
+-                new PackageIdentity("a", NuGetVersion.Parse("5.0.0")),
++                new PackageIdentity("a", NuGetVersion.Parse("5.0.0"))
+             };
+ 
+             var pinned = new HashSet<PackageIdentity>();
+@@ -42,7 +42,7 @@ public void RetentionUtility_PruneAllButOne()
+                 new PackageIdentity("a", NuGetVersion.Parse("1.0.0")),
+                 new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta")),
+                 new PackageIdentity("a", NuGetVersion.Parse("5.0.0-beta")),
+-                new PackageIdentity("a", NuGetVersion.Parse("5.0.0")),
++                new PackageIdentity("a", NuGetVersion.Parse("5.0.0"))
+             };
+ 
+             var pinned = new HashSet<PackageIdentity>();
+@@ -50,7 +50,7 @@ public void RetentionUtility_PruneAllButOne()
+             var expected = new HashSet<PackageIdentity>()
+             {
+                 new PackageIdentity("a", NuGetVersion.Parse("1.0.0")),
+-                new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta")),
++                new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta"))
+             };
+ 
+             var pruned = RetentionUtility.GetPackagesToPrune(feed, pinned, stableVersionMax: 1, prereleaseVersionMax: 1);
+@@ -66,7 +66,7 @@ public void RetentionUtility_MultipleIdsAreSeparate()
+                 new PackageIdentity("a", NuGetVersion.Parse("1.0.0")),
+                 new PackageIdentity("b", NuGetVersion.Parse("2.0.0")),
+                 new PackageIdentity("c", NuGetVersion.Parse("3.0.0")),
+-                new PackageIdentity("d", NuGetVersion.Parse("4.0.0")),
++                new PackageIdentity("d", NuGetVersion.Parse("4.0.0"))
+             };
+ 
+             var pinned = new HashSet<PackageIdentity>();
+@@ -88,7 +88,7 @@ public void RetentionUtility_PruneWithMultipleIds()
+                 new PackageIdentity("a", NuGetVersion.Parse("1.0.0")),
+                 new PackageIdentity("a", NuGetVersion.Parse("2.0.0")),
+                 new PackageIdentity("b", NuGetVersion.Parse("1.0.0")),
+-                new PackageIdentity("b", NuGetVersion.Parse("2.0.0")),
++                new PackageIdentity("b", NuGetVersion.Parse("2.0.0"))
+             };
+ 
+             var pinned = new HashSet<PackageIdentity>();
+@@ -96,7 +96,7 @@ public void RetentionUtility_PruneWithMultipleIds()
+             var expected = new HashSet<PackageIdentity>()
+             {
+                 new PackageIdentity("a", NuGetVersion.Parse("1.0.0")),
+-                new PackageIdentity("b", NuGetVersion.Parse("1.0.0")),
++                new PackageIdentity("b", NuGetVersion.Parse("1.0.0"))
+             };
+ 
+             var pruned = RetentionUtility.GetPackagesToPrune(feed, pinned, stableVersionMax: 1, prereleaseVersionMax: 1);
+@@ -112,7 +112,7 @@ public void RetentionUtility_PruneWithMixedIdCasing()
+                 new PackageIdentity("a", NuGetVersion.Parse("1.0.0")),
+                 new PackageIdentity("a", NuGetVersion.Parse("2.0.0")),
+                 new PackageIdentity("A", NuGetVersion.Parse("3.0.0")),
+-                new PackageIdentity("A", NuGetVersion.Parse("4.0.0")),
++                new PackageIdentity("A", NuGetVersion.Parse("4.0.0"))
+             };
+ 
+             var pinned = new HashSet<PackageIdentity>();
+@@ -121,7 +121,7 @@ public void RetentionUtility_PruneWithMixedIdCasing()
+             {
+                 new PackageIdentity("a", NuGetVersion.Parse("1.0.0")),
+                 new PackageIdentity("a", NuGetVersion.Parse("2.0.0")),
+-                new PackageIdentity("A", NuGetVersion.Parse("3.0.0")),
++                new PackageIdentity("A", NuGetVersion.Parse("3.0.0"))
+             };
+ 
+             var pruned = RetentionUtility.GetPackagesToPrune(feed, pinned, stableVersionMax: 1, prereleaseVersionMax: 1);
+@@ -141,7 +141,7 @@ public void RetentionUtility_PruneOnlyPrerelease()
+                 new PackageIdentity("a", NuGetVersion.Parse("5.0.0-beta")),
+                 new PackageIdentity("a", NuGetVersion.Parse("5.0.0")),
+                 new PackageIdentity("a", NuGetVersion.Parse("6.0.0")),
+-                new PackageIdentity("a", NuGetVersion.Parse("1.0.0")),
++                new PackageIdentity("a", NuGetVersion.Parse("1.0.0"))
+             };
+ 
+             var pinned = new HashSet<PackageIdentity>();
+@@ -151,7 +151,7 @@ public void RetentionUtility_PruneOnlyPrerelease()
+                 new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta")),
+                 new PackageIdentity("a", NuGetVersion.Parse("2.0.0-beta")),
+                 new PackageIdentity("a", NuGetVersion.Parse("3.0.0-beta")),
+-                new PackageIdentity("a", NuGetVersion.Parse("4.0.0-beta")),
++                new PackageIdentity("a", NuGetVersion.Parse("4.0.0-beta"))
+             };
+ 
+             var pruned = RetentionUtility.GetPackagesToPrune(feed, pinned, stableVersionMax: 1024, prereleaseVersionMax: 1);
+@@ -169,7 +169,7 @@ public void RetentionUtility_PruneWithAllVersionsPinned()
+                 new PackageIdentity("a", NuGetVersion.Parse("3.0.0-beta")),
+                 new PackageIdentity("a", NuGetVersion.Parse("1.0.0")),
+                 new PackageIdentity("a", NuGetVersion.Parse("2.0.0")),
+-                new PackageIdentity("a", NuGetVersion.Parse("3.0.0")),
++                new PackageIdentity("a", NuGetVersion.Parse("3.0.0"))
+             };
+ 
+             var pinned = new HashSet<PackageIdentity>()
+@@ -179,7 +179,7 @@ public void RetentionUtility_PruneWithAllVersionsPinned()
+                 new PackageIdentity("a", NuGetVersion.Parse("3.0.0-beta")),
+                 new PackageIdentity("a", NuGetVersion.Parse("1.0.0")),
+                 new PackageIdentity("a", NuGetVersion.Parse("2.0.0")),
+-                new PackageIdentity("a", NuGetVersion.Parse("3.0.0")),
++                new PackageIdentity("a", NuGetVersion.Parse("3.0.0"))
+             };
+ 
+             var expected = new HashSet<PackageIdentity>()
+@@ -201,14 +201,14 @@ public void RetentionUtility_PinnedVersionsDoNotCauseHigherVersionsToGetPruned()
+                 new PackageIdentity("a", NuGetVersion.Parse("3.0.0")),
+                 new PackageIdentity("a", NuGetVersion.Parse("4.0.0")),
+                 new PackageIdentity("a", NuGetVersion.Parse("5.0.0")),
+-                new PackageIdentity("a", NuGetVersion.Parse("6.0.0")),
++                new PackageIdentity("a", NuGetVersion.Parse("6.0.0"))
+             };
+ 
+             var pinned = new HashSet<PackageIdentity>()
+             {
+                 new PackageIdentity("a", NuGetVersion.Parse("1.0.0")),
+                 new PackageIdentity("a", NuGetVersion.Parse("2.0.0")),
+-                new PackageIdentity("a", NuGetVersion.Parse("3.0.0")),
++                new PackageIdentity("a", NuGetVersion.Parse("3.0.0"))
+             };
+ 
+             var expected = new HashSet<PackageIdentity>()
+@@ -230,7 +230,7 @@ public void RetentionUtility_PruneReleaseLabels_TwoLabels_Basic()
+                 new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta.a.3")),
+                 new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta.b.1")),
+                 new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta.b.2")),
+-                new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta.b.3")),
++                new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta.b.3"))
+             };
+ 
+             var pinned = new HashSet<PackageIdentity>();
+@@ -238,7 +238,7 @@ public void RetentionUtility_PruneReleaseLabels_TwoLabels_Basic()
+             var expected = new HashSet<PackageIdentity>()
+             {
+                 new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta.a.1")),
+-                new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta.b.1")),
++                new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta.b.1"))
+             };
+ 
+             var pruned = RetentionUtility.GetPackagesToPrune(feed, pinned, stableVersionMax: 1024, prereleaseVersionMax: 2, groupByUniqueReleaseLabelCount: 2);
+@@ -256,7 +256,7 @@ public void RetentionUtility_PruneReleaseLabels_TwoLabels_MajorVersionDoesNotMat
+                 new PackageIdentity("a", NuGetVersion.Parse("3.3.3-beta.a.3")),
+                 new PackageIdentity("a", NuGetVersion.Parse("4.4.4-beta.b.1")),
+                 new PackageIdentity("a", NuGetVersion.Parse("5.5.5-beta.b.2")),
+-                new PackageIdentity("a", NuGetVersion.Parse("6.6.6-beta.b.3")),
++                new PackageIdentity("a", NuGetVersion.Parse("6.6.6-beta.b.3"))
+             };
+ 
+             var pinned = new HashSet<PackageIdentity>();
+@@ -264,7 +264,7 @@ public void RetentionUtility_PruneReleaseLabels_TwoLabels_MajorVersionDoesNotMat
+             var expected = new HashSet<PackageIdentity>()
+             {
+                 new PackageIdentity("a", NuGetVersion.Parse("1.1.1-beta.a.1")),
+-                new PackageIdentity("a", NuGetVersion.Parse("4.4.4-beta.b.1")),
++                new PackageIdentity("a", NuGetVersion.Parse("4.4.4-beta.b.1"))
+             };
+ 
+             var pruned = RetentionUtility.GetPackagesToPrune(feed, pinned, stableVersionMax: 1024, prereleaseVersionMax: 2, groupByUniqueReleaseLabelCount: 2);
+@@ -282,7 +282,7 @@ public void RetentionUtility_PruneReleaseLabels_TwoLabels_MajorVersionDoesNotMat
+                 new PackageIdentity("a", NuGetVersion.Parse("3.3.3-beta.a.3")),
+                 new PackageIdentity("a", NuGetVersion.Parse("3.3.3-beta.b.1")),
+                 new PackageIdentity("a", NuGetVersion.Parse("1.2.2-beta.b.2")),
+-                new PackageIdentity("a", NuGetVersion.Parse("1.1.1-beta.b.3")),
++                new PackageIdentity("a", NuGetVersion.Parse("1.1.1-beta.b.3"))
+             };
+ 
+             var pinned = new HashSet<PackageIdentity>();
+@@ -290,7 +290,7 @@ public void RetentionUtility_PruneReleaseLabels_TwoLabels_MajorVersionDoesNotMat
+             var expected = new HashSet<PackageIdentity>()
+             {
+                 new PackageIdentity("a", NuGetVersion.Parse("1.1.1-beta.a.1")),
+-                new PackageIdentity("a", NuGetVersion.Parse("1.1.1-beta.b.3")),
++                new PackageIdentity("a", NuGetVersion.Parse("1.1.1-beta.b.3"))
+             };
+ 
+             var pruned = RetentionUtility.GetPackagesToPrune(feed, pinned, stableVersionMax: 1024, prereleaseVersionMax: 2, groupByUniqueReleaseLabelCount: 2);
+@@ -322,7 +322,7 @@ public void RetentionUtility_PruneReleaseLabels_TwoLabels()
+                 new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta.a.1")),
+                 new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta.a.2")),
+                 new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta.a")),
+-                new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta.b.1")),
++                new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta.b.1"))
+             };
+ 
+             var pruned = RetentionUtility.GetPackagesToPrune(feed, pinned, stableVersionMax: 1024, prereleaseVersionMax: 2, groupByUniqueReleaseLabelCount: 2);
+@@ -356,7 +356,7 @@ public void RetentionUtility_PruneReleaseLabels_TwoLabels_VerifyPerId()
+                 new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta.a.1")),
+                 new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta.a.2")),
+                 new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta.a")),
+-                new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta.b.1")),
++                new PackageIdentity("a", NuGetVersion.Parse("1.0.0-beta.b.1"))
+             };
+ 
+             var pruned = RetentionUtility.GetPackagesToPrune(feed, pinned, stableVersionMax: 1024, prereleaseVersionMax: 2, groupByUniqueReleaseLabelCount: 2);
+diff --git a/test/SleetLib.Tests/SleetFileComparerTests.cs b/test/SleetLib.Tests/SleetFileComparerTests.cs
+index 25a2773..a03b61f 100644
+--- a/test/SleetLib.Tests/SleetFileComparerTests.cs
++++ b/test/SleetLib.Tests/SleetFileComparerTests.cs
+@@ -95,18 +95,31 @@ public PureSleetFile(string uri)
+             public Uri EntityUri { get; }
+             public ISleetFileSystem FileSystem => throw new NotImplementedException();
+             public bool HasChanges => false;
++
+             public Task Write(Stream stream, ILogger log, CancellationToken token) => throw new NotImplementedException();
++
+             public Task Push(ILogger log, CancellationToken token) => throw new NotImplementedException();
++
+             public Task<bool> Exists(ILogger log, CancellationToken token) => throw new NotImplementedException();
++
+             public Task<JObject> GetJson(ILogger log, CancellationToken token) => throw new NotImplementedException();
++
+             public Task<JObject> GetJsonOrNull(ILogger log, CancellationToken token) => throw new NotImplementedException();
++
+             public Task Write(JObject json, ILogger log, CancellationToken token) => throw new NotImplementedException();
++
+             public void Link(string path, ILogger log, CancellationToken token) => throw new NotImplementedException();
++
+             public void Delete(ILogger log, CancellationToken token) => throw new NotImplementedException();
++
+             public Task<Stream> GetStream(ILogger log, CancellationToken token) => throw new NotImplementedException();
++
+             public Task<bool> CopyTo(string path, bool overwrite, ILogger log, CancellationToken token) => throw new NotImplementedException();
++
+             public Task FetchAsync(ILogger log, CancellationToken token) => throw new NotImplementedException();
++
+             public Task<bool> ExistsWithFetch(ILogger log, CancellationToken token) => throw new NotImplementedException();
++
+             public void Invalidate() => throw new NotImplementedException();
+         }
+     }
+diff --git a/test/SleetLib.Tests/SleetUtilityTests.cs b/test/SleetLib.Tests/SleetUtilityTests.cs
+index f57e205..9f24c30 100644
+--- a/test/SleetLib.Tests/SleetUtilityTests.cs
++++ b/test/SleetLib.Tests/SleetUtilityTests.cs
+@@ -29,6 +29,5 @@ public void SleetUtility_GetServiceName()
+                 result.Should().Be(ServiceNames.Unknown);
+             }
+         }
+-
+     }
+ }
+diff --git a/test/SleetLib.Tests/SourceUtilityTests.cs b/test/SleetLib.Tests/SourceUtilityTests.cs
+index b710371..6577bd4 100644
+--- a/test/SleetLib.Tests/SourceUtilityTests.cs
++++ b/test/SleetLib.Tests/SourceUtilityTests.cs
+@@ -19,7 +19,6 @@ public async Task GivenThatABaseUriChangesVerifyValidationFails()
+                 var log = new TestLogger();
+                 var settings = new LocalSettings();
+ 
+-
+                 var fileSystem1 = new PhysicalFileSystem(cache, UriUtility.CreateUri(target.Root), UriUtility.CreateUri("https://tempuri.org/"));
+                 var fileSystem2 = new PhysicalFileSystem(cache, UriUtility.CreateUri(target.Root), UriUtility.CreateUri("https://tempuri.org/b/"));
+ 
+diff --git a/test/SleetLib.Tests/SymbolsTests.cs b/test/SleetLib.Tests/SymbolsTests.cs
+index 2d3bde1..1eb76a0 100644
+--- a/test/SleetLib.Tests/SymbolsTests.cs
++++ b/test/SleetLib.Tests/SymbolsTests.cs
+@@ -1071,7 +1071,6 @@ private static async Task AddBasicPackagesAsync(SleetTestContext testContext, Sy
+             var symPkgAZip = symPkgA.Save(testContext.Packages);
+             var symPkgAInput = SleetTestContext.GetPackageInput(symPkgAZip);
+ 
+-
+             await service.AddPackageAsync(pkgAInput);
+             await service.AddSymbolsPackageAsync(symPkgAInput);
+         }

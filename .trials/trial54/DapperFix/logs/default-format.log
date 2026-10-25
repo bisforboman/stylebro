@@ -1,0 +1,75 @@
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+Indentation kept: Dapper/SqlMapper.cs:3940-4007: '#if' decides whether these lines are an if/else (or loop) body, inside a block, or (a '#region' line) compiled at all, so each framework or configuration would indent them its own way. Their indentation is left as it is.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net461, net472, net481, net5.0, net8.0, netstandard2.0). net10.0: only the projects whose code compiles differently there.
+Configurations: runs for Release (Dapper, Dapper.StrongName, Dapper.Tests.Performance) too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.
+Shared files: these projects compile the same files with other '#if' symbols or settings, so each group gets a run of its own (loaded together, 'dotnet format' crashes: https://github.com/dotnet/roslyn/issues/86001): Dapper.EntityFramework.StrongName, Dapper.StrongName | Dapper, Dapper.EntityFramework; Dapper | Dapper.StrongName; Dapper.StrongName | Dapper.
+Checked net461, Release, part 2 of 2 (run 1 of 17)
+Checked net5.0 (run 2 of 17)
+Checked netstandard2.0, part 2 of 2 (run 3 of 17)
+Checked net10.0 (run 4 of 17)
+Checked net472, Release (run 5 of 17)
+Checked net461, part 1 of 2 (run 6 of 17)
+Checked net10.0, Release, part 1 of 2 (run 7 of 17)
+Checked net8.0, part 1 of 2 (run 8 of 17)
+Checked netstandard2.0, Release, part 1 of 2 (run 9 of 17)
+Checked net461, part 2 of 2 (run 10 of 17)
+Checked net10.0, Release, part 2 of 2 (run 11 of 17)
+Checked netstandard2.0, Release, part 2 of 2 (run 12 of 17)
+Checked net8.0, part 2 of 2 (run 13 of 17)
+Checked net472 (run 14 of 17)
+Checked net461, Release, part 1 of 2 (run 15 of 17)
+Checked netstandard2.0, part 1 of 2 (run 16 of 17)
+Checked net481 (run 17 of 17)
+== net10.0 (1 project(s), 29 files with findings)
+'dotnet format' had warnings loading the workspace in its net10.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+== net461, part 1 of 2 (3 project(s), 51 files with findings)
+== net461, part 2 of 2 (4 project(s), 53 files with findings)
+== net472 (1 project(s), 32 files with findings)
+== net481 (1 project(s), 37 files with findings)
+== net5.0 (1 project(s), 4 files with findings)
+== net8.0, part 1 of 2 (5 project(s), 89 files with findings)
+== net8.0, part 2 of 2 (1 project(s), 45 files with findings)
+== netstandard2.0, part 1 of 2 (4 project(s), 54 files with findings)
+== netstandard2.0, part 2 of 2 (1 project(s), 45 files with findings)
+== net10.0, Release, part 1 of 2 (2 project(s), 77 files with findings)
+== net10.0, Release, part 2 of 2 (1 project(s), 45 files with findings)
+== net461, Release, part 1 of 2 (1 project(s), 45 files with findings)
+== net461, Release, part 2 of 2 (1 project(s), 45 files with findings)
+== net472, Release (1 project(s), 32 files with findings)
+== netstandard2.0, Release, part 1 of 2 (1 project(s), 45 files with findings)
+== netstandard2.0, Release, part 2 of 2 (1 project(s), 45 files with findings)
+Run 1: 128 files changed:
+  benchmarks/Dapper.Tests.Performance/Benchmarks.Belgrade.cs
+  benchmarks/Dapper.Tests.Performance/Benchmarks.cs
+  benchmarks/Dapper.Tests.Performance/Benchmarks.Dapper.cs
+  benchmarks/Dapper.Tests.Performance/Benchmarks.Dashing.cs
+  benchmarks/Dapper.Tests.Performance/Benchmarks.EntityFramework.cs
+  benchmarks/Dapper.Tests.Performance/Benchmarks.EntityFrameworkCore.cs
+  benchmarks/Dapper.Tests.Performance/Benchmarks.HandCoded.cs
+  benchmarks/Dapper.Tests.Performance/Benchmarks.Linq2DB.cs
+  benchmarks/Dapper.Tests.Performance/Benchmarks.Linq2Sql.cs
+  benchmarks/Dapper.Tests.Performance/Benchmarks.Massive.cs
+  ... and 118 more
+Checked netstandard2.0, part 2 of 2 (run 1 of 17)
+Checked net5.0 (run 2 of 17)
+Checked net461, Release, part 2 of 2 (run 3 of 17)
+Checked net10.0 (run 4 of 17)
+Checked net472, Release (run 5 of 17)
+Checked net461, part 1 of 2 (run 6 of 17)
+Checked net10.0, Release, part 1 of 2 (run 7 of 17)
+Checked net8.0, part 1 of 2 (run 8 of 17)
+Checked netstandard2.0, Release, part 1 of 2 (run 9 of 17)
+Checked net461, part 2 of 2 (run 10 of 17)
+Checked net10.0, Release, part 2 of 2 (run 11 of 17)
+Checked net8.0, part 2 of 2 (run 12 of 17)
+Checked netstandard2.0, Release, part 2 of 2 (run 13 of 17)
+Checked net461, Release, part 1 of 2 (run 14 of 17)
+Checked net472 (run 15 of 17)
+Checked netstandard2.0, part 1 of 2 (run 16 of 17)
+Checked net481 (run 17 of 17)
+Run 2: 0 files changed, clean.
+Clean: 1 finding kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them (https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose).
+  Dapper/SqlMapper.DapperRow.Descriptor.cs(51,55): BRO1307 Rename 's_converter' to 'Converter'. Kept: at a use of the name, the new name would mean something else.
+Baseline: stylebro.baseline: added 1 kept finding, so the build and 'format --verify-no-changes' skip it (new violations still fail; delete an entry to see it again) (https://bisforboman.github.io/stylebro/baseline/).
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

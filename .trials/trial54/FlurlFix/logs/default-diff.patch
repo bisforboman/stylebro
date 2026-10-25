@@ -1,0 +1,1932 @@
+diff --git a/.editorconfig b/.editorconfig
+index c0b7230..b1bd533 100644
+--- a/.editorconfig
++++ b/.editorconfig
+@@ -60,3 +60,89 @@ csharp_space_between_method_declaration_empty_parameter_list_parentheses = false
+ csharp_space_between_method_call_name_and_opening_parenthesis = false
+ csharp_space_between_method_call_empty_parameter_list_parentheses = false
+ csharp_preserve_single_line_blocks = true
++
++# BEGIN stylebro-migrate (stylebro-migrate init: built-in .NET rules for StyleBro's preset; edits inside are replaced)
++[*.cs]
++# Built-in .NET rules that cover StyleCop rules, at the preset's severities. Their options (brace placement, modifier
++# order, ...) come from StyleBro's preset. The severities have to be here: 'dotnet format' ignores rule severities in a
++# package's global config. Add <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> to report them on build too.
++
++# Braces (SA1503, SA1519, SA1520) are StyleBro's BRO1514-BRO1516: IDE0011's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0011.severity = none
++# Access modifiers (SA1400, SA1205) are StyleBro's BRO1404/BRO1007: IDE0040's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0040.severity = none
++# Modifier order: access modifier first, then static (SA1206, SA1207)
++dotnet_diagnostic.IDE0036.severity = warning
++# 'int' instead of 'Int32' (SA1121)
++dotnet_diagnostic.IDE0049.severity = warning
++# Unnecessary parentheses (SA1119) are StyleBro's BRO1405: IDE0047's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0047.severity = none
++# Parentheses that show precedence (SA1407, SA1408) are StyleBro's BRO1406/BRO1407: IDE0048's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0048.severity = none
++# Using placement (SA1200) is StyleBro's BRO1008: IDE0065's fix can change what names bind to (CS0104, CS0118)
++dotnet_diagnostic.IDE0065.severity = none
++# Blank lines (SA1507, SA1508, SA1513) are StyleBro's BRO1517-BRO1519: the SDK's fixes break multi-targeted projects
++dotnet_diagnostic.IDE2000.severity = none
++dotnet_diagnostic.IDE2002.severity = none
++dotnet_diagnostic.IDE2003.severity = none
++# 'this.' qualification isn't required (SA1101 is off in the preset)
++dotnet_diagnostic.IDE0009.severity = none
++
++# Conventions in this repository's code (stylebro-migrate init counted them; delete a line to have it counted again)
++# init: private fields: named '_field' in 78 of 78 places in your code
++stylebro_private_field_naming = _camelCase
++# init: '{' of multi-line blocks: at the end of the line in 1071 of 1303 places in your code
++csharp_new_line_before_open_brace = none
++# init: one-line if/else/loop/using/lock bodies: without braces in 275 of 289 places in your code
++csharp_prefer_braces = when_multiline
++# init: one-line jumps ('if (x) return;'): allowed, because your code has some (37 of 40 places on the 'if' line without braces; any 3 keep them allowed: without it BRO1514 would add braces to each)
++stylebro_allow_single_line_jump_statements = true
++# init: operators where a line wraps: at the end of the line in 70 of 76 places in your code
++dotnet_style_operator_placement_when_wrapping = end_of_line
++# init: multi-line initializers: without a trailing comma in 37 of 39 places in your code
++stylebro_trailing_comma = omit
++# init: empty strings: "" in 109 of 109 places in your code
++stylebro_empty_string_style = literal
++# init: null checks: '== null' in 115 of 115 places in your code
++stylebro_null_check_style = equality_operator
++# init: <inheritdoc/> tags: '<inheritdoc />' in 61 of 64 places in your code
++stylebro_inheritdoc_style = spaced
++# init: default values: 'default' in 116 of 117 places in your code
++csharp_prefer_simple_default_expression = true
++# init: split lists: your code mixes both forms (9 first item on the next line, 6 first item after '('), so BRO1107 is off. To choose one: set stylebro_split_list_first_item and remove the next line.
++dotnet_diagnostic.BRO1107.severity = none
++# init: ': base(...)'/': this(...)': on the constructor's line in 28 of 28 places in your code
++stylebro_constructor_initializer_placement = same_line
++# init: 'where' constraints: on the declaration's line in 24 of 24 places in your code
++stylebro_constraint_placement = same_line
++# init: 'new T { ... }' with an initializer: your code mixes both forms (28 without '()', 17 with '()'), so BRO1141 is off. To choose one: set stylebro_object_creation_parentheses and remove the next line.
++dotnet_diagnostic.BRO1141.severity = none
++# init: switch sections: without a blank line in 6 of 6 places in your code
++stylebro_blank_line_between_switch_sections = omit
++# init: statements on their 'if'/loop/'case' line: allowed, because your code has some (51 of 290 places on their owner's line; any 3 keep them allowed: csharp_preserve_single_line_statements = false would move each to a line of its own)
++csharp_preserve_single_line_statements = true
++# init: types' members: your code mixes both forms (36 in BRO1001's order, 32 in another order), so BRO1001 is off. To choose one: set dotnet_diagnostic.BRO1001.severity and remove the next line.
++dotnet_diagnostic.BRO1001.severity = none
++# init: internal-by-default types: your code mixes both forms (3 with 'internal', 2 without an access modifier), so BRO1404 is off. To choose one: set dotnet_diagnostic.BRO1404.severity and remove the next line.
++dotnet_diagnostic.BRO1404.severity = none
++# init: property summaries: your code mixes both forms (22 starting with 'Gets'/'Sets', 60 in their own words), so BRO1604 is off. To choose one: set dotnet_diagnostic.BRO1604.severity and remove the next line.
++dotnet_diagnostic.BRO1604.severity = none
++# init: adjacent locals of one type: your code mixes both forms (2 declared one by one, 2 declared together ('int a, b;')), so BRO1142 is off. To choose one: set dotnet_diagnostic.BRO1142.severity and remove the next line.
++dotnet_diagnostic.BRO1142.severity = none
++# init: declarations with 2+ attributes: your code mixes both forms (36 one per list ('[A]' '[B]'), 23 combined ('[A, B]')), so BRO1102 is off. To choose one: set dotnet_diagnostic.BRO1102.severity and remove the next line.
++dotnet_diagnostic.BRO1102.severity = none
++# init: empty blocks ('{ }'): on one line in 22 of 22 blocks in your code
++stylebro_allow_empty_single_line_blocks = true
++# init: C# files' line endings: LF in 81 of 81 files in your code
++end_of_line = lf
++# init: statements after a block's '}': your code mixes both forms (44 after a blank line, 37 right below the '}'), so BRO1519 is off. To choose one: set dotnet_diagnostic.BRO1519.severity and remove the next line.
++dotnet_diagnostic.BRO1519.severity = none
++# init: '//' comments below code: your code mixes both forms (81 after a blank line, 32 right below the code), so BRO1504 is off. To choose one: set dotnet_diagnostic.BRO1504.severity and remove the next line.
++dotnet_diagnostic.BRO1504.severity = none
++# init: using directives: 75 of 78 files sorted, 46 of 48 with System first
++dotnet_sort_system_directives_first = true
++# init: private constants/static readonly fields: your code mixes their casing (1 PascalCase, 2 _camelCase), so BRO1306 is off (it checks constants, static readonly and non-private fields). To choose one: set stylebro_private_static_field_naming (PascalCase, camelCase, _camelCase or s_camelCase) and remove the next line.
++dotnet_diagnostic.BRO1306.severity = none
++# init: namespace braces: csharp_new_line_before_open_brace = none puts a namespace's '{' at the end of the line, but 81 of 81 files have it on its own line. IDE0055 is off until you decide, so 'format' leaves whitespace alone; with IDE0055 on, 81 files will change. Set csharp_new_line_before_open_brace accordingly (Roslyn has no value for namespaces alone: 'types' is for types and namespaces alike), or accept the change: put 'dotnet_diagnostic.IDE0055.severity = warning' below the stylebro-migrate block in a [*.cs] section (a later line wins).
++dotnet_diagnostic.IDE0055.severity = none
++# END stylebro-migrate
+diff --git a/src/Flurl.CodeGen/Flurl.CodeGen.csproj b/src/Flurl.CodeGen/Flurl.CodeGen.csproj
+index 2fc654a..9071d59 100644
+--- a/src/Flurl.CodeGen/Flurl.CodeGen.csproj
++++ b/src/Flurl.CodeGen/Flurl.CodeGen.csproj
+@@ -1,8 +1,11 @@
+-﻿<Project Sdk="Microsoft.NET.Sdk">
++<Project Sdk="Microsoft.NET.Sdk">
+ 
+   <PropertyGroup>
+     <OutputType>Exe</OutputType>
+     <TargetFramework>net6.0</TargetFramework>
+   </PropertyGroup>
+ 
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial54.2" PrivateAssets="all" />
++  </ItemGroup>
+ </Project>
+\ No newline at end of file
+diff --git a/src/Flurl.CodeGen/HttpExtensionMethod.cs b/src/Flurl.CodeGen/HttpExtensionMethod.cs
+index e3dfd84..ee2927f 100644
+--- a/src/Flurl.CodeGen/HttpExtensionMethod.cs
++++ b/src/Flurl.CodeGen/HttpExtensionMethod.cs
+@@ -40,7 +40,7 @@ namespace Flurl.CodeGen
+ 			" an asynchronous ",
+ 			(HttpVerb == null) ? "request." : $"{HttpVerb.ToUpperInvariant()} request.");
+ 
+-		public bool HasRequestBody => (HttpVerb == "Post" || HttpVerb == "Put" || HttpVerb == "Patch" || HttpVerb == null);
++		public bool HasRequestBody => HttpVerb == "Post" || HttpVerb == "Put" || HttpVerb == "Patch" || HttpVerb == null;
+ 
+ 		public string HttpVerb { get; }
+ 		public string RequestBodyType { get; }
+diff --git a/src/Flurl.CodeGen/Metadata.cs b/src/Flurl.CodeGen/Metadata.cs
+index 0bf9f39..09a70cb 100644
+--- a/src/Flurl.CodeGen/Metadata.cs
++++ b/src/Flurl.CodeGen/Metadata.cs
+@@ -77,7 +77,6 @@ namespace Flurl.CodeGen
+ 			yield return Create("AppendQueryParam", "Creates a new Url object from the string and adds multiple parameters without values to the query.")
+ 				.AddArg("names", "params string[]", "Names of query parameters");
+ 
+-
+ 			yield return Create("RemoveQueryParam", "Creates a new Url object from the string and removes a name/value pair from the query by name.")
+ 				.AddArg("name", "string", "Query string parameter name to remove");
+ 
+@@ -163,7 +162,7 @@ namespace Flurl.CodeGen
+ 			from reqType in new[] { null, "Json", "String", "UrlEncoded" }
+ 			from respType in new[] { null, "Json", "String", "Stream", "Bytes" }
+ 			where IsSupportedCombo(verb, reqType, respType, extendedArg.Type)
+-			let isGenenric = (respType == "Json")
++			let isGenenric = respType == "Json"
+ 			select new HttpExtensionMethod(verb, isGenenric, reqType, respType) { ExtendedTypeArg = extendedArg };
+ 
+ 		/// <summary>
+diff --git a/src/Flurl.Http.Newtonsoft/Flurl.Http.Newtonsoft.csproj b/src/Flurl.Http.Newtonsoft/Flurl.Http.Newtonsoft.csproj
+index 43b0d51..3ed3450 100644
+--- a/src/Flurl.Http.Newtonsoft/Flurl.Http.Newtonsoft.csproj
++++ b/src/Flurl.Http.Newtonsoft/Flurl.Http.Newtonsoft.csproj
+@@ -1,4 +1,4 @@
+-﻿<Project Sdk="Microsoft.NET.Sdk">
++<Project Sdk="Microsoft.NET.Sdk">
+   <PropertyGroup>
+     <TargetFrameworks>net6.0;netstandard2.0;net461</TargetFrameworks>
+     <LangVersion>9.0</LangVersion>
+@@ -37,4 +37,7 @@
+   <ItemGroup Condition="'$(TargetFramework)'=='net461'">
+     <Reference Include="System.Net.Http" />
+   </ItemGroup>
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial54.2" PrivateAssets="all" />
++  </ItemGroup>
+ </Project>
+diff --git a/src/Flurl.Http.Newtonsoft/GeneratedExtensions.cs b/src/Flurl.Http.Newtonsoft/GeneratedExtensions.cs
+index 547fba6..b985cf3 100644
+--- a/src/Flurl.Http.Newtonsoft/GeneratedExtensions.cs
++++ b/src/Flurl.Http.Newtonsoft/GeneratedExtensions.cs
+@@ -99,6 +99,5 @@ namespace Flurl.Http.Newtonsoft
+ 		public static Task<IList<dynamic>> GetJsonListAsync(this Uri uri, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default) {
+ 			return new FlurlRequest(uri).GetJsonListAsync(completionOption, cancellationToken);
+ 		}
+-		
+ 	}
+ }
+diff --git a/src/Flurl.Http/Configuration/DefaultJsonSerializer.cs b/src/Flurl.Http/Configuration/DefaultJsonSerializer.cs
+index 0bc346b..ab46edb 100644
+--- a/src/Flurl.Http/Configuration/DefaultJsonSerializer.cs
++++ b/src/Flurl.Http/Configuration/DefaultJsonSerializer.cs
+@@ -35,8 +35,8 @@ namespace Flurl.Http.Configuration
+ 		/// Deserializes the specified stream to an object of type T.
+ 		/// </summary>
+ 		/// <param name="stream">The stream to deserialize.</param>
+-		public T Deserialize<T>(Stream stream) => stream.CanSeek && stream.Length == 0
+-			? default
+-			: JsonSerializer.Deserialize<T>(stream, _options);
++		public T Deserialize<T>(Stream stream) => stream.CanSeek && stream.Length == 0 ?
++			default :
++			JsonSerializer.Deserialize<T>(stream, _options);
+ 	}
+ }
+\ No newline at end of file
+diff --git a/src/Flurl.Http/Configuration/FlurlClientFactory.cs b/src/Flurl.Http/Configuration/FlurlClientFactory.cs
+index 41b23d2..418af10 100644
+--- a/src/Flurl.Http/Configuration/FlurlClientFactory.cs
++++ b/src/Flurl.Http/Configuration/FlurlClientFactory.cs
+@@ -27,7 +27,7 @@ namespace Flurl.Http.Configuration
+ 	}
+ 
+ 	/// <summary>
+-	/// Extension methods on IFlurlClientFactory
++	/// Extension methods on IFlurlClientFactory.
+ 	/// </summary>
+ 	public static class FlurlClientFactoryExtensions
+ 	{
+@@ -71,7 +71,9 @@ namespace Flurl.Http.Configuration
+ 				handler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+ 
+ 			if (!_isBrowser) {
+-				try { handler.UseCookies = false; }
++				try {
++					handler.UseCookies = false;
++				}
+ 				catch (PlatformNotSupportedException) { } // already checked for Blazor, but just in case any other surprises pop up
+ 			}
+ 
+diff --git a/src/Flurl.Http/Configuration/FlurlHttpSettings.cs b/src/Flurl.Http/Configuration/FlurlHttpSettings.cs
+index 7b50b9c..65f8f92 100644
+--- a/src/Flurl.Http/Configuration/FlurlHttpSettings.cs
++++ b/src/Flurl.Http/Configuration/FlurlHttpSettings.cs
+@@ -6,7 +6,7 @@ using Flurl.Http.Testing;
+ namespace Flurl.Http.Configuration
+ {
+ 	/// <summary>
+-	/// A set of properties that affect Flurl.Http behavior
++	/// A set of properties that affect Flurl.Http behavior.
+ 	/// </summary>
+ 	public class FlurlHttpSettings
+ 	{
+@@ -100,16 +100,17 @@ namespace Flurl.Http.Configuration
+ 		/// Gets a settings value from this instance if explicitly set, otherwise from the default settings that back this instance.
+ 		/// </summary>
+ 		internal T Get<T>([CallerMemberName]string propName = null) {
+-			IEnumerable<FlurlHttpSettings> prioritize() {
++			IEnumerable<FlurlHttpSettings> Prioritize() {
+ 				yield return HttpTest.Current?.Settings;
+ 				for (var settings = this; settings != null; settings = settings.Parent)
+ 					yield return settings;
+ 				yield return Defaults;
+ 			}
+ 
+-			foreach (var settings in prioritize())
++			foreach (var settings in Prioritize()) {
+ 				if (settings?._vals?.TryGetValue(propName, out var val) == true)
+ 					return (T)val;
++			}
+ 
+ 			return default; // should never get this far assuming Defaults is fully populated
+ 		}
+diff --git a/src/Flurl.Http/Configuration/ISerializer.cs b/src/Flurl.Http/Configuration/ISerializer.cs
+index 71b2a87..0f5b060 100644
+--- a/src/Flurl.Http/Configuration/ISerializer.cs
++++ b/src/Flurl.Http/Configuration/ISerializer.cs
+@@ -14,10 +14,12 @@ namespace Flurl.Http.Configuration
+ 		/// Serializes an object to a string representation.
+ 		/// </summary>
+ 	    string Serialize(object obj);
++
+ 		/// <summary>
+ 		/// Deserializes an object from a string representation.
+ 		/// </summary>
+ 		T Deserialize<T>(string s);
++
+ 		/// <summary>
+ 		/// Deserializes an object from a stream representation.
+ 		/// </summary>
+diff --git a/src/Flurl.Http/Configuration/RedirectSettings.cs b/src/Flurl.Http/Configuration/RedirectSettings.cs
+index f39d6e8..f9032b7 100644
+--- a/src/Flurl.Http/Configuration/RedirectSettings.cs
++++ b/src/Flurl.Http/Configuration/RedirectSettings.cs
+@@ -15,7 +15,7 @@ namespace Flurl.Http.Configuration
+ 		private readonly FlurlHttpSettings _settings;
+ 
+ 		/// <summary>
+-		/// Creates a new instance of RedirectSettings.
++		/// Initializes a new instance of the <see cref="RedirectSettings"/> class.
+ 		/// </summary>
+ 		public RedirectSettings(FlurlHttpSettings settings) {
+ 			_settings = settings;
+diff --git a/src/Flurl.Http/CookieCutter.cs b/src/Flurl.Http/CookieCutter.cs
+index 7f25ea5..ee08844 100644
+--- a/src/Flurl.Http/CookieCutter.cs
++++ b/src/Flurl.Http/CookieCutter.cs
+@@ -172,10 +172,10 @@ namespace Flurl.Http
+ 			}
+ 
+ 			// it seems intuitive tht a non-empty path should start with /, but I can't find this in any spec
+-			//if (!string.IsNullOrEmpty(Path) && !Path.OrdinalStartsWith("/")) {
+-			//	reason = $"{Path} is not a valid Path. A non-empty Path must start with a / character.";
+-			//	return false;
+-			//}
++			// if (!string.IsNullOrEmpty(Path) && !Path.OrdinalStartsWith("/")) {
++			// 	reason = $"{Path} is not a valid Path. A non-empty Path must start with a / character.";
++			// 	return false;
++			// }
+ 
+ 			reason = "ok";
+ 			return true;
+@@ -276,18 +276,18 @@ namespace Flurl.Http
+ 
+ 		// Possible future enhancement: https://github.com/tmenier/Flurl/issues/538
+ 		// This method works, but the feature still needs caching of some kind and an opt-in config setting.
+-		//private static async Task<bool> IsPublicSuffixesAsync(string domain) {
+-		//	using (var stream = await "https://publicsuffix.org/list/public_suffix_list.dat".GetStreamAsync())
+-		//	using (var reader = new StreamReader(stream)) {
+-		//		while (true) {
+-		//			var line = await reader.ReadLineAsync();
+-		//			if (line == null) break;
+-		//			if (line.Trim() == "") continue;
+-		//			if (line.OrdinalStartsWith("//")) continue;
+-		//			if (line == domain) return true;
+-		//		}
+-		//	}
+-		//	return false;
+-		//}
++		// private static async Task<bool> IsPublicSuffixesAsync(string domain) {
++		// 	using (var stream = await "https://publicsuffix.org/list/public_suffix_list.dat".GetStreamAsync())
++		// 	using (var reader = new StreamReader(stream)) {
++		// 		while (true) {
++		// 			var line = await reader.ReadLineAsync();
++		// 			if (line == null) break;
++		// 			if (line.Trim() == "") continue;
++		// 			if (line.OrdinalStartsWith("//")) continue;
++		// 			if (line == domain) return true;
++		// 		}
++		// 	}
++		// 	return false;
++		// }
+ 	}
+ }
+diff --git a/src/Flurl.Http/CookieJar.cs b/src/Flurl.Http/CookieJar.cs
+index 93d48f0..d25e407 100644
+--- a/src/Flurl.Http/CookieJar.cs
++++ b/src/Flurl.Http/CookieJar.cs
+@@ -71,7 +71,7 @@ namespace Flurl.Http
+ 		}
+ 
+ 		/// <summary>
+-		/// Removes all cookies from this CookieJar
++		/// Removes all cookies from this CookieJar.
+ 		/// </summary>
+ 		public CookieJar Clear() {
+ 			_dict.Clear();
+diff --git a/src/Flurl.Http/CookieSession.cs b/src/Flurl.Http/CookieSession.cs
+index dad0761..6c85867 100644
+--- a/src/Flurl.Http/CookieSession.cs
++++ b/src/Flurl.Http/CookieSession.cs
+@@ -18,7 +18,7 @@ namespace Flurl.Http
+ 		}
+ 
+ 		/// <summary>
+-		/// Creates a new CookieSession where all requests are made using the provided IFlurlClient
++		/// Creates a new CookieSession where all requests are made using the provided IFlurlClient.
+ 		/// </summary>
+ 		public CookieSession(IFlurlClient client) {
+ 			_client = client;
+diff --git a/src/Flurl.Http/Flurl.Http.csproj b/src/Flurl.Http/Flurl.Http.csproj
+index 929a277..8e6f8ce 100644
+--- a/src/Flurl.Http/Flurl.Http.csproj
++++ b/src/Flurl.Http/Flurl.Http.csproj
+@@ -1,4 +1,4 @@
+-﻿<Project Sdk="Microsoft.NET.Sdk">
++<Project Sdk="Microsoft.NET.Sdk">
+   <PropertyGroup>
+     <TargetFrameworks>net6.0;netstandard2.0;net461</TargetFrameworks>
+     <LangVersion>9.0</LangVersion>
+@@ -42,4 +42,7 @@
+     <Reference Include="System.Net.Http" />
+     <PackageReference Include="System.Text.Json" Version="6.0.10" />
+   </ItemGroup>
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial54.2" PrivateAssets="all" />
++  </ItemGroup>
+ </Project>
+\ No newline at end of file
+diff --git a/src/Flurl.Http/FlurlClient.cs b/src/Flurl.Http/FlurlClient.cs
+index 474d856..a64b357 100644
+--- a/src/Flurl.Http/FlurlClient.cs
++++ b/src/Flurl.Http/FlurlClient.cs
+@@ -1,19 +1,19 @@
+ using System;
++using System.Collections.Generic;
+ using System.Linq;
+ using System.Net.Http;
+-using System.Threading.Tasks;
++using System.Net.Http.Headers;
++using System.Reflection;
+ using System.Threading;
++using System.Threading.Tasks;
+ using Flurl.Http.Configuration;
+ using Flurl.Http.Testing;
+ using Flurl.Util;
+-using System.Collections.Generic;
+-using System.Net.Http.Headers;
+-using System.Reflection;
+ 
+ namespace Flurl.Http
+ {
+ 	/// <summary>
+-	/// Interface defining FlurlClient's contract (useful for mocking and DI)
++	/// Interface defining FlurlClient's contract (useful for mocking and DI).
+ 	/// </summary>
+ 	public interface IFlurlClient : ISettingsContainer, IHeadersContainer, IEventHandlerContainer, IDisposable {
+ 		/// <summary>
+@@ -30,7 +30,7 @@ namespace Flurl.Http
+ 		/// Creates a new IFlurlRequest that can be further built and sent fluently.
+ 		/// </summary>
+ 		/// <param name="urlSegments">The URL or URL segments for the request. If BaseUrl is defined, it is assumed that these are path segments off that base.</param>
+-		/// <returns>A new IFlurlRequest</returns>
++		/// <returns>A new IFlurlRequest.</returns>
+ 		IFlurlRequest Request(params object[] urlSegments);
+ 
+ 		/// <summary>
+@@ -42,8 +42,8 @@ namespace Flurl.Http
+ 		/// Asynchronously sends an HTTP request.
+ 		/// </summary>
+ 		/// <param name="request">The IFlurlRequest to send.</param>
+-		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+ 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
++		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+ 		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
+ 		Task<IFlurlResponse> SendAsync(IFlurlRequest request, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default);
+ 	}
+@@ -56,7 +56,7 @@ namespace Flurl.Http
+ 		private static readonly Lazy<IFlurlClientFactory> _defaultFactory = new(() => new DefaultFlurlClientFactory());
+ 
+ 		/// <summary>
+-		/// Creates a new instance of <see cref="FlurlClient"/>.
++		/// Initializes a new instance of the <see cref="FlurlClient"/> class.
+ 		/// </summary>
+ 		/// <param name="baseUrl">The base URL associated with this client.</param>
+ 		public FlurlClient(string baseUrl = null) : this(_defaultFactory.Value.CreateHttpClient(), baseUrl) { }
+@@ -176,8 +176,9 @@ namespace Flurl.Http
+ 					var redirResponse = await ProcessRedirectAsync(call, completionOption, cancellationToken).ConfigureAwait(false);
+ 					return redirResponse ?? call.Response;
+ 				}
+-				else
++				else {
+ 					throw new FlurlHttpException(call, null);
++				}
+ 			}
+ 			catch (Exception ex) {
+ 				return await HandleExceptionAsync(call, ex, cancellationToken).ConfigureAwait(false);
+@@ -277,7 +278,7 @@ namespace Flurl.Http
+ 
+ 			redir.Count = 1 + (call.Request.RedirectedFrom?.Redirect?.Count ?? 0);
+ 
+-			var isSecureToInsecure = (call.Request.Url.IsSecureScheme && !redir.Url.IsSecureScheme);
++			var isSecureToInsecure = call.Request.Url.IsSecureScheme && !redir.Url.IsSecureScheme;
+ 
+ 			redir.Follow =
+ 				new[] { 301, 302, 303, 307, 308 }.Contains(call.Response.StatusCode) &&
+diff --git a/src/Flurl.Http/FlurlCookie.cs b/src/Flurl.Http/FlurlCookie.cs
+index 777683b..32c8ed2 100644
+--- a/src/Flurl.Http/FlurlCookie.cs
++++ b/src/Flurl.Http/FlurlCookie.cs
+@@ -15,10 +15,12 @@ namespace Flurl.Http
+ 		/// Indicates a browser should only send cookie for same-site requests.
+ 		/// </summary>
+ 		Strict,
++
+ 		/// <summary>
+ 		/// Indicates a browser should send cookie for cross-site requests only with top-level navigation. 
+ 		/// </summary>
+ 		Lax,
++
+ 		/// <summary>
+ 		/// Indicates a browser should send cookie for same-site and cross-site requests.
+ 		/// </summary>
+@@ -186,7 +188,6 @@ namespace Flurl.Http
+ 		/// </summary>
+ 		public static FlurlCookie LoadFromString(string s) => LoadFrom(new StringReader(s));
+ 
+-
+ 		/// <summary>
+ 		/// Makes this cookie immutable. Call when added to a jar.
+ 		/// </summary>
+diff --git a/src/Flurl.Http/FlurlEventHandler.cs b/src/Flurl.Http/FlurlEventHandler.cs
+index d9137ea..182c732 100644
+--- a/src/Flurl.Http/FlurlEventHandler.cs
++++ b/src/Flurl.Http/FlurlEventHandler.cs
+@@ -37,7 +37,7 @@ namespace Flurl.Http
+ 	}
+ 
+ 	/// <summary>
+-	/// Defines a handler for Flurl events such as BeforeCall, AfterCall, and OnError
++	/// Defines a handler for Flurl events such as BeforeCall, AfterCall, and OnError.
+ 	/// </summary>
+ 	public interface IFlurlEventHandler
+ 	{
+@@ -71,14 +71,20 @@ namespace Flurl.Http
+ 		internal class FromAction : FlurlEventHandler
+ 		{
+ 			private readonly Action<FlurlCall> _act;
++
+ 			public FromAction(Action<FlurlCall> act) => _act = act;
++
++			/// <inheritdoc />
+ 			public override void Handle(FlurlEventType eventType, FlurlCall call) => _act(call);
+ 		}
+ 
+ 		internal class FromAsyncAction : FlurlEventHandler
+ 		{
+ 			private readonly Func<FlurlCall, Task> _act;
++
+ 			public FromAsyncAction(Func<FlurlCall, Task> act) => _act = act;
++
++			/// <inheritdoc />
+ 			public override Task HandleAsync(FlurlEventType eventType, FlurlCall call) => _act(call);
+ 		}
+ 	}
+diff --git a/src/Flurl.Http/FlurlHttpException.cs b/src/Flurl.Http/FlurlHttpException.cs
+index 2d6ff49..e7c767e 100644
+--- a/src/Flurl.Http/FlurlHttpException.cs
++++ b/src/Flurl.Http/FlurlHttpException.cs
+@@ -10,7 +10,7 @@ namespace Flurl.Http
+ 	public class FlurlHttpException : Exception
+ 	{
+ 		/// <summary>
+-		/// An object containing details about the failed HTTP call
++		/// An object containing details about the failed HTTP call.
+ 		/// </summary>
+ 		public FlurlCall Call { get; }
+ 
+diff --git a/src/Flurl.Http/FlurlRequest.cs b/src/Flurl.Http/FlurlRequest.cs
+index c98e664..605dd6e 100644
+--- a/src/Flurl.Http/FlurlRequest.cs
++++ b/src/Flurl.Http/FlurlRequest.cs
+@@ -64,8 +64,8 @@ namespace Flurl.Http
+ 		/// </summary>
+ 		/// <param name="verb">The HTTP method used to make the request.</param>
+ 		/// <param name="content">Contents of the request body.</param>
+-		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+ 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
++		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+ 		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
+ 		Task<IFlurlResponse> SendAsync(HttpMethod verb, HttpContent content = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default);
+ 	}
+@@ -85,14 +85,14 @@ namespace Flurl.Http
+ 		}
+ 
+ 		/// <summary>
+-		/// Used internally by FlurlClient.Request
++		/// Used internally by FlurlClient.Request.
+ 		/// </summary>
+ 		internal FlurlRequest(IFlurlClient client, params object[] urlSegments) : this(client?.BaseUrl, urlSegments) {
+ 			Client = client;
+ 		}
+ 
+ 		/// <summary>
+-		/// Used internally by FlurlClient.Request and CookieSession.Request
++		/// Used internally by FlurlClient.Request and CookieSession.Request.
+ 		/// </summary>
+ 		internal FlurlRequest(string baseUrl, params object[] urlSegments) {
+ 			var parts = new List<string>(urlSegments.Select(s => s.ToInvariantString()));
+diff --git a/src/Flurl.Http/FlurlResponse.cs b/src/Flurl.Http/FlurlResponse.cs
+index a38be29..f9aa7c3 100644
+--- a/src/Flurl.Http/FlurlResponse.cs
++++ b/src/Flurl.Http/FlurlResponse.cs
+@@ -40,8 +40,8 @@ namespace Flurl.Http
+ 		/// </summary>
+ 		/// <typeparam name="T">A type whose structure matches the expected JSON response.</typeparam>
+ 		/// <returns>A Task whose result is an object containing data in the response body.</returns>
+-		/// <example>x = await url.PostAsync(data).GetJson&lt;T&gt;()</example>
+ 		/// <exception cref="FlurlHttpException">Condition.</exception>
++		/// <example>x = await url.PostAsync(data).GetJson&lt;T&gt;()</example>
+ 		Task<T> GetJsonAsync<T>();
+ 
+ 		/// <summary>
+@@ -101,16 +101,18 @@ namespace Flurl.Http
+ 		private IReadOnlyNameValueList<string> LoadHeaders() {
+ 			var result = new NameValueList<string>(false);
+ 
+-			foreach (var h in ResponseMessage.Headers)
+-			foreach (var v in h.Value)
+-				result.Add(h.Key, v);
++			foreach (var h in ResponseMessage.Headers) {
++				foreach (var v in h.Value)
++					result.Add(h.Key, v);
++			}
+ 
+ 			if (ResponseMessage.Content?.Headers == null)
+ 				return result;
+ 
+-			foreach (var h in ResponseMessage.Content.Headers)
+-			foreach (var v in h.Value)
+-				result.Add(h.Key, v);
++			foreach (var h in ResponseMessage.Content.Headers) {
++				foreach (var v in h.Value)
++					result.Add(h.Key, v);
++			}
+ 
+ 			return result;
+ 		}
+diff --git a/src/Flurl.Http/GeneratedExtensions.cs b/src/Flurl.Http/GeneratedExtensions.cs
+index 75b39ab..631d742 100644
+--- a/src/Flurl.Http/GeneratedExtensions.cs
++++ b/src/Flurl.Http/GeneratedExtensions.cs
+@@ -1838,6 +1838,5 @@ namespace Flurl.Http
+ 		public static IFlurlRequest OnRedirect(this Uri uri, Func<FlurlCall, Task> action) {
+ 			return new FlurlRequest(uri).OnRedirect(action);
+ 		}
+-		
+ 	}
+ }
+diff --git a/src/Flurl.Http/IEventHandlerContainer.cs b/src/Flurl.Http/IEventHandlerContainer.cs
+index 879fdaf..60aec59 100644
+--- a/src/Flurl.Http/IEventHandlerContainer.cs
++++ b/src/Flurl.Http/IEventHandlerContainer.cs
+@@ -16,7 +16,7 @@ namespace Flurl.Http
+ 	}
+ 
+ 	/// <summary>
+-	/// Fluent extension methods for tweaking FlurlHttpSettings
++	/// Fluent extension methods for tweaking FlurlHttpSettings.
+ 	/// </summary>
+ 	public static class EventHandlerContainerExtensions
+ 	{
+diff --git a/src/Flurl.Http/ISettingsContainer.cs b/src/Flurl.Http/ISettingsContainer.cs
+index 698fd87..b5a4b74 100644
+--- a/src/Flurl.Http/ISettingsContainer.cs
++++ b/src/Flurl.Http/ISettingsContainer.cs
+@@ -17,7 +17,7 @@ namespace Flurl.Http
+ 	}
+ 
+ 	/// <summary>
+-	/// Fluent extension methods for tweaking FlurlHttpSettings
++	/// Fluent extension methods for tweaking FlurlHttpSettings.
+ 	/// </summary>
+ 	public static class SettingsExtensions
+ 	{
+diff --git a/src/Flurl.Http/MultipartExtensions.cs b/src/Flurl.Http/MultipartExtensions.cs
+index 475893c..b8f74a5 100644
+--- a/src/Flurl.Http/MultipartExtensions.cs
++++ b/src/Flurl.Http/MultipartExtensions.cs
+@@ -14,8 +14,8 @@ namespace Flurl.Http
+ 		/// <summary>
+ 		/// Sends an asynchronous multipart/form-data POST request.
+ 		/// </summary>
+-		/// <param name="buildContent">A delegate for building the content parts.</param>
+ 		/// <param name="request">The IFlurlRequest.</param>
++		/// <param name="buildContent">A delegate for building the content parts.</param>
+ 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
+ 		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+ 		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
+diff --git a/src/Flurl.Http/ResponseExtensions.cs b/src/Flurl.Http/ResponseExtensions.cs
+index 3e4cdaf..2d192a5 100644
+--- a/src/Flurl.Http/ResponseExtensions.cs
++++ b/src/Flurl.Http/ResponseExtensions.cs
+@@ -15,8 +15,8 @@ namespace Flurl.Http
+ 		/// </summary>
+ 		/// <typeparam name="T">A type whose structure matches the expected JSON response.</typeparam>
+ 		/// <returns>A Task whose result is an object containing data in the response body.</returns>
+-		/// <example>x = await url.PostAsync(data).ReceiveJson&lt;T&gt;()</example>
+ 		/// <exception cref="FlurlHttpException">Condition.</exception>
++		/// <example>x = await url.PostAsync(data).ReceiveJson&lt;T&gt;()</example>
+ 		public static async Task<T> ReceiveJson<T>(this Task<IFlurlResponse> response) {
+ 			using var resp = await response.ConfigureAwait(false);
+ 			if (resp == null) return default;
+diff --git a/src/Flurl.Http/Testing/FilteredHttpTestSetup.cs b/src/Flurl.Http/Testing/FilteredHttpTestSetup.cs
+index 3e66fa0..5cc4bea 100644
+--- a/src/Flurl.Http/Testing/FilteredHttpTestSetup.cs
++++ b/src/Flurl.Http/Testing/FilteredHttpTestSetup.cs
+@@ -15,7 +15,7 @@ namespace Flurl.Http.Testing
+ 		private readonly List<Func<FlurlCall, bool>> _filters = new List<Func<FlurlCall, bool>>();
+ 
+ 		/// <summary>
+-		/// Constructs a new instance of FilteredHttpTestSetup.
++		/// Initializes a new instance of the <see cref="FilteredHttpTestSetup"/> class.
+ 		/// </summary>
+ 		/// <param name="settings">FlurlHttpSettings used in fake calls.</param>
+ 		/// <param name="urlPatterns">URL(s) or URL pattern(s) that this HttpTestSetup applies to. Can contain * wildcard.</param>
+diff --git a/src/Flurl.Http/Testing/HttpCallAssertion.cs b/src/Flurl.Http/Testing/HttpCallAssertion.cs
+index 150f8bb..7d50755 100644
+--- a/src/Flurl.Http/Testing/HttpCallAssertion.cs
++++ b/src/Flurl.Http/Testing/HttpCallAssertion.cs
+@@ -20,7 +20,7 @@ namespace Flurl.Http.Testing
+ 		private IList<FlurlCall> _calls;
+ 
+ 		/// <summary>
+-		/// Constructs a new instance of HttpCallAssertion.
++		/// Initializes a new instance of the <see cref="HttpCallAssertion"/> class.
+ 		/// </summary>
+ 		/// <param name="test">The HttpTest containing calls being asserted.</param>
+ 		/// <param name="negate">If true, assertions pass when calls matching criteria were NOT made.</param>
+@@ -34,7 +34,7 @@ namespace Flurl.Http.Testing
+ 	    /// Assert whether calls matching specified criteria were made a specific number of times. (When not specified,
+ 	    /// assertions verify whether any calls matching criteria were made.)
+ 	    /// </summary>
+-	    /// <param name="expectedCount">Exact number of expected calls</param>
++	    /// <param name="expectedCount">Exact number of expected calls.</param>
+ 	    /// <exception cref="ArgumentException"><paramref name="expectedCount"/> must be greater than or equal to 0.</exception>
+ 	    public void Times(int expectedCount) {
+ 			if (expectedCount < 0)
+@@ -90,6 +90,7 @@ namespace Flurl.Http.Testing
+ 		}
+ 
+ 		#region request body
++
+ 		/// <summary>
+ 		/// Asserts whether calls were made containing given request body. body may contain * wildcard.
+ 		/// </summary>
+@@ -115,6 +116,7 @@ namespace Flurl.Http.Testing
+ 		#endregion
+ 
+ 		#region query params
++
+ 		/// <summary>
+ 		/// Asserts whether calls were made containing the given query parameter name and (optionally) value. value may contain * wildcard.
+ 		/// </summary>
+@@ -173,6 +175,7 @@ namespace Flurl.Http.Testing
+ 		#endregion
+ 
+ 		#region headers
++
+ 		/// <summary>
+ 		/// Asserts whether calls were made containing the given header name and (optionally) value. value may contain * wildcard.
+ 		/// </summary>
+@@ -213,7 +216,8 @@ namespace Flurl.Http.Testing
+ 			return With(call => {
+ 				if (!names.Any()) return call.Request.Headers.Any();
+ 				return call.Request.Headers.Select(h => h.Name).Intersect(names).Any();
+-			}, descrip);
++			},
++				descrip);
+ 		}
+ 
+ 		/// <summary>
+@@ -234,6 +238,7 @@ namespace Flurl.Http.Testing
+ 		#endregion
+ 
+ 		#region cookies
++
+ 		/// <summary>
+ 		/// Asserts whether calls were made containing the given cookie name and (optionally) value. value may contain * wildcard.
+ 		/// </summary>
+@@ -274,7 +279,8 @@ namespace Flurl.Http.Testing
+ 			return With(call => {
+ 				if (!names.Any()) return call.Request.Cookies.Any();
+ 				return call.Request.Cookies.Select(c => c.Name).Intersect(names).Any();
+-			}, descrip);
++			},
++				descrip);
+ 		}
+ 
+ 		/// <summary>
+diff --git a/src/Flurl.Http/Testing/HttpTest.cs b/src/Flurl.Http/Testing/HttpTest.cs
+index cf22194..c641b18 100644
+--- a/src/Flurl.Http/Testing/HttpTest.cs
++++ b/src/Flurl.Http/Testing/HttpTest.cs
+@@ -28,7 +28,7 @@ namespace Flurl.Http.Testing
+ 		internal void LogCall(FlurlCall call) => _calls.Enqueue(call);
+ 
+ 		/// <summary>
+-		/// Gets the current HttpTest from the logical (async) call context
++		/// Gets the current HttpTest from the logical (async) call context.
+ 		/// </summary>
+ 		public static HttpTest Current => GetCurrentTest();
+ 
+@@ -88,7 +88,9 @@ namespace Flurl.Http.Testing
+ 		}
+ 
+ 		private static readonly System.Threading.AsyncLocal<HttpTest> _test = new System.Threading.AsyncLocal<HttpTest>();
++
+ 		private static void SetCurrentTest(HttpTest test) => _test.Value = test;
++
+ 		private static HttpTest GetCurrentTest() => _test.Value;
+ 	}
+ }
+\ No newline at end of file
+diff --git a/src/Flurl.Http/Testing/HttpTestSetup.cs b/src/Flurl.Http/Testing/HttpTestSetup.cs
+index 698339b..66f0313 100644
+--- a/src/Flurl.Http/Testing/HttpTestSetup.cs
++++ b/src/Flurl.Http/Testing/HttpTestSetup.cs
+@@ -22,7 +22,7 @@ namespace Flurl.Http.Testing
+ 		private bool _allowRealHttp = false;
+ 
+ 		/// <summary>
+-		/// Constructs a new instance of HttpTestSetup.
++		/// Initializes a new instance of the <see cref="HttpTestSetup"/> class.
+ 		/// </summary>
+ 		/// <param name="settings">FlurlHttpSettings used in fake calls.</param>
+ 		protected HttpTestSetup(FlurlHttpSettings settings) {
+diff --git a/src/Flurl.Http/Testing/Util.cs b/src/Flurl.Http/Testing/Util.cs
+index 12c2af8..314d03e 100644
+--- a/src/Flurl.Http/Testing/Util.cs
++++ b/src/Flurl.Http/Testing/Util.cs
+@@ -9,7 +9,7 @@ using Flurl.Util;
+ namespace Flurl.Http.Testing
+ {
+ 	/// <summary>
+-	/// Utility methods used by both HttpTestSetup and HttpTestAssertion
++	/// Utility methods used by both HttpTestSetup and HttpTestAssertion.
+ 	/// </summary>
+ 	internal static class Util
+ 	{
+@@ -26,7 +26,7 @@ namespace Flurl.Http.Testing
+ 		}
+ 
+ 		/// <summary>
+-		/// null value means just check for existence by name
++		/// null value means just check for existence by name.
+ 		/// </summary>
+ 		internal static bool HasQueryParam(this FlurlCall call, string name, object value = null) {
+ 			if (value == null)
+@@ -66,7 +66,7 @@ namespace Flurl.Http.Testing
+ 		}
+ 
+ 		/// <summary>
+-		/// null value means just check for existence by name
++		/// null value means just check for existence by name.
+ 		/// </summary>
+ 		internal static bool HasHeader(this FlurlCall call, string name, object value = null) {
+ 			return (value == null) ?
+@@ -75,7 +75,7 @@ namespace Flurl.Http.Testing
+ 		}
+ 
+ 		/// <summary>
+-		/// null value means just check for existence by name
++		/// null value means just check for existence by name.
+ 		/// </summary>
+ 		internal static bool HasCookie(this FlurlCall call, string name, object value = null) {
+ 			return (value == null) ?
+@@ -91,7 +91,7 @@ namespace Flurl.Http.Testing
+ 		}
+ 
+ 		/// <summary>
+-		/// same as MatchesPattern, but doesn't require trailing * to ignore query string
++		/// same as MatchesPattern, but doesn't require trailing * to ignore query string.
+ 		/// </summary>
+ 		internal static bool MatchesUrlPattern(string url, string pattern) {
+ 			if (MatchesPattern(url, pattern))
+diff --git a/src/Flurl.Http/UrlBuilderExtensions.cs b/src/Flurl.Http/UrlBuilderExtensions.cs
+index 54fbb5d..0c167a9 100644
+--- a/src/Flurl.Http/UrlBuilderExtensions.cs
++++ b/src/Flurl.Http/UrlBuilderExtensions.cs
+@@ -4,14 +4,14 @@ using System.Collections.Generic;
+ namespace Flurl.Http
+ {
+ 	/// <summary>
+-	/// URL builder extension methods on FlurlRequest
++	/// URL builder extension methods on FlurlRequest.
+ 	/// </summary>
+ 	public static class UrlBuilderExtensions
+ 	{
+ 		/// <summary>
+ 		/// Appends a segment to the URL path, ensuring there is one and only one '/' character as a seperator.
+ 		/// </summary>
+-		/// <param name="request">The IFlurlRequest associated with the URL</param>
++		/// <param name="request">The IFlurlRequest associated with the URL.</param>
+ 		/// <param name="segment">The segment to append</param>
+ 		/// <param name="fullyEncode">If true, URL-encodes reserved characters such as '/', '+', and '%'. Otherwise, only encodes strictly illegal characters (including '%' but only when not followed by 2 hex characters).</param>
+ 		/// <returns>This IFlurlRequest</returns>
+@@ -24,7 +24,7 @@ namespace Flurl.Http
+ 		/// <summary>
+ 		/// Appends multiple segments to the URL path, ensuring there is one and only one '/' character as a seperator.
+ 		/// </summary>
+-		/// <param name="request">The IFlurlRequest associated with the URL</param>
++		/// <param name="request">The IFlurlRequest associated with the URL.</param>
+ 		/// <param name="segments">The segments to append</param>
+ 		/// <returns>This IFlurlRequest</returns>
+ 		public static IFlurlRequest AppendPathSegments(this IFlurlRequest request, params object[] segments) {
+@@ -35,7 +35,7 @@ namespace Flurl.Http
+ 		/// <summary>
+ 		/// Appends multiple segments to the URL path, ensuring there is one and only one '/' character as a seperator.
+ 		/// </summary>
+-		/// <param name="request">The IFlurlRequest associated with the URL</param>
++		/// <param name="request">The IFlurlRequest associated with the URL.</param>
+ 		/// <param name="segments">The segments to append</param>
+ 		/// <returns>This IFlurlRequest</returns>
+ 		public static IFlurlRequest AppendPathSegments(this IFlurlRequest request, IEnumerable<object> segments) {
+@@ -46,7 +46,7 @@ namespace Flurl.Http
+ 		/// <summary>
+ 		/// Adds a parameter to the URL query, overwriting the value if name exists.
+ 		/// </summary>
+-		/// <param name="request">The IFlurlRequest associated with the URL</param>
++		/// <param name="request">The IFlurlRequest associated with the URL.</param>
+ 		/// <param name="name">Name of query parameter</param>
+ 		/// <param name="value">Value of query parameter</param>
+ 		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+@@ -59,10 +59,10 @@ namespace Flurl.Http
+ 		/// <summary>
+ 		/// Adds a parameter to the URL query, overwriting the value if name exists.
+ 		/// </summary>
+-		/// <param name="request">The IFlurlRequest associated with the URL</param>
++		/// <param name="request">The IFlurlRequest associated with the URL.</param>
+ 		/// <param name="name">Name of query parameter</param>
+ 		/// <param name="value">Value of query parameter</param>
+-		/// <param name="isEncoded">Set to true to indicate the value is already URL-encoded</param>
++		/// <param name="isEncoded">Set to true to indicate the value is already URL-encoded.</param>
+ 		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+ 		/// <returns>This IFlurlRequest</returns>
+ 		/// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null" />.</exception>
+@@ -74,7 +74,7 @@ namespace Flurl.Http
+ 		/// <summary>
+ 		/// Adds a parameter without a value to the URL query, removing any existing value.
+ 		/// </summary>
+-		/// <param name="request">The IFlurlRequest associated with the URL</param>
++		/// <param name="request">The IFlurlRequest associated with the URL.</param>
+ 		/// <param name="name">Name of query parameter</param>
+ 		/// <returns>This IFlurlRequest</returns>
+ 		public static IFlurlRequest SetQueryParam(this IFlurlRequest request, string name) {
+@@ -85,7 +85,7 @@ namespace Flurl.Http
+ 		/// <summary>
+ 		/// Parses values (usually an anonymous object or dictionary) into name/value pairs and adds them to the URL query, overwriting any that already exist.
+ 		/// </summary>
+-		/// <param name="request">The IFlurlRequest associated with the URL</param>
++		/// <param name="request">The IFlurlRequest associated with the URL.</param>
+ 		/// <param name="values">Typically an anonymous object, ie: new { x = 1, y = 2 }</param>
+ 		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+ 		/// <returns>This IFlurlRequest</returns>
+@@ -97,7 +97,7 @@ namespace Flurl.Http
+ 		/// <summary>
+ 		/// Adds multiple parameters without values to the URL query.
+ 		/// </summary>
+-		/// <param name="request">The IFlurlRequest associated with the URL</param>
++		/// <param name="request">The IFlurlRequest associated with the URL.</param>
+ 		/// <param name="names">Names of query parameters.</param>
+ 		/// <returns>This IFlurlRequest</returns>
+ 		public static IFlurlRequest SetQueryParams(this IFlurlRequest request, IEnumerable<string> names) {
+@@ -108,7 +108,7 @@ namespace Flurl.Http
+ 		/// <summary>
+ 		/// Adds multiple parameters without values to the URL query.
+ 		/// </summary>
+-		/// <param name="request">The IFlurlRequest associated with the URL</param>
++		/// <param name="request">The IFlurlRequest associated with the URL.</param>
+ 		/// <param name="names">Names of query parameters</param>
+ 		/// <returns>This IFlurlRequest</returns>
+ 		public static IFlurlRequest SetQueryParams(this IFlurlRequest request, params string[] names) {
+@@ -119,7 +119,7 @@ namespace Flurl.Http
+ 		/// <summary>
+ 		/// Adds a parameter to the URL query.
+ 		/// </summary>
+-		/// <param name="request">The IFlurlRequest associated with the URL</param>
++		/// <param name="request">The IFlurlRequest associated with the URL.</param>
+ 		/// <param name="name">Name of query parameter</param>
+ 		/// <param name="value">Value of query parameter</param>
+ 		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+@@ -132,10 +132,10 @@ namespace Flurl.Http
+ 		/// <summary>
+ 		/// Adds a parameter to the URL query.
+ 		/// </summary>
+-		/// <param name="request">The IFlurlRequest associated with the URL</param>
++		/// <param name="request">The IFlurlRequest associated with the URL.</param>
+ 		/// <param name="name">Name of query parameter</param>
+ 		/// <param name="value">Value of query parameter</param>
+-		/// <param name="isEncoded">Set to true to indicate the value is already URL-encoded</param>
++		/// <param name="isEncoded">Set to true to indicate the value is already URL-encoded.</param>
+ 		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+ 		/// <returns>This IFlurlRequest</returns>
+ 		/// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null" />.</exception>
+@@ -147,7 +147,7 @@ namespace Flurl.Http
+ 		/// <summary>
+ 		/// Adds a parameter without a value to the URL query.
+ 		/// </summary>
+-		/// <param name="request">The IFlurlRequest associated with the URL</param>
++		/// <param name="request">The IFlurlRequest associated with the URL.</param>
+ 		/// <param name="name">Name of query parameter</param>
+ 		/// <returns>This IFlurlRequest</returns>
+ 		public static IFlurlRequest AppendQueryParam(this IFlurlRequest request, string name) {
+@@ -158,7 +158,7 @@ namespace Flurl.Http
+ 		/// <summary>
+ 		/// Parses values (usually an anonymous object or dictionary) into name/value pairs and adds them to the URL query, overwriting any that already exist.
+ 		/// </summary>
+-		/// <param name="request">The IFlurlRequest associated with the URL</param>
++		/// <param name="request">The IFlurlRequest associated with the URL.</param>
+ 		/// <param name="values">Typically an anonymous object, ie: new { x = 1, y = 2 }</param>
+ 		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+ 		/// <returns>This IFlurlRequest</returns>
+@@ -170,7 +170,7 @@ namespace Flurl.Http
+ 		/// <summary>
+ 		/// Adds multiple parameters without values to the URL query.
+ 		/// </summary>
+-		/// <param name="request">The IFlurlRequest associated with the URL</param>
++		/// <param name="request">The IFlurlRequest associated with the URL.</param>
+ 		/// <param name="names">Names of query parameters.</param>
+ 		/// <returns>This IFlurlRequest</returns>
+ 		public static IFlurlRequest AppendQueryParam(this IFlurlRequest request, IEnumerable<string> names) {
+@@ -181,7 +181,7 @@ namespace Flurl.Http
+ 		/// <summary>
+ 		/// Adds multiple parameters without values to the URL query.
+ 		/// </summary>
+-		/// <param name="request">The IFlurlRequest associated with the URL</param>
++		/// <param name="request">The IFlurlRequest associated with the URL.</param>
+ 		/// <param name="names">Names of query parameters</param>
+ 		/// <returns>This IFlurlRequest</returns>
+ 		public static IFlurlRequest AppendQueryParam(this IFlurlRequest request, params string[] names) {
+@@ -192,7 +192,7 @@ namespace Flurl.Http
+ 		/// <summary>
+ 		/// Removes a name/value pair from the URL query by name.
+ 		/// </summary>
+-		/// <param name="request">The IFlurlRequest associated with the URL</param>
++		/// <param name="request">The IFlurlRequest associated with the URL.</param>
+ 		/// <param name="name">Query string parameter name to remove</param>
+ 		/// <returns>This IFlurlRequest</returns>
+ 		public static IFlurlRequest RemoveQueryParam(this IFlurlRequest request, string name) {
+@@ -203,7 +203,7 @@ namespace Flurl.Http
+ 		/// <summary>
+ 		/// Removes multiple name/value pairs from the URL query by name.
+ 		/// </summary>
+-		/// <param name="request">The IFlurlRequest associated with the URL</param>
++		/// <param name="request">The IFlurlRequest associated with the URL.</param>
+ 		/// <param name="names">Query string parameter names to remove</param>
+ 		/// <returns>This IFlurlRequest</returns>
+ 		public static IFlurlRequest RemoveQueryParams(this IFlurlRequest request, params string[] names) {
+@@ -214,7 +214,7 @@ namespace Flurl.Http
+ 		/// <summary>
+ 		/// Removes multiple name/value pairs from the URL query by name.
+ 		/// </summary>
+-		/// <param name="request">The IFlurlRequest associated with the URL</param>
++		/// <param name="request">The IFlurlRequest associated with the URL.</param>
+ 		/// <param name="names">Query string parameter names to remove</param>
+ 		/// <returns>This IFlurlRequest</returns>
+ 		public static IFlurlRequest RemoveQueryParams(this IFlurlRequest request, IEnumerable<string> names) {
+@@ -225,7 +225,7 @@ namespace Flurl.Http
+ 		/// <summary>
+ 		/// Set the URL fragment fluently.
+ 		/// </summary>
+-		/// <param name="request">The IFlurlRequest associated with the URL</param>
++		/// <param name="request">The IFlurlRequest associated with the URL.</param>
+ 		/// <param name="fragment">The part of the URL afer #</param>
+ 		/// <returns>This IFlurlRequest</returns>
+ 		public static IFlurlRequest SetFragment(this IFlurlRequest request, string fragment) {
+@@ -236,7 +236,7 @@ namespace Flurl.Http
+ 		/// <summary>
+ 		/// Removes the URL fragment including the #.
+ 		/// </summary>
+-		/// <param name="request">The IFlurlRequest associated with the URL</param>
++		/// <param name="request">The IFlurlRequest associated with the URL.</param>
+ 		/// <returns>This IFlurlRequest</returns>
+ 		public static IFlurlRequest RemoveFragment(this IFlurlRequest request) {
+ 			request.Url.RemoveFragment();
+diff --git a/src/Flurl/Flurl.csproj b/src/Flurl/Flurl.csproj
+index 0952c7e..32dcbe5 100644
+--- a/src/Flurl/Flurl.csproj
++++ b/src/Flurl/Flurl.csproj
+@@ -1,4 +1,4 @@
+-﻿<Project Sdk="Microsoft.NET.Sdk">
++<Project Sdk="Microsoft.NET.Sdk">
+   <PropertyGroup>
+     <TargetFrameworks>netstandard2.0;net461;net472</TargetFrameworks>
+     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+@@ -32,4 +32,7 @@
+   <ItemGroup Condition="'$(TargetFramework)'=='net461'">
+     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+   </ItemGroup>
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial54.2" PrivateAssets="all" />
++  </ItemGroup>
+ </Project>
+\ No newline at end of file
+diff --git a/src/Flurl/GeneratedExtensions.cs b/src/Flurl/GeneratedExtensions.cs
+index 844d625..55b1ca0 100644
+--- a/src/Flurl/GeneratedExtensions.cs
++++ b/src/Flurl/GeneratedExtensions.cs
+@@ -504,6 +504,5 @@ namespace Flurl
+ 		public static Url ResetToRoot(this Uri uri) {
+ 			return new Url(uri).ResetToRoot();
+ 		}
+-		
+ 	}
+ }
+diff --git a/src/Flurl/NullValueHandling.cs b/src/Flurl/NullValueHandling.cs
+index 7180ab9..e7d2406 100644
+--- a/src/Flurl/NullValueHandling.cs
++++ b/src/Flurl/NullValueHandling.cs
+@@ -13,10 +13,12 @@ namespace Flurl
+ 		/// Set as name without value in query string.
+ 		/// </summary>
+ 		NameOnly,
++
+ 		/// <summary>
+ 		/// Don't add to query string, remove any existing value.
+ 		/// </summary>
+ 		Remove,
++
+ 		/// <summary>
+ 		/// Don't add to query string, but leave any existing value unchanged.
+ 		/// </summary>
+diff --git a/src/Flurl/QueryParamCollection.cs b/src/Flurl/QueryParamCollection.cs
+index 0cae617..0f257ae 100644
+--- a/src/Flurl/QueryParamCollection.cs
++++ b/src/Flurl/QueryParamCollection.cs
+@@ -13,7 +13,7 @@ namespace Flurl
+ 		private readonly NameValueList<QueryParamValue> _values = new NameValueList<QueryParamValue>(true);
+ 
+ 		/// <summary>
+-		/// Returns a new instance of QueryParamCollection
++		/// Returns a new instance of QueryParamCollection.
+ 		/// </summary>
+ 		/// <param name="query">Optional query string to parse.</param>
+ 		public QueryParamCollection(string query = null) {
+@@ -110,16 +110,19 @@ namespace Flurl
+ 		}
+ 
+ 		private IEnumerable<object> SplitCollection(object value) {
+-			if (value == null)
++			if (value == null) {
+ 				yield return null;
+-			else if (value is string s)
++			}
++			else if (value is string s) {
+ 				yield return s;
++			}
+ 			else if (value is IEnumerable en) {
+ 				foreach (var item in en.Cast<object>().SelectMany(SplitCollection).ToList())
+ 					yield return item;
+ 			}
+-			else
++			else {
+ 				yield return value;
++			}
+ 		}
+ 
+ 		/// <summary>
+diff --git a/src/Flurl/Url.cs b/src/Flurl/Url.cs
+index 8a713a8..445e182 100644
+--- a/src/Flurl/Url.cs
++++ b/src/Flurl/Url.cs
+@@ -1,8 +1,8 @@
+-using Flurl.Util;
+ using System;
+ using System.Collections.Generic;
+ using System.Linq;
+ using System.Text.RegularExpressions;
++using Flurl.Util;
+ 
+ namespace Flurl
+ {
+@@ -27,6 +27,7 @@ namespace Flurl
+ 		private bool _trailingHash;
+ 
+ 		#region public properties
++
+ 		/// <summary>
+ 		/// The scheme of the URL, i.e. "http". Does not include ":" delimiter. Empty string if the URL is relative.
+ 		/// </summary>
+@@ -89,6 +90,7 @@ namespace Flurl
+ 					string.Join("/", PathSegments),
+ 					_trailingSlash && PathSegments.Any() ? "/" : "");
+ 			}
++
+ 			set {
+ 				PathSegments.Clear();
+ 				_trailingSlash = false;
+@@ -139,6 +141,7 @@ namespace Flurl
+ 		#endregion
+ 
+ 		#region ctors and parsing methods
++
+ 		/// <summary>
+ 		/// Constructs a Url object from a string.
+ 		/// </summary>
+@@ -251,12 +254,13 @@ namespace Flurl
+ 		#endregion
+ 
+ 		#region fluent builder methods
++
+ 		/// <summary>
+ 		/// Appends a segment to the URL path, ensuring there is one and only one '/' character as a separator.
+ 		/// </summary>
+ 		/// <param name="segment">The segment to append</param>
+ 		/// <param name="fullyEncode">If true, URL-encodes reserved characters such as '/', '+', and '%'. Otherwise, only encodes strictly illegal characters (including '%' but only when not followed by 2 hex characters).</param>
+-		/// <returns>the Url object with the segment appended</returns>
++		/// <returns>the Url object with the segment appended.</returns>
+ 		/// <exception cref="ArgumentNullException"><paramref name="segment"/> is <see langword="null" />.</exception>
+ 		public Url AppendPathSegment(object segment, bool fullyEncode = false) {
+ 			if (segment == null)
+@@ -283,7 +287,7 @@ namespace Flurl
+ 		/// Appends multiple segments to the URL path, ensuring there is one and only one '/' character as a seperator.
+ 		/// </summary>
+ 		/// <param name="segments">The segments to append</param>
+-		/// <returns>the Url object with the segments appended</returns>
++		/// <returns>the Url object with the segments appended.</returns>
+ 		public Url AppendPathSegments(params object[] segments) {
+ 			foreach(var segment in segments)
+ 				AppendPathSegment(segment);
+@@ -295,7 +299,7 @@ namespace Flurl
+ 		/// Appends multiple segments to the URL path, ensuring there is one and only one '/' character as a seperator.
+ 		/// </summary>
+ 		/// <param name="segments">The segments to append</param>
+-		/// <returns>the Url object with the segments appended</returns>
++		/// <returns>the Url object with the segments appended.</returns>
+ 		public Url AppendPathSegments(IEnumerable<object> segments) {
+ 			foreach(var s in segments)
+ 				AppendPathSegment(s);
+@@ -329,7 +333,7 @@ namespace Flurl
+ 		/// <param name="name">Name of query parameter</param>
+ 		/// <param name="value">Value of query parameter</param>
+ 		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+-		/// <returns>The Url object with the query parameter added</returns>
++		/// <returns>The Url object with the query parameter added.</returns>
+ 		public Url SetQueryParam(string name, object value, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+ 			QueryParams.AddOrReplace(name, value, false, nullValueHandling);
+ 			return this;
+@@ -340,9 +344,9 @@ namespace Flurl
+ 		/// </summary>
+ 		/// <param name="name">Name of query parameter</param>
+ 		/// <param name="value">Value of query parameter</param>
+-		/// <param name="isEncoded">Set to true to indicate the value is already URL-encoded</param>
++		/// <param name="isEncoded">Set to true to indicate the value is already URL-encoded.</param>
+ 		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+-		/// <returns>The Url object with the query parameter added</returns>
++		/// <returns>The Url object with the query parameter added.</returns>
+ 		/// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null" />.</exception>
+ 		public Url SetQueryParam(string name, string value, bool isEncoded = false, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+ 			QueryParams.AddOrReplace(name, value, isEncoded, nullValueHandling);
+@@ -353,7 +357,7 @@ namespace Flurl
+ 		/// Adds a parameter without a value to the query, removing any existing value.
+ 		/// </summary>
+ 		/// <param name="name">Name of query parameter</param>
+-		/// <returns>The Url object with the query parameter added</returns>
++		/// <returns>The Url object with the query parameter added.</returns>
+ 		public Url SetQueryParam(string name) {
+ 			QueryParams.AddOrReplace(name, null, false, NullValueHandling.NameOnly);
+ 			return this;
+@@ -364,7 +368,7 @@ namespace Flurl
+ 		/// </summary>
+ 		/// <param name="values">Typically an anonymous object, ie: new { x = 1, y = 2 }</param>
+ 		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+-		/// <returns>The Url object with the query parameters added</returns>
++		/// <returns>The Url object with the query parameters added.</returns>
+ 		public Url SetQueryParams(object values, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+ 			if (values == null)
+ 				return this;
+@@ -387,7 +391,7 @@ namespace Flurl
+ 		/// Adds multiple parameters without values to the query.
+ 		/// </summary>
+ 		/// <param name="names">Names of query parameters.</param>
+-		/// <returns>The Url object with the query parameter added</returns>
++		/// <returns>The Url object with the query parameter added.</returns>
+ 		public Url SetQueryParams(IEnumerable<string> names) {
+ 			if (names == null)
+ 				return this;
+@@ -411,7 +415,7 @@ namespace Flurl
+ 		/// <param name="name">Name of query parameter</param>
+ 		/// <param name="value">Value of query parameter</param>
+ 		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+-		/// <returns>The Url object with the query parameter added</returns>
++		/// <returns>The Url object with the query parameter added.</returns>
+ 		public Url AppendQueryParam(string name, object value, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+ 			QueryParams.Add(name, value, false, nullValueHandling);
+ 			return this;
+@@ -422,9 +426,9 @@ namespace Flurl
+ 		/// </summary>
+ 		/// <param name="name">Name of query parameter</param>
+ 		/// <param name="value">Value of query parameter</param>
+-		/// <param name="isEncoded">Set to true to indicate the value is already URL-encoded</param>
++		/// <param name="isEncoded">Set to true to indicate the value is already URL-encoded.</param>
+ 		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+-		/// <returns>The Url object with the query parameter added</returns>
++		/// <returns>The Url object with the query parameter added.</returns>
+ 		/// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null" />.</exception>
+ 		public Url AppendQueryParam(string name, string value, bool isEncoded = false, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+ 			QueryParams.Add(name, value, isEncoded, nullValueHandling);
+@@ -435,7 +439,7 @@ namespace Flurl
+ 		/// Adds a parameter without a value to the query.
+ 		/// </summary>
+ 		/// <param name="name">Name of query parameter</param>
+-		/// <returns>The Url object with the query parameter added</returns>
++		/// <returns>The Url object with the query parameter added.</returns>
+ 		public Url AppendQueryParam(string name) {
+ 			QueryParams.Add(name, null, false, NullValueHandling.NameOnly);
+ 			return this;
+@@ -446,7 +450,7 @@ namespace Flurl
+ 		/// </summary>
+ 		/// <param name="values">Typically an anonymous object, ie: new { x = 1, y = 2 }</param>
+ 		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+-		/// <returns>The Url object with the query parameters added</returns>
++		/// <returns>The Url object with the query parameters added.</returns>
+ 		public Url AppendQueryParam(object values, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+ 			if (values == null)
+ 				return this;
+@@ -464,7 +468,7 @@ namespace Flurl
+ 		/// Adds multiple parameters without values to the query.
+ 		/// </summary>
+ 		/// <param name="names">Names of query parameters.</param>
+-		/// <returns>The Url object with the query parameter added</returns>
++		/// <returns>The Url object with the query parameter added.</returns>
+ 		public Url AppendQueryParam(IEnumerable<string> names) {
+ 			if (names == null)
+ 				return this;
+@@ -486,7 +490,7 @@ namespace Flurl
+ 		/// Removes a name/value pair from the query by name.
+ 		/// </summary>
+ 		/// <param name="name">Query string parameter name to remove</param>
+-		/// <returns>The Url object with the query parameter removed</returns>
++		/// <returns>The Url object with the query parameter removed.</returns>
+ 		public Url RemoveQueryParam(string name) {
+ 			QueryParams.Remove(name);
+ 			return this;
+@@ -507,7 +511,7 @@ namespace Flurl
+ 		/// Removes multiple name/value pairs from the query by name.
+ 		/// </summary>
+ 		/// <param name="names">Query string parameter names to remove</param>
+-		/// <returns>The Url object with the query parameters removed</returns>
++		/// <returns>The Url object with the query parameters removed.</returns>
+ 		public Url RemoveQueryParams(IEnumerable<string> names) {
+ 			foreach(var name in names)
+ 				QueryParams.Remove(name);
+@@ -527,7 +531,7 @@ namespace Flurl
+ 		/// Set the URL fragment fluently.
+ 		/// </summary>
+ 		/// <param name="fragment">The part of the URL after #</param>
+-		/// <returns>The Url object with the new fragment set</returns>
++		/// <returns>The Url object with the new fragment set.</returns>
+ 		public Url SetFragment(string fragment) {
+ 			Fragment = fragment ?? "";
+ 			return this;
+@@ -536,7 +540,7 @@ namespace Flurl
+ 		/// <summary>
+ 		/// Removes the URL fragment including the #.
+ 		/// </summary>
+-		/// <returns>The Url object with the fragment removed</returns>
++		/// <returns>The Url object with the fragment removed.</returns>
+ 		public Url RemoveFragment() => SetFragment("");
+ 
+ 		/// <summary>
+@@ -578,10 +582,11 @@ namespace Flurl
+ 		#endregion
+ 
+ 		#region conversion, equality, etc.
++
+ 		/// <summary>
+ 		/// Converts this Url object to its string representation.
+ 		/// </summary>
+-		/// <param name="encodeSpaceAsPlus">Indicates whether to encode spaces with the "+" character instead of "%20"</param>
++		/// <param name="encodeSpaceAsPlus">Indicates whether to encode spaces with the "+" character instead of "%20".</param>
+ 		/// <returns></returns>
+ 		public string ToString(bool encodeSpaceAsPlus) {
+ 			if (!_parsed)
+@@ -603,29 +608,29 @@ namespace Flurl
+ 		public override string ToString() => ToString(false);
+ 
+ 		/// <summary>
+-		/// Converts this Url object to System.Uri
++		/// Converts this Url object to System.Uri.
+ 		/// </summary>
+-		/// <returns>The System.Uri object</returns>
++		/// <returns>The System.Uri object.</returns>
+ 		public Uri ToUri() => new Uri(this, UriKind.RelativeOrAbsolute);
+ 
+ 		/// <summary>
+ 		/// Implicit conversion from Url to String.
+ 		/// </summary>
+-		/// <param name="url">The Url object</param>
+-		/// <returns>The string</returns>
++		/// <param name="url">The Url object.</param>
++		/// <returns>The string.</returns>
+ 		public static implicit operator string(Url url) => url?.ToString();
+ 
+ 		/// <summary>
+ 		/// Implicit conversion from String to Url.
+ 		/// </summary>
+-		/// <param name="url">The String representation of the URL</param>
+-		/// <returns>The string</returns>
++		/// <param name="url">The String representation of the URL.</param>
++		/// <returns>The string.</returns>
+ 		public static implicit operator Url(string url) => new Url(url);
+ 
+ 		/// <summary>
+ 		/// Implicit conversion from System.Uri to Flurl.Url.
+ 		/// </summary>
+-		/// <returns>The string</returns>
++		/// <returns>The string.</returns>
+ 		public static implicit operator Url(Uri uri) => new Url(uri.ToString());
+ 
+ 		/// <summary>
+@@ -642,6 +647,7 @@ namespace Flurl
+ 		#endregion
+ 
+ 		#region static utility methods
++
+ 		/// <summary>
+ 		/// Basically a Path.Combine for URLs. Ensures exactly one '/' separates each segment,
+ 		/// and exactly on '&amp;' separates each query parameter.
+@@ -759,8 +765,8 @@ namespace Flurl
+ 		/// <summary>
+ 		/// Checks if a string is a well-formed absolute URL.
+ 		/// </summary>
+-		/// <param name="url">The string to check</param>
+-		/// <returns>true if the string is a well-formed absolute URL</returns>
++		/// <param name="url">The string to check.</param>
++		/// <returns>true if the string is a well-formed absolute URL.</returns>
+ 		public static bool IsValid(string url) =>
+ 			!string.IsNullOrWhiteSpace(url) &&
+ 			// TryCreate will succeed for URLs starting with "//". We want to require a scheme to be considered "absolute".
+diff --git a/src/Flurl/Util/CommonExtensions.cs b/src/Flurl/Util/CommonExtensions.cs
+index 16d4ba9..fa95672 100644
+--- a/src/Flurl/Util/CommonExtensions.cs
++++ b/src/Flurl/Util/CommonExtensions.cs
+@@ -21,7 +21,7 @@ namespace Flurl.Util
+ 		/// For objects that already implement IEnumerable&lt;KeyValuePair&gt;, the object itself is simply returned.
+ 		/// For all other objects, all publicly readable properties are extracted and returned as pairs.
+ 		/// </summary>
+-		/// <param name="obj">The object to parse into key-value pairs</param>
++		/// <param name="obj">The object to parse into key-value pairs.</param>
+ 		/// <returns></returns>
+ 		/// <exception cref="ArgumentNullException"><paramref name="obj"/> is <see langword="null" />.</exception>
+ 		public static IEnumerable<(string Key, object Value)> ToKeyValuePairs(this object obj) {
+@@ -107,11 +107,11 @@ namespace Flurl.Util
+ 
+ 			// added to deal with https://github.com/tmenier/Flurl/issues/632
+ 			// thx @j2jensen!
+-			if (value is IEnumerable col
+-			    && declaredType.IsGenericType
+-			    && declaredType.GetGenericTypeDefinition() == typeof(IEnumerable<>)
+-			    && !col.GetType().GetInterfaces().Contains(declaredType)
+-			    && declaredType.IsInstanceOfType(col))
++			if (value is IEnumerable col &&
++			    declaredType.IsGenericType &&
++			    declaredType.GetGenericTypeDefinition() == typeof(IEnumerable<>) &&
++			    !col.GetType().GetInterfaces().Contains(declaredType) &&
++			    declaredType.IsInstanceOfType(col))
+ 			{
+ 				var elementType = declaredType.GetGenericArguments()[0];
+ 				return col.Cast<object>().Select(element => Convert.ChangeType(element, elementType));
+diff --git a/src/Flurl/Util/NameValueList.cs b/src/Flurl/Util/NameValueList.cs
+index 52aacef..013ceb7 100644
+--- a/src/Flurl/Util/NameValueList.cs
++++ b/src/Flurl/Util/NameValueList.cs
+@@ -97,10 +97,12 @@ namespace Flurl.Util
+ 			var i = 0;
+ 			var replaced = false;
+ 			while (i < this.Count) {
+-				if (!this[i].Name.OrdinalEquals(name, !_caseSensitiveNames))
++				if (!this[i].Name.OrdinalEquals(name, !_caseSensitiveNames)) {
+ 					i++;
+-				else if (replaced)
++				}
++				else if (replaced) {
+ 					this.RemoveAt(i);
++				}
+ 				else {
+ 					this[i] = (name, value);
+ 					replaced = true;
+diff --git a/test/Flurl.Test/Flurl.Test.csproj b/test/Flurl.Test/Flurl.Test.csproj
+index 74d73b6..1221f10 100644
+--- a/test/Flurl.Test/Flurl.Test.csproj
++++ b/test/Flurl.Test/Flurl.Test.csproj
+@@ -31,4 +31,7 @@
+     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+   </ItemGroup>
+ 
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial54.2" PrivateAssets="all" />
++  </ItemGroup>
+ </Project>
+diff --git a/test/Flurl.Test/Http/CookieTests.cs b/test/Flurl.Test/Http/CookieTests.cs
+index 6f36324..093d11f 100644
+--- a/test/Flurl.Test/Http/CookieTests.cs
++++ b/test/Flurl.Test/Http/CookieTests.cs
+@@ -387,7 +387,6 @@ namespace Flurl.Test.Http
+ 		[TestCase("__Host-", "https://cookies.com", true, "cookies.com", "/", false)]
+ 		[TestCase("__Host-", "https://cookies.com", true, null, null, false)]
+ 		[TestCase("__Host-", "https://cookies.com", true, null, "/a", false)]
+-
+ 		[TestCase("__Secure-", "https://cookies.com", true, null, "/", true)]
+ 		[TestCase("__Secure-", "http://cookies.com", true, null, "/", false)]
+ 		[TestCase("__Secure-", "https://cookies.com", false, null, "/", false)]
+@@ -516,8 +515,9 @@ namespace Flurl.Test.Http
+ 			var jar = new CookieJar();
+ 			Assert.AreEqual(shouldAddToJar, jar.TryAddOrReplace(cookie, out reason));
+ 
+-			if (shouldAddToJar)
++			if (shouldAddToJar) {
+ 				Assert.AreEqual(cookie.Name, jar.SingleOrDefault()?.Name);
++			}
+ 			else {
+ 				Assert.Throws<InvalidCookieException>(() => jar.AddOrReplace(cookie));
+ 				CollectionAssert.IsEmpty(jar);
+diff --git a/test/Flurl.Test/Http/DefaultUrlEncodedSerializerTests.cs b/test/Flurl.Test/Http/DefaultUrlEncodedSerializerTests.cs
+index baab907..7fa60e2 100644
+--- a/test/Flurl.Test/Http/DefaultUrlEncodedSerializerTests.cs
++++ b/test/Flurl.Test/Http/DefaultUrlEncodedSerializerTests.cs
+@@ -1,10 +1,10 @@
+-﻿using Flurl.Http.Configuration;
+-using NUnit.Framework;
+-using System;
++﻿using System;
+ using System.Collections.Generic;
+ using System.Linq;
+ using System.Text;
+ using System.Threading.Tasks;
++using Flurl.Http.Configuration;
++using NUnit.Framework;
+ 
+ namespace Flurl.Test.Http
+ {
+diff --git a/test/Flurl.Test/Http/EventHandlerTests.cs b/test/Flurl.Test/Http/EventHandlerTests.cs
+index e05fb20..3b4bfd1 100644
+--- a/test/Flurl.Test/Http/EventHandlerTests.cs
++++ b/test/Flurl.Test/Http/EventHandlerTests.cs
+@@ -17,6 +17,7 @@ namespace Flurl.Test.Http
+ 	public abstract class EventHandlerTestsBase<T> where T : IEventHandlerContainer
+ 	{
+ 		protected abstract T CreateContainer();
++
+ 		protected abstract IFlurlRequest GetRequest(T container);
+ 
+ 		[Test]
+@@ -95,6 +96,7 @@ namespace Flurl.Test.Http
+ 	public class RequestEventHandlersTests : EventHandlerTestsBase<IFlurlRequest>
+ 	{
+ 		protected override IFlurlRequest CreateContainer() => new FlurlRequest("http://api.com");
++
+ 		protected override IFlurlRequest GetRequest(IFlurlRequest req) => req;
+ 	}
+ 
+@@ -102,6 +104,7 @@ namespace Flurl.Test.Http
+ 	public class ClientEventHandlersTests : EventHandlerTestsBase<IFlurlClient>
+ 	{
+ 		protected override IFlurlClient CreateContainer() => new FlurlClient();
++
+ 		protected override IFlurlRequest GetRequest(IFlurlClient cli) => cli.Request("http://api.com");
+ 	}
+ 
+@@ -109,6 +112,7 @@ namespace Flurl.Test.Http
+ 	public class ClientBuilderEventHandlersTests : EventHandlerTestsBase<IFlurlClientBuilder>
+ 	{
+ 		protected override IFlurlClientBuilder CreateContainer() => new FlurlClientBuilder();
++
+ 		protected override IFlurlRequest GetRequest(IFlurlClientBuilder builder) => builder.Build().Request("http://api.com");
+ 	}
+ }
+\ No newline at end of file
+diff --git a/test/Flurl.Test/Http/GetTests.cs b/test/Flurl.Test/Http/GetTests.cs
+index 0d9097b..3eae0a5 100644
+--- a/test/Flurl.Test/Http/GetTests.cs
++++ b/test/Flurl.Test/Http/GetTests.cs
+@@ -13,7 +13,9 @@ namespace Flurl.Test.Http
+ 		public GetTests() : base(HttpMethod.Get) { }
+ 
+ 		protected override Task<IFlurlResponse> CallOnString(string url) => url.GetAsync();
++
+ 		protected override Task<IFlurlResponse> CallOnUrl(Url url) => url.GetAsync();
++
+ 		protected override Task<IFlurlResponse> CallOnFlurlRequest(IFlurlRequest req) => req.GetAsync();
+ 
+ 		[Test]
+@@ -177,7 +179,7 @@ namespace Flurl.Test.Http
+ 			Assert.IsNotNull(result);
+ 			Assert.AreEqual(123, result.Id);
+ 			// This doesn't work because we deserialized to TestData first, which doesn't have somethingElse, so that value is lost.
+-			//Assert.AreEqual("bar", result.somethingElse);
++			// Assert.AreEqual("bar", result.somethingElse);
+ 			Assert.IsNull(result.SomethingElse);
+ 
+ 			Assert.IsNotNull(logMe);
+diff --git a/test/Flurl.Test/Http/HeadersTests.cs b/test/Flurl.Test/Http/HeadersTests.cs
+index 07dcf98..5281028 100644
+--- a/test/Flurl.Test/Http/HeadersTests.cs
++++ b/test/Flurl.Test/Http/HeadersTests.cs
+@@ -17,6 +17,7 @@ namespace Flurl.Test.Http
+ 	public abstract class HeadersTestsBase<T> where T : IHeadersContainer
+ 	{
+ 		protected abstract T CreateContainer();
++
+ 		protected abstract IFlurlRequest GetRequest(T container);
+ 
+ 		[Test]
+@@ -140,6 +141,7 @@ namespace Flurl.Test.Http
+ 	public class RequestHeadersTests : HeadersTestsBase<IFlurlRequest>
+ 	{
+ 		protected override IFlurlRequest CreateContainer() => new FlurlRequest("http://api.com");
++
+ 		protected override IFlurlRequest GetRequest(IFlurlRequest req) => req;
+ 	}
+ 
+@@ -147,6 +149,7 @@ namespace Flurl.Test.Http
+ 	public class ClientHeadersTests : HeadersTestsBase<IFlurlClient>
+ 	{
+ 		protected override IFlurlClient CreateContainer() => new FlurlClient();
++
+ 		protected override IFlurlRequest GetRequest(IFlurlClient cli) => cli.Request("http://api.com");
+ 
+ 		[Test] // #778
+@@ -166,6 +169,7 @@ namespace Flurl.Test.Http
+ 	public class ClientBuilderHeadersTests : HeadersTestsBase<IFlurlClientBuilder>
+ 	{
+ 		protected override IFlurlClientBuilder CreateContainer() => new FlurlClientBuilder();
++
+ 		protected override IFlurlRequest GetRequest(IFlurlClientBuilder builder) => builder.Build().Request("http://api.com");
+ 	}
+ }
+diff --git a/test/Flurl.Test/Http/HttpMethodTests.cs b/test/Flurl.Test/Http/HttpMethodTests.cs
+index 8baf60d..203681e 100644
+--- a/test/Flurl.Test/Http/HttpMethodTests.cs
++++ b/test/Flurl.Test/Http/HttpMethodTests.cs
+@@ -19,7 +19,9 @@ namespace Flurl.Test.Http
+ 		}
+ 
+ 		protected abstract Task<IFlurlResponse> CallOnString(string url);
++
+ 		protected abstract Task<IFlurlResponse> CallOnUrl(Url url);
++
+ 		protected abstract Task<IFlurlResponse> CallOnFlurlRequest(IFlurlRequest req);
+ 
+ 		[Test]
+@@ -48,8 +50,11 @@ namespace Flurl.Test.Http
+ 	public class PutTests : HttpMethodTests
+ 	{
+ 		public PutTests() : base(HttpMethod.Put) { }
++
+ 		protected override Task<IFlurlResponse> CallOnString(string url) => url.PutAsync(null);
++
+ 		protected override Task<IFlurlResponse> CallOnUrl(Url url) => url.PutAsync(null);
++
+ 		protected override Task<IFlurlResponse> CallOnFlurlRequest(IFlurlRequest req) => req.PutAsync(null);
+ 	}
+ 
+@@ -57,8 +62,11 @@ namespace Flurl.Test.Http
+ 	public class PatchTests : HttpMethodTests
+ 	{
+ 		public PatchTests() : base(new HttpMethod("PATCH")) { }
++
+ 		protected override Task<IFlurlResponse> CallOnString(string url) => url.PatchAsync(null);
++
+ 		protected override Task<IFlurlResponse> CallOnUrl(Url url) => url.PatchAsync(null);
++
+ 		protected override Task<IFlurlResponse> CallOnFlurlRequest(IFlurlRequest req) => req.PatchAsync(null);
+ 	}
+ 
+@@ -66,8 +74,11 @@ namespace Flurl.Test.Http
+ 	public class DeleteTests : HttpMethodTests
+ 	{
+ 		public DeleteTests() : base(HttpMethod.Delete) { }
++
+ 		protected override Task<IFlurlResponse> CallOnString(string url) => url.DeleteAsync();
++
+ 		protected override Task<IFlurlResponse> CallOnUrl(Url url) => url.DeleteAsync();
++
+ 		protected override Task<IFlurlResponse> CallOnFlurlRequest(IFlurlRequest req) => req.DeleteAsync();
+ 	}
+ 
+@@ -75,8 +86,11 @@ namespace Flurl.Test.Http
+ 	public class HeadTests : HttpMethodTests
+ 	{
+ 		public HeadTests() : base(HttpMethod.Head) { }
++
+ 		protected override Task<IFlurlResponse> CallOnString(string url) => url.HeadAsync();
++
+ 		protected override Task<IFlurlResponse> CallOnUrl(Url url) => url.HeadAsync();
++
+ 		protected override Task<IFlurlResponse> CallOnFlurlRequest(IFlurlRequest req) => req.HeadAsync();
+ 	}
+ 
+@@ -84,8 +98,11 @@ namespace Flurl.Test.Http
+ 	public class OptionsTests : HttpMethodTests
+ 	{
+ 		public OptionsTests() : base(HttpMethod.Options) { }
++
+ 		protected override Task<IFlurlResponse> CallOnString(string url) => url.OptionsAsync();
++
+ 		protected override Task<IFlurlResponse> CallOnUrl(Url url) => url.OptionsAsync();
++
+ 		protected override Task<IFlurlResponse> CallOnFlurlRequest(IFlurlRequest req) => req.OptionsAsync();
+ 	}
+ }
+diff --git a/test/Flurl.Test/Http/HttpStatusRangeParserTests.cs b/test/Flurl.Test/Http/HttpStatusRangeParserTests.cs
+index a72fa17..51baf42 100644
+--- a/test/Flurl.Test/Http/HttpStatusRangeParserTests.cs
++++ b/test/Flurl.Test/Http/HttpStatusRangeParserTests.cs
+@@ -11,38 +11,31 @@ namespace Flurl.Test.Http
+ 		[TestCase("4**", 400, ExpectedResult = true)]
+ 		[TestCase("4**", 499, ExpectedResult = true)]
+ 		[TestCase("4**", 500, ExpectedResult = false)]
+-
+ 		[TestCase("4xx", 399, ExpectedResult = false)]
+ 		[TestCase("4xx", 400, ExpectedResult = true)]
+ 		[TestCase("4xx", 499, ExpectedResult = true)]
+ 		[TestCase("4xx", 500, ExpectedResult = false)]
+-
+ 		[TestCase("4XX", 399, ExpectedResult = false)]
+ 		[TestCase("4XX", 400, ExpectedResult = true)]
+ 		[TestCase("4XX", 499, ExpectedResult = true)]
+ 		[TestCase("4XX", 500, ExpectedResult = false)]
+-
+ 		[TestCase("400-499", 399, ExpectedResult = false)]
+ 		[TestCase("400-499", 400, ExpectedResult = true)]
+ 		[TestCase("400-499", 499, ExpectedResult = true)]
+ 		[TestCase("400-499", 500, ExpectedResult = false)]
+-
+ 		[TestCase("100,3xx,600", 100, ExpectedResult = true)]
+ 		[TestCase("100,3xx,600", 101, ExpectedResult = false)]
+ 		[TestCase("100,3xx,600", 300, ExpectedResult = true)]
+ 		[TestCase("100,3xx,600", 399, ExpectedResult = true)]
+ 		[TestCase("100,3xx,600", 400, ExpectedResult = false)]
+ 		[TestCase("100,3xx,600", 600, ExpectedResult = true)]
+-
+ 		[TestCase("400-409,490-499", 399, ExpectedResult = false)]
+ 		[TestCase("400-409,490-499", 405, ExpectedResult = true)]
+ 		[TestCase("400-409,490-499", 450, ExpectedResult = false)]
+ 		[TestCase("400-409,490-499", 495, ExpectedResult = true)]
+ 		[TestCase("400-409,490-499", 500, ExpectedResult = false)]
+-
+ 		[TestCase("*", 0, ExpectedResult = true)]
+ 		[TestCase(",,,*", 9999, ExpectedResult = true)]
+-
+ 		[TestCase("", 0, ExpectedResult = false)]
+ 		[TestCase(",,,", 9999, ExpectedResult = false)]
+ 		public bool parser_works(string pattern, int value) {
+diff --git a/test/Flurl.Test/Http/NewtonsoftTests.cs b/test/Flurl.Test/Http/NewtonsoftTests.cs
+index 21e6028..981226c 100644
+--- a/test/Flurl.Test/Http/NewtonsoftTests.cs
++++ b/test/Flurl.Test/Http/NewtonsoftTests.cs
+@@ -1,14 +1,14 @@
+ ﻿using System;
+ using System.Collections.Generic;
+ using System.Net.Http;
+-using NUnit.Framework;
++using System.Threading.Tasks;
+ using Flurl.Http;
++using Flurl.Http.Configuration;
+ using Flurl.Http.Newtonsoft;
+ using Flurl.Http.Testing;
+-using System.Threading.Tasks;
+-using Flurl.Http.Configuration;
+ using Newtonsoft.Json;
+ using Newtonsoft.Json.Linq;
++using NUnit.Framework;
+ 
+ namespace Flurl.Test.Http
+ {
+@@ -25,6 +25,7 @@ namespace Flurl.Test.Http
+ 			["number"] = 1,
+ 			["date"] = new DateTime(2024, 1, 2)
+ 		};
++
+ 		private readonly string _requestJson = "{\"test\":\"test\",\"number\":1,\"date\":\"1/2/24\"}";
+ 
+ 		private class ResponseModel
+@@ -33,6 +34,7 @@ namespace Flurl.Test.Http
+ 			[JsonProperty("newtonsoft_prop")]
+ 			public string SomeProp { get; set; }
+ 		}
++
+ 		private readonly ResponseModel _responseObject = new ResponseModel { SomeProp = "xyz" };
+ 		private readonly string _responseJson = "{\"newtonsoft_prop\":\"xyz\"}";
+ 
+@@ -162,7 +164,7 @@ namespace Flurl.Test.Http
+ 			var ex = new FlurlHttpException(new FlurlCall {
+ 				Request = new FlurlRequest(),
+ 				HttpRequestMessage = new HttpRequestMessage(),
+-				Response = null,
++				Response = null
+ 			});
+ 			var err = await ex.GetResponseJsonAsync();
+ 			Assert.IsNull(err);
+diff --git a/test/Flurl.Test/Http/PostTests.cs b/test/Flurl.Test/Http/PostTests.cs
+index 491417e..9da458b 100644
+--- a/test/Flurl.Test/Http/PostTests.cs
++++ b/test/Flurl.Test/Http/PostTests.cs
+@@ -12,7 +12,9 @@ namespace Flurl.Test.Http
+ 		public PostTests() : base(HttpMethod.Post) { }
+ 
+ 		protected override Task<IFlurlResponse> CallOnString(string url) => url.PostAsync(null);
++
+ 		protected override Task<IFlurlResponse> CallOnUrl(Url url) => url.PostAsync(null);
++
+ 		protected override Task<IFlurlResponse> CallOnFlurlRequest(IFlurlRequest req) => req.PostAsync(null);
+ 
+ 		[Test]
+diff --git a/test/Flurl.Test/Http/RealHttpTests.cs b/test/Flurl.Test/Http/RealHttpTests.cs
+index ab0be40..0d0ad52 100644
+--- a/test/Flurl.Test/Http/RealHttpTests.cs
++++ b/test/Flurl.Test/Http/RealHttpTests.cs
+@@ -20,8 +20,8 @@ namespace Flurl.Test.Http
+ 	public class RealHttpTests
+ 	{
+ 		[TestCase("gzip", "gzipped")]
+-		//currently unable to test deflate against httpbin (#474)
+-		//[TestCase("deflate", "deflated")]
++		// currently unable to test deflate against httpbin (#474)
++		// [TestCase("deflate", "deflated")]
+ 		public async Task decompresses_automatically(string encoding, string jsonKey) {
+ 			var result = await "https://httpbin.org"
+ 				.AppendPathSegment(encoding)
+@@ -130,7 +130,7 @@ namespace Flurl.Test.Http
+ 							// hack to deal with #179. appears to be fixed on httpbin now.
+ 							// content.Headers.ContentLength = 735;
+ 						})
+-						//.ReceiveString();
++						// .ReceiveString();
+ 						.ReceiveJson<HttpBinResponse>();
+ 					Assert.AreEqual("1", resp.form["a"]);
+ 					Assert.AreEqual("2", resp.form["b"]);
+@@ -342,7 +342,6 @@ namespace Flurl.Test.Http
+ 			var resp = await "https://httpbin.org/cookies/set?z=999".WithAutoRedirect(false).GetAsync();
+ 			Assert.AreEqual("999", resp.Cookies.FirstOrDefault(c => c.Name == "z")?.Value);
+ 
+-
+ 			// but using WithCookies we can capture it even with redirects enabled
+ 			await "https://httpbin.org/cookies/set?z=999".WithCookies(out var cookies).GetAsync();
+ 			Assert.AreEqual("999", cookies.FirstOrDefault(c => c.Name == "z")?.Value);
+diff --git a/test/Flurl.Test/Http/SettingsTests.cs b/test/Flurl.Test/Http/SettingsTests.cs
+index ee5763c..3b12c8f 100644
+--- a/test/Flurl.Test/Http/SettingsTests.cs
++++ b/test/Flurl.Test/Http/SettingsTests.cs
+@@ -16,6 +16,7 @@ namespace Flurl.Test.Http
+ 	public abstract class SettingsTestsBase<T> where T : ISettingsContainer
+ 	{
+ 		protected abstract T CreateContainer();
++
+ 		protected abstract IFlurlRequest GetRequest(T container);
+ 
+ 		[Test]
+@@ -155,6 +156,7 @@ namespace Flurl.Test.Http
+ 	public class RequestSettingsTests : SettingsTestsBase<IFlurlRequest>
+ 	{
+ 		protected override IFlurlRequest CreateContainer() => new FlurlRequest("http://api.com");
++
+ 		protected override IFlurlRequest GetRequest(IFlurlRequest req) => req;
+ 
+ 		[Test]
+@@ -180,6 +182,7 @@ namespace Flurl.Test.Http
+ 	public class ClientSettingsTests : SettingsTestsBase<IFlurlClient>
+ 	{
+ 		protected override IFlurlClient CreateContainer() => new FlurlClient();
++
+ 		protected override IFlurlRequest GetRequest(IFlurlClient cli) => cli.Request("http://api.com");
+ 	}
+ 
+@@ -187,6 +190,7 @@ namespace Flurl.Test.Http
+ 	public class ClientBuilderSettingsTests : SettingsTestsBase<IFlurlClientBuilder>
+ 	{
+ 		protected override IFlurlClientBuilder CreateContainer() => new FlurlClientBuilder();
++
+ 		protected override IFlurlRequest GetRequest(IFlurlClientBuilder builder) => builder.Build().Request("http://api.com");
+ 	}
+ 
+@@ -194,6 +198,7 @@ namespace Flurl.Test.Http
+ 	public class HttpTestSettingsTests : SettingsTestsBase<HttpTest>
+ 	{
+ 		protected override HttpTest CreateContainer() => HttpTest.Current ?? new HttpTest();
++
+ 		protected override IFlurlRequest GetRequest(HttpTest container) => new FlurlRequest("http://api.com");
+ 
+ 		[TearDown]
+@@ -220,7 +225,9 @@ namespace Flurl.Test.Http
+ 		private class FakeSerializer : ISerializer
+ 		{
+ 			public string Serialize(object obj) => "foo";
++
+ 			public T Deserialize<T>(string s) => default;
++
+ 			public T Deserialize<T>(Stream stream) => default;
+ 		}
+ 	}
+diff --git a/test/Flurl.Test/Http/TestingTests.cs b/test/Flurl.Test/Http/TestingTests.cs
+index 79ecc65..435233f 100644
+--- a/test/Flurl.Test/Http/TestingTests.cs
++++ b/test/Flurl.Test/Http/TestingTests.cs
+@@ -455,7 +455,7 @@ namespace Flurl.Test.Http
+ 						await Task.Delay(100);
+ 					}
+ 					test.ShouldHaveCalled("http://www.api.com").Times(calls);
+-					//Console.WriteLine($"{calls} calls expected, {test.CallLog.Count} calls made");
++					// Console.WriteLine($"{calls} calls expected, {test.CallLog.Count} calls made");
+ 				}
+ 			}
+ 
+diff --git a/test/Flurl.Test/ReflectionHelper.cs b/test/Flurl.Test/ReflectionHelper.cs
+index 87e9738..cccf186 100644
+--- a/test/Flurl.Test/ReflectionHelper.cs
++++ b/test/Flurl.Test/ReflectionHelper.cs
+@@ -73,7 +73,6 @@ namespace Flurl.Test
+ 
+ 		public static bool AreSameType(Type a, Type b) {
+ 			if (a.IsGenericParameter && b.IsGenericParameter) {
+-
+ 				var constraintsA = a.GetTypeInfo().GetGenericParameterConstraints();
+ 				var constraintsB = b.GetTypeInfo().GetGenericParameterConstraints();
+ 
+@@ -88,7 +87,6 @@ namespace Flurl.Test
+ 			}
+ 
+ 			if (a.GetTypeInfo().IsGenericType && b.GetTypeInfo().IsGenericType) {
+-
+ 				if (a.GetGenericTypeDefinition() != b.GetGenericTypeDefinition())
+ 					return false;
+ 
+diff --git a/test/Flurl.Test/UrlBuilder/CommonExtensionsTests.cs b/test/Flurl.Test/UrlBuilder/CommonExtensionsTests.cs
+index 30e4db6..cc9b26f 100644
+--- a/test/Flurl.Test/UrlBuilder/CommonExtensionsTests.cs
++++ b/test/Flurl.Test/UrlBuilder/CommonExtensionsTests.cs
+@@ -1,8 +1,8 @@
+ ﻿using System;
+ using System.Collections.Generic;
+ using System.Linq;
+-using NUnit.Framework;
+ using Flurl.Util;
++using NUnit.Framework;
+ 
+ namespace Flurl.Test.UrlBuilder
+ {
+@@ -40,7 +40,7 @@ namespace Flurl.Test.UrlBuilder
+ 				new KeyValuePair<object, object>("one", 1),
+ 				new KeyValuePair<object, object>("two", "foo"),
+ 				new KeyValuePair<object, object>("three", null),
+-				new KeyValuePair<object, object>(null, "four"),
++				new KeyValuePair<object, object>(null, "four")
+ 			}.ToKeyValuePairs();
+ 
+ 			AssertKV(kv, ("one", 1), ("two", "foo"), ("three", null));
+diff --git a/test/Flurl.Test/UrlBuilder/UrlBuildingTests.cs b/test/Flurl.Test/UrlBuilder/UrlBuildingTests.cs
+index 43dfa17..a425918 100644
+--- a/test/Flurl.Test/UrlBuilder/UrlBuildingTests.cs
++++ b/test/Flurl.Test/UrlBuilder/UrlBuildingTests.cs
+@@ -242,7 +242,7 @@ namespace Flurl.Test.UrlBuilder
+ 
+ 		[Test]
+ 		public void can_remove_query_params_by_enumerable() {
+-			var url = "http://www.mysite.com/more?x=1&y=2&z=3".RemoveQueryParams(new[] { "x", "z" });
++			var url = "http://www.mysite.com/more?x=1&y=2&z=3".RemoveQueryParams("x", "z");
+ 			Assert.AreEqual("http://www.mysite.com/more?y=2", url.ToString());
+ 		}
+ 
+diff --git a/test/Flurl.Test/UrlBuilder/UrlParsingTests.cs b/test/Flurl.Test/UrlBuilder/UrlParsingTests.cs
+index 2a11eac..32765e2 100644
+--- a/test/Flurl.Test/UrlBuilder/UrlParsingTests.cs
++++ b/test/Flurl.Test/UrlBuilder/UrlParsingTests.cs
+@@ -78,7 +78,8 @@ namespace Flurl.Test.UrlBuilder
+ 				("foo", ""),
+ 				("", "bar"),
+ 				("y", "6")
+-			}, q.ToArray());
++			},
++				q.ToArray());
+ 
+ 			Assert.AreEqual(("y", "4"), q[3]);
+ 			Assert.AreEqual("foo", q[6].Name);

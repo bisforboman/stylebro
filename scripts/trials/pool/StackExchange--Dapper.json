@@ -1,0 +1,24 @@
+{
+  "repo": "StackExchange/Dapper",
+  "branch": "main",
+  "commit": "eb47546a408bbf6c178bda4f04dc205bc51ffbfe",
+  "csFiles": 157,
+  "tags": [
+    "library",
+    "multi-target",
+    "if-in-bodies",
+    "twae",
+    "editorconfig-minority"
+  ],
+  "setups": "Root .editorconfig [*.{cs,csx,vb,vbx}] charset = utf-8-bom (156 of 157 C# files with a BOM) and insert_final_newline = true (2 without), dotnet_sort_system_directives_first; TreatWarningsAsErrors in the root Directory.Build.props (tests/ and benchmarks/ import it and turn docs off); central package management with GlobalPackageReferences (ReferenceTrimmer, Nerdbank.GitVersioning, SourceLink); net461/netstandard2.0/net8.0/net10.0 libraries, net481/net8.0/net10.0 tests, net472/net10.0 benchmarks, net5.0 Dapper.Rainbow, StrongName projects compiling the same files; a LINQ to SQL designer file in the benchmarks.",
+  "build": "ok",
+  "workaround": "a full clone (Nerdbank.GitVersioning); nuget.config <clear/>s (the trial feed there); with -p:TreatWarningsAsErrors=true the untouched code fails 5 RT0000 (ReferenceTrimmer wants docs)",
+  "tests": "dotnet test tests/Dapper.Tests -f net10.0 --filter \"FullyQualifiedName~Sqlite|FullyQualifiedName~DuckDB\": 8 pass; of all 800, 66 pass without database servers, 704 fail on connections",
+  "usedIn": "trial 54",
+  "verified": {
+    "by": "trial 54 session",
+    "date": "2026-10-25",
+    "sdks": "10.0.113, 8.0.132"
+  },
+  "notes": "A minority of files against the repository's own charset and insert_final_newline (trial 53's notes); a package with props and targets in a library that some test projects' frameworks don't have (trial 54's load fix)."
+}
