@@ -28,6 +28,25 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
+    public void Format_Files_PutsANewBaselineWhereAWholeRunOfTheRepositoryDoes()
+    {
+        // '--files' shows paths from the repository's root; a new baseline still goes next to the only solution, Src/.
+        Directory.CreateDirectory(Path.Combine(root, ".git"));
+        Write("Src/App.slnx", "<Solution>\n  <Project Path=\"App/App.csproj\" />\n</Solution>\n");
+        Write("Src/App/App.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
+        Write("Src/App/C.cs", "class C\n{\n    private int Count;\n}\n");
+        var code = FormatCommand.Run([FormatCommand.FilesOption, Path.Combine(root, "Src", "App", "C.cs")], _ => { }, (args, _) =>
+        {
+            File.AppendAllText(Environment.GetEnvironmentVariable(KeptFinding.Variable)!, new KeptFinding(Path.Combine(root, "Src", "App", "C.cs"), 3, 17, "BRO1303", KeptReason.NameInString, "Rename 'Count' to 'count'") + "\n");
+            return 0;
+        });
+
+        Assert.Equal(0, code);
+        Assert.False(File.Exists(Path.Combine(root, "stylebro.baseline")));
+        Assert.Single(Analyzers.Baseline.Baseline.Parse(File.ReadAllText(Path.Combine(root, "Src", "stylebro.baseline"))).Entries);
+    }
+
+    [Fact]
     public void Preview_ListsAnIndentationNoteOnce_WhenALaterPassNumbersTheChangedText()
     {
         // ZLinq: the preview's first format pass said Sum.cs:21,26,32,142, its second (on the fixed text) Sum.cs:21,26,32-33,36,159,
