@@ -1,0 +1,33 @@
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+xUnit: xunit.analyzers 2.0.0 is restored here, and from 1.24 on its code fixes have no Fix All, which 'dotnet format' needs: its assertion fixes aren't applied (the build still reports their warnings; your IDE fixes them one at a time).
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, netstandard2.0, netstandard2.1). net7.0, net8.0, net9.0: no run of their own, the code compiles the same as for another framework of the same kind (the same '#if' symbols tested, files and settings).
+Checked netstandard2.1 (run 1 of 3)
+Checked netstandard2.0 (run 2 of 3)
+Checked net10.0 (run 3 of 3)
+== net10.0 (13 project(s), 168 files with findings)
+'dotnet format' had warnings loading the workspace in its net10.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+== netstandard2.0 (13 project(s), 145 files with findings)
+== netstandard2.1 (1 project(s), 4 files with findings)
+Run 1: 206 files changed:
+  benchmarks/ZiggyCreatures.FusionCache.Benchmarks/ExecutionBenchmarkAsync.cs
+  benchmarks/ZiggyCreatures.FusionCache.Benchmarks/ExecutionBenchmarkSync.cs
+  benchmarks/ZiggyCreatures.FusionCache.Benchmarks/HappyPathBenchmark.cs
+  benchmarks/ZiggyCreatures.FusionCache.Benchmarks/LockerComparisonBenchmark.cs
+  benchmarks/ZiggyCreatures.FusionCache.Benchmarks/LoggingBenchmark.cs
+  benchmarks/ZiggyCreatures.FusionCache.Benchmarks/MetricsTagsBenchmark.cs
+  benchmarks/ZiggyCreatures.FusionCache.Benchmarks/ParallelComparisonBenchmark.cs
+  benchmarks/ZiggyCreatures.FusionCache.Benchmarks/Program.cs
+  benchmarks/ZiggyCreatures.FusionCache.Benchmarks/SequentialComparisonBenchmarkAsync.cs
+  benchmarks/ZiggyCreatures.FusionCache.Benchmarks/SequentialComparisonBenchmarkSync.cs
+  ... and 196 more
+Checked netstandard2.1 (run 1 of 3)
+Checked netstandard2.0 (run 2 of 3)
+Checked net10.0 (run 3 of 3)
+Run 2: 0 files changed, clean.
+Clean: 2 findings kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them (https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose).
+  src/ZiggyCreatures.FusionCache.AspNetCore.OutputCaching/FusionOutputCacheStore.cs(7,35): BRO1303 Rename '_cache' to 'cache'. Kept: the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time (first: tests/ZiggyCreatures.FusionCache.Tests/Stuff/TestsUtils.cs(134)).
+  src/ZiggyCreatures.FusionCache.Serialization.SystemTextJson/FusionCacheSystemTextJsonSerializer.cs(11,31): BRO1303 Rename '_options' to 'options'. Kept: the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time (first: tests/ZiggyCreatures.FusionCache.Tests/DependencyInjectionTests.cs(725)).
+Baseline: stylebro.baseline: added 2 kept findings, so the build and 'format --verify-no-changes' skip them (new violations still fail; delete an entry to see it again) (https://bisforboman.github.io/stylebro/baseline/).
+Not checked: xunit.analyzers' rules: xunit.analyzers 2.0.0's fixes have no Fix All, so 'dotnet format' can't apply or check them (a note: the build still reports their warnings; the verdict doesn't count them)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

@@ -1,0 +1,1408 @@
+Running tests from /home/user/w56/FusionCache/default2/tests/ZiggyCreatures.FusionCache.Tests/bin/Release/net10.0/ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)
+[+16/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2s)
+
+[+21/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5s)
+
+[+39/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8s)
+
+[+45/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11s)
+
+[+69/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14s)
+
+[+74/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(17s)
+
+[+91/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(20s)
+
+[+94/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(23s)
+
+[+153/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(26s)
+
+[+158/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(29s)
+
+[+166/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(32s)
+
+[+177/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(35s)
+
+[+180/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(38s)
+
+[+187/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(41s)
+
+[+197/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(44s)
+
+[+207/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(47s)
+
+[+211/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(50s)
+
+[+216/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(53s)
+
+[+218/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(56s)
+
+[+226/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(59s)
+
+[+247/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 02s)
+
+[+253/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 05s)
+
+[+257/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 08s)
+
+[+280/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 11s)
+
+[+300/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 14s)
+
+[+300/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 17s)
+
+[+301/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 20s)
+
+failed FusionCacheTests.AutoRecoveryTests.CanHandleIssuesWithBothDistributedCacheAndBackplaneAsync(serializerType: NewtonsoftJson) (2s 842ms)
+  from /home/user/w56/FusionCache/default2/tests/ZiggyCreatures.FusionCache.Tests/bin/Release/net10.0/ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)
+  Assert.Equal() Failure: Values differ
+  Expected: 30
+  Actual:   10
+    at FusionCacheTests.AutoRecoveryTests.CanHandleIssuesWithBothDistributedCacheAndBackplaneAsync(SerializerType serializerType) in /home/user/w56/FusionCache/default2/tests/ZiggyCreatures.FusionCache.Tests/AutoRecoveryTests_Async.cs:342
+    --- End of stack trace from previous location ---
+  Standard output
+    TRAC 2026-10-26T21:00:42.318Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV]: instance created
+    DEBU 2026-10-26T21:00:42.318Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV]: setup serializer (SERIALIZER=ZiggyCreatures.Caching.Fusion.Serialization.NewtonsoftJson.FusionCacheNewtonsoftJsonSerializer)
+    DEBU 2026-10-26T21:00:42.318Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV]: setup distributed cache (CACHE=ZiggyCreatures.Caching.Fusion.Chaos.ChaosDistributedCache)
+    DEBU 2026-10-26T21:00:42.318Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV]: setup backplane (BACKPLANE=ZiggyCreatures.Caching.Fusion.Chaos.ChaosBackplane)
+    TRAC 2026-10-26T21:00:42.318Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0]: instance created
+    DEBU 2026-10-26T21:00:42.318Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0]: setup serializer (SERIALIZER=ZiggyCreatures.Caching.Fusion.Serialization.NewtonsoftJson.FusionCacheNewtonsoftJsonSerializer)
+    DEBU 2026-10-26T21:00:42.318Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0]: setup distributed cache (CACHE=ZiggyCreatures.Caching.Fusion.Chaos.ChaosDistributedCache)
+    DEBU 2026-10-26T21:00:42.318Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0]: setup backplane (BACKPLANE=ZiggyCreatures.Caching.Fusion.Chaos.ChaosBackplane)
+    TRAC 2026-10-26T21:00:42.319Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IH1): [BP] before subscribing to backplane on channel FusionCache.Backplane:v2
+    DEBU 2026-10-26T21:00:42.319Z: FUSION ChaosBackplane: Subscribe
+    INFO 2026-10-26T21:00:42.319Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IH2): [BP] backplane connected
+    TRAC 2026-10-26T21:00:42.319Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IH1): [BP] after subscribing to backplane on channel FusionCache.Backplane:v2
+    TRAC 2026-10-26T21:00:42.319Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IH3): [BP] before subscribing to backplane on channel FusionCache.Backplane:v2
+    DEBU 2026-10-26T21:00:42.319Z: FUSION ChaosBackplane: Subscribe
+    INFO 2026-10-26T21:00:42.319Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IH4): [BP] backplane connected
+    TRAC 2026-10-26T21:00:42.319Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IH3): [BP] after subscribing to backplane on channel FusionCache.Backplane:v2
+    INFO 2026-10-26T21:00:42.835Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IME K=MyCache:foo): GetOrSetAsync<T> call FEO[DUR=10m LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:42.835Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IME K=MyCache:foo): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.835Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IME K=MyCache:foo): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.835Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IME K=MyCache:foo): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.836Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IME K=MyCache:foo): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:42.836Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IME K=MyCache:foo): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.836Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IME K=MyCache:foo): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.836Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IME K=MyCache:foo): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:42.836Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IME K=MyCache:foo): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:42.836Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IME K=MyCache:foo): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:42.836Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IME K=MyCache:foo): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:42.836Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IME K=MyCache:foo): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.836Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IME K=MyCache:foo): [ML] MEMORY LOCK released
+    DEBU 2026-10-26T21:00:42.836Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IME K=MyCache:foo): [DC] saving distributed entry
+    TRAC 2026-10-26T21:00:42.836Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IME K=MyCache:foo): [DC] serializing the entry FE(D)[T=2026-10-26T21:00:42.836738, LEXP=2026-10-26T21:10:42.836738][]
+    TRAC 2026-10-26T21:00:42.836Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IME K=MyCache:foo): [DC] before setting entry in distributed
+    TRAC 2026-10-26T21:00:42.836Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IME K=MyCache:foo): [DC] after setting entry in distributed
+    DEBU 2026-10-26T21:00:42.836Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IME K=MyCache:foo): [BP] publishing set
+    TRAC 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IME K=MyCache:foo): [BP] before sending a backplane notification
+    TRAC 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IQA K=MyCache:foo): [BP] a backplane notification has been received from remote cache 0HNPJKG3I2IGV (SET)
+    TRAC 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IQA K=MyCache:foo): [BP] no memory entry, ignoring incoming backplane message
+    TRAC 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IME K=MyCache:foo): [BP] after sending a backplane notification
+    INFO 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2IME K=MyCache:foo): GetOrSetAsync<T> return FE(M)[T=2026-10-26T21:00:42.836738, LEXP=2026-10-26T21:10:42.836819][]
+    INFO 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IQD K=MyCache:foo): GetOrSetAsync<T> call FEO[DUR=10m LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IQD K=MyCache:foo): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IQD K=MyCache:foo): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IQD K=MyCache:foo): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IQD K=MyCache:foo): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IQD K=MyCache:foo): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IQD K=MyCache:foo): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IQD K=MyCache:foo): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IQD K=MyCache:foo): [DC] distributed entry found FE(D)[T=2026-10-26T21:00:42.836738, LEXP=2026-10-26T21:10:42.836738][]
+    INFO 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IRV K=MyCache:__fc:t:!): GetOrSetAsync<T> call FEO[DUR=01:00:00 LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IRV K=MyCache:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IRV K=MyCache:__fc:t:!): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IRV K=MyCache:__fc:t:!): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IRV K=MyCache:__fc:t:!): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IRV K=MyCache:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IRV K=MyCache:__fc:t:!): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IRV K=MyCache:__fc:t:!): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IRV K=MyCache:__fc:t:!): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IRV K=MyCache:__fc:t:!): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:42.837Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IRV K=MyCache:__fc:t:!): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IRV K=MyCache:__fc:t:!): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IRV K=MyCache:__fc:t:!): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IRV K=MyCache:__fc:t:!): GetOrSetAsync<T> return FE(M)[T=2026-10-26T21:00:42.837994, LEXP=2026-10-26T22:00:42.837998][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IQD K=MyCache:foo): new Clear (Remove) timestamp 0 (OLD: -1)
+    INFO 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IS3 K=MyCache:__fc:t:*): GetOrSetAsync<T> call FEO[DUR=01:00:00 LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IS3 K=MyCache:__fc:t:*): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IS3 K=MyCache:__fc:t:*): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IS3 K=MyCache:__fc:t:*): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IS3 K=MyCache:__fc:t:*): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IS3 K=MyCache:__fc:t:*): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IS3 K=MyCache:__fc:t:*): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IS3 K=MyCache:__fc:t:*): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IS3 K=MyCache:__fc:t:*): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IS3 K=MyCache:__fc:t:*): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IS3 K=MyCache:__fc:t:*): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IS3 K=MyCache:__fc:t:*): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IS3 K=MyCache:__fc:t:*): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IS3 K=MyCache:__fc:t:*): GetOrSetAsync<T> return FE(M)[T=2026-10-26T21:00:42.838058, LEXP=2026-10-26T22:00:42.838059][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IQD K=MyCache:foo): new Clear (Expire) timestamp 0 (OLD: -1)
+    DEBU 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IQD K=MyCache:foo): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IQD K=MyCache:foo): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IQD K=MyCache:foo): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IQD K=MyCache:foo): GetOrSetAsync<T> return FE(M)[T=2026-10-26T21:00:42.836738, LEXP=2026-10-26T21:10:42.836738][]
+    DEBU 2026-10-26T21:00:42.838Z: FUSION ChaosDistributedCache: SetAlwaysThrow
+    DEBU 2026-10-26T21:00:42.838Z: FUSION ChaosBackplane: SetAlwaysThrow
+    DEBU 2026-10-26T21:00:42.838Z: FUSION ChaosBackplane: SetAlwaysThrow
+    INFO 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IS7 K=MyCache:foo): SetAsync<T> call FEO[DUR=10m LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    DEBU 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IS7 K=MyCache:foo): [MC] saving memory entry
+    DEBU 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IS7 K=MyCache:foo): [DC] saving distributed entry
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IS7 K=MyCache:foo): [DC] serializing the entry FE(D)[T=2026-10-26T21:00:42.838201, LEXP=2026-10-26T21:10:42.838201][]
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IS7 K=MyCache:foo): [DC] before setting entry in distributed
+    
+    WARN 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IS7 K=MyCache:foo): [DC] an error occurred while setting entry in distributed
+    ZiggyCreatures.Caching.Fusion.Chaos.ChaosException: Just a little bit of controlled chaos
+       at ZiggyCreatures.Caching.Fusion.Chaos.FusionCacheChaosUtils.MaybeChaosAsync(TimeSpan minDelay, TimeSpan maxDelay, Single throwProbability, CancellationToken token) in /home/user/w56/FusionCache/default2/src/ZiggyCreatures.FusionCache.Chaos/FusionCacheChaosUtils.cs:line 108
+       at ZiggyCreatures.Caching.Fusion.Chaos.Internals.AbstractChaosComponent.MaybeChaosAsync(CancellationToken token) in /home/user/w56/FusionCache/default2/src/ZiggyCreatures.FusionCache.Chaos/Internals/AbstractChaosComponent.cs:line 71
+       at ZiggyCreatures.Caching.Fusion.Chaos.ChaosDistributedCache.SetAsync(String key, Byte[] value, DistributedCacheEntryOptions options, CancellationToken token) in /home/user/w56/FusionCache/default2/src/ZiggyCreatures.FusionCache.Chaos/ChaosDistributedCache.cs:line 79
+       at ZiggyCreatures.Caching.Fusion.Internals.Distributed.DistributedCacheAccessor.<>c__DisplayClass15_0`1.<<SetEntryAsync>b__0>d.MoveNext() in /home/user/w56/FusionCache/default2/src/ZiggyCreatures.FusionCache/Internals/Distributed/DistributedCacheAccessor_Async.cs:line 152
+    --- End of stack trace from previous location ---
+       at ZiggyCreatures.Caching.Fusion.Internals.RunUtils.RunAsyncActionWithTimeoutAsync(Func`2 asyncAction, TimeSpan timeout, Boolean cancelIfTimeout, Action`1 timedOutTaskProcessor, CancellationToken token) in /home/user/w56/FusionCache/default2/src/ZiggyCreatures.FusionCache/Internals/RunUtils.cs:line 138
+       at ZiggyCreatures.Caching.Fusion.Internals.Distributed.DistributedCacheAccessor.ExecuteOperationAsync(String operationId, String key, Func`2 action, String actionDescription, FusionCacheEntryOptions options, CancellationToken token) in /home/user/w56/FusionCache/default2/src/ZiggyCreatures.FusionCache/Internals/Distributed/DistributedCacheAccessor_Async.cs:line 19
+    
+    
+    DEBU 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2IS7 K=MyCache:foo): added (or overwrote) an item to the auto-recovery queue
+    INFO 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISC K=MyCache:foo): GetOrDefaultAsync<T> call FEO[DUR=10m LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISC K=MyCache:foo): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISC K=MyCache:foo): [MC] memory entry found FE(M)[T=2026-10-26T21:00:42.836738, LEXP=2026-10-26T21:10:42.836819][]
+    INFO 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISD K=MyCache:__fc:t:!): GetOrSetAsync<T> call FEO[DUR=01:00:00 LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISD K=MyCache:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISD K=MyCache:__fc:t:!): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISD K=MyCache:__fc:t:!): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISD K=MyCache:__fc:t:!): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISD K=MyCache:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISD K=MyCache:__fc:t:!): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISD K=MyCache:__fc:t:!): [DC] trying to get entry from distributed
+    
+    WARN 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISD K=MyCache:__fc:t:!): [DC] an error occurred while getting entry from distributed
+    ZiggyCreatures.Caching.Fusion.Chaos.ChaosException: Just a little bit of controlled chaos
+       at ZiggyCreatures.Caching.Fusion.Chaos.FusionCacheChaosUtils.MaybeChaosAsync(TimeSpan minDelay, TimeSpan maxDelay, Single throwProbability, CancellationToken token) in /home/user/w56/FusionCache/default2/src/ZiggyCreatures.FusionCache.Chaos/FusionCacheChaosUtils.cs:line 108
+       at ZiggyCreatures.Caching.Fusion.Chaos.Internals.AbstractChaosComponent.MaybeChaosAsync(CancellationToken token) in /home/user/w56/FusionCache/default2/src/ZiggyCreatures.FusionCache.Chaos/Internals/AbstractChaosComponent.cs:line 71
+       at ZiggyCreatures.Caching.Fusion.Chaos.ChaosDistributedCache.GetAsync(String key, CancellationToken token) in /home/user/w56/FusionCache/default2/src/ZiggyCreatures.FusionCache.Chaos/ChaosDistributedCache.cs:line 37
+       at ZiggyCreatures.Caching.Fusion.Internals.Distributed.DistributedCacheAccessor.<>c__DisplayClass16_0`1.<<TryGetEntryAsync>b__0>d.MoveNext() in /home/user/w56/FusionCache/default2/src/ZiggyCreatures.FusionCache/Internals/Distributed/DistributedCacheAccessor_Async.cs:line 183
+    --- End of stack trace from previous location ---
+       at ZiggyCreatures.Caching.Fusion.Internals.RunUtils.RunAsyncFuncWithTimeoutAsync[TResult](Func`2 asyncFunc, TimeSpan timeout, Boolean cancelIfTimeout, Action`1 timedOutTaskProcessor, CancellationToken token)
+       at ZiggyCreatures.Caching.Fusion.Internals.Distributed.DistributedCacheAccessor.TryGetEntryAsync[TValue](String operationId, String key, FusionCacheEntryOptions options, Boolean hasFallbackValue, Nullable`1 timeout, CancellationToken token) in /home/user/w56/FusionCache/default2/src/ZiggyCreatures.FusionCache/Internals/Distributed/DistributedCacheAccessor_Async.cs:line 182
+    
+    
+    DEBU 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISD K=MyCache:__fc:t:!): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISD K=MyCache:__fc:t:!): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISD K=MyCache:__fc:t:!): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISD K=MyCache:__fc:t:!): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISD K=MyCache:__fc:t:!): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISD K=MyCache:__fc:t:!): GetOrSetAsync<T> return FE(M)[T=2026-10-26T21:00:42.838942, LEXP=2026-10-26T22:00:42.838945][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISC K=MyCache:foo): new Clear (Remove) timestamp 0 (OLD: -1)
+    INFO 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISG K=MyCache:__fc:t:*): GetOrSetAsync<T> call FEO[DUR=01:00:00 LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISG K=MyCache:__fc:t:*): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISG K=MyCache:__fc:t:*): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISG K=MyCache:__fc:t:*): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISG K=MyCache:__fc:t:*): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISG K=MyCache:__fc:t:*): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISG K=MyCache:__fc:t:*): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.838Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISG K=MyCache:__fc:t:*): [DC] trying to get entry from distributed
+    
+    WARN 2026-10-26T21:00:42.839Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISG K=MyCache:__fc:t:*): [DC] an error occurred while getting entry from distributed
+    ZiggyCreatures.Caching.Fusion.Chaos.ChaosException: Just a little bit of controlled chaos
+       at ZiggyCreatures.Caching.Fusion.Chaos.FusionCacheChaosUtils.MaybeChaosAsync(TimeSpan minDelay, TimeSpan maxDelay, Single throwProbability, CancellationToken token) in /home/user/w56/FusionCache/default2/src/ZiggyCreatures.FusionCache.Chaos/FusionCacheChaosUtils.cs:line 108
+       at ZiggyCreatures.Caching.Fusion.Chaos.Internals.AbstractChaosComponent.MaybeChaosAsync(CancellationToken token) in /home/user/w56/FusionCache/default2/src/ZiggyCreatures.FusionCache.Chaos/Internals/AbstractChaosComponent.cs:line 71
+       at ZiggyCreatures.Caching.Fusion.Chaos.ChaosDistributedCache.GetAsync(String key, CancellationToken token) in /home/user/w56/FusionCache/default2/src/ZiggyCreatures.FusionCache.Chaos/ChaosDistributedCache.cs:line 37
+       at ZiggyCreatures.Caching.Fusion.Internals.Distributed.DistributedCacheAccessor.<>c__DisplayClass16_0`1.<<TryGetEntryAsync>b__0>d.MoveNext() in /home/user/w56/FusionCache/default2/src/ZiggyCreatures.FusionCache/Internals/Distributed/DistributedCacheAccessor_Async.cs:line 183
+    --- End of stack trace from previous location ---
+       at ZiggyCreatures.Caching.Fusion.Internals.RunUtils.RunAsyncFuncWithTimeoutAsync[TResult](Func`2 asyncFunc, TimeSpan timeout, Boolean cancelIfTimeout, Action`1 timedOutTaskProcessor, CancellationToken token)
+       at ZiggyCreatures.Caching.Fusion.Internals.Distributed.DistributedCacheAccessor.TryGetEntryAsync[TValue](String operationId, String key, FusionCacheEntryOptions options, Boolean hasFallbackValue, Nullable`1 timeout, CancellationToken token) in /home/user/w56/FusionCache/default2/src/ZiggyCreatures.FusionCache/Internals/Distributed/DistributedCacheAccessor_Async.cs:line 182
+    
+    
+    DEBU 2026-10-26T21:00:42.839Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISG K=MyCache:__fc:t:*): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:42.839Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISG K=MyCache:__fc:t:*): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:42.839Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISG K=MyCache:__fc:t:*): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:42.839Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISG K=MyCache:__fc:t:*): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.839Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISG K=MyCache:__fc:t:*): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:42.839Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISG K=MyCache:__fc:t:*): GetOrSetAsync<T> return FE(M)[T=2026-10-26T21:00:42.839099, LEXP=2026-10-26T22:00:42.839100][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:42.839Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISC K=MyCache:foo): new Clear (Expire) timestamp 0 (OLD: -1)
+    TRAC 2026-10-26T21:00:42.839Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISC K=MyCache:foo): using memory entry
+    INFO 2026-10-26T21:00:42.839Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISC K=MyCache:foo): GetOrDefaultAsync<T> return FE(M)[T=2026-10-26T21:00:42.836738, LEXP=2026-10-26T21:10:42.836819][]
+    INFO 2026-10-26T21:00:42.839Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2ISL K=MyCache:foo): GetOrDefaultAsync<T> call FEO[DUR=10m LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:42.839Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2ISL K=MyCache:foo): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.839Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2ISL K=MyCache:foo): [MC] memory entry found FE(M)[T=2026-10-26T21:00:42.838201, LEXP=2026-10-26T21:10:42.838201][]
+    TRAC 2026-10-26T21:00:42.839Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2ISL K=MyCache:foo): using memory entry
+    INFO 2026-10-26T21:00:42.839Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2ISL K=MyCache:foo): GetOrDefaultAsync<T> return FE(M)[T=2026-10-26T21:00:42.838201, LEXP=2026-10-26T21:10:42.838201][]
+    DEBU 2026-10-26T21:00:42.839Z: FUSION ChaosDistributedCache: SetNeverThrow
+    DEBU 2026-10-26T21:00:42.839Z: FUSION ChaosBackplane: SetNeverThrow
+    INFO 2026-10-26T21:00:42.839Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2ISN): [BP] backplane re-connected
+    DEBU 2026-10-26T21:00:42.839Z: FUSION ChaosBackplane: SetNeverThrow
+    INFO 2026-10-26T21:00:42.839Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2ISO): [BP] backplane re-connected
+    TRAC 2026-10-26T21:00:42.839Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2ISO): auto-recovery barrier set from 0 to 639286452438391833
+    INFO 2026-10-26T21:00:42.839Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2ISO): waiting at least 00:00:01 to start auto-recovery to let the other nodes reconnect, to better handle backpressure
+    INFO 2026-10-26T21:00:45.158Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2J2Q K=MyCache:foo): GetOrSetAsync<T> call FEO[DUR=10m LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:45.158Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2J2Q K=MyCache:foo): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:45.158Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2J2Q K=MyCache:foo): [MC] memory entry found FE(M)[T=2026-10-26T21:00:42.836738, LEXP=2026-10-26T21:10:42.836819][]
+    TRAC 2026-10-26T21:00:45.158Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2J2Q K=MyCache:foo): using memory entry
+    INFO 2026-10-26T21:00:45.158Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2J2Q K=MyCache:foo): GetOrSetAsync<T> return FE(M)[T=2026-10-26T21:00:42.836738, LEXP=2026-10-26T21:10:42.836819][]
+    INFO 2026-10-26T21:00:45.158Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2J2R K=MyCache:foo): GetOrSetAsync<T> call FEO[DUR=10m LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:45.158Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2J2R K=MyCache:foo): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:45.158Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2J2R K=MyCache:foo): [MC] memory entry found FE(M)[T=2026-10-26T21:00:42.838201, LEXP=2026-10-26T21:10:42.838201][]
+    TRAC 2026-10-26T21:00:45.158Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2J2R K=MyCache:foo): using memory entry
+    INFO 2026-10-26T21:00:45.158Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2J2R K=MyCache:foo): GetOrSetAsync<T> return FE(M)[T=2026-10-26T21:00:42.838201, LEXP=2026-10-26T21:10:42.838201][]
+    TRAC 2026-10-26T21:00:45.159Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2J2S): [BP] before unsubscribing to backplane
+    DEBU 2026-10-26T21:00:45.159Z: FUSION ChaosBackplane: Unsubscribe
+    TRAC 2026-10-26T21:00:45.159Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0] (O=0HNPJKG3I2J2S): [BP] after unsubscribing to backplane
+    DEBU 2026-10-26T21:00:45.159Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0]: backplane removed
+    DEBU 2026-10-26T21:00:45.159Z: FUSION [N=FusionCache I=0HNPJKG3I2IH0]: distributed cache removed
+    TRAC 2026-10-26T21:00:45.159Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2J2T): [BP] before unsubscribing to backplane
+    DEBU 2026-10-26T21:00:45.159Z: FUSION ChaosBackplane: Unsubscribe
+    TRAC 2026-10-26T21:00:45.159Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV] (O=0HNPJKG3I2J2T): [BP] after unsubscribing to backplane
+    DEBU 2026-10-26T21:00:45.159Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV]: backplane removed
+    DEBU 2026-10-26T21:00:45.159Z: FUSION [N=FusionCache I=0HNPJKG3I2IGV]: distributed cache removed
+    
+  Error output
+failed FusionCacheTests.L1L2Tests.CanRemoveByTag(serializerType: ServiceStackJson) (7s 963ms)
+  from /home/user/w56/FusionCache/default2/tests/ZiggyCreatures.FusionCache.Tests/bin/Release/net10.0/ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)
+  Assert.Equal() Failure: Values differ
+  Expected: 333
+  Actual:   3333
+    at FusionCacheTests.L1L2Tests.CanRemoveByTag(SerializerType serializerType) in /home/user/w56/FusionCache/default2/tests/ZiggyCreatures.FusionCache.Tests/L1L2Tests_Sync.cs:947
+    at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+    at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+  Standard output
+    TRAC 2026-10-26T21:00:41.610Z: FUSION [N=0HNPJKG3I2IAC I=C1]: instance created
+    DEBU 2026-10-26T21:00:41.610Z: FUSION [N=0HNPJKG3I2IAC I=C1]: setup serializer (SERIALIZER=ZiggyCreatures.Caching.Fusion.Serialization.ServiceStackJson.FusionCacheServiceStackJsonSerializer)
+    DEBU 2026-10-26T21:00:41.610Z: FUSION [N=0HNPJKG3I2IAC I=C1]: setup distributed cache (CACHE=Microsoft.Extensions.Caching.Distributed.MemoryDistributedCache)
+    TRAC 2026-10-26T21:00:41.610Z: FUSION [N=0HNPJKG3I2IAC I=C2]: instance created
+    DEBU 2026-10-26T21:00:41.610Z: FUSION [N=0HNPJKG3I2IAC I=C2]: setup serializer (SERIALIZER=ZiggyCreatures.Caching.Fusion.Serialization.ServiceStackJson.FusionCacheServiceStackJsonSerializer)
+    DEBU 2026-10-26T21:00:41.610Z: FUSION [N=0HNPJKG3I2IAC I=C2]: setup distributed cache (CACHE=Microsoft.Extensions.Caching.Distributed.MemoryDistributedCache)
+    INFO 2026-10-26T21:00:41.610Z: STEP 1
+    INFO 2026-10-26T21:00:41.610Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IAF K=0HNPJKG3I2IAC:foo): Set<T> call FEO[DUR=4s LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=Y AC=N]
+    DEBU 2026-10-26T21:00:41.610Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IAF K=0HNPJKG3I2IAC:foo): [MC] saving memory entry
+    DEBU 2026-10-26T21:00:41.610Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IAF K=0HNPJKG3I2IAC:foo): [DC] saving distributed entry
+    TRAC 2026-10-26T21:00:41.610Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IAF K=0HNPJKG3I2IAC:foo): [DC] serializing the entry FE(D)[T=2026-10-26T21:00:41.610108, LEXP=2026-10-26T21:00:45.610108][]
+    TRAC 2026-10-26T21:00:41.610Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IAF K=0HNPJKG3I2IAC:foo): [DC] before setting entry in distributed
+    TRAC 2026-10-26T21:00:41.610Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IAF K=0HNPJKG3I2IAC:foo): [DC] after setting entry in distributed
+    INFO 2026-10-26T21:00:41.610Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IAO K=0HNPJKG3I2IAC:bar): Set<T> call FEO[DUR=4s LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=Y AC=N]
+    DEBU 2026-10-26T21:00:41.610Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IAO K=0HNPJKG3I2IAC:bar): [MC] saving memory entry
+    DEBU 2026-10-26T21:00:41.610Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IAO K=0HNPJKG3I2IAC:bar): [DC] saving distributed entry
+    TRAC 2026-10-26T21:00:41.610Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IAO K=0HNPJKG3I2IAC:bar): [DC] serializing the entry FE(D)[T=2026-10-26T21:00:41.610813, LEXP=2026-10-26T21:00:45.610813][]
+    TRAC 2026-10-26T21:00:41.610Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IAO K=0HNPJKG3I2IAC:bar): [DC] before setting entry in distributed
+    TRAC 2026-10-26T21:00:41.610Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IAO K=0HNPJKG3I2IAC:bar): [DC] after setting entry in distributed
+    INFO 2026-10-26T21:00:41.610Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IAS K=0HNPJKG3I2IAC:baz): GetOrSet<T> call FEO[DUR=4s LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=Y AC=N]
+    TRAC 2026-10-26T21:00:41.610Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IAS K=0HNPJKG3I2IAC:baz): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IAS K=0HNPJKG3I2IAC:baz): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IAS K=0HNPJKG3I2IAC:baz): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IAS K=0HNPJKG3I2IAC:baz): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IAS K=0HNPJKG3I2IAC:baz): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IAS K=0HNPJKG3I2IAC:baz): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IAS K=0HNPJKG3I2IAC:baz): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IAS K=0HNPJKG3I2IAC:baz): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IAS K=0HNPJKG3I2IAC:baz): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IAS K=0HNPJKG3I2IAC:baz): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IAS K=0HNPJKG3I2IAC:baz): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IAS K=0HNPJKG3I2IAC:baz): [ML] MEMORY LOCK released
+    DEBU 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IAS K=0HNPJKG3I2IAC:baz): [DC] saving distributed entry
+    TRAC 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IAS K=0HNPJKG3I2IAC:baz): [DC] serializing the entry FE(D)[T=2026-10-26T21:00:41.611176, LEXP=2026-10-26T21:00:45.611176][]
+    TRAC 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IAS K=0HNPJKG3I2IAC:baz): [DC] before setting entry in distributed
+    TRAC 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IAS K=0HNPJKG3I2IAC:baz): [DC] after setting entry in distributed
+    INFO 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IAS K=0HNPJKG3I2IAC:baz): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:41.611176, LEXP=2026-10-26T21:00:45.611366][]
+    INFO 2026-10-26T21:00:41.611Z: STEP 2
+    INFO 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IB7 K=0HNPJKG3I2IAC:foo): GetOrSet<T> call FEO[DUR=4s LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=Y AC=N]
+    TRAC 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IB7 K=0HNPJKG3I2IAC:foo): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IB7 K=0HNPJKG3I2IAC:foo): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IB7 K=0HNPJKG3I2IAC:foo): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IB7 K=0HNPJKG3I2IAC:foo): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IB7 K=0HNPJKG3I2IAC:foo): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IB7 K=0HNPJKG3I2IAC:foo): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IB7 K=0HNPJKG3I2IAC:foo): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IB7 K=0HNPJKG3I2IAC:foo): [DC] distributed entry found FE(D)[T=2026-10-26T21:00:41.610108, LEXP=2026-10-26T21:00:45.610108][]
+    INFO 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBC K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:41.611Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBC K=0HNPJKG3I2IAC:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:41.612Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBC K=0HNPJKG3I2IAC:__fc:t:!): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:41.612Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBC K=0HNPJKG3I2IAC:__fc:t:!): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:41.612Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBC K=0HNPJKG3I2IAC:__fc:t:!): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:41.612Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBC K=0HNPJKG3I2IAC:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:41.612Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBC K=0HNPJKG3I2IAC:__fc:t:!): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:41.612Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBC K=0HNPJKG3I2IAC:__fc:t:!): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:41.612Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBC K=0HNPJKG3I2IAC:__fc:t:!): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:41.612Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBC K=0HNPJKG3I2IAC:__fc:t:!): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:41.619Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBC K=0HNPJKG3I2IAC:__fc:t:!): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:41.619Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBC K=0HNPJKG3I2IAC:__fc:t:!): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:41.619Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBC K=0HNPJKG3I2IAC:__fc:t:!): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:41.619Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBC K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:41.612147, LEXP=2026-10-26T21:00:42.119692][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:41.619Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IB7 K=0HNPJKG3I2IAC:foo): new Clear (Remove) timestamp 0 (OLD: -1)
+    INFO 2026-10-26T21:00:41.619Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBF K=0HNPJKG3I2IAC:__fc:t:x): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:41.619Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBF K=0HNPJKG3I2IAC:__fc:t:x): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:41.619Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBF K=0HNPJKG3I2IAC:__fc:t:x): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:41.619Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBF K=0HNPJKG3I2IAC:__fc:t:x): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:41.619Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBF K=0HNPJKG3I2IAC:__fc:t:x): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:41.619Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBF K=0HNPJKG3I2IAC:__fc:t:x): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:41.619Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBF K=0HNPJKG3I2IAC:__fc:t:x): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:41.619Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBF K=0HNPJKG3I2IAC:__fc:t:x): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:41.810Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBF K=0HNPJKG3I2IAC:__fc:t:x): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:41.810Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBF K=0HNPJKG3I2IAC:__fc:t:x): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:41.945Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBF K=0HNPJKG3I2IAC:__fc:t:x): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:41.945Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBF K=0HNPJKG3I2IAC:__fc:t:x): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:41.945Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBF K=0HNPJKG3I2IAC:__fc:t:x): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:41.945Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBF K=0HNPJKG3I2IAC:__fc:t:x): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:41.810553, LEXP=2026-10-26T21:00:42.445538][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    INFO 2026-10-26T21:00:41.945Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBR K=0HNPJKG3I2IAC:__fc:t:y): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:41.945Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBR K=0HNPJKG3I2IAC:__fc:t:y): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:41.945Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBR K=0HNPJKG3I2IAC:__fc:t:y): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:41.945Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBR K=0HNPJKG3I2IAC:__fc:t:y): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:41.945Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBR K=0HNPJKG3I2IAC:__fc:t:y): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:41.945Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBR K=0HNPJKG3I2IAC:__fc:t:y): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:41.945Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBR K=0HNPJKG3I2IAC:__fc:t:y): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:41.945Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBR K=0HNPJKG3I2IAC:__fc:t:y): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:42.188Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBR K=0HNPJKG3I2IAC:__fc:t:y): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:42.188Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBR K=0HNPJKG3I2IAC:__fc:t:y): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:42.314Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBR K=0HNPJKG3I2IAC:__fc:t:y): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:42.314Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBR K=0HNPJKG3I2IAC:__fc:t:y): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.314Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBR K=0HNPJKG3I2IAC:__fc:t:y): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:42.314Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IBR K=0HNPJKG3I2IAC:__fc:t:y): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:42.188252, LEXP=2026-10-26T21:00:42.814705][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    INFO 2026-10-26T21:00:42.314Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IC9 K=0HNPJKG3I2IAC:__fc:t:*): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:42.314Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IC9 K=0HNPJKG3I2IAC:__fc:t:*): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.314Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IC9 K=0HNPJKG3I2IAC:__fc:t:*): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.314Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IC9 K=0HNPJKG3I2IAC:__fc:t:*): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.314Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IC9 K=0HNPJKG3I2IAC:__fc:t:*): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:42.314Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IC9 K=0HNPJKG3I2IAC:__fc:t:*): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.314Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IC9 K=0HNPJKG3I2IAC:__fc:t:*): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.314Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IC9 K=0HNPJKG3I2IAC:__fc:t:*): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:42.319Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IC9 K=0HNPJKG3I2IAC:__fc:t:*): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:42.319Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IC9 K=0HNPJKG3I2IAC:__fc:t:*): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:42.319Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IC9 K=0HNPJKG3I2IAC:__fc:t:*): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:42.319Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IC9 K=0HNPJKG3I2IAC:__fc:t:*): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.319Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IC9 K=0HNPJKG3I2IAC:__fc:t:*): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:42.319Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IC9 K=0HNPJKG3I2IAC:__fc:t:*): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:42.319540, LEXP=2026-10-26T21:00:42.819864][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:42.319Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IB7 K=0HNPJKG3I2IAC:foo): new Clear (Expire) timestamp 0 (OLD: -1)
+    DEBU 2026-10-26T21:00:42.319Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IB7 K=0HNPJKG3I2IAC:foo): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:42.319Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IB7 K=0HNPJKG3I2IAC:foo): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.319Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IB7 K=0HNPJKG3I2IAC:foo): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:42.319Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IB7 K=0HNPJKG3I2IAC:foo): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:41.610108, LEXP=2026-10-26T21:00:45.610108][]
+    INFO 2026-10-26T21:00:42.319Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHB K=0HNPJKG3I2IAC:bar): GetOrSet<T> call FEO[DUR=4s LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=Y AC=N]
+    TRAC 2026-10-26T21:00:42.319Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHB K=0HNPJKG3I2IAC:bar): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHB K=0HNPJKG3I2IAC:bar): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHB K=0HNPJKG3I2IAC:bar): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHB K=0HNPJKG3I2IAC:bar): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHB K=0HNPJKG3I2IAC:bar): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHB K=0HNPJKG3I2IAC:bar): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHB K=0HNPJKG3I2IAC:bar): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHB K=0HNPJKG3I2IAC:bar): [DC] distributed entry found FE(D)[T=2026-10-26T21:00:41.610813, LEXP=2026-10-26T21:00:45.610813][]
+    INFO 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHG K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHG K=0HNPJKG3I2IAC:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHG K=0HNPJKG3I2IAC:__fc:t:!): [MC] memory entry found (expired) FE(M)[T=2026-10-26T21:00:41.612147, LEXP=2026-10-26T21:00:42.119692][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHG K=0HNPJKG3I2IAC:__fc:t:!): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHG K=0HNPJKG3I2IAC:__fc:t:!): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHG K=0HNPJKG3I2IAC:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHG K=0HNPJKG3I2IAC:__fc:t:!): [MC] memory entry found (expired) FE(M)[T=2026-10-26T21:00:41.612147, LEXP=2026-10-26T21:00:42.119692][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHG K=0HNPJKG3I2IAC:__fc:t:!): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHG K=0HNPJKG3I2IAC:__fc:t:!): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHG K=0HNPJKG3I2IAC:__fc:t:!): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHG K=0HNPJKG3I2IAC:__fc:t:!): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHG K=0HNPJKG3I2IAC:__fc:t:!): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHG K=0HNPJKG3I2IAC:__fc:t:!): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHG K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:42.320281, LEXP=2026-10-26T21:00:42.820290][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    INFO 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHK K=0HNPJKG3I2IAC:__fc:t:y): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHK K=0HNPJKG3I2IAC:__fc:t:y): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHK K=0HNPJKG3I2IAC:__fc:t:y): [MC] memory entry found FE(M)[T=2026-10-26T21:00:42.188252, LEXP=2026-10-26T21:00:42.814705][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHK K=0HNPJKG3I2IAC:__fc:t:y): using memory entry
+    INFO 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHK K=0HNPJKG3I2IAC:__fc:t:y): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:42.188252, LEXP=2026-10-26T21:00:42.814705][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    INFO 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHM K=0HNPJKG3I2IAC:__fc:t:z): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHM K=0HNPJKG3I2IAC:__fc:t:z): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHM K=0HNPJKG3I2IAC:__fc:t:z): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHM K=0HNPJKG3I2IAC:__fc:t:z): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHM K=0HNPJKG3I2IAC:__fc:t:z): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHM K=0HNPJKG3I2IAC:__fc:t:z): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHM K=0HNPJKG3I2IAC:__fc:t:z): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHM K=0HNPJKG3I2IAC:__fc:t:z): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHM K=0HNPJKG3I2IAC:__fc:t:z): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHM K=0HNPJKG3I2IAC:__fc:t:z): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHM K=0HNPJKG3I2IAC:__fc:t:z): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHM K=0HNPJKG3I2IAC:__fc:t:z): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHM K=0HNPJKG3I2IAC:__fc:t:z): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHM K=0HNPJKG3I2IAC:__fc:t:z): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:42.320473, LEXP=2026-10-26T21:00:42.820553][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    INFO 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHS K=0HNPJKG3I2IAC:__fc:t:*): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHS K=0HNPJKG3I2IAC:__fc:t:*): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHS K=0HNPJKG3I2IAC:__fc:t:*): [MC] memory entry found FE(M)[T=2026-10-26T21:00:42.319540, LEXP=2026-10-26T21:00:42.819864][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHS K=0HNPJKG3I2IAC:__fc:t:*): using memory entry
+    INFO 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHS K=0HNPJKG3I2IAC:__fc:t:*): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:42.319540, LEXP=2026-10-26T21:00:42.819864][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    DEBU 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHB K=0HNPJKG3I2IAC:bar): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHB K=0HNPJKG3I2IAC:bar): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHB K=0HNPJKG3I2IAC:bar): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IHB K=0HNPJKG3I2IAC:bar): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:41.610813, LEXP=2026-10-26T21:00:45.610813][]
+    INFO 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IHT K=0HNPJKG3I2IAC:baz): GetOrSet<T> call FEO[DUR=4s LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=Y AC=N]
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IHT K=0HNPJKG3I2IAC:baz): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IHT K=0HNPJKG3I2IAC:baz): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IHT K=0HNPJKG3I2IAC:baz): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IHT K=0HNPJKG3I2IAC:baz): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IHT K=0HNPJKG3I2IAC:baz): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IHT K=0HNPJKG3I2IAC:baz): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.320Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IHT K=0HNPJKG3I2IAC:baz): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IHT K=0HNPJKG3I2IAC:baz): [DC] distributed entry found FE(D)[T=2026-10-26T21:00:41.611176, LEXP=2026-10-26T21:00:45.611176][]
+    INFO 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2II5 K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2II5 K=0HNPJKG3I2IAC:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2II5 K=0HNPJKG3I2IAC:__fc:t:!): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2II5 K=0HNPJKG3I2IAC:__fc:t:!): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2II5 K=0HNPJKG3I2IAC:__fc:t:!): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2II5 K=0HNPJKG3I2IAC:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2II5 K=0HNPJKG3I2IAC:__fc:t:!): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2II5 K=0HNPJKG3I2IAC:__fc:t:!): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2II5 K=0HNPJKG3I2IAC:__fc:t:!): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2II5 K=0HNPJKG3I2IAC:__fc:t:!): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2II5 K=0HNPJKG3I2IAC:__fc:t:!): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2II5 K=0HNPJKG3I2IAC:__fc:t:!): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2II5 K=0HNPJKG3I2IAC:__fc:t:!): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2II5 K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:42.321339, LEXP=2026-10-26T21:00:42.821628][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IHT K=0HNPJKG3I2IAC:baz): new Clear (Remove) timestamp 0 (OLD: -1)
+    INFO 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIF K=0HNPJKG3I2IAC:__fc:t:x): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIF K=0HNPJKG3I2IAC:__fc:t:x): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIF K=0HNPJKG3I2IAC:__fc:t:x): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIF K=0HNPJKG3I2IAC:__fc:t:x): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIF K=0HNPJKG3I2IAC:__fc:t:x): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIF K=0HNPJKG3I2IAC:__fc:t:x): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIF K=0HNPJKG3I2IAC:__fc:t:x): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIF K=0HNPJKG3I2IAC:__fc:t:x): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIF K=0HNPJKG3I2IAC:__fc:t:x): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:42.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIF K=0HNPJKG3I2IAC:__fc:t:x): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIF K=0HNPJKG3I2IAC:__fc:t:x): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIF K=0HNPJKG3I2IAC:__fc:t:x): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIF K=0HNPJKG3I2IAC:__fc:t:x): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIF K=0HNPJKG3I2IAC:__fc:t:x): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:42.321990, LEXP=2026-10-26T21:00:42.822021][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    INFO 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIM K=0HNPJKG3I2IAC:__fc:t:z): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIM K=0HNPJKG3I2IAC:__fc:t:z): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIM K=0HNPJKG3I2IAC:__fc:t:z): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIM K=0HNPJKG3I2IAC:__fc:t:z): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIM K=0HNPJKG3I2IAC:__fc:t:z): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIM K=0HNPJKG3I2IAC:__fc:t:z): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIM K=0HNPJKG3I2IAC:__fc:t:z): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIM K=0HNPJKG3I2IAC:__fc:t:z): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIM K=0HNPJKG3I2IAC:__fc:t:z): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIM K=0HNPJKG3I2IAC:__fc:t:z): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIM K=0HNPJKG3I2IAC:__fc:t:z): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIM K=0HNPJKG3I2IAC:__fc:t:z): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIM K=0HNPJKG3I2IAC:__fc:t:z): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIM K=0HNPJKG3I2IAC:__fc:t:z): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:42.322292, LEXP=2026-10-26T21:00:42.822306][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    INFO 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIS K=0HNPJKG3I2IAC:__fc:t:*): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIS K=0HNPJKG3I2IAC:__fc:t:*): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIS K=0HNPJKG3I2IAC:__fc:t:*): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIS K=0HNPJKG3I2IAC:__fc:t:*): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIS K=0HNPJKG3I2IAC:__fc:t:*): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIS K=0HNPJKG3I2IAC:__fc:t:*): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIS K=0HNPJKG3I2IAC:__fc:t:*): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIS K=0HNPJKG3I2IAC:__fc:t:*): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIS K=0HNPJKG3I2IAC:__fc:t:*): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIS K=0HNPJKG3I2IAC:__fc:t:*): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIS K=0HNPJKG3I2IAC:__fc:t:*): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIS K=0HNPJKG3I2IAC:__fc:t:*): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIS K=0HNPJKG3I2IAC:__fc:t:*): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIS K=0HNPJKG3I2IAC:__fc:t:*): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:42.322374, LEXP=2026-10-26T21:00:42.822383][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IHT K=0HNPJKG3I2IAC:baz): new Clear (Expire) timestamp 0 (OLD: -1)
+    DEBU 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IHT K=0HNPJKG3I2IAC:baz): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IHT K=0HNPJKG3I2IAC:baz): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IHT K=0HNPJKG3I2IAC:baz): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IHT K=0HNPJKG3I2IAC:baz): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:41.611176, LEXP=2026-10-26T21:00:45.611176][]
+    INFO 2026-10-26T21:00:42.322Z: STEP 3
+    INFO 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIU T=x): RemoveByTagAsync call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    INFO 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIV K=0HNPJKG3I2IAC:__fc:t:x): Set<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    DEBU 2026-10-26T21:00:42.322Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIV K=0HNPJKG3I2IAC:__fc:t:x): [MC] saving memory entry
+    DEBU 2026-10-26T21:00:42.323Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIV K=0HNPJKG3I2IAC:__fc:t:x): [DC] saving distributed entry
+    TRAC 2026-10-26T21:00:42.323Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIV K=0HNPJKG3I2IAC:__fc:t:x): [DC] serializing the entry FE(D)[T=2026-10-26T21:00:42.322449, LEXP=2026-10-27T21:00:42.322449][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:42.324Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIV K=0HNPJKG3I2IAC:__fc:t:x): [DC] before setting entry in distributed
+    TRAC 2026-10-26T21:00:42.324Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IIV K=0HNPJKG3I2IAC:__fc:t:x): [DC] after setting entry in distributed
+    INFO 2026-10-26T21:00:43.074Z: STEP 4
+    INFO 2026-10-26T21:00:43.074Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVE K=0HNPJKG3I2IAC:foo): GetOrDefault<T> call FEO[DUR=4s LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=Y AC=N]
+    TRAC 2026-10-26T21:00:43.074Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVE K=0HNPJKG3I2IAC:foo): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.074Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVE K=0HNPJKG3I2IAC:foo): [MC] memory entry found FE(M)[T=2026-10-26T21:00:41.610108, LEXP=2026-10-26T21:00:45.610107][]
+    INFO 2026-10-26T21:00:43.074Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVF K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:43.074Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVF K=0HNPJKG3I2IAC:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.074Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVF K=0HNPJKG3I2IAC:__fc:t:!): [MC] memory entry found (expired) FE(M)[T=2026-10-26T21:00:42.321339, LEXP=2026-10-26T21:00:42.821628][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.074Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVF K=0HNPJKG3I2IAC:__fc:t:!): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:43.074Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVF K=0HNPJKG3I2IAC:__fc:t:!): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:43.074Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVF K=0HNPJKG3I2IAC:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.074Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVF K=0HNPJKG3I2IAC:__fc:t:!): [MC] memory entry found (expired) FE(M)[T=2026-10-26T21:00:42.321339, LEXP=2026-10-26T21:00:42.821628][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.074Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVF K=0HNPJKG3I2IAC:__fc:t:!): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:43.075Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVF K=0HNPJKG3I2IAC:__fc:t:!): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:43.075Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVF K=0HNPJKG3I2IAC:__fc:t:!): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:43.075Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVF K=0HNPJKG3I2IAC:__fc:t:!): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:43.075Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVF K=0HNPJKG3I2IAC:__fc:t:!): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:43.075Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVF K=0HNPJKG3I2IAC:__fc:t:!): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:43.075Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVF K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:43.075308, LEXP=2026-10-26T21:00:43.575502][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    INFO 2026-10-26T21:00:43.075Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVG K=0HNPJKG3I2IAC:__fc:t:x): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:43.075Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVG K=0HNPJKG3I2IAC:__fc:t:x): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.075Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVG K=0HNPJKG3I2IAC:__fc:t:x): [MC] memory entry found (expired) FE(M)[T=2026-10-26T21:00:42.322449, LEXP=2026-10-26T21:00:42.822449][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.075Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVG K=0HNPJKG3I2IAC:__fc:t:x): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:43.075Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVG K=0HNPJKG3I2IAC:__fc:t:x): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:43.075Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVG K=0HNPJKG3I2IAC:__fc:t:x): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.075Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVG K=0HNPJKG3I2IAC:__fc:t:x): [MC] memory entry found (expired) FE(M)[T=2026-10-26T21:00:42.322449, LEXP=2026-10-26T21:00:42.822449][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.075Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVG K=0HNPJKG3I2IAC:__fc:t:x): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:43.075Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVG K=0HNPJKG3I2IAC:__fc:t:x): [DC] distributed entry found FE(D)[T=2026-10-26T21:00:42.322449, LEXP=2026-10-27T21:00:42.322449][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    DEBU 2026-10-26T21:00:43.076Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVG K=0HNPJKG3I2IAC:__fc:t:x): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:43.076Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVG K=0HNPJKG3I2IAC:__fc:t:x): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:43.076Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVG K=0HNPJKG3I2IAC:__fc:t:x): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:43.076Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVG K=0HNPJKG3I2IAC:__fc:t:x): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:42.322449, LEXP=2026-10-27T21:00:42.322449][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.076Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVE K=0HNPJKG3I2IAC:foo): entry invalidated by tag x
+    TRAC 2026-10-26T21:00:43.076Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVE K=0HNPJKG3I2IAC:foo): cascade expire entry
+    INFO 2026-10-26T21:00:43.076Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVH K=0HNPJKG3I2IAC:foo): Expire call FEO[DUR=1.00:00:00 LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=NR SZ=1 FS=Y FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:43.076Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVH K=0HNPJKG3I2IAC:foo): [MC] Metadata (null)
+    DEBU 2026-10-26T21:00:43.076Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVH K=0HNPJKG3I2IAC:foo): [MC] expiring memory entry
+    DEBU 2026-10-26T21:00:43.077Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVH K=0HNPJKG3I2IAC:foo): [DC] removing distributed entry
+    TRAC 2026-10-26T21:00:43.077Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVH K=0HNPJKG3I2IAC:foo): [DC] before removing entry from distributed
+    TRAC 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVH K=0HNPJKG3I2IAC:foo): [DC] after removing entry from distributed
+    TRAC 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVE K=0HNPJKG3I2IAC:foo): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVE K=0HNPJKG3I2IAC:foo): [DC] distributed entry not found
+    INFO 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVE K=0HNPJKG3I2IAC:foo): GetOrDefault<T> return (default value)
+    INFO 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVI K=0HNPJKG3I2IAC:bar): GetOrSet<T> call FEO[DUR=4s LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=Y AC=N]
+    TRAC 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVI K=0HNPJKG3I2IAC:bar): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVI K=0HNPJKG3I2IAC:bar): [MC] memory entry found FE(M)[T=2026-10-26T21:00:41.610813, LEXP=2026-10-26T21:00:45.610813][]
+    INFO 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVJ K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVJ K=0HNPJKG3I2IAC:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVJ K=0HNPJKG3I2IAC:__fc:t:!): [MC] memory entry found FE(M)[T=2026-10-26T21:00:43.075308, LEXP=2026-10-26T21:00:43.575502][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVJ K=0HNPJKG3I2IAC:__fc:t:!): using memory entry
+    INFO 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVJ K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:43.075308, LEXP=2026-10-26T21:00:43.575502][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    INFO 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVK K=0HNPJKG3I2IAC:__fc:t:y): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVK K=0HNPJKG3I2IAC:__fc:t:y): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVK K=0HNPJKG3I2IAC:__fc:t:y): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVK K=0HNPJKG3I2IAC:__fc:t:y): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVK K=0HNPJKG3I2IAC:__fc:t:y): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVK K=0HNPJKG3I2IAC:__fc:t:y): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVK K=0HNPJKG3I2IAC:__fc:t:y): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVK K=0HNPJKG3I2IAC:__fc:t:y): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVK K=0HNPJKG3I2IAC:__fc:t:y): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVK K=0HNPJKG3I2IAC:__fc:t:y): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVK K=0HNPJKG3I2IAC:__fc:t:y): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVK K=0HNPJKG3I2IAC:__fc:t:y): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVK K=0HNPJKG3I2IAC:__fc:t:y): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVK K=0HNPJKG3I2IAC:__fc:t:y): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:43.078803, LEXP=2026-10-26T21:00:43.578821][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    INFO 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVL K=0HNPJKG3I2IAC:__fc:t:z): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVL K=0HNPJKG3I2IAC:__fc:t:z): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVL K=0HNPJKG3I2IAC:__fc:t:z): [MC] memory entry found (expired) FE(M)[T=2026-10-26T21:00:42.322292, LEXP=2026-10-26T21:00:42.822306][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVL K=0HNPJKG3I2IAC:__fc:t:z): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVL K=0HNPJKG3I2IAC:__fc:t:z): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVL K=0HNPJKG3I2IAC:__fc:t:z): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVL K=0HNPJKG3I2IAC:__fc:t:z): [MC] memory entry found (expired) FE(M)[T=2026-10-26T21:00:42.322292, LEXP=2026-10-26T21:00:42.822306][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.078Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVL K=0HNPJKG3I2IAC:__fc:t:z): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVL K=0HNPJKG3I2IAC:__fc:t:z): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVL K=0HNPJKG3I2IAC:__fc:t:z): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVL K=0HNPJKG3I2IAC:__fc:t:z): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVL K=0HNPJKG3I2IAC:__fc:t:z): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVL K=0HNPJKG3I2IAC:__fc:t:z): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVL K=0HNPJKG3I2IAC:__fc:t:z): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:43.079119, LEXP=2026-10-26T21:00:43.579157][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    INFO 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVM K=0HNPJKG3I2IAC:__fc:t:*): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVM K=0HNPJKG3I2IAC:__fc:t:*): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVM K=0HNPJKG3I2IAC:__fc:t:*): [MC] memory entry found (expired) FE(M)[T=2026-10-26T21:00:42.322374, LEXP=2026-10-26T21:00:42.822383][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVM K=0HNPJKG3I2IAC:__fc:t:*): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVM K=0HNPJKG3I2IAC:__fc:t:*): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVM K=0HNPJKG3I2IAC:__fc:t:*): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVM K=0HNPJKG3I2IAC:__fc:t:*): [MC] memory entry found (expired) FE(M)[T=2026-10-26T21:00:42.322374, LEXP=2026-10-26T21:00:42.822383][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVM K=0HNPJKG3I2IAC:__fc:t:*): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVM K=0HNPJKG3I2IAC:__fc:t:*): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVM K=0HNPJKG3I2IAC:__fc:t:*): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVM K=0HNPJKG3I2IAC:__fc:t:*): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVM K=0HNPJKG3I2IAC:__fc:t:*): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVM K=0HNPJKG3I2IAC:__fc:t:*): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVM K=0HNPJKG3I2IAC:__fc:t:*): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:43.079345, LEXP=2026-10-26T21:00:43.579380][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVI K=0HNPJKG3I2IAC:bar): using memory entry
+    INFO 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2IVI K=0HNPJKG3I2IAC:bar): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:41.610813, LEXP=2026-10-26T21:00:45.610813][]
+    INFO 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVN K=0HNPJKG3I2IAC:baz): GetOrSet<T> call FEO[DUR=4s LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=Y AC=N]
+    TRAC 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVN K=0HNPJKG3I2IAC:baz): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVN K=0HNPJKG3I2IAC:baz): [MC] memory entry found FE(M)[T=2026-10-26T21:00:41.611176, LEXP=2026-10-26T21:00:45.611366][]
+    INFO 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVO K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVO K=0HNPJKG3I2IAC:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVO K=0HNPJKG3I2IAC:__fc:t:!): [MC] memory entry found (expired) FE(M)[T=2026-10-26T21:00:42.320281, LEXP=2026-10-26T21:00:42.820290][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVO K=0HNPJKG3I2IAC:__fc:t:!): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVO K=0HNPJKG3I2IAC:__fc:t:!): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVO K=0HNPJKG3I2IAC:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVO K=0HNPJKG3I2IAC:__fc:t:!): [MC] memory entry found (expired) FE(M)[T=2026-10-26T21:00:42.320281, LEXP=2026-10-26T21:00:42.820290][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVO K=0HNPJKG3I2IAC:__fc:t:!): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVO K=0HNPJKG3I2IAC:__fc:t:!): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVO K=0HNPJKG3I2IAC:__fc:t:!): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVO K=0HNPJKG3I2IAC:__fc:t:!): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVO K=0HNPJKG3I2IAC:__fc:t:!): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVO K=0HNPJKG3I2IAC:__fc:t:!): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVO K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:43.079838, LEXP=2026-10-26T21:00:43.579926][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    INFO 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVP K=0HNPJKG3I2IAC:__fc:t:x): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVP K=0HNPJKG3I2IAC:__fc:t:x): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVP K=0HNPJKG3I2IAC:__fc:t:x): [MC] memory entry found (expired) FE(M)[T=2026-10-26T21:00:41.810553, LEXP=2026-10-26T21:00:42.445538][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.079Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVP K=0HNPJKG3I2IAC:__fc:t:x): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVP K=0HNPJKG3I2IAC:__fc:t:x): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVP K=0HNPJKG3I2IAC:__fc:t:x): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVP K=0HNPJKG3I2IAC:__fc:t:x): [MC] memory entry found (expired) FE(M)[T=2026-10-26T21:00:41.810553, LEXP=2026-10-26T21:00:42.445538][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVP K=0HNPJKG3I2IAC:__fc:t:x): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVP K=0HNPJKG3I2IAC:__fc:t:x): [DC] distributed entry found FE(D)[T=2026-10-26T21:00:42.322449, LEXP=2026-10-27T21:00:42.322449][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    DEBU 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVP K=0HNPJKG3I2IAC:__fc:t:x): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVP K=0HNPJKG3I2IAC:__fc:t:x): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVP K=0HNPJKG3I2IAC:__fc:t:x): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVP K=0HNPJKG3I2IAC:__fc:t:x): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:42.322449, LEXP=2026-10-27T21:00:42.322449][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVN K=0HNPJKG3I2IAC:baz): entry invalidated by tag x
+    TRAC 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVN K=0HNPJKG3I2IAC:baz): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVN K=0HNPJKG3I2IAC:baz): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVN K=0HNPJKG3I2IAC:baz): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVN K=0HNPJKG3I2IAC:baz): [MC] memory entry found FE(M)[T=2026-10-26T21:00:41.611176, LEXP=2026-10-26T21:00:45.611366][]
+    INFO 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVQ K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVQ K=0HNPJKG3I2IAC:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVQ K=0HNPJKG3I2IAC:__fc:t:!): [MC] memory entry found FE(M)[T=2026-10-26T21:00:43.079838, LEXP=2026-10-26T21:00:43.579926][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVQ K=0HNPJKG3I2IAC:__fc:t:!): using memory entry
+    INFO 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVQ K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:43.079838, LEXP=2026-10-26T21:00:43.579926][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    INFO 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVR K=0HNPJKG3I2IAC:__fc:t:x): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVR K=0HNPJKG3I2IAC:__fc:t:x): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVR K=0HNPJKG3I2IAC:__fc:t:x): [MC] memory entry found FE(M)[T=2026-10-26T21:00:42.322449, LEXP=2026-10-27T21:00:42.322449][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVR K=0HNPJKG3I2IAC:__fc:t:x): using memory entry
+    INFO 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVR K=0HNPJKG3I2IAC:__fc:t:x): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:42.322449, LEXP=2026-10-27T21:00:42.322449][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVN K=0HNPJKG3I2IAC:baz): entry invalidated by tag x
+    TRAC 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVN K=0HNPJKG3I2IAC:baz): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVN K=0HNPJKG3I2IAC:baz): [DC] distributed entry found FE(D)[T=2026-10-26T21:00:41.611176, LEXP=2026-10-26T21:00:45.611176][]
+    INFO 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVS K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVS K=0HNPJKG3I2IAC:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVS K=0HNPJKG3I2IAC:__fc:t:!): [MC] memory entry found FE(M)[T=2026-10-26T21:00:43.079838, LEXP=2026-10-26T21:00:43.579926][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVS K=0HNPJKG3I2IAC:__fc:t:!): using memory entry
+    INFO 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVS K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:43.079838, LEXP=2026-10-26T21:00:43.579926][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    INFO 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVT K=0HNPJKG3I2IAC:__fc:t:x): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVT K=0HNPJKG3I2IAC:__fc:t:x): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVT K=0HNPJKG3I2IAC:__fc:t:x): [MC] memory entry found FE(M)[T=2026-10-26T21:00:42.322449, LEXP=2026-10-27T21:00:42.322449][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVT K=0HNPJKG3I2IAC:__fc:t:x): using memory entry
+    INFO 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVT K=0HNPJKG3I2IAC:__fc:t:x): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:42.322449, LEXP=2026-10-27T21:00:42.322449][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVN K=0HNPJKG3I2IAC:baz): entry invalidated by tag x
+    DEBU 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVN K=0HNPJKG3I2IAC:baz): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVN K=0HNPJKG3I2IAC:baz): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVN K=0HNPJKG3I2IAC:baz): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVN K=0HNPJKG3I2IAC:baz): [ML] MEMORY LOCK released
+    DEBU 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVN K=0HNPJKG3I2IAC:baz): [DC] saving distributed entry
+    TRAC 2026-10-26T21:00:43.080Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVN K=0HNPJKG3I2IAC:baz): [DC] serializing the entry FE(D)[T=2026-10-26T21:00:43.080530, LEXP=2026-10-26T21:00:47.080530][]
+    TRAC 2026-10-26T21:00:43.081Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVN K=0HNPJKG3I2IAC:baz): [DC] before setting entry in distributed
+    TRAC 2026-10-26T21:00:43.081Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVN K=0HNPJKG3I2IAC:baz): [DC] after setting entry in distributed
+    INFO 2026-10-26T21:00:43.081Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVN K=0HNPJKG3I2IAC:baz): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:43.080530, LEXP=2026-10-26T21:00:47.080815][]
+    INFO 2026-10-26T21:00:43.081Z: STEP 5
+    INFO 2026-10-26T21:00:43.081Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVU T=y): RemoveByTagAsync call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    INFO 2026-10-26T21:00:43.081Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVV K=0HNPJKG3I2IAC:__fc:t:y): Set<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    DEBU 2026-10-26T21:00:43.081Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVV K=0HNPJKG3I2IAC:__fc:t:y): [MC] saving memory entry
+    DEBU 2026-10-26T21:00:43.081Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVV K=0HNPJKG3I2IAC:__fc:t:y): [DC] saving distributed entry
+    TRAC 2026-10-26T21:00:43.081Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVV K=0HNPJKG3I2IAC:__fc:t:y): [DC] serializing the entry FE(D)[T=2026-10-26T21:00:43.081352, LEXP=2026-10-27T21:00:43.081352][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.081Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVV K=0HNPJKG3I2IAC:__fc:t:y): [DC] before setting entry in distributed
+    TRAC 2026-10-26T21:00:43.081Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2IVV K=0HNPJKG3I2IAC:__fc:t:y): [DC] after setting entry in distributed
+    INFO 2026-10-26T21:00:43.831Z: STEP 6
+    INFO 2026-10-26T21:00:43.831Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2B K=0HNPJKG3I2IAC:foo): GetOrSet<T> call FEO[DUR=4s LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=Y AC=N]
+    TRAC 2026-10-26T21:00:43.831Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2B K=0HNPJKG3I2IAC:foo): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.831Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2B K=0HNPJKG3I2IAC:foo): [MC] memory entry found FE(M)[T=2026-10-26T21:00:41.610108, LEXP=2026-10-26T21:00:45.610108][]
+    INFO 2026-10-26T21:00:43.831Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2C K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:43.831Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2C K=0HNPJKG3I2IAC:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.831Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2C K=0HNPJKG3I2IAC:__fc:t:!): [MC] memory entry found (expired) FE(M)[T=2026-10-26T21:00:43.079838, LEXP=2026-10-26T21:00:43.579926][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.831Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2C K=0HNPJKG3I2IAC:__fc:t:!): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:43.831Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2C K=0HNPJKG3I2IAC:__fc:t:!): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:43.832Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2C K=0HNPJKG3I2IAC:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:43.832Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2C K=0HNPJKG3I2IAC:__fc:t:!): [MC] memory entry found (expired) FE(M)[T=2026-10-26T21:00:43.079838, LEXP=2026-10-26T21:00:43.579926][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:43.832Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2C K=0HNPJKG3I2IAC:__fc:t:!): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:44.178Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2C K=0HNPJKG3I2IAC:__fc:t:!): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:44.178Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2C K=0HNPJKG3I2IAC:__fc:t:!): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:44.354Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2C K=0HNPJKG3I2IAC:__fc:t:!): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:44.354Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2C K=0HNPJKG3I2IAC:__fc:t:!): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:44.354Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2C K=0HNPJKG3I2IAC:__fc:t:!): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:44.354Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2C K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:44.178454, LEXP=2026-10-26T21:00:44.854643][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    INFO 2026-10-26T21:00:44.354Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2J K=0HNPJKG3I2IAC:__fc:t:x): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:44.354Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2J K=0HNPJKG3I2IAC:__fc:t:x): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:44.354Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2J K=0HNPJKG3I2IAC:__fc:t:x): [MC] memory entry found FE(M)[T=2026-10-26T21:00:42.322449, LEXP=2026-10-27T21:00:42.322449][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:44.354Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2J K=0HNPJKG3I2IAC:__fc:t:x): using memory entry
+    INFO 2026-10-26T21:00:44.354Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2J K=0HNPJKG3I2IAC:__fc:t:x): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:42.322449, LEXP=2026-10-27T21:00:42.322449][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:44.354Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2B K=0HNPJKG3I2IAC:foo): entry invalidated by tag x
+    TRAC 2026-10-26T21:00:44.354Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2B K=0HNPJKG3I2IAC:foo): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:44.354Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2B K=0HNPJKG3I2IAC:foo): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:44.354Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2B K=0HNPJKG3I2IAC:foo): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:44.354Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2B K=0HNPJKG3I2IAC:foo): [MC] memory entry found FE(M)[T=2026-10-26T21:00:41.610108, LEXP=2026-10-26T21:00:45.610108][]
+    INFO 2026-10-26T21:00:44.354Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2K K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:44.354Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2K K=0HNPJKG3I2IAC:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:44.354Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2K K=0HNPJKG3I2IAC:__fc:t:!): [MC] memory entry found FE(M)[T=2026-10-26T21:00:44.178454, LEXP=2026-10-26T21:00:44.854643][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:44.354Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2K K=0HNPJKG3I2IAC:__fc:t:!): using memory entry
+    INFO 2026-10-26T21:00:44.354Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2K K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:44.178454, LEXP=2026-10-26T21:00:44.854643][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    INFO 2026-10-26T21:00:44.355Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2L K=0HNPJKG3I2IAC:__fc:t:x): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:44.355Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2L K=0HNPJKG3I2IAC:__fc:t:x): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:44.355Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2L K=0HNPJKG3I2IAC:__fc:t:x): [MC] memory entry found FE(M)[T=2026-10-26T21:00:42.322449, LEXP=2026-10-27T21:00:42.322449][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:44.355Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2L K=0HNPJKG3I2IAC:__fc:t:x): using memory entry
+    INFO 2026-10-26T21:00:44.355Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2L K=0HNPJKG3I2IAC:__fc:t:x): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:42.322449, LEXP=2026-10-27T21:00:42.322449][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:44.355Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2B K=0HNPJKG3I2IAC:foo): entry invalidated by tag x
+    TRAC 2026-10-26T21:00:44.355Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2B K=0HNPJKG3I2IAC:foo): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:44.756Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2B K=0HNPJKG3I2IAC:foo): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:44.756Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2B K=0HNPJKG3I2IAC:foo): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:44.957Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2B K=0HNPJKG3I2IAC:foo): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:44.957Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2B K=0HNPJKG3I2IAC:foo): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:44.957Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2B K=0HNPJKG3I2IAC:foo): [ML] MEMORY LOCK released
+    DEBU 2026-10-26T21:00:45.167Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2B K=0HNPJKG3I2IAC:foo): [DC] saving distributed entry
+    TRAC 2026-10-26T21:00:45.167Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2B K=0HNPJKG3I2IAC:foo): [DC] serializing the entry FE(D)[T=2026-10-26T21:00:44.756443, LEXP=2026-10-26T21:00:48.756443][]
+    TRAC 2026-10-26T21:00:45.167Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2B K=0HNPJKG3I2IAC:foo): [DC] before setting entry in distributed
+    TRAC 2026-10-26T21:00:45.610Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2B K=0HNPJKG3I2IAC:foo): [DC] after setting entry in distributed
+    INFO 2026-10-26T21:00:45.612Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J2B K=0HNPJKG3I2IAC:foo): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:44.756443, LEXP=2026-10-26T21:00:48.957636][]
+    INFO 2026-10-26T21:00:45.613Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3H K=0HNPJKG3I2IAC:bar): GetOrSet<T> call FEO[DUR=4s LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=Y AC=N]
+    TRAC 2026-10-26T21:00:45.613Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3H K=0HNPJKG3I2IAC:bar): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:45.613Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3H K=0HNPJKG3I2IAC:bar): [MC] memory entry found (expired) FE(M)[T=2026-10-26T21:00:41.610813, LEXP=2026-10-26T21:00:45.610813][]
+    INFO 2026-10-26T21:00:45.613Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3I K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:45.613Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3I K=0HNPJKG3I2IAC:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:45.613Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3I K=0HNPJKG3I2IAC:__fc:t:!): [MC] memory entry found (expired) FE(M)[T=2026-10-26T21:00:44.178454, LEXP=2026-10-26T21:00:44.854643][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:45.613Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3I K=0HNPJKG3I2IAC:__fc:t:!): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:45.613Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3I K=0HNPJKG3I2IAC:__fc:t:!): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:45.613Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3I K=0HNPJKG3I2IAC:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:45.613Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3I K=0HNPJKG3I2IAC:__fc:t:!): [MC] memory entry found (expired) FE(M)[T=2026-10-26T21:00:44.178454, LEXP=2026-10-26T21:00:44.854643][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:45.613Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3I K=0HNPJKG3I2IAC:__fc:t:!): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:45.838Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3I K=0HNPJKG3I2IAC:__fc:t:!): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:45.838Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3I K=0HNPJKG3I2IAC:__fc:t:!): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:46.064Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3I K=0HNPJKG3I2IAC:__fc:t:!): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:46.064Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3I K=0HNPJKG3I2IAC:__fc:t:!): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:46.064Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3I K=0HNPJKG3I2IAC:__fc:t:!): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:46.064Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3I K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:45.838239, LEXP=2026-10-26T21:00:46.564151][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    INFO 2026-10-26T21:00:46.064Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3R K=0HNPJKG3I2IAC:__fc:t:y): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:46.064Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3R K=0HNPJKG3I2IAC:__fc:t:y): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:46.064Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3R K=0HNPJKG3I2IAC:__fc:t:y): [MC] memory entry found (expired) FE(M)[T=2026-10-26T21:00:43.081352, LEXP=2026-10-26T21:00:43.581352][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:46.064Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3R K=0HNPJKG3I2IAC:__fc:t:y): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:46.064Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3R K=0HNPJKG3I2IAC:__fc:t:y): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:46.064Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3R K=0HNPJKG3I2IAC:__fc:t:y): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:46.064Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3R K=0HNPJKG3I2IAC:__fc:t:y): [MC] memory entry found (expired) FE(M)[T=2026-10-26T21:00:43.081352, LEXP=2026-10-26T21:00:43.581352][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:46.064Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3R K=0HNPJKG3I2IAC:__fc:t:y): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:46.315Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3R K=0HNPJKG3I2IAC:__fc:t:y): [DC] distributed entry found FE(D)[T=2026-10-26T21:00:43.081352, LEXP=2026-10-27T21:00:43.081352][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    DEBU 2026-10-26T21:00:46.315Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3R K=0HNPJKG3I2IAC:__fc:t:y): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:46.315Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3R K=0HNPJKG3I2IAC:__fc:t:y): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:46.315Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3R K=0HNPJKG3I2IAC:__fc:t:y): [ML] MEMORY LOCK released
+    INFO 2026-10-26T21:00:46.315Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3R K=0HNPJKG3I2IAC:__fc:t:y): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:43.081352, LEXP=2026-10-27T21:00:43.081352][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:46.315Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3H K=0HNPJKG3I2IAC:bar): entry invalidated by tag y
+    TRAC 2026-10-26T21:00:46.315Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3H K=0HNPJKG3I2IAC:bar): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:46.315Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3H K=0HNPJKG3I2IAC:bar): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:46.315Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3H K=0HNPJKG3I2IAC:bar): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:46.315Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3H K=0HNPJKG3I2IAC:bar): [MC] memory entry found (expired) FE(M)[T=2026-10-26T21:00:41.610813, LEXP=2026-10-26T21:00:45.610813][]
+    INFO 2026-10-26T21:00:46.315Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3V K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:46.315Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3V K=0HNPJKG3I2IAC:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:46.315Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3V K=0HNPJKG3I2IAC:__fc:t:!): [MC] memory entry found FE(M)[T=2026-10-26T21:00:45.838239, LEXP=2026-10-26T21:00:46.564151][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:46.315Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3V K=0HNPJKG3I2IAC:__fc:t:!): using memory entry
+    INFO 2026-10-26T21:00:46.315Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3V K=0HNPJKG3I2IAC:__fc:t:!): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:45.838239, LEXP=2026-10-26T21:00:46.564151][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    INFO 2026-10-26T21:00:46.315Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J40 K=0HNPJKG3I2IAC:__fc:t:y): GetOrSet<T> call FEO[DUR=500ms LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T21:00:46.315Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J40 K=0HNPJKG3I2IAC:__fc:t:y): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:46.315Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J40 K=0HNPJKG3I2IAC:__fc:t:y): [MC] memory entry found FE(M)[T=2026-10-26T21:00:43.081352, LEXP=2026-10-27T21:00:43.081352][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:46.315Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J40 K=0HNPJKG3I2IAC:__fc:t:y): using memory entry
+    INFO 2026-10-26T21:00:46.315Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J40 K=0HNPJKG3I2IAC:__fc:t:y): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:43.081352, LEXP=2026-10-27T21:00:43.081352][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T21:00:46.316Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3H K=0HNPJKG3I2IAC:bar): entry invalidated by tag y
+    TRAC 2026-10-26T21:00:46.316Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3H K=0HNPJKG3I2IAC:bar): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:46.818Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3H K=0HNPJKG3I2IAC:bar): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:46.818Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3H K=0HNPJKG3I2IAC:bar): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:47.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3H K=0HNPJKG3I2IAC:bar): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:47.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3H K=0HNPJKG3I2IAC:bar): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:47.320Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3H K=0HNPJKG3I2IAC:bar): [ML] MEMORY LOCK released
+    DEBU 2026-10-26T21:00:47.822Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3H K=0HNPJKG3I2IAC:bar): [DC] saving distributed entry
+    TRAC 2026-10-26T21:00:47.822Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3H K=0HNPJKG3I2IAC:bar): [DC] serializing the entry FE(D)[T=2026-10-26T21:00:46.818077, LEXP=2026-10-26T21:00:50.818077][]
+    TRAC 2026-10-26T21:00:47.822Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3H K=0HNPJKG3I2IAC:bar): [DC] before setting entry in distributed
+    TRAC 2026-10-26T21:00:48.321Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3H K=0HNPJKG3I2IAC:bar): [DC] after setting entry in distributed
+    INFO 2026-10-26T21:00:48.321Z: FUSION [N=0HNPJKG3I2IAC I=C2] (O=0HNPJKG3I2J3H K=0HNPJKG3I2IAC:bar): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:46.818077, LEXP=2026-10-26T21:00:51.320338][]
+    INFO 2026-10-26T21:00:48.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2J4O K=0HNPJKG3I2IAC:baz): GetOrSet<T> call FEO[DUR=4s LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=Y AC=N]
+    TRAC 2026-10-26T21:00:48.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2J4O K=0HNPJKG3I2IAC:baz): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:48.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2J4O K=0HNPJKG3I2IAC:baz): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:48.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2J4O K=0HNPJKG3I2IAC:baz): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T21:00:48.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2J4O K=0HNPJKG3I2IAC:baz): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T21:00:48.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2J4O K=0HNPJKG3I2IAC:baz): [MC] trying to get from memory
+    DEBU 2026-10-26T21:00:48.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2J4O K=0HNPJKG3I2IAC:baz): [MC] memory entry not found
+    TRAC 2026-10-26T21:00:48.321Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2J4O K=0HNPJKG3I2IAC:baz): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T21:00:48.570Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2J4O K=0HNPJKG3I2IAC:baz): [DC] distributed entry not found
+    DEBU 2026-10-26T21:00:48.570Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2J4O K=0HNPJKG3I2IAC:baz): calling the factory (timeout=/)
+    DEBU 2026-10-26T21:00:48.822Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2J4O K=0HNPJKG3I2IAC:baz): [MC] saving memory entry
+    TRAC 2026-10-26T21:00:48.822Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2J4O K=0HNPJKG3I2IAC:baz): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T21:00:48.822Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2J4O K=0HNPJKG3I2IAC:baz): [ML] MEMORY LOCK released
+    DEBU 2026-10-26T21:00:49.075Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2J4O K=0HNPJKG3I2IAC:baz): [DC] saving distributed entry
+    TRAC 2026-10-26T21:00:49.075Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2J4O K=0HNPJKG3I2IAC:baz): [DC] serializing the entry FE(D)[T=2026-10-26T21:00:48.570874, LEXP=2026-10-26T21:00:52.570874][]
+    TRAC 2026-10-26T21:00:49.075Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2J4O K=0HNPJKG3I2IAC:baz): [DC] before setting entry in distributed
+    TRAC 2026-10-26T21:00:49.570Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2J4O K=0HNPJKG3I2IAC:baz): [DC] after setting entry in distributed
+    INFO 2026-10-26T21:00:49.571Z: FUSION [N=0HNPJKG3I2IAC I=C1] (O=0HNPJKG3I2J4O K=0HNPJKG3I2IAC:baz): GetOrSet<T> return FE(M)[T=2026-10-26T21:00:48.570874, LEXP=2026-10-26T21:00:52.822126][]
+    DEBU 2026-10-26T21:00:49.571Z: FUSION [N=0HNPJKG3I2IAC I=C2]: distributed cache removed
+    DEBU 2026-10-26T21:00:49.571Z: FUSION [N=0HNPJKG3I2IAC I=C1]: distributed cache removed
+    
+  Error output
+[+308/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 23s)
+
+[+315/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 26s)
+
+[+325/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 29s)
+
+[+334/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 32s)
+
+[+343/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 35s)
+
+[+351/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 38s)
+
+[+353/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 41s)
+
+[+353/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 44s)
+
+[+353/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 47s)
+
+[+353/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 50s)
+
+[+353/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 53s)
+
+[+353/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 56s)
+
+[+353/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 59s)
+
+[+353/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 02s)
+
+[+371/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 05s)
+
+[+379/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 08s)
+
+[+387/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 11s)
+
+[+395/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 14s)
+
+[+403/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 17s)
+
+[+411/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 20s)
+
+[+418/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 23s)
+
+[+439/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 26s)
+
+[+448/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 29s)
+
+[+457/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 32s)
+
+[+471/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 35s)
+
+[+484/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 38s)
+
+[+493/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 41s)
+
+[+498/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 44s)
+
+[+505/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 47s)
+
+[+518/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 50s)
+
+[+525/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 53s)
+
+[+533/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 56s)
+
+[+541/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 59s)
+
+[+547/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 02s)
+
+[+554/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 05s)
+
+[+563/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 08s)
+
+[+619/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 11s)
+
+[+630/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 14s)
+
+[+642/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 17s)
+
+[+661/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 20s)
+
+[+669/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 23s)
+
+[+681/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 26s)
+
+[+686/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 29s)
+
+[+692/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 32s)
+
+[+700/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 35s)
+
+[+725/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 38s)
+
+[+733/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 41s)
+
+[+740/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 44s)
+
+[+746/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 47s)
+
+[+753/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 50s)
+
+[+767/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 53s)
+
+[+772/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 56s)
+
+[+785/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 59s)
+
+[+793/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 02s)
+
+[+808/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 05s)
+
+[+818/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 08s)
+
+[+826/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 11s)
+
+[+836/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 14s)
+
+[+848/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 17s)
+
+[+853/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 20s)
+
+[+873/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 23s)
+
+[+880/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 26s)
+
+[+888/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 29s)
+
+[+901/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 32s)
+
+[+909/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 35s)
+
+[+918/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 38s)
+
+[+927/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 41s)
+
+[+939/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 44s)
+
+[+945/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 47s)
+
+[+955/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 50s)
+
+[+963/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 53s)
+
+[+971/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 56s)
+
+[+976/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 59s)
+
+[+990/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 02s)
+
+[+1002/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 05s)
+
+[+1017/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 08s)
+
+[+1023/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 11s)
+
+[+1031/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 14s)
+
+[+1040/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 17s)
+
+[+1051/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 20s)
+
+[+1051/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 23s)
+
+[+1063/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 26s)
+
+[+1068/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 29s)
+
+[+1069/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 32s)
+
+[+1085/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 35s)
+
+[+1095/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 38s)
+
+[+1101/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 41s)
+
+[+1103/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 44s)
+
+[+1103/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 47s)
+
+[+1129/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 50s)
+
+[+1131/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 53s)
+
+[+1135/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 56s)
+
+[+1138/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 59s)
+
+[+1146/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 02s)
+
+[+1152/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 05s)
+
+[+1160/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 08s)
+
+[+1167/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 11s)
+
+[+1174/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 14s)
+
+[+1181/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 17s)
+
+[+1184/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 20s)
+
+[+1188/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 23s)
+
+[+1190/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 26s)
+
+[+1193/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 29s)
+
+[+1207/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 32s)
+
+[+1210/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 35s)
+
+[+1213/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 38s)
+
+[+1218/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 41s)
+
+[+1222/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 44s)
+
+[+1227/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 47s)
+
+[+1233/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 50s)
+
+[+1244/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 53s)
+
+[+1257/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 56s)
+
+[+1261/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 59s)
+
+[+1266/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 02s)
+
+[+1272/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 05s)
+
+[+1279/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 08s)
+
+[+1287/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 11s)
+
+[+1290/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 14s)
+
+[+1293/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 17s)
+
+[+1294/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 20s)
+
+[+1296/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 23s)
+
+[+1298/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 26s)
+
+[+1299/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 29s)
+
+[+1302/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 32s)
+
+[+1305/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 35s)
+
+[+1308/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 38s)
+
+[+1308/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 41s)
+
+[+1310/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 44s)
+
+[+1312/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 47s)
+
+[+1312/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 50s)
+
+[+1314/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 53s)
+
+[+1316/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 56s)
+
+[+1319/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 59s)
+
+[+1320/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 02s)
+
+[+1325/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 05s)
+
+[+1330/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 08s)
+
+[+1333/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 11s)
+
+[+1337/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 14s)
+
+[+1340/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 17s)
+
+[+1342/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 20s)
+
+[+1347/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 23s)
+
+[+1353/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 26s)
+
+[+1357/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 29s)
+
+[+1362/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 32s)
+
+[+1365/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 35s)
+
+[+1370/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 38s)
+
+[+1377/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 41s)
+
+[+1377/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 44s)
+
+[+1379/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 47s)
+
+[+1380/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 50s)
+
+[+1381/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 53s)
+
+[+1383/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 56s)
+
+[+1384/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 59s)
+
+[+1385/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 02s)
+
+[+1386/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 05s)
+
+[+1389/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 08s)
+
+[+1393/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 11s)
+
+[+1397/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 14s)
+
+[+1401/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 17s)
+
+[+1405/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 20s)
+
+[+1406/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 23s)
+
+[+1409/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 26s)
+
+[+1411/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 29s)
+
+[+1413/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 32s)
+
+[+1414/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 35s)
+
+[+1414/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 38s)
+
+[+1415/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 41s)
+
+[+1416/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 44s)
+
+[+1417/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 47s)
+
+[+1417/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 50s)
+
+[+1418/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 53s)
+
+[+1419/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 56s)
+
+[+1420/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 59s)
+
+[+1420/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 02s)
+
+[+1421/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 05s)
+
+[+1422/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 08s)
+
+[+1423/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 11s)
+
+[+1423/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 14s)
+
+[+1424/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 17s)
+
+[+1425/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 20s)
+
+[+1425/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 23s)
+
+[+1426/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 26s)
+
+[+1426/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 29s)
+
+[+1427/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 32s)
+
+[+1428/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 35s)
+
+[+1428/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 38s)
+
+[+1429/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 41s)
+
+[+1429/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 44s)
+
+[+1430/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 47s)
+
+[+1430/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 50s)
+
+[+1451/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 53s)
+
+[+1453/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 56s)
+
+[+1473/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 59s)
+
+[+1474/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 02s)
+
+[+1476/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 05s)
+
+[+1477/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 08s)
+
+[+1478/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 11s)
+
+[+1480/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 14s)
+
+[+1481/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 17s)
+
+[+1483/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 20s)
+
+[+1484/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 23s)
+
+[+1486/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 26s)
+
+[+1487/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 29s)
+
+[+1489/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 32s)
+
+[+1490/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 35s)
+
+[+1491/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 38s)
+
+[+1492/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 41s)
+
+[+1492/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 44s)
+
+[+1493/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 47s)
+
+[+1493/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 50s)
+
+[+1494/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 53s)
+
+[+1495/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 56s)
+
+[+1495/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 59s)
+
+[+1496/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 02s)
+
+[+1496/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 05s)
+
+[+1498/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 08s)
+
+[+1499/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 11s)
+
+[+1500/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 14s)
+
+[+1502/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 17s)
+
+[+1503/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 20s)
+
+[+1504/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 23s)
+
+[+1506/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 26s)
+
+[+1507/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 29s)
+
+[+1508/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 32s)
+
+[+1509/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 35s)
+
+[+1510/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 38s)
+
+[+1511/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 41s)
+
+[+1511/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 44s)
+
+[+1512/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 47s)
+
+[+1513/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 50s)
+
+[+1514/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 53s)
+
+[+1514/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 56s)
+
+[+1515/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 59s)
+
+[+1516/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 02s)
+
+[+1517/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 05s)
+
+[+1518/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 08s)
+
+[+1519/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 11s)
+
+[+1520/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 14s)
+
+[+1527/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 17s)
+
+[+1527/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 20s)
+
+[+1528/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 23s)
+
+[+1528/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 26s)
+
+[+1529/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 29s)
+
+[+1530/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 32s)
+
+[+1530/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 35s)
+
+[+1531/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 38s)
+
+[+1531/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 41s)
+
+[+1532/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 44s)
+
+[+1545/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 47s)
+
+[+1546/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 50s)
+
+[+1548/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 53s)
+
+[+1549/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 56s)
+
+[+1551/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 59s)
+
+[+1551/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 02s)
+
+[+1552/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 05s)
+
+[+1553/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 08s)
+
+[+1554/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 11s)
+
+[+1555/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 14s)
+
+[+1555/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 17s)
+
+[+1556/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 20s)
+
+[+1557/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 23s)
+
+[+1559/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 26s)
+
+[+1560/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 29s)
+
+[+1562/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 32s)
+
+[+1564/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 35s)
+
+[+1566/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 38s)
+
+[+1568/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 41s)
+
+[+1569/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 44s)
+
+[+1570/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 47s)
+
+[+1571/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 50s)
+
+[+1571/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 53s)
+
+[+1572/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 56s)
+
+[+1573/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 59s)
+
+[+1574/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 02s)
+
+[+1575/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 05s)
+
+[+1575/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 08s)
+
+[+1576/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 11s)
+
+[+1577/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 14s)
+
+[+1577/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 17s)
+
+[+1578/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 20s)
+
+[+1579/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 23s)
+
+[+1579/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 26s)
+
+[+1580/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 29s)
+
+[+1581/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 32s)
+
+[+1582/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 35s)
+
+[+1583/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 38s)
+
+[+1585/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 41s)
+
+[+1586/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 44s)
+
+[+1599/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 47s)
+
+[+1601/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 50s)
+
+[+1602/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 53s)
+
+[+1604/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 56s)
+
+[+1605/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 59s)
+
+[+1607/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(16m 02s)
+
+[+1609/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(16m 05s)
+
+[+1614/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(16m 08s)
+
+/home/user/w56/FusionCache/default2/tests/ZiggyCreatures.FusionCache.Tests/bin/Release/net10.0/ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64) failed with 2 error(s) (16m 09s 800ms)
+Exit code: 2
+
+Test run summary: Failed!
+  total: 1625
+  failed: 2
+  succeeded: 1623
+  skipped: 0
+  duration: 16m 10s 075ms
+Test run completed with non-success exit code: 2 (see: https://aka.ms/testingplatform/exitcodes)

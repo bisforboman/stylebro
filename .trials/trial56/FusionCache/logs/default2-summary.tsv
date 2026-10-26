@@ -1,0 +1,12 @@
+preview	0	112s	bro preview init
+setup	0	12s	bash -c python3 /home/user/stylebro/.trials/trial56/addref.py Directory.Build.props "<PackageReference Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial56.3\" PrivateAssets=\"all\" />" && git diff --stat && bro init --write
+format	0	99s	bro format
+check	0	46s	bro check
+check-json	0
+checkbuild	0	164s	bro check --build
+checkbuild-json	0
+twae-Debug	0	22s	twae Debug
+test-Debug	2	967s	env CFG=Debug bash -c dotnet test --solution ZiggyCreatures.FusionCache.slnx -c $CFG
+twae-Release	0	32s	twae Release
+test-Release	2	977s	env CFG=Release bash -c dotnet test --solution ZiggyCreatures.FusionCache.slnx -c $CFG
+DONE
