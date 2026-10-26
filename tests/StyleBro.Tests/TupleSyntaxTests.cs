@@ -121,6 +121,145 @@ public class TupleSyntaxTests
         }
         """);
 
+    // Issue #304 (ShotDetector): in every pattern, '(A, B) x' would be a positional pattern: CS8129, CS1061.
+    [Fact]
+    public Task PatternTypes_StayValueTupleInEveryPatternShape() => Verify.VerifyFixAsync(
+        """
+        using System;
+
+        class C
+        {
+            static string Text(object? value) => value switch
+            {
+                null => "none",
+                ValueTuple<double, double, double, double> w => $"{w.Item1},{w.Item2},{w.Item3},{w.Item4}",
+                ValueTuple<int, int, int, int> c => $"{c.Item1},{c.Item2},{c.Item3},{c.Item4}",
+                ValueTuple<long, long> => "pair",
+                _ => value.ToString() ?? "",
+            };
+
+            static int M(object value, Box box, object[] items)
+            {
+                if (value is ValueTuple<int, int> t)
+                {
+                    return t.Item1;
+                }
+
+                if (value is not ValueTuple<int, string> && value is ValueTuple<long, long> or ValueTuple<int, long> or null)
+                {
+                    return 1;
+                }
+
+                if (value is (ValueTuple<string, string>) && box is { Content: ValueTuple<int, int> inner } && inner.Item1 == 1)
+                {
+                    return 2;
+                }
+
+                return items is [ValueTuple<int, int> first, ..] ? first.Item2 : 0;
+            }
+        }
+
+        class Box
+        {
+            public object? Content { get; set; }
+        }
+        """,
+        """
+        using System;
+
+        class C
+        {
+            static string Text(object? value) => value switch
+            {
+                null => "none",
+                ValueTuple<double, double, double, double> w => $"{w.Item1},{w.Item2},{w.Item3},{w.Item4}",
+                ValueTuple<int, int, int, int> c => $"{c.Item1},{c.Item2},{c.Item3},{c.Item4}",
+                ValueTuple<long, long> => "pair",
+                _ => value.ToString() ?? "",
+            };
+
+            static int M(object value, Box box, object[] items)
+            {
+                if (value is ValueTuple<int, int> t)
+                {
+                    return t.Item1;
+                }
+
+                if (value is not ValueTuple<int, string> && value is ValueTuple<long, long> or ValueTuple<int, long> or null)
+                {
+                    return 1;
+                }
+
+                if (value is (ValueTuple<string, string>) && box is { Content: ValueTuple<int, int> inner } && inner.Item1 == 1)
+                {
+                    return 2;
+                }
+
+                return items is [ValueTuple<int, int> first, ..] ? first.Item2 : 0;
+            }
+        }
+
+        class Box
+        {
+            public object? Content { get; set; }
+        }
+        """);
+
+    // Next to #304's patterns: an array of tuples is still a type in a pattern, and a query's range variable, a lambda's
+    // return type and a cast take tuple syntax. A using alias needs C# 12 for it and is left alone.
+    [Fact]
+    public Task TypesNearPatterns_BecomeTupleTypes() => Verify.VerifyFixAsync(
+        """
+        using System;
+        using System.Linq;
+        using P = System.ValueTuple<int, int>;
+
+        class C
+        {
+            int M(object value, {|BRO1123:ValueTuple<int, int>|}[] items)
+            {
+                var q = from {|BRO1123:ValueTuple<int, int>|} x in items select x.Item1;
+                var f = {|BRO1123:ValueTuple<int, int>|} () => default;
+                var g = (({|BRO1123:ValueTuple<int, int>|})(object)items[0]).Item1;
+                if (value is {|BRO1123:ValueTuple<int, int>|}[] a)
+                {
+                    return a.Length;
+                }
+
+                return value switch
+                {
+                    {|BRO1123:ValueTuple<long, int>|}[] b => b.Length,
+                    _ => 0,
+                };
+            }
+        }
+        """,
+        """
+        using System;
+        using System.Linq;
+        using P = System.ValueTuple<int, int>;
+
+        class C
+        {
+            int M(object value, (int, int)[] items)
+            {
+                var q = from (int, int) x in items select x.Item1;
+                var f = (int, int) () => default;
+                var g = (((int, int))(object)items[0]).Item1;
+                if (value is (int, int)[] a)
+                {
+                    return a.Length;
+                }
+
+                return value switch
+                {
+                    (long, int)[] b => b.Length,
+                    _ => 0,
+                };
+            }
+        }
+        """);
+
     [Fact]
     public Task Creations_BecomeTupleLiterals() => Verify.VerifyFixAsync(
         """

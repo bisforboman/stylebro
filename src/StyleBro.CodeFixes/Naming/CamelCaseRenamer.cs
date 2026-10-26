@@ -885,7 +885,7 @@ internal static class CamelCaseRenamer
                 }
             }
 
-            foreach (var referenced in await SymbolFinder.FindReferencesAsync(current, solution, cancellationToken).ConfigureAwait(false))
+            foreach (var referenced in await References.FindAsync(current, solution, cancellationToken).ConfigureAwait(false))
             {
                 // A constructor's references are 'new T(...)' (renamed with the type) and 'this(...)'/'base(...)' (left).
                 var isConstructor = referenced.Definition is IMethodSymbol { MethodKind: MethodKind.Constructor or MethodKind.StaticConstructor };

@@ -203,6 +203,16 @@ public class LinkedFileFixAllTests
         Assert.Equal(text, (await fixedSolution.GetDocument(ids[1])!.GetTextAsync()).ToString());
     }
 
+    // Main's CI, 2026-10-26: the test above failed 1 run in 1,000 under load with "The given key 'Derived.run()' was not
+    // present in the dictionary", a race inside Roslyn 4.8's FindReferences (References). A new search gets past it.
+    [Fact]
+    public async Task RoslynsFindReferencesRace_IsSearchedAgain()
+    {
+        var calls = 0;
+        var result = await References.RetryAsync(() => ++calls < 3 ? throw new KeyNotFoundException() : Task.FromResult(calls));
+        Assert.Equal(3, result);
+    }
+
     // The fix-loop measurement (2026-10): Serilog's Log.cs got 'ref Serilog.Log.logger' in some 'dotnet format' runs and
     // 'ref Log.logger' in others. A static field's qualifier was spelled with the field's type from the copy whose
     // diagnostic started the rename, against another copy's semantic model, where that type isn't the one 'Log' binds to.

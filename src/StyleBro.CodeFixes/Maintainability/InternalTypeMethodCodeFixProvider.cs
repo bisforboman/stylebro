@@ -90,7 +90,7 @@ public sealed class InternalTypeMethodCodeFixProvider : CodeFixProvider
             return true;
         }
 
-        foreach (var referenced in await SymbolFinder.FindReferencesAsync(method, solution, cancellationToken).ConfigureAwait(false))
+        foreach (var referenced in await References.FindAsync(method, solution, cancellationToken).ConfigureAwait(false))
         {
             foreach (var reference in referenced.Locations)
             {
