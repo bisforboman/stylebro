@@ -43,7 +43,9 @@ function Normalize([string[]] $lines, [string] $root) {
         $timings = $false
         # Also the findings a build of another configuration lists ('  path(l,c): BRO1108: ...', trial 48, Tomlyn's Release
         # build): in MSBuild's output order, which a parallel build changes between two runs of the same engine.
-        if ($line -match '^\s*.+?\(\d+,\d+\): (?:error|warning|kept) \w+:' -or $line -match '^\s+.+?\(\d+,\d+\): [A-Z]+\d+: ' -or $line -match '^Checked .+ \(run \d+ of \d+\)$') {
+        # And the load-warning note: the host prints it when its one workspace load ends, between whichever runs' headers
+        # are out by then (EnumGenerators, trial 56: after net10.0 part 2 in one host run, part 3 in the next).
+        if ($line -match '^\s*.+?\(\d+,\d+\): (?:error|warning|kept) \w+:' -or $line -match '^\s+.+?\(\d+,\d+\): [A-Z]+\d+: ' -or $line -match '^Checked .+ \(run \d+ of \d+\)$' -or $line -match "^'dotnet format' had warnings loading the workspace") {
             $unordered.Add(($line -replace ' \(run \d+ of \d+\)$', ''))
         }
         else {
