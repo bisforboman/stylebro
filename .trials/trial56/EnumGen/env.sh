@@ -2,4 +2,4 @@ SRC=/home/user/cand/andrewlock-NetEscapades.EnumGenerators; COMMIT=d3995b8fa8854
 SLN=NetEscapades.EnumGenerators.sln
 TESTS='dotnet test NetEscapades.EnumGenerators.sln -c $CFG'
 PREVIEW=init
-SETUP='python3 /home/user/stylebro/.trials/trial56/addref.py Directory.Build.props "<PackageReference Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial56.1\" PrivateAssets=\"all\" />" && git diff --stat && bro init --write'
+SETUP='for f in Directory.Build.props build/Directory.Build.props tests/NetEscapades.EnumGenerators.Benchmarks/Directory.Build.props; do python3 /home/user/stylebro/.trials/trial56/addref.py $f "<PackageReference Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial56.1\" PrivateAssets=\"all\" />"; done && git diff --stat && bro init --write'
