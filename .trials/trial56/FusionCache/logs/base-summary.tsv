@@ -1,0 +1,2 @@
+build	0	46s	dotnet build ZiggyCreatures.FusionCache.slnx -c Debug
+twae-Debug	0	61s	twae Debug

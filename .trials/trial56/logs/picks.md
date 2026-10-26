@@ -14,7 +14,14 @@ StyleBro main 61b1a6e (after #306: engine report parity), feed 0.8.0-trial56.1.
     **robinrodricks/FluentFTP**.
   - Draw 1: 1-62 used, **63 ZiggyCreatures/FusionCache**.
   - Draw 60: 60-62 used, 63 picked, **64 andrewlock/NetEscapades.EnumGenerators**.
-- Smoke results: see `smoke-*.log` and the list below.
+- Smoke (restore + Debug build + tests, `smoke-*.log`):
+  - FluentFTP 9fa18c5 (442 .cs, library net7.0-net9.0;net462;net472;netstandard2.0/2.1, VB examples in the solution, no
+    Directory.Build.props): builds; 273 tests, 3 fail untouched.
+  - FusionCache af09f81 (262 .cs, MTP runner, core netstandard2.0;net8.0;net9.0;net10.0, plugins netstandard2.0): builds;
+    1,625 tests in 16 min, 4 timing-sensitive failures untouched.
+  - NetEscapades.EnumGenerators d3995b8 (105 .cs, in-solution generator, TreatWarningsAsErrors, net48/net451 test targets):
+    builds; every suite passes.
+  - DynamicData 65016e5: builds (5,042 warnings, StyleCop/Roslynator ones among them); 2,614 pass, 17 skipped.
 
 ## Targeted
 
@@ -35,3 +42,12 @@ Silk.NET (11,680 .cs, workloads). So FusionCache covers #306's lens and the targ
   (src/ also holds Directory.Build.props/.targets, Directory.Packages.props and stylecop.json: StyleCop, so `bro migrate`);
   the library targets netstandard2.0;net462;net6.0;net7.0;net8.0;net9.0;net10.0, the tests net9.0; Nerdbank.GitVersioning
   (version.json at the root, full clone).
+
+## Commits
+
+| Repository | Branch | Commit |
+|---|---|---|
+| robinrodricks/FluentFTP | master | 9fa18c533acfe53fac0222f12634fafa70879cc8 |
+| ZiggyCreatures/FusionCache | main | af09f81a3ea8d7ed71183b46501946da801a2a22 |
+| andrewlock/NetEscapades.EnumGenerators | main | d3995b8fa8854357c902e2d2b4495ed16c5f8546 |
+| reactiveui/DynamicData | main | 65016e5ba22a7c889b0a06cc1094e389281612c3 |

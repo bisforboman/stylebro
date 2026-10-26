@@ -1,1 +1,44 @@
 == build
+  NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests -> /home/user/cand/andrewlock-NetEscapades.EnumGenerators/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests/debug_net7.0/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests -> /home/user/cand/andrewlock-NetEscapades.EnumGenerators/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests/debug_net8.0/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests -> /home/user/cand/andrewlock-NetEscapades.EnumGenerators/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests/debug_net9.0/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests -> /home/user/cand/andrewlock-NetEscapades.EnumGenerators/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests/debug_net10.0/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests -> /home/user/cand/andrewlock-NetEscapades.EnumGenerators/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/debug_net6.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests -> /home/user/cand/andrewlock-NetEscapades.EnumGenerators/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/debug_net7.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests -> /home/user/cand/andrewlock-NetEscapades.EnumGenerators/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/debug_net9.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests -> /home/user/cand/andrewlock-NetEscapades.EnumGenerators/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/debug_net8.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests -> /home/user/cand/andrewlock-NetEscapades.EnumGenerators/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/debug_net10.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:01:12.82
+build rc 0
+== test
+Passed!  - Failed:     0, Passed:  2319, Skipped:     0, Total:  2319, Duration: 1 s - NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll (net7.0)
+Passed!  - Failed:     0, Passed:  2319, Skipped:     0, Total:  2319, Duration: 1 s - NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll (net8.0)
+Passed!  - Failed:     0, Passed:  2319, Skipped:     0, Total:  2319, Duration: 1 s - NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll (net9.0)
+Passed!  - Failed:     0, Passed:  2319, Skipped:     0, Total:  2319, Duration: 1 s - NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll (net10.0)
+Passed!  - Failed:     0, Passed:    14, Skipped:     1, Total:    15, Duration: 106 ms - NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll (net7.0)
+Passed!  - Failed:     0, Passed:    14, Skipped:     1, Total:    15, Duration: 133 ms - NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll (net6.0)
+Passed!  - Failed:     0, Passed:    14, Skipped:     1, Total:    15, Duration: 189 ms - NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll (net8.0)
+Passed!  - Failed:     0, Passed:    14, Skipped:     1, Total:    15, Duration: 205 ms - NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll (net9.0)
+Passed!  - Failed:     0, Passed:    14, Skipped:     1, Total:    15, Duration: 106 ms - NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll (net10.0)
+Passed!  - Failed:     0, Passed:     7, Skipped:     1, Total:     8, Duration: 12 ms - NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll (net6.0)
+Passed!  - Failed:     0, Passed:     7, Skipped:     1, Total:     8, Duration: 11 ms - NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll (net7.0)
+Passed!  - Failed:     0, Passed:     7, Skipped:     1, Total:     8, Duration: 140 ms - NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll (net8.0)
+Passed!  - Failed:     0, Passed:     7, Skipped:     1, Total:     8, Duration: 18 ms - NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll (net9.0)
+Passed!  - Failed:     0, Passed:     7, Skipped:     1, Total:     8, Duration: 10 ms - NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll (net10.0)
+Passed!  - Failed:     0, Passed:  4808, Skipped:     0, Total:  4808, Duration: 2 s - NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll (net6.0)
+Passed!  - Failed:     0, Passed:  4809, Skipped:     0, Total:  4809, Duration: 3 s - NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll (net7.0)
+Passed!  - Failed:     0, Passed:  4809, Skipped:     0, Total:  4809, Duration: 2 s - NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll (net8.0)
+Passed!  - Failed:     0, Passed:  4809, Skipped:     0, Total:  4809, Duration: 2 s - NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll (net9.0)
+Passed!  - Failed:     0, Passed:  4809, Skipped:     0, Total:  4809, Duration: 2 s - NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll (net10.0)
+Passed!  - Failed:     0, Passed:  2325, Skipped:     0, Total:  2325, Duration: 1 s - NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll (net6.0)
+Passed!  - Failed:     0, Passed:  2326, Skipped:     0, Total:  2326, Duration: 1 s - NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll (net7.0)
+Passed!  - Failed:     0, Passed:  2326, Skipped:     0, Total:  2326, Duration: 1 s - NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll (net9.0)
+Passed!  - Failed:     0, Passed:  2326, Skipped:     0, Total:  2326, Duration: 1 s - NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll (net8.0)
+Passed!  - Failed:     0, Passed:  2326, Skipped:     0, Total:  2326, Duration: 1 s - NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll (net10.0)
+Passed!  - Failed:     0, Passed:   409, Skipped:     0, Total:   409, Duration: 1 m - NetEscapades.EnumGenerators.Tests.dll (net10.0)
+test rc 0

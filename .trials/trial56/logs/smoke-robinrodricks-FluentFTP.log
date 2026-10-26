@@ -1,0 +1,20 @@
+== build
+/home/user/cand/robinrodricks-FluentFTP/FluentFTP/Client/FakeClient/FakeFtpClient.cs(31,32): warning CS0067: The event 'FakeFtpClient.ValidateCertificate' is never used [/home/user/cand/robinrodricks-FluentFTP/FluentFTP/FluentFTP.csproj::TargetFramework=netstandard2.0]
+/home/user/cand/robinrodricks-FluentFTP/FluentFTP/Helpers/FileListings.cs(17,60): warning CS1573: Parameter 'client' has no matching param tag in the XML comment for 'FileListings.FileExistsInNameListing(BaseFtpClient, string[], string)' (but other parameters do) [/home/user/cand/robinrodricks-FluentFTP/FluentFTP/FluentFTP.csproj::TargetFramework=netstandard2.0]
+/home/user/cand/robinrodricks-FluentFTP/FluentFTP/Client/FakeClient/FakeAsyncFtpClient.cs(31,32): warning CS0067: The event 'FakeAsyncFtpClient.ValidateCertificate' is never used [/home/user/cand/robinrodricks-FluentFTP/FluentFTP/FluentFTP.csproj::TargetFramework=netstandard2.1]
+/home/user/cand/robinrodricks-FluentFTP/FluentFTP/Client/FakeClient/FakeFtpClient.cs(31,32): warning CS0067: The event 'FakeFtpClient.ValidateCertificate' is never used [/home/user/cand/robinrodricks-FluentFTP/FluentFTP/FluentFTP.csproj::TargetFramework=netstandard2.1]
+/home/user/cand/robinrodricks-FluentFTP/FluentFTP/Client/FakeClient/FakeAsyncFtpClient.cs(33,36): warning CS0067: The event 'FakeAsyncFtpClient.ConfigureAuthentication' is never used [/home/user/cand/robinrodricks-FluentFTP/FluentFTP/FluentFTP.csproj::TargetFramework=netstandard2.1]
+/home/user/cand/robinrodricks-FluentFTP/FluentFTP/Client/FakeClient/FakeFtpClient.cs(33,36): warning CS0067: The event 'FakeFtpClient.ConfigureAuthentication' is never used [/home/user/cand/robinrodricks-FluentFTP/FluentFTP/FluentFTP.csproj::TargetFramework=netstandard2.1]
+/home/user/cand/robinrodricks-FluentFTP/FluentFTP/Helpers/FileListings.cs(17,60): warning CS1573: Parameter 'client' has no matching param tag in the XML comment for 'FileListings.FileExistsInNameListing(BaseFtpClient, string[], string)' (but other parameters do) [/home/user/cand/robinrodricks-FluentFTP/FluentFTP/FluentFTP.csproj::TargetFramework=netstandard2.1]
+/home/user/cand/robinrodricks-FluentFTP/FluentFTP.Tests/Unit/PathInsecureTests.cs(30,19): warning CS8600: Converting null literal or possible null value to non-nullable type. [/home/user/cand/robinrodricks-FluentFTP/FluentFTP.Tests/FluentFTP.Tests.csproj]
+/home/user/cand/robinrodricks-FluentFTP/FluentFTP.Tests/Unit/PathSanitizerTests.cs(17,10): warning CS8618: Non-nullable field '_insecureClient' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the field as nullable. [/home/user/cand/robinrodricks-FluentFTP/FluentFTP.Tests/FluentFTP.Tests.csproj]
+/home/user/cand/robinrodricks-FluentFTP/FluentFTP.Tests/Unit/PathSanitizerTests.cs(45,19): warning CS8600: Converting null literal or possible null value to non-nullable type. [/home/user/cand/robinrodricks-FluentFTP/FluentFTP.Tests/FluentFTP.Tests.csproj]
+/home/user/cand/robinrodricks-FluentFTP/FluentFTP.Tests/Unit/PathInsecureTests.cs(12,32): warning CS8618: Non-nullable field '_insecureClient' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the field as nullable. [/home/user/cand/robinrodricks-FluentFTP/FluentFTP.Tests/FluentFTP.Tests.csproj]
+    54 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:22.46
+build rc 0
+== test
+Failed!  - Failed:     3, Passed:   270, Skipped:     0, Total:   273, Duration: 10 s - FluentFTP.Tests.dll (net7.0)
+test rc 1
