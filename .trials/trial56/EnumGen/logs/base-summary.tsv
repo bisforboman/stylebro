@@ -1,0 +1,6 @@
+build	0	30s	dotnet build NetEscapades.EnumGenerators.sln -c Debug
+twae-Debug	0	23s	twae Debug
+test-Debug	0	238s	env CFG=Debug bash -c dotnet test NetEscapades.EnumGenerators.sln -c $CFG
+twae-Release	0	23s	twae Release
+test-Release	0	225s	env CFG=Release bash -c dotnet test NetEscapades.EnumGenerators.sln -c $CFG
+DONE

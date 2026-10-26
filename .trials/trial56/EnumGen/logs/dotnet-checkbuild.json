@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "command": "format",
+  "previewOf": null,
+  "path": "/home/user/w56/EnumGen/dotnet",
+  "write": false,
+  "settings": [],
+  "conventions": [],
+  "sonar": null,
+  "agentsMd": null,
+  "runs": [
+    {
+      "run": 1,
+      "filesChanged": [],
+      "changesPerRule": {}
+    }
+  ],
+  "changesPerRule": {},
+  "filesPerRule": null,
+  "keptFindings": [
+    {
+      "path": "tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs",
+      "line": 26,
+      "column": 38,
+      "rule": "BRO1306",
+      "reason": "NewNameMeansSomethingElse",
+      "reasonText": "at a use of the name, the new name would mean something else",
+      "message": "Rename '_enum' to 'Enum'"
+    },
+    {
+      "path": "tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs",
+      "line": 53,
+      "column": 38,
+      "rule": "BRO1306",
+      "reason": "NewNameMeansSomethingElse",
+      "reasonText": "at a use of the name, the new name would mean something else",
+      "message": "Rename '_enum' to 'Enum'"
+    },
+    {
+      "path": "tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs",
+      "line": 73,
+      "column": 36,
+      "rule": "BRO1306",
+      "reason": "NewNameMeansSomethingElse",
+      "reasonText": "at a use of the name, the new name would mean something else",
+      "message": "Rename '_enum' to 'Enum'"
+    },
+    {
+      "path": "tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs",
+      "line": 109,
+      "column": 36,
+      "rule": "BRO1306",
+      "reason": "NewNameMeansSomethingElse",
+      "reasonText": "at a use of the name, the new name would mean something else",
+      "message": "Rename '_enum' to 'Enum'"
+    },
+    {
+      "path": "tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs",
+      "line": 300,
+      "column": 36,
+      "rule": "BRO1306",
+      "reason": "NewNameMeansSomethingElse",
+      "reasonText": "at a use of the name, the new name would mean something else",
+      "message": "Rename '_enum' to 'Enum'"
+    },
+    {
+      "path": "tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs",
+      "line": 421,
+      "column": 36,
+      "rule": "BRO1306",
+      "reason": "NewNameMeansSomethingElse",
+      "reasonText": "at a use of the name, the new name would mean something else",
+      "message": "Rename '_enum' to 'Enum'"
+    }
+  ],
+  "patch": null,
+  "clean": true,
+  "exitCode": 0,
+  "notChecked": [
+    "IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)"
+  ]
+}

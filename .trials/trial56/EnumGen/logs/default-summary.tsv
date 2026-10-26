@@ -1,0 +1,12 @@
+preview	3	161s	bro preview init
+setup	0	11s	bash -c for f in Directory.Build.props build/Directory.Build.props tests/NetEscapades.EnumGenerators.Benchmarks/Directory.Build.props; do python3 /home/user/stylebro/.trials/trial56/addref.py $f "<PackageReference Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial56.1\" PrivateAssets=\"all\" />"; done && git diff --stat && bro init --write
+format	3	121s	bro format
+check	0	83s	bro check
+check-json	0
+checkbuild	0	428s	bro check --build
+checkbuild-json	0
+twae-Debug	0	41s	twae Debug
+test-Debug	0	475s	env CFG=Debug bash -c dotnet test NetEscapades.EnumGenerators.sln -c $CFG
+twae-Release	0	32s	twae Release
+test-Release	0	235s	env CFG=Release bash -c dotnet test NetEscapades.EnumGenerators.sln -c $CFG
+DONE

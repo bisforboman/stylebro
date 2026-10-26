@@ -1,0 +1,11 @@
+base start 02:41
+base done 02:50
+default start 02:50
+default/dotnet restarted after the setup fix 02:54
+default start 02:54
+default done 03:32
+dotnet start 03:32
+dotnet done 04:20
+soak start 04:20
+soak done rc=1 04:46
+CHAIN-DONE

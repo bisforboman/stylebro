@@ -1,0 +1,117 @@
+Previewing 'bro init --write' and 'bro format' on a copy; nothing in /home/user/w56/EnumGen/default changes.
+Copying the repository to /tmp/stylebro-preview-5VoyF6/default... 0s
+Conventions in the code (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  kept     private fields: 31 of 31 named '_field' -> _camelCase
+  default  '{' of multi-line blocks: 1121 of 1121 on its own line -> all
+  default  else/catch/finally after '}': 39 of 39 on a new line -> true
+  default  one-line if/else/loop/using/lock bodies: 201 of 211 with braces -> true
+  default  one-line jumps ('if (x) return;'): 146 in braces -> false
+  off      operators where a line wraps: 89 at the start of the line, 46 at the end of the line -> BRO1520 is off
+  kept     '=>' where a line wraps: 196 of 211 at the start of the line -> beginning_of_line
+  default  '=' where a line wraps: 83 of 83 at the end of the line -> end_of_line
+  default  multi-line initializers: 94 of 98 with a trailing comma -> include
+  off      empty strings: 18 string.Empty, 10 "" -> BRO1106 is off
+  default  null checks: 88 of 90 'is null' -> pattern_matching
+  default  one-line <summary> texts: 35 of 35 on three lines -> multi_line
+  kept     default values: 25 of 25 'default' -> true
+  default  ')' of split lists: 512 of 513 after the last item -> last_item
+  off      split lists: 109 first item on the next line, 61 first item after '(' -> BRO1107 is off
+  default  ': base(...)'/': this(...)': 7 of 7 on its own line -> own_line
+  default  'where' constraints: 10 of 11 on their own line -> own_line
+  default  'new T { ... }' with an initializer: 13 of 13 without '()' -> omit
+  off      switch sections: 1 after a blank line, 3 without a blank line -> BRO1526 is off
+  default  files' using directives: 62 of 62 outside the namespace -> outside_namespace
+  off      mixed arithmetic ('a + b * c'): 2 with parentheses, 4 without parentheses -> BRO1406 is off
+  default  statements on their 'if'/loop/'case' line: 18 on a line of their own -> false
+  default  types' members: 53 of 67 in BRO1001's order -> warning
+  mixed    overloads BRO1001 could split: 1 apart, 5 next to each other -> default stays (false)
+  too few  lambda-first calls: 2 calls -> default stays (false)
+  default  split lists' items: 165 of 181 one per line -> warning
+  default  unsigned literal suffixes: 10 of 10 upper case ('0U', '1UL') -> warning
+  default  private-by-default members: 206 of 230 with 'private' -> for_non_interface_members
+  default  internal-by-default types: 17 of 20 with 'internal' -> warning
+  off      property summaries: 5 starting with 'Gets'/'Sets', 12 in their own words -> BRO1604 is off
+  default  adjacent locals of one type: 90 of 90 declared one by one -> warning
+  default  declarations with 2+ attributes: 109 of 118 one per list ('[A]' '[B]') -> warning
+  default  adjacent fields of one type: 37 of 41 declared one by one -> warning
+  default  private static fields: 9 of 11 without a prefix -> warning
+  too few  usings inside a namespace: 2 usings -> default stays (warning)
+  default  built-in type names: 87 of 87 only keywords ('int') -> warning
+  default  empty blocks ('{ }'): 7 of 7 on two lines -> false
+  default  statement blocks ('if (x) { y(); }'): 210 of 210 on several lines -> warning
+  default  auto-property accessors ('{ get; set; }'): 30 of 30 on one line -> warning
+  kept     C# files' line endings: 102 of 102 LF -> lf
+  default  statements after a block's '}': 178 of 185 after a blank line -> warning
+  too few  nested ifs BRO1149 would merge: 1 nested if -> default stays (warning)
+  default  neighbouring members: 750 of 898 with a blank line between -> warning
+  default  doc comments below code: 51 of 51 after a blank line -> warning
+  default  '//' comments above code: 242 of 242 right above the code -> warning
+  default  '//' comments below code: 130 of 143 after a blank line -> warning
+  default  doc comment texts: 77 of 90 ending with a period -> warning
+  default  doc element order: 7 of 7 in BRO1619's order -> warning
+  default  keywords in doc comments: 12 of 16 '<see langword="null"/>' -> warning
+  default  non-private fields: 11 of 11 PascalCase or as your naming rule says -> warning
+  default  doc comments above their element: 62 of 63 right above it -> warning
+  too few  primary-constructor parameter names: 2 parameters -> default stays (warning)
+  default  tuple element names: 19 of 23 '(int Count, ...)' -> PascalCase
+  default  using directives: 79 of 81 files sorted, 57 of 58 with System first -> sorted, System first
+  default  private constants/static readonly fields: 31 of 35 PascalCase -> PascalCase
+  default  spacing, control-flow keywords: 288 of 289 'if (x)' -> 'if (x)'
+  default  spacing, control-flow parentheses: 289 of 289 'if (x)' -> 'if (x)'
+  default  spacing, parenthesized expressions: 105 of 105 '(a + b)' -> '(a + b)'
+  default  spacing, cast parentheses: 156 of 156 '(int)x' -> '(int)x'
+  default  spacing, casts: 152 of 156 '(int)x' -> '(int)x'
+  default  spacing, call arguments: 2055 of 2055 'F(x)' -> 'F(x)'
+  default  spacing, declared parameters: 521 of 521 'void F(int x)' -> 'void F(int x)'
+Summary:
+  Kept your style for 51 settings: wrote stylebro_private_field_naming, stylebro_arrow_placement_when_wrapping,
+    csharp_prefer_simple_default_expression, end_of_line; 47 were already StyleBro's default.
+  Turned 6 rules off because your code mixes both forms: BRO1520 (operators where a line wraps),
+    BRO1106 (empty strings), BRO1107 (split lists), BRO1526 (switch sections),
+    BRO1406 (mixed arithmetic ('a + b * c')), BRO1604 (property summaries).
+  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
+  4 settings had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_allow_leading_multiline_lambda,
+    dotnet_diagnostic.BRO1126.severity, dotnet_diagnostic.BRO1149.severity, dotnet_diagnostic.BRO1302.severity.
+Settings: 55 lines in .editorconfig; 4 lines in Directory.Build.props (StyleBro.Analyzers); 6 lines in build/Directory.Build.props (StyleBro.Analyzers); 4 lines in tests/NetEscapades.EnumGenerators.Benchmarks/Directory.Build.props (StyleBro.Analyzers)
+  StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial56.1 to build/Directory.Build.props, Directory.Build.props, tests/NetEscapades.EnumGenerators.Benchmarks/Directory.Build.props for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).
+Format run 1... 1m 53s
+Format run 2... 5s
+Format: 80 files, 555 reported changes, nothing left to change after 1 run, but not verified (below)
+  IDE0055  Whitespace and formatting                   45 files
+  BRO1517  Code should not contain multiple blan...    23 files
+  BRO1505  Elements should be separated by a bla...    19 files
+  BRO1001  Members should be ordered                   17 files
+  BRO1108  Parameters should be on the same line...    14 files
+  BRO1521  Place '=>' consistently when an expre...    12 files
+  BRO1603  Documentation text should end with a ...    12 files
+  BRO1504  Single-line comments should be preced...    11 files
+  BRO1102  Each attribute should be in its own b...     9 files
+  BRO1519  Closing brace should be followed by b...     6 files
+  ... and 24 more rules
+Sample (IDE0055, src/NetEscapades.EnumGenerators.Generators/Diagnostics/DefinitionAnalyzers/DuplicateEnumValueAnalyzer.cs):
+  (removes trailing whitespace)
+Sample (BRO1517, tests/NetEscapades.EnumGenerators.IntegrationTests/SerializationOptionsTests.cs; BRO1104 changed this file too):
+  (removes a blank line)
+Sample (BRO1505, tests/NetEscapades.EnumGenerators.IntegrationTests/EnumInFooExtensionEverythingTests.cs):
+  (adds a blank line)
+Clean: 6 findings kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them (https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose).
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(26,38): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(53,38): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(73,36): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(109,36): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(300,36): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(421,36): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+Baseline (in the patch): stylebro.baseline: added 6 kept findings, so the build and 'format --verify-no-changes' skip them (new violations still fail; delete an entry to see it again) (https://bisforboman.github.io/stylebro/baseline/).
+Full diff: .git/stylebro-preview.patch (4,944 lines)
+Note: Not built: build/, tests/NetEscapades.EnumGenerators.Nuget.AnalyzerTests/, tests/NetEscapades.EnumGenerators.Nuget.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.Interceptors.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.Interceptors.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard/: no configuration of NetEscapades.EnumGenerators.sln builds their projects, so 'dotnet restore' skips them and 'format' leaves them alone. Where a Directory.Build.props above brings StyleBro into their builds, format each on their own: 'bro format build/_build.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.AnalyzerTests/NetEscapades.EnumGenerators.Nuget.AnalyzerTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.IntegrationTests/NetEscapades.EnumGenerators.Nuget.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.Interceptors.IntegrationTests/NetEscapades.EnumGenerators.Nuget.Interceptors.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.Interceptors.IntegrationTests/NetEscapades.EnumGenerators.Nuget.NetStandard.Interceptors.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.IntegrationTests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets.IntegrationTests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard/NetEscapades.EnumGenerators.Nuget.NetStandard.csproj'.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Not checked: NetEscapades.EnumGenerators.IntegrationTests in Release: it takes an in-solution source generator, so only a build checks that configuration ('bro check' builds it)
+Not checked: NetEscapades.EnumGenerators.Interceptors.IntegrationTests in Release: it takes an in-solution source generator, so only a build checks that configuration ('bro check' builds it)
+Not checked: NetEscapades.EnumGenerators.NetStandard in Release: it takes an in-solution source generator, so only a build checks that configuration ('bro check' builds it)
+Not checked: NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests in Release: it takes an in-solution source generator, so only a build checks that configuration ('bro check' builds it)
+Not checked: NetEscapades.EnumGenerators.NetStandard.SystemMemory in Release: it takes an in-solution source generator, so only a build checks that configuration ('bro check' builds it)
+Not checked: NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests in Release: it takes an in-solution source generator, so only a build checks that configuration ('bro check' builds it)
+Not verified: 6 parts of the build weren't checked (the 'Not checked:' lines above); the rest is clean. The build may still report findings there: fix what's named, or build it (bro check --build).
+Done in 2m 34s.

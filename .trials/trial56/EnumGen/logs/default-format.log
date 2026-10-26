@@ -1,0 +1,101 @@
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+Not built: build/, tests/NetEscapades.EnumGenerators.Nuget.AnalyzerTests/, tests/NetEscapades.EnumGenerators.Nuget.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.Interceptors.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.Interceptors.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard/: no configuration of NetEscapades.EnumGenerators.sln builds their projects, so 'dotnet restore' skips them and 'format' leaves them alone. Where a Directory.Build.props above brings StyleBro into their builds, format each on their own: 'bro format build/_build.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.AnalyzerTests/NetEscapades.EnumGenerators.Nuget.AnalyzerTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.IntegrationTests/NetEscapades.EnumGenerators.Nuget.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.Interceptors.IntegrationTests/NetEscapades.EnumGenerators.Nuget.Interceptors.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.Interceptors.IntegrationTests/NetEscapades.EnumGenerators.Nuget.NetStandard.Interceptors.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.IntegrationTests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets.IntegrationTests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard/NetEscapades.EnumGenerators.Nuget.NetStandard.csproj'.
+Generators: building NetEscapades.EnumGenerators.Generators, NetEscapades.EnumGenerators.Interceptors, NetEscapades.EnumGenerators.Attributes, NetEscapades.EnumGenerators.Interceptors.Attributes, NetEscapades.EnumGenerators first (in the default configuration, the one 'dotnet format' loads): the code uses them as a source generator, and without their output the generated code would be missing from the checks.
+Generators: building NetEscapades.EnumGenerators.Attributes, NetEscapades.EnumGenerators.Generators first (in Release, for the runs of that configuration): the code uses them as a source generator, and without their output the generated code would be missing from the checks.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net451, net48, net6.0, net7.0, netstandard2.0). net5.0, net8.0, net9.0, netcoreapp2.1, netcoreapp3.1: no run of their own, the code compiles the same as for another framework of the same kind (the same '#if' symbols tested, files and settings). net10.0, net7.0: only the projects whose code compiles differently there.
+Configurations: runs for Release (NetEscapades.EnumGenerators.IntegrationTests, NetEscapades.EnumGenerators.NetStandard.IntegrationTests, NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests, NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests) too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.
+Shared files: these projects compile the same files with other '#if' symbols or settings, so each group gets a run of its own (loaded together, 'dotnet format' crashes: https://github.com/dotnet/roslyn/issues/86001): NetEscapades.EnumGenerators.IntegrationTests | NetEscapades.EnumGenerators.Interceptors.IntegrationTests, NetEscapades.EnumGenerators.NetStandard.IntegrationTests | NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests | NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests | NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests; NetEscapades.EnumGenerators.IntegrationTests, NetEscapades.EnumGenerators.Interceptors.IntegrationTests | NetEscapades.EnumGenerators.NetStandard.IntegrationTests | NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests | NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests | NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests; NetEscapades.EnumGenerators.IntegrationTests | NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests | NetEscapades.EnumGenerators.Tests; NetEscapades.EnumGenerators.Generators, NetEscapades.EnumGenerators.Interceptors, NetEscapades.EnumGenerators.NetStandard.SystemMemory | NetEscapades.EnumGenerators.NetStandard; NetEscapades.EnumGenerators.IntegrationTests | NetEscapades.EnumGenerators.NetStandard.IntegrationTests | NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests | NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.
+Checked net48 (run 1 of 21)
+Checked netstandard2.0, part 2 of 2 (run 2 of 21)
+Checked net10.0, part 1 of 5 (run 3 of 21)
+Checked net6.0, part 5 of 5 (run 4 of 21)
+Checked net7.0, part 1 of 3 (run 5 of 21)
+Checked net10.0, part 2 of 5 (run 6 of 21)
+Checked net10.0, part 3 of 5 (run 7 of 21)
+Checked net7.0, part 2 of 3 (run 8 of 21)
+Checked net6.0, part 1 of 5 (run 9 of 21)
+Checked net10.0, part 4 of 5 (run 10 of 21)
+Checked net6.0, part 2 of 5 (run 11 of 21)
+Checked net7.0, part 3 of 3 (run 12 of 21)
+Checked net6.0, part 3 of 5 (run 13 of 21)
+Checked net10.0, part 5 of 5 (run 14 of 21)
+Checked net451 (run 15 of 21)
+Checked net6.0, part 4 of 5 (run 16 of 21)
+Checked netstandard2.0, part 1 of 2 (run 17 of 21)
+Checked net6.0, Release, part 1 of 4 (run 18 of 21)
+Checked net6.0, Release, part 2 of 4 (run 19 of 21)
+Checked net6.0, Release, part 3 of 4 (run 20 of 21)
+Checked net6.0, Release, part 4 of 4 (run 21 of 21)
+== net10.0, part 1 of 5 (1 project(s), 17 files with findings)
+== net10.0, part 2 of 5 (3 project(s), 34 files with findings)
+'dotnet format' had warnings loading the workspace in its net10.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+== net10.0, part 3 of 5 (1 project(s), 2 files with findings)
+== net10.0, part 4 of 5 (1 project(s), 16 files with findings)
+== net10.0, part 5 of 5 (1 project(s), 17 files with findings)
+== net451 (3 project(s), 6 files with findings)
+== net48 (1 project(s), 2 files with findings)
+== net6.0, part 1 of 5 (5 project(s), 38 files with findings)
+== net6.0, part 2 of 5 (1 project(s), 16 files with findings)
+== net6.0, part 3 of 5 (1 project(s), 2 files with findings)
+== net6.0, part 4 of 5 (1 project(s), 16 files with findings)
+== net6.0, part 5 of 5 (1 project(s), 18 files with findings)
+== net7.0, part 1 of 3 (1 project(s), 18 files with findings)
+== net7.0, part 2 of 3 (1 project(s), 18 files with findings)
+== net7.0, part 3 of 3 (1 project(s), 16 files with findings)
+== netstandard2.0, part 1 of 2 (8 project(s), 43 files with findings)
+== netstandard2.0, part 2 of 2 (1 project(s), 2 files with findings)
+== net6.0, Release, part 1 of 4 (1 project(s), 18 files with findings)
+== net6.0, Release, part 2 of 4 (1 project(s), 16 files with findings)
+== net6.0, Release, part 3 of 4 (1 project(s), 16 files with findings)
+== net6.0, Release, part 4 of 4 (1 project(s), 18 files with findings)
+Run 1: 80 files changed:
+  src/NetEscapades.EnumGenerators.Attributes/EnumExtensionsAttribute.cs
+  src/NetEscapades.EnumGenerators.Attributes/MetadataSource.cs
+  src/NetEscapades.EnumGenerators.Generators/DefaultConfiguration.cs
+  src/NetEscapades.EnumGenerators.Generators/Diagnostics/AnalyzerHelpers.cs
+  src/NetEscapades.EnumGenerators.Generators/Diagnostics/CodeFixProviderBase.cs
+  src/NetEscapades.EnumGenerators.Generators/Diagnostics/CompilationExtensions.cs
+  src/NetEscapades.EnumGenerators.Generators/Diagnostics/DefinitionAnalyzers/DuplicateEnumValueAnalyzer.cs
+  src/NetEscapades.EnumGenerators.Generators/Diagnostics/DefinitionAnalyzers/DuplicateExtensionClassAnalyzer.cs
+  src/NetEscapades.EnumGenerators.Generators/Diagnostics/DefinitionAnalyzers/EnumInGenericTypeAnalyzer.cs
+  src/NetEscapades.EnumGenerators.Generators/Diagnostics/UsageAnalyzers/GetNamesCodeFixProvider.cs
+  ... and 70 more
+Checked net48 (run 1 of 21)
+Checked netstandard2.0, part 2 of 2 (run 2 of 21)
+Checked net6.0, part 5 of 5 (run 3 of 21)
+Checked net6.0, Release, part 1 of 4 (run 4 of 21)
+Checked net7.0, part 1 of 3 (run 5 of 21)
+Checked net6.0, Release, part 2 of 4 (run 6 of 21)
+Checked net7.0, part 2 of 3 (run 7 of 21)
+Checked net10.0, part 1 of 5 (run 8 of 21)
+Checked net6.0, Release, part 3 of 4 (run 9 of 21)
+Checked net6.0, Release, part 4 of 4 (run 10 of 21)
+Checked net7.0, part 3 of 3 (run 11 of 21)
+Checked net6.0, part 1 of 5 (run 12 of 21)
+Checked net6.0, part 2 of 5 (run 13 of 21)
+Checked net10.0, part 2 of 5 (run 14 of 21)
+Checked netstandard2.0, part 1 of 2 (run 15 of 21)
+Checked net6.0, part 3 of 5 (run 16 of 21)
+Checked net10.0, part 3 of 5 (run 17 of 21)
+Checked net6.0, part 4 of 5 (run 18 of 21)
+Checked net10.0, part 4 of 5 (run 19 of 21)
+Checked net10.0, part 5 of 5 (run 20 of 21)
+Checked net451 (run 21 of 21)
+Run 2: 0 files changed, but not everything was checked (below).
+6 findings kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them (https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose).
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(26,38): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(53,38): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(73,36): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(109,36): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(300,36): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(421,36): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+Baseline: stylebro.baseline: added 6 kept findings, so the build and 'format --verify-no-changes' skip them (new violations still fail; delete an entry to see it again) (https://bisforboman.github.io/stylebro/baseline/).
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Not checked: NetEscapades.EnumGenerators.IntegrationTests in Release: it takes an in-solution source generator, so only a build checks that configuration ('bro check' builds it)
+Not checked: NetEscapades.EnumGenerators.Interceptors.IntegrationTests in Release: it takes an in-solution source generator, so only a build checks that configuration ('bro check' builds it)
+Not checked: NetEscapades.EnumGenerators.NetStandard in Release: it takes an in-solution source generator, so only a build checks that configuration ('bro check' builds it)
+Not checked: NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests in Release: it takes an in-solution source generator, so only a build checks that configuration ('bro check' builds it)
+Not checked: NetEscapades.EnumGenerators.NetStandard.SystemMemory in Release: it takes an in-solution source generator, so only a build checks that configuration ('bro check' builds it)
+Not checked: NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests in Release: it takes an in-solution source generator, so only a build checks that configuration ('bro check' builds it)
+Not verified: 6 parts of the build weren't checked (the 'Not checked:' lines above); the rest is clean. The build may still report findings there: fix what's named, or build it (bro check --build).
