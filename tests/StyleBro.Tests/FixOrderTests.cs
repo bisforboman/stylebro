@@ -870,8 +870,8 @@ public class FixOrderTests
     // start of its line gets the list's indentation in every order, not the comma's empty one.
     [Fact]
     public Task ListsWithACommaAtColumnZero_IndentTheItem() => AssertConvergesInEveryOrderWithConfigAsync(
-        "public class C\n{\n\tpublic int F(string key, System.Func<int, int> f, int x = 0, int token = 0) => 0;\n\n" +
-        "\tpublic void M()\n\t{\n\t\t_ = F(\"foo\", y => y, x: 1\n, token: 2);\n\t}\n}\n",
+        "public class C\n{\n\tpublic int F(string key, System.Func<int, int> f, int x = 0, int token = 0) => 0;\n\n"
+        + "\tpublic void M()\n\t{\n\t\t_ = F(\"foo\", y => y, x: 1\n, token: 2);\n\t}\n}\n",
         "indent_style = tab\nindent_size = 4\nstylebro_closing_parenthesis_placement = own_line\n",
         "BRO1107",
         "BRO1108",

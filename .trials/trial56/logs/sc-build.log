@@ -1,0 +1,24 @@
+  Determining projects to restore...
+  Restored /home/user/stylebro/samples/Messy/Messy.csproj (in 202 ms).
+  Restored /home/user/stylebro/src/StyleBro.Package/StyleBro.Package.csproj (in 2.7 sec).
+  Restored /home/user/stylebro/src/StyleBro.CodeFixes/StyleBro.CodeFixes.csproj (in 3.3 sec).
+  Restored /home/user/stylebro/src/StyleBro.FormatHost/StyleBro.FormatHost.csproj (in 3.3 sec).
+  Restored /home/user/stylebro/src/StyleBro.Migrate/StyleBro.Migrate.csproj (in 289 ms).
+  Restored /home/user/stylebro/src/StyleBro.Analyzers/StyleBro.Analyzers.csproj (in 9 ms).
+  Restored /home/user/stylebro/tests/StyleBro.Tests/StyleBro.Tests.csproj (in 3.34 sec).
+  StyleBro.Analyzers -> /home/user/stylebro/src/StyleBro.Analyzers/bin/Debug/netstandard2.0/StyleBro.Analyzers.dll
+  StyleBro.FormatHost -> /home/user/stylebro/src/StyleBro.FormatHost/bin/Debug/net8.0/StyleBro.FormatHost.dll
+  StyleBro.CodeFixes -> /home/user/stylebro/src/StyleBro.CodeFixes/bin/Debug/netstandard2.0/StyleBro.CodeFixes.dll
+  StyleBro.Migrate -> /home/user/stylebro/src/StyleBro.Migrate/bin/Debug/net8.0/StyleBro.Migrate.dll
+  StyleBro.Package -> /home/user/stylebro/src/StyleBro.Package/bin/Debug/netstandard2.0/StyleBro.Package.dll
+  Messy -> /home/user/stylebro/samples/Messy/bin/Debug/net10.0/Messy.dll
+/home/user/stylebro/tests/StyleBro.Tests/FixOrderTests.cs(873,118): warning BRO1520: Put '+' at the beginning of the line (https://bisforboman.github.io/stylebro/rules/BRO1520/) [/home/user/stylebro/tests/StyleBro.Tests/StyleBro.Tests.csproj]
+  StyleBro.Tests -> /home/user/stylebro/tests/StyleBro.Tests/bin/Debug/net10.0/StyleBro.Tests.dll
+
+Build succeeded.
+
+/home/user/stylebro/tests/StyleBro.Tests/FixOrderTests.cs(873,118): warning BRO1520: Put '+' at the beginning of the line (https://bisforboman.github.io/stylebro/rules/BRO1520/) [/home/user/stylebro/tests/StyleBro.Tests/StyleBro.Tests.csproj]
+    1 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:45.70
