@@ -1,0 +1,4 @@
+init rc=0
+format rc=3
+check rc=0
+checkbuild rc=0

@@ -1,0 +1,39 @@
+Checking StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Not built: build/, tests/NetEscapades.EnumGenerators.Nuget.AnalyzerTests/, tests/NetEscapades.EnumGenerators.Nuget.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.Interceptors.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.Interceptors.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard/: no configuration of NetEscapades.EnumGenerators.sln builds their projects, so 'dotnet restore' skips them and 'format' leaves them alone. Where a Directory.Build.props above brings StyleBro into their builds, format each on their own: 'bro format build/_build.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.AnalyzerTests/NetEscapades.EnumGenerators.Nuget.AnalyzerTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.IntegrationTests/NetEscapades.EnumGenerators.Nuget.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.Interceptors.IntegrationTests/NetEscapades.EnumGenerators.Nuget.Interceptors.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.Interceptors.IntegrationTests/NetEscapades.EnumGenerators.Nuget.NetStandard.Interceptors.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.IntegrationTests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets.IntegrationTests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard/NetEscapades.EnumGenerators.Nuget.NetStandard.csproj'.
+Generators: building NetEscapades.EnumGenerators.Attributes, NetEscapades.EnumGenerators.Interceptors.Attributes first (in the default configuration, the one 'dotnet format' loads): the code uses them as a source generator, and without their output the generated code would be missing from the checks.
+Without StyleBro: tests/NetEscapades.EnumGenerators.Benchmarks/NetEscapades.EnumGenerators.Benchmarks.csproj has no StyleBro.Analyzers in its restore output, so StyleBro's rules don't run there. Add the package there, or restore it, then run again.
+Configurations: NetEscapades.EnumGenerators.IntegrationTests, NetEscapades.EnumGenerators.Interceptors.IntegrationTests, NetEscapades.EnumGenerators.NetStandard, NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests and 2 more: they take an in-solution source generator, so a build of their other configurations checks the code only those compile ('#if !DEBUG') at the end too.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net451, net48, net6.0, net7.0, netstandard2.0). net5.0, net8.0, net9.0, netcoreapp2.1, netcoreapp3.1: no run of their own, the code compiles the same as for another framework of the same kind (the same '#if' symbols tested, files and settings). net10.0, net7.0: only the projects whose code compiles differently there.
+Shared files: these projects compile the same files with other '#if' symbols or settings, so each group gets a run of its own (loaded together, 'dotnet format' crashes: https://github.com/dotnet/roslyn/issues/86001): NetEscapades.EnumGenerators.IntegrationTests | NetEscapades.EnumGenerators.NetStandard.IntegrationTests | NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests | NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests | NetEscapades.EnumGenerators.Tests; NetEscapades.EnumGenerators.IntegrationTests, NetEscapades.EnumGenerators.Interceptors.IntegrationTests | NetEscapades.EnumGenerators.NetStandard.IntegrationTests | NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests | NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests | NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests; NetEscapades.EnumGenerators.IntegrationTests | NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests; NetEscapades.EnumGenerators.Generators, NetEscapades.EnumGenerators.Interceptors, NetEscapades.EnumGenerators.NetStandard.SystemMemory | NetEscapades.EnumGenerators.NetStandard.
+Checked net6.0, part 2 of 5 (run 1 of 16)
+Checked net10.0, part 5 of 5 (run 2 of 16)
+Checked net451 (run 3 of 16)
+Checked net6.0, part 3 of 5 (run 4 of 16)
+Checked net7.0, part 1 of 2 (run 5 of 16)
+Checked net10.0, part 1 of 5 (run 6 of 16)
+Checked net48 (run 7 of 16)
+Checked net6.0, part 4 of 5 (run 8 of 16)
+Checked net10.0, part 2 of 5 (run 9 of 16)
+Checked net7.0, part 2 of 2 (run 10 of 16)
+Checked net10.0, part 3 of 5 (run 11 of 16)
+Checked net6.0, part 5 of 5 (run 12 of 16)
+Checked net6.0, part 1 of 5 (run 13 of 16)
+Checked net10.0, part 4 of 5 (run 14 of 16)
+Checked netstandard2.0, part 1 of 2 (run 15 of 16)
+Checked netstandard2.0, part 2 of 2 (run 16 of 16)
+'dotnet format' had warnings loading the workspace in its net10.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Building NetEscapades.EnumGenerators.IntegrationTests in Release to check it (it takes an in-solution source generator)...
+Building NetEscapades.EnumGenerators.Interceptors.IntegrationTests in Release to check it (it takes an in-solution source generator)...
+Building NetEscapades.EnumGenerators.NetStandard in Release to check it (it takes an in-solution source generator)...
+Building NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests in Release to check it (it takes an in-solution source generator)...
+Building NetEscapades.EnumGenerators.NetStandard.SystemMemory in Release to check it (it takes an in-solution source generator)...
+Building NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests in Release to check it (it takes an in-solution source generator)...
+Release build of NetEscapades.EnumGenerators.IntegrationTests: no findings.
+Release build of NetEscapades.EnumGenerators.Interceptors.IntegrationTests: no findings.
+Release build of NetEscapades.EnumGenerators.NetStandard: no findings.
+Release build of NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests: no findings.
+Release build of NetEscapades.EnumGenerators.NetStandard.SystemMemory: no findings.
+Release build of NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests: no findings.
+Clean.
