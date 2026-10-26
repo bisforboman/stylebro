@@ -1,0 +1,19 @@
+  Determining projects to restore...
+  Restored /home/user/stylebro/src/StyleBro.Package/StyleBro.Package.csproj (in 2.17 sec).
+  Restored /home/user/stylebro/src/StyleBro.Analyzers/StyleBro.Analyzers.csproj (in 3.93 sec).
+  Restored /home/user/stylebro/src/StyleBro.CodeFixes/StyleBro.CodeFixes.csproj (in 3.93 sec).
+  StyleBro.Analyzers -> /home/user/stylebro/src/StyleBro.Analyzers/bin/Release/netstandard2.0/StyleBro.Analyzers.dll
+  StyleBro.CodeFixes -> /home/user/stylebro/src/StyleBro.CodeFixes/bin/Release/netstandard2.0/StyleBro.CodeFixes.dll
+  StyleBro.Package -> /home/user/stylebro/src/StyleBro.Package/bin/Release/netstandard2.0/StyleBro.Package.dll
+  Successfully created package '/home/user/feed56/StyleBro.Analyzers.0.8.0-trial56.1.nupkg'.
+  Determining projects to restore...
+  Restored /home/user/stylebro/src/StyleBro.Migrate/StyleBro.Migrate.csproj (in 1.75 sec).
+  Restored /home/user/stylebro/src/StyleBro.FormatHost/StyleBro.FormatHost.csproj (in 2.31 sec).
+  1 of 3 projects are up-to-date for restore.
+  StyleBro.Analyzers -> /home/user/stylebro/src/StyleBro.Analyzers/bin/Release/netstandard2.0/StyleBro.Analyzers.dll
+  StyleBro.FormatHost -> /home/user/stylebro/src/StyleBro.FormatHost/bin/Release/net8.0/StyleBro.FormatHost.dll
+  StyleBro.Migrate -> /home/user/stylebro/src/StyleBro.Migrate/bin/Release/net8.0/StyleBro.Migrate.dll
+  StyleBro.Migrate -> /home/user/stylebro/src/StyleBro.Migrate/bin/Release/net8.0/StyleBro.Migrate.dll
+  StyleBro.Migrate -> /home/user/stylebro/src/StyleBro.Migrate/bin/Release/net8.0/publish/
+  Successfully created package '/home/user/feed56/StyleBro.Tool.0.8.0-trial56.1.nupkg'.
+PACK-DONE 0

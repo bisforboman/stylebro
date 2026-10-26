@@ -1,0 +1,22 @@
+== build
+  StackExchange.Exceptional.Tests -> /home/user/cand/NickCraver-StackExchange.Exceptional/tests/StackExchange.Exceptional.Tests/bin/Debug/net8.0/StackExchange.Exceptional.Tests.dll
+  Samples.ConsoleNetCore -> /home/user/cand/NickCraver-StackExchange.Exceptional/samples/Samples.ConsoleNetCore/bin/Debug/net8.0/Samples.ConsoleNetCore.dll
+  StackExchange.Exceptional.Tests -> /home/user/cand/NickCraver-StackExchange.Exceptional/tests/StackExchange.Exceptional.Tests/bin/Debug/net48/StackExchange.Exceptional.Tests.dll
+  Samples.Console -> /home/user/cand/NickCraver-StackExchange.Exceptional/samples/Samples.Console/bin/Debug/net472/win7-x64/Samples.Console.exe
+  Samples.AspNetCore -> /home/user/cand/NickCraver-StackExchange.Exceptional/samples/Samples.AspNetCore/bin/Debug/net8.0/Samples.AspNetCore.dll
+  StackExchange.Exceptional.Tests.AspNetCore -> /home/user/cand/NickCraver-StackExchange.Exceptional/tests/StackExchange.Exceptional.Tests.AspNetCore/bin/Debug/net8.0/StackExchange.Exceptional.Tests.AspNetCore.dll
+
+Build FAILED.
+
+/home/user/cand/NickCraver-StackExchange.Exceptional/samples/Samples.MVC5/Samples.MVC5.csproj : warning : Error occurred while getting package vulnerability data: Unable to load the service index for source https://www.myget.org/F/xunit/api/v3/index.json.
+/root/.nuget/packages/msbuild.sdk.systemweb/4.0.93/Sdk/Sdk.targets(31,3): error MSB4019: The imported project "/usr/lib/dotnet/sdk/10.0.113/Microsoft/VisualStudio/v18.0/WebApplications/Microsoft.WebApplication.targets" was not found. Confirm that the expression in the Import declaration "$(VSToolsPath)/WebApplications/Microsoft.WebApplication.targets", which evaluated to "/usr/lib/dotnet/sdk/10.0.113/Microsoft/VisualStudio/v18.0/WebApplications/Microsoft.WebApplication.targets", is correct, and that the file exists on disk. [/home/user/cand/NickCraver-StackExchange.Exceptional/samples/Samples.MVC5/Samples.MVC5.csproj]
+    1 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:33.51
+build rc 1
+== test
+/root/.nuget/packages/msbuild.sdk.systemweb/4.0.93/Sdk/Sdk.targets(31,3): error MSB4019: The imported project "/usr/lib/dotnet/sdk/10.0.113/Microsoft/VisualStudio/v18.0/WebApplications/Microsoft.WebApplication.targets" was not found. Confirm that the expression in the Import declaration "$(VSToolsPath)/WebApplications/Microsoft.WebApplication.targets", which evaluated to "/usr/lib/dotnet/sdk/10.0.113/Microsoft/VisualStudio/v18.0/WebApplications/Microsoft.WebApplication.targets", is correct, and that the file exists on disk. [/home/user/cand/NickCraver-StackExchange.Exceptional/samples/Samples.MVC5/Samples.MVC5.csproj]
+Passed!  - Failed:     0, Passed:    26, Skipped:     0, Total:    26, Duration: 1 s - StackExchange.Exceptional.Tests.AspNetCore.dll (net8.0)
+Passed!  - Failed:     0, Passed:    30, Skipped:    45, Total:    75, Duration: 2 s - StackExchange.Exceptional.Tests.dll (net8.0)
+test rc 1
