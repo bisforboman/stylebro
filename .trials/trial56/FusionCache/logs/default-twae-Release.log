@@ -1,0 +1,50 @@
+  Determining projects to restore...
+  Restored /home/user/w56/FusionCache/default/tests/ZiggyCreatures.FusionCache.Playground/ZiggyCreatures.FusionCache.Playground.csproj (in 426 ms).
+  Restored /home/user/w56/FusionCache/default/tests/AOTTester/AOTTester.csproj (in 416 ms).
+  Restored /home/user/w56/FusionCache/default/tests/ZiggyCreatures.FusionCache.Tests/ZiggyCreatures.FusionCache.Tests.csproj (in 422 ms).
+  19 of 22 projects are up-to-date for restore.
+  SerializerPayloadGenerator -> /home/user/w56/FusionCache/default/tests/SerializerPayloadGenerator/bin/Release/net10.0/SerializerPayloadGenerator.dll
+  ZiggyCreatures.FusionCache -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache/bin/Release/netstandard2.0/ZiggyCreatures.FusionCache.dll
+  ZiggyCreatures.FusionCache.AspNetCore.OutputCaching -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.AspNetCore.OutputCaching/bin/Release/net7.0/ZiggyCreatures.FusionCache.AspNetCore.OutputCaching.dll
+  ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack/bin/Release/net7.0/ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack.dll
+  ZiggyCreatures.FusionCache.Locking.Distributed.Redis -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Locking.Distributed.Redis/bin/Release/netstandard2.0/ZiggyCreatures.FusionCache.Locking.Distributed.Redis.dll
+  ZiggyCreatures.FusionCache.Serialization.NewtonsoftJson -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Serialization.NewtonsoftJson/bin/Release/netstandard2.0/ZiggyCreatures.FusionCache.Serialization.NewtonsoftJson.dll
+  ZiggyCreatures.FusionCache.Serialization.ProtoBufNet -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Serialization.ProtoBufNet/bin/Release/netstandard2.0/ZiggyCreatures.FusionCache.Serialization.ProtoBufNet.dll
+  ZiggyCreatures.FusionCache.Serialization.ServiceStackJson -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Serialization.ServiceStackJson/bin/Release/netstandard2.0/ZiggyCreatures.FusionCache.Serialization.ServiceStackJson.dll
+  ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack/bin/Release/netstandard2.0/ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack.dll
+  ZiggyCreatures.FusionCache.OpenTelemetry -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.OpenTelemetry/bin/Release/netstandard2.0/ZiggyCreatures.FusionCache.OpenTelemetry.dll
+  ZiggyCreatures.FusionCache -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache/bin/Release/net8.0/ZiggyCreatures.FusionCache.dll
+  ZiggyCreatures.FusionCache.Locking.Distributed.Memory -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Locking.Distributed.Memory/bin/Release/netstandard2.0/ZiggyCreatures.FusionCache.Locking.Distributed.Memory.dll
+  ZiggyCreatures.FusionCache.Chaos -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Chaos/bin/Release/netstandard2.0/ZiggyCreatures.FusionCache.Chaos.dll
+  ZiggyCreatures.FusionCache.Backplane.Memory -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Backplane.Memory/bin/Release/netstandard2.0/ZiggyCreatures.FusionCache.Backplane.Memory.dll
+  ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis/bin/Release/netstandard2.0/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis.dll
+  ZiggyCreatures.FusionCache -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache/bin/Release/net9.0/ZiggyCreatures.FusionCache.dll
+  ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis/bin/Release/net9.0/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis.dll
+  ZiggyCreatures.FusionCache -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache/bin/Release/net10.0/ZiggyCreatures.FusionCache.dll
+  ZiggyCreatures.FusionCache.AspNetCore.OutputCaching -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.AspNetCore.OutputCaching/bin/Release/net8.0/ZiggyCreatures.FusionCache.AspNetCore.OutputCaching.dll
+  ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack/bin/Release/net8.0/ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack.dll
+  ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis/bin/Release/net8.0/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis.dll
+  ZiggyCreatures.FusionCache.AspNetCore.OutputCaching -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.AspNetCore.OutputCaching/bin/Release/net10.0/ZiggyCreatures.FusionCache.AspNetCore.OutputCaching.dll
+  ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis/bin/Release/net10.0/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis.dll
+  ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack/bin/Release/net10.0/ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack.dll
+  ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack/bin/Release/netstandard2.1/ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack.dll
+  ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack/bin/Release/net7.0/ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack.dll
+  ZiggyCreatures.FusionCache.Locking.AsyncKeyed -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Locking.AsyncKeyed/bin/Release/net10.0/ZiggyCreatures.FusionCache.Locking.AsyncKeyed.dll
+  ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack/bin/Release/net10.0/ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack.dll
+  ZiggyCreatures.FusionCache.Serialization.SystemTextJson -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Serialization.SystemTextJson/bin/Release/netstandard2.0/ZiggyCreatures.FusionCache.Serialization.SystemTextJson.dll
+  ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack/bin/Release/net8.0/ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack.dll
+  ZiggyCreatures.FusionCache.Simulator -> /home/user/w56/FusionCache/default/tests/ZiggyCreatures.FusionCache.Simulator/bin/Release/net10.0/ZiggyCreatures.FusionCache.Simulator.dll
+  ZiggyCreatures.FusionCache.Locking.AsyncKeyed -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Locking.AsyncKeyed/bin/Release/netstandard2.0/ZiggyCreatures.FusionCache.Locking.AsyncKeyed.dll
+  ZiggyCreatures.FusionCache.Locking.AsyncKeyed -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Locking.AsyncKeyed/bin/Release/net8.0/ZiggyCreatures.FusionCache.Locking.AsyncKeyed.dll
+  ZiggyCreatures.FusionCache.Locking.AsyncKeyed -> /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Locking.AsyncKeyed/bin/Release/net9.0/ZiggyCreatures.FusionCache.Locking.AsyncKeyed.dll
+  AOTTester -> /home/user/w56/FusionCache/default/tests/AOTTester/bin/Release/net10.0/linux-x64/AOTTester.dll
+  ZiggyCreatures.FusionCache.Playground -> /home/user/w56/FusionCache/default/tests/ZiggyCreatures.FusionCache.Playground/bin/Release/net10.0/ZiggyCreatures.FusionCache.Playground.dll
+  ZiggyCreatures.FusionCache.Tests -> /home/user/w56/FusionCache/default/tests/ZiggyCreatures.FusionCache.Tests/bin/Release/net10.0/ZiggyCreatures.FusionCache.Tests.dll
+  WebAppTest -> /home/user/w56/FusionCache/default/tests/WebAppTest/bin/Release/net10.0/WebAppTest.dll
+  ZiggyCreatures.FusionCache.Benchmarks -> /home/user/w56/FusionCache/default/benchmarks/ZiggyCreatures.FusionCache.Benchmarks/bin/Release/net10.0/ZiggyCreatures.FusionCache.Benchmarks.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:40.64

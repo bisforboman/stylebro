@@ -1,0 +1,134 @@
+Previewing 'bro init --write' and 'bro format' on a copy; nothing in /home/user/w56/FusionCache/dotnet changes.
+Copying the repository to /tmp/stylebro-preview-xuXcdu/dotnet... 0s
+Conventions in the code (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  note     csharp_prefer_braces = true:silent in .editorconfig isn't enforced (its severity is silent or none), so your code decides
+  note     csharp_using_directive_placement = outside_namespace:silent in .editorconfig isn't enforced (its severity is silent or none), so your code decides
+  note     dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity:silent in .editorconfig isn't enforced (its severity is silent or none), so your code decides
+  note     dotnet_style_require_accessibility_modifiers = for_non_interface_members:silent in .editorconfig isn't enforced (its severity is silent or none), so your code decides
+  note     dotnet_style_predefined_type_for_locals_parameters_members = true:silent in .editorconfig isn't enforced (its severity is silent or none), so your code decides
+  note     dotnet_style_predefined_type_for_member_access = true:silent in .editorconfig isn't enforced (its severity is silent or none), so your code decides
+  kept     private fields: 30 of 30 named '_field' -> _camelCase
+  set      '{' of multi-line blocks: 1469 of 1469 on its own line -> set in .editorconfig (all)
+  set      else/catch/finally after '}': 47 of 47 on a new line -> set in .editorconfig (true)
+  both     one-line if/else/loop/using/lock bodies: 67 with braces, 80 without braces -> both allowed
+  default  one-line jumps ('if (x) return;'): 6 in braces -> false
+  off      operators where a line wraps: 18 at the start of the line, 7 at the end of the line -> .editorconfig says beginning_of_line, unenforced, code mixed: BRO1520 is off
+  kept     multi-line initializers: 128 of 167 without a trailing comma -> omit
+  kept     empty strings: 4 of 4 "" -> literal
+  default  null checks: 41 of 41 'is null' -> pattern_matching
+  too few  one-line <summary> texts: 2 places -> default stays (multi_line)
+  default  <inheritdoc/> tags: 8 of 8 '<inheritdoc/>' -> compact
+  set      default values: 19 of 19 'default' -> set in .editorconfig (true:suggestion)
+  kept     ')' of split lists: 227 of 286 on its own line -> own_line
+  default  split lists: 203 of 203 first item on the next line -> next_line
+  default  ': base(...)'/': this(...)': 18 of 18 on its own line -> own_line
+  default  'where' constraints: 13 of 13 on their own line -> own_line
+  off      'new T { ... }' with an initializer: 161 without '()', 153 with '()' -> BRO1141 is off
+  kept     switch sections: 20 of 20 without a blank line -> omit
+  default  files' using directives: 86 of 86 outside the namespace -> outside_namespace
+  set      statements on their 'if'/loop/'case' line: 120 on a line of their own -> set in .editorconfig (true)
+  off      types' members: 25 in BRO1001's order, 34 in another order -> BRO1001 is off
+  kept     lambda-first calls: 10 of 10 rest on the lambda's last line -> true
+  default  split lists' items: 203 of 252 one per line -> warning
+  default  private-by-default members: 224 of 240 with 'private' -> for_non_interface_members
+  default  partial type parts: 36 of 36 with an access modifier -> warning
+  default  internal-by-default types: 14 of 16 with 'internal' -> warning
+  default  adjacent locals of one type: 48 of 52 declared one by one -> warning
+  default  declarations with 2+ attributes: 201 of 212 one per list ('[A]' '[B]') -> warning
+  default  adjacent fields of one type: 42 of 42 declared one by one -> warning
+  default  private static fields: 82 of 82 without a prefix -> warning
+  default  built-in type names: 91 of 91 only keywords ('int') -> warning
+  default  empty blocks ('{ }'): 15 of 15 on two lines -> false
+  too few  block-bodied properties/methods: 1 member -> default stays (warning)
+  default  statement blocks ('if (x) { y(); }'): 86 of 86 on several lines -> warning
+  default  auto-property accessors ('{ get; set; }'): 37 of 37 on one line -> warning
+  set      C# files' line endings: 107 of 107 LF -> set in .editorconfig (crlf)
+  default  statements after a block's '}': 91 of 118 after a blank line -> warning
+  too few  nested ifs BRO1149 would merge: 2 nested ifs -> default stays (warning)
+  default  neighbouring members: 708 of 713 with a blank line between -> warning
+  default  doc comments below code: 12 of 12 after a blank line -> warning
+  default  '//' comments above code: 963 of 963 right above the code -> warning
+  default  '//' comments below code: 831 of 892 after a blank line -> warning
+  default  doc comment texts: 9 of 9 ending with a period -> warning
+  too few  doc element order: 1 doc comment -> default stays (warning)
+  default  non-private fields: 19 of 19 PascalCase or as your naming rule says -> warning
+  default  doc comments above their element: 14 of 14 right above it -> warning
+  default  tuple element names: 20 of 20 '(int Count, ...)' -> PascalCase
+  set      using directives: 76 of 76 files sorted, 33 of 33 with System first -> set in .editorconfig
+  default  private constants/static readonly fields: 72 of 72 PascalCase -> PascalCase
+  set      spacing, control-flow keywords: 277 of 277 'if (x)' -> set in .editorconfig (true)
+  set      spacing, control-flow parentheses: 277 of 277 'if (x)' -> set in .editorconfig (false)
+  set      spacing, parenthesized expressions: 43 of 43 '(a + b)' -> set in .editorconfig (false)
+  set      spacing, cast parentheses: 25 of 25 '(int)x' -> set in .editorconfig (false)
+  set      spacing, casts: 25 of 25 '(int)x' -> set in .editorconfig (false)
+  set      spacing, call arguments: 9050 of 9050 'F(x)' -> set in .editorconfig (false)
+  set      spacing, declared parameters: 364 of 364 'void F(int x)' -> set in .editorconfig (false)
+Summary:
+  Kept your style for 35 settings: wrote stylebro_private_field_naming, stylebro_trailing_comma,
+    stylebro_empty_string_style, stylebro_closing_parenthesis_placement, stylebro_blank_line_between_switch_sections,
+    stylebro_allow_leading_multiline_lambda; 29 were already StyleBro's default.
+  Allowed both forms for 1 setting because your code mixes them: csharp_prefer_braces = when_multiline (one-line
+    if/else/loop/using/lock bodies).
+  Turned 3 rules off because your code mixes both forms: BRO1520 (operators where a line wraps: your .editorconfig says
+    beginning_of_line), BRO1141 ('new T { ... }' with an initializer), BRO1001 (types' members).
+  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
+  4 settings had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_summary_layout,
+    dotnet_diagnostic.BRO1509.severity, dotnet_diagnostic.BRO1149.severity, dotnet_diagnostic.BRO1619.severity.
+  note     Line endings: your .editorconfig says end_of_line = crlf, but git checks out 107 C# files with each machine's ending (a .gitattributes 'text' attribute without 'eol', or core.autocrlf), so Linux and macOS checkouts don't match it. Set end_of_line = unset for C# files and IDE0055 to suggestion, so neither 'format' nor the build touches endings. To settle it: '*.cs text eol=crlf' in .gitattributes (then 'git add --renormalize .'), or remove end_of_line from .editorconfig.
+  note     Charset: your .editorconfig says charset = utf-8-bom, and 1 of 107 C# files starts without a BOM: 'format' adds a BOM to it. To keep that out of the formatting changes, change it in a commit of their own first.
+Settings: 53 lines in .editorconfig; 4 lines in Directory.Build.props (StyleBro.Analyzers); 40 lines in src/ZiggyCreatures.FusionCache.AspNetCore.OutputCaching/.editorconfig; 42 lines in src/ZiggyCreatures.FusionCache.Backplane.Memory/.editorconfig; 46 lines in src/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis/.editorconfig; 44 lines in src/ZiggyCreatures.FusionCache.Chaos/.editorconfig; 38 lines in src/ZiggyCreatures.FusionCache.Locking.AsyncKeyed/.editorconfig; 40 lines in src/ZiggyCreatures.FusionCache.Locking.Distributed.Memory/.editorconfig; 42 lines in src/ZiggyCreatures.FusionCache.Locking.Distributed.Redis/.editorconfig; 42 lines in src/ZiggyCreatures.FusionCache.OpenTelemetry/.editorconfig; 46 lines in src/ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack/.editorconfig; 36 lines in src/ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack/.editorconfig; 38 lines in src/ZiggyCreatures.FusionCache.Serialization.NewtonsoftJson/.editorconfig; 44 lines in src/ZiggyCreatures.FusionCache.Serialization.ProtoBufNet/.editorconfig; 36 lines in src/ZiggyCreatures.FusionCache.Serialization.ServiceStackJson/.editorconfig; 36 lines in src/ZiggyCreatures.FusionCache.Serialization.SystemTextJson/.editorconfig; 66 lines in src/ZiggyCreatures.FusionCache/.editorconfig
+  StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial56.1 to Directory.Build.props for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).
+Format run 1... 2m 47s
+Format run 2... 52s
+Format: 206 files, 1,674 reported changes, clean after 1 run
+  IDE0055  Whitespace and formatting                  152 files
+  BRO1002  Single-line comments should begin wit...    51 files
+  BRO1504  Single-line comments should be preced...    30 files
+  BRO1401  Use a trailing comma in multi-line in...    21 files
+  BRO1606  Constructor summary documentation sho...    18 files
+  BRO1519  Closing brace should be followed by b...    17 files
+  BRO1603  Documentation text should end with a ...    17 files
+  BRO1303  Private field names should be camelCase     16 files
+  BRO1517  Code should not contain multiple blan...    13 files
+  BRO1110  Closing parenthesis or bracket should...    11 files
+  ... and 35 more rules
+Sample (IDE0055, src/ZiggyCreatures.FusionCache.AspNetCore.OutputCaching/FusionOutputCacheServiceCollectionExtensions.cs):
+  -	/// <summary>
+  -	/// Adds services to the specified <see cref="IServiceCollection" /> to have output caching based on FusionCache.
+  -	/// <br/><br/>
+  -	/// <strong>NOTE:</strong> please remember to call services.AddFusionCache(...) BEFORE calling this method to register a FusionCache instance, either the default one or a specific named one (in this case please specify the same name in <see cref="FusionOutputCacheOptions.CacheName"/>).
+  -	/// <br/><br/>
+  -	/// <strong>NOTE:</strong> please remember to call services.AddOutputCache(...) AFTER calling this method, to setup the core OutputCache services.
+  -	/// </summary>
+  -	/// <param name="services">The <see cref="IServiceCollection" /> to add services to.</param>
+  -	/// <param name="setupAction">An <see cref="Action{FusionOutputCacheOptions}"/> to configure the provided <see cref="FusionOutputCacheOptions"/>.</param>
+  -	/// <returns>The <see cref="IServiceCollection"/> so that additional calls can be chained.</returns>
+  -	public static IServiceCollection AddFusionOutputCache(this IServiceCollection services, Action<FusionOutputCacheOptions>? setupAction = null)
+  -	{
+    ...
+Sample (BRO1002, tests/ZiggyCreatures.FusionCache.Tests/GeneralTests_Async.cs):
+  -		//await cache.SetAsync<int>(
+  -		//	"my-foo-01",
+  -		//	async (ctx, ct) =>
+  -		//	{
+  -		//		isFailSafeEnabled = ctx.Options.IsFailSafeEnabled;
+  -		//		duration = ctx.Options.Duration;
+  -		//		priority = ctx.Options.Priority;
+  -
+  -		//		return 42;
+  -		//	},
+  -		//	token: TestContext.Current.CancellationToken
+  -		//);
+    ...
+Sample (BRO1504, tests/ZiggyCreatures.FusionCache.Tests/EventsTests_Async.cs):
+  (adds a blank line)
+Clean: 2 findings kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them (https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose).
+  src/ZiggyCreatures.FusionCache.AspNetCore.OutputCaching/FusionOutputCacheStore.cs(7,35): BRO1303 Rename '_cache' to 'cache'. Kept: the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time (first: tests/ZiggyCreatures.FusionCache.Tests/Stuff/TestsUtils.cs(134)).
+  src/ZiggyCreatures.FusionCache.Serialization.SystemTextJson/FusionCacheSystemTextJsonSerializer.cs(11,31): BRO1303 Rename '_options' to 'options'. Kept: the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time (first: tests/ZiggyCreatures.FusionCache.Tests/DependencyInjectionTests.cs(725)).
+Baseline (in the patch): stylebro.baseline: added 2 kept findings, so the build and 'format --verify-no-changes' skip them (new violations still fail; delete an entry to see it again) (https://bisforboman.github.io/stylebro/baseline/).
+Full diff: .git/stylebro-preview.patch (52,386 lines)
+Not checked: xunit.analyzers' rules: xunit.analyzers 2.0.0's fixes have no Fix All, so 'dotnet format' can't apply or check them (a note: the build still reports their warnings; the verdict doesn't count them)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 4m 2s.

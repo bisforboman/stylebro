@@ -1,0 +1,1044 @@
+Running tests from /home/user/w56/FusionCache/default/tests/ZiggyCreatures.FusionCache.Tests/bin/Release/net10.0/ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)
+[+24/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2s)
+
+[+47/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5s)
+
+[+55/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8s)
+
+[+80/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11s)
+
+[+87/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14s)
+
+[+94/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(17s)
+
+[+127/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(20s)
+
+[+138/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(23s)
+
+[+145/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(26s)
+
+[+165/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(29s)
+
+[+174/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(32s)
+
+[+184/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(35s)
+
+[+199/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(38s)
+
+[+213/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(41s)
+
+[+221/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(44s)
+
+[+232/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(47s)
+
+[+240/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(50s)
+
+[+260/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(53s)
+
+[+269/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(56s)
+
+[+285/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(59s)
+
+[+295/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 02s)
+
+[+303/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 05s)
+
+[+315/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 08s)
+
+[+323/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 11s)
+
+[+380/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 14s)
+
+[+390/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 17s)
+
+[+396/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 20s)
+
+[+409/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 23s)
+
+[+416/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 26s)
+
+[+426/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 29s)
+
+[+440/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 32s)
+
+[+448/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 35s)
+
+[+456/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 38s)
+
+[+466/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 41s)
+
+[+477/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 44s)
+
+[+487/x0/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 47s)
+
+failed FusionCacheTests.AutoRecoveryTests.CanHandleIssuesWithBothDistributedCacheAndBackplane(serializerType: SystemTextJson) (2s 311ms)
+  from /home/user/w56/FusionCache/default/tests/ZiggyCreatures.FusionCache.Tests/bin/Release/net10.0/ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)
+  Assert.Equal() Failure: Values differ
+  Expected: 30
+  Actual:   10
+    at FusionCacheTests.AutoRecoveryTests.CanHandleIssuesWithBothDistributedCacheAndBackplane(SerializerType serializerType) in /home/user/w56/FusionCache/default/tests/ZiggyCreatures.FusionCache.Tests/AutoRecoveryTests_Sync.cs:342
+    at InvokeStub_AutoRecoveryTests.CanHandleIssuesWithBothDistributedCacheAndBackplane(Object, Span`1)
+    at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Standard output
+    TRAC 2026-10-26T03:50:37.087Z: FUSION [N=FusionCache I=0HNPJ2G5T6068]: instance created
+    DEBU 2026-10-26T03:50:37.087Z: FUSION [N=FusionCache I=0HNPJ2G5T6068]: setup serializer (SERIALIZER=ZiggyCreatures.Caching.Fusion.Serialization.SystemTextJson.FusionCacheSystemTextJsonSerializer)
+    DEBU 2026-10-26T03:50:37.087Z: FUSION [N=FusionCache I=0HNPJ2G5T6068]: setup distributed cache (CACHE=ZiggyCreatures.Caching.Fusion.Chaos.ChaosDistributedCache)
+    DEBU 2026-10-26T03:50:37.087Z: FUSION [N=FusionCache I=0HNPJ2G5T6068]: setup backplane (BACKPLANE=ZiggyCreatures.Caching.Fusion.Chaos.ChaosBackplane)
+    TRAC 2026-10-26T03:50:37.087Z: FUSION [N=FusionCache I=0HNPJ2G5T6069]: instance created
+    DEBU 2026-10-26T03:50:37.087Z: FUSION [N=FusionCache I=0HNPJ2G5T6069]: setup serializer (SERIALIZER=ZiggyCreatures.Caching.Fusion.Serialization.SystemTextJson.FusionCacheSystemTextJsonSerializer)
+    DEBU 2026-10-26T03:50:37.087Z: FUSION [N=FusionCache I=0HNPJ2G5T6069]: setup distributed cache (CACHE=ZiggyCreatures.Caching.Fusion.Chaos.ChaosDistributedCache)
+    DEBU 2026-10-26T03:50:37.087Z: FUSION [N=FusionCache I=0HNPJ2G5T6069]: setup backplane (BACKPLANE=ZiggyCreatures.Caching.Fusion.Chaos.ChaosBackplane)
+    INFO 2026-10-26T03:50:37.387Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606A K=MyCache:foo): GetOrSet<T> call FEO[DUR=10m LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T03:50:37.387Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606A K=MyCache:foo): [MC] trying to get from memory
+    DEBU 2026-10-26T03:50:37.387Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606A K=MyCache:foo): [MC] memory entry not found
+    TRAC 2026-10-26T03:50:37.387Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606A K=MyCache:foo): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T03:50:37.387Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606A K=MyCache:foo): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T03:50:37.387Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606A K=MyCache:foo): [MC] trying to get from memory
+    DEBU 2026-10-26T03:50:37.387Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606A K=MyCache:foo): [MC] memory entry not found
+    TRAC 2026-10-26T03:50:37.387Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606A K=MyCache:foo): [DC] trying to get entry from distributed
+    TRAC 2026-10-26T03:50:37.388Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T606B): [BP] before subscribing to backplane on channel FusionCache.Backplane:v2
+    DEBU 2026-10-26T03:50:37.388Z: FUSION ChaosBackplane: Subscribe
+    DEBU 2026-10-26T03:50:37.388Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606A K=MyCache:foo): [DC] distributed entry not found
+    INFO 2026-10-26T03:50:37.388Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T606C): [BP] backplane connected
+    DEBU 2026-10-26T03:50:37.388Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606A K=MyCache:foo): calling the factory (timeout=/)
+    TRAC 2026-10-26T03:50:37.388Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T606B): [BP] after subscribing to backplane on channel FusionCache.Backplane:v2
+    TRAC 2026-10-26T03:50:37.388Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606D): [BP] before subscribing to backplane on channel FusionCache.Backplane:v2
+    DEBU 2026-10-26T03:50:37.388Z: FUSION ChaosBackplane: Subscribe
+    INFO 2026-10-26T03:50:37.388Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606E): [BP] backplane connected
+    TRAC 2026-10-26T03:50:37.388Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606D): [BP] after subscribing to backplane on channel FusionCache.Backplane:v2
+    DEBU 2026-10-26T03:50:37.388Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606A K=MyCache:foo): [MC] saving memory entry
+    TRAC 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606A K=MyCache:foo): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606A K=MyCache:foo): [ML] MEMORY LOCK released
+    DEBU 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606A K=MyCache:foo): [DC] saving distributed entry
+    TRAC 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606A K=MyCache:foo): [DC] serializing the entry FE(D)[T=2026-10-26T03:50:37.388307, LEXP=2026-10-26T04:00:37.388307][]
+    TRAC 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606A K=MyCache:foo): [DC] before setting entry in distributed
+    TRAC 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606A K=MyCache:foo): [DC] after setting entry in distributed
+    DEBU 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606A K=MyCache:foo): [BP] publishing set
+    TRAC 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606A K=MyCache:foo): [BP] before sending a backplane notification
+    TRAC 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607J K=MyCache:foo): [BP] a backplane notification has been received from remote cache 0HNPJ2G5T6068 (SET)
+    TRAC 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607J K=MyCache:foo): [BP] no memory entry, ignoring incoming backplane message
+    TRAC 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606A K=MyCache:foo): [BP] after sending a backplane notification
+    INFO 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T606A K=MyCache:foo): GetOrSet<T> return FE(M)[T=2026-10-26T03:50:37.388307, LEXP=2026-10-26T04:00:37.388416][]
+    INFO 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607S K=MyCache:foo): GetOrSet<T> call FEO[DUR=10m LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607S K=MyCache:foo): [MC] trying to get from memory
+    DEBU 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607S K=MyCache:foo): [MC] memory entry not found
+    TRAC 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607S K=MyCache:foo): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607S K=MyCache:foo): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607S K=MyCache:foo): [MC] trying to get from memory
+    DEBU 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607S K=MyCache:foo): [MC] memory entry not found
+    TRAC 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607S K=MyCache:foo): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607S K=MyCache:foo): [DC] distributed entry found FE(D)[T=2026-10-26T03:50:37.388307, LEXP=2026-10-26T04:00:37.388307][]
+    INFO 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607V K=MyCache:__fc:t:!): GetOrSet<T> call FEO[DUR=01:00:00 LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607V K=MyCache:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T03:50:37.389Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607V K=MyCache:__fc:t:!): [MC] memory entry not found
+    TRAC 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607V K=MyCache:__fc:t:!): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607V K=MyCache:__fc:t:!): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607V K=MyCache:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607V K=MyCache:__fc:t:!): [MC] memory entry not found
+    TRAC 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607V K=MyCache:__fc:t:!): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607V K=MyCache:__fc:t:!): [DC] distributed entry not found
+    DEBU 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607V K=MyCache:__fc:t:!): calling the factory (timeout=/)
+    DEBU 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607V K=MyCache:__fc:t:!): [MC] saving memory entry
+    TRAC 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607V K=MyCache:__fc:t:!): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607V K=MyCache:__fc:t:!): [ML] MEMORY LOCK released
+    INFO 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607V K=MyCache:__fc:t:!): GetOrSet<T> return FE(M)[T=2026-10-26T03:50:37.390090, LEXP=2026-10-26T04:50:37.390174][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607S K=MyCache:foo): new Clear (Remove) timestamp 0 (OLD: -1)
+    INFO 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T6085 K=MyCache:__fc:t:*): GetOrSet<T> call FEO[DUR=01:00:00 LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T6085 K=MyCache:__fc:t:*): [MC] trying to get from memory
+    DEBU 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T6085 K=MyCache:__fc:t:*): [MC] memory entry not found
+    TRAC 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T6085 K=MyCache:__fc:t:*): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T6085 K=MyCache:__fc:t:*): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T6085 K=MyCache:__fc:t:*): [MC] trying to get from memory
+    DEBU 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T6085 K=MyCache:__fc:t:*): [MC] memory entry not found
+    TRAC 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T6085 K=MyCache:__fc:t:*): [DC] trying to get entry from distributed
+    DEBU 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T6085 K=MyCache:__fc:t:*): [DC] distributed entry not found
+    DEBU 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T6085 K=MyCache:__fc:t:*): calling the factory (timeout=/)
+    DEBU 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T6085 K=MyCache:__fc:t:*): [MC] saving memory entry
+    TRAC 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T6085 K=MyCache:__fc:t:*): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T6085 K=MyCache:__fc:t:*): [ML] MEMORY LOCK released
+    INFO 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T6085 K=MyCache:__fc:t:*): GetOrSet<T> return FE(M)[T=2026-10-26T03:50:37.390277, LEXP=2026-10-26T04:50:37.390290][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607S K=MyCache:foo): new Clear (Expire) timestamp 0 (OLD: -1)
+    DEBU 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607S K=MyCache:foo): [MC] saving memory entry
+    TRAC 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607S K=MyCache:foo): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607S K=MyCache:foo): [ML] MEMORY LOCK released
+    INFO 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T607S K=MyCache:foo): GetOrSet<T> return FE(M)[T=2026-10-26T03:50:37.388307, LEXP=2026-10-26T04:00:37.388307][]
+    DEBU 2026-10-26T03:50:37.390Z: FUSION ChaosDistributedCache: SetAlwaysThrow
+    DEBU 2026-10-26T03:50:37.390Z: FUSION ChaosBackplane: SetAlwaysThrow
+    DEBU 2026-10-26T03:50:37.390Z: FUSION ChaosBackplane: SetAlwaysThrow
+    INFO 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T608C K=MyCache:foo): Set<T> call FEO[DUR=10m LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    DEBU 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T608C K=MyCache:foo): [MC] saving memory entry
+    DEBU 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T608C K=MyCache:foo): [DC] saving distributed entry
+    TRAC 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T608C K=MyCache:foo): [DC] serializing the entry FE(D)[T=2026-10-26T03:50:37.390347, LEXP=2026-10-26T04:00:37.390347][]
+    TRAC 2026-10-26T03:50:37.390Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T608C K=MyCache:foo): [DC] before setting entry in distributed
+    
+    WARN 2026-10-26T03:50:37.392Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T608C K=MyCache:foo): [DC] an error occurred while setting entry in distributed
+    ZiggyCreatures.Caching.Fusion.Chaos.ChaosException: Just a little bit of controlled chaos
+       at ZiggyCreatures.Caching.Fusion.Chaos.Internals.AbstractChaosComponent.MaybeChaos(CancellationToken token) in /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Chaos/Internals/AbstractChaosComponent.cs:line 62
+       at ZiggyCreatures.Caching.Fusion.Chaos.ChaosDistributedCache.Set(String key, Byte[] value, DistributedCacheEntryOptions options) in /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Chaos/ChaosDistributedCache.cs:line 72
+       at ZiggyCreatures.Caching.Fusion.Internals.Distributed.DistributedCacheAccessor.<>c__DisplayClass19_0`1.<SetEntry>b__0(CancellationToken _) in /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache/Internals/Distributed/DistributedCacheAccessor_Sync.cs:line 133
+       at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+    --- End of stack trace from previous location ---
+       at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+       at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+    --- End of stack trace from previous location ---
+       at ZiggyCreatures.Caching.Fusion.Internals.RunUtils.RunAsyncActionWithTimeoutAsync(Func`2 asyncAction, TimeSpan timeout, Boolean cancelIfTimeout, Action`1 timedOutTaskProcessor, CancellationToken token) in /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache/Internals/RunUtils.cs:line 138
+       at ZiggyCreatures.Caching.Fusion.Internals.RunUtils.RunSyncActionWithTimeout(Action`1 syncAction, TimeSpan timeout, Boolean cancelIfTimeout, Action`1 timedOutTaskProcessor, CancellationToken token) in /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache/Internals/RunUtils.cs:line 223
+       at ZiggyCreatures.Caching.Fusion.Internals.Distributed.DistributedCacheAccessor.ExecuteOperation(String operationId, String key, Action`1 action, String actionDescription, FusionCacheEntryOptions options, CancellationToken token) in /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache/Internals/Distributed/DistributedCacheAccessor_Sync.cs:line 16
+    
+    
+    DEBU 2026-10-26T03:50:37.392Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T608C K=MyCache:foo): added (or overwrote) an item to the auto-recovery queue
+    INFO 2026-10-26T03:50:37.392Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AF K=MyCache:foo): GetOrDefault<T> call FEO[DUR=10m LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T03:50:37.392Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AF K=MyCache:foo): [MC] trying to get from memory
+    DEBU 2026-10-26T03:50:37.392Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AF K=MyCache:foo): [MC] memory entry found FE(M)[T=2026-10-26T03:50:37.388307, LEXP=2026-10-26T04:00:37.388416][]
+    INFO 2026-10-26T03:50:37.392Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AG K=MyCache:__fc:t:!): GetOrSet<T> call FEO[DUR=01:00:00 LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T03:50:37.393Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AG K=MyCache:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T03:50:37.393Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AG K=MyCache:__fc:t:!): [MC] memory entry not found
+    TRAC 2026-10-26T03:50:37.393Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AG K=MyCache:__fc:t:!): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T03:50:37.393Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AG K=MyCache:__fc:t:!): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T03:50:37.393Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AG K=MyCache:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T03:50:37.393Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AG K=MyCache:__fc:t:!): [MC] memory entry not found
+    TRAC 2026-10-26T03:50:37.393Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AG K=MyCache:__fc:t:!): [DC] trying to get entry from distributed
+    
+    WARN 2026-10-26T03:50:37.393Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AG K=MyCache:__fc:t:!): [DC] an error occurred while getting entry from distributed
+    ZiggyCreatures.Caching.Fusion.Chaos.ChaosException: Just a little bit of controlled chaos
+       at ZiggyCreatures.Caching.Fusion.Chaos.FusionCacheChaosUtils.MaybeThrow(Single throwProbability) in /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Chaos/FusionCacheChaosUtils.cs:line 33
+       at ZiggyCreatures.Caching.Fusion.Internals.Distributed.DistributedCacheAccessor.<>c__DisplayClass20_0`1.<TryGetEntry>b__0(CancellationToken _) in /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache/Internals/Distributed/DistributedCacheAccessor_Sync.cs:line 166
+       at System.Threading.Tasks.Task`1.InnerInvoke()
+       at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+    --- End of stack trace from previous location ---
+       at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+       at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+    --- End of stack trace from previous location ---
+       at ZiggyCreatures.Caching.Fusion.Internals.RunUtils.RunAsyncFuncWithTimeoutAsync[TResult](Func`2 asyncFunc, TimeSpan timeout, Boolean cancelIfTimeout, Action`1 timedOutTaskProcessor, CancellationToken token)
+       at ZiggyCreatures.Caching.Fusion.Internals.RunUtils.RunSyncFuncWithTimeout[TResult](Func`2 syncFunc, TimeSpan timeout, Boolean cancelIfTimeout, Action`1 timedOutTaskProcessor, CancellationToken token)
+       at ZiggyCreatures.Caching.Fusion.Internals.Distributed.DistributedCacheAccessor.TryGetEntry[TValue](String operationId, String key, FusionCacheEntryOptions options, Boolean hasFallbackValue, Nullable`1 timeout, CancellationToken token) in /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache/Internals/Distributed/DistributedCacheAccessor_Sync.cs:line 165
+    
+    
+    DEBU 2026-10-26T03:50:37.393Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AG K=MyCache:__fc:t:!): [DC] distributed entry not found
+    DEBU 2026-10-26T03:50:37.393Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AG K=MyCache:__fc:t:!): calling the factory (timeout=/)
+    DEBU 2026-10-26T03:50:37.393Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AG K=MyCache:__fc:t:!): [MC] saving memory entry
+    TRAC 2026-10-26T03:50:37.393Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AG K=MyCache:__fc:t:!): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T03:50:37.393Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AG K=MyCache:__fc:t:!): [ML] MEMORY LOCK released
+    INFO 2026-10-26T03:50:37.393Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AG K=MyCache:__fc:t:!): GetOrSet<T> return FE(M)[T=2026-10-26T03:50:37.393270, LEXP=2026-10-26T04:50:37.393295][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T03:50:37.393Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AF K=MyCache:foo): new Clear (Remove) timestamp 0 (OLD: -1)
+    INFO 2026-10-26T03:50:37.393Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AI K=MyCache:__fc:t:*): GetOrSet<T> call FEO[DUR=01:00:00 LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T03:50:37.393Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AI K=MyCache:__fc:t:*): [MC] trying to get from memory
+    DEBU 2026-10-26T03:50:37.393Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AI K=MyCache:__fc:t:*): [MC] memory entry not found
+    TRAC 2026-10-26T03:50:37.393Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AI K=MyCache:__fc:t:*): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T03:50:37.393Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AI K=MyCache:__fc:t:*): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T03:50:37.393Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AI K=MyCache:__fc:t:*): [MC] trying to get from memory
+    DEBU 2026-10-26T03:50:37.393Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AI K=MyCache:__fc:t:*): [MC] memory entry not found
+    TRAC 2026-10-26T03:50:37.393Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AI K=MyCache:__fc:t:*): [DC] trying to get entry from distributed
+    
+    WARN 2026-10-26T03:50:37.395Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AI K=MyCache:__fc:t:*): [DC] an error occurred while getting entry from distributed
+    ZiggyCreatures.Caching.Fusion.Chaos.ChaosException: Just a little bit of controlled chaos
+       at ZiggyCreatures.Caching.Fusion.Chaos.FusionCacheChaosUtils.MaybeThrow(Single throwProbability) in /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache.Chaos/FusionCacheChaosUtils.cs:line 33
+       at ZiggyCreatures.Caching.Fusion.Internals.Distributed.DistributedCacheAccessor.<>c__DisplayClass20_0`1.<TryGetEntry>b__0(CancellationToken _) in /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache/Internals/Distributed/DistributedCacheAccessor_Sync.cs:line 166
+       at System.Threading.Tasks.Task`1.InnerInvoke()
+       at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+    --- End of stack trace from previous location ---
+       at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+       at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+    --- End of stack trace from previous location ---
+       at ZiggyCreatures.Caching.Fusion.Internals.RunUtils.RunAsyncFuncWithTimeoutAsync[TResult](Func`2 asyncFunc, TimeSpan timeout, Boolean cancelIfTimeout, Action`1 timedOutTaskProcessor, CancellationToken token)
+       at ZiggyCreatures.Caching.Fusion.Internals.RunUtils.RunSyncFuncWithTimeout[TResult](Func`2 syncFunc, TimeSpan timeout, Boolean cancelIfTimeout, Action`1 timedOutTaskProcessor, CancellationToken token)
+       at ZiggyCreatures.Caching.Fusion.Internals.Distributed.DistributedCacheAccessor.TryGetEntry[TValue](String operationId, String key, FusionCacheEntryOptions options, Boolean hasFallbackValue, Nullable`1 timeout, CancellationToken token) in /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache/Internals/Distributed/DistributedCacheAccessor_Sync.cs:line 165
+    
+    
+    DEBU 2026-10-26T03:50:37.395Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AI K=MyCache:__fc:t:*): [DC] distributed entry not found
+    DEBU 2026-10-26T03:50:37.395Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AI K=MyCache:__fc:t:*): calling the factory (timeout=/)
+    DEBU 2026-10-26T03:50:37.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AI K=MyCache:__fc:t:*): [MC] saving memory entry
+    TRAC 2026-10-26T03:50:37.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AI K=MyCache:__fc:t:*): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T03:50:37.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AI K=MyCache:__fc:t:*): [ML] MEMORY LOCK released
+    INFO 2026-10-26T03:50:37.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AI K=MyCache:__fc:t:*): GetOrSet<T> return FE(M)[T=2026-10-26T03:50:37.395488, LEXP=2026-10-26T04:50:37.396391][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T03:50:37.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AF K=MyCache:foo): new Clear (Expire) timestamp 0 (OLD: -1)
+    TRAC 2026-10-26T03:50:37.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AF K=MyCache:foo): using memory entry
+    INFO 2026-10-26T03:50:37.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60AF K=MyCache:foo): GetOrDefault<T> return FE(M)[T=2026-10-26T03:50:37.388307, LEXP=2026-10-26T04:00:37.388416][]
+    INFO 2026-10-26T03:50:37.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T60BD K=MyCache:foo): GetOrDefault<T> call FEO[DUR=10m LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T03:50:37.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T60BD K=MyCache:foo): [MC] trying to get from memory
+    DEBU 2026-10-26T03:50:37.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T60BD K=MyCache:foo): [MC] memory entry found FE(M)[T=2026-10-26T03:50:37.390347, LEXP=2026-10-26T04:00:37.390347][]
+    TRAC 2026-10-26T03:50:37.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T60BD K=MyCache:foo): using memory entry
+    INFO 2026-10-26T03:50:37.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T60BD K=MyCache:foo): GetOrDefault<T> return FE(M)[T=2026-10-26T03:50:37.390347, LEXP=2026-10-26T04:00:37.390347][]
+    DEBU 2026-10-26T03:50:37.396Z: FUSION ChaosDistributedCache: SetNeverThrow
+    DEBU 2026-10-26T03:50:37.396Z: FUSION ChaosBackplane: SetNeverThrow
+    INFO 2026-10-26T03:50:37.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60BE): [BP] backplane re-connected
+    DEBU 2026-10-26T03:50:37.396Z: FUSION ChaosBackplane: SetNeverThrow
+    INFO 2026-10-26T03:50:37.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T60BF): [BP] backplane re-connected
+    TRAC 2026-10-26T03:50:37.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T60BF): auto-recovery barrier set from 0 to 639285834383965547
+    INFO 2026-10-26T03:50:37.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T60BF): waiting at least 00:00:01 to start auto-recovery to let the other nodes reconnect, to better handle backpressure
+    INFO 2026-10-26T03:50:39.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60DK K=MyCache:foo): GetOrSet<T> call FEO[DUR=10m LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T03:50:39.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60DK K=MyCache:foo): [MC] trying to get from memory
+    DEBU 2026-10-26T03:50:39.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60DK K=MyCache:foo): [MC] memory entry found FE(M)[T=2026-10-26T03:50:37.388307, LEXP=2026-10-26T04:00:37.388416][]
+    TRAC 2026-10-26T03:50:39.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60DK K=MyCache:foo): using memory entry
+    INFO 2026-10-26T03:50:39.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60DK K=MyCache:foo): GetOrSet<T> return FE(M)[T=2026-10-26T03:50:37.388307, LEXP=2026-10-26T04:00:37.388416][]
+    INFO 2026-10-26T03:50:39.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T60DL K=MyCache:foo): GetOrSet<T> call FEO[DUR=10m LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T03:50:39.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T60DL K=MyCache:foo): [MC] trying to get from memory
+    DEBU 2026-10-26T03:50:39.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T60DL K=MyCache:foo): [MC] memory entry found FE(M)[T=2026-10-26T03:50:37.390347, LEXP=2026-10-26T04:00:37.390347][]
+    TRAC 2026-10-26T03:50:39.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T60DL K=MyCache:foo): using memory entry
+    INFO 2026-10-26T03:50:39.396Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T60DL K=MyCache:foo): GetOrSet<T> return FE(M)[T=2026-10-26T03:50:37.390347, LEXP=2026-10-26T04:00:37.390347][]
+    TRAC 2026-10-26T03:50:39.398Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T60DM): [BP] before unsubscribing to backplane
+    DEBU 2026-10-26T03:50:39.398Z: FUSION ChaosBackplane: Unsubscribe
+    TRAC 2026-10-26T03:50:39.398Z: FUSION [N=FusionCache I=0HNPJ2G5T6069] (O=0HNPJ2G5T60DM): [BP] after unsubscribing to backplane
+    DEBU 2026-10-26T03:50:39.398Z: FUSION [N=FusionCache I=0HNPJ2G5T6069]: backplane removed
+    DEBU 2026-10-26T03:50:39.398Z: FUSION [N=FusionCache I=0HNPJ2G5T6069]: distributed cache removed
+    TRAC 2026-10-26T03:50:39.398Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60DN): [BP] before unsubscribing to backplane
+    DEBU 2026-10-26T03:50:39.398Z: FUSION ChaosBackplane: Unsubscribe
+    TRAC 2026-10-26T03:50:39.398Z: FUSION [N=FusionCache I=0HNPJ2G5T6068] (O=0HNPJ2G5T60DN): [BP] after unsubscribing to backplane
+    DEBU 2026-10-26T03:50:39.398Z: FUSION [N=FusionCache I=0HNPJ2G5T6068]: backplane removed
+    DEBU 2026-10-26T03:50:39.398Z: FUSION [N=FusionCache I=0HNPJ2G5T6068]: distributed cache removed
+    
+  Error output
+[+498/x1/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 50s)
+
+[+514/x1/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 53s)
+
+[+528/x1/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 56s)
+
+[+533/x1/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(1m 59s)
+
+[+536/x1/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 02s)
+
+[+552/x1/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 05s)
+
+[+560/x1/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 08s)
+
+[+569/x1/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 11s)
+
+[+570/x1/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 14s)
+
+[+570/x1/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 17s)
+
+[+579/x1/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 20s)
+
+[+588/x1/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 23s)
+
+[+601/x1/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 26s)
+
+[+606/x1/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 29s)
+
+[+608/x1/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 32s)
+
+[+608/x1/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 35s)
+
+failed FusionCacheTests.L1Tests.CanHandleEagerRefreshWithTags (1s 435ms)
+  from /home/user/w56/FusionCache/default/tests/ZiggyCreatures.FusionCache.Tests/bin/Release/net10.0/ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)
+  Assert.Equal() Failure: Values differ
+  Expected: 639285834806730034
+  Actual:   639285834798625205
+    at FusionCacheTests.L1Tests.CanHandleEagerRefreshWithTags() in /home/user/w56/FusionCache/default/tests/ZiggyCreatures.FusionCache.Tests/L1Tests_Sync.cs:1685
+    at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+    at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+    at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+    at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Standard output
+    TRAC 2026-10-26T03:51:19.489Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV]: instance created
+    INFO 2026-10-26T03:51:19.489Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM0 K=foo): GetOrSet<T> call FEO[DUR=4s LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=Y AC=N]
+    TRAC 2026-10-26T03:51:19.489Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM0 K=foo): [MC] trying to get from memory
+    DEBU 2026-10-26T03:51:19.489Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM0 K=foo): [MC] memory entry not found
+    TRAC 2026-10-26T03:51:19.489Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM0 K=foo): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T03:51:19.489Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM0 K=foo): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T03:51:19.489Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM0 K=foo): [MC] trying to get from memory
+    DEBU 2026-10-26T03:51:19.489Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM0 K=foo): [MC] memory entry not found
+    DEBU 2026-10-26T03:51:19.489Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM0 K=foo): calling the factory (timeout=/)
+    DEBU 2026-10-26T03:51:19.862Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM0 K=foo): [MC] saving memory entry
+    TRAC 2026-10-26T03:51:19.862Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM0 K=foo): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T03:51:19.862Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM0 K=foo): [ML] MEMORY LOCK released
+    INFO 2026-10-26T03:51:19.862Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM0 K=foo): GetOrSet<T> return FE(M)[T=2026-10-26T03:51:19.489709, LEXP=2026-10-26T03:51:23.862598][S=N, EEXP=2026-10-26T03:51:20.662598, LM=/, ET=/, S=/, P=Normal]
+    INFO 2026-10-26T03:51:19.862Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM3 K=foo): GetOrSet<T> call FEO[DUR=4s LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=Y AC=N]
+    TRAC 2026-10-26T03:51:19.862Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM3 K=foo): [MC] trying to get from memory
+    DEBU 2026-10-26T03:51:19.862Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM3 K=foo): [MC] memory entry found FE(M)[T=2026-10-26T03:51:19.489709, LEXP=2026-10-26T03:51:23.862598][S=N, EEXP=2026-10-26T03:51:20.662598, LM=/, ET=/, S=/, P=Normal]
+    TRAC 2026-10-26T03:51:19.862Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM3 K=foo): using memory entry
+    INFO 2026-10-26T03:51:19.862Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM3 K=foo): GetOrSet<T> return FE(M)[T=2026-10-26T03:51:19.489709, LEXP=2026-10-26T03:51:23.862598][S=N, EEXP=2026-10-26T03:51:20.662598, LM=/, ET=/, S=/, P=Normal]
+    INFO 2026-10-26T03:51:20.673Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM9 K=foo): GetOrSet<T> call FEO[DUR=4s LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=Y AC=N]
+    TRAC 2026-10-26T03:51:20.673Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM9 K=foo): [MC] trying to get from memory
+    DEBU 2026-10-26T03:51:20.673Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM9 K=foo): [MC] memory entry found FE(M)[T=2026-10-26T03:51:19.489709, LEXP=2026-10-26T03:51:23.862598][S=N, EEXP=2026-10-26T03:51:20.662598, LM=/, ET=/, S=/, P=Normal]
+    TRAC 2026-10-26T03:51:20.673Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM9 K=foo): should eagerly refresh
+    TRAC 2026-10-26T03:51:20.673Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM9 K=foo): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T03:51:20.673Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM9 K=foo): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T03:51:20.673Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM9 K=foo): using memory entry
+    INFO 2026-10-26T03:51:20.673Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EM9 K=foo): GetOrSet<T> return FE(M)[T=2026-10-26T03:51:19.489709, LEXP=2026-10-26T03:51:23.862598][S=N, EEXP=/, LM=/, ET=/, S=/, P=Normal]
+    INFO 2026-10-26T03:51:20.923Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EN5 K=foo): GetOrSet<T> call FEO[DUR=4s LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=N FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=Y AC=N]
+    TRAC 2026-10-26T03:51:20.923Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EN5 K=foo): [MC] trying to get from memory
+    DEBU 2026-10-26T03:51:20.923Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EN5 K=foo): [MC] memory entry found FE(M)[T=2026-10-26T03:51:19.489709, LEXP=2026-10-26T03:51:23.862598][S=N, EEXP=/, LM=/, ET=/, S=/, P=Normal]
+    TRAC 2026-10-26T03:51:20.923Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EN5 K=foo): using memory entry
+    INFO 2026-10-26T03:51:20.923Z: FUSION [N=FusionCache I=0HNPJ2G5T7ELV] (O=0HNPJ2G5T7EN5 K=foo): GetOrSet<T> return FE(M)[T=2026-10-26T03:51:19.489709, LEXP=2026-10-26T03:51:23.862598][S=N, EEXP=/, LM=/, ET=/, S=/, P=Normal]
+    
+  Error output
+[+615/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 38s)
+
+[+624/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 41s)
+
+[+643/x2/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 44s)
+
+failed FusionCacheTests.L1Tests.AdaptiveCachingWithBackgroundFactoryCompletion (14s 266ms)
+  from /home/user/w56/FusionCache/default/tests/ZiggyCreatures.FusionCache.Tests/bin/Release/net10.0/ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)
+  Assert.Equal() Failure: Values differ
+  Expected: 21
+  Actual:   42
+    at FusionCacheTests.L1Tests.AdaptiveCachingWithBackgroundFactoryCompletion() in /home/user/w56/FusionCache/default/tests/ZiggyCreatures.FusionCache.Tests/L1Tests_Sync.cs:422
+    at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+    at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+    at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+    at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[+653/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 47s)
+
+[+654/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 50s)
+
+[+654/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 53s)
+
+[+654/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 56s)
+
+[+662/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(2m 59s)
+
+[+667/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 02s)
+
+[+676/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 05s)
+
+[+693/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 08s)
+
+[+703/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 11s)
+
+[+717/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 14s)
+
+[+726/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 17s)
+
+[+737/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 20s)
+
+[+762/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 23s)
+
+[+779/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 26s)
+
+[+795/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 29s)
+
+[+809/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 32s)
+
+[+825/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 35s)
+
+[+843/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 38s)
+
+[+852/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 41s)
+
+[+871/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 44s)
+
+[+880/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 47s)
+
+[+886/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 50s)
+
+[+898/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 53s)
+
+[+905/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 56s)
+
+[+911/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(3m 59s)
+
+[+918/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 02s)
+
+[+926/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 05s)
+
+[+940/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 08s)
+
+[+946/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 11s)
+
+[+955/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 14s)
+
+[+961/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 17s)
+
+[+968/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 20s)
+
+[+974/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 23s)
+
+[+988/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 26s)
+
+[+1000/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 29s)
+
+[+1013/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 32s)
+
+[+1029/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 35s)
+
+[+1038/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 38s)
+
+[+1051/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 41s)
+
+[+1060/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 44s)
+
+[+1067/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 47s)
+
+[+1078/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 50s)
+
+[+1082/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 53s)
+
+[+1088/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 56s)
+
+[+1093/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(4m 59s)
+
+[+1096/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 02s)
+
+[+1098/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 05s)
+
+[+1102/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 08s)
+
+[+1104/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 11s)
+
+[+1107/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 14s)
+
+[+1116/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 17s)
+
+[+1139/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 20s)
+
+[+1145/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 23s)
+
+[+1148/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 26s)
+
+[+1159/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 29s)
+
+[+1162/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 32s)
+
+[+1167/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 35s)
+
+[+1171/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 38s)
+
+[+1176/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 41s)
+
+[+1182/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 44s)
+
+[+1188/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 47s)
+
+[+1193/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 50s)
+
+[+1196/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 53s)
+
+[+1200/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 56s)
+
+[+1204/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(5m 59s)
+
+[+1205/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 02s)
+
+[+1209/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 05s)
+
+[+1212/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 08s)
+
+[+1223/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 11s)
+
+[+1229/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 14s)
+
+[+1231/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 17s)
+
+[+1235/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 20s)
+
+[+1237/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 23s)
+
+[+1240/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 26s)
+
+[+1243/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 29s)
+
+[+1244/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 32s)
+
+[+1247/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 35s)
+
+[+1249/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 38s)
+
+[+1251/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 41s)
+
+[+1253/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 44s)
+
+[+1262/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 47s)
+
+[+1264/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 50s)
+
+[+1267/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 53s)
+
+[+1269/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 56s)
+
+[+1270/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(6m 59s)
+
+[+1273/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 02s)
+
+[+1282/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 05s)
+
+[+1291/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 08s)
+
+[+1293/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 11s)
+
+[+1301/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 14s)
+
+[+1308/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 17s)
+
+[+1314/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 20s)
+
+[+1327/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 23s)
+
+[+1341/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 26s)
+
+[+1348/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 29s)
+
+[+1360/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 32s)
+
+[+1376/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 35s)
+
+[+1377/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 38s)
+
+[+1379/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 41s)
+
+[+1380/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 44s)
+
+[+1381/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 47s)
+
+[+1383/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 50s)
+
+[+1384/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 53s)
+
+[+1386/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 56s)
+
+[+1386/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(7m 59s)
+
+[+1388/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 02s)
+
+[+1390/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 05s)
+
+[+1394/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 08s)
+
+[+1398/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 11s)
+
+[+1402/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 14s)
+
+[+1405/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 17s)
+
+[+1407/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 20s)
+
+[+1410/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 23s)
+
+[+1413/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 26s)
+
+[+1416/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 29s)
+
+[+1423/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 32s)
+
+[+1423/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 35s)
+
+[+1431/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 38s)
+
+[+1431/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 41s)
+
+[+1432/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 44s)
+
+[+1433/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 47s)
+
+[+1433/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 50s)
+
+[+1434/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 53s)
+
+[+1434/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 56s)
+
+[+1435/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(8m 59s)
+
+[+1435/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 02s)
+
+[+1438/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 05s)
+
+[+1440/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 08s)
+
+[+1442/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 11s)
+
+[+1444/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 14s)
+
+[+1446/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 17s)
+
+[+1454/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 20s)
+
+[+1454/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 23s)
+
+[+1455/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 26s)
+
+[+1456/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 29s)
+
+[+1456/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 32s)
+
+[+1457/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 35s)
+
+[+1457/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 38s)
+
+[+1458/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 41s)
+
+[+1459/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 44s)
+
+[+1459/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 47s)
+
+[+1466/x3/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 50s)
+
+failed FusionCacheTests.L1L2Tests.AppliesDistributedCacheSoftTimeout(serializerType: CysharpMemoryPack) (3s 255ms)
+  from /home/user/w56/FusionCache/default/tests/ZiggyCreatures.FusionCache.Tests/bin/Release/net10.0/ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)
+  Distributed cache soft timeout not applied (2)
+    at FusionCacheTests.L1L2Tests.AppliesDistributedCacheSoftTimeout(SerializerType serializerType) in /home/user/w56/FusionCache/default/tests/ZiggyCreatures.FusionCache.Tests/L1L2Tests_Sync.cs:117
+    at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+    at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+  Standard output
+    TRAC 2026-10-26T03:58:39.238Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT]: instance created
+    DEBU 2026-10-26T03:58:39.238Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT]: setup serializer (SERIALIZER=ZiggyCreatures.Caching.Fusion.Serialization.CysharpMemoryPack.FusionCacheCysharpMemoryPackSerializer)
+    DEBU 2026-10-26T03:58:39.238Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT]: setup distributed cache (CACHE=ZiggyCreatures.Caching.Fusion.Chaos.ChaosDistributedCache)
+    INFO 2026-10-26T03:58:39.238Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDU K=MyCache:foo_7c39a068382c43e388081d45881a6d00): Set<T> call FEO[DUR=1s LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=Y FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=/ DHTO=/ ABDO=N SBN=N ABBO=Y AC=N]
+    DEBU 2026-10-26T03:58:39.238Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDU K=MyCache:foo_7c39a068382c43e388081d45881a6d00): [MC] saving memory entry
+    DEBU 2026-10-26T03:58:39.238Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDU K=MyCache:foo_7c39a068382c43e388081d45881a6d00): [DC] saving distributed entry
+    TRAC 2026-10-26T03:58:39.238Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDU K=MyCache:foo_7c39a068382c43e388081d45881a6d00): [DC] serializing the entry FE(D)[T=2026-10-26T03:58:39.238220, LEXP=2026-10-26T03:58:40.238220][S=N, EEXP=/, LM=/, ET=/, S=/, P=Normal]
+    TRAC 2026-10-26T03:58:39.238Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDU K=MyCache:foo_7c39a068382c43e388081d45881a6d00): [DC] before setting entry in distributed
+    TRAC 2026-10-26T03:58:39.238Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDU K=MyCache:foo_7c39a068382c43e388081d45881a6d00): [DC] after setting entry in distributed
+    INFO 2026-10-26T03:58:40.488Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDV K=MyCache:foo_7c39a068382c43e388081d45881a6d00): GetOrSet<T> call FEO[DUR=1s LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=/ JIT=0 PR=N SZ=/ FS=Y FSMAX=1.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=100ms DHTO=500ms ABDO=N SBN=N ABBO=Y AC=N]
+    TRAC 2026-10-26T03:58:40.488Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDV K=MyCache:foo_7c39a068382c43e388081d45881a6d00): [MC] trying to get from memory
+    DEBU 2026-10-26T03:58:40.488Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDV K=MyCache:foo_7c39a068382c43e388081d45881a6d00): [MC] memory entry found (expired) FE(M)[T=2026-10-26T03:58:39.238220, LEXP=2026-10-26T03:58:40.238219][S=N, EEXP=/, LM=/, ET=/, S=/, P=Normal]
+    INFO 2026-10-26T03:58:40.488Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE0 K=MyCache:__fc:t:!): GetOrSet<T> call FEO[DUR=01:00:00 LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=100ms DHTO=500ms ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T03:58:40.488Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE0 K=MyCache:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T03:58:40.488Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE0 K=MyCache:__fc:t:!): [MC] memory entry not found
+    TRAC 2026-10-26T03:58:40.488Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE0 K=MyCache:__fc:t:!): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T03:58:40.488Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE0 K=MyCache:__fc:t:!): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T03:58:40.488Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE0 K=MyCache:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T03:58:40.488Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE0 K=MyCache:__fc:t:!): [MC] memory entry not found
+    TRAC 2026-10-26T03:58:40.488Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE0 K=MyCache:__fc:t:!): [DC] trying to get entry from distributed
+    
+    WARN 2026-10-26T03:58:40.994Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE0 K=MyCache:__fc:t:!): [DC] a synthetic timeout occurred while getting entry from distributed
+    ZiggyCreatures.Caching.Fusion.SyntheticTimeoutException: The operation has timed out.
+       at ZiggyCreatures.Caching.Fusion.Internals.RunUtils.RunAsyncFuncWithTimeoutAsync[TResult](Func`2 asyncFunc, TimeSpan timeout, Boolean cancelIfTimeout, Action`1 timedOutTaskProcessor, CancellationToken token) in /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache/Internals/RunUtils.cs:line 75
+       at ZiggyCreatures.Caching.Fusion.Internals.RunUtils.RunSyncFuncWithTimeout[TResult](Func`2 syncFunc, TimeSpan timeout, Boolean cancelIfTimeout, Action`1 timedOutTaskProcessor, CancellationToken token)
+       at ZiggyCreatures.Caching.Fusion.Internals.Distributed.DistributedCacheAccessor.TryGetEntry[TValue](String operationId, String key, FusionCacheEntryOptions options, Boolean hasFallbackValue, Nullable`1 timeout, CancellationToken token) in /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache/Internals/Distributed/DistributedCacheAccessor_Sync.cs:line 165
+    
+    
+    DEBU 2026-10-26T03:58:40.994Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE0 K=MyCache:__fc:t:!): [DC] distributed entry not found
+    DEBU 2026-10-26T03:58:40.994Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE0 K=MyCache:__fc:t:!): calling the factory (timeout=/)
+    DEBU 2026-10-26T03:58:40.994Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE0 K=MyCache:__fc:t:!): [MC] saving memory entry
+    TRAC 2026-10-26T03:58:40.994Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE0 K=MyCache:__fc:t:!): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T03:58:40.994Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE0 K=MyCache:__fc:t:!): [ML] MEMORY LOCK released
+    INFO 2026-10-26T03:58:40.994Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE0 K=MyCache:__fc:t:!): GetOrSet<T> return FE(M)[T=2026-10-26T03:58:40.994670, LEXP=2026-10-26T04:58:40.994712][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T03:58:40.994Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDV K=MyCache:foo_7c39a068382c43e388081d45881a6d00): new Clear (Remove) timestamp 0 (OLD: -1)
+    INFO 2026-10-26T03:58:40.994Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE1 K=MyCache:__fc:t:*): GetOrSet<T> call FEO[DUR=01:00:00 LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=100ms DHTO=500ms ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T03:58:40.994Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE1 K=MyCache:__fc:t:*): [MC] trying to get from memory
+    DEBU 2026-10-26T03:58:40.994Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE1 K=MyCache:__fc:t:*): [MC] memory entry not found
+    TRAC 2026-10-26T03:58:40.994Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE1 K=MyCache:__fc:t:*): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T03:58:40.994Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE1 K=MyCache:__fc:t:*): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T03:58:40.994Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE1 K=MyCache:__fc:t:*): [MC] trying to get from memory
+    DEBU 2026-10-26T03:58:40.994Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE1 K=MyCache:__fc:t:*): [MC] memory entry not found
+    TRAC 2026-10-26T03:58:40.994Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE1 K=MyCache:__fc:t:*): [DC] trying to get entry from distributed
+    
+    WARN 2026-10-26T03:58:41.495Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE1 K=MyCache:__fc:t:*): [DC] a synthetic timeout occurred while getting entry from distributed
+    ZiggyCreatures.Caching.Fusion.SyntheticTimeoutException: The operation has timed out.
+       at ZiggyCreatures.Caching.Fusion.Internals.RunUtils.RunAsyncFuncWithTimeoutAsync[TResult](Func`2 asyncFunc, TimeSpan timeout, Boolean cancelIfTimeout, Action`1 timedOutTaskProcessor, CancellationToken token) in /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache/Internals/RunUtils.cs:line 75
+       at ZiggyCreatures.Caching.Fusion.Internals.RunUtils.RunSyncFuncWithTimeout[TResult](Func`2 syncFunc, TimeSpan timeout, Boolean cancelIfTimeout, Action`1 timedOutTaskProcessor, CancellationToken token)
+       at ZiggyCreatures.Caching.Fusion.Internals.Distributed.DistributedCacheAccessor.TryGetEntry[TValue](String operationId, String key, FusionCacheEntryOptions options, Boolean hasFallbackValue, Nullable`1 timeout, CancellationToken token) in /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache/Internals/Distributed/DistributedCacheAccessor_Sync.cs:line 165
+    
+    
+    DEBU 2026-10-26T03:58:41.495Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE1 K=MyCache:__fc:t:*): [DC] distributed entry not found
+    DEBU 2026-10-26T03:58:41.495Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE1 K=MyCache:__fc:t:*): calling the factory (timeout=/)
+    DEBU 2026-10-26T03:58:41.495Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE1 K=MyCache:__fc:t:*): [MC] saving memory entry
+    TRAC 2026-10-26T03:58:41.495Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE1 K=MyCache:__fc:t:*): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T03:58:41.495Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE1 K=MyCache:__fc:t:*): [ML] MEMORY LOCK released
+    INFO 2026-10-26T03:58:41.495Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE1 K=MyCache:__fc:t:*): GetOrSet<T> return FE(M)[T=2026-10-26T03:58:41.495473, LEXP=2026-10-26T04:58:41.495667][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T03:58:41.495Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDV K=MyCache:foo_7c39a068382c43e388081d45881a6d00): new Clear (Expire) timestamp 0 (OLD: -1)
+    TRAC 2026-10-26T03:58:41.495Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDV K=MyCache:foo_7c39a068382c43e388081d45881a6d00): [ML] waiting to acquire the MEMORY LOCK
+    TRAC 2026-10-26T03:58:41.495Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDV K=MyCache:foo_7c39a068382c43e388081d45881a6d00): [ML] MEMORY LOCK acquired
+    TRAC 2026-10-26T03:58:41.495Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDV K=MyCache:foo_7c39a068382c43e388081d45881a6d00): [MC] trying to get from memory
+    DEBU 2026-10-26T03:58:41.495Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDV K=MyCache:foo_7c39a068382c43e388081d45881a6d00): [MC] memory entry found (expired) FE(M)[T=2026-10-26T03:58:39.238220, LEXP=2026-10-26T03:58:40.238219][S=N, EEXP=/, LM=/, ET=/, S=/, P=Normal]
+    INFO 2026-10-26T03:58:41.495Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE2 K=MyCache:__fc:t:!): GetOrSet<T> call FEO[DUR=01:00:00 LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=100ms DHTO=500ms ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T03:58:41.495Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE2 K=MyCache:__fc:t:!): [MC] trying to get from memory
+    DEBU 2026-10-26T03:58:41.495Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE2 K=MyCache:__fc:t:!): [MC] memory entry found FE(M)[T=2026-10-26T03:58:40.994670, LEXP=2026-10-26T04:58:40.994712][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T03:58:41.495Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE2 K=MyCache:__fc:t:!): using memory entry
+    INFO 2026-10-26T03:58:41.495Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE2 K=MyCache:__fc:t:!): GetOrSet<T> return FE(M)[T=2026-10-26T03:58:40.994670, LEXP=2026-10-26T04:58:40.994712][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    INFO 2026-10-26T03:58:41.495Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE3 K=MyCache:__fc:t:*): GetOrSet<T> call FEO[DUR=01:00:00 LKTO=/ SKMR=N SKMW=N SKDR=N SKDW=N SKDRWS=N MDUR=/ DDUR=1.00:00:00 JIT=0 PR=NR SZ=0 FS=Y FSMAX=10.00:00:00 DFSMAX=/ FSTHR=30s FSTO=/ FHTO=/ TOFC=Y DSTO=100ms DHTO=500ms ABDO=N SBN=N ABBO=N AC=N]
+    TRAC 2026-10-26T03:58:41.495Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE3 K=MyCache:__fc:t:*): [MC] trying to get from memory
+    DEBU 2026-10-26T03:58:41.495Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE3 K=MyCache:__fc:t:*): [MC] memory entry found FE(M)[T=2026-10-26T03:58:41.495473, LEXP=2026-10-26T04:58:41.495667][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T03:58:41.495Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE3 K=MyCache:__fc:t:*): using memory entry
+    INFO 2026-10-26T03:58:41.495Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFE3 K=MyCache:__fc:t:*): GetOrSet<T> return FE(M)[T=2026-10-26T03:58:41.495473, LEXP=2026-10-26T04:58:41.495667][S=N, EEXP=/, LM=/, ET=/, S=0, P=NeverRemove]
+    TRAC 2026-10-26T03:58:41.495Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDV K=MyCache:foo_7c39a068382c43e388081d45881a6d00): [DC] trying to get entry from distributed
+    
+    WARN 2026-10-26T03:58:42.025Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDV K=MyCache:foo_7c39a068382c43e388081d45881a6d00): [DC] a synthetic timeout occurred while getting entry from distributed
+    ZiggyCreatures.Caching.Fusion.SyntheticTimeoutException: The operation has timed out.
+       at ZiggyCreatures.Caching.Fusion.Internals.RunUtils.RunAsyncFuncWithTimeoutAsync[TResult](Func`2 asyncFunc, TimeSpan timeout, Boolean cancelIfTimeout, Action`1 timedOutTaskProcessor, CancellationToken token) in /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache/Internals/RunUtils.cs:line 75
+       at ZiggyCreatures.Caching.Fusion.Internals.RunUtils.RunSyncFuncWithTimeout[TResult](Func`2 syncFunc, TimeSpan timeout, Boolean cancelIfTimeout, Action`1 timedOutTaskProcessor, CancellationToken token)
+       at ZiggyCreatures.Caching.Fusion.Internals.Distributed.DistributedCacheAccessor.TryGetEntry[TValue](String operationId, String key, FusionCacheEntryOptions options, Boolean hasFallbackValue, Nullable`1 timeout, CancellationToken token) in /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache/Internals/Distributed/DistributedCacheAccessor_Sync.cs:line 165
+    
+    
+    DEBU 2026-10-26T03:58:42.026Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDV K=MyCache:foo_7c39a068382c43e388081d45881a6d00): [DC] distributed entry not found
+    DEBU 2026-10-26T03:58:42.026Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDV K=MyCache:foo_7c39a068382c43e388081d45881a6d00): calling the factory (timeout=/)
+    
+    WARN 2026-10-26T03:58:42.490Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDV K=MyCache:foo_7c39a068382c43e388081d45881a6d00): an error occurred while calling the factory
+    System.Exception: Sloths are cool
+       at FusionCacheTests.L1L2Tests.<>c.<AppliesDistributedCacheSoftTimeout>b__52_0(CancellationToken _) in /home/user/w56/FusionCache/default/tests/ZiggyCreatures.FusionCache.Tests/L1L2Tests_Sync.cs:line 106
+       at ZiggyCreatures.Caching.Fusion.FusionCacheExtMethods.<>c__DisplayClass49_0`1.<GetOrSet>b__0(FusionCacheFactoryExecutionContext`1 _, CancellationToken ct) in /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache/FusionCacheExtMethods_FactoryNoCtx_Sync.cs:line 124
+       at System.Threading.Tasks.Task`1.InnerInvoke()
+       at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+    --- End of stack trace from previous location ---
+       at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+       at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+    --- End of stack trace from previous location ---
+       at ZiggyCreatures.Caching.Fusion.Internals.RunUtils.RunAsyncFuncWithTimeoutAsync[TResult](Func`2 asyncFunc, TimeSpan timeout, Boolean cancelIfTimeout, Action`1 timedOutTaskProcessor, CancellationToken token) in /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache/Internals/RunUtils.cs:line 69
+       at ZiggyCreatures.Caching.Fusion.Internals.RunUtils.RunSyncFuncWithTimeout[TResult](Func`2 syncFunc, TimeSpan timeout, Boolean cancelIfTimeout, Action`1 timedOutTaskProcessor, CancellationToken token) in /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache/Internals/RunUtils.cs:line 181
+       at ZiggyCreatures.Caching.Fusion.FusionCache.GetOrSetEntryInternal[TValue](String operationId, String key, String originalKey, String[] tags, Func`3 factory, Boolean isRealFactory, MaybeValue`1 failSafeDefaultValue, FusionCacheEntryOptions options, Activity activity, CancellationToken token) in /home/user/w56/FusionCache/default/src/ZiggyCreatures.FusionCache/FusionCache_Sync.cs:line 352
+    
+    
+    TRAC 2026-10-26T03:58:42.490Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDV K=MyCache:foo_7c39a068382c43e388081d45881a6d00): trying to activate FAIL-SAFE
+    
+    WARN 2026-10-26T03:58:42.490Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDV K=MyCache:foo_7c39a068382c43e388081d45881a6d00): FAIL-SAFE activated (from memory)
+    
+    TRAC 2026-10-26T03:58:42.490Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDV K=MyCache:foo_7c39a068382c43e388081d45881a6d00): shifting a memory entry from 10/26/2026 03:58:40 +00:00 to 10/26/2026 03:59:12 +00:00 (DIFF: 00:00:32.2526604)
+    TRAC 2026-10-26T03:58:42.490Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDV K=MyCache:foo_7c39a068382c43e388081d45881a6d00): [ML] releasing MEMORY LOCK
+    TRAC 2026-10-26T03:58:42.490Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDV K=MyCache:foo_7c39a068382c43e388081d45881a6d00): [ML] MEMORY LOCK released
+    INFO 2026-10-26T03:58:42.490Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT] (O=0HNPJ2G5TEFDV K=MyCache:foo_7c39a068382c43e388081d45881a6d00): GetOrSet<T> return FE(M)[T=2026-10-26T03:58:39.238220, LEXP=2026-10-26T03:59:12.490879][S=Y, EEXP=/, LM=/, ET=/, S=/, P=Normal]
+    TRAC 2026-10-26T03:58:42.490Z: Elapsed (with extra pad): 2007.4459 ms
+    DEBU 2026-10-26T03:58:42.491Z: FUSION [N=FusionCache I=0HNPJ2G5TEFDT]: distributed cache removed
+    
+  Error output
+[+1466/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 53s)
+
+[+1467/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 56s)
+
+[+1468/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(9m 59s)
+
+[+1469/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 02s)
+
+[+1470/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 05s)
+
+[+1471/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 08s)
+
+[+1472/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 11s)
+
+[+1473/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 14s)
+
+[+1473/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 17s)
+
+[+1474/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 20s)
+
+[+1475/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 23s)
+
+[+1476/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 26s)
+
+[+1476/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 29s)
+
+[+1478/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 32s)
+
+[+1479/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 35s)
+
+[+1480/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 38s)
+
+[+1482/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 41s)
+
+[+1483/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 44s)
+
+[+1485/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 47s)
+
+[+1486/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 50s)
+
+[+1488/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 53s)
+
+[+1489/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 56s)
+
+[+1491/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(10m 59s)
+
+[+1493/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 02s)
+
+[+1497/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 05s)
+
+[+1501/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 08s)
+
+[+1503/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 11s)
+
+[+1505/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 14s)
+
+[+1513/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 17s)
+
+[+1515/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 20s)
+
+[+1517/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 23s)
+
+[+1525/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 26s)
+
+[+1525/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 29s)
+
+[+1526/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 32s)
+
+[+1527/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 35s)
+
+[+1527/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 38s)
+
+[+1528/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 41s)
+
+[+1528/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 44s)
+
+[+1529/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 47s)
+
+[+1530/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 50s)
+
+[+1530/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 53s)
+
+[+1531/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 56s)
+
+[+1532/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(11m 59s)
+
+[+1534/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 02s)
+
+[+1535/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 05s)
+
+[+1536/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 08s)
+
+[+1538/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 11s)
+
+[+1539/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 14s)
+
+[+1541/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 17s)
+
+[+1542/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 20s)
+
+[+1543/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 23s)
+
+[+1543/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 26s)
+
+[+1544/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 29s)
+
+[+1545/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 32s)
+
+[+1545/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 35s)
+
+[+1546/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 38s)
+
+[+1546/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 41s)
+
+[+1547/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 44s)
+
+[+1547/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 47s)
+
+[+1548/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 50s)
+
+[+1555/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 53s)
+
+[+1557/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 56s)
+
+[+1558/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(12m 59s)
+
+[+1560/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 02s)
+
+[+1562/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 05s)
+
+[+1563/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 08s)
+
+[+1565/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 11s)
+
+[+1566/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 14s)
+
+[+1567/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 17s)
+
+[+1567/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 20s)
+
+[+1567/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 23s)
+
+[+1568/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 26s)
+
+[+1568/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 29s)
+
+[+1568/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 32s)
+
+[+1568/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 35s)
+
+[+1569/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 38s)
+
+[+1569/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 41s)
+
+[+1569/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 44s)
+
+[+1570/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 47s)
+
+[+1570/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 50s)
+
+[+1570/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 53s)
+
+[+1571/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 56s)
+
+[+1571/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(13m 59s)
+
+[+1571/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 02s)
+
+[+1571/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 05s)
+
+[+1572/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 08s)
+
+[+1572/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 11s)
+
+[+1572/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 14s)
+
+[+1573/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 17s)
+
+[+1573/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 20s)
+
+[+1573/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 23s)
+
+[+1573/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 26s)
+
+[+1574/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 29s)
+
+[+1574/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 32s)
+
+[+1574/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 35s)
+
+[+1575/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 38s)
+
+[+1575/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 41s)
+
+[+1575/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 44s)
+
+[+1575/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 47s)
+
+[+1576/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 50s)
+
+[+1576/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 53s)
+
+[+1576/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 56s)
+
+[+1577/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(14m 59s)
+
+[+1577/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 02s)
+
+[+1577/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 05s)
+
+[+1578/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 08s)
+
+[+1578/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 11s)
+
+[+1578/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 14s)
+
+[+1578/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 17s)
+
+[+1597/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 20s)
+
+[+1599/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 23s)
+
+[+1600/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 26s)
+
+[+1601/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 29s)
+
+[+1603/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 32s)
+
+[+1604/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 35s)
+
+[+1605/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 38s)
+
+[+1607/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 41s)
+
+[+1608/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 44s)
+
+[+1609/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 47s)
+
+[+1611/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 50s)
+
+[+1612/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 53s)
+
+[+1613/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 56s)
+
+[+1615/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(15m 59s)
+
+[+1617/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(16m 02s)
+
+[+1620/x4/?0] ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64)(16m 05s)
+
+/home/user/w56/FusionCache/default/tests/ZiggyCreatures.FusionCache.Tests/bin/Release/net10.0/ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64) failed with 4 error(s) (16m 07s 151ms)
+Exit code: 2
+
+Test run summary: Failed!
+  total: 1625
+  failed: 4
+  succeeded: 1621
+  skipped: 0
+  duration: 16m 07s 439ms
+Test run completed with non-success exit code: 2 (see: https://aka.ms/testingplatform/exitcodes)

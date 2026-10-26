@@ -1,0 +1,869 @@
+ Directory.Build.props | 3 +++
+ 1 file changed, 3 insertions(+)
+Conventions in the code (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  note     csharp_prefer_braces = true:silent in .editorconfig isn't enforced (its severity is silent or none), so your code decides
+  note     csharp_using_directive_placement = outside_namespace:silent in .editorconfig isn't enforced (its severity is silent or none), so your code decides
+  note     dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity:silent in .editorconfig isn't enforced (its severity is silent or none), so your code decides
+  note     dotnet_style_require_accessibility_modifiers = for_non_interface_members:silent in .editorconfig isn't enforced (its severity is silent or none), so your code decides
+  note     dotnet_style_predefined_type_for_locals_parameters_members = true:silent in .editorconfig isn't enforced (its severity is silent or none), so your code decides
+  note     dotnet_style_predefined_type_for_member_access = true:silent in .editorconfig isn't enforced (its severity is silent or none), so your code decides
+  kept     private fields: 30 of 30 named '_field' -> _camelCase
+  set      '{' of multi-line blocks: 1469 of 1469 on its own line -> set in .editorconfig (all)
+  set      else/catch/finally after '}': 47 of 47 on a new line -> set in .editorconfig (true)
+  both     one-line if/else/loop/using/lock bodies: 67 with braces, 80 without braces -> both allowed
+  default  one-line jumps ('if (x) return;'): 6 in braces -> false
+  off      operators where a line wraps: 18 at the start of the line, 7 at the end of the line -> .editorconfig says beginning_of_line, unenforced, code mixed: BRO1520 is off
+  kept     multi-line initializers: 128 of 167 without a trailing comma -> omit
+  kept     empty strings: 4 of 4 "" -> literal
+  default  null checks: 41 of 41 'is null' -> pattern_matching
+  too few  one-line <summary> texts: 2 places -> default stays (multi_line)
+  default  <inheritdoc/> tags: 8 of 8 '<inheritdoc/>' -> compact
+  set      default values: 19 of 19 'default' -> set in .editorconfig (true:suggestion)
+  kept     ')' of split lists: 227 of 286 on its own line -> own_line
+  default  split lists: 203 of 203 first item on the next line -> next_line
+  default  ': base(...)'/': this(...)': 18 of 18 on its own line -> own_line
+  default  'where' constraints: 13 of 13 on their own line -> own_line
+  off      'new T { ... }' with an initializer: 161 without '()', 153 with '()' -> BRO1141 is off
+  kept     switch sections: 20 of 20 without a blank line -> omit
+  default  files' using directives: 86 of 86 outside the namespace -> outside_namespace
+  set      statements on their 'if'/loop/'case' line: 120 on a line of their own -> set in .editorconfig (true)
+  off      types' members: 25 in BRO1001's order, 34 in another order -> BRO1001 is off
+  kept     lambda-first calls: 10 of 10 rest on the lambda's last line -> true
+  default  split lists' items: 203 of 252 one per line -> warning
+  default  private-by-default members: 224 of 240 with 'private' -> for_non_interface_members
+  default  partial type parts: 36 of 36 with an access modifier -> warning
+  default  internal-by-default types: 14 of 16 with 'internal' -> warning
+  default  adjacent locals of one type: 48 of 52 declared one by one -> warning
+  default  declarations with 2+ attributes: 201 of 212 one per list ('[A]' '[B]') -> warning
+  default  adjacent fields of one type: 42 of 42 declared one by one -> warning
+  default  private static fields: 82 of 82 without a prefix -> warning
+  default  built-in type names: 91 of 91 only keywords ('int') -> warning
+  default  empty blocks ('{ }'): 15 of 15 on two lines -> false
+  too few  block-bodied properties/methods: 1 member -> default stays (warning)
+  default  statement blocks ('if (x) { y(); }'): 86 of 86 on several lines -> warning
+  default  auto-property accessors ('{ get; set; }'): 37 of 37 on one line -> warning
+  set      C# files' line endings: 107 of 107 LF -> set in .editorconfig (crlf)
+  default  statements after a block's '}': 91 of 118 after a blank line -> warning
+  too few  nested ifs BRO1149 would merge: 2 nested ifs -> default stays (warning)
+  default  neighbouring members: 708 of 713 with a blank line between -> warning
+  default  doc comments below code: 12 of 12 after a blank line -> warning
+  default  '//' comments above code: 963 of 963 right above the code -> warning
+  default  '//' comments below code: 831 of 892 after a blank line -> warning
+  default  doc comment texts: 9 of 9 ending with a period -> warning
+  too few  doc element order: 1 doc comment -> default stays (warning)
+  default  non-private fields: 19 of 19 PascalCase or as your naming rule says -> warning
+  default  doc comments above their element: 14 of 14 right above it -> warning
+  default  tuple element names: 20 of 20 '(int Count, ...)' -> PascalCase
+  set      using directives: 76 of 76 files sorted, 33 of 33 with System first -> set in .editorconfig
+  default  private constants/static readonly fields: 72 of 72 PascalCase -> PascalCase
+  set      spacing, control-flow keywords: 277 of 277 'if (x)' -> set in .editorconfig (true)
+  set      spacing, control-flow parentheses: 277 of 277 'if (x)' -> set in .editorconfig (false)
+  set      spacing, parenthesized expressions: 43 of 43 '(a + b)' -> set in .editorconfig (false)
+  set      spacing, cast parentheses: 25 of 25 '(int)x' -> set in .editorconfig (false)
+  set      spacing, casts: 25 of 25 '(int)x' -> set in .editorconfig (false)
+  set      spacing, call arguments: 9050 of 9050 'F(x)' -> set in .editorconfig (false)
+  set      spacing, declared parameters: 364 of 364 'void F(int x)' -> set in .editorconfig (false)
+Summary:
+  Kept your style for 35 settings: wrote stylebro_private_field_naming, stylebro_trailing_comma,
+    stylebro_empty_string_style, stylebro_closing_parenthesis_placement, stylebro_blank_line_between_switch_sections,
+    stylebro_allow_leading_multiline_lambda; 29 were already StyleBro's default.
+  Allowed both forms for 1 setting because your code mixes them: csharp_prefer_braces = when_multiline (one-line
+    if/else/loop/using/lock bodies).
+  Turned 3 rules off because your code mixes both forms: BRO1520 (operators where a line wraps: your .editorconfig says
+    beginning_of_line), BRO1141 ('new T { ... }' with an initializer), BRO1001 (types' members).
+  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
+  4 settings had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_summary_layout,
+    dotnet_diagnostic.BRO1509.severity, dotnet_diagnostic.BRO1149.severity, dotnet_diagnostic.BRO1619.severity.
+  note     Line endings: your .editorconfig says end_of_line = crlf, but git checks out 107 C# files with each machine's ending (a .gitattributes 'text' attribute without 'eol', or core.autocrlf), so Linux and macOS checkouts don't match it. Set end_of_line = unset for C# files and IDE0055 to suggestion, so neither 'format' nor the build touches endings. To settle it: '*.cs text eol=crlf' in .gitattributes (then 'git add --renormalize .'), or remove end_of_line from .editorconfig.
+  note     Charset: your .editorconfig says charset = utf-8-bom, and 1 of 107 C# files starts without a BOM: 'format' adds a BOM to it. To keep that out of the formatting changes, change it in a commit of their own first.
+
+6 projects target several frameworks (src/ZiggyCreatures.FusionCache.AspNetCore.OutputCaching/ZiggyCreatures.FusionCache.AspNetCore.OutputCaching.csproj, src/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis.csproj, src/ZiggyCreatures.FusionCache.Locking.AsyncKeyed/ZiggyCreatures.FusionCache.Locking.AsyncKeyed.csproj, ...).
+Run 'bro format' instead of 'dotnet format' here: with IDE0055 on, 'dotnet format' crashes on multi-targeted
+projects (Roslyn can't merge the target frameworks' copies of a file). The command runs it once per target framework.
+
+src/ZiggyCreatures.FusionCache/.editorconfig says root = true, so the root's settings don't reach src/ZiggyCreatures.FusionCache/: it gets a block of its own, from its own code.
+Conventions in the code under src/ZiggyCreatures.FusionCache/ (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  kept     private fields: 93 of 94 named '_field' -> _camelCase
+  default  '{' of multi-line blocks: 1769 of 1769 on its own line -> all
+  default  else/catch/finally after '}': 223 of 223 on a new line -> true
+  both     one-line if/else/loop/using/lock bodies: 294 with braces, 658 without braces -> both allowed
+  default  one-line jumps ('if (x) return;'): 78 in braces -> false
+  default  operators where a line wraps: 45 of 49 at the start of the line -> beginning_of_line
+  default  '=' where a line wraps: 5 of 5 at the end of the line -> end_of_line
+  off      multi-line initializers: 8 with a trailing comma, 14 without a trailing comma -> BRO1401 is off
+  off      empty strings: 6 string.Empty, 13 "" -> BRO1106 is off
+  default  null checks: 423 of 423 'is null' -> pattern_matching
+  default  one-line <summary> texts: 428 of 442 on three lines -> multi_line
+  default  <inheritdoc/> tags: 159 of 160 '<inheritdoc/>' -> compact
+  kept     default values: 182 of 185 'default' -> true
+  kept     ')' of split lists: 40 of 40 on its own line -> own_line
+  default  split lists: 37 of 37 first item on the next line -> next_line
+  default  ': base(...)'/': this(...)': 21 of 21 on its own line -> own_line
+  default  'where' constraints: 6 of 6 on their own line -> own_line
+  off      'new T { ... }' with an initializer: 6 without '()', 5 with '()' -> BRO1141 is off
+  kept     switch sections: 11 of 11 without a blank line -> omit
+  default  files' using directives: 68 of 68 outside the namespace -> outside_namespace
+  too few  mixed arithmetic ('a + b * c'): 2 places -> default stays (always_for_clarity)
+  default  statements on their 'if'/loop/'case' line: 699 on a line of their own -> false
+  off      overrides/interface implementations: 117 with a doc comment, 79 without a doc comment -> BRO1601 is off
+  off      types' members: 23 in BRO1001's order, 30 in another order -> BRO1001 is off
+  too few  overloads BRO1001 could split: 1 place -> default stays (false)
+  default  lambda-first calls: 10 of 10 one argument per line -> false
+  default  split lists' items: 37 of 37 one per line -> warning
+  default  private-by-default members: 191 of 192 with 'private' -> for_non_interface_members
+  default  partial type parts: 20 of 20 with an access modifier -> warning
+  default  internal-by-default types: 22 of 22 with 'internal' -> warning
+  off      property summaries: 232 of 238 in their own words -> BRO1604 is off
+  default  adjacent locals of one type: 4 of 4 declared one by one -> warning
+  default  declarations with 2+ attributes: 16 of 16 one per list ('[A]' '[B]') -> warning
+  default  adjacent fields of one type: 101 of 101 declared one by one -> warning
+  default  private static fields: 12 of 12 without a prefix -> warning
+  default  built-in type names: 89 of 89 only keywords ('int') -> warning
+  default  empty blocks ('{ }'): 23 of 23 on two lines -> false
+  default  block-bodied properties/methods: 54 of 55 on several lines -> warning
+  default  statement blocks ('if (x) { y(); }'): 328 of 328 on several lines -> warning
+  off      accessor bodies: 9 laid out alike, 4 one-line and multi-line mixed -> BRO1510 is off
+  default  auto-property accessors ('{ get; set; }'): 289 of 291 on one line -> warning
+  kept     C# files' line endings: 100 of 100 LF -> lf
+  default  statements after a block's '}': 257 of 261 after a blank line -> warning
+  off      nested ifs BRO1149 would merge: 23 nested -> BRO1149 is off
+  default  neighbouring members: 1027 of 1030 with a blank line between -> warning
+  default  doc comments below code: 783 of 784 after a blank line -> warning
+  default  '//' comments above code: 645 of 645 right above the code -> warning
+  default  '//' comments below code: 483 of 494 after a blank line -> warning
+  default  doc comment texts: 1689 of 1958 ending with a period -> warning
+  default  doc element order (param, returns): 278 of 279 in BRO1619's order -> warning
+  default  keywords in doc comments: 74 of 74 '<see langword="null"/>' -> warning
+  off      non-private fields: 7 PascalCase or as your naming rule says, 4 named otherwise -> BRO1306 is off
+  default  doc comments above their element: 872 of 872 right above it -> warning
+  kept     tuple element names: 28 of 32 '(int count, ...)' -> camelCase
+  default  using directives: 42 of 42 files sorted, 25 of 25 with System first -> sorted, System first
+  off      private constants/static readonly fields: 11 PascalCase, 4 _camelCase -> BRO1306 is off
+  default  spacing, control-flow keywords: 1304 of 1304 'if (x)' -> 'if (x)'
+  default  spacing, control-flow parentheses: 1304 of 1304 'if (x)' -> 'if (x)'
+  default  spacing, parenthesized expressions: 54 of 54 '(a + b)' -> '(a + b)'
+  default  spacing, cast parentheses: 48 of 48 '(int)x' -> '(int)x'
+  default  spacing, casts: 48 of 48 '(int)x' -> '(int)x'
+  default  spacing, call arguments: 2712 of 2712 'F(x)' -> 'F(x)'
+  default  spacing, declared parameters: 671 of 671 'void F(int x)' -> 'void F(int x)'
+Summary:
+  Kept your style for 50 settings: wrote stylebro_private_field_naming, csharp_prefer_simple_default_expression,
+    stylebro_closing_parenthesis_placement, stylebro_blank_line_between_switch_sections, end_of_line,
+    stylebro_tuple_element_name_casing; 44 were already StyleBro's default.
+  Allowed both forms for 1 setting because your code mixes them: csharp_prefer_braces = when_multiline (one-line
+    if/else/loop/using/lock bodies).
+  Turned 7 rules off because your code mixes both forms: BRO1401 (multi-line initializers), BRO1106 (empty strings),
+    BRO1141 ('new T { ... }' with an initializer), BRO1601 (overrides/interface implementations),
+    BRO1001 (types' members), BRO1510 (accessor bodies),
+    BRO1306 (non-private fields; private constants/static readonly fields).
+  Turned 2 rules off because your code doesn't do what they enforce: BRO1604 (property summaries: 232 of 238 in their
+    own words), BRO1149 (nested ifs BRO1149 would merge: 23 nested).
+  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
+  2 settings had fewer than 3 places to tell,
+    StyleBro's defaults stay: dotnet_style_parentheses_in_arithmetic_binary_operators, stylebro_keep_overloads_together.
+
+
+src/ZiggyCreatures.FusionCache.AspNetCore.OutputCaching/.editorconfig says root = true, so the root's settings don't reach src/ZiggyCreatures.FusionCache.AspNetCore.OutputCaching/: it gets a block of its own, from its own code.
+Conventions in the code under src/ZiggyCreatures.FusionCache.AspNetCore.OutputCaching/ (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  too few  private fields: 1 place -> default stays (camelCase)
+  default  '{' of multi-line blocks: 12 of 12 on its own line -> all
+  too few  else/catch/finally after '}': 1 place -> default stays (true)
+  both     one-line if/else/loop/using/lock bodies: 2 with braces, 1 without braces -> both allowed
+  too few  null checks: 2 places -> default stays (pattern_matching)
+  default  one-line <summary> texts: 3 of 3 on three lines -> multi_line
+  kept     <inheritdoc/> tags: 3 of 3 '<inheritdoc />' -> spaced
+  default  files' using directives: 3 of 3 outside the namespace -> outside_namespace
+  too few  statements on their 'if'/loop/'case' line: 1 place -> default stays (false)
+  too few  types' members: 2 types -> default stays (warning)
+  too few  private-by-default members: 2 members -> default stays (for_non_interface_members)
+  too few  internal-by-default types: 1 type -> default stays (warning)
+  too few  property summaries: 1 summary -> default stays (warning)
+  too few  built-in type names: 2 files -> default stays (warning)
+  too few  statement blocks ('if (x) { y(); }'): 2 blocks -> default stays (warning)
+  too few  auto-property accessors ('{ get; set; }'): 1 property declaration -> default stays (warning)
+  kept     C# files' line endings: 3 of 3 LF -> lf
+  too few  statements after a block's '}': 1 statement -> default stays (warning)
+  default  neighbouring members: 5 of 5 with a blank line between -> warning
+  default  doc comments below code: 5 of 5 after a blank line -> warning
+  default  doc comment texts: 7 of 7 ending with a period -> warning
+  too few  doc element order: 1 doc comment -> default stays (warning)
+  too few  keywords in doc comments: 1 keyword -> default stays (warning)
+  default  doc comments above their element: 7 of 7 right above it -> warning
+  too few  using directives: 1 file -> default stays (sorted, System first)
+  too few  spacing, control-flow keywords: 2 of 2 'if (x)' -> default stays
+  too few  spacing, control-flow parentheses: 2 of 2 'if (x)' -> default stays
+  default  spacing, call arguments: 15 of 15 'F(x)' -> 'F(x)'
+  default  spacing, declared parameters: 5 of 5 'void F(int x)' -> 'void F(int x)'
+Summary:
+  Kept your style for 11 settings: wrote stylebro_inheritdoc_style, end_of_line; 9 were already StyleBro's default.
+  Allowed both forms for 1 setting because your code mixes them: csharp_prefer_braces = when_multiline (one-line
+    if/else/loop/using/lock bodies).
+  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
+  17 settings had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_private_field_naming,
+    csharp_new_line_before_else, stylebro_null_check_style, csharp_preserve_single_line_statements,
+    dotnet_diagnostic.BRO1001.severity, dotnet_style_require_accessibility_modifiers,
+    dotnet_diagnostic.BRO1404.severity, dotnet_diagnostic.BRO1604.severity, dotnet_diagnostic.IDE0049.severity,
+    dotnet_diagnostic.BRO1508.severity, dotnet_diagnostic.BRO1527.severity, dotnet_diagnostic.BRO1519.severity,
+    dotnet_diagnostic.BRO1619.severity, dotnet_diagnostic.BRO1618.severity, dotnet_sort_system_directives_first,
+    csharp_space_after_keywords_in_control_flow_statements, csharp_space_between_parentheses (control_flow_statements).
+
+
+src/ZiggyCreatures.FusionCache.Backplane.Memory/.editorconfig says root = true, so the root's settings don't reach src/ZiggyCreatures.FusionCache.Backplane.Memory/: it gets a block of its own, from its own code.
+Conventions in the code under src/ZiggyCreatures.FusionCache.Backplane.Memory/ (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  kept     private fields: 10 of 10 named '_field' -> _camelCase
+  default  '{' of multi-line blocks: 42 of 42 on its own line -> all
+  default  else/catch/finally after '}': 5 of 5 on a new line -> true
+  kept     one-line if/else/loop/using/lock bodies: 45 of 47 without braces -> when_multiline
+  default  null checks: 27 of 27 'is null' -> pattern_matching
+  default  one-line <summary> texts: 6 of 6 on three lines -> multi_line
+  default  <inheritdoc/> tags: 6 of 6 '<inheritdoc/>' -> compact
+  too few  default values: 2 places -> default stays (false)
+  default  files' using directives: 5 of 5 outside the namespace -> outside_namespace
+  default  statements on their 'if'/loop/'case' line: 45 on a line of their own -> false
+  off      types' members: 2 in BRO1001's order, 1 in another order -> BRO1001 is off
+  default  private-by-default members: 14 of 14 with 'private' -> for_non_interface_members
+  default  partial type parts: 3 of 3 with an access modifier -> warning
+  too few  property summaries: 1 summary -> default stays (warning)
+  too few  private static fields: 1 field -> default stays (warning)
+  default  built-in type names: 4 of 4 only keywords ('int') -> warning
+  too few  block-bodied properties/methods: 1 member -> default stays (warning)
+  too few  statement blocks ('if (x) { y(); }'): 2 blocks -> default stays (warning)
+  too few  auto-property accessors ('{ get; set; }'): 1 property declaration -> default stays (warning)
+  kept     C# files' line endings: 6 of 6 LF -> lf
+  default  statements after a block's '}': 5 of 5 after a blank line -> warning
+  default  neighbouring members: 12 of 12 with a blank line between -> warning
+  default  doc comments below code: 9 of 9 after a blank line -> warning
+  default  '//' comments above code: 5 of 5 right above the code -> warning
+  default  '//' comments below code: 4 of 4 after a blank line -> warning
+  default  doc comment texts: 14 of 15 ending with a period -> warning
+  default  doc element order: 3 of 3 in BRO1619's order -> warning
+  default  doc comments above their element: 13 of 13 right above it -> warning
+  too few  using directives: 2 files -> default stays (sorted, System first)
+  too few  private constants/static readonly fields: 1 field -> default stays (PascalCase)
+  default  spacing, control-flow keywords: 59 of 59 'if (x)' -> 'if (x)'
+  default  spacing, control-flow parentheses: 59 of 59 'if (x)' -> 'if (x)'
+  default  spacing, call arguments: 93 of 93 'F(x)' -> 'F(x)'
+  default  spacing, declared parameters: 9 of 9 'void F(int x)' -> 'void F(int x)'
+Summary:
+  Kept your style for 25 settings: wrote stylebro_private_field_naming, csharp_prefer_braces,
+    end_of_line; 22 were already StyleBro's default.
+  Turned 1 rule off because your code mixes both forms: BRO1001 (types' members).
+  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
+  8 settings had fewer than 3 places to tell, StyleBro's defaults stay: csharp_prefer_simple_default_expression,
+    dotnet_diagnostic.BRO1604.severity, dotnet_diagnostic.BRO1307.severity, dotnet_diagnostic.BRO1509.severity,
+    dotnet_diagnostic.BRO1508.severity, dotnet_diagnostic.BRO1527.severity, dotnet_sort_system_directives_first,
+    stylebro_private_static_field_naming.
+
+
+src/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis/.editorconfig says root = true, so the root's settings don't reach src/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis/: it gets a block of its own, from its own code.
+Conventions in the code under src/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis/ (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  kept     private fields: 12 of 12 named '_field' -> _camelCase
+  default  '{' of multi-line blocks: 55 of 55 on its own line -> all
+  default  else/catch/finally after '}': 8 of 8 on a new line -> true
+  kept     one-line if/else/loop/using/lock bodies: 39 of 47 without braces -> when_multiline
+  default  null checks: 40 of 40 'is null' -> pattern_matching
+  default  one-line <summary> texts: 9 of 9 on three lines -> multi_line
+  default  <inheritdoc/> tags: 6 of 6 '<inheritdoc/>' -> compact
+  kept     default values: 4 of 4 'default' -> true
+  default  files' using directives: 5 of 5 outside the namespace -> outside_namespace
+  default  statements on their 'if'/loop/'case' line: 39 on a line of their own -> false
+  off      types' members: 3 of 3 in another order -> BRO1001 is off
+  default  private-by-default members: 21 of 21 with 'private' -> for_non_interface_members
+  default  partial type parts: 3 of 3 with an access modifier -> warning
+  off      property summaries: 4 of 4 in their own words -> BRO1604 is off
+  too few  declarations with 2+ attributes: 1 place -> default stays (warning)
+  default  built-in type names: 4 of 4 only keywords ('int') -> warning
+  too few  block-bodied properties/methods: 1 member -> default stays (warning)
+  default  statement blocks ('if (x) { y(); }'): 12 of 12 on several lines -> warning
+  default  auto-property accessors ('{ get; set; }'): 4 of 4 on one line -> warning
+  kept     C# files' line endings: 6 of 6 LF -> lf
+  default  statements after a block's '}': 9 of 9 after a blank line -> warning
+  default  neighbouring members: 20 of 20 with a blank line between -> warning
+  default  doc comments below code: 14 of 14 after a blank line -> warning
+  default  '//' comments above code: 7 of 7 right above the code -> warning
+  default  '//' comments below code: 4 of 4 after a blank line -> warning
+  default  doc comment texts: 18 of 18 ending with a period -> warning
+  default  doc element order: 3 of 3 in BRO1619's order -> warning
+  default  doc comments above their element: 16 of 16 right above it -> warning
+  default  using directives: 3 of 3 files sorted, 1 of 1 with System first -> sorted, System first
+  default  spacing, control-flow keywords: 51 of 51 'if (x)' -> 'if (x)'
+  default  spacing, control-flow parentheses: 51 of 51 'if (x)' -> 'if (x)'
+  default  spacing, call arguments: 86 of 86 'F(x)' -> 'F(x)'
+  default  spacing, declared parameters: 14 of 14 'void F(int x)' -> 'void F(int x)'
+Summary:
+  Kept your style for 29 settings: wrote stylebro_private_field_naming, csharp_prefer_braces,
+    csharp_prefer_simple_default_expression, end_of_line; 25 were already StyleBro's default.
+  Turned 2 rules off because your code doesn't do what they enforce: BRO1001 (types' members: 3 of 3 in another order),
+    BRO1604 (property summaries: 4 of 4 in their own words).
+  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
+  2 settings had fewer than 3 places to tell, StyleBro's defaults stay: dotnet_diagnostic.BRO1102.severity,
+    dotnet_diagnostic.BRO1509.severity.
+
+
+src/ZiggyCreatures.FusionCache.Chaos/.editorconfig says root = true, so the root's settings don't reach src/ZiggyCreatures.FusionCache.Chaos/: it gets a block of its own, from its own code.
+Conventions in the code under src/ZiggyCreatures.FusionCache.Chaos/ (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  kept     private fields: 12 of 12 named '_field' -> _camelCase
+  default  '{' of multi-line blocks: 80 of 80 on its own line -> all
+  too few  else/catch/finally after '}': 1 place -> default stays (true)
+  kept     one-line if/else/loop/using/lock bodies: 27 of 29 without braces -> when_multiline
+  too few  null checks: 2 places -> default stays (pattern_matching)
+  default  one-line <summary> texts: 38 of 41 on three lines -> multi_line
+  default  <inheritdoc/> tags: 33 of 33 '<inheritdoc/>' -> compact
+  kept     default values: 14 of 14 'default' -> true
+  too few  ')' of split lists: 2 places -> default stays (last_item)
+  too few  split lists: 2 places -> default stays (next_line)
+  default  ': base(...)'/': this(...)': 10 of 10 on its own line -> own_line
+  default  files' using directives: 10 of 10 outside the namespace -> outside_namespace
+  default  statements on their 'if'/loop/'case' line: 27 on a line of their own -> false
+  too few  overrides/interface implementations: 1 place -> default stays (warning)
+  default  types' members: 8 of 8 in BRO1001's order -> warning
+  too few  split lists' items: 2 places -> default stays (warning)
+  default  private-by-default members: 12 of 16 with 'private' -> for_non_interface_members
+  off      property summaries: 3 of 3 in their own words -> BRO1604 is off
+  default  built-in type names: 8 of 8 only keywords ('int') -> warning
+  default  empty blocks ('{ }'): 4 of 4 on two lines -> false
+  too few  statement blocks ('if (x) { y(); }'): 2 blocks -> default stays (warning)
+  default  auto-property accessors ('{ get; set; }'): 3 of 3 on one line -> warning
+  kept     C# files' line endings: 11 of 11 LF -> lf
+  too few  statements after a block's '}': 1 statement -> default stays (warning)
+  default  neighbouring members: 69 of 69 with a blank line between -> warning
+  default  doc comments below code: 73 of 73 after a blank line -> warning
+  default  '//' comments above code: 3 of 3 right above the code -> warning
+  default  '//' comments below code: 4 of 4 after a blank line -> warning
+  default  doc comment texts: 95 of 95 ending with a period -> warning
+  default  doc element order: 17 of 17 in BRO1619's order -> warning
+  default  keywords in doc comments: 13 of 13 '<see langword="null"/>' -> warning
+  default  doc comments above their element: 78 of 78 right above it -> warning
+  default  using directives: 7 of 7 files sorted -> sorted, System first
+  default  spacing, control-flow keywords: 29 of 29 'if (x)' -> 'if (x)'
+  default  spacing, control-flow parentheses: 29 of 29 'if (x)' -> 'if (x)'
+  too few  spacing, parenthesized expressions: 1 of 1 '(a + b)' -> default stays
+  default  spacing, call arguments: 130 of 130 'F(x)' -> 'F(x)'
+  default  spacing, declared parameters: 57 of 57 'void F(int x)' -> 'void F(int x)'
+Summary:
+  Kept your style for 28 settings: wrote stylebro_private_field_naming, csharp_prefer_braces,
+    csharp_prefer_simple_default_expression, end_of_line; 24 were already StyleBro's default.
+  Turned 1 rule off because your code doesn't do what it enforces: BRO1604 (property summaries: 3 of 3 in their own
+    words).
+  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
+  9 settings had fewer than 3 places to tell, StyleBro's defaults stay: csharp_new_line_before_else,
+    stylebro_null_check_style, stylebro_closing_parenthesis_placement, stylebro_split_list_first_item,
+    dotnet_diagnostic.BRO1601.severity, dotnet_diagnostic.BRO1108.severity, dotnet_diagnostic.BRO1508.severity,
+    dotnet_diagnostic.BRO1519.severity, csharp_space_between_parentheses (expressions).
+
+
+src/ZiggyCreatures.FusionCache.Locking.AsyncKeyed/.editorconfig says root = true, so the root's settings don't reach src/ZiggyCreatures.FusionCache.Locking.AsyncKeyed/: it gets a block of its own, from its own code.
+Conventions in the code under src/ZiggyCreatures.FusionCache.Locking.AsyncKeyed/ (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  off      private fields: 1 named 'field', 2 named '_field' -> BRO1303 is off
+  default  '{' of multi-line blocks: 17 of 17 on its own line -> all
+  too few  else/catch/finally after '}': 2 places -> default stays (true)
+  both     one-line if/else/loop/using/lock bodies: 1 with braces, 4 without braces -> both allowed
+  too few  one-line jumps ('if (x) return;'): 1 place -> default stays (false)
+  too few  null checks: 2 places -> default stays (pattern_matching)
+  default  one-line <summary> texts: 4 of 4 on three lines -> multi_line
+  default  <inheritdoc/> tags: 8 of 8 '<inheritdoc/>' -> compact
+  too few  files' using directives: 2 places -> default stays (outside_namespace)
+  default  statements on their 'if'/loop/'case' line: 4 on a line of their own -> false
+  too few  types' members: 2 types -> default stays (warning)
+  default  private-by-default members: 3 of 3 with 'private' -> for_non_interface_members
+  too few  built-in type names: 2 files -> default stays (warning)
+  too few  empty blocks ('{ }'): 1 block -> default stays (false)
+  default  statement blocks ('if (x) { y(); }'): 3 of 3 on several lines -> warning
+  too few  C# files' line endings: 2 files -> default stays (unset)
+  too few  statements after a block's '}': 1 statement -> default stays (warning)
+  default  neighbouring members: 11 of 11 with a blank line between -> warning
+  default  doc comments below code: 12 of 12 after a blank line -> warning
+  too few  '//' comments above code: 2 comments -> default stays (warning)
+  too few  '//' comments below code: 1 comment -> default stays (warning)
+  default  doc comment texts: 4 of 4 ending with a period -> warning
+  default  doc comments above their element: 11 of 11 right above it -> warning
+  too few  using directives: 2 files -> default stays (sorted, System first)
+  default  spacing, control-flow keywords: 7 of 7 'if (x)' -> 'if (x)'
+  default  spacing, control-flow parentheses: 7 of 7 'if (x)' -> 'if (x)'
+  too few  spacing, parenthesized expressions: 2 of 2 '(a + b)' -> default stays
+  too few  spacing, cast parentheses: 2 of 2 '(int)x' -> default stays
+  too few  spacing, casts: 2 of 2 '(int)x' -> default stays
+  default  spacing, call arguments: 12 of 12 'F(x)' -> 'F(x)'
+  default  spacing, declared parameters: 8 of 8 'void F(int x)' -> 'void F(int x)'
+Summary:
+  Kept your style for 14 settings, all already StyleBro's default.
+  Allowed both forms for 1 setting because your code mixes them: csharp_prefer_braces = when_multiline (one-line
+    if/else/loop/using/lock bodies).
+  Turned 1 rule off because your code mixes both forms: BRO1303 (private fields).
+  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
+  15 settings had fewer than 3 places to tell, StyleBro's defaults stay: csharp_new_line_before_else,
+    stylebro_allow_single_line_jump_statements, stylebro_null_check_style, csharp_using_directive_placement,
+    dotnet_diagnostic.BRO1001.severity, dotnet_diagnostic.IDE0049.severity, stylebro_allow_empty_single_line_blocks,
+    end_of_line, dotnet_diagnostic.BRO1519.severity, dotnet_diagnostic.BRO1506.severity,
+    dotnet_diagnostic.BRO1504.severity, dotnet_sort_system_directives_first,
+    csharp_space_between_parentheses (expressions), csharp_space_between_parentheses (type_casts),
+    csharp_space_after_cast.
+
+
+src/ZiggyCreatures.FusionCache.Locking.Distributed.Memory/.editorconfig says root = true, so the root's settings don't reach src/ZiggyCreatures.FusionCache.Locking.Distributed.Memory/: it gets a block of its own, from its own code.
+Conventions in the code under src/ZiggyCreatures.FusionCache.Locking.Distributed.Memory/ (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  kept     private fields: 5 of 5 named '_field' -> _camelCase
+  default  '{' of multi-line blocks: 25 of 25 on its own line -> all
+  too few  else/catch/finally after '}': 2 places -> default stays (true)
+  kept     one-line if/else/loop/using/lock bodies: 13 of 15 without braces -> when_multiline
+  too few  one-line jumps ('if (x) return;'): 1 place -> default stays (false)
+  default  null checks: 8 of 8 'is null' -> pattern_matching
+  default  one-line <summary> texts: 8 of 8 on three lines -> multi_line
+  default  <inheritdoc/> tags: 5 of 5 '<inheritdoc/>' -> compact
+  too few  ')' of split lists: 1 place -> default stays (last_item)
+  too few  split lists: 1 place -> default stays (next_line)
+  default  files' using directives: 3 of 3 outside the namespace -> outside_namespace
+  default  statements on their 'if'/loop/'case' line: 13 on a line of their own -> false
+  too few  types' members: 2 types -> default stays (warning)
+  too few  lambda-first calls: 1 call -> default stays (false)
+  too few  split lists' items: 1 place -> default stays (warning)
+  default  private-by-default members: 7 of 7 with 'private' -> for_non_interface_members
+  too few  property summaries: 1 summary -> default stays (warning)
+  too few  built-in type names: 2 files -> default stays (warning)
+  too few  block-bodied properties/methods: 1 member -> default stays (warning)
+  default  statement blocks ('if (x) { y(); }'): 4 of 4 on several lines -> warning
+  too few  auto-property accessors ('{ get; set; }'): 1 property declaration -> default stays (warning)
+  kept     C# files' line endings: 3 of 3 LF -> lf
+  too few  statements after a block's '}': 1 statement -> default stays (warning)
+  default  neighbouring members: 13 of 13 with a blank line between -> warning
+  default  doc comments below code: 11 of 11 after a blank line -> warning
+  too few  '//' comments above code: 2 comments -> default stays (warning)
+  too few  '//' comments below code: 2 comments -> default stays (warning)
+  default  doc comment texts: 15 of 15 ending with a period -> warning
+  too few  doc element order: 2 doc comments -> default stays (warning)
+  default  doc comments above their element: 13 of 13 right above it -> warning
+  too few  using directives: 2 files -> default stays (sorted, System first)
+  default  spacing, control-flow keywords: 18 of 18 'if (x)' -> 'if (x)'
+  default  spacing, control-flow parentheses: 18 of 18 'if (x)' -> 'if (x)'
+  too few  spacing, parenthesized expressions: 2 of 2 '(a + b)' -> default stays
+  default  spacing, cast parentheses: 8 of 8 '(int)x' -> '(int)x'
+  default  spacing, casts: 8 of 8 '(int)x' -> '(int)x'
+  default  spacing, call arguments: 31 of 31 'F(x)' -> 'F(x)'
+  default  spacing, declared parameters: 10 of 10 'void F(int x)' -> 'void F(int x)'
+Summary:
+  Kept your style for 21 settings: wrote stylebro_private_field_naming, csharp_prefer_braces,
+    end_of_line; 18 were already StyleBro's default.
+  17 settings had fewer than 3 places to tell, StyleBro's defaults stay: csharp_new_line_before_else,
+    stylebro_allow_single_line_jump_statements, stylebro_closing_parenthesis_placement, stylebro_split_list_first_item,
+    dotnet_diagnostic.BRO1001.severity, stylebro_allow_leading_multiline_lambda, dotnet_diagnostic.BRO1108.severity,
+    dotnet_diagnostic.BRO1604.severity, dotnet_diagnostic.IDE0049.severity, dotnet_diagnostic.BRO1509.severity,
+    dotnet_diagnostic.BRO1527.severity, dotnet_diagnostic.BRO1519.severity, dotnet_diagnostic.BRO1506.severity,
+    dotnet_diagnostic.BRO1504.severity, dotnet_diagnostic.BRO1619.severity, dotnet_sort_system_directives_first,
+    csharp_space_between_parentheses (expressions).
+
+
+src/ZiggyCreatures.FusionCache.Locking.Distributed.Redis/.editorconfig says root = true, so the root's settings don't reach src/ZiggyCreatures.FusionCache.Locking.Distributed.Redis/: it gets a block of its own, from its own code.
+Conventions in the code under src/ZiggyCreatures.FusionCache.Locking.Distributed.Redis/ (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  kept     private fields: 5 of 5 named '_field' -> _camelCase
+  default  '{' of multi-line blocks: 36 of 36 on its own line -> all
+  default  else/catch/finally after '}': 6 of 6 on a new line -> true
+  kept     one-line if/else/loop/using/lock bodies: 17 of 21 without braces -> when_multiline
+  default  null checks: 17 of 17 'is null' -> pattern_matching
+  default  one-line <summary> texts: 9 of 9 on three lines -> multi_line
+  default  <inheritdoc/> tags: 5 of 5 '<inheritdoc/>' -> compact
+  default  files' using directives: 5 of 5 outside the namespace -> outside_namespace
+  default  statements on their 'if'/loop/'case' line: 17 on a line of their own -> false
+  too few  types' members: 2 types -> default stays (warning)
+  default  private-by-default members: 8 of 8 with 'private' -> for_non_interface_members
+  default  partial type parts: 3 of 3 with an access modifier -> warning
+  off      property summaries: 4 of 4 in their own words -> BRO1604 is off
+  default  built-in type names: 4 of 4 only keywords ('int') -> warning
+  too few  block-bodied properties/methods: 1 member -> default stays (warning)
+  default  statement blocks ('if (x) { y(); }'): 7 of 7 on several lines -> warning
+  default  auto-property accessors ('{ get; set; }'): 4 of 4 on one line -> warning
+  kept     C# files' line endings: 5 of 5 LF -> lf
+  default  statements after a block's '}': 3 of 3 after a blank line -> warning
+  default  neighbouring members: 13 of 13 with a blank line between -> warning
+  default  doc comments below code: 12 of 12 after a blank line -> warning
+  default  '//' comments above code: 3 of 3 right above the code -> warning
+  too few  '//' comments below code: 2 comments -> default stays (warning)
+  default  doc comment texts: 19 of 19 ending with a period -> warning
+  default  doc element order: 3 of 3 in BRO1619's order -> warning
+  too few  keywords in doc comments: 1 keyword -> default stays (warning)
+  default  doc comments above their element: 16 of 16 right above it -> warning
+  default  using directives: 5 of 5 files sorted -> sorted, System first
+  default  spacing, control-flow keywords: 25 of 25 'if (x)' -> 'if (x)'
+  default  spacing, control-flow parentheses: 25 of 25 'if (x)' -> 'if (x)'
+  too few  spacing, parenthesized expressions: 2 of 2 '(a + b)' -> default stays
+  too few  spacing, cast parentheses: 2 of 2 '(int)x' -> default stays
+  too few  spacing, casts: 2 of 2 '(int)x' -> default stays
+  default  spacing, call arguments: 43 of 43 'F(x)' -> 'F(x)'
+  default  spacing, declared parameters: 9 of 9 'void F(int x)' -> 'void F(int x)'
+Summary:
+  Kept your style for 27 settings: wrote stylebro_private_field_naming, csharp_prefer_braces,
+    end_of_line; 24 were already StyleBro's default.
+  Turned 1 rule off because your code doesn't do what it enforces: BRO1604 (property summaries: 4 of 4 in their own
+    words).
+  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
+  7 settings had fewer than 3 places to tell, StyleBro's defaults stay: dotnet_diagnostic.BRO1001.severity,
+    dotnet_diagnostic.BRO1509.severity, dotnet_diagnostic.BRO1504.severity, dotnet_diagnostic.BRO1618.severity,
+    csharp_space_between_parentheses (expressions), csharp_space_between_parentheses (type_casts),
+    csharp_space_after_cast.
+
+
+src/ZiggyCreatures.FusionCache.OpenTelemetry/.editorconfig says root = true, so the root's settings don't reach src/ZiggyCreatures.FusionCache.OpenTelemetry/: it gets a block of its own, from its own code.
+Conventions in the code under src/ZiggyCreatures.FusionCache.OpenTelemetry/ (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  default  '{' of multi-line blocks: 6 of 6 on its own line -> all
+  kept     one-line if/else/loop/using/lock bodies: 8 of 8 without braces -> when_multiline
+  too few  null checks: 2 places -> default stays (pattern_matching)
+  default  one-line <summary> texts: 12 of 12 on three lines -> multi_line
+  too few  files' using directives: 2 places -> default stays (outside_namespace)
+  default  statements on their 'if'/loop/'case' line: 8 on a line of their own -> false
+  off      property summaries: 6 of 6 in their own words -> BRO1604 is off
+  too few  built-in type names: 2 files -> default stays (warning)
+  default  auto-property accessors ('{ get; set; }'): 6 of 6 on one line -> warning
+  kept     C# files' line endings: 4 of 4 LF -> lf
+  default  neighbouring members: 4 of 4 with a blank line between -> warning
+  default  doc comments below code: 8 of 8 after a blank line -> warning
+  off      doc comment texts: 12 ending with a period, 6 without a period -> BRO1603 is off
+  too few  doc element order: 2 doc comments -> default stays (warning)
+  default  keywords in doc comments: 6 of 6 '<see langword="null"/>' -> warning
+  default  doc comments above their element: 12 of 12 right above it -> warning
+  too few  using directives: 2 files -> default stays (sorted, System first)
+  default  spacing, control-flow keywords: 8 of 8 'if (x)' -> 'if (x)'
+  default  spacing, control-flow parentheses: 8 of 8 'if (x)' -> 'if (x)'
+  default  spacing, call arguments: 14 of 14 'F(x)' -> 'F(x)'
+  too few  spacing, declared parameters: 2 of 2 'void F(int x)' -> default stays
+Summary:
+  Kept your style for 13 settings: wrote csharp_prefer_braces, end_of_line; 11 were already StyleBro's default.
+  Turned 1 rule off because your code mixes both forms: BRO1603 (doc comment texts).
+  Turned 1 rule off because your code doesn't do what it enforces: BRO1604 (property summaries: 6 of 6 in their own
+    words).
+  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
+  6 settings had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_null_check_style,
+    csharp_using_directive_placement, dotnet_diagnostic.IDE0049.severity, dotnet_diagnostic.BRO1619.severity,
+    dotnet_sort_system_directives_first, csharp_space_between_method_declaration_parameter_list_parentheses.
+
+
+src/ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack/.editorconfig says root = true, so the root's settings don't reach src/ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack/: it gets a block of its own, from its own code.
+Conventions in the code under src/ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack/ (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  too few  private fields: 1 place -> default stays (camelCase)
+  default  '{' of multi-line blocks: 32 of 32 on its own line -> all
+  too few  else/catch/finally after '}': 1 place -> default stays (true)
+  too few  one-line if/else/loop/using/lock bodies: 2 places -> default stays (true)
+  default  null checks: 8 of 8 'is null' -> pattern_matching
+  default  one-line <summary> texts: 8 of 8 on three lines -> multi_line
+  kept     <inheritdoc/> tags: 5 of 5 '<inheritdoc />' -> spaced
+  kept     default values: 5 of 5 'default' -> true
+  too few  ': base(...)'/': this(...)': 1 place -> default stays (own_line)
+  default  files' using directives: 4 of 4 outside the namespace -> outside_namespace
+  too few  statements on their 'if'/loop/'case' line: 2 places -> default stays (false)
+  off      overrides/interface implementations: 1 with a doc comment, 4 without a doc comment -> BRO1601 is off
+  off      types' members: 3 of 3 in another order -> BRO1001 is off
+  off      private-by-default members: 1 with 'private', 2 without 'private' -> BRO1404 is off
+  too few  partial type parts: 2 partial parts -> default stays (warning)
+  too few  internal-by-default types: 2 types -> default stays (warning)
+  too few  property summaries: 1 summary -> default stays (warning)
+  default  built-in type names: 3 of 3 only keywords ('int') -> warning
+  too few  statement blocks ('if (x) { y(); }'): 1 block -> default stays (warning)
+  too few  auto-property accessors ('{ get; set; }'): 1 property declaration -> default stays (warning)
+  kept     C# files' line endings: 4 of 4 LF -> lf
+  default  statements after a block's '}': 6 of 6 after a blank line -> warning
+  default  neighbouring members: 18 of 18 with a blank line between -> warning
+  default  doc comments below code: 10 of 10 after a blank line -> warning
+  too few  '//' comments above code: 1 comment -> default stays (warning)
+  default  doc comment texts: 15 of 16 ending with a period -> warning
+  too few  doc element order: 2 doc comments -> default stays (warning)
+  too few  keywords in doc comments: 1 keyword -> default stays (warning)
+  too few  non-private fields: 2 fields -> default stays (warning)
+  default  doc comments above their element: 13 of 13 right above it -> warning
+  default  using directives: 4 of 4 files sorted, 1 of 1 with System first -> sorted, System first
+  default  spacing, control-flow keywords: 8 of 8 'if (x)' -> 'if (x)'
+  default  spacing, control-flow parentheses: 8 of 8 'if (x)' -> 'if (x)'
+  default  spacing, call arguments: 26 of 26 'F(x)' -> 'F(x)'
+  default  spacing, declared parameters: 16 of 16 'void F(int x)' -> 'void F(int x)'
+Summary:
+  Kept your style for 18 settings: wrote stylebro_inheritdoc_style, csharp_prefer_simple_default_expression,
+    end_of_line; 15 were already StyleBro's default.
+  Turned 2 rules off because your code mixes both forms: BRO1601 (overrides/interface implementations),
+    BRO1404 (private-by-default members).
+  Turned 1 rule off because your code doesn't do what it enforces: BRO1001 (types' members: 3 of 3 in another order).
+  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
+  14 settings had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_private_field_naming,
+    csharp_new_line_before_else, csharp_prefer_braces, stylebro_constructor_initializer_placement,
+    csharp_preserve_single_line_statements, dotnet_diagnostic.BRO1007.severity, dotnet_diagnostic.BRO1404.severity,
+    dotnet_diagnostic.BRO1604.severity, dotnet_diagnostic.BRO1508.severity, dotnet_diagnostic.BRO1527.severity,
+    dotnet_diagnostic.BRO1506.severity, dotnet_diagnostic.BRO1619.severity, dotnet_diagnostic.BRO1618.severity,
+    dotnet_diagnostic.BRO1306.severity.
+
+
+src/ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack/.editorconfig says root = true, so the root's settings don't reach src/ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack/: it gets a block of its own, from its own code.
+Conventions in the code under src/ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack/ (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  too few  private fields: 1 place -> default stays (camelCase)
+  default  '{' of multi-line blocks: 11 of 11 on its own line -> all
+  too few  one-line if/else/loop/using/lock bodies: 2 places -> default stays (true)
+  too few  null checks: 2 places -> default stays (pattern_matching)
+  default  one-line <summary> texts: 8 of 8 on three lines -> multi_line
+  kept     <inheritdoc/> tags: 5 of 5 '<inheritdoc />' -> spaced
+  too few  default values: 2 places -> default stays (false)
+  too few  ': base(...)'/': this(...)': 1 place -> default stays (own_line)
+  too few  files' using directives: 2 places -> default stays (outside_namespace)
+  too few  statements on their 'if'/loop/'case' line: 2 places -> default stays (false)
+  too few  overrides/interface implementations: 1 place -> default stays (warning)
+  too few  types' members: 1 type -> default stays (warning)
+  too few  private-by-default members: 1 member -> default stays (for_non_interface_members)
+  too few  property summaries: 1 summary -> default stays (warning)
+  too few  built-in type names: 1 file -> default stays (warning)
+  too few  auto-property accessors ('{ get; set; }'): 1 property declaration -> default stays (warning)
+  too few  C# files' line endings: 2 files -> default stays (unset)
+  default  neighbouring members: 9 of 9 with a blank line between -> warning
+  default  doc comments below code: 10 of 10 after a blank line -> warning
+  default  '//' comments above code: 4 of 4 right above the code -> warning
+  default  doc comment texts: 16 of 16 ending with a period -> warning
+  too few  doc element order: 2 doc comments -> default stays (warning)
+  default  doc comments above their element: 13 of 13 right above it -> warning
+  too few  using directives: 2 files -> default stays (sorted, System first)
+  too few  spacing, control-flow keywords: 2 of 2 'if (x)' -> default stays
+  too few  spacing, control-flow parentheses: 2 of 2 'if (x)' -> default stays
+  default  spacing, call arguments: 14 of 14 'F(x)' -> 'F(x)'
+  default  spacing, declared parameters: 8 of 8 'void F(int x)' -> 'void F(int x)'
+Summary:
+  Kept your style for 10 settings: wrote stylebro_inheritdoc_style; 9 were already StyleBro's default.
+  18 settings had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_private_field_naming,
+    csharp_prefer_braces, stylebro_null_check_style, csharp_prefer_simple_default_expression,
+    stylebro_constructor_initializer_placement, csharp_using_directive_placement,
+    csharp_preserve_single_line_statements, dotnet_diagnostic.BRO1601.severity, dotnet_diagnostic.BRO1001.severity,
+    dotnet_style_require_accessibility_modifiers, dotnet_diagnostic.BRO1604.severity,
+    dotnet_diagnostic.IDE0049.severity, dotnet_diagnostic.BRO1527.severity, end_of_line,
+    dotnet_diagnostic.BRO1619.severity, dotnet_sort_system_directives_first,
+    csharp_space_after_keywords_in_control_flow_statements, csharp_space_between_parentheses (control_flow_statements).
+
+
+src/ZiggyCreatures.FusionCache.Serialization.NewtonsoftJson/.editorconfig says root = true, so the root's settings don't reach src/ZiggyCreatures.FusionCache.Serialization.NewtonsoftJson/: it gets a block of its own, from its own code.
+Conventions in the code under src/ZiggyCreatures.FusionCache.Serialization.NewtonsoftJson/ (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  kept     private fields: 3 of 3 named '_field' -> _camelCase
+  default  '{' of multi-line blocks: 12 of 12 on its own line -> all
+  too few  one-line if/else/loop/using/lock bodies: 2 places -> default stays (true)
+  too few  null checks: 2 places -> default stays (pattern_matching)
+  default  one-line <summary> texts: 8 of 8 on three lines -> multi_line
+  kept     <inheritdoc/> tags: 5 of 5 '<inheritdoc />' -> spaced
+  too few  default values: 2 places -> default stays (false)
+  too few  ': base(...)'/': this(...)': 1 place -> default stays (own_line)
+  too few  files' using directives: 2 places -> default stays (outside_namespace)
+  too few  statements on their 'if'/loop/'case' line: 2 places -> default stays (false)
+  too few  overrides/interface implementations: 1 place -> default stays (warning)
+  too few  types' members: 2 types -> default stays (warning)
+  default  private-by-default members: 3 of 3 with 'private' -> for_non_interface_members
+  too few  internal-by-default types: 1 type -> default stays (warning)
+  too few  property summaries: 1 summary -> default stays (warning)
+  too few  private static fields: 1 field -> default stays (warning)
+  too few  built-in type names: 1 file -> default stays (warning)
+  too few  auto-property accessors ('{ get; set; }'): 2 property declarations -> default stays (warning)
+  too few  C# files' line endings: 2 files -> default stays (unset)
+  default  neighbouring members: 10 of 13 with a blank line between -> warning
+  default  doc comments below code: 10 of 11 after a blank line -> warning
+  too few  '//' comments above code: 1 comment -> default stays (warning)
+  default  doc comment texts: 16 of 16 ending with a period -> warning
+  too few  doc element order: 2 doc comments -> default stays (warning)
+  default  doc comments above their element: 13 of 13 right above it -> warning
+  too few  using directives: 2 files -> default stays (sorted, System first)
+  too few  spacing, control-flow keywords: 2 of 2 'if (x)' -> default stays
+  too few  spacing, control-flow parentheses: 2 of 2 'if (x)' -> default stays
+  default  spacing, call arguments: 22 of 22 'F(x)' -> 'F(x)'
+  default  spacing, declared parameters: 10 of 10 'void F(int x)' -> 'void F(int x)'
+Summary:
+  Kept your style for 11 settings: wrote stylebro_private_field_naming,
+    stylebro_inheritdoc_style; 9 were already StyleBro's default.
+  19 settings had fewer than 3 places to tell, StyleBro's defaults stay: csharp_prefer_braces,
+    stylebro_null_check_style, csharp_prefer_simple_default_expression, stylebro_constructor_initializer_placement,
+    csharp_using_directive_placement, csharp_preserve_single_line_statements, dotnet_diagnostic.BRO1601.severity,
+    dotnet_diagnostic.BRO1001.severity, dotnet_diagnostic.BRO1404.severity, dotnet_diagnostic.BRO1604.severity,
+    dotnet_diagnostic.BRO1307.severity, dotnet_diagnostic.IDE0049.severity, dotnet_diagnostic.BRO1527.severity,
+    end_of_line, dotnet_diagnostic.BRO1506.severity, dotnet_diagnostic.BRO1619.severity,
+    dotnet_sort_system_directives_first, csharp_space_after_keywords_in_control_flow_statements,
+    csharp_space_between_parentheses (control_flow_statements).
+
+
+src/ZiggyCreatures.FusionCache.Serialization.ProtoBufNet/.editorconfig says root = true, so the root's settings don't reach src/ZiggyCreatures.FusionCache.Serialization.ProtoBufNet/: it gets a block of its own, from its own code.
+Conventions in the code under src/ZiggyCreatures.FusionCache.Serialization.ProtoBufNet/ (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  too few  private fields: 1 place -> default stays (camelCase)
+  default  '{' of multi-line blocks: 20 of 20 on its own line -> all
+  too few  else/catch/finally after '}': 1 place -> default stays (true)
+  kept     one-line if/else/loop/using/lock bodies: 8 of 8 without braces -> when_multiline
+  too few  multi-line initializers: 1 place -> default stays (include)
+  default  null checks: 4 of 4 'is null' -> pattern_matching
+  default  one-line <summary> texts: 8 of 8 on three lines -> multi_line
+  kept     <inheritdoc/> tags: 5 of 5 '<inheritdoc />' -> spaced
+  kept     default values: 3 of 3 'default' -> true
+  too few  ')' of split lists: 1 place -> default stays (last_item)
+  too few  split lists: 1 place -> default stays (next_line)
+  too few  ': base(...)'/': this(...)': 1 place -> default stays (own_line)
+  too few  'new T { ... }' with an initializer: 1 place -> default stays (omit)
+  default  files' using directives: 3 of 3 outside the namespace -> outside_namespace
+  default  statements on their 'if'/loop/'case' line: 8 on a line of their own -> false
+  too few  overrides/interface implementations: 1 place -> default stays (warning)
+  too few  types' members: 2 types -> default stays (warning)
+  too few  split lists' items: 1 place -> default stays (warning)
+  default  private-by-default members: 6 of 6 with 'private' -> for_non_interface_members
+  too few  internal-by-default types: 1 type -> default stays (warning)
+  too few  property summaries: 1 summary -> default stays (warning)
+  too few  adjacent fields of one type: 1 place -> default stays (warning)
+  default  private static fields: 4 of 4 without a prefix -> warning
+  too few  built-in type names: 2 files -> default stays (warning)
+  too few  empty blocks ('{ }'): 1 block -> default stays (false)
+  default  auto-property accessors ('{ get; set; }'): 7 of 7 on one line -> warning
+  kept     C# files' line endings: 3 of 3 LF -> lf
+  default  neighbouring members: 12 of 12 with a blank line between -> warning
+  default  doc comments below code: 10 of 10 after a blank line -> warning
+  default  '//' comments above code: 3 of 3 right above the code -> warning
+  too few  '//' comments below code: 1 comment -> default stays (warning)
+  default  doc comment texts: 16 of 16 ending with a period -> warning
+  too few  doc element order: 2 doc comments -> default stays (warning)
+  default  doc comments above their element: 13 of 13 right above it -> warning
+  default  using directives: 3 of 3 files sorted, 1 of 1 with System first -> sorted, System first
+  kept     private constants/static readonly fields: 4 of 4 _camelCase -> _camelCase
+  default  spacing, control-flow keywords: 10 of 10 'if (x)' -> 'if (x)'
+  default  spacing, control-flow parentheses: 10 of 10 'if (x)' -> 'if (x)'
+  too few  spacing, cast parentheses: 1 of 1 '(int)x' -> default stays
+  too few  spacing, casts: 1 of 1 '(int)x' -> default stays
+  default  spacing, call arguments: 31 of 31 'F(x)' -> 'F(x)'
+  default  spacing, declared parameters: 10 of 10 'void F(int x)' -> 'void F(int x)'
+Summary:
+  Kept your style for 23 settings: wrote csharp_prefer_braces, stylebro_inheritdoc_style,
+    csharp_prefer_simple_default_expression, end_of_line,
+    stylebro_private_static_field_naming; 18 were already StyleBro's default.
+  19 settings had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_private_field_naming,
+    csharp_new_line_before_else, stylebro_trailing_comma, stylebro_closing_parenthesis_placement,
+    stylebro_split_list_first_item, stylebro_constructor_initializer_placement, stylebro_object_creation_parentheses,
+    dotnet_diagnostic.BRO1601.severity, dotnet_diagnostic.BRO1001.severity, dotnet_diagnostic.BRO1108.severity,
+    dotnet_diagnostic.BRO1404.severity, dotnet_diagnostic.BRO1604.severity, dotnet_diagnostic.BRO1114.severity,
+    dotnet_diagnostic.IDE0049.severity, stylebro_allow_empty_single_line_blocks, dotnet_diagnostic.BRO1504.severity,
+    dotnet_diagnostic.BRO1619.severity, csharp_space_between_parentheses (type_casts), csharp_space_after_cast.
+
+
+src/ZiggyCreatures.FusionCache.Serialization.ServiceStackJson/.editorconfig says root = true, so the root's settings don't reach src/ZiggyCreatures.FusionCache.Serialization.ServiceStackJson/: it gets a block of its own, from its own code.
+Conventions in the code under src/ZiggyCreatures.FusionCache.Serialization.ServiceStackJson/ (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  default  '{' of multi-line blocks: 12 of 12 on its own line -> all
+  too few  else/catch/finally after '}': 1 place -> default stays (true)
+  too few  one-line if/else/loop/using/lock bodies: 2 places -> default stays (true)
+  too few  multi-line initializers: 1 place -> default stays (include)
+  too few  null checks: 2 places -> default stays (pattern_matching)
+  default  one-line <summary> texts: 5 of 5 on three lines -> multi_line
+  kept     <inheritdoc/> tags: 5 of 5 '<inheritdoc />' -> spaced
+  too few  default values: 2 places -> default stays (false)
+  too few  'new T { ... }' with an initializer: 1 place -> default stays (omit)
+  too few  files' using directives: 2 places -> default stays (outside_namespace)
+  too few  statements on their 'if'/loop/'case' line: 2 places -> default stays (false)
+  too few  overrides/interface implementations: 1 place -> default stays (warning)
+  too few  types' members: 1 type -> default stays (warning)
+  too few  built-in type names: 1 file -> default stays (warning)
+  too few  empty blocks ('{ }'): 1 block -> default stays (false)
+  too few  statement blocks ('if (x) { y(); }'): 1 block -> default stays (warning)
+  too few  C# files' line endings: 2 files -> default stays (unset)
+  default  neighbouring members: 7 of 7 with a blank line between -> warning
+  default  doc comments below code: 9 of 9 after a blank line -> warning
+  too few  '//' comments above code: 2 comments -> default stays (warning)
+  too few  '//' comments below code: 2 comments -> default stays (warning)
+  default  doc comment texts: 9 of 9 ending with a period -> warning
+  too few  doc element order: 2 doc comments -> default stays (warning)
+  default  doc comments above their element: 10 of 10 right above it -> warning
+  too few  using directives: 2 files -> default stays (sorted, System first)
+  too few  spacing, control-flow keywords: 2 of 2 'if (x)' -> default stays
+  too few  spacing, control-flow parentheses: 2 of 2 'if (x)' -> default stays
+  default  spacing, call arguments: 17 of 17 'F(x)' -> 'F(x)'
+  default  spacing, declared parameters: 6 of 6 'void F(int x)' -> 'void F(int x)'
+Summary:
+  Kept your style for 9 settings: wrote stylebro_inheritdoc_style; 8 were already StyleBro's default.
+  20 settings had fewer than 3 places to tell, StyleBro's defaults stay: csharp_new_line_before_else,
+    csharp_prefer_braces, stylebro_trailing_comma, stylebro_null_check_style, csharp_prefer_simple_default_expression,
+    stylebro_object_creation_parentheses, csharp_using_directive_placement, csharp_preserve_single_line_statements,
+    dotnet_diagnostic.BRO1601.severity, dotnet_diagnostic.BRO1001.severity, dotnet_diagnostic.IDE0049.severity,
+    stylebro_allow_empty_single_line_blocks, dotnet_diagnostic.BRO1508.severity, end_of_line,
+    dotnet_diagnostic.BRO1506.severity, dotnet_diagnostic.BRO1504.severity, dotnet_diagnostic.BRO1619.severity,
+    dotnet_sort_system_directives_first, csharp_space_after_keywords_in_control_flow_statements,
+    csharp_space_between_parentheses (control_flow_statements).
+
+
+src/ZiggyCreatures.FusionCache.Serialization.SystemTextJson/.editorconfig says root = true, so the root's settings don't reach src/ZiggyCreatures.FusionCache.Serialization.SystemTextJson/: it gets a block of its own, from its own code.
+Conventions in the code under src/ZiggyCreatures.FusionCache.Serialization.SystemTextJson/ (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  too few  private fields: 1 place -> default stays (camelCase)
+  default  '{' of multi-line blocks: 11 of 11 on its own line -> all
+  too few  one-line if/else/loop/using/lock bodies: 2 places -> default stays (true)
+  too few  null checks: 2 places -> default stays (pattern_matching)
+  default  one-line <summary> texts: 8 of 8 on three lines -> multi_line
+  kept     <inheritdoc/> tags: 5 of 5 '<inheritdoc />' -> spaced
+  too few  default values: 2 places -> default stays (false)
+  too few  ': base(...)'/': this(...)': 1 place -> default stays (own_line)
+  too few  'new T { ... }' with an initializer: 1 place -> default stays (omit)
+  too few  files' using directives: 2 places -> default stays (outside_namespace)
+  too few  statements on their 'if'/loop/'case' line: 2 places -> default stays (false)
+  too few  overrides/interface implementations: 1 place -> default stays (warning)
+  too few  types' members: 1 type -> default stays (warning)
+  too few  private-by-default members: 1 member -> default stays (for_non_interface_members)
+  too few  property summaries: 1 summary -> default stays (warning)
+  too few  built-in type names: 1 file -> default stays (warning)
+  too few  auto-property accessors ('{ get; set; }'): 1 property declaration -> default stays (warning)
+  too few  C# files' line endings: 2 files -> default stays (unset)
+  default  neighbouring members: 9 of 9 with a blank line between -> warning
+  default  doc comments below code: 10 of 10 after a blank line -> warning
+  too few  '//' comments above code: 1 comment -> default stays (warning)
+  default  doc comment texts: 16 of 16 ending with a period -> warning
+  too few  doc element order: 2 doc comments -> default stays (warning)
+  default  doc comments above their element: 13 of 13 right above it -> warning
+  too few  using directives: 1 file -> default stays (sorted, System first)
+  too few  spacing, control-flow keywords: 2 of 2 'if (x)' -> default stays
+  too few  spacing, control-flow parentheses: 2 of 2 'if (x)' -> default stays
+  default  spacing, call arguments: 14 of 14 'F(x)' -> 'F(x)'
+  default  spacing, declared parameters: 8 of 8 'void F(int x)' -> 'void F(int x)'
+Summary:
+  Kept your style for 9 settings: wrote stylebro_inheritdoc_style; 8 were already StyleBro's default.
+  20 settings had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_private_field_naming,
+    csharp_prefer_braces, stylebro_null_check_style, csharp_prefer_simple_default_expression,
+    stylebro_constructor_initializer_placement, stylebro_object_creation_parentheses, csharp_using_directive_placement,
+    csharp_preserve_single_line_statements, dotnet_diagnostic.BRO1601.severity, dotnet_diagnostic.BRO1001.severity,
+    dotnet_style_require_accessibility_modifiers, dotnet_diagnostic.BRO1604.severity,
+    dotnet_diagnostic.IDE0049.severity, dotnet_diagnostic.BRO1527.severity, end_of_line,
+    dotnet_diagnostic.BRO1506.severity, dotnet_diagnostic.BRO1619.severity, dotnet_sort_system_directives_first,
+    csharp_space_after_keywords_in_control_flow_statements, csharp_space_between_parentheses (control_flow_statements).
+
+Wrote the built-in rule severities to .editorconfig.
+Wrote the built-in rule severities to src/ZiggyCreatures.FusionCache/.editorconfig.
+Wrote the built-in rule severities to src/ZiggyCreatures.FusionCache.AspNetCore.OutputCaching/.editorconfig.
+Wrote the built-in rule severities to src/ZiggyCreatures.FusionCache.Backplane.Memory/.editorconfig.
+Wrote the built-in rule severities to src/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis/.editorconfig.
+Wrote the built-in rule severities to src/ZiggyCreatures.FusionCache.Chaos/.editorconfig.
+Wrote the built-in rule severities to src/ZiggyCreatures.FusionCache.Locking.AsyncKeyed/.editorconfig.
+Wrote the built-in rule severities to src/ZiggyCreatures.FusionCache.Locking.Distributed.Memory/.editorconfig.
+Wrote the built-in rule severities to src/ZiggyCreatures.FusionCache.Locking.Distributed.Redis/.editorconfig.
+Wrote the built-in rule severities to src/ZiggyCreatures.FusionCache.OpenTelemetry/.editorconfig.
+Wrote the built-in rule severities to src/ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack/.editorconfig.
+Wrote the built-in rule severities to src/ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack/.editorconfig.
+Wrote the built-in rule severities to src/ZiggyCreatures.FusionCache.Serialization.NewtonsoftJson/.editorconfig.
+Wrote the built-in rule severities to src/ZiggyCreatures.FusionCache.Serialization.ProtoBufNet/.editorconfig.
+Wrote the built-in rule severities to src/ZiggyCreatures.FusionCache.Serialization.ServiceStackJson/.editorconfig.
+Wrote the built-in rule severities to src/ZiggyCreatures.FusionCache.Serialization.SystemTextJson/.editorconfig.
+Set the preset version in Directory.Build.props (<StyleBroPreset>1.0</StyleBroPreset>): rules of newer releases stay off until you raise it.
+Tip: --agents-md writes a StyleBro section into AGENTS.md for AI coding agents.
+Next: run 'bro format'. Plain 'dotnet format' also applies every other analyzer's and the compiler's fixes.
