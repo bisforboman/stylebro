@@ -1,0 +1,16 @@
+base start 05:17
+base done 05:39
+default start 05:39
+default (0.8.0-trial56.2) stopped after check failed on MSB4186; rerun on 0.8.0-trial56.3 05:55
+default start 05:55
+default done 06:50
+dotnet start 06:50
+dotnet done 08:23
+soak start 08:23
+dotnet test-Release: test host hung (no output 07:33-08:24, tree identical to default's), killed 08:24; rerun with --blame-hang after the chain
+restart after the container was reclaimed: soak again 20:05
+soak start 20:06
+soak done rc=0 20:31
+CHAIN-DONE
+dotnet test-Release rerun rc=1 22:31
+QUEUE-R-DONE
