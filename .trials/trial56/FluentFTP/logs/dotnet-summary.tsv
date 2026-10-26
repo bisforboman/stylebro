@@ -1,0 +1,12 @@
+preview	0	396s	bro preview init --engine dotnet-format
+setup	0	7s	bash -c printf "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial56.1\" PrivateAssets=\"all\" />\n  </ItemGroup>\n</Project>\n" > Directory.Build.props && cat Directory.Build.props && bro init --write
+format	0	648s	bro format --engine dotnet-format
+check	0	157s	bro check --engine dotnet-format
+check-json	0
+checkbuild	3	292s	bro check --build --engine dotnet-format
+checkbuild-json	3
+twae-Debug	1	23s	twae Debug
+test-Debug	1	46s	env CFG=Debug bash -c dotnet test FluentFTP.sln -c $CFG
+twae-Release	1	20s	twae Release
+test-Release	1	44s	env CFG=Release bash -c dotnet test FluentFTP.sln -c $CFG
+DONE

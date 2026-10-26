@@ -1,0 +1,124 @@
+  Determining projects to restore...
+  Restored /home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj (in 448 ms).
+  Restored /home/user/w56/FluentFTP/base/FluentFTP.AotExample/FluentFTP.AotExamples.csproj (in 447 ms).
+  Restored /home/user/w56/FluentFTP/base/FluentFTP.Tests/FluentFTP.Tests.csproj (in 468 ms).
+  Restored /home/user/w56/FluentFTP/base/FluentFTP.BouncyCastle/FluentFTP.BouncyCastle.csproj (in 448 ms).
+  Restored /home/user/w56/FluentFTP/base/FluentFTP.VBExamples/FluentFTP.VBExamples.vbproj (in 2 ms).
+  Restored /home/user/w56/FluentFTP/base/FluentFTP.Xunit/FluentFTP.Xunit.csproj (in 4 ms).
+  Restored /home/user/w56/FluentFTP/base/FluentFTP.Logging/FluentFTP.Logging.csproj (in 11 ms).
+  Restored /home/user/w56/FluentFTP/base/FluentFTP.CSharpExamples/FluentFTP.CSharpExamples.csproj (in 21 ms).
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeFtpClient.cs(31,32): warning CS0067: The event 'FakeFtpClient.ValidateCertificate' is never used [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net462]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeAsyncFtpClient.cs(31,32): warning CS0067: The event 'FakeAsyncFtpClient.ValidateCertificate' is never used [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net462]
+/home/user/w56/FluentFTP/base/FluentFTP/Helpers/FileListings.cs(17,60): warning CS1573: Parameter 'client' has no matching param tag in the XML comment for 'FileListings.FileExistsInNameListing(BaseFtpClient, string[], string)' (but other parameters do) [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net462]
+  FluentFTP -> /home/user/w56/FluentFTP/base/FluentFTP/bin/Release/net462/FluentFTP.dll
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeAsyncFtpClient.cs(314,45): warning CS8425: Async-iterator 'FakeAsyncFtpClient.GetListingEnumerable(string, FtpListOption, CancellationToken, CancellationToken)' has one or more parameters of type 'CancellationToken' but none of them is decorated with the 'EnumeratorCancellation' attribute, so the cancellation token parameter from the generated 'IAsyncEnumerable<>.GetAsyncEnumerator' will be unconsumed [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net7.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeAsyncFtpClient.cs(319,45): warning CS8425: Async-iterator 'FakeAsyncFtpClient.GetListingEnumerable(string, CancellationToken, CancellationToken)' has one or more parameters of type 'CancellationToken' but none of them is decorated with the 'EnumeratorCancellation' attribute, so the cancellation token parameter from the generated 'IAsyncEnumerable<>.GetAsyncEnumerator' will be unconsumed [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net7.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeAsyncFtpClient.cs(324,45): warning CS8425: Async-iterator 'FakeAsyncFtpClient.GetListingEnumerable(CancellationToken, CancellationToken)' has one or more parameters of type 'CancellationToken' but none of them is decorated with the 'EnumeratorCancellation' attribute, so the cancellation token parameter from the generated 'IAsyncEnumerable<>.GetAsyncEnumerator' will be unconsumed [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net7.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeFtpClient.cs(33,36): warning CS0067: The event 'FakeFtpClient.ConfigureAuthentication' is never used [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net7.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeAsyncFtpClient.cs(33,36): warning CS0067: The event 'FakeAsyncFtpClient.ConfigureAuthentication' is never used [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net7.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeAsyncFtpClient.cs(31,32): warning CS0067: The event 'FakeAsyncFtpClient.ValidateCertificate' is never used [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net7.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeFtpClient.cs(31,32): warning CS0067: The event 'FakeFtpClient.ValidateCertificate' is never used [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net7.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Helpers/FileListings.cs(17,60): warning CS1573: Parameter 'client' has no matching param tag in the XML comment for 'FileListings.FileExistsInNameListing(BaseFtpClient, string[], string)' (but other parameters do) [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net7.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeAsyncFtpClient.cs(314,45): warning CS8425: Async-iterator 'FakeAsyncFtpClient.GetListingEnumerable(string, FtpListOption, CancellationToken, CancellationToken)' has one or more parameters of type 'CancellationToken' but none of them is decorated with the 'EnumeratorCancellation' attribute, so the cancellation token parameter from the generated 'IAsyncEnumerable<>.GetAsyncEnumerator' will be unconsumed [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net9.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeAsyncFtpClient.cs(319,45): warning CS8425: Async-iterator 'FakeAsyncFtpClient.GetListingEnumerable(string, CancellationToken, CancellationToken)' has one or more parameters of type 'CancellationToken' but none of them is decorated with the 'EnumeratorCancellation' attribute, so the cancellation token parameter from the generated 'IAsyncEnumerable<>.GetAsyncEnumerator' will be unconsumed [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net9.0]
+  FluentFTP -> /home/user/w56/FluentFTP/base/FluentFTP/bin/Release/net7.0/FluentFTP.dll
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeAsyncFtpClient.cs(324,45): warning CS8425: Async-iterator 'FakeAsyncFtpClient.GetListingEnumerable(CancellationToken, CancellationToken)' has one or more parameters of type 'CancellationToken' but none of them is decorated with the 'EnumeratorCancellation' attribute, so the cancellation token parameter from the generated 'IAsyncEnumerable<>.GetAsyncEnumerator' will be unconsumed [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net9.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeAsyncFtpClient.cs(33,36): warning CS0067: The event 'FakeAsyncFtpClient.ConfigureAuthentication' is never used [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net9.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeFtpClient.cs(31,32): warning CS0067: The event 'FakeFtpClient.ValidateCertificate' is never used [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net9.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeFtpClient.cs(33,36): warning CS0067: The event 'FakeFtpClient.ConfigureAuthentication' is never used [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net9.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeAsyncFtpClient.cs(31,32): warning CS0067: The event 'FakeAsyncFtpClient.ValidateCertificate' is never used [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net9.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Helpers/FileListings.cs(17,60): warning CS1573: Parameter 'client' has no matching param tag in the XML comment for 'FileListings.FileExistsInNameListing(BaseFtpClient, string[], string)' (but other parameters do) [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net9.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/SyncClient/DownloadFileInternal.cs(69,7): warning CA2022: Avoid inexact read with 'System.IO.Stream.Read(byte[], int, int)' (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2022) [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net9.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/SyncClient/ExecuteDownloadText.cs(45,9): warning CA2022: Avoid inexact read with 'FluentFTP.FtpDataStream.Read(byte[], int, int)' (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2022) [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net9.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/AsyncClient/DownloadFileInternal.cs(69,13): warning CA2022: Avoid inexact read with 'System.IO.Stream.ReadAsync(byte[], int, int, System.Threading.CancellationToken)' (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2022) [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net9.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/SyncClient/GetListing.cs(228,10): warning CA2022: Avoid inexact read with 'FluentFTP.FtpDataStream.Read(byte[], int, int)' (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2022) [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net9.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/AsyncClient/ExecuteDownloadText.cs(49,15): warning CA2022: Avoid inexact read with 'FluentFTP.FtpDataStream.ReadAsync(byte[], int, int, System.Threading.CancellationToken)' (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2022) [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net9.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Proxy/SyncProxy/FtpClientSocks4Proxy.cs(49,4): warning CA2022: Avoid inexact read with 'FluentFTP.FtpSocketStream.Read(byte[], int, int)' (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2022) [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net9.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Proxy/SyncProxy/FtpClientSocks4aProxy.cs(31,4): warning CA2022: Avoid inexact read with 'FluentFTP.FtpSocketStream.Read(byte[], int, int)' (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2022) [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net9.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Proxy/Socks/SocksProxy.cs(113,6): warning CA2022: Avoid inexact read with 'FluentFTP.FtpSocketStream.Read(byte[], int, int)' (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2022) [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net9.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Proxy/Socks/SocksProxy.cs(364,12): warning CA2022: Avoid inexact read with 'FluentFTP.FtpSocketStream.ReadAsync(byte[], int, int, System.Threading.CancellationToken)' (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2022) [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net9.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Proxy/AsyncProxy/AsyncFtpClientSocks4Proxy.cs(31,10): warning CA2022: Avoid inexact read with 'FluentFTP.FtpSocketStream.ReadAsync(byte[], int, int, System.Threading.CancellationToken)' (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2022) [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net9.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Proxy/AsyncProxy/AsyncFtpClientSocks4aProxy.cs(31,10): warning CA2022: Avoid inexact read with 'FluentFTP.FtpSocketStream.ReadAsync(byte[], int, int, System.Threading.CancellationToken)' (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2022) [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net9.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/AsyncClient/GetListing.cs(355,16): warning CA2022: Avoid inexact read with 'FluentFTP.FtpDataStream.ReadAsync(byte[], int, int, System.Threading.CancellationToken)' (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2022) [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net9.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeAsyncFtpClient.cs(314,45): warning CS8425: Async-iterator 'FakeAsyncFtpClient.GetListingEnumerable(string, FtpListOption, CancellationToken, CancellationToken)' has one or more parameters of type 'CancellationToken' but none of them is decorated with the 'EnumeratorCancellation' attribute, so the cancellation token parameter from the generated 'IAsyncEnumerable<>.GetAsyncEnumerator' will be unconsumed [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net8.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeAsyncFtpClient.cs(319,45): warning CS8425: Async-iterator 'FakeAsyncFtpClient.GetListingEnumerable(string, CancellationToken, CancellationToken)' has one or more parameters of type 'CancellationToken' but none of them is decorated with the 'EnumeratorCancellation' attribute, so the cancellation token parameter from the generated 'IAsyncEnumerable<>.GetAsyncEnumerator' will be unconsumed [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net8.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeAsyncFtpClient.cs(324,45): warning CS8425: Async-iterator 'FakeAsyncFtpClient.GetListingEnumerable(CancellationToken, CancellationToken)' has one or more parameters of type 'CancellationToken' but none of them is decorated with the 'EnumeratorCancellation' attribute, so the cancellation token parameter from the generated 'IAsyncEnumerable<>.GetAsyncEnumerator' will be unconsumed [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net8.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeAsyncFtpClient.cs(31,32): warning CS0067: The event 'FakeAsyncFtpClient.ValidateCertificate' is never used [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net8.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeFtpClient.cs(33,36): warning CS0067: The event 'FakeFtpClient.ConfigureAuthentication' is never used [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net8.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeAsyncFtpClient.cs(33,36): warning CS0067: The event 'FakeAsyncFtpClient.ConfigureAuthentication' is never used [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net8.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeFtpClient.cs(31,32): warning CS0067: The event 'FakeFtpClient.ValidateCertificate' is never used [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net8.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Helpers/FileListings.cs(17,60): warning CS1573: Parameter 'client' has no matching param tag in the XML comment for 'FileListings.FileExistsInNameListing(BaseFtpClient, string[], string)' (but other parameters do) [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net8.0]
+  FluentFTP -> /home/user/w56/FluentFTP/base/FluentFTP/bin/Release/net9.0/FluentFTP.dll
+  FluentFTP -> /home/user/w56/FluentFTP/base/FluentFTP/bin/Release/net8.0/FluentFTP.dll
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeAsyncFtpClient.cs(31,32): warning CS0067: The event 'FakeAsyncFtpClient.ValidateCertificate' is never used [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net472]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeFtpClient.cs(31,32): warning CS0067: The event 'FakeFtpClient.ValidateCertificate' is never used [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net472]
+/home/user/w56/FluentFTP/base/FluentFTP/Helpers/FileListings.cs(17,60): warning CS1573: Parameter 'client' has no matching param tag in the XML comment for 'FileListings.FileExistsInNameListing(BaseFtpClient, string[], string)' (but other parameters do) [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=net472]
+  FluentFTP -> /home/user/w56/FluentFTP/base/FluentFTP/bin/Release/net472/FluentFTP.dll
+  FluentFTP.BouncyCastle -> /home/user/w56/FluentFTP/base/FluentFTP.BouncyCastle/bin/Release/net7.0/FluentFTP.BouncyCastle.dll
+  FluentFTP.BouncyCastle -> /home/user/w56/FluentFTP/base/FluentFTP.BouncyCastle/bin/Release/net8.0/FluentFTP.BouncyCastle.dll
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeFtpClient.cs(31,32): warning CS0067: The event 'FakeFtpClient.ValidateCertificate' is never used [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=netstandard2.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeAsyncFtpClient.cs(31,32): warning CS0067: The event 'FakeAsyncFtpClient.ValidateCertificate' is never used [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=netstandard2.0]
+/home/user/w56/FluentFTP/base/FluentFTP/Helpers/FileListings.cs(17,60): warning CS1573: Parameter 'client' has no matching param tag in the XML comment for 'FileListings.FileExistsInNameListing(BaseFtpClient, string[], string)' (but other parameters do) [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=netstandard2.0]
+  FluentFTP -> /home/user/w56/FluentFTP/base/FluentFTP/bin/Release/netstandard2.0/FluentFTP.dll
+  FluentFTP.BouncyCastle -> /home/user/w56/FluentFTP/base/FluentFTP.BouncyCastle/bin/Release/net9.0/FluentFTP.BouncyCastle.dll
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeFtpClient.cs(33,36): warning CS0067: The event 'FakeFtpClient.ConfigureAuthentication' is never used [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=netstandard2.1]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeFtpClient.cs(31,32): warning CS0067: The event 'FakeFtpClient.ValidateCertificate' is never used [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=netstandard2.1]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeAsyncFtpClient.cs(31,32): warning CS0067: The event 'FakeAsyncFtpClient.ValidateCertificate' is never used [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=netstandard2.1]
+/home/user/w56/FluentFTP/base/FluentFTP/Client/FakeClient/FakeAsyncFtpClient.cs(33,36): warning CS0067: The event 'FakeAsyncFtpClient.ConfigureAuthentication' is never used [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=netstandard2.1]
+/home/user/w56/FluentFTP/base/FluentFTP/Helpers/FileListings.cs(17,60): warning CS1573: Parameter 'client' has no matching param tag in the XML comment for 'FileListings.FileExistsInNameListing(BaseFtpClient, string[], string)' (but other parameters do) [/home/user/w56/FluentFTP/base/FluentFTP/FluentFTP.csproj::TargetFramework=netstandard2.1]
+  FluentFTP -> /home/user/w56/FluentFTP/base/FluentFTP/bin/Release/netstandard2.1/FluentFTP.dll
+  FluentFTP.Xunit -> /home/user/w56/FluentFTP/base/FluentFTP.Xunit/bin/Release/net7.0/FluentFTP.Xunit.dll
+Test run for /home/user/w56/FluentFTP/base/FluentFTP.Xunit/bin/Release/net7.0/FluentFTP.Xunit.dll (.NETCoreApp,Version=v7.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+No test is available in /home/user/w56/FluentFTP/base/FluentFTP.Xunit/bin/Release/net7.0/FluentFTP.Xunit.dll. Make sure that test discoverer & executors are registered and platform & framework version settings are appropriate and try again.
+
+/home/user/w56/FluentFTP/base/FluentFTP.Tests/Unit/PathSanitizerTests.cs(17,10): warning CS8618: Non-nullable field '_insecureClient' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the field as nullable. [/home/user/w56/FluentFTP/base/FluentFTP.Tests/FluentFTP.Tests.csproj]
+/home/user/w56/FluentFTP/base/FluentFTP.Tests/Unit/PathSanitizerTests.cs(45,19): warning CS8600: Converting null literal or possible null value to non-nullable type. [/home/user/w56/FluentFTP/base/FluentFTP.Tests/FluentFTP.Tests.csproj]
+/home/user/w56/FluentFTP/base/FluentFTP.Tests/Unit/PathInsecureTests.cs(30,19): warning CS8600: Converting null literal or possible null value to non-nullable type. [/home/user/w56/FluentFTP/base/FluentFTP.Tests/FluentFTP.Tests.csproj]
+/home/user/w56/FluentFTP/base/FluentFTP.Tests/Unit/PathInsecureTests.cs(12,32): warning CS8618: Non-nullable field '_insecureClient' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the field as nullable. [/home/user/w56/FluentFTP/base/FluentFTP.Tests/FluentFTP.Tests.csproj]
+  FluentFTP.Tests -> /home/user/w56/FluentFTP/base/FluentFTP.Tests/bin/Release/net7.0/FluentFTP.Tests.dll
+Test run for /home/user/w56/FluentFTP/base/FluentFTP.Tests/bin/Release/net7.0/FluentFTP.Tests.dll (.NETCoreApp,Version=v7.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.69]     FluentFTP.Tests.Unit.TimeoutTests.ConnectTimeout [FAIL]
+  Failed FluentFTP.Tests.Unit.TimeoutTests.ConnectTimeout [45 ms]
+  Error Message:
+   System.IO.IOException : Failed to connect to host.
+  Stack Trace:
+     at FluentFTP.FtpSocketStream.Connect(String host, Int32 port, FtpIpVersion ipVersions) in /home/user/w56/FluentFTP/base/FluentFTP/Streams/FtpSocketStream.cs:line 1004
+   at FluentFTP.FtpClient.Connect(FtpSocketStream stream) in /home/user/w56/FluentFTP/base/FluentFTP/Client/SyncClient/Connect.cs:line 273
+   at FluentFTP.FtpClient.Connect(Boolean reConnect) in /home/user/w56/FluentFTP/base/FluentFTP/Client/SyncClient/Connect.cs:line 91
+   at FluentFTP.FtpClient.Connect() in /home/user/w56/FluentFTP/base/FluentFTP/Client/SyncClient/Connect.cs:line 18
+   at FluentFTP.Tests.Unit.TimeoutTests.ConnectTimeout() in /home/user/w56/FluentFTP/base/FluentFTP.Tests/Unit/TimeoutTests.cs:line 30
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+[xUnit.net 00:00:00.75]     FluentFTP.Tests.Unit.TimeoutTests.ConnectTimeoutAsync [FAIL]
+[xUnit.net 00:00:01.57]     FluentFTP.Tests.Unit.TimeoutTests.ConnectTimeoutAsyncCancel [FAIL]
+  Failed FluentFTP.Tests.Unit.TimeoutTests.ConnectTimeoutAsync [91 ms]
+  Error Message:
+   System.IO.IOException : Failed to connect to host.
+  Stack Trace:
+     at FluentFTP.FtpSocketStream.ConnectAsync(String host, Int32 port, FtpIpVersion ipVersions, CancellationToken token) in /home/user/w56/FluentFTP/base/FluentFTP/Streams/FtpSocketStream.cs:line 1174
+   at FluentFTP.AsyncFtpClient.ConnectAsync(FtpSocketStream stream, CancellationToken token) in /home/user/w56/FluentFTP/base/FluentFTP/Client/AsyncClient/Connect.cs:line 277
+   at FluentFTP.AsyncFtpClient.Connect(Boolean reConnect, CancellationToken token) in /home/user/w56/FluentFTP/base/FluentFTP/Client/AsyncClient/Connect.cs:line 92
+   at FluentFTP.AsyncFtpClient.Connect(CancellationToken token) in /home/user/w56/FluentFTP/base/FluentFTP/Client/AsyncClient/Connect.cs:line 18
+   at FluentFTP.Tests.Unit.TimeoutTests.ConnectTimeoutAsync() in /home/user/w56/FluentFTP/base/FluentFTP.Tests/Unit/TimeoutTests.cs:line 46
+--- End of stack trace from previous location ---
+  Failed FluentFTP.Tests.Unit.TimeoutTests.ConnectTimeoutAsyncCancel [925 ms]
+  Error Message:
+   System.IO.IOException : Failed to connect to host.
+  Stack Trace:
+     at FluentFTP.FtpSocketStream.ConnectAsync(String host, Int32 port, FtpIpVersion ipVersions, CancellationToken token) in /home/user/w56/FluentFTP/base/FluentFTP/Streams/FtpSocketStream.cs:line 1174
+   at FluentFTP.AsyncFtpClient.ConnectAsync(FtpSocketStream stream, CancellationToken token) in /home/user/w56/FluentFTP/base/FluentFTP/Client/AsyncClient/Connect.cs:line 277
+   at FluentFTP.AsyncFtpClient.Connect(Boolean reConnect, CancellationToken token) in /home/user/w56/FluentFTP/base/FluentFTP/Client/AsyncClient/Connect.cs:line 92
+   at FluentFTP.AsyncFtpClient.Connect(CancellationToken token) in /home/user/w56/FluentFTP/base/FluentFTP/Client/AsyncClient/Connect.cs:line 18
+   at FluentFTP.Tests.Unit.TimeoutTests.ConnectTimeoutAsyncCancel() in /home/user/w56/FluentFTP/base/FluentFTP.Tests/Unit/TimeoutTests.cs:line 70
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:     3, Passed:   270, Skipped:     0, Total:   273, Duration: 15 s - FluentFTP.Tests.dll (net7.0)
+  Successfully created package '/home/user/w56/FluentFTP/base/FluentFTP/bin/Release/FluentFTP.55.1.0.nupkg'.
