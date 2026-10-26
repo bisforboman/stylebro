@@ -1,0 +1,3140 @@
+diff --git a/.editorconfig b/.editorconfig
+index e60f5624..47d8826a 100644
+--- a/.editorconfig
++++ b/.editorconfig
+@@ -562,3 +562,323 @@ end_of_line = lf
+ end_of_line = crlf
+ 
+ vsspell_dictionary_languages = en-US
++
++# BEGIN stylebro-migrate
++# Generated from this repository's StyleCop settings by bro migrate. Run it again to update; edits
++# between these markers are overwritten.
++[src/DynamicData/**.cs]
++# No StyleCop ran in: src/DynamicData.Benchmarks, src/DynamicData.Tests; 'bro format' leaves them alone (remove this line to format them)
++# StyleBro rules: on when StyleCop enforced every rule they replace.
++dotnet_diagnostic.BRO1001.severity = none
++dotnet_diagnostic.BRO1002.severity = error
++dotnet_diagnostic.BRO1003.severity = error
++dotnet_diagnostic.BRO1004.severity = error
++dotnet_diagnostic.BRO1005.severity = error
++dotnet_diagnostic.BRO1006.severity = error
++dotnet_diagnostic.BRO1007.severity = error
++dotnet_diagnostic.BRO1008.severity = none
++dotnet_diagnostic.BRO1101.severity = error
++dotnet_diagnostic.BRO1102.severity = error
++dotnet_diagnostic.BRO1103.severity = error
++dotnet_diagnostic.BRO1104.severity = error
++dotnet_diagnostic.BRO1105.severity = error
++dotnet_diagnostic.BRO1106.severity = error
++dotnet_diagnostic.BRO1107.severity = none
++dotnet_diagnostic.BRO1108.severity = none
++dotnet_diagnostic.BRO1109.severity = error
++dotnet_diagnostic.BRO1110.severity = error
++dotnet_diagnostic.BRO1111.severity = error
++dotnet_diagnostic.BRO1112.severity = error
++dotnet_diagnostic.BRO1113.severity = error
++dotnet_diagnostic.BRO1114.severity = error
++dotnet_diagnostic.BRO1115.severity = error
++dotnet_diagnostic.BRO1116.severity = error
++dotnet_diagnostic.BRO1117.severity = error
++dotnet_diagnostic.BRO1118.severity = none
++dotnet_diagnostic.BRO1119.severity = error
++dotnet_diagnostic.BRO1120.severity = error
++dotnet_diagnostic.BRO1121.severity = error
++dotnet_diagnostic.BRO1122.severity = error
++dotnet_diagnostic.BRO1123.severity = warning
++dotnet_diagnostic.BRO1124.severity = warning
++dotnet_diagnostic.BRO1125.severity = error
++dotnet_diagnostic.BRO1126.severity = error
++dotnet_diagnostic.BRO1127.severity = error
++dotnet_diagnostic.BRO1128.severity = error
++dotnet_diagnostic.BRO1129.severity = error
++dotnet_diagnostic.BRO1130.severity = error
++dotnet_diagnostic.BRO1131.severity = error
++dotnet_diagnostic.BRO1132.severity = error
++dotnet_diagnostic.BRO1133.severity = none
++dotnet_diagnostic.BRO1134.severity = none
++dotnet_diagnostic.BRO1135.severity = none
++dotnet_diagnostic.BRO1136.severity = none
++dotnet_diagnostic.BRO1137.severity = none
++dotnet_diagnostic.BRO1138.severity = none
++dotnet_diagnostic.BRO1139.severity = none
++dotnet_diagnostic.BRO1140.severity = none
++dotnet_diagnostic.BRO1141.severity = none
++dotnet_diagnostic.BRO1142.severity = none
++dotnet_diagnostic.BRO1143.severity = none
++dotnet_diagnostic.BRO1144.severity = none
++dotnet_diagnostic.BRO1145.severity = none
++dotnet_diagnostic.BRO1146.severity = none
++dotnet_diagnostic.BRO1147.severity = none
++dotnet_diagnostic.BRO1148.severity = none
++dotnet_diagnostic.BRO1149.severity = none
++dotnet_diagnostic.BRO1150.severity = none
++dotnet_diagnostic.BRO1151.severity = none
++dotnet_diagnostic.BRO1301.severity = error
++dotnet_diagnostic.BRO1302.severity = error
++dotnet_diagnostic.BRO1303.severity = none
++dotnet_diagnostic.BRO1304.severity = error
++dotnet_diagnostic.BRO1305.severity = error
++dotnet_diagnostic.BRO1306.severity = none
++dotnet_diagnostic.BRO1307.severity = error
++dotnet_diagnostic.BRO1308.severity = error
++dotnet_diagnostic.BRO1309.severity = error
++dotnet_diagnostic.BRO1310.severity = none
++dotnet_diagnostic.BRO1311.severity = none
++dotnet_diagnostic.BRO1312.severity = error
++dotnet_diagnostic.BRO1313.severity = none
++dotnet_diagnostic.BRO1314.severity = none
++dotnet_diagnostic.BRO1401.severity = none
++dotnet_diagnostic.BRO1402.severity = error
++dotnet_diagnostic.BRO1403.severity = error
++dotnet_diagnostic.BRO1404.severity = error
++dotnet_diagnostic.BRO1405.severity = error
++dotnet_diagnostic.BRO1406.severity = error
++dotnet_diagnostic.BRO1407.severity = error
++dotnet_diagnostic.BRO1408.severity = none
++dotnet_diagnostic.BRO1409.severity = none
++dotnet_diagnostic.BRO1410.severity = none
++dotnet_diagnostic.BRO1501.severity = error
++dotnet_diagnostic.BRO1502.severity = error
++dotnet_diagnostic.BRO1503.severity = error
++dotnet_diagnostic.BRO1504.severity = none
++dotnet_diagnostic.BRO1505.severity = error
++dotnet_diagnostic.BRO1506.severity = none
++dotnet_diagnostic.BRO1507.severity = error
++dotnet_diagnostic.BRO1508.severity = error
++dotnet_diagnostic.BRO1509.severity = error
++dotnet_diagnostic.BRO1510.severity = error
++dotnet_diagnostic.BRO1511.severity = error
++dotnet_diagnostic.BRO1512.severity = error
++dotnet_diagnostic.BRO1513.severity = error
++dotnet_diagnostic.BRO1514.severity = none
++dotnet_diagnostic.BRO1515.severity = error
++dotnet_diagnostic.BRO1516.severity = error
++dotnet_diagnostic.BRO1517.severity = error
++dotnet_diagnostic.BRO1518.severity = error
++dotnet_diagnostic.BRO1519.severity = none
++dotnet_diagnostic.BRO1520.severity = none
++dotnet_diagnostic.BRO1521.severity = none
++dotnet_diagnostic.BRO1522.severity = none
++dotnet_diagnostic.BRO1523.severity = none
++dotnet_diagnostic.BRO1524.severity = none
++dotnet_diagnostic.BRO1525.severity = none
++dotnet_diagnostic.BRO1526.severity = none
++dotnet_diagnostic.BRO1527.severity = none
++dotnet_diagnostic.BRO1601.severity = error
++dotnet_diagnostic.BRO1602.severity = error
++dotnet_diagnostic.BRO1603.severity = error
++dotnet_diagnostic.BRO1604.severity = none
++dotnet_diagnostic.BRO1605.severity = error
++dotnet_diagnostic.BRO1606.severity = error
++dotnet_diagnostic.BRO1607.severity = error
++dotnet_diagnostic.BRO1608.severity = error
++dotnet_diagnostic.BRO1609.severity = error
++dotnet_diagnostic.BRO1610.severity = error
++dotnet_diagnostic.BRO1611.severity = error
++dotnet_diagnostic.BRO1612.severity = error
++dotnet_diagnostic.BRO1613.severity = error
++dotnet_diagnostic.BRO1614.severity = error
++dotnet_diagnostic.BRO1615.severity = none
++dotnet_diagnostic.BRO1616.severity = none
++dotnet_diagnostic.BRO1617.severity = none
++dotnet_diagnostic.BRO1618.severity = none
++dotnet_diagnostic.BRO1619.severity = none
++stylebro_member_order = field, constructor, finalizer, delegate, event, enum, interface, property, indexer, conversion, operator, extension, method, struct, class
++stylebro_member_access_order = public, internal, protected_internal, protected, private_protected, private
++stylebro_member_constants_first = true
++stylebro_member_static_first = true
++stylebro_member_readonly_first = true
++stylebro_private_field_naming = _camelCase
++stylebro_private_mutable_static_field_naming = _camelCase
++stylebro_private_static_field_naming = PascalCase
++stylebro_allow_leading_underscore_in_pascal_fields = true
++stylebro_document_exposed_elements = true
++stylebro_document_internal_elements = false
++stylebro_document_private_elements = false
++stylebro_allow_consecutive_usings = true
++stylebro_tuple_element_name_casing = camelCase
++
++# Built-in .NET rules, with the severity of the StyleCop rules they cover.
++dotnet_diagnostic.IDE0055.severity = error
++dotnet_diagnostic.IDE0011.severity = none
++csharp_prefer_braces = true
++dotnet_diagnostic.IDE0040.severity = none
++dotnet_style_require_accessibility_modifiers = for_non_interface_members
++dotnet_diagnostic.IDE0036.severity = error
++dotnet_diagnostic.IDE0049.severity = error
++dotnet_diagnostic.IDE0047.severity = none
++dotnet_diagnostic.IDE0048.severity = none
++dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity
++dotnet_style_parentheses_in_other_binary_operators = always_for_clarity
++dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity
++dotnet_style_parentheses_in_other_operators = never_if_unnecessary
++dotnet_diagnostic.IDE0065.severity = none
++dotnet_separate_import_directive_groups = false
++dotnet_diagnostic.IDE2000.severity = none
++dotnet_style_allow_multiple_blank_lines_experimental = false
++dotnet_diagnostic.IDE2002.severity = none
++csharp_style_allow_blank_lines_between_consecutive_braces_experimental = false
++dotnet_diagnostic.IDE2003.severity = none
++dotnet_style_allow_statement_immediately_after_block_experimental = true
++dotnet_diagnostic.IDE0009.severity = none
++dotnet_diagnostic.IDE0003.severity = error
++dotnet_diagnostic.IDE0073.severity = error
++file_header_template = Copyright (c) 2011-2025 Roland Pheasant. All rights reserved.\nRoland Pheasant licenses this file to you under the MIT license.\nSee the LICENSE file in the project root for full license information.
++end_of_line = lf
++
++# StyleCop.Analyzers version: 1.2.0-beta.556 (rules it doesn't have stay off after the package is removed)
++# stylecop.json settings (used once the file is gone): {"indentation":{"useTabs":false,"indentationSize":4},"documentationRules":{"documentExposedElements":true,"documentInternalElements":false,"documentPrivateElements":false,"documentInterfaces":true,"documentPrivateFields":false,"documentationCulture":"en-US","companyName":"Roland Pheasant","copyrightText":"Copyright (c) 2011-2025 {companyName}. All rights reserved.\n{companyName} licenses this file to you under the {licenseName} license.\nSee the LICENSE file in the project root for full license information.","variables":{"licenseName":"MIT","licenseFile":"LICENSE"},"xmlHeader":false},"layoutRules":{"newlineAtEndOfFile":"allow","allowConsecutiveUsings":true},"maintainabilityRules":{"topLevelTypes":["class","interface","struct","enum","delegate"]},"orderingRules":{"usingDirectivesPlacement":"outsideNamespace","systemUsingDirectivesFirst":true},"namingRules":{"tupleElementNameCasing":"camelCase"}}
++
++[src/{DynamicData.Benchmarks,DynamicData.Tests}/**.cs]
++# No StyleCop ran here: StyleBro's rules and the built-in ones the block sets are off by id, so the build and 'format' leave it alone.
++dotnet_diagnostic.BRO1001.severity = none
++dotnet_diagnostic.BRO1002.severity = none
++dotnet_diagnostic.BRO1003.severity = none
++dotnet_diagnostic.BRO1004.severity = none
++dotnet_diagnostic.BRO1005.severity = none
++dotnet_diagnostic.BRO1006.severity = none
++dotnet_diagnostic.BRO1007.severity = none
++dotnet_diagnostic.BRO1008.severity = none
++dotnet_diagnostic.BRO1101.severity = none
++dotnet_diagnostic.BRO1102.severity = none
++dotnet_diagnostic.BRO1103.severity = none
++dotnet_diagnostic.BRO1104.severity = none
++dotnet_diagnostic.BRO1105.severity = none
++dotnet_diagnostic.BRO1106.severity = none
++dotnet_diagnostic.BRO1107.severity = none
++dotnet_diagnostic.BRO1108.severity = none
++dotnet_diagnostic.BRO1109.severity = none
++dotnet_diagnostic.BRO1110.severity = none
++dotnet_diagnostic.BRO1111.severity = none
++dotnet_diagnostic.BRO1112.severity = none
++dotnet_diagnostic.BRO1113.severity = none
++dotnet_diagnostic.BRO1114.severity = none
++dotnet_diagnostic.BRO1115.severity = none
++dotnet_diagnostic.BRO1116.severity = none
++dotnet_diagnostic.BRO1117.severity = none
++dotnet_diagnostic.BRO1118.severity = none
++dotnet_diagnostic.BRO1119.severity = none
++dotnet_diagnostic.BRO1120.severity = none
++dotnet_diagnostic.BRO1121.severity = none
++dotnet_diagnostic.BRO1122.severity = none
++dotnet_diagnostic.BRO1123.severity = none
++dotnet_diagnostic.BRO1124.severity = none
++dotnet_diagnostic.BRO1125.severity = none
++dotnet_diagnostic.BRO1126.severity = none
++dotnet_diagnostic.BRO1127.severity = none
++dotnet_diagnostic.BRO1128.severity = none
++dotnet_diagnostic.BRO1129.severity = none
++dotnet_diagnostic.BRO1130.severity = none
++dotnet_diagnostic.BRO1131.severity = none
++dotnet_diagnostic.BRO1132.severity = none
++dotnet_diagnostic.BRO1133.severity = none
++dotnet_diagnostic.BRO1134.severity = none
++dotnet_diagnostic.BRO1135.severity = none
++dotnet_diagnostic.BRO1136.severity = none
++dotnet_diagnostic.BRO1137.severity = none
++dotnet_diagnostic.BRO1138.severity = none
++dotnet_diagnostic.BRO1139.severity = none
++dotnet_diagnostic.BRO1140.severity = none
++dotnet_diagnostic.BRO1141.severity = none
++dotnet_diagnostic.BRO1142.severity = none
++dotnet_diagnostic.BRO1144.severity = none
++dotnet_diagnostic.BRO1146.severity = none
++dotnet_diagnostic.BRO1149.severity = none
++dotnet_diagnostic.BRO1150.severity = none
++dotnet_diagnostic.BRO1151.severity = none
++dotnet_diagnostic.BRO1301.severity = none
++dotnet_diagnostic.BRO1302.severity = none
++dotnet_diagnostic.BRO1303.severity = none
++dotnet_diagnostic.BRO1304.severity = none
++dotnet_diagnostic.BRO1305.severity = none
++dotnet_diagnostic.BRO1306.severity = none
++dotnet_diagnostic.BRO1307.severity = none
++dotnet_diagnostic.BRO1308.severity = none
++dotnet_diagnostic.BRO1309.severity = none
++dotnet_diagnostic.BRO1311.severity = none
++dotnet_diagnostic.BRO1312.severity = none
++dotnet_diagnostic.BRO1401.severity = none
++dotnet_diagnostic.BRO1402.severity = none
++dotnet_diagnostic.BRO1403.severity = none
++dotnet_diagnostic.BRO1404.severity = none
++dotnet_diagnostic.BRO1405.severity = none
++dotnet_diagnostic.BRO1406.severity = none
++dotnet_diagnostic.BRO1407.severity = none
++dotnet_diagnostic.BRO1408.severity = none
++dotnet_diagnostic.BRO1410.severity = none
++dotnet_diagnostic.BRO1501.severity = none
++dotnet_diagnostic.BRO1502.severity = none
++dotnet_diagnostic.BRO1503.severity = none
++dotnet_diagnostic.BRO1504.severity = none
++dotnet_diagnostic.BRO1505.severity = none
++dotnet_diagnostic.BRO1506.severity = none
++dotnet_diagnostic.BRO1507.severity = none
++dotnet_diagnostic.BRO1508.severity = none
++dotnet_diagnostic.BRO1509.severity = none
++dotnet_diagnostic.BRO1510.severity = none
++dotnet_diagnostic.BRO1511.severity = none
++dotnet_diagnostic.BRO1512.severity = none
++dotnet_diagnostic.BRO1513.severity = none
++dotnet_diagnostic.BRO1514.severity = none
++dotnet_diagnostic.BRO1515.severity = none
++dotnet_diagnostic.BRO1516.severity = none
++dotnet_diagnostic.BRO1517.severity = none
++dotnet_diagnostic.BRO1518.severity = none
++dotnet_diagnostic.BRO1519.severity = none
++dotnet_diagnostic.BRO1520.severity = none
++dotnet_diagnostic.BRO1521.severity = none
++dotnet_diagnostic.BRO1522.severity = none
++dotnet_diagnostic.BRO1523.severity = none
++dotnet_diagnostic.BRO1524.severity = none
++dotnet_diagnostic.BRO1525.severity = none
++dotnet_diagnostic.BRO1526.severity = none
++dotnet_diagnostic.BRO1527.severity = none
++dotnet_diagnostic.BRO1601.severity = none
++dotnet_diagnostic.BRO1602.severity = none
++dotnet_diagnostic.BRO1603.severity = none
++dotnet_diagnostic.BRO1604.severity = none
++dotnet_diagnostic.BRO1605.severity = none
++dotnet_diagnostic.BRO1606.severity = none
++dotnet_diagnostic.BRO1607.severity = none
++dotnet_diagnostic.BRO1608.severity = none
++dotnet_diagnostic.BRO1609.severity = none
++dotnet_diagnostic.BRO1610.severity = none
++dotnet_diagnostic.BRO1611.severity = none
++dotnet_diagnostic.BRO1612.severity = none
++dotnet_diagnostic.BRO1613.severity = none
++dotnet_diagnostic.BRO1614.severity = none
++dotnet_diagnostic.BRO1615.severity = none
++dotnet_diagnostic.BRO1616.severity = none
++dotnet_diagnostic.BRO1617.severity = none
++dotnet_diagnostic.BRO1618.severity = none
++dotnet_diagnostic.BRO1619.severity = none
++dotnet_diagnostic.IDE0003.severity = none
++dotnet_diagnostic.IDE0009.severity = none
++dotnet_diagnostic.IDE0011.severity = none
++dotnet_diagnostic.IDE0036.severity = none
++dotnet_diagnostic.IDE0040.severity = none
++dotnet_diagnostic.IDE0047.severity = none
++dotnet_diagnostic.IDE0048.severity = none
++dotnet_diagnostic.IDE0049.severity = none
++dotnet_diagnostic.IDE0055.severity = none
++dotnet_diagnostic.IDE0065.severity = none
++dotnet_diagnostic.IDE0073.severity = none
++dotnet_diagnostic.IDE2000.severity = none
++dotnet_diagnostic.IDE2002.severity = none
++dotnet_diagnostic.IDE2003.severity = none
++# END stylebro-migrate
+diff --git a/src/Directory.Build.props b/src/Directory.Build.props
+index 73840a9f..59aea73b 100644
+--- a/src/Directory.Build.props
++++ b/src/Directory.Build.props
+@@ -2,6 +2,7 @@
+ 
+ <Project>
+   <PropertyGroup>
++    <StyleBroPreset>none</StyleBroPreset>
+     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+     <NoWarn>$(NoWarn);1591;1701;1702;1705;VSX1000;CA1510</NoWarn>
+     <Platform>AnyCPU</Platform>
+diff --git a/src/Directory.Packages.props b/src/Directory.Packages.props
+index fc4c2ad0..9069d836 100644
+--- a/src/Directory.Packages.props
++++ b/src/Directory.Packages.props
+@@ -41,6 +41,6 @@
+   </ItemGroup>
+   <ItemGroup Condition="!$(IsTestProject) AND !$(IsBenchmarkProject)">
+     <GlobalPackageReference Include="Roslynator.Analyzers" Version="4.15.0" />
+-    <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
++    <GlobalPackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial56.3" />
+   </ItemGroup>
+ </Project>
+diff --git a/src/DynamicData/Binding/ObservableCollectionAdaptor.cs b/src/DynamicData/Binding/ObservableCollectionAdaptor.cs
+index ed0ab67d..6bd7b9ff 100644
+--- a/src/DynamicData/Binding/ObservableCollectionAdaptor.cs
++++ b/src/DynamicData/Binding/ObservableCollectionAdaptor.cs
+@@ -28,7 +28,7 @@ public class ObservableCollectionAdaptor<T>(IObservableCollection<T> collection,
+     private bool _loaded;
+ 
+     /// <summary>
+-    /// Initializes a new instance of the <see cref="ObservableCollectionAdaptor{TObject}"/> class.
++    /// Initializes a new instance of the <see cref="ObservableCollectionAdaptor{T}"/> class.
+     /// </summary>
+     /// <param name="collection">The collection.</param>
+     public ObservableCollectionAdaptor(IObservableCollection<T> collection)
+@@ -37,7 +37,7 @@ public class ObservableCollectionAdaptor<T>(IObservableCollection<T> collection,
+     }
+ 
+     /// <summary>
+-    /// Initializes a new instance of the <see cref="ObservableCollectionAdaptor{TObject}"/> class.
++    /// Initializes a new instance of the <see cref="ObservableCollectionAdaptor{T}"/> class.
+     /// </summary>
+     /// <param name="collection">The collection.</param>
+     /// <param name="options"> The binding options.</param>
+diff --git a/src/DynamicData/Cache/Internal/ExpireAfter.cs b/src/DynamicData/Cache/Internal/ExpireAfter.cs
+index 2c9239f5..eb12e7b7 100644
+--- a/src/DynamicData/Cache/Internal/ExpireAfter.cs
++++ b/src/DynamicData/Cache/Internal/ExpireAfter.cs
+@@ -1,7 +1,7 @@
+-// Copyright (c) 2011-2025 Roland Pheasant. All rights reserved.
+-// Roland Pheasant licenses this file to you under the MIT license.
+-// See the LICENSE file in the project root for full license information.
+-
+-namespace DynamicData.Cache.Internal;
+-
+-internal static partial class ExpireAfter;
++// Copyright (c) 2011-2025 Roland Pheasant. All rights reserved.
++// Roland Pheasant licenses this file to you under the MIT license.
++// See the LICENSE file in the project root for full license information.
++
++namespace DynamicData.Cache.Internal;
++
++internal static partial class ExpireAfter;
+diff --git a/src/DynamicData/Cache/Internal/Filter.Dynamic.cs b/src/DynamicData/Cache/Internal/Filter.Dynamic.cs
+index d155f61e..a801a89a 100644
+--- a/src/DynamicData/Cache/Internal/Filter.Dynamic.cs
++++ b/src/DynamicData/Cache/Internal/Filter.Dynamic.cs
+@@ -360,11 +360,11 @@ internal static partial class Filter
+ 
+             private void ReFilter(TState predicateState)
+             {
+-                #if SUPPORTS_DICTIONARY_MUTATION_DURING_ENUMERATION
++#if SUPPORTS_DICTIONARY_MUTATION_DURING_ENUMERATION
+                 foreach (var key in _itemStatesByKey.Keys)
+-                #else
++#else
+                 foreach (var key in _itemStatesByKey.Keys.ToArray())
+-                #endif
++#endif
+                 {
+                     var itemState = _itemStatesByKey[key];
+ 
+diff --git a/src/DynamicData/Cache/Internal/Filter.cs b/src/DynamicData/Cache/Internal/Filter.cs
+index dabc3ba7..c661e1c0 100644
+--- a/src/DynamicData/Cache/Internal/Filter.cs
++++ b/src/DynamicData/Cache/Internal/Filter.cs
+@@ -1,7 +1,7 @@
+-// Copyright (c) 2011-2025 Roland Pheasant. All rights reserved.
+-// Roland Pheasant licenses this file to you under the MIT license.
+-// See the LICENSE file in the project root for full license information.
+-
+-namespace DynamicData.Cache.Internal;
+-
+-internal static partial class Filter;
++// Copyright (c) 2011-2025 Roland Pheasant. All rights reserved.
++// Roland Pheasant licenses this file to you under the MIT license.
++// See the LICENSE file in the project root for full license information.
++
++namespace DynamicData.Cache.Internal;
++
++internal static partial class Filter;
+diff --git a/src/DynamicData/Cache/Internal/FilterImmutable.cs b/src/DynamicData/Cache/Internal/FilterImmutable.cs
+index 383a9f2d..c92584b2 100644
+--- a/src/DynamicData/Cache/Internal/FilterImmutable.cs
++++ b/src/DynamicData/Cache/Internal/FilterImmutable.cs
+@@ -29,7 +29,7 @@ internal sealed class FilterImmutable<TObject, TKey>
+                     observer.OnNext(changes);
+                 }
+             }
+-            : (observer, changes) => observer.OnNext(changes);
++        : (observer, changes) => observer.OnNext(changes);
+     }
+ 
+     public IObservable<IChangeSet<TObject, TKey>> Run()
+diff --git a/src/DynamicData/Cache/Internal/MergeManyCacheChangeSets.cs b/src/DynamicData/Cache/Internal/MergeManyCacheChangeSets.cs
+index ad879439..d7c4815d 100644
+--- a/src/DynamicData/Cache/Internal/MergeManyCacheChangeSets.cs
++++ b/src/DynamicData/Cache/Internal/MergeManyCacheChangeSets.cs
+@@ -37,7 +37,7 @@ internal sealed class MergeManyCacheChangeSets<TObject, TKey, TDestination, TDes
+                 new ChangeSetCache<TDestination, TDestinationKey>(MakeChildObservable(changeSetSelector(obj, key).IgnoreSameReferenceUpdate()))));
+         }
+ 
+-    protected override void ParentOnNext(IChangeSet<ChangeSetCache<TDestination, TDestinationKey>, TKey> changes)
++        protected override void ParentOnNext(IChangeSet<ChangeSetCache<TDestination, TDestinationKey>, TKey> changes)
+         {
+             // Process all the changes at once to preserve the changeset order
+             foreach (var change in changes.ToConcreteType())
+diff --git a/src/DynamicData/Cache/Internal/MergeManyCacheChangeSetsSourceCompare.cs b/src/DynamicData/Cache/Internal/MergeManyCacheChangeSetsSourceCompare.cs
+index a8875e77..15e87ef7 100644
+--- a/src/DynamicData/Cache/Internal/MergeManyCacheChangeSetsSourceCompare.cs
++++ b/src/DynamicData/Cache/Internal/MergeManyCacheChangeSetsSourceCompare.cs
+@@ -97,10 +97,10 @@ internal sealed class MergeManyCacheChangeSetsSourceCompare<TObject, TKey, TDest
+         public override int Compare(ParentChildEntry? x, ParentChildEntry? y) => (x, y) switch
+         {
+             (not null, not null) => comparerParent.Compare(x.Parent, y.Parent) switch
+-                                    {
+-                                        0 => comparerChild.Compare(x.Child, y.Child),
+-                                        int i => i,
+-                                    },
++            {
++                0 => comparerChild.Compare(x.Child, y.Child),
++                int i => i,
++            },
+             (null, null) => 0,
+             (null, not null) => 1,
+             (not null, null) => -1,
+diff --git a/src/DynamicData/Cache/Internal/TransformMany.cs b/src/DynamicData/Cache/Internal/TransformMany.cs
+index 81f5ed02..9866576b 100644
+--- a/src/DynamicData/Cache/Internal/TransformMany.cs
++++ b/src/DynamicData/Cache/Internal/TransformMany.cs
+@@ -1,223 +1,223 @@
+-﻿// Copyright (c) 2011-2025 Roland Pheasant. All rights reserved.
+-// Roland Pheasant licenses this file to you under the MIT license.
+-// See the LICENSE file in the project root for full license information.
+-
+-namespace DynamicData.Cache.Internal;
+-
+-internal sealed class TransformMany<TDestination, TDestinationKey, TSource, TSourceKey>(IObservable<IChangeSet<TSource, TSourceKey>> source, Func<TSource, IEnumerable<TDestination>> manySelector, Func<TDestination, TDestinationKey> keySelector, Func<TSource, IObservable<IChangeSet<TDestination, TDestinationKey>>>? childChanges = null)
+-    where TDestination : notnull
+-    where TDestinationKey : notnull
+-    where TSource : notnull
+-    where TSourceKey : notnull
+-{
+-    public TransformMany(IObservable<IChangeSet<TSource, TSourceKey>> source, Func<TSource, ReadOnlyObservableCollection<TDestination>> manySelector, Func<TDestination, TDestinationKey> keySelector)
+-        : this(
+-            source,
+-            manySelector,
+-            keySelector,
+-            t => Observable.Defer(
+-                () =>
+-                {
+-                    var subsequentChanges = manySelector(t).ToObservableChangeSet(keySelector);
+-
+-                    if (manySelector(t).Count > 0)
+-                    {
+-                        return subsequentChanges;
+-                    }
+-
+-                    return Observable.Return(ChangeSet<TDestination, TDestinationKey>.Empty).Concat(subsequentChanges);
+-                }))
+-    {
+-    }
+-
+-    public TransformMany(IObservable<IChangeSet<TSource, TSourceKey>> source, Func<TSource, ObservableCollection<TDestination>> manySelector, Func<TDestination, TDestinationKey> keySelector)
+-        : this(
+-            source,
+-            manySelector,
+-            keySelector,
+-            t => Observable.Defer(
+-                () =>
+-                {
+-                    var subsequentChanges = manySelector(t).ToObservableChangeSet(keySelector);
+-
+-                    if (manySelector(t).Count > 0)
+-                    {
+-                        return subsequentChanges;
+-                    }
+-
+-                    return Observable.Return(ChangeSet<TDestination, TDestinationKey>.Empty).Concat(subsequentChanges);
+-                }))
+-    {
+-    }
+-
+-    public TransformMany(IObservable<IChangeSet<TSource, TSourceKey>> source, Func<TSource, IObservableCache<TDestination, TDestinationKey>> manySelector, Func<TDestination, TDestinationKey> keySelector)
+-        : this(
+-            source,
+-            x => manySelector(x).Items,
+-            keySelector,
+-            t => Observable.Defer(
+-                () =>
+-                {
+-                    var subsequentChanges = Observable.Create<IChangeSet<TDestination, TDestinationKey>>(o => manySelector(t).Connect().Subscribe(o));
+-
+-                    if (manySelector(t).Count > 0)
+-                    {
+-                        return subsequentChanges;
+-                    }
+-
+-                    return Observable.Return(ChangeSet<TDestination, TDestinationKey>.Empty).Concat(subsequentChanges);
+-                }))
+-    {
+-    }
+-
+-    public IObservable<IChangeSet<TDestination, TDestinationKey>> Run() => childChanges is null ? Create() : CreateWithChangeSet();
+-
+-    private IObservable<IChangeSet<TDestination, TDestinationKey>> Create() => source.Transform(
+-            (t, _) =>
+-            {
+-                var destination = manySelector(t).Select(m => new DestinationContainer(m, keySelector(m))).ToArray();
+-                return new ManyContainer(() => destination);
+-            },
+-            true).Select(changes => new ChangeSet<TDestination, TDestinationKey>(new DestinationEnumerator(changes)));
+-
+-    private IObservable<IChangeSet<TDestination, TDestinationKey>> CreateWithChangeSet()
+-    {
+-        if (childChanges is null)
+-        {
+-            throw new InvalidOperationException("The childChanges is null and should not be.");
+-        }
+-
+-        return Observable.Create<IChangeSet<TDestination, TDestinationKey>>(
+-            observer =>
+-            {
+-                var result = new ChangeAwareCache<TDestination, TDestinationKey>();
+-
+-                var transformed = source.Transform(
+-                    (t, _) =>
+-                    {
+-                        // Only skip initial for first time Adds where there is initial data records
+-                        var locker = new Lock();
+-                        var changes = childChanges(t).Synchronize(locker).Skip(1);
+-                        return new ManyContainer(
+-                            () =>
+-                            {
+-                                var collection = manySelector(t);
+-                                lock (locker)
+-                                {
+-                                    return collection.Select(m => new DestinationContainer(m, keySelector(m))).ToArray();
+-                                }
+-                            },
+-                            changes);
+-                    }).Publish();
+-
+-                var queue = new SharedDeliveryQueue();
+-                var initial = transformed.SynchronizeSafe(queue).Select(changes => new ChangeSet<TDestination, TDestinationKey>(new DestinationEnumerator(changes)));
+-
+-                var subsequent = transformed.MergeMany(x => x.Changes).SynchronizeSafe(queue);
+-
+-                var allChanges = initial.UnsynchronizedMerge(subsequent).Select(
+-                    changes =>
+-                    {
+-                        result.Clone(changes);
+-                        return result.CaptureChanges();
+-                    });
+-
+-                return new CompositeDisposable(allChanges.SubscribeSafe(observer), transformed.Connect(), queue);
+-            });
+-    }
+-
+-    private sealed class DestinationContainer(TDestination item, TDestinationKey key)
+-    {
+-        public static IEqualityComparer<DestinationContainer> KeyComparer { get; } = new KeyEqualityComparer();
+-
+-        public TDestination Item { get; } = item;
+-
+-        public TDestinationKey Key { get; } = key;
+-
+-        private sealed class KeyEqualityComparer : IEqualityComparer<DestinationContainer>
+-        {
+-            public bool Equals(DestinationContainer? x, DestinationContainer? y)
+-            {
+-                if (x is null && y is null)
+-                {
+-                    return true;
+-                }
+-
+-                if (x is null || y is null)
+-                {
+-                    return false;
+-                }
+-
+-                return EqualityComparer<TDestinationKey?>.Default.Equals(x.Key, y.Key);
+-            }
+-
+-            public int GetHashCode(DestinationContainer obj) => EqualityComparer<TDestinationKey?>.Default.GetHashCode(obj.Key);
+-        }
+-    }
+-
+-    private sealed class DestinationEnumerator(IChangeSet<ManyContainer, TSourceKey> changes) : IEnumerable<Change<TDestination, TDestinationKey>>
+-    {
+-        public IEnumerator<Change<TDestination, TDestinationKey>> GetEnumerator()
+-        {
+-            foreach (var change in changes.ToConcreteType())
+-            {
+-                switch (change.Reason)
+-                {
+-                    case ChangeReason.Add:
+-                    case ChangeReason.Remove:
+-                    case ChangeReason.Refresh:
+-                        {
+-                            foreach (var destination in change.Current.Destination)
+-                            {
+-                                yield return new Change<TDestination, TDestinationKey>(change.Reason, destination.Key, destination.Item);
+-                            }
+-                        }
+-
+-                        break;
+-                    case ChangeReason.Update:
+-                        {
+-                            var previousItems = change.Previous.Value.Destination.AsArray();
+-                            var currentItems = change.Current.Destination.AsArray();
+-
+-                            var removes = previousItems.Except(currentItems, DestinationContainer.KeyComparer);
+-                            var adds = currentItems.Except(previousItems, DestinationContainer.KeyComparer);
+-                            var updates = currentItems.Intersect(previousItems, DestinationContainer.KeyComparer);
+-
+-                            foreach (var destination in removes)
+-                            {
+-                                yield return new Change<TDestination, TDestinationKey>(ChangeReason.Remove, destination.Key, destination.Item);
+-                            }
+-
+-                            foreach (var destination in adds)
+-                            {
+-                                yield return new Change<TDestination, TDestinationKey>(ChangeReason.Add, destination.Key, destination.Item);
+-                            }
+-
+-                            foreach (var destination in updates)
+-                            {
+-                                var current = currentItems.First(d => d.Key.Equals(destination.Key));
+-                                var previous = previousItems.First(d => d.Key.Equals(destination.Key));
+-
+-                                // Do not update is items are the same reference
+-                                if (!ReferenceEquals(current.Item, previous.Item))
+-                                {
+-                                    yield return new Change<TDestination, TDestinationKey>(ChangeReason.Update, destination.Key, current.Item, previous.Item);
+-                                }
+-                            }
+-                        }
+-
+-                        break;
+-                }
+-            }
+-        }
+-
+-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+-    }
+-
+-    private sealed class ManyContainer(Func<IEnumerable<DestinationContainer>> initial, IObservable<IChangeSet<TDestination, TDestinationKey>>? changes = null)
+-    {
+-        public IObservable<IChangeSet<TDestination, TDestinationKey>> Changes { get; } = changes ?? Observable.Empty<IChangeSet<TDestination, TDestinationKey>>();
+-
+-        public IEnumerable<DestinationContainer> Destination => initial();
+-    }
+-}
++﻿// Copyright (c) 2011-2025 Roland Pheasant. All rights reserved.
++// Roland Pheasant licenses this file to you under the MIT license.
++// See the LICENSE file in the project root for full license information.
++
++namespace DynamicData.Cache.Internal;
++
++internal sealed class TransformMany<TDestination, TDestinationKey, TSource, TSourceKey>(IObservable<IChangeSet<TSource, TSourceKey>> source, Func<TSource, IEnumerable<TDestination>> manySelector, Func<TDestination, TDestinationKey> keySelector, Func<TSource, IObservable<IChangeSet<TDestination, TDestinationKey>>>? childChanges = null)
++    where TDestination : notnull
++    where TDestinationKey : notnull
++    where TSource : notnull
++    where TSourceKey : notnull
++{
++    public TransformMany(IObservable<IChangeSet<TSource, TSourceKey>> source, Func<TSource, ReadOnlyObservableCollection<TDestination>> manySelector, Func<TDestination, TDestinationKey> keySelector)
++        : this(
++            source,
++            manySelector,
++            keySelector,
++            t => Observable.Defer(
++                () =>
++                {
++                    var subsequentChanges = manySelector(t).ToObservableChangeSet(keySelector);
++
++                    if (manySelector(t).Count > 0)
++                    {
++                        return subsequentChanges;
++                    }
++
++                    return Observable.Return(ChangeSet<TDestination, TDestinationKey>.Empty).Concat(subsequentChanges);
++                }))
++    {
++    }
++
++    public TransformMany(IObservable<IChangeSet<TSource, TSourceKey>> source, Func<TSource, ObservableCollection<TDestination>> manySelector, Func<TDestination, TDestinationKey> keySelector)
++        : this(
++            source,
++            manySelector,
++            keySelector,
++            t => Observable.Defer(
++                () =>
++                {
++                    var subsequentChanges = manySelector(t).ToObservableChangeSet(keySelector);
++
++                    if (manySelector(t).Count > 0)
++                    {
++                        return subsequentChanges;
++                    }
++
++                    return Observable.Return(ChangeSet<TDestination, TDestinationKey>.Empty).Concat(subsequentChanges);
++                }))
++    {
++    }
++
++    public TransformMany(IObservable<IChangeSet<TSource, TSourceKey>> source, Func<TSource, IObservableCache<TDestination, TDestinationKey>> manySelector, Func<TDestination, TDestinationKey> keySelector)
++        : this(
++            source,
++            x => manySelector(x).Items,
++            keySelector,
++            t => Observable.Defer(
++                () =>
++                {
++                    var subsequentChanges = Observable.Create<IChangeSet<TDestination, TDestinationKey>>(o => manySelector(t).Connect().Subscribe(o));
++
++                    if (manySelector(t).Count > 0)
++                    {
++                        return subsequentChanges;
++                    }
++
++                    return Observable.Return(ChangeSet<TDestination, TDestinationKey>.Empty).Concat(subsequentChanges);
++                }))
++    {
++    }
++
++    public IObservable<IChangeSet<TDestination, TDestinationKey>> Run() => childChanges is null ? Create() : CreateWithChangeSet();
++
++    private IObservable<IChangeSet<TDestination, TDestinationKey>> Create() => source.Transform(
++            (t, _) =>
++            {
++                var destination = manySelector(t).Select(m => new DestinationContainer(m, keySelector(m))).ToArray();
++                return new ManyContainer(() => destination);
++            },
++            true).Select(changes => new ChangeSet<TDestination, TDestinationKey>(new DestinationEnumerator(changes)));
++
++    private IObservable<IChangeSet<TDestination, TDestinationKey>> CreateWithChangeSet()
++    {
++        if (childChanges is null)
++        {
++            throw new InvalidOperationException("The childChanges is null and should not be.");
++        }
++
++        return Observable.Create<IChangeSet<TDestination, TDestinationKey>>(
++            observer =>
++            {
++                var result = new ChangeAwareCache<TDestination, TDestinationKey>();
++
++                var transformed = source.Transform(
++                    (t, _) =>
++                    {
++                        // Only skip initial for first time Adds where there is initial data records
++                        var locker = new Lock();
++                        var changes = childChanges(t).Synchronize(locker).Skip(1);
++                        return new ManyContainer(
++                            () =>
++                            {
++                                var collection = manySelector(t);
++                                lock (locker)
++                                {
++                                    return collection.Select(m => new DestinationContainer(m, keySelector(m))).ToArray();
++                                }
++                            },
++                            changes);
++                    }).Publish();
++
++                var queue = new SharedDeliveryQueue();
++                var initial = transformed.SynchronizeSafe(queue).Select(changes => new ChangeSet<TDestination, TDestinationKey>(new DestinationEnumerator(changes)));
++
++                var subsequent = transformed.MergeMany(x => x.Changes).SynchronizeSafe(queue);
++
++                var allChanges = initial.UnsynchronizedMerge(subsequent).Select(
++                    changes =>
++                    {
++                        result.Clone(changes);
++                        return result.CaptureChanges();
++                    });
++
++                return new CompositeDisposable(allChanges.SubscribeSafe(observer), transformed.Connect(), queue);
++            });
++    }
++
++    private sealed class DestinationContainer(TDestination item, TDestinationKey key)
++    {
++        public static IEqualityComparer<DestinationContainer> KeyComparer { get; } = new KeyEqualityComparer();
++
++        public TDestination Item { get; } = item;
++
++        public TDestinationKey Key { get; } = key;
++
++        private sealed class KeyEqualityComparer : IEqualityComparer<DestinationContainer>
++        {
++            public bool Equals(DestinationContainer? x, DestinationContainer? y)
++            {
++                if (x is null && y is null)
++                {
++                    return true;
++                }
++
++                if (x is null || y is null)
++                {
++                    return false;
++                }
++
++                return EqualityComparer<TDestinationKey?>.Default.Equals(x.Key, y.Key);
++            }
++
++            public int GetHashCode(DestinationContainer obj) => EqualityComparer<TDestinationKey?>.Default.GetHashCode(obj.Key);
++        }
++    }
++
++    private sealed class DestinationEnumerator(IChangeSet<ManyContainer, TSourceKey> changes) : IEnumerable<Change<TDestination, TDestinationKey>>
++    {
++        public IEnumerator<Change<TDestination, TDestinationKey>> GetEnumerator()
++        {
++            foreach (var change in changes.ToConcreteType())
++            {
++                switch (change.Reason)
++                {
++                    case ChangeReason.Add:
++                    case ChangeReason.Remove:
++                    case ChangeReason.Refresh:
++                        {
++                            foreach (var destination in change.Current.Destination)
++                            {
++                                yield return new Change<TDestination, TDestinationKey>(change.Reason, destination.Key, destination.Item);
++                            }
++                        }
++
++                        break;
++                    case ChangeReason.Update:
++                        {
++                            var previousItems = change.Previous.Value.Destination.AsArray();
++                            var currentItems = change.Current.Destination.AsArray();
++
++                            var removes = previousItems.Except(currentItems, DestinationContainer.KeyComparer);
++                            var adds = currentItems.Except(previousItems, DestinationContainer.KeyComparer);
++                            var updates = currentItems.Intersect(previousItems, DestinationContainer.KeyComparer);
++
++                            foreach (var destination in removes)
++                            {
++                                yield return new Change<TDestination, TDestinationKey>(ChangeReason.Remove, destination.Key, destination.Item);
++                            }
++
++                            foreach (var destination in adds)
++                            {
++                                yield return new Change<TDestination, TDestinationKey>(ChangeReason.Add, destination.Key, destination.Item);
++                            }
++
++                            foreach (var destination in updates)
++                            {
++                                var current = currentItems.First(d => d.Key.Equals(destination.Key));
++                                var previous = previousItems.First(d => d.Key.Equals(destination.Key));
++
++                                // Do not update is items are the same reference
++                                if (!ReferenceEquals(current.Item, previous.Item))
++                                {
++                                    yield return new Change<TDestination, TDestinationKey>(ChangeReason.Update, destination.Key, current.Item, previous.Item);
++                                }
++                            }
++                        }
++
++                        break;
++                }
++            }
++        }
++
++        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
++    }
++
++    private sealed class ManyContainer(Func<IEnumerable<DestinationContainer>> initial, IObservable<IChangeSet<TDestination, TDestinationKey>>? changes = null)
++    {
++        public IObservable<IChangeSet<TDestination, TDestinationKey>> Changes { get; } = changes ?? Observable.Empty<IChangeSet<TDestination, TDestinationKey>>();
++
++        public IEnumerable<DestinationContainer> Destination => initial();
++    }
++}
+diff --git a/src/DynamicData/Cache/Internal/UniquenessEnforcer.cs b/src/DynamicData/Cache/Internal/UniquenessEnforcer.cs
+index 29b9b0a6..b8556f4e 100644
+--- a/src/DynamicData/Cache/Internal/UniquenessEnforcer.cs
++++ b/src/DynamicData/Cache/Internal/UniquenessEnforcer.cs
+@@ -9,10 +9,10 @@ internal sealed class UniquenessEnforcer<TObject, TKey>(IObservable<IChangeSet<T
+     where TKey : notnull
+ {
+     public IObservable<IChangeSet<TObject, TKey>> Run() =>
+-/*
+-    For refresh,  we need to check whether there was a previous add or update in the batch. If not use refresh,
+-    otherwise use the previous update.
+-*/
++        /*
++            For refresh,  we need to check whether there was a previous add or update in the batch. If not use refresh,
++            otherwise use the previous update.
++        */
+ 
+         source
+             .WhereReasonsAreNot(ChangeReason.Moved)
+diff --git a/src/DynamicData/Cache/ObservableCache.cs b/src/DynamicData/Cache/ObservableCache.cs
+index 3c193c10..cae20ebb 100644
+--- a/src/DynamicData/Cache/ObservableCache.cs
++++ b/src/DynamicData/Cache/ObservableCache.cs
+@@ -252,37 +252,37 @@ internal sealed class ObservableCache<TObject, TKey> : IObservableCache<TObject,
+                         // one needs an extra check.
+                         _isEditInProgress.IsValueCreated || (_editLevel is not 0))
+                     switch
+-                    {
+-                        // Neither the suspension system nor the edit system is active, create the connection
+-                        // immediately.
+-                        (false, false) => factory.Invoke(),
+-
+-                        // Edit system is active, suspension system isn't
+-                        // Need to avoid activating the suspension system if we don't absolutely need to, as it adds
+-                        // locking overhead to edit operations. But then when the edit is done, we need to check if a
+-                        // suspension came in. If so, do a followup wait with the full logic for both systems. It
+-                        // needs to be the full logic, in case an edit comes in during the suspension, and so on.
+-                        (false, true) => _isEditInProgress.Value
+-                            .Where(static isEditInProgress => !isEditInProgress)
+-                            .Take(1)
+-                            .SelectMany(_ => (_suspensionTracker.IsValueCreated && _suspensionTracker.Value.AreNotificationsSuspended)
+-                                ? CreateFullyDeferredConnection()
+-                                : factory.Invoke()),
+-
+-                        // Suspension system is active, edit system isn't
+-                        // Same case as above, but reversed. Just wait on the suspension system, but then do a followup
+-                        // wait if needed.
+-                        (true, false) => _suspensionTracker.Value.NotificationsSuspendedObservable
+-                            .Where(static isSuspensionInProgress => !isSuspensionInProgress)
+-                            .Take(1)
+-                            .SelectMany(_ => (_isEditInProgress.IsValueCreated && _isEditInProgress.Value.Value)
+-                                ? CreateFullyDeferredConnection()
+-                                : factory.Invoke()),
+-
+-                        // If both systems are already active, we can monitor both systems simultaneously, and make the
+-                        // connection as soon as both are idle at the same time.
+-                        _ => CreateFullyDeferredConnection()
+-                    };
++                {
++                    // Neither the suspension system nor the edit system is active, create the connection
++                    // immediately.
++                    (false, false) => factory.Invoke(),
++
++                    // Edit system is active, suspension system isn't
++                    // Need to avoid activating the suspension system if we don't absolutely need to, as it adds
++                    // locking overhead to edit operations. But then when the edit is done, we need to check if a
++                    // suspension came in. If so, do a followup wait with the full logic for both systems. It
++                    // needs to be the full logic, in case an edit comes in during the suspension, and so on.
++                    (false, true) => _isEditInProgress.Value
++                        .Where(static isEditInProgress => !isEditInProgress)
++                        .Take(1)
++                        .SelectMany(_ => (_suspensionTracker.IsValueCreated && _suspensionTracker.Value.AreNotificationsSuspended)
++                            ? CreateFullyDeferredConnection()
++                            : factory.Invoke()),
++
++                    // Suspension system is active, edit system isn't
++                    // Same case as above, but reversed. Just wait on the suspension system, but then do a followup
++                    // wait if needed.
++                    (true, false) => _suspensionTracker.Value.NotificationsSuspendedObservable
++                        .Where(static isSuspensionInProgress => !isSuspensionInProgress)
++                        .Take(1)
++                        .SelectMany(_ => (_isEditInProgress.IsValueCreated && _isEditInProgress.Value.Value)
++                            ? CreateFullyDeferredConnection()
++                            : factory.Invoke()),
++
++                    // If both systems are already active, we can monitor both systems simultaneously, and make the
++                    // connection as soon as both are idle at the same time.
++                    _ => CreateFullyDeferredConnection()
++                };
+ 
+                 return observable.SubscribeSafe(observer);
+ 
+diff --git a/src/DynamicData/Cache/PageContext.cs b/src/DynamicData/Cache/PageContext.cs
+index 940a1ae7..09e2c06c 100644
+--- a/src/DynamicData/Cache/PageContext.cs
++++ b/src/DynamicData/Cache/PageContext.cs
+@@ -16,10 +16,8 @@ public record PageContext<TObject>(
+     IComparer<TObject> Comparer,
+     SortAndPageOptions Options)
+ {
+-    internal static readonly PageContext<TObject> Empty = new
+-    (
++    internal static readonly PageContext<TObject> Empty = new(
+         new PageResponse(0, 0, 0, 0),
+         Comparer<TObject>.Default,
+-        new SortAndPageOptions()
+-    );
++        new SortAndPageOptions());
+ }
+diff --git a/src/DynamicData/Cache/Tests/ChangeSetAggregator.cs b/src/DynamicData/Cache/Tests/ChangeSetAggregator.cs
+index f6b9f5f5..daee3f6e 100644
+--- a/src/DynamicData/Cache/Tests/ChangeSetAggregator.cs
++++ b/src/DynamicData/Cache/Tests/ChangeSetAggregator.cs
+@@ -17,7 +17,7 @@ public sealed class ChangeSetAggregator<TObject, TKey, TContext> : IDisposable
+     private readonly IDisposable _disposer;
+ 
+     /// <summary>
+-    /// Initializes a new instance of the <see cref="ChangeSetAggregator{TObject, TKey, IContext}"/> class.
++    /// Initializes a new instance of the <see cref="ChangeSetAggregator{TObject, TKey, TContext}"/> class.
+     /// </summary>
+     /// <param name="source">The source.</param>
+     public ChangeSetAggregator(IObservable<IChangeSet<TObject, TKey, TContext>> source)
+diff --git a/src/DynamicData/Cache/VirtualContext.cs b/src/DynamicData/Cache/VirtualContext.cs
+index f909ddbc..770138ea 100644
+--- a/src/DynamicData/Cache/VirtualContext.cs
++++ b/src/DynamicData/Cache/VirtualContext.cs
+@@ -16,10 +16,8 @@ public record VirtualContext<TObject>(
+     IComparer<TObject> Comparer,
+     SortAndVirtualizeOptions Options)
+ {
+-    internal static readonly VirtualContext<TObject> Empty = new
+-    (
++    internal static readonly VirtualContext<TObject> Empty = new(
+         new VirtualResponse(0, 0, 0),
+         Comparer<TObject>.Default,
+-        new SortAndVirtualizeOptions()
+-    );
++        new SortAndVirtualizeOptions());
+ }
+diff --git a/src/DynamicData/Kernel/EnumerableEx.cs b/src/DynamicData/Kernel/EnumerableEx.cs
+index 163a3fe6..1de44d04 100644
+--- a/src/DynamicData/Kernel/EnumerableEx.cs
++++ b/src/DynamicData/Kernel/EnumerableEx.cs
+@@ -106,9 +106,9 @@ public static class EnumerableEx
+         }
+     }
+ 
+-    #if !NET9_0_OR_GREATER
++#if !NET9_0_OR_GREATER
+     internal static HashSet<T> ToHashSet<T>(this IEnumerable<T> source) => new(source);
+-    #endif
++#endif
+ 
+     /// <summary>
+     /// Returns an object with it's current index.
+diff --git a/src/DynamicData/List/Internal/ExpireAfter.cs b/src/DynamicData/List/Internal/ExpireAfter.cs
+index 8d923d1d..7d8ddcc7 100644
+--- a/src/DynamicData/List/Internal/ExpireAfter.cs
++++ b/src/DynamicData/List/Internal/ExpireAfter.cs
+@@ -334,7 +334,7 @@ internal sealed class ExpireAfter<T>
+                             }
+                             break;
+ 
+-                        // Ignoring Refresh changes, since ISourceList<T> doesn't generate them.
++                            // Ignoring Refresh changes, since ISourceList<T> doesn't generate them.
+                     }
+                 }
+ 
+diff --git a/src/DynamicData/List/Internal/Filter.cs b/src/DynamicData/List/Internal/Filter.cs
+index b43fc2dd..67ef7271 100644
+--- a/src/DynamicData/List/Internal/Filter.cs
++++ b/src/DynamicData/List/Internal/Filter.cs
+@@ -1,7 +1,7 @@
+-// Copyright (c) 2011-2025 Roland Pheasant. All rights reserved.
+-// Roland Pheasant licenses this file to you under the MIT license.
+-// See the LICENSE file in the project root for full license information.
+-
+-namespace DynamicData.List.Internal;
+-
+-internal static partial class Filter;
++// Copyright (c) 2011-2025 Roland Pheasant. All rights reserved.
++// Roland Pheasant licenses this file to you under the MIT license.
++// See the LICENSE file in the project root for full license information.
++
++namespace DynamicData.List.Internal;
++
++internal static partial class Filter;
+diff --git a/src/DynamicData/List/Internal/OnItemAdded.cs b/src/DynamicData/List/Internal/OnItemAdded.cs
+index deff69cc..636b072b 100644
+--- a/src/DynamicData/List/Internal/OnItemAdded.cs
++++ b/src/DynamicData/List/Internal/OnItemAdded.cs
+@@ -1,39 +1,39 @@
+-// Copyright (c) 2011-2025 Roland Pheasant. All rights reserved.
+-// Roland Pheasant licenses this file to you under the MIT license.
+-// See the LICENSE file in the project root for full license information.
+-
+-namespace DynamicData.List.Internal;
+-
+-internal static class OnItemAdded<T>
+-    where T : notnull
+-{
+-    public static IObservable<IChangeSet<T>> Create(
+-        IObservable<IChangeSet<T>> source,
+-        Action<T> addAction)
+-    {
+-        ArgumentNullException.ThrowIfNull(source);
+-        ArgumentNullException.ThrowIfNull(addAction);
+-
+-        return source.Do(changeSet =>
+-        {
+-            foreach (var change in changeSet)
+-            {
+-                switch (change.Reason)
+-                {
+-                    case ListChangeReason.Add:
+-                        addAction.Invoke(change.Item.Current);
+-                        break;
+-
+-                    case ListChangeReason.AddRange:
+-                        foreach (var item in change.Range)
+-                            addAction.Invoke(item);
+-                        break;
+-
+-                    case ListChangeReason.Replace:
+-                        addAction.Invoke(change.Item.Current);
+-                        break;
+-                }
+-            }
+-        });
+-    }
+-}
++// Copyright (c) 2011-2025 Roland Pheasant. All rights reserved.
++// Roland Pheasant licenses this file to you under the MIT license.
++// See the LICENSE file in the project root for full license information.
++
++namespace DynamicData.List.Internal;
++
++internal static class OnItemAdded<T>
++    where T : notnull
++{
++    public static IObservable<IChangeSet<T>> Create(
++        IObservable<IChangeSet<T>> source,
++        Action<T> addAction)
++    {
++        ArgumentNullException.ThrowIfNull(source);
++        ArgumentNullException.ThrowIfNull(addAction);
++
++        return source.Do(changeSet =>
++        {
++            foreach (var change in changeSet)
++            {
++                switch (change.Reason)
++                {
++                    case ListChangeReason.Add:
++                        addAction.Invoke(change.Item.Current);
++                        break;
++
++                    case ListChangeReason.AddRange:
++                        foreach (var item in change.Range)
++                            addAction.Invoke(item);
++                        break;
++
++                    case ListChangeReason.Replace:
++                        addAction.Invoke(change.Item.Current);
++                        break;
++                }
++            }
++        });
++    }
++}
+diff --git a/src/DynamicData/List/Internal/OnItemRefreshed.cs b/src/DynamicData/List/Internal/OnItemRefreshed.cs
+index 8df3b770..a53b6460 100644
+--- a/src/DynamicData/List/Internal/OnItemRefreshed.cs
++++ b/src/DynamicData/List/Internal/OnItemRefreshed.cs
+@@ -1,26 +1,26 @@
+-// Copyright (c) 2011-2025 Roland Pheasant. All rights reserved.
+-// Roland Pheasant licenses this file to you under the MIT license.
+-// See the LICENSE file in the project root for full license information.
+-
+-namespace DynamicData.List.Internal;
+-
+-internal static class OnItemRefreshed<T>
+-    where T : notnull
+-{
+-    public static IObservable<IChangeSet<T>> Create(
+-        IObservable<IChangeSet<T>> source,
+-        Action<T> refreshAction)
+-    {
+-        ArgumentNullException.ThrowIfNull(source);
+-        ArgumentNullException.ThrowIfNull(refreshAction);
+-
+-        return source.Do(changeSet =>
+-        {
+-            foreach (var change in changeSet)
+-            {
+-                if (change.Reason is ListChangeReason.Refresh)
+-                    refreshAction.Invoke(change.Item.Current);
+-            }
+-        });
+-    }
+-}
++// Copyright (c) 2011-2025 Roland Pheasant. All rights reserved.
++// Roland Pheasant licenses this file to you under the MIT license.
++// See the LICENSE file in the project root for full license information.
++
++namespace DynamicData.List.Internal;
++
++internal static class OnItemRefreshed<T>
++    where T : notnull
++{
++    public static IObservable<IChangeSet<T>> Create(
++        IObservable<IChangeSet<T>> source,
++        Action<T> refreshAction)
++    {
++        ArgumentNullException.ThrowIfNull(source);
++        ArgumentNullException.ThrowIfNull(refreshAction);
++
++        return source.Do(changeSet =>
++        {
++            foreach (var change in changeSet)
++            {
++                if (change.Reason is ListChangeReason.Refresh)
++                    refreshAction.Invoke(change.Item.Current);
++            }
++        });
++    }
++}
+diff --git a/src/DynamicData/List/Internal/OnItemRemoved.cs b/src/DynamicData/List/Internal/OnItemRemoved.cs
+index 0bcc8d97..0f4c41f0 100644
+--- a/src/DynamicData/List/Internal/OnItemRemoved.cs
++++ b/src/DynamicData/List/Internal/OnItemRemoved.cs
+@@ -1,57 +1,57 @@
+-// Copyright (c) 2011-2025 Roland Pheasant. All rights reserved.
+-// Roland Pheasant licenses this file to you under the MIT license.
+-// See the LICENSE file in the project root for full license information.
+-
+-namespace DynamicData.List.Internal;
+-
+-internal static class OnItemRemoved<T>
+-    where T : notnull
+-{
+-    public static IObservable<IChangeSet<T>> Create(
+-        IObservable<IChangeSet<T>> source,
+-        Action<T> removeAction,
+-        bool invokeOnUnsubscribe)
+-    {
+-        ArgumentNullException.ThrowIfNull(source);
+-        ArgumentNullException.ThrowIfNull(removeAction);
+-
+-        var removalProcessor = source.Do(changeSet =>
+-        {
+-            foreach (var change in changeSet)
+-            {
+-                switch (change.Reason)
+-                {
+-                    case ListChangeReason.Clear:
+-                    case ListChangeReason.RemoveRange:
+-                        foreach (var item in change.Range)
+-                            removeAction.Invoke(item);
+-                        break;
+-
+-                    case ListChangeReason.Remove:
+-                        removeAction.Invoke(change.Item.Current);
+-                        break;
+-
+-                    case ListChangeReason.Replace:
+-                        removeAction.Invoke(change.Item.Previous.Value);
+-                        break;
+-                }
+-            }
+-        });
+-
+-        return invokeOnUnsubscribe
+-            ? Observable.Create<IChangeSet<T>>(observer =>
+-            {
+-                var items = new List<T>();
+-
+-                return removalProcessor
+-                    .Do(changeSet => items.Clone(changeSet))
+-                    .Finally(() =>
+-                    {
+-                        foreach (var item in items)
+-                            removeAction.Invoke(item);
+-                    })
+-                    .SubscribeSafe(observer);
+-            })
+-            : removalProcessor;
+-    }
+-}
++// Copyright (c) 2011-2025 Roland Pheasant. All rights reserved.
++// Roland Pheasant licenses this file to you under the MIT license.
++// See the LICENSE file in the project root for full license information.
++
++namespace DynamicData.List.Internal;
++
++internal static class OnItemRemoved<T>
++    where T : notnull
++{
++    public static IObservable<IChangeSet<T>> Create(
++        IObservable<IChangeSet<T>> source,
++        Action<T> removeAction,
++        bool invokeOnUnsubscribe)
++    {
++        ArgumentNullException.ThrowIfNull(source);
++        ArgumentNullException.ThrowIfNull(removeAction);
++
++        var removalProcessor = source.Do(changeSet =>
++        {
++            foreach (var change in changeSet)
++            {
++                switch (change.Reason)
++                {
++                    case ListChangeReason.Clear:
++                    case ListChangeReason.RemoveRange:
++                        foreach (var item in change.Range)
++                            removeAction.Invoke(item);
++                        break;
++
++                    case ListChangeReason.Remove:
++                        removeAction.Invoke(change.Item.Current);
++                        break;
++
++                    case ListChangeReason.Replace:
++                        removeAction.Invoke(change.Item.Previous.Value);
++                        break;
++                }
++            }
++        });
++
++        return invokeOnUnsubscribe
++            ? Observable.Create<IChangeSet<T>>(observer =>
++            {
++                var items = new List<T>();
++
++                return removalProcessor
++                    .Do(changeSet => items.Clone(changeSet))
++                    .Finally(() =>
++                    {
++                        foreach (var item in items)
++                            removeAction.Invoke(item);
++                    })
++                    .SubscribeSafe(observer);
++            })
++            : removalProcessor;
++    }
++}
+diff --git a/src/DynamicData/List/Internal/TransformMany.cs b/src/DynamicData/List/Internal/TransformMany.cs
+index bc3c3136..e787e2c7 100644
+--- a/src/DynamicData/List/Internal/TransformMany.cs
++++ b/src/DynamicData/List/Internal/TransformMany.cs
+@@ -1,231 +1,231 @@
+-// Copyright (c) 2011-2025 Roland Pheasant. All rights reserved.
+-// Roland Pheasant licenses this file to you under the MIT license.
+-// See the LICENSE file in the project root for full license information.
+-
+-namespace DynamicData.List.Internal;
+-
+-internal sealed class TransformMany<TSource, TDestination>(IObservable<IChangeSet<TSource>> source, Func<TSource, IEnumerable<TDestination>> manySelector, IEqualityComparer<TDestination>? equalityComparer = null, Func<TSource, IObservable<IChangeSet<TDestination>>>? childChanges = null)
+-    where TSource : notnull
+-    where TDestination : notnull
+-{
+-    private readonly IEqualityComparer<TDestination> _equalityComparer = equalityComparer ?? EqualityComparer<TDestination>.Default;
+-    private readonly IObservable<IChangeSet<TSource>> _source = source ?? throw new ArgumentNullException(nameof(source));
+-
+-    public TransformMany(IObservable<IChangeSet<TSource>> source, Func<TSource, ReadOnlyObservableCollection<TDestination>> manySelector, IEqualityComparer<TDestination>? equalityComparer = null)
+-        : this(
+-            source,
+-            manySelector,
+-            equalityComparer,
+-            t => Observable.Defer(
+-                () =>
+-                {
+-                    var subsequentChanges = manySelector(t).ToObservableChangeSet();
+-
+-                    if (manySelector(t).Count > 0)
+-                    {
+-                        return subsequentChanges;
+-                    }
+-
+-                    return Observable.Return(ChangeSet<TDestination>.Empty).Concat(subsequentChanges);
+-                }))
+-    {
+-    }
+-
+-    public TransformMany(IObservable<IChangeSet<TSource>> source, Func<TSource, ObservableCollection<TDestination>> manySelector, IEqualityComparer<TDestination>? equalityComparer = null)
+-        : this(
+-            source,
+-            manySelector,
+-            equalityComparer,
+-            t => Observable.Defer(
+-                () =>
+-                {
+-                    var subsequentChanges = manySelector(t).ToObservableChangeSet();
+-
+-                    if (manySelector(t).Count > 0)
+-                    {
+-                        return subsequentChanges;
+-                    }
+-
+-                    return Observable.Return(ChangeSet<TDestination>.Empty).Concat(subsequentChanges);
+-                }))
+-    {
+-    }
+-
+-    public TransformMany(IObservable<IChangeSet<TSource>> source, Func<TSource, IObservableList<TDestination>> manySelector, IEqualityComparer<TDestination>? equalityComparer = null)
+-        : this(
+-            source,
+-            s => new ManySelectorFunc(s, x => manySelector(x).Items),
+-            equalityComparer,
+-            t => Observable.Defer(
+-                () =>
+-                {
+-                    var subsequentChanges = manySelector(t).Connect();
+-
+-                    if (manySelector(t).Count > 0)
+-                    {
+-                        return subsequentChanges;
+-                    }
+-
+-                    return Observable.Return(ChangeSet<TDestination>.Empty).Concat(subsequentChanges);
+-                }))
+-    {
+-    }
+-
+-    public IObservable<IChangeSet<TDestination>> Run()
+-    {
+-        if (childChanges is not null)
+-        {
+-            return CreateWithChangeSet();
+-        }
+-
+-        return Observable.Create<IChangeSet<TDestination>>(
+-            observer =>
+-            {
+-                // NB: ChangeAwareList is used internally by dd to capture changes to a list and ensure they can be replayed by subsequent operators
+-                var result = new ChangeAwareList<TDestination>();
+-
+-                return _source.Transform(item => new ManyContainer(manySelector(item).ToArray()), true).Select(
+-                    changes =>
+-                    {
+-                        var destinationChanges = new DestinationEnumerator(changes, _equalityComparer);
+-                        result.Clone(destinationChanges, _equalityComparer);
+-                        return result.CaptureChanges();
+-                    }).NotEmpty().SubscribeSafe(observer);
+-            });
+-    }
+-
+-    private IObservable<IChangeSet<TDestination>> CreateWithChangeSet()
+-    {
+-        if (childChanges is null)
+-        {
+-            throw new InvalidOperationException("_childChanges must not be null.");
+-        }
+-
+-        return Observable.Create<IChangeSet<TDestination>>(
+-            observer =>
+-            {
+-                var result = new ChangeAwareList<TDestination>();
+-
+-                var transformed = _source.Transform(
+-                    t =>
+-                    {
+-                        var locker = new Lock();
+-                        var collection = manySelector(t);
+-                        var changes = childChanges(t).Synchronize(locker).Skip(1);
+-                        return new ManyContainer(collection, changes);
+-                    }).Publish();
+-
+-                var outerLock = new Lock();
+-                var initial = transformed.Synchronize(outerLock).Select(changes => new ChangeSet<TDestination>(new DestinationEnumerator(changes, _equalityComparer)));
+-
+-                var subsequent = transformed.MergeMany(x => x.Changes).Synchronize(outerLock);
+-
+-                var init = initial.Select(
+-                    changes =>
+-                    {
+-                        result.Clone(changes, _equalityComparer);
+-                        return result.CaptureChanges();
+-                    });
+-
+-                var subsequentSelection = subsequent.RemoveIndex().Select(
+-                    changes =>
+-                    {
+-                        result.Clone(changes, _equalityComparer);
+-                        return result.CaptureChanges();
+-                    });
+-
+-                var allChanges = init.Merge(subsequentSelection);
+-
+-                return new CompositeDisposable(allChanges.SubscribeSafe(observer), transformed.Connect());
+-            });
+-    }
+-
+-    // make this an instance
+-    private sealed class DestinationEnumerator(IChangeSet<ManyContainer> changes, IEqualityComparer<TDestination> equalityComparer) : IEnumerable<Change<TDestination>>
+-    {
+-        public IEnumerator<Change<TDestination>> GetEnumerator()
+-        {
+-            foreach (var change in changes)
+-            {
+-                switch (change.Reason)
+-                {
+-                    case ListChangeReason.Add:
+-                    case ListChangeReason.Remove:
+-                        foreach (var destination in change.Item.Current.Destination)
+-                        {
+-                            yield return new Change<TDestination>(change.Reason, destination);
+-                        }
+-
+-                        break;
+-
+-                    case ListChangeReason.AddRange:
+-                    case ListChangeReason.Clear:
+-                        {
+-                            var items = change.Range.SelectMany(m => m.Destination);
+-                            yield return new Change<TDestination>(change.Reason, items);
+-                        }
+-
+-                        break;
+-
+-                    case ListChangeReason.Replace:
+-                    case ListChangeReason.Refresh:
+-                        {
+-                            // this is difficult as we need to discover adds and removes (and perhaps replaced)
+-                            var currentItems = change.Item.Current.Destination.AsArray();
+-                            var previousItems = change.Item.Previous.Value.Destination.AsArray();
+-
+-                            var adds = currentItems.Except(previousItems, equalityComparer);
+-
+-                            // I am not sure whether it is possible to translate the original change into a replace
+-                            foreach (var destination in previousItems.Except(currentItems, equalityComparer))
+-                            {
+-                                yield return new Change<TDestination>(ListChangeReason.Remove, destination);
+-                            }
+-
+-                            foreach (var destination in adds)
+-                            {
+-                                yield return new Change<TDestination>(ListChangeReason.Add, destination);
+-                            }
+-                        }
+-
+-                        break;
+-
+-                    case ListChangeReason.RemoveRange:
+-                        {
+-                            foreach (var destination in change.Range.SelectMany(m => m.Destination))
+-                            {
+-                                yield return new Change<TDestination>(ListChangeReason.Remove, destination);
+-                            }
+-                        }
+-
+-                        break;
+-
+-                    case ListChangeReason.Moved:
+-                        // do nothing as the original index has no bearing on the destination index
+-                        break;
+-
+-                    default:
+-                        throw new IndexOutOfRangeException("Unknown list reason " + change);
+-                }
+-            }
+-        }
+-
+-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+-    }
+-
+-    private sealed class ManyContainer(IEnumerable<TDestination> destination, IObservable<IChangeSet<TDestination>>? changes = null)
+-    {
+-        public IObservable<IChangeSet<TDestination>> Changes { get; } = changes ?? Observable.Empty<IChangeSet<TDestination>>();
+-
+-        public IEnumerable<TDestination> Destination { get; } = destination;
+-    }
+-
+-    private sealed class ManySelectorFunc(TSource source, Func<TSource, IEnumerable<TDestination>> selector) : IEnumerable<TDestination>
+-    {
+-        private readonly Func<TSource, IEnumerable<TDestination>> _selector = selector ?? throw new ArgumentNullException(nameof(selector));
+-
+-        public IEnumerator<TDestination> GetEnumerator() => _selector(source).GetEnumerator();
+-
+-        IEnumerator IEnumerable.GetEnumerator() => _selector(source).GetEnumerator();
+-    }
+-}
++// Copyright (c) 2011-2025 Roland Pheasant. All rights reserved.
++// Roland Pheasant licenses this file to you under the MIT license.
++// See the LICENSE file in the project root for full license information.
++
++namespace DynamicData.List.Internal;
++
++internal sealed class TransformMany<TSource, TDestination>(IObservable<IChangeSet<TSource>> source, Func<TSource, IEnumerable<TDestination>> manySelector, IEqualityComparer<TDestination>? equalityComparer = null, Func<TSource, IObservable<IChangeSet<TDestination>>>? childChanges = null)
++    where TSource : notnull
++    where TDestination : notnull
++{
++    private readonly IEqualityComparer<TDestination> _equalityComparer = equalityComparer ?? EqualityComparer<TDestination>.Default;
++    private readonly IObservable<IChangeSet<TSource>> _source = source ?? throw new ArgumentNullException(nameof(source));
++
++    public TransformMany(IObservable<IChangeSet<TSource>> source, Func<TSource, ReadOnlyObservableCollection<TDestination>> manySelector, IEqualityComparer<TDestination>? equalityComparer = null)
++        : this(
++            source,
++            manySelector,
++            equalityComparer,
++            t => Observable.Defer(
++                () =>
++                {
++                    var subsequentChanges = manySelector(t).ToObservableChangeSet();
++
++                    if (manySelector(t).Count > 0)
++                    {
++                        return subsequentChanges;
++                    }
++
++                    return Observable.Return(ChangeSet<TDestination>.Empty).Concat(subsequentChanges);
++                }))
++    {
++    }
++
++    public TransformMany(IObservable<IChangeSet<TSource>> source, Func<TSource, ObservableCollection<TDestination>> manySelector, IEqualityComparer<TDestination>? equalityComparer = null)
++        : this(
++            source,
++            manySelector,
++            equalityComparer,
++            t => Observable.Defer(
++                () =>
++                {
++                    var subsequentChanges = manySelector(t).ToObservableChangeSet();
++
++                    if (manySelector(t).Count > 0)
++                    {
++                        return subsequentChanges;
++                    }
++
++                    return Observable.Return(ChangeSet<TDestination>.Empty).Concat(subsequentChanges);
++                }))
++    {
++    }
++
++    public TransformMany(IObservable<IChangeSet<TSource>> source, Func<TSource, IObservableList<TDestination>> manySelector, IEqualityComparer<TDestination>? equalityComparer = null)
++        : this(
++            source,
++            s => new ManySelectorFunc(s, x => manySelector(x).Items),
++            equalityComparer,
++            t => Observable.Defer(
++                () =>
++                {
++                    var subsequentChanges = manySelector(t).Connect();
++
++                    if (manySelector(t).Count > 0)
++                    {
++                        return subsequentChanges;
++                    }
++
++                    return Observable.Return(ChangeSet<TDestination>.Empty).Concat(subsequentChanges);
++                }))
++    {
++    }
++
++    public IObservable<IChangeSet<TDestination>> Run()
++    {
++        if (childChanges is not null)
++        {
++            return CreateWithChangeSet();
++        }
++
++        return Observable.Create<IChangeSet<TDestination>>(
++            observer =>
++            {
++                // NB: ChangeAwareList is used internally by dd to capture changes to a list and ensure they can be replayed by subsequent operators
++                var result = new ChangeAwareList<TDestination>();
++
++                return _source.Transform(item => new ManyContainer(manySelector(item).ToArray()), true).Select(
++                    changes =>
++                    {
++                        var destinationChanges = new DestinationEnumerator(changes, _equalityComparer);
++                        result.Clone(destinationChanges, _equalityComparer);
++                        return result.CaptureChanges();
++                    }).NotEmpty().SubscribeSafe(observer);
++            });
++    }
++
++    private IObservable<IChangeSet<TDestination>> CreateWithChangeSet()
++    {
++        if (childChanges is null)
++        {
++            throw new InvalidOperationException("_childChanges must not be null.");
++        }
++
++        return Observable.Create<IChangeSet<TDestination>>(
++            observer =>
++            {
++                var result = new ChangeAwareList<TDestination>();
++
++                var transformed = _source.Transform(
++                    t =>
++                    {
++                        var locker = new Lock();
++                        var collection = manySelector(t);
++                        var changes = childChanges(t).Synchronize(locker).Skip(1);
++                        return new ManyContainer(collection, changes);
++                    }).Publish();
++
++                var outerLock = new Lock();
++                var initial = transformed.Synchronize(outerLock).Select(changes => new ChangeSet<TDestination>(new DestinationEnumerator(changes, _equalityComparer)));
++
++                var subsequent = transformed.MergeMany(x => x.Changes).Synchronize(outerLock);
++
++                var init = initial.Select(
++                    changes =>
++                    {
++                        result.Clone(changes, _equalityComparer);
++                        return result.CaptureChanges();
++                    });
++
++                var subsequentSelection = subsequent.RemoveIndex().Select(
++                    changes =>
++                    {
++                        result.Clone(changes, _equalityComparer);
++                        return result.CaptureChanges();
++                    });
++
++                var allChanges = init.Merge(subsequentSelection);
++
++                return new CompositeDisposable(allChanges.SubscribeSafe(observer), transformed.Connect());
++            });
++    }
++
++    // make this an instance
++    private sealed class DestinationEnumerator(IChangeSet<ManyContainer> changes, IEqualityComparer<TDestination> equalityComparer) : IEnumerable<Change<TDestination>>
++    {
++        public IEnumerator<Change<TDestination>> GetEnumerator()
++        {
++            foreach (var change in changes)
++            {
++                switch (change.Reason)
++                {
++                    case ListChangeReason.Add:
++                    case ListChangeReason.Remove:
++                        foreach (var destination in change.Item.Current.Destination)
++                        {
++                            yield return new Change<TDestination>(change.Reason, destination);
++                        }
++
++                        break;
++
++                    case ListChangeReason.AddRange:
++                    case ListChangeReason.Clear:
++                        {
++                            var items = change.Range.SelectMany(m => m.Destination);
++                            yield return new Change<TDestination>(change.Reason, items);
++                        }
++
++                        break;
++
++                    case ListChangeReason.Replace:
++                    case ListChangeReason.Refresh:
++                        {
++                            // this is difficult as we need to discover adds and removes (and perhaps replaced)
++                            var currentItems = change.Item.Current.Destination.AsArray();
++                            var previousItems = change.Item.Previous.Value.Destination.AsArray();
++
++                            var adds = currentItems.Except(previousItems, equalityComparer);
++
++                            // I am not sure whether it is possible to translate the original change into a replace
++                            foreach (var destination in previousItems.Except(currentItems, equalityComparer))
++                            {
++                                yield return new Change<TDestination>(ListChangeReason.Remove, destination);
++                            }
++
++                            foreach (var destination in adds)
++                            {
++                                yield return new Change<TDestination>(ListChangeReason.Add, destination);
++                            }
++                        }
++
++                        break;
++
++                    case ListChangeReason.RemoveRange:
++                        {
++                            foreach (var destination in change.Range.SelectMany(m => m.Destination))
++                            {
++                                yield return new Change<TDestination>(ListChangeReason.Remove, destination);
++                            }
++                        }
++
++                        break;
++
++                    case ListChangeReason.Moved:
++                        // do nothing as the original index has no bearing on the destination index
++                        break;
++
++                    default:
++                        throw new IndexOutOfRangeException("Unknown list reason " + change);
++                }
++            }
++        }
++
++        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
++    }
++
++    private sealed class ManyContainer(IEnumerable<TDestination> destination, IObservable<IChangeSet<TDestination>>? changes = null)
++    {
++        public IObservable<IChangeSet<TDestination>> Changes { get; } = changes ?? Observable.Empty<IChangeSet<TDestination>>();
++
++        public IEnumerable<TDestination> Destination { get; } = destination;
++    }
++
++    private sealed class ManySelectorFunc(TSource source, Func<TSource, IEnumerable<TDestination>> selector) : IEnumerable<TDestination>
++    {
++        private readonly Func<TSource, IEnumerable<TDestination>> _selector = selector ?? throw new ArgumentNullException(nameof(selector));
++
++        public IEnumerator<TDestination> GetEnumerator() => _selector(source).GetEnumerator();
++
++        IEnumerator IEnumerable.GetEnumerator() => _selector(source).GetEnumerator();
++    }
++}
+diff --git a/src/DynamicData/List/ListEx.cs b/src/DynamicData/List/ListEx.cs
+index 435047a4..dc3cc96c 100644
+--- a/src/DynamicData/List/ListEx.cs
++++ b/src/DynamicData/List/ListEx.cs
+@@ -1,642 +1,642 @@
+-﻿// Copyright (c) 2011-2025 Roland Pheasant. All rights reserved.
+-// Roland Pheasant licenses this file to you under the MIT license.
+-// See the LICENSE file in the project root for full license information.
+-
+-// ReSharper disable once CheckNamespace
+-namespace DynamicData;
+-
+-/// <summary>
+-/// Extensions to help with maintenance of a list.
+-/// </summary>
+-public static class ListEx
+-{
+-    /// <summary>
+-    /// Adds the  items to the specified list.
+-    /// </summary>
+-    /// <typeparam name="T">The type of the item.</typeparam>
+-    /// <param name="source">The source.</param>
+-    /// <param name="items">The items.</param>
+-    /// <exception cref="ArgumentNullException">
+-    /// source
+-    /// or
+-    /// items.
+-    /// </exception>
+-    public static void Add<T>(this IList<T> source, IEnumerable<T> items)
+-    {
+-        ArgumentNullException.ThrowIfNull(source);
+-        ArgumentNullException.ThrowIfNull(items);
+-
+-        items.ForEach(source.Add);
+-    }
+-
+-    /// <summary>
+-    /// Adds the range if a negative is specified, otherwise the range is added at the end of the list.
+-    /// </summary>
+-    /// <typeparam name="T">The type of the item.</typeparam>
+-    /// <param name="source">The source.</param>
+-    /// <param name="items">The items.</param>
+-    /// <param name="index">The index.</param>
+-    public static void AddOrInsertRange<T>(this IList<T> source, IEnumerable<T> items, int index)
+-    {
+-        ArgumentNullException.ThrowIfNull(source);
+-        ArgumentNullException.ThrowIfNull(items);
+-
+-        switch (source)
+-        {
+-            case List<T> list when index >= 0:
+-                list.InsertRange(index, items);
+-                break;
+-            case List<T> list:
+-                list.AddRange(items);
+-                break;
+-            case IExtendedList<T> extendedList when index >= 0:
+-                extendedList.InsertRange(items, index);
+-                break;
+-            case IExtendedList<T> extendedList:
+-                extendedList.AddRange(items);
+-                break;
+-            default:
+-                {
+-                    if (index >= 0)
+-                    {
+-                        // TODO: Why the hell reverse? Surely there must be as reason otherwise I would not have done it.
+-                        items.Reverse().ForEach(t => source.Insert(index, t));
+-                    }
+-                    else
+-                    {
+-                        items.ForEach(source.Add);
+-                    }
+-
+-                    break;
+-                }
+-        }
+-    }
+-
+-    /// <summary>
+-    /// Adds the range to the source list.
+-    /// </summary>
+-    /// <typeparam name="T">The type of the item.</typeparam>
+-    /// <param name="source">The source.</param>
+-    /// <param name="items">The items.</param>
+-    /// <exception cref="ArgumentNullException">
+-    /// source
+-    /// or
+-    /// items.
+-    /// </exception>
+-    public static void AddRange<T>(this IList<T> source, IEnumerable<T> items)
+-    {
+-        ArgumentNullException.ThrowIfNull(source);
+-        ArgumentNullException.ThrowIfNull(items);
+-
+-        switch (source)
+-        {
+-            case List<T> list:
+-                list.AddRange(items);
+-                break;
+-            case IExtendedList<T> extendedList:
+-                extendedList.AddRange(items);
+-                break;
+-            default:
+-                foreach (var t in items)
+-                    source.Add(t);
+-                break;
+-        }
+-    }
+-
+-    /// <summary>
+-    /// Adds the range to the list. The starting range is at the specified index.
+-    /// </summary>
+-    /// <typeparam name="T">The type of the item.</typeparam>
+-    /// <param name="source">The source.</param>
+-    /// <param name="items">The items.</param>
+-    /// <param name="index">The index.</param>
+-    public static void AddRange<T>(this IList<T> source, IEnumerable<T> items, int index)
+-    {
+-        ArgumentNullException.ThrowIfNull(source);
+-        ArgumentNullException.ThrowIfNull(items);
+-
+-        switch (source)
+-        {
+-            case List<T> list:
+-                list.InsertRange(index, items);
+-                break;
+-            case IExtendedList<T> list:
+-                list.InsertRange(items, index);
+-                break;
+-            default:
+-                items.ForEach(source.Add);
+-                break;
+-        }
+-    }
+-
+-    /// <summary>
+-    /// Performs a binary search on the specified collection.
+-    /// </summary>
+-    /// <typeparam name="TItem">The type of the item.</typeparam>
+-    /// <param name="list">The list to be searched.</param>
+-    /// <param name="value">The value to search for.</param>
+-    /// <returns>The index of the specified value in the specified array, if value is found; otherwise, a negative number.</returns>
+-    public static int BinarySearch<TItem>(this IList<TItem> list, TItem value) => BinarySearch(list, value, Comparer<TItem>.Default);
+-
+-    /// <summary>
+-    /// Performs a binary search on the specified collection.
+-    /// </summary>
+-    /// <typeparam name="TItem">The type of the item.</typeparam>
+-    /// <param name="list">The list to be searched.</param>
+-    /// <param name="value">The value to search for.</param>
+-    /// <param name="comparer">The comparer that is used to compare the value with the list items.</param>
+-    /// <returns>The index of the specified value in the specified array, if value is found; otherwise, a negative number.</returns>
+-    public static int BinarySearch<TItem>(this IList<TItem> list, TItem value, IComparer<TItem> comparer)
+-    {
+-        ArgumentNullException.ThrowIfNull(comparer);
+-
+-        return list.BinarySearch(value, comparer.Compare);
+-    }
+-
+-    /// <summary>
+-    /// <para>Performs a binary search on the specified collection.</para>
+-    /// <para>Thanks to https://stackoverflow.com/questions/967047/how-to-perform-a-binary-search-on-ilistt.</para>
+-    /// </summary>
+-    /// <typeparam name="TItem">The type of the item.</typeparam>
+-    /// <typeparam name="TSearch">The type of the searched item.</typeparam>
+-    /// <param name="list">The list to be searched.</param>
+-    /// <param name="value">The value to search for.</param>
+-    /// <param name="comparer">The comparer that is used to compare the value with the list items.</param>
+-    /// <returns>The index of the specified value in the specified array, if value is found; otherwise, a negative number.</returns>
+-    public static int BinarySearch<TItem, TSearch>(this IList<TItem> list, TSearch value, Func<TSearch, TItem, int> comparer)
+-    {
+-        ArgumentNullException.ThrowIfNull(list);
+-        ArgumentNullException.ThrowIfNull(comparer);
+-
+-        var lower = 0;
+-        var upper = list.Count - 1;
+-
+-        while (lower <= upper)
+-        {
+-            var middle = lower + ((upper - lower) / 2);
+-            var comparisonResult = comparer(value, list[middle]);
+-            if (comparisonResult < 0)
+-            {
+-                upper = middle - 1;
+-            }
+-            else if (comparisonResult > 0)
+-            {
+-                lower = middle + 1;
+-            }
+-            else
+-            {
+-                return middle;
+-            }
+-        }
+-
+-        return ~lower;
+-    }
+-
+-    /// <summary>
+-    /// Clones the list from the specified change set.
+-    /// </summary>
+-    /// <typeparam name="T">The type of the item.</typeparam>
+-    /// <param name="source">The source.</param>
+-    /// <param name="changes">The changes.</param>
+-    /// <exception cref="ArgumentNullException">
+-    /// source
+-    /// or
+-    /// changes.
+-    /// </exception>
+-    public static void Clone<T>(this IList<T> source, IChangeSet<T> changes)
+-        where T : notnull => Clone(source, changes, null);
+-
+-    /// <summary>
+-    /// Clones the list from the specified change set.
+-    /// </summary>
+-    /// <typeparam name="T">The type of the item.</typeparam>
+-    /// <param name="source">The source.</param>
+-    /// <param name="changes">The changes.</param>
+-    /// <param name="equalityComparer">An equality comparer to match items in the changes.</param>
+-    /// <exception cref="ArgumentNullException">
+-    /// source
+-    /// or
+-    /// changes.
+-    /// </exception>
+-    public static void Clone<T>(this IList<T> source, IChangeSet<T> changes, IEqualityComparer<T>? equalityComparer)
+-        where T : notnull => Clone(source, (IEnumerable<Change<T>>)changes, equalityComparer);
+-
+-    /// <summary>
+-    /// Clones the list from the specified enumerable of changes.
+-    /// </summary>
+-    /// <typeparam name="T">The type of the item.</typeparam>
+-    /// <param name="source">The source.</param>
+-    /// <param name="changes">The changes.</param>
+-    /// <param name="equalityComparer">An equality comparer to match items in the changes.</param>
+-    /// <exception cref="ArgumentNullException">
+-    /// source
+-    /// or
+-    /// changes.
+-    /// </exception>
+-    public static void Clone<T>(this IList<T> source, IEnumerable<Change<T>> changes, IEqualityComparer<T>? equalityComparer)
+-        where T : notnull
+-    {
+-        ArgumentNullException.ThrowIfNull(source);
+-        ArgumentNullException.ThrowIfNull(changes);
+-
+-        foreach (var item in changes)
+-        {
+-            Clone(source, item, equalityComparer ?? EqualityComparer<T>.Default);
+-        }
+-    }
+-
+-    /// <summary>
+-    /// Finds the index of the current item using the specified equality comparer.
+-    /// </summary>
+-    /// <typeparam name="T">The type of the item.</typeparam>
+-    /// <param name="source">The source enumerable.</param>
+-    /// <param name="item">The item to get the index of.</param>
+-    /// <returns>The index.</returns>
+-    public static int IndexOf<T>(this IEnumerable<T> source, T item) => IndexOf(source, item, EqualityComparer<T>.Default);
+-
+-    /// <summary>
+-    /// Finds the index of the current item using the specified equality comparer.
+-    /// </summary>
+-    /// <typeparam name="T">The type of the item.</typeparam>
+-    /// <param name="source">The source enumerable.</param>
+-    /// <param name="item">The item to get the index of.</param>
+-    /// <param name="equalityComparer">Use to determine object equality.</param>
+-    /// <returns>The index.</returns>
+-    public static int IndexOf<T>(this IEnumerable<T> source, T item, IEqualityComparer<T> equalityComparer)
+-    {
+-        ArgumentNullException.ThrowIfNull(source);
+-        ArgumentNullException.ThrowIfNull(equalityComparer);
+-
+-        var i = 0;
+-        foreach (var candidate in source)
+-        {
+-            if (equalityComparer.Equals(item, candidate))
+-            {
+-                return i;
+-            }
+-
+-            i++;
+-        }
+-
+-        return -1;
+-    }
+-
+-    /// <summary>
+-    /// Lookups the item using the specified comparer. If matched, the item's index is also returned.
+-    /// </summary>
+-    /// <typeparam name="T">The type of the item.</typeparam>
+-    /// <param name="source">The source.</param>
+-    /// <param name="item">The item.</param>
+-    /// <param name="equalityComparer">The equality comparer.</param>
+-    /// <returns>The index of the item if available.</returns>
+-    public static Optional<ItemWithIndex<T>> IndexOfOptional<T>(this IEnumerable<T> source, T item, IEqualityComparer<T>? equalityComparer = null)
+-    {
+-        var comparer = equalityComparer ?? EqualityComparer<T>.Default;
+-        var index = source.IndexOf(item, comparer);
+-        return index < 0 ? Optional<ItemWithIndex<T>>.None : new ItemWithIndex<T>(item, index);
+-    }
+-
+-    /// <summary>
+-    /// Removes the  items from the specified list.
+-    /// </summary>
+-    /// <typeparam name="T">The type of the item.</typeparam>
+-    /// <param name="source">The source.</param>
+-    /// <param name="items">The items.</param>
+-    /// <exception cref="ArgumentNullException">
+-    /// source
+-    /// or
+-    /// items.
+-    /// </exception>
+-    public static void Remove<T>(this IList<T> source, IEnumerable<T> items)
+-    {
+-        ArgumentNullException.ThrowIfNull(source);
+-        ArgumentNullException.ThrowIfNull(items);
+-
+-        items.ForEach(t => source.Remove(t));
+-    }
+-
+-    /// <summary>
+-    /// Removes many items from the collection in an optimal way.
+-    /// </summary>
+-    /// <typeparam name="T">The type of the item.</typeparam>
+-    /// <param name="source">The source.</param>
+-    /// <param name="itemsToRemove">The items to remove.</param>
+-    public static void RemoveMany<T>(this IList<T> source, IEnumerable<T> itemsToRemove)
+-    {
+-        /*
+-            This may seem OTT but for large sets of data where there are many removes scattered
+-            across the source collection IndexOf lookups can result in very slow updates
+-            (especially for subsequent operators)
+-        */
+-        ArgumentNullException.ThrowIfNull(source);
+-        ArgumentNullException.ThrowIfNull(itemsToRemove);
+-
+-        var toRemoveArray = itemsToRemove.AsArray();
+-
+-        // match all indexes and and remove in reverse as it is more efficient
+-        var toRemove = source.IndexOfMany(toRemoveArray).OrderByDescending(x => x.Index).ToArray();
+-
+-        // if there are duplicates, it could be that an item exists in the
+-        // source collection more than once - in that case the fast remove
+-        // would remove each instance
+-        var hasDuplicates = toRemove.Duplicates(t => t.Item).Any();
+-
+-        if (hasDuplicates)
+-        {
+-            // Slow remove but safe
+-            toRemoveArray.ForEach(t => source.Remove(t));
+-        }
+-        else
+-        {
+-            // Fast remove because we know the index of all and we remove in order
+-            toRemove.ForEach(t => source.RemoveAt(t.Index));
+-        }
+-    }
+-
+-    /// <summary>
+-    /// Replaces the specified item.
+-    /// </summary>
+-    /// <typeparam name="T">The type of the item.</typeparam>
+-    /// <param name="source">The source.</param>
+-    /// <param name="original">The original.</param>
+-    /// <param name="replaceWith">The value to replace with.</param>
+-    /// <exception cref="ArgumentNullException">source
+-    /// or
+-    /// items.</exception>
+-    public static void Replace<T>(this IList<T> source, T original, T replaceWith)
+-    {
+-        ArgumentNullException.ThrowIfNull(source);
+-        ArgumentNullException.ThrowIfNull(original);
+-        ArgumentNullException.ThrowIfNull(replaceWith);
+-
+-        var index = source.IndexOf(original);
+-        if (index == -1)
+-        {
+-            throw new ArgumentException("Cannot find index of original item. Either it does not exist in the list or the hashcode has mutated");
+-        }
+-
+-        source[index] = replaceWith;
+-    }
+-
+-    /// <summary>
+-    /// Replaces the specified item.
+-    /// </summary>
+-    /// <typeparam name="T">The type of item.</typeparam>
+-    /// <param name="source">The source.</param>
+-    /// <param name="original">The item which is to be replaced. If not in the list and argument exception will be thrown.</param>
+-    /// <param name="replaceWith">The new item.</param>
+-    /// <param name="comparer">The equality comparer to be used to find the original item in the list.</param>
+-    /// <exception cref="ArgumentNullException">source
+-    /// or
+-    /// items.</exception>
+-    public static void Replace<T>(this IList<T> source, T original, T replaceWith, IEqualityComparer<T> comparer)
+-    {
+-        ArgumentNullException.ThrowIfNull(source);
+-        ArgumentNullException.ThrowIfNull(original);
+-        ArgumentNullException.ThrowIfNull(replaceWith);
+-        ArgumentNullException.ThrowIfNull(comparer);
+-
+-        var index = source.IndexOf(original);
+-        if (index == -1)
+-        {
+-            throw new ArgumentException("Cannot find index of original item. Either it does not exist in the list or the hashcode has mutated");
+-        }
+-
+-        if (comparer.Equals(source[index], replaceWith))
+-        {
+-            source[index] = replaceWith;
+-        }
+-    }
+-
+-    /// <summary>
+-    /// Replaces the item if found, otherwise the item is added to the list.
+-    /// </summary>
+-    /// <typeparam name="T">The type of the item.</typeparam>
+-    /// <param name="source">The source.</param>
+-    /// <param name="original">The original.</param>
+-    /// <param name="replaceWith">The value to replace with.</param>
+-    public static void ReplaceOrAdd<T>(this IList<T> source, T original, T replaceWith)
+-    {
+-        ArgumentNullException.ThrowIfNull(source);
+-        ArgumentNullException.ThrowIfNull(original);
+-        ArgumentNullException.ThrowIfNull(replaceWith);
+-
+-        var index = source.IndexOf(original);
+-        if (index == -1)
+-        {
+-            source.Add(replaceWith);
+-        }
+-        else
+-        {
+-            source[index] = replaceWith;
+-        }
+-    }
+-
+-    /// <summary>
+-    /// <para>Clears the collection if the number of items in the range is the same as the source collection. Otherwise a  remove many operation is applied.</para>
+-    /// <para>NB: This is because an observable change set may be a composite of multiple change sets in which case if one of them has clear operation applied it should not clear the entire result.</para>
+-    /// </summary>
+-    /// <typeparam name="T">The type of the item.</typeparam>
+-    /// <param name="source">The source.</param>
+-    /// <param name="change">The change.</param>
+-    internal static void ClearOrRemoveMany<T>(this IList<T> source, Change<T> change)
+-        where T : notnull
+-    {
+-        // apply this to other operators
+-        if (source.Count == change.Range.Count)
+-        {
+-            source.Clear();
+-        }
+-        else
+-        {
+-            source.RemoveMany(change.Range);
+-        }
+-    }
+-
+-    internal static bool MovedWithinRange<T>(this Change<T> source, int startIndex, int endIndex)
+-        where T : notnull
+-    {
+-        if (source.Reason != ListChangeReason.Moved)
+-        {
+-            return false;
+-        }
+-
+-        var current = source.Item.CurrentIndex;
+-        var previous = source.Item.PreviousIndex;
+-
+-        return (current >= startIndex && current <= endIndex) || (previous >= startIndex && previous <= endIndex);
+-    }
+-
+-    private static void Clone<T>(this IList<T> source, Change<T> item, IEqualityComparer<T> equalityComparer)
+-        where T : notnull
+-    {
+-        var changeAware = source as ChangeAwareList<T>;
+-
+-        switch (item.Reason)
+-        {
+-            case ListChangeReason.Add:
+-                {
+-                    var change = item.Item;
+-                    var hasIndex = change.CurrentIndex >= 0;
+-                    if (hasIndex)
+-                    {
+-                        source.Insert(change.CurrentIndex, change.Current);
+-                    }
+-                    else
+-                    {
+-                        source.Add(change.Current);
+-                    }
+-
+-                    break;
+-                }
+-
+-            case ListChangeReason.AddRange:
+-                {
+-                    source.AddOrInsertRange(item.Range, item.Range.Index);
+-                    break;
+-                }
+-
+-            case ListChangeReason.Clear:
+-                {
+-                    source.ClearOrRemoveMany(item);
+-                    break;
+-                }
+-
+-            case ListChangeReason.Replace:
+-                {
+-                    var change = item.Item;
+-                    if (change.CurrentIndex >= 0 && change.CurrentIndex == change.PreviousIndex)
+-                    {
+-                        source[change.CurrentIndex] = change.Current;
+-                    }
+-                    else
+-                    {
+-                        if (change.PreviousIndex == -1)
+-                        {
+-                            source.Remove(change.Previous.Value);
+-                        }
+-                        else
+-                        {
+-                            // is this best? or replace + move?
+-                            source.RemoveAt(change.PreviousIndex);
+-                        }
+-
+-                        if (change.CurrentIndex == -1)
+-                        {
+-                            source.Add(change.Current);
+-                        }
+-                        else
+-                        {
+-                            source.Insert(change.CurrentIndex, change.Current);
+-                        }
+-                    }
+-
+-                    break;
+-                }
+-
+-            case ListChangeReason.Refresh:
+-                {
+-                    if (changeAware is not null)
+-                    {
+-                        changeAware.RefreshAt(item.Item.CurrentIndex);
+-                    }
+-                    else
+-                    {
+-                        source.RemoveAt(item.Item.CurrentIndex);
+-                        source.Insert(item.Item.CurrentIndex, item.Item.Current);
+-                    }
+-
+-                    break;
+-                }
+-
+-            case ListChangeReason.Remove:
+-                {
+-                    var change = item.Item;
+-                    var hasIndex = change.CurrentIndex >= 0;
+-                    if (hasIndex)
+-                    {
+-                        source.RemoveAt(change.CurrentIndex);
+-                    }
+-                    else
+-                    {
+-                        var index = source.IndexOf(change.Current, equalityComparer);
+-                        if (index > -1)
+-                        {
+-                            source.RemoveAt(index);
+-                        }
+-                    }
+-
+-                    break;
+-                }
+-
+-            case ListChangeReason.RemoveRange:
+-                {
+-                    // ignore this case because WhereReasonsAre removes the index [in which case call RemoveMany]
+-                    //// if (item.Range.Index < 0)
+-                    ////    throw new UnspecifiedIndexException("ListChangeReason.RemoveRange should not have an index specified index");
+-                    if (item.Range.Index >= 0 && (source is IExtendedList<T> || source is List<T>))
+-                    {
+-                        source.RemoveRange(item.Range.Index, item.Range.Count);
+-                    }
+-                    else
+-                    {
+-                        source.RemoveMany(item.Range);
+-                    }
+-
+-                    break;
+-                }
+-
+-            case ListChangeReason.Moved:
+-                {
+-                    var change = item.Item;
+-                    var hasIndex = change.CurrentIndex >= 0;
+-                    if (!hasIndex)
+-                    {
+-                        throw new UnspecifiedIndexException("Cannot move as an index was not specified");
+-                    }
+-
+-                    if (source is IExtendedList<T> extendedList)
+-                    {
+-                        extendedList.Move(change.PreviousIndex, change.CurrentIndex);
+-                    }
+-                    else if (source is ObservableCollection<T> observableCollection)
+-                    {
+-                        observableCollection.Move(change.PreviousIndex, change.CurrentIndex);
+-                    }
+-                    else
+-                    {
+-                        // check this works whatever the index is
+-                        source.RemoveAt(change.PreviousIndex);
+-                        source.Insert(change.CurrentIndex, change.Current);
+-                    }
+-
+-                    break;
+-                }
+-        }
+-    }
+-
+-    /// <summary>
+-    /// Removes the number of items, starting at the specified index.
+-    /// </summary>
+-    /// <typeparam name="T">The type of the item.</typeparam>
+-    /// <param name="source">The source.</param>
+-    /// <param name="index">The index.</param>
+-    /// <param name="count">The count.</param>
+-    /// <exception cref="NotSupportedException">Cannot remove range.</exception>
+-    private static void RemoveRange<T>(this IList<T> source, int index, int count)
+-    {
+-        ArgumentNullException.ThrowIfNull(source);
+-
+-        switch (source)
+-        {
+-            case List<T> list:
+-                list.RemoveRange(index, count);
+-                break;
+-            case IExtendedList<T> list:
+-                list.RemoveRange(index, count);
+-                break;
+-            default:
+-                throw new NotSupportedException($"Cannot remove range from {source.GetType().FullName}");
+-        }
+-    }
+-}
++﻿// Copyright (c) 2011-2025 Roland Pheasant. All rights reserved.
++// Roland Pheasant licenses this file to you under the MIT license.
++// See the LICENSE file in the project root for full license information.
++
++// ReSharper disable once CheckNamespace
++namespace DynamicData;
++
++/// <summary>
++/// Extensions to help with maintenance of a list.
++/// </summary>
++public static class ListEx
++{
++    /// <summary>
++    /// Adds the  items to the specified list.
++    /// </summary>
++    /// <typeparam name="T">The type of the item.</typeparam>
++    /// <param name="source">The source.</param>
++    /// <param name="items">The items.</param>
++    /// <exception cref="ArgumentNullException">
++    /// source
++    /// or
++    /// items.
++    /// </exception>
++    public static void Add<T>(this IList<T> source, IEnumerable<T> items)
++    {
++        ArgumentNullException.ThrowIfNull(source);
++        ArgumentNullException.ThrowIfNull(items);
++
++        items.ForEach(source.Add);
++    }
++
++    /// <summary>
++    /// Adds the range if a negative is specified, otherwise the range is added at the end of the list.
++    /// </summary>
++    /// <typeparam name="T">The type of the item.</typeparam>
++    /// <param name="source">The source.</param>
++    /// <param name="items">The items.</param>
++    /// <param name="index">The index.</param>
++    public static void AddOrInsertRange<T>(this IList<T> source, IEnumerable<T> items, int index)
++    {
++        ArgumentNullException.ThrowIfNull(source);
++        ArgumentNullException.ThrowIfNull(items);
++
++        switch (source)
++        {
++            case List<T> list when index >= 0:
++                list.InsertRange(index, items);
++                break;
++            case List<T> list:
++                list.AddRange(items);
++                break;
++            case IExtendedList<T> extendedList when index >= 0:
++                extendedList.InsertRange(items, index);
++                break;
++            case IExtendedList<T> extendedList:
++                extendedList.AddRange(items);
++                break;
++            default:
++                {
++                    if (index >= 0)
++                    {
++                        // TODO: Why the hell reverse? Surely there must be as reason otherwise I would not have done it.
++                        items.Reverse().ForEach(t => source.Insert(index, t));
++                    }
++                    else
++                    {
++                        items.ForEach(source.Add);
++                    }
++
++                    break;
++                }
++        }
++    }
++
++    /// <summary>
++    /// Adds the range to the source list.
++    /// </summary>
++    /// <typeparam name="T">The type of the item.</typeparam>
++    /// <param name="source">The source.</param>
++    /// <param name="items">The items.</param>
++    /// <exception cref="ArgumentNullException">
++    /// source
++    /// or
++    /// items.
++    /// </exception>
++    public static void AddRange<T>(this IList<T> source, IEnumerable<T> items)
++    {
++        ArgumentNullException.ThrowIfNull(source);
++        ArgumentNullException.ThrowIfNull(items);
++
++        switch (source)
++        {
++            case List<T> list:
++                list.AddRange(items);
++                break;
++            case IExtendedList<T> extendedList:
++                extendedList.AddRange(items);
++                break;
++            default:
++                foreach (var t in items)
++                    source.Add(t);
++                break;
++        }
++    }
++
++    /// <summary>
++    /// Adds the range to the list. The starting range is at the specified index.
++    /// </summary>
++    /// <typeparam name="T">The type of the item.</typeparam>
++    /// <param name="source">The source.</param>
++    /// <param name="items">The items.</param>
++    /// <param name="index">The index.</param>
++    public static void AddRange<T>(this IList<T> source, IEnumerable<T> items, int index)
++    {
++        ArgumentNullException.ThrowIfNull(source);
++        ArgumentNullException.ThrowIfNull(items);
++
++        switch (source)
++        {
++            case List<T> list:
++                list.InsertRange(index, items);
++                break;
++            case IExtendedList<T> list:
++                list.InsertRange(items, index);
++                break;
++            default:
++                items.ForEach(source.Add);
++                break;
++        }
++    }
++
++    /// <summary>
++    /// Performs a binary search on the specified collection.
++    /// </summary>
++    /// <typeparam name="TItem">The type of the item.</typeparam>
++    /// <param name="list">The list to be searched.</param>
++    /// <param name="value">The value to search for.</param>
++    /// <returns>The index of the specified value in the specified array, if value is found; otherwise, a negative number.</returns>
++    public static int BinarySearch<TItem>(this IList<TItem> list, TItem value) => BinarySearch(list, value, Comparer<TItem>.Default);
++
++    /// <summary>
++    /// Performs a binary search on the specified collection.
++    /// </summary>
++    /// <typeparam name="TItem">The type of the item.</typeparam>
++    /// <param name="list">The list to be searched.</param>
++    /// <param name="value">The value to search for.</param>
++    /// <param name="comparer">The comparer that is used to compare the value with the list items.</param>
++    /// <returns>The index of the specified value in the specified array, if value is found; otherwise, a negative number.</returns>
++    public static int BinarySearch<TItem>(this IList<TItem> list, TItem value, IComparer<TItem> comparer)
++    {
++        ArgumentNullException.ThrowIfNull(comparer);
++
++        return list.BinarySearch(value, comparer.Compare);
++    }
++
++    /// <summary>
++    /// <para>Performs a binary search on the specified collection.</para>
++    /// <para>Thanks to https://stackoverflow.com/questions/967047/how-to-perform-a-binary-search-on-ilistt.</para>
++    /// </summary>
++    /// <typeparam name="TItem">The type of the item.</typeparam>
++    /// <typeparam name="TSearch">The type of the searched item.</typeparam>
++    /// <param name="list">The list to be searched.</param>
++    /// <param name="value">The value to search for.</param>
++    /// <param name="comparer">The comparer that is used to compare the value with the list items.</param>
++    /// <returns>The index of the specified value in the specified array, if value is found; otherwise, a negative number.</returns>
++    public static int BinarySearch<TItem, TSearch>(this IList<TItem> list, TSearch value, Func<TSearch, TItem, int> comparer)
++    {
++        ArgumentNullException.ThrowIfNull(list);
++        ArgumentNullException.ThrowIfNull(comparer);
++
++        var lower = 0;
++        var upper = list.Count - 1;
++
++        while (lower <= upper)
++        {
++            var middle = lower + ((upper - lower) / 2);
++            var comparisonResult = comparer(value, list[middle]);
++            if (comparisonResult < 0)
++            {
++                upper = middle - 1;
++            }
++            else if (comparisonResult > 0)
++            {
++                lower = middle + 1;
++            }
++            else
++            {
++                return middle;
++            }
++        }
++
++        return ~lower;
++    }
++
++    /// <summary>
++    /// Clones the list from the specified change set.
++    /// </summary>
++    /// <typeparam name="T">The type of the item.</typeparam>
++    /// <param name="source">The source.</param>
++    /// <param name="changes">The changes.</param>
++    /// <exception cref="ArgumentNullException">
++    /// source
++    /// or
++    /// changes.
++    /// </exception>
++    public static void Clone<T>(this IList<T> source, IChangeSet<T> changes)
++        where T : notnull => Clone(source, changes, null);
++
++    /// <summary>
++    /// Clones the list from the specified change set.
++    /// </summary>
++    /// <typeparam name="T">The type of the item.</typeparam>
++    /// <param name="source">The source.</param>
++    /// <param name="changes">The changes.</param>
++    /// <param name="equalityComparer">An equality comparer to match items in the changes.</param>
++    /// <exception cref="ArgumentNullException">
++    /// source
++    /// or
++    /// changes.
++    /// </exception>
++    public static void Clone<T>(this IList<T> source, IChangeSet<T> changes, IEqualityComparer<T>? equalityComparer)
++        where T : notnull => Clone(source, (IEnumerable<Change<T>>)changes, equalityComparer);
++
++    /// <summary>
++    /// Clones the list from the specified enumerable of changes.
++    /// </summary>
++    /// <typeparam name="T">The type of the item.</typeparam>
++    /// <param name="source">The source.</param>
++    /// <param name="changes">The changes.</param>
++    /// <param name="equalityComparer">An equality comparer to match items in the changes.</param>
++    /// <exception cref="ArgumentNullException">
++    /// source
++    /// or
++    /// changes.
++    /// </exception>
++    public static void Clone<T>(this IList<T> source, IEnumerable<Change<T>> changes, IEqualityComparer<T>? equalityComparer)
++        where T : notnull
++    {
++        ArgumentNullException.ThrowIfNull(source);
++        ArgumentNullException.ThrowIfNull(changes);
++
++        foreach (var item in changes)
++        {
++            Clone(source, item, equalityComparer ?? EqualityComparer<T>.Default);
++        }
++    }
++
++    /// <summary>
++    /// Finds the index of the current item using the specified equality comparer.
++    /// </summary>
++    /// <typeparam name="T">The type of the item.</typeparam>
++    /// <param name="source">The source enumerable.</param>
++    /// <param name="item">The item to get the index of.</param>
++    /// <returns>The index.</returns>
++    public static int IndexOf<T>(this IEnumerable<T> source, T item) => IndexOf(source, item, EqualityComparer<T>.Default);
++
++    /// <summary>
++    /// Finds the index of the current item using the specified equality comparer.
++    /// </summary>
++    /// <typeparam name="T">The type of the item.</typeparam>
++    /// <param name="source">The source enumerable.</param>
++    /// <param name="item">The item to get the index of.</param>
++    /// <param name="equalityComparer">Use to determine object equality.</param>
++    /// <returns>The index.</returns>
++    public static int IndexOf<T>(this IEnumerable<T> source, T item, IEqualityComparer<T> equalityComparer)
++    {
++        ArgumentNullException.ThrowIfNull(source);
++        ArgumentNullException.ThrowIfNull(equalityComparer);
++
++        var i = 0;
++        foreach (var candidate in source)
++        {
++            if (equalityComparer.Equals(item, candidate))
++            {
++                return i;
++            }
++
++            i++;
++        }
++
++        return -1;
++    }
++
++    /// <summary>
++    /// Lookups the item using the specified comparer. If matched, the item's index is also returned.
++    /// </summary>
++    /// <typeparam name="T">The type of the item.</typeparam>
++    /// <param name="source">The source.</param>
++    /// <param name="item">The item.</param>
++    /// <param name="equalityComparer">The equality comparer.</param>
++    /// <returns>The index of the item if available.</returns>
++    public static Optional<ItemWithIndex<T>> IndexOfOptional<T>(this IEnumerable<T> source, T item, IEqualityComparer<T>? equalityComparer = null)
++    {
++        var comparer = equalityComparer ?? EqualityComparer<T>.Default;
++        var index = source.IndexOf(item, comparer);
++        return index < 0 ? Optional<ItemWithIndex<T>>.None : new ItemWithIndex<T>(item, index);
++    }
++
++    /// <summary>
++    /// Removes the  items from the specified list.
++    /// </summary>
++    /// <typeparam name="T">The type of the item.</typeparam>
++    /// <param name="source">The source.</param>
++    /// <param name="items">The items.</param>
++    /// <exception cref="ArgumentNullException">
++    /// source
++    /// or
++    /// items.
++    /// </exception>
++    public static void Remove<T>(this IList<T> source, IEnumerable<T> items)
++    {
++        ArgumentNullException.ThrowIfNull(source);
++        ArgumentNullException.ThrowIfNull(items);
++
++        items.ForEach(t => source.Remove(t));
++    }
++
++    /// <summary>
++    /// Removes many items from the collection in an optimal way.
++    /// </summary>
++    /// <typeparam name="T">The type of the item.</typeparam>
++    /// <param name="source">The source.</param>
++    /// <param name="itemsToRemove">The items to remove.</param>
++    public static void RemoveMany<T>(this IList<T> source, IEnumerable<T> itemsToRemove)
++    {
++        /*
++            This may seem OTT but for large sets of data where there are many removes scattered
++            across the source collection IndexOf lookups can result in very slow updates
++            (especially for subsequent operators)
++        */
++        ArgumentNullException.ThrowIfNull(source);
++        ArgumentNullException.ThrowIfNull(itemsToRemove);
++
++        var toRemoveArray = itemsToRemove.AsArray();
++
++        // match all indexes and and remove in reverse as it is more efficient
++        var toRemove = source.IndexOfMany(toRemoveArray).OrderByDescending(x => x.Index).ToArray();
++
++        // if there are duplicates, it could be that an item exists in the
++        // source collection more than once - in that case the fast remove
++        // would remove each instance
++        var hasDuplicates = toRemove.Duplicates(t => t.Item).Any();
++
++        if (hasDuplicates)
++        {
++            // Slow remove but safe
++            toRemoveArray.ForEach(t => source.Remove(t));
++        }
++        else
++        {
++            // Fast remove because we know the index of all and we remove in order
++            toRemove.ForEach(t => source.RemoveAt(t.Index));
++        }
++    }
++
++    /// <summary>
++    /// Replaces the specified item.
++    /// </summary>
++    /// <typeparam name="T">The type of the item.</typeparam>
++    /// <param name="source">The source.</param>
++    /// <param name="original">The original.</param>
++    /// <param name="replaceWith">The value to replace with.</param>
++    /// <exception cref="ArgumentNullException">source
++    /// or
++    /// items.</exception>
++    public static void Replace<T>(this IList<T> source, T original, T replaceWith)
++    {
++        ArgumentNullException.ThrowIfNull(source);
++        ArgumentNullException.ThrowIfNull(original);
++        ArgumentNullException.ThrowIfNull(replaceWith);
++
++        var index = source.IndexOf(original);
++        if (index == -1)
++        {
++            throw new ArgumentException("Cannot find index of original item. Either it does not exist in the list or the hashcode has mutated");
++        }
++
++        source[index] = replaceWith;
++    }
++
++    /// <summary>
++    /// Replaces the specified item.
++    /// </summary>
++    /// <typeparam name="T">The type of item.</typeparam>
++    /// <param name="source">The source.</param>
++    /// <param name="original">The item which is to be replaced. If not in the list and argument exception will be thrown.</param>
++    /// <param name="replaceWith">The new item.</param>
++    /// <param name="comparer">The equality comparer to be used to find the original item in the list.</param>
++    /// <exception cref="ArgumentNullException">source
++    /// or
++    /// items.</exception>
++    public static void Replace<T>(this IList<T> source, T original, T replaceWith, IEqualityComparer<T> comparer)
++    {
++        ArgumentNullException.ThrowIfNull(source);
++        ArgumentNullException.ThrowIfNull(original);
++        ArgumentNullException.ThrowIfNull(replaceWith);
++        ArgumentNullException.ThrowIfNull(comparer);
++
++        var index = source.IndexOf(original);
++        if (index == -1)
++        {
++            throw new ArgumentException("Cannot find index of original item. Either it does not exist in the list or the hashcode has mutated");
++        }
++
++        if (comparer.Equals(source[index], replaceWith))
++        {
++            source[index] = replaceWith;
++        }
++    }
++
++    /// <summary>
++    /// Replaces the item if found, otherwise the item is added to the list.
++    /// </summary>
++    /// <typeparam name="T">The type of the item.</typeparam>
++    /// <param name="source">The source.</param>
++    /// <param name="original">The original.</param>
++    /// <param name="replaceWith">The value to replace with.</param>
++    public static void ReplaceOrAdd<T>(this IList<T> source, T original, T replaceWith)
++    {
++        ArgumentNullException.ThrowIfNull(source);
++        ArgumentNullException.ThrowIfNull(original);
++        ArgumentNullException.ThrowIfNull(replaceWith);
++
++        var index = source.IndexOf(original);
++        if (index == -1)
++        {
++            source.Add(replaceWith);
++        }
++        else
++        {
++            source[index] = replaceWith;
++        }
++    }
++
++    /// <summary>
++    /// <para>Clears the collection if the number of items in the range is the same as the source collection. Otherwise a  remove many operation is applied.</para>
++    /// <para>NB: This is because an observable change set may be a composite of multiple change sets in which case if one of them has clear operation applied it should not clear the entire result.</para>
++    /// </summary>
++    /// <typeparam name="T">The type of the item.</typeparam>
++    /// <param name="source">The source.</param>
++    /// <param name="change">The change.</param>
++    internal static void ClearOrRemoveMany<T>(this IList<T> source, Change<T> change)
++        where T : notnull
++    {
++        // apply this to other operators
++        if (source.Count == change.Range.Count)
++        {
++            source.Clear();
++        }
++        else
++        {
++            source.RemoveMany(change.Range);
++        }
++    }
++
++    internal static bool MovedWithinRange<T>(this Change<T> source, int startIndex, int endIndex)
++        where T : notnull
++    {
++        if (source.Reason != ListChangeReason.Moved)
++        {
++            return false;
++        }
++
++        var current = source.Item.CurrentIndex;
++        var previous = source.Item.PreviousIndex;
++
++        return (current >= startIndex && current <= endIndex) || (previous >= startIndex && previous <= endIndex);
++    }
++
++    private static void Clone<T>(this IList<T> source, Change<T> item, IEqualityComparer<T> equalityComparer)
++        where T : notnull
++    {
++        var changeAware = source as ChangeAwareList<T>;
++
++        switch (item.Reason)
++        {
++            case ListChangeReason.Add:
++                {
++                    var change = item.Item;
++                    var hasIndex = change.CurrentIndex >= 0;
++                    if (hasIndex)
++                    {
++                        source.Insert(change.CurrentIndex, change.Current);
++                    }
++                    else
++                    {
++                        source.Add(change.Current);
++                    }
++
++                    break;
++                }
++
++            case ListChangeReason.AddRange:
++                {
++                    source.AddOrInsertRange(item.Range, item.Range.Index);
++                    break;
++                }
++
++            case ListChangeReason.Clear:
++                {
++                    source.ClearOrRemoveMany(item);
++                    break;
++                }
++
++            case ListChangeReason.Replace:
++                {
++                    var change = item.Item;
++                    if (change.CurrentIndex >= 0 && change.CurrentIndex == change.PreviousIndex)
++                    {
++                        source[change.CurrentIndex] = change.Current;
++                    }
++                    else
++                    {
++                        if (change.PreviousIndex == -1)
++                        {
++                            source.Remove(change.Previous.Value);
++                        }
++                        else
++                        {
++                            // is this best? or replace + move?
++                            source.RemoveAt(change.PreviousIndex);
++                        }
++
++                        if (change.CurrentIndex == -1)
++                        {
++                            source.Add(change.Current);
++                        }
++                        else
++                        {
++                            source.Insert(change.CurrentIndex, change.Current);
++                        }
++                    }
++
++                    break;
++                }
++
++            case ListChangeReason.Refresh:
++                {
++                    if (changeAware is not null)
++                    {
++                        changeAware.RefreshAt(item.Item.CurrentIndex);
++                    }
++                    else
++                    {
++                        source.RemoveAt(item.Item.CurrentIndex);
++                        source.Insert(item.Item.CurrentIndex, item.Item.Current);
++                    }
++
++                    break;
++                }
++
++            case ListChangeReason.Remove:
++                {
++                    var change = item.Item;
++                    var hasIndex = change.CurrentIndex >= 0;
++                    if (hasIndex)
++                    {
++                        source.RemoveAt(change.CurrentIndex);
++                    }
++                    else
++                    {
++                        var index = source.IndexOf(change.Current, equalityComparer);
++                        if (index > -1)
++                        {
++                            source.RemoveAt(index);
++                        }
++                    }
++
++                    break;
++                }
++
++            case ListChangeReason.RemoveRange:
++                {
++                    // ignore this case because WhereReasonsAre removes the index [in which case call RemoveMany]
++                    //// if (item.Range.Index < 0)
++                    ////    throw new UnspecifiedIndexException("ListChangeReason.RemoveRange should not have an index specified index");
++                    if (item.Range.Index >= 0 && (source is IExtendedList<T> || source is List<T>))
++                    {
++                        source.RemoveRange(item.Range.Index, item.Range.Count);
++                    }
++                    else
++                    {
++                        source.RemoveMany(item.Range);
++                    }
++
++                    break;
++                }
++
++            case ListChangeReason.Moved:
++                {
++                    var change = item.Item;
++                    var hasIndex = change.CurrentIndex >= 0;
++                    if (!hasIndex)
++                    {
++                        throw new UnspecifiedIndexException("Cannot move as an index was not specified");
++                    }
++
++                    if (source is IExtendedList<T> extendedList)
++                    {
++                        extendedList.Move(change.PreviousIndex, change.CurrentIndex);
++                    }
++                    else if (source is ObservableCollection<T> observableCollection)
++                    {
++                        observableCollection.Move(change.PreviousIndex, change.CurrentIndex);
++                    }
++                    else
++                    {
++                        // check this works whatever the index is
++                        source.RemoveAt(change.PreviousIndex);
++                        source.Insert(change.CurrentIndex, change.Current);
++                    }
++
++                    break;
++                }
++        }
++    }
++
++    /// <summary>
++    /// Removes the number of items, starting at the specified index.
++    /// </summary>
++    /// <typeparam name="T">The type of the item.</typeparam>
++    /// <param name="source">The source.</param>
++    /// <param name="index">The index.</param>
++    /// <param name="count">The count.</param>
++    /// <exception cref="NotSupportedException">Cannot remove range.</exception>
++    private static void RemoveRange<T>(this IList<T> source, int index, int count)
++    {
++        ArgumentNullException.ThrowIfNull(source);
++
++        switch (source)
++        {
++            case List<T> list:
++                list.RemoveRange(index, count);
++                break;
++            case IExtendedList<T> list:
++                list.RemoveRange(index, count);
++                break;
++            default:
++                throw new NotSupportedException($"Cannot remove range from {source.GetType().FullName}");
++        }
++    }
++}
+diff --git a/src/DynamicData/Platforms/net45/ParallelType.cs b/src/DynamicData/Platforms/net45/ParallelType.cs
+index 1ef290a5..086a4e44 100644
+--- a/src/DynamicData/Platforms/net45/ParallelType.cs
++++ b/src/DynamicData/Platforms/net45/ParallelType.cs
+@@ -28,4 +28,4 @@ namespace DynamicData.PLinq
+     }
+ }
+ 
+-#endif
+\ No newline at end of file
++#endif

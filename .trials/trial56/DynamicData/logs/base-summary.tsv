@@ -1,0 +1,6 @@
+build	0	117s	dotnet build src/DynamicData.sln -c Debug
+twae-Debug	1	71s	twae Debug
+test-Debug	0	242s	env CFG=Debug bash -c dotnet test src/DynamicData.sln -c $CFG
+twae-Release	1	111s	twae Release
+test-Release	1	748s	env CFG=Release bash -c dotnet test src/DynamicData.sln -c $CFG
+DONE

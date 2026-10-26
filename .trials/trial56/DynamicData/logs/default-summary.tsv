@@ -1,0 +1,12 @@
+preview	0	170s	bro preview migrate .
+setup	0	4s	bash -c bro migrate . --write && sed -i "s#<GlobalPackageReference Include=\"StyleCop.Analyzers\" Version=\"1.2.0-beta.556\" />#<GlobalPackageReference Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial56.3\" />#" src/Directory.Packages.props && git diff --stat
+format	0	263s	bro format
+check	0	166s	bro check
+check-json	0
+checkbuild	3	697s	bro check --build
+checkbuild-json	3
+twae-Debug	1	120s	twae Debug
+test-Debug	0	255s	env CFG=Debug bash -c dotnet test src/DynamicData.sln -c $CFG
+twae-Release	1	56s	twae Release
+test-Release	0	667s	env CFG=Release bash -c dotnet test src/DynamicData.sln -c $CFG
+DONE

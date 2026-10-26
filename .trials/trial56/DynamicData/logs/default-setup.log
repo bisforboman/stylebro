@@ -1,0 +1,61 @@
+Read: .editorconfig, src/stylecop.json
+StyleCop.Analyzers version: 1.2.0-beta.556
+StyleCop runs only in src/DynamicData: the settings apply there, with the rules StyleCop has on there.
+No StyleCop in src/DynamicData.Benchmarks, src/DynamicData.Tests: StyleBro's rules and the built-in ones the block sets are off there by id, so the build and 'bro format' leave them alone. To have them checked and formatted too, remove the block's '# No StyleCop ran in' line and its section for them.
+Warning: Not restored: src/DynamicData/DynamicData.csproj. A package can bring a global config that sets StyleCop's rules (GlobalAnalyzerConfigFiles), and it is read from the restore: run 'dotnet restore', then this again.
+StyleCop rules on: 146; enforced by StyleBro or the SDK after migrating: 114
+Not enforced after removing StyleCop (32):
+  Dropped by design (no safe automatic fix, or not applicable):
+    SA0002: StyleCop's own diagnostic for an invalid stylecop.json.
+    SA1401: Making a public or protected field private changes the public API and breaks callers.
+    SA1403: StyleCop has no fix; splitting namespaces into files has the same problem as SA1402.
+    SA1404: The justification of a SuppressMessage has to be written by a person.
+    SA1405: StyleCop has no fix; the message for Debug.Assert has to be written by a person.
+    SA1406: StyleCop has no fix; the message for Debug.Fail has to be written by a person.
+    SA1414: StyleCop has no fix (1.2 only); tuple element names in signatures have to be chosen by a person.
+    SA1601: Missing documentation on a partial element; the only fix is placeholder text.
+    SA1602: Missing documentation on enum members; the only fix is placeholder text.
+    SA1604: A doc comment without <summary>; the fix would be placeholder text.
+    SA1605: Same as SA1604 for partial elements.
+    SA1606: An empty <summary>; the fix would be placeholder text.
+    SA1607: Same as SA1606 for partial elements.
+    SA1608: The default "Summary description for X" text has to be replaced by a person.
+    SA1610: An empty <value>; StyleCop's fix writes placeholder text.
+    SA1611: Missing <param>; the fix would be placeholder text.
+    SA1614: An empty <param>; the fix would be placeholder text.
+    SA1615: Missing <returns>; the fix would be placeholder text.
+    SA1616: An empty <returns>; the fix would be placeholder text.
+    SA1618: Missing <typeparam>; the fix would be placeholder text.
+    SA1619: Same as SA1618 for partial types.
+    SA1622: An empty <typeparam>; the fix would be placeholder text.
+    SA1625: Identical text copied between tags has to be rewritten by a person.
+    SA1648: <inheritdoc/> where there is nothing to inherit: the fix is real documentation.
+    SA1649: Renaming files isn't something dotnet format can do.
+  Not covered yet:
+    SA1517: Code should not contain blank lines at start of file
+    SX1309: Field names should begin with underscore
+  Partly covered or not expressible:
+    SA1107: the SDK's csharp_preserve_single_line_statements = false would split it, but also one-line anonymous methods and blocks StyleCop accepts ('delegate { }')
+    SA1214: BRO1001 also enforces SA1201, SA1202, SA1203, SA1204, which are off
+    SA1303: BRO1306 also enforces SA1311, which is off
+    SA1304: BRO1306 also enforces SA1311, which is off
+    SA1307: BRO1306 also enforces SA1311, which is off
+SX1309 (fields begin with an underscore) is on, so BRO1303 uses '_camelCase'.
+Not kept, because nothing enforces them (severity silent or none): csharp_prefer_braces = true:silent; StyleCop's setting is written instead.
+Kept the repository's own settings for: csharp_new_line_before_open_brace, csharp_preserve_single_line_blocks, csharp_preserve_single_line_statements, indent_size, indent_style, csharp_preferred_modifier_order, dotnet_style_predefined_type_for_locals_parameters_members, dotnet_style_predefined_type_for_member_access, csharp_using_directive_placement, dotnet_sort_system_directives_first, dotnet_style_qualification_for_field, dotnet_style_qualification_for_property, dotnet_style_qualification_for_method, dotnet_style_qualification_for_event.
+Line endings: your .editorconfig says end_of_line = crlf, but 795 of 849 C# files are LF as committed and git doesn't convert them: nothing enforced it, so end_of_line = lf is written for C# files and 'format' converts the other 54 (CRLF) to LF where it formats them. To keep CRLF: put 'end_of_line = crlf' below the stylebro-migrate block, in a [*.cs] section (a later line wins; the block's own lines come back on the next init) and run 'bro format' (it rewrites the files), or add '*.cs text eol=crlf' to .gitattributes and run 'git add --renormalize .'.
+Final line breaks: your .editorconfig says insert_final_newline = true, and 4 of 849 C# files end without a line break: 'format' adds a last line break to them. To keep that out of the formatting changes, change them in a commit of their own first.
+This repository has multi-targeted projects. Run 'bro format' instead of 'dotnet format' here: with IDE0055 on, 'dotnet format' crashes on multi-targeted projects (Roslyn can't merge the target frameworks' copies of a file). The command runs it once per target framework.
+src/DynamicData.Benchmarks/.editorconfig says root = true, and StyleCop didn't run there: no settings there.
+Suppressions: none in the code to carry over.
+src/stylecop.json: StyleBro doesn't read it; the settings are in the block now, which also records them for later runs. Once StyleCop.Analyzers is gone, it can go, with the <AdditionalFiles> item naming it.
+
+Wrote the settings to .editorconfig.
+Turned the preset off in src/Directory.Build.props (<StyleBroPreset>none</StyleBroPreset>): the settings above replace it.
+Tip: --agents-md writes a StyleBro section into AGENTS.md for AI coding agents.
+StyleCop.Analyzers is referenced in src/Directory.Packages.props: StyleBro.Analyzers goes there: as a GlobalPackageReference, like StyleCop's; otherwise its version in src/Directory.Packages.props (central package management).
+Next: add the StyleBro.Analyzers package, remove StyleCop.Analyzers, and run 'bro format'.
+ .editorconfig                | 320 +++++++++++++++++++++++++++++++++++++++++++
+ src/Directory.Build.props    |   1 +
+ src/Directory.Packages.props |   2 +-
+ 3 files changed, 322 insertions(+), 1 deletion(-)
