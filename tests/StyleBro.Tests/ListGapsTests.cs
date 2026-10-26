@@ -129,4 +129,24 @@ public class ListGapsTests
                 1);
         }
         """");
+
+    // FusionCache (trial 56): a comma alone on its line goes up, and the item below it keeps its own indentation, not
+    // the comma's (column 0 there).
+    [Fact]
+    public Task CommaAloneOnItsLine_ItemKeepsItsIndentation() => VerifyFixAsync(
+        """
+        class C
+        {
+            int M(int a, int b) => this.M(1
+        {|BRO1117:,|}
+                2);
+        }
+        """,
+        """
+        class C
+        {
+            int M(int a, int b) => this.M(1,
+                2);
+        }
+        """);
 }

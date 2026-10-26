@@ -65,8 +65,15 @@ internal static class ListGaps
                 var span = TextSpan.FromBounds(previousEnd.Span.End, items[i].SpanStart);
 
                 // The comma goes up; the item keeps its line, without the blank lines before it (BRO1119's, done here
-                // so one run is enough).
+                // so one run is enough). An item on a line after its comma's keeps its own indentation, not the comma's
+                // (FusionCache, trial 56: BRO1108 had moved 'token:' below a ',' at column 0).
                 var gap = text.ToString(TextSpan.FromBounds(previousEnd.Span.End, comma.SpanStart));
+                var afterComma = text.ToString(TextSpan.FromBounds(comma.Span.End, items[i].SpanStart));
+                if (afterComma.IndexOf('\n') >= 0)
+                {
+                    gap = afterComma;
+                }
+
                 var lastBreak = gap.LastIndexOf('\n');
                 var keep = lastBreak > 0 && gap[lastBreak - 1] == '\r' ? gap.Substring(lastBreak - 1) : gap.Substring(lastBreak);
                 yield return new Finding(comma.GetLocation(), DiagnosticIds.CommaOnItemLine, new TextChange(span, "," + keep));
