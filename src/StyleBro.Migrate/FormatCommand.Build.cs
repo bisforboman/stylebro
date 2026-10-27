@@ -177,6 +177,8 @@ internal static partial class FormatCommand
         var failed = new List<string>();
         var bothFailed = new List<string>();
         var uncompiled = new List<string>();
+        var notCompared = new List<string>();
+        List<string> Expected(string configuration) => (expectedProjects ??= [.. expected?.Invoke() ?? BuiltProjects(workspacePath, root)]).Except(NotBuiltIn(workspacePath, configuration), StringComparer.OrdinalIgnoreCase).ToList();
         try
         {
             foreach (var configuration in configurations)
@@ -188,12 +190,28 @@ internal static partial class FormatCommand
                     ? WithHook(UntouchedHook(Path.GetDirectoryName(Path.GetFullPath(copy))!, ids), () => build(Path.GetFullPath(Path.Combine(copy, Path.GetRelativePath(top, root))), Path.GetFullPath(Path.Combine(copy, relative)), configuration))
                     : null;
                 var beforeMessages = before is { } b ? BuildMessages(b.Output, untouched!) : untouched == string.Empty ? current : null;
-                var (found, newErrors, old) = CompareBuild(current, beforeMessages, ids);
+
+                // Errors in projects the untouched code's build compiled nothing for (a project they need failed there) have
+                // nothing to compare with: not new, not verified (owner's decision 2026-10-27; trial 57, DapperAOT: after a
+                // design-time load MSBuild compiled Dapper.AOT.Test.Integration without the reference that failed, and its 7
+                // CS0234 errors made "Not clean" where the untouched build never compiled it). Findings of format's rules count.
+                var unmatched = before is { ExitCode: not 0 } failedBefore
+                    ? Uncompiled(failedBefore.Output, beforeMessages!, Expected(configuration)).ToHashSet(StringComparer.OrdinalIgnoreCase)
+                    : [];
+                bool Unmatched(BuildMessage m) => m.Error && !ids.Contains(m.Id) && unmatched.Contains(m.Project);
+                var (found, newErrors, old) = CompareBuild(current.Where(m => !Unmatched(m)).ToList(), beforeMessages, ids);
+                var notComparedHere = current.Where(Unmatched).Select(m => m.Project).Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList();
 
                 // A failed build no line explains (a crash, an MSBuild error without a position) counts unless the untouched one failed too.
                 var unexplained = exitCode != 0 && found.Count == 0 && newErrors.Count == 0 && (untouched is null || (before is { } u && u.ExitCode == 0));
                 log($"{configuration}: {(found.Count == 0 && newErrors.Count == 0 && !unexplained ? "no findings, no new errors" : string.Join(", ", new[] { found.Count > 0 ? $"{found.Count} finding{(found.Count == 1 ? string.Empty : "s")} of format's rules" : null, newErrors.Count > 0 ? $"{newErrors.Count} new error{(newErrors.Count == 1 ? string.Empty : "s")}" : null, unexplained ? $"the build failed (exit code {exitCode})" : null }.OfType<string>()))}{(old > 0 ? $" ({old} error{(old == 1 ? string.Empty : "s")} the untouched code has too, not counted)" : string.Empty)}{(found.Count > 0 || newErrors.Count > 0 ? ":" : ".")}");
                 found.Take(20).Concat(newErrors.Take(20)).ToList().ForEach(log);
+                if (notComparedHere.Count > 0)
+                {
+                    notCompared.Add($"{configuration} ({ShortList(notComparedHere)})");
+                    log($"  Not compared: {ShortList(notComparedHere, 10)} (the untouched code's build didn't compile {(notComparedHere.Count == 1 ? "it" : "them")}: a project {(notComparedHere.Count == 1 ? "it needs" : "they need")} failed there).");
+                }
+
                 findings += found.Count;
                 if (newErrors.Count > 0 || unexplained)
                 {
@@ -207,7 +225,7 @@ internal static partial class FormatCommand
                     bothFailed.Add(configuration);
                     current.Where(StopsCompiling).Select(m => m.Shown).Distinct(StringComparer.Ordinal).Take(5).ToList().ForEach(log);
                 }
-                else if (exitCode != 0 && found.Count == 0 && Uncompiled(output, current, (expectedProjects ??= [.. expected?.Invoke() ?? BuiltProjects(workspacePath, root)]).Except(NotBuiltIn(workspacePath, configuration), StringComparer.OrdinalIgnoreCase)) is { Count: > 0 } skipped)
+                else if (exitCode != 0 && found.Count == 0 && Uncompiled(output, current, Expected(configuration)) is { Count: > 0 } skipped)
                 {
                     // Failed with errors in the code the untouched code has too: the projects that need the failed ones didn't
                     // compile, so their analyzers never ran (owner's decision 2026-10-20: not verified, naming them).
@@ -230,10 +248,17 @@ internal static partial class FormatCommand
 
         var findingsPart = findings > 0 ? $"the builds report {findings} finding{(findings == 1 ? string.Empty : "s")} of format's rules (above): fix {(findings == 1 ? "it" : "them")} by hand, or suppress or baseline {(findings == 1 ? "it" : "them")}" : null;
         var failedPart = failed.Count > 0 ? $"the {string.Join(", ", failed)} build{(failed.Count == 1 ? string.Empty : "s")} {(untouched is null ? "failed" : "failed where the untouched code's didn't")} (above)" : null;
-        return findingsPart is not null || failedPart is not null ? $"Not clean: {string.Join("; and ", new[] { findingsPart, failedPart }.OfType<string>())}."
+        var notComparedPart = notCompared.Count > 0
+            ? $"the {string.Join(", ", notCompared)} build{(notCompared.Count == 1 ? string.Empty : "s")} compiled projects the untouched code's build didn't (a project they need failed there), so their errors have nothing to compare with (above)"
+            : null;
+        var notVerified = findingsPart is not null || failedPart is not null ? null
             : bothFailed.Count == 0 && uncompiled.Count > 0 ? $"{NotVerifiedMarker} the {string.Join(", ", uncompiled)} build{(uncompiled.Count == 1 ? string.Empty : "s")} didn't compile {(uncompiled.Count == 1 ? "those projects" : "the projects named")}: a project they need failed, as in the untouched code's build (above), so StyleBro's rules didn't run there. Fix those errors, then run again."
             : bothFailed.Count > 0 ? $"{NotVerifiedMarker} the {string.Join(", ", bothFailed)} build{(bothFailed.Count == 1 ? string.Empty : "s")} failed, as the untouched code's {(bothFailed.Count == 1 ? "does" : "do")} (above), so {(bothFailed.Count == 1 ? "it" : "they")} compiled nothing past {(bothFailed.Count == 1 ? "its" : "their")} errors: fix them (a missing workload, a failed restore), then run again."
             : null;
+        return findingsPart is not null || failedPart is not null ? $"Not clean: {string.Join("; and ", new[] { findingsPart, failedPart }.OfType<string>())}."
+            : notComparedPart is null ? notVerified
+            : notVerified is null ? $"{NotVerifiedMarker} {notComparedPart}: fix the errors the untouched code has too, then run again."
+            : $"{notVerified} Also, {notComparedPart}.";
     }
 
     /// <summary>

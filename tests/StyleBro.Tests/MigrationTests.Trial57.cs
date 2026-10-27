@@ -67,4 +67,42 @@ public sealed partial class MigrationTests
             DeleteFolder(shallowCopy);
         }
     }
+
+    [Fact]
+    public void BuildCheck_ErrorsInAProjectTheUntouchedBuildDidntCompile_AreNotCompared()
+    {
+        // DapperAOT: Analyzers fails with warnings as errors (RS1032) in both builds; the untouched build never compiled
+        // Integration (it needs a project that failed), but after a design-time load the working tree's build compiled it without
+        // that reference: 7 CS0234 errors, "Not clean". They have nothing to compare with: not verified (owner, 2026-10-27).
+        var solution = Path.Combine(root, "A.slnx");
+        File.WriteAllText(solution, "<Solution>\n  <Project Path=\"Analyzers/Analyzers.csproj\" />\n  <Project Path=\"Integration/Integration.csproj\" />\n  <Project Path=\"Other/Other.csproj\" />\n</Solution>\n");
+        var copy = Path.Combine(root, "copy", "repo");
+        Directory.CreateDirectory(copy);
+        (int, IReadOnlyList<string>) Build(string folder, string workspace, string configuration)
+        {
+            List<string> output =
+            [
+                $"{Path.Combine(folder, "Analyzers", "D.cs")}(29,13): error RS1032: The diagnostic message should not contain any line return [{Path.Combine(folder, "Analyzers", "Analyzers.csproj")}]",
+                "  Other -> /tmp/out/Other.dll",
+            ];
+            if (folder == root)
+            {
+                output.Add($"{Path.Combine(folder, "Integration", "T.cs")}(1,35): error CS0234: The type or namespace name 'Executables' does not exist [{Path.Combine(folder, "Integration", "Integration.csproj")}]");
+            }
+
+            return (1, output);
+        }
+
+        var lines = new List<string>();
+        var line = FormatCommand.BuildCheckLine(root, solution, lines.Add, Build, () => copy, () => ["Analyzers", "Integration", "Other"]);
+
+        Assert.Contains("Debug: no findings, no new errors (1 error the untouched code has too, not counted).", lines);
+        Assert.Contains("  Not compared: Integration (the untouched code's build didn't compile it: a project it needs failed there).", lines);
+        Assert.Equal(FormatCommand.NotVerifiedMarker + " the Debug (Integration), Release (Integration) builds compiled projects the untouched code's build didn't (a project they need failed there), so their errors have nothing to compare with (above): fix the errors the untouched code has too, then run again.", line);
+
+        // A finding of format's rules there still counts.
+        (int, IReadOnlyList<string>) WithFinding(string folder, string workspace, string configuration) =>
+            folder == root ? (1, [.. Build(folder, workspace, configuration).Item2, $"{Path.Combine(folder, "Integration", "T.cs")}(2,1): error BRO1002: Add a space after '//' [{Path.Combine(folder, "Integration", "Integration.csproj")}]"]) : Build(folder, workspace, configuration);
+        Assert.StartsWith("Not clean: the builds report 2 findings", FormatCommand.BuildCheckLine(root, solution, _ => { }, WithFinding, () => copy, () => ["Analyzers", "Integration", "Other"]), StringComparison.Ordinal);
+    }
 }
