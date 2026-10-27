@@ -38,6 +38,19 @@ public sealed class FormatHostFixTests : IDisposable
     }
 
     [Fact]
+    public void AFixer_ForAnotherLanguage_IsLeftOut()
+    {
+        // The visual-basic fixture: with a Visual Basic project in the workspace, IDE0036's VB fixer ran after the C# one on the
+        // C# diagnostics and deleted the method whose modifiers it was handed.
+        CodeFixProvider[] fixers = [new CSharpFixer("X1"), new BasicFixer("X1"), new Fixer("X1")];
+
+        Assert.Equal([typeof(CSharpFixer), typeof(Fixer)], FixOrder.FixersFor("X1", fixers, [LanguageNames.CSharp]).Select(f => f.GetType()));
+        Assert.Equal([typeof(BasicFixer), typeof(Fixer)], FixOrder.FixersFor("X1", fixers, [LanguageNames.VisualBasic]).Select(f => f.GetType()));
+        Assert.Equal(3, FixOrder.FixersFor("X1", fixers, [LanguageNames.CSharp, LanguageNames.VisualBasic]).Count);
+        Assert.Equal(3, FixOrder.FixersFor("X1", fixers).Count);
+    }
+
+    [Fact]
     public async Task TheCache_RunsAnAnalyzer_OnlyOnContentItHasntSeen()
     {
         using var workspace = new AdhocWorkspace();
@@ -291,6 +304,26 @@ public sealed class FormatHostFixTests : IDisposable
     }
 
     private sealed class OtherFixer(params string[] ids) : CodeFixProvider
+    {
+        public override ImmutableArray<string> FixableDiagnosticIds => [.. ids];
+
+        public override FixAllProvider? GetFixAllProvider() => null;
+
+        public override Task RegisterCodeFixesAsync(CodeFixContext context) => Task.CompletedTask;
+    }
+
+    [ExportCodeFixProvider(LanguageNames.CSharp)]
+    private sealed class CSharpFixer(params string[] ids) : CodeFixProvider
+    {
+        public override ImmutableArray<string> FixableDiagnosticIds => [.. ids];
+
+        public override FixAllProvider? GetFixAllProvider() => null;
+
+        public override Task RegisterCodeFixesAsync(CodeFixContext context) => Task.CompletedTask;
+    }
+
+    [ExportCodeFixProvider(LanguageNames.VisualBasic)]
+    private sealed class BasicFixer(params string[] ids) : CodeFixProvider
     {
         public override ImmutableArray<string> FixableDiagnosticIds => [.. ids];
 
