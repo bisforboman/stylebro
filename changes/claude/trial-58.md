@@ -6,3 +6,6 @@
 - **BRO1103** and **BRO1106** no longer report code in an expression tree (an `Expression<...>` lambda or a query over
   `IQueryable`): swapping `'c' == s[0]` or replacing `string.Empty` with `""` there changed the tree a program reads at run
   time.
+- **`bro check --build`** no longer says "Not verified" when a project's only build error is CS1685 (a type the compiler
+  needs found in two referenced assemblies, with warnings as errors) and the untouched code has it too: the project still
+  compiles far enough for StyleBro's rules to run.

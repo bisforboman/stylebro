@@ -23,11 +23,13 @@ internal static partial class FormatCommand
 
     private static readonly Regex BuildLine = new(@"^\s*(?<path>.+?)(?:\((?<line>\d+),(?<column>\d+)\))? ?: (?<kind>warning|error) (?<id>[A-Za-z]+\d+): (?<message>.*?)(?: \[(?<project>[^\]]*)\])?\s*$");
 
-    // Compiler errors without a place in the code that the compiler reports when it emits, after the analyzers ran (trial 49,
-    // superpower: CS8002, a strong-named assembly referencing an unsigned one, with warnings as errors; a planted finding in
-    // that project was reported). Every other error without a place stops the build before the compiler (restore, MSBuild,
+    // Compiler errors without a place in the code that don't stop the analyzers: CS8002 when the compiler emits (trial 49,
+    // superpower: a strong-named assembly referencing an unsigned one, with warnings as errors; a planted finding in that
+    // project was reported), CS1685 when it binds (trial 58, ExpressionTreeToString: 'RuntimeHelpers' in two referenced
+    // assemblies in its net452/net472 tests; "Not verified: compiled nothing" while the old engine's build of those projects
+    // reported 329 findings). Every other error without a place stops the build before the compiler (restore, MSBuild,
     // command line: CS0006, CS2001).
-    private static readonly HashSet<string> EmitErrors = new(StringComparer.Ordinal) { "CS8002" };
+    private static readonly HashSet<string> EmitErrors = new(StringComparer.Ordinal) { "CS8002", "CS1685" };
 
     private static readonly Regex OutputLine = new(@"^\s*(?<name>\S.*?) -> (?:/|[A-Za-z]:\\)");
 

@@ -45,4 +45,22 @@ public sealed partial class MigrationTests
         Assert.Contains("<WarningsNotAsErrors>$(WarningsNotAsErrors);xUnit2013</WarningsNotAsErrors>", hook, StringComparison.Ordinal);
         Assert.Contains("  <PropertyGroup>\n", File.ReadAllText(FormatCommand.UntouchedHook(root, ["xUnit2013"])), StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void BuildCheck_ATypeDefinedInTwoReferences_DoesntStopTheAnalyzers()
+    {
+        // ExpressionTreeToString: its net452/net472 tests see 'RuntimeHelpers' in two referenced assemblies, CS1685 with warnings
+        // as errors, untouched too. Without a place in the code it read as an error that stops the build before the compiler
+        // ("Not verified: ... compiled nothing past their errors"), but the compiler reports it while binding, and the
+        // analyzers ran: the old engine's build of the same projects reported 329 findings of format's rules.
+        var solution = Path.Combine(root, "App.slnx");
+        File.WriteAllText(solution, "<Solution>\n  <Project Path=\"Poly/Poly.csproj\" />\n  <Project Path=\"App/App.csproj\" />\n</Solution>\n");
+        var app = Path.Combine(root, "App", "App.csproj");
+        (int, IReadOnlyList<string>) Build(string folder, string workspace, string configuration) =>
+            (1, [$"CSC : error CS1685: The predefined type 'RuntimeHelpers' is defined in multiple assemblies in the global alias; using definition from 'Poly, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' [{app}::TargetFramework=net472]", "  Poly -> /tmp/out/Poly.dll"]);
+
+        var lines = new List<string>();
+        Assert.Null(FormatCommand.BuildCheckLine(root, solution, lines.Add, Build, () => string.Empty, () => ["Poly", "App"]));
+        Assert.Contains("Debug: no findings, no new errors (1 error the untouched code has too, not counted).", lines);
+    }
 }
