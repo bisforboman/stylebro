@@ -903,7 +903,7 @@ engines (`.trials/README.md`, "Engine soak").
   under CI=true. Running chains rewrite their tracked logs, so the stop hook kept asking to commit: in-progress logs stay
   untracked until their chain ends. One worker restart (nothing lost).
 
-## Trial 56 (2026-10-26, VERDICT; host soak: SOAK)
+## Trial 56 (2026-10-26, not clean: owner "Not clean", tally 0; host soak: clean, the first clean soak with the host as the default)
 
 - Repos (three random plus one targeted): robinrodricks/FluentFTP, ZiggyCreatures/FusionCache,
   andrewlock/NetEscapades.EnumGenerators (random, seed 56: draws 71, 1, 60 of 79 entries; draw 71, NickCraver/StackExchange.Exceptional,
