@@ -112,8 +112,8 @@ function Test-Verdict($result, [int]$expected, [string]$reason, $failures) {
     $report = $result.Report
     switch ($result.Code) {
         0 {
-            # check: "Clean."; format: "Run N: 0 files changed, clean."; the preview: "clean after N runs".
-            if ($result.Text -notmatch '(?m)^Clean\.|, clean\.$|clean after \d+ runs?') { $failures.Add("$name exited 0 without saying it is clean") }
+            # check: "Clean." or "Clean: 1 finding kept on purpose"; format: "Run N: 0 files changed, clean."; the preview: "clean after N runs".
+            if ($result.Text -notmatch '(?m)^Clean[.:]|, clean\.$|clean after \d+ runs?') { $failures.Add("$name exited 0 without saying it is clean") }
             # Notes (IDE0049 on an SDK that ignores the multi-target guard, ...) say the verdict doesn't count them.
             $gaps = @($report.notChecked | Where-Object { $_ -and $_ -notmatch "the verdict doesn't count" })
             if ($report -and ($report.clean -eq $false -or $gaps.Count -gt 0)) { $failures.Add("$name exited 0 but its --json has clean=$($report.clean), notChecked: $($gaps -join '; ')") }

@@ -10,7 +10,7 @@
     }
     Create = {
         param($root)
-        New-Project $root 'Src/Lib/Lib.csproj'
+        New-Project $root 'Src/Lib/Lib.csproj' -Properties ([ordered]@{ Nullable = 'enable' })
         Set-Messy $root 'Src/Lib/Calc.cs' -Namespace 'Lib'
         Set-Text $root 'Src/Lib/Counter.cs' "namespace Lib;`n`npublic class Counter`n{`n    private int _count;`n    private int _total;`n`n    public int Next() => ++_count + _total++;`n}"
         Set-Text $root 'Src/Lib/Reader.cs' "namespace Lib;`n`npublic static class Reader`n{`n    public static object? Read(Counter counter) => typeof(Counter).GetField(`"_count`", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(counter);`n}"
