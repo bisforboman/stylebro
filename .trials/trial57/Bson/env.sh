@@ -3,4 +3,4 @@ SLN=Src/Newtonsoft.Json.Bson.slnx
 TESTS='cd Src && dotnet test Newtonsoft.Json.Bson.slnx -c $CFG'
 PREVIEW=init
 PREP="sed -i '/json-net-public/d' Src/NuGet.Config"
-SETUP='printf "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial57.1\" PrivateAssets=\"all\" />\n  </ItemGroup>\n</Project>\n" > Directory.Build.props && cat Directory.Build.props && bro init --write'
+SETUP='printf "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial57.2\" PrivateAssets=\"all\" />\n  </ItemGroup>\n</Project>\n" > Directory.Build.props && cat Directory.Build.props && bro init --write'

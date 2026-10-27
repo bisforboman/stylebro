@@ -3,4 +3,4 @@ SLN=Dapper.AOT.slnx
 TESTS='dotnet test test/Dapper.AOT.Test/Dapper.AOT.Test.csproj -c $CFG -f net10.0 --filter "FullyQualifiedName!~Integration"'
 PREVIEW=init
 PREBUILD_CHECK=1
-SETUP='python3 /home/user/stylebro/.trials/trial57/addref.py Directory.Packages.props "<PackageVersion Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial57.1\" />" && python3 /home/user/stylebro/.trials/trial57/addref.py Directory.Build.props "<PackageReference Include=\"StyleBro.Analyzers\" PrivateAssets=\"all\" />" && git diff --stat && bro init --write'
+SETUP='python3 /home/user/stylebro/.trials/trial57/addref.py Directory.Packages.props "<PackageVersion Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial57.2\" />" && python3 /home/user/stylebro/.trials/trial57/addref.py Directory.Build.props "<PackageReference Include=\"StyleBro.Analyzers\" PrivateAssets=\"all\" />" && git diff --stat && bro init --write'
