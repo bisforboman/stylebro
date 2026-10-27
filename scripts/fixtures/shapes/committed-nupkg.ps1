@@ -7,6 +7,7 @@
 #   alone.
 @{
     Description = 'a .nupkg next to the solution, one next to test code, a packages/ folder'
+    Target = 'src/Fixture.sln'
     Reference = {
         param($repo)
         $props = Join-Path $repo 'src/Directory.Build.props'
