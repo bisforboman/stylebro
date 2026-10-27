@@ -89,4 +89,25 @@ Summary:
 Settings: 99 lines in .editorconfig; 9 lines in Directory.Build.props (StyleBro.Analyzers)
   StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial58.2 to Directory.Build.props for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).
 Format run 1... 4m 37s
-Format run 2... 
+Format run 2... 1m 37s
+Format: 218 files, 10,616 reported changes, clean after 1 run
+  IDE0055  Whitespace and formatting                  126 files
+  BRO1505  Elements should be separated by a bla...    69 files
+  ENDOFLINE                                             36 files
+  BRO1002  Single-line comments should begin wit...    32 files
+  IMPORTS                                              25 files
+  BRO1503  Opening braces should not be followed...    22 files
+  BRO1504  Single-line comments should be preced...    22 files
+  BRO1405  Statement should not use unnecessary ...    21 files
+  BRO1517  Code should not contain multiple blan...    21 files
+  BRO1303  Private field names should be camelCase     20 files
+  ... and 39 more rules
+Sample (IDE0055, src/NPoco.Abstractions/Expressions/MemberChainHelper.cs):
+  (removes trailing whitespace)
+Sample (BRO1505, src/NPoco.Abstractions/AnsiString.cs):
+  (adds a blank line)
+Sample (ENDOFLINE, src/NPoco.Abstractions/ReflectionCache.cs):
+  (changes only line endings or whitespace)
+Full diff: .git/stylebro-preview.patch (30,248 lines)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 6m 26s.

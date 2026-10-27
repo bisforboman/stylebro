@@ -1,0 +1,96 @@
+You can invoke the tool using the following command: bro
+Tool 'stylebro.tool' (version '0.8.0-trial58.1') was successfully installed.
+== stylecop-partial : StyleCop 1.1.118 in the library only, migrate; the tests it leaves alone fail TWAE untouched (xUnit2013)
+  preview                      exit 0 (13 s)
+  migrate                      exit 0 (3 s)
+  host-format                  exit 0 (14 s)
+  host-check                   exit 0 (10 s)
+  host-check-build             exit 2 (35 s)
+  dotnet-format-format         exit 0 (24 s)
+  dotnet-format-check          exit 0 (21 s)
+  dotnet-format-check-build    exit 2 (50 s)
+  FAIL stylecop-partial (178 s)
+    - preview exited 0 without saying it is clean
+    - host-check-build exited 2, expected 0 (log: /home/user/fx58/before/stylecop-partial/logs/host-check-build.txt)
+    - dotnet-format-check-build exited 2, expected 0 (log: /home/user/fx58/before/stylecop-partial/logs/dotnet-format-check-build.txt)
+    --- build.txt (last 12 lines)
+        Restored /home/user/fx58/before/stylecop-partial/host/tests/Lib.Tests/Lib.Tests.csproj (in 1.47 sec).
+        Restored /home/user/fx58/before/stylecop-partial/host/src/Lib/Lib.csproj (in 1.47 sec).
+        Lib -> /home/user/fx58/before/stylecop-partial/host/src/Lib/bin/Debug/net10.0/Lib.dll
+      /home/user/fx58/before/stylecop-partial/host/tests/Lib.Tests/CounterTests.cs(12,13): error xUnit2013: Do not use Assert.Equal() to check for collection size. Use Assert.Single instead. (https://xunit.net/xunit.analyzers/rules/xUnit2013) [/home/user/fx58/before/stylecop-partial/host/tests/Lib.Tests/Lib.Tests.csproj]
+      
+      Build FAILED.
+      
+      /home/user/fx58/before/stylecop-partial/host/tests/Lib.Tests/CounterTests.cs(12,13): error xUnit2013: Do not use Assert.Equal() to check for collection size. Use Assert.Single instead. (https://xunit.net/xunit.analyzers/rules/xUnit2013) [/home/user/fx58/before/stylecop-partial/host/tests/Lib.Tests/Lib.Tests.csproj]
+          0 Warning(s)
+          1 Error(s)
+      
+      Time Elapsed 00:00:03.85
+    --- dotnet-format-check-build.txt (last 12 lines)
+      Debug|x64: 1 finding of format's rules:
+        tests/Lib.Tests/CounterTests.cs(12,13): xUnit2013: Do not use Assert.Equal() to check for collection size. Use Assert.Single instead. (https://xunit.net/xunit.analyzers/rules/xUnit2013)
+      Debug|x86: 1 finding of format's rules:
+        tests/Lib.Tests/CounterTests.cs(12,13): xUnit2013: Do not use Assert.Equal() to check for collection size. Use Assert.Single instead. (https://xunit.net/xunit.analyzers/rules/xUnit2013)
+      Release: 1 finding of format's rules:
+        tests/Lib.Tests/CounterTests.cs(12,13): xUnit2013: Do not use Assert.Equal() to check for collection size. Use Assert.Single instead. (https://xunit.net/xunit.analyzers/rules/xUnit2013)
+      Release|x64: 1 finding of format's rules:
+        tests/Lib.Tests/CounterTests.cs(12,13): xUnit2013: Do not use Assert.Equal() to check for collection size. Use Assert.Single instead. (https://xunit.net/xunit.analyzers/rules/xUnit2013)
+      Release|x86: 1 finding of format's rules:
+        tests/Lib.Tests/CounterTests.cs(12,13): xUnit2013: Do not use Assert.Equal() to check for collection size. Use Assert.Single instead. (https://xunit.net/xunit.analyzers/rules/xUnit2013)
+      Formatting is clean. But:
+      Not clean: the builds report 6 findings of format's rules (above): fix them by hand, or suppress or baseline them.
+    --- dotnet-format-check.txt (last 12 lines)
+      Checking StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (163 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+      Leaving alone: tests/: StyleCop didn't run there, so the migration set nothing up there (the stylebro-migrate block in .editorconfig names them).
+      Clean.
+    --- dotnet-format-format.txt (last 12 lines)
+      Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (163 ids); --all applies every analyzer's and compiler fix.
+      Leaving alone: tests/: StyleCop didn't run there, so the migration set nothing up there (the stylebro-migrate block in .editorconfig names them).
+      Run 1: 0 files changed, clean.
+    --- host-check-build.txt (last 12 lines)
+      Debug|x64: 1 finding of format's rules:
+        tests/Lib.Tests/CounterTests.cs(12,13): xUnit2013: Do not use Assert.Equal() to check for collection size. Use Assert.Single instead. (https://xunit.net/xunit.analyzers/rules/xUnit2013)
+      Debug|x86: 1 finding of format's rules:
+        tests/Lib.Tests/CounterTests.cs(12,13): xUnit2013: Do not use Assert.Equal() to check for collection size. Use Assert.Single instead. (https://xunit.net/xunit.analyzers/rules/xUnit2013)
+      Release: 1 finding of format's rules:
+        tests/Lib.Tests/CounterTests.cs(12,13): xUnit2013: Do not use Assert.Equal() to check for collection size. Use Assert.Single instead. (https://xunit.net/xunit.analyzers/rules/xUnit2013)
+      Release|x64: 1 finding of format's rules:
+        tests/Lib.Tests/CounterTests.cs(12,13): xUnit2013: Do not use Assert.Equal() to check for collection size. Use Assert.Single instead. (https://xunit.net/xunit.analyzers/rules/xUnit2013)
+      Release|x86: 1 finding of format's rules:
+        tests/Lib.Tests/CounterTests.cs(12,13): xUnit2013: Do not use Assert.Equal() to check for collection size. Use Assert.Single instead. (https://xunit.net/xunit.analyzers/rules/xUnit2013)
+      Formatting is clean. But:
+      Not clean: the builds report 6 findings of format's rules (above): fix them by hand, or suppress or baseline them.
+    --- host-check.txt (last 12 lines)
+      Checking StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (163 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+      Leaving alone: tests/: StyleCop didn't run there, so the migration set nothing up there (the stylebro-migrate block in .editorconfig names them).
+      Clean.
+    --- host-format.txt (last 12 lines)
+      Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (163 ids); --all applies every analyzer's and compiler fix.
+      Leaving alone: tests/: StyleCop didn't run there, so the migration set nothing up there (the stylebro-migrate block in .editorconfig names them).
+      Run 1: 0 files changed, clean.
+    --- migrate.txt (last 12 lines)
+          SA1642: StyleCop never checked it here: no project sets GenerateDocumentationFile, so the build doesn't parse documentation (SA0001)
+          SA1643: StyleCop never checked it here: no project sets GenerateDocumentationFile, so the build doesn't parse documentation (SA0001)
+          SA1651: StyleCop never checked it here: no project sets GenerateDocumentationFile, so the build doesn't parse documentation (SA0001)
+      Private fields where StyleCop runs: 0 named '_field', 0 named 'field'; SA1309 is on where StyleCop runs, so BRO1303 uses 'camelCase'.
+      Line endings: C# files 2 LF, 0 CRLF -> end_of_line not set ('format' writes your OS's ending into the lines it changes)
+      Suppressions: none in the code to carry over.
+      
+      Wrote the settings to .editorconfig.
+      Turned the preset off in Directory.Build.props (<StyleBroPreset>none</StyleBroPreset>): the settings above replace it.
+      Tip: --agents-md writes a StyleBro section into AGENTS.md for AI coding agents.
+      StyleCop.Analyzers is referenced in src/Lib/Lib.csproj: StyleBro.Analyzers goes there.
+      Next: add the StyleBro.Analyzers package, remove StyleCop.Analyzers, and run 'bro format'.
+    --- preview.txt (last 12 lines)
+      Previewing 'bro migrate --write' and 'bro format' on a copy; nothing in /home/user/fx58/before/stylecop-partial/repo changes.
+      Copying the repository to /tmp/stylebro-preview-fCf38m/repo... 0s
+      Settings: 329 lines in .editorconfig; 6 lines in Directory.Build.props (StyleBroPreset=none)
+        StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial58.1 to src/Lib/Lib.csproj for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).
+      Format run 1... 10s
+      Format: 0 files, 0 reported changes, nothing to change
+      Full diff: .git/stylebro-preview.patch (359 lines)
+      Done in 13s.
+| Shape | Result | Time |
+| --- | --- | --- |
+| stylecop-partial | FAIL: preview exited 0 without saying it is clean<br>host-check-build exited 2, expected 0 (log: /home/user/fx58/before/stylecop-partial/logs/host-check-build.txt)<br>dotnet-format-check-build exited 2, expected 0 (log: /home/user/fx58/before/stylecop-partial/logs/dotnet-format-check-build.txt) | 178 s |
+Work folder: /home/user/fx58/before

@@ -1,0 +1,49 @@
+Fixing StyleBro's rules and the built-in rules init and migrate turn on (141 ids); --all applies every analyzer's and compiler fix.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net462, net8.0, netstandard2.0, netstandard2.1). net8.0, netstandard2.1: only the projects whose code compiles differently there.
+Configurations: runs for Release (NPoco, NPoco.Tests) too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.
+Checked netstandard2.0, Release (run 1 of 10)
+Checked net462, Release (run 2 of 10)
+Checked netstandard2.0 (run 3 of 10)
+Checked netstandard2.1, Release (run 4 of 10)
+Checked net10.0 (run 5 of 10)
+Checked netstandard2.1 (run 6 of 10)
+Checked net8.0, Release (run 7 of 10)
+Checked net462 (run 8 of 10)
+Checked net10.0, Release (run 9 of 10)
+Checked net8.0 (run 10 of 10)
+== net10.0 (7 project(s), 218 files with findings)
+== net462 (6 project(s), 145 files with findings)
+'dotnet format' had warnings loading the workspace in its net462 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+== net8.0 (1 project(s), 68 files with findings)
+== netstandard2.0 (6 project(s), 145 files with findings)
+== netstandard2.1 (1 project(s), 68 files with findings)
+== net10.0, Release (2 project(s), 141 files with findings)
+== net462, Release (1 project(s), 68 files with findings)
+== net8.0, Release (1 project(s), 68 files with findings)
+== netstandard2.0, Release (1 project(s), 68 files with findings)
+== netstandard2.1, Release (1 project(s), 68 files with findings)
+Run 1: 218 files changed:
+  src/NPoco.Abstractions/AnsiString.cs
+  src/NPoco.Abstractions/CloneExtensions.cs
+  src/NPoco.Abstractions/ColumnAttribute.cs
+  src/NPoco.Abstractions/ColumnTypeAttribute.cs
+  src/NPoco.Abstractions/ComplexMappingAttribute.cs
+  src/NPoco.Abstractions/ComputedColumnAttribute.cs
+  src/NPoco.Abstractions/ComputedColumnType.cs
+  src/NPoco.Abstractions/Expressions/GeneralMember.cs
+  src/NPoco.Abstractions/Expressions/ISqlExpression.cs
+  src/NPoco.Abstractions/Expressions/MemberChainHelper.cs
+  ... and 208 more
+Checked netstandard2.0, Release (run 1 of 10)
+Checked net462, Release (run 2 of 10)
+Checked netstandard2.0 (run 3 of 10)
+Checked net10.0 (run 4 of 10)
+Checked netstandard2.1, Release (run 5 of 10)
+Checked net8.0, Release (run 6 of 10)
+Checked netstandard2.1 (run 7 of 10)
+Checked net462 (run 8 of 10)
+Checked net10.0, Release (run 9 of 10)
+Checked net8.0 (run 10 of 10)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
