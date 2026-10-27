@@ -44,7 +44,8 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
 - **BRO1103** (SA1131) constant on the left of a comparison: swap operands, flip `<`/`>`/`<=`/`>=`. "Constant" as in
   StyleCop (incl. `static readonly` fields). Only built-in operators and operators from the core library (same
   assembly as `object`) are swapped; a type's own `==` may not be symmetric -> not reported (deviation). Same-precedence
-  left operand gets parentheses (`1 == 2 == b` -> `b == (1 == 2)`). Fix All is a bottom-up rewriter (nesting).
+  left operand gets parentheses (`1 == 2 == b` -> `b == (1 == 2)`). Fix All is a bottom-up rewriter (nesting). Not in
+  expression trees (trial 58: ExpressionTreeToString's `Tuesday <= dow` became a `>=` node; owner's decision 2026-10-27).
 - **BRO1104** (SA1129) `new T()` for value types -> `default(T)`, or like StyleCop `CancellationToken.None`,
   `Guid.Empty`, `IntPtr/UIntPtr.Zero`, an enum's zero member; `default(T)` in parameter defaults (must be constant).
   Not reported: explicit parameterless struct ctor (like StyleCop), type parameters and `new S();` statements
@@ -123,7 +124,9 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
 - **BRO1006** (SA1006, 2026-10-03, `Spacing/DirectiveSpacingAnalyzer.cs`) `# if` -> `#if`: StyleCop's check (a `#` whose
   trailing trivia has no line break, reported on the next token); empty `# ` directives skipped. Parity `directive-spacing`: 8/8, identical.
 - **BRO1106** (SA1122) `""`/`@""` -> `string.Empty`, except constant contexts (const, attribute args, parameter
-  defaults, case labels, patterns). Same results as StyleCop.
+  defaults, case labels, patterns). Same results as StyleCop, except expression trees (trial 58, owner's decision
+  2026-10-27: both directions skip a lambda or query converted to System.Linq.Expressions, `NullChecks.IsInExpressionTree`;
+  ExpressionTreeToString's tests render `() => string.Empty`).
 - **BRO1401** (SA1413, maintainability block) trailing comma in multi-line array/object/collection/with initializers,
   anonymous objects, enums, switch expressions (not collection expressions/patterns/`{k, v}` pairs, like StyleCop 1.2).
   Inserts `, ` when code follows directly (StyleCop's `,}` broke SA1001 in the private app). Skips lists with
