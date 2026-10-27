@@ -7,7 +7,8 @@
 @{
     Description = 'a Visual Basic project next to C#'
     EnginesDiffer = 'the old engine leaves the tests (which reference VbApp) out of its runs, by decision'
-    EngineExpect = @{ 'dotnet-format' = @{ format = 3; check = 3; 'check-build' = 3 } }
+    # check --build then finds what the left-out tests still have: Not clean (2), as it should.
+    EngineExpect = @{ 'dotnet-format' = @{ format = 3; check = 3; 'check-build' = 2 } }
     EngineReasons = @{ 'dotnet-format' = @{ format = 'Lib\.Tests\.csproj: it references a Visual Basic project'; check = 'Lib\.Tests\.csproj: it references a Visual Basic project' } }
     Assert = {
         param($repo, $runs)
