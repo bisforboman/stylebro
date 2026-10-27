@@ -43,7 +43,7 @@ internal static partial class FormatCommand
                 var where = m.Groups["line"].Success ? $"{path}({m.Groups["line"].Value},{m.Groups["column"].Value})" : path;
                 var shown = $"  {where}: {m.Groups["id"].Value}: {m.Groups["message"].Value}{(framework.Length > 0 ? $" ({framework})" : string.Empty)}";
                 var projectFile = framework.Length > 0 ? project.Substring(0, project.IndexOf("::", StringComparison.Ordinal)) : project;
-                return (Line: m.Value.Trim(), Message: new BuildMessage($"{path.ToUpperInvariant()}|{framework}|{m.Groups["id"].Value}|{m.Groups["message"].Value}", m.Groups["id"].Value, m.Groups["kind"].Value == "error", shown, m.Groups["line"].Success, Path.GetFileNameWithoutExtension(projectFile)));
+                return (Line: m.Value.Trim(), Message: new BuildMessage($"{path.ToUpperInvariant()}|{framework}|{m.Groups["id"].Value}|{m.Groups["message"].Value}", m.Groups["id"].Value, m.Groups["kind"].Value == "error", shown, m.Groups["line"].Success, Path.GetFileNameWithoutExtension(projectFile), path));
             })
             .DistinctBy(x => x.Line, StringComparer.Ordinal)
             .Select(x => x.Message)
@@ -52,15 +52,18 @@ internal static partial class FormatCommand
     /// <summary>
     /// What a build in one configuration says: the findings of format's rules (<paramref name="ids"/>), errors the untouched
     /// code's build (<paramref name="untouched"/>, null: no such build) doesn't have, and the errors both have. Counted per key,
-    /// so a message the untouched code has twice and the code three times is one new error.
+    /// so a message the untouched code has twice and the code three times is one new error. In the folders format leaves
+    /// alone (<paramref name="leftAlone"/>, relative to the build's root with a trailing '/') format's rules are errors like
+    /// any other: format fixed nothing there.
     /// </summary>
-    public static (List<string> Findings, List<string> New, int Old) CompareBuild(IReadOnlyList<BuildMessage> current, IReadOnlyList<BuildMessage>? untouched, IReadOnlySet<string> ids)
+    public static (List<string> Findings, List<string> New, int Old) CompareBuild(IReadOnlyList<BuildMessage> current, IReadOnlyList<BuildMessage>? untouched, IReadOnlySet<string> ids, IReadOnlyList<string>? leftAlone = null)
     {
-        var findings = current.Where(m => ids.Contains(m.Id)).Select(m => m.Shown).Distinct(StringComparer.Ordinal).ToList();
-        var before = (untouched ?? []).Where(m => m.Error && !ids.Contains(m.Id)).GroupBy(m => m.Key, StringComparer.Ordinal).ToDictionary(g => g.Key, g => g.Count(), StringComparer.Ordinal);
+        bool Finding(BuildMessage m) => IsFinding(m, ids, leftAlone);
+        var findings = current.Where(Finding).Select(m => m.Shown).Distinct(StringComparer.Ordinal).ToList();
+        var before = (untouched ?? []).Where(m => m.Error && !Finding(m)).GroupBy(m => m.Key, StringComparer.Ordinal).ToDictionary(g => g.Key, g => g.Count(), StringComparer.Ordinal);
         var newErrors = new List<string>();
         var old = 0;
-        foreach (var group in current.Where(m => m.Error && !ids.Contains(m.Id)).GroupBy(m => m.Key, StringComparer.Ordinal))
+        foreach (var group in current.Where(m => m.Error && !Finding(m)).GroupBy(m => m.Key, StringComparer.Ordinal))
         {
             var had = before.TryGetValue(group.Key, out var count) ? count : 0;
             old += Math.Min(had, group.Count());
@@ -69,6 +72,14 @@ internal static partial class FormatCommand
 
         return (findings, newErrors, old);
     }
+
+    /// <summary>
+    /// Whether a build message is a finding of format's rules: one of <paramref name="ids"/>, outside the folders format leaves
+    /// alone (<see cref="Migration.UnformattedFolders"/>). Trial 58, LightInject: StyleCop ran only in the library, so format
+    /// left the tests alone, and an xUnit2013 there that the untouched code has too made check --build "Not clean".
+    /// </summary>
+    public static bool IsFinding(BuildMessage message, IReadOnlySet<string> ids, IReadOnlyList<string>? leftAlone) =>
+        ids.Contains(message.Id) && leftAlone?.Any(f => message.RelativePath.StartsWith(f, StringComparison.OrdinalIgnoreCase)) != true;
 
     /// <summary>The configurations --build builds: the solution's ('Release|x64' with its platform), else the project's Configurations (Debug and Release).</summary>
     public static List<string> BuildConfigurations(string workspacePath) =>
@@ -159,6 +170,7 @@ internal static partial class FormatCommand
         var repository = RepositoryRoot(root);
         var top = repository ?? root;
         var relative = Path.GetRelativePath(top, workspacePath);
+        var leftAlone = Migration.UnformattedFolders(root).Select(f => Path.GetRelativePath(top, Path.GetFullPath(Path.Combine(root, f))).Replace('\\', '/').TrimEnd('/') + "/").ToList();
         string? temp = null;
         string? untouched;
         if (untouchedRoot is not null)
@@ -206,7 +218,7 @@ internal static partial class FormatCommand
                 var (exitCode, output) = build(root, workspacePath, configuration);
                 var current = BuildMessages(output, top);
                 (int ExitCode, IReadOnlyList<string> Output)? before = untouched is { Length: > 0 } copy
-                    ? WithHook(UntouchedHook(Path.GetDirectoryName(Path.GetFullPath(copy))!, ids), () => build(Path.GetFullPath(Path.Combine(copy, Path.GetRelativePath(top, root))), Path.GetFullPath(Path.Combine(copy, relative)), configuration))
+                    ? WithHook(UntouchedHook(Path.GetDirectoryName(Path.GetFullPath(copy))!, ids, leftAlone.Select(f => Path.GetFullPath(Path.Combine(copy, f)))), () => build(Path.GetFullPath(Path.Combine(copy, Path.GetRelativePath(top, root))), Path.GetFullPath(Path.Combine(copy, relative)), configuration))
                     : null;
                 var beforeMessages = before is { } b ? BuildMessages(b.Output, untouched!) : untouched == string.Empty ? current : null;
 
@@ -217,8 +229,8 @@ internal static partial class FormatCommand
                 var unmatched = before is { ExitCode: not 0 } failedBefore
                     ? Uncompiled(failedBefore.Output, beforeMessages!, Expected(configuration)).ToHashSet(StringComparer.OrdinalIgnoreCase)
                     : [];
-                bool Unmatched(BuildMessage m) => m.Error && !ids.Contains(m.Id) && unmatched.Contains(m.Project);
-                var (found, newErrors, old) = CompareBuild(current.Where(m => !Unmatched(m)).ToList(), beforeMessages, ids);
+                bool Unmatched(BuildMessage m) => m.Error && !IsFinding(m, ids, leftAlone) && unmatched.Contains(m.Project);
+                var (found, newErrors, old) = CompareBuild(current.Where(m => !Unmatched(m)).ToList(), beforeMessages, ids, leftAlone);
                 var notComparedHere = current.Where(Unmatched).Select(m => m.Project).Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList();
 
                 // A failed build no line explains (a crash, an MSBuild error without a position) counts unless the untouched one failed too.
@@ -299,13 +311,16 @@ internal static partial class FormatCommand
     /// warnings there. Trial 40, Blazored.Toast: HEAD had init's settings but not format's fixes, so the library failed on
     /// BRO findings and the projects referencing it never compiled in the copy; their own errors (CS0067, the same seven)
     /// then counted as new in the formatted build, and check --build said "Not clean". A hook already set is imported too.
+    /// Not in the projects under <paramref name="leftAlone"/> (full paths): format fixed nothing there, so their errors are
+    /// compared as they are (<see cref="IsFinding"/>).
     /// </summary>
-    public static string UntouchedHook(string folder, IEnumerable<string> ids)
+    public static string UntouchedHook(string folder, IEnumerable<string> ids, IEnumerable<string>? leftAlone = null)
     {
         var path = Path.Combine(folder, "stylebro-untouched.targets");
         var chained = Environment.GetEnvironmentVariable(HookVariable);
         var import = string.IsNullOrEmpty(chained) ? string.Empty : $"  <Import Project=\"{System.Security.SecurityElement.Escape(chained)}\" Condition=\"Exists('{System.Security.SecurityElement.Escape(chained)}')\" />\n";
-        File.WriteAllText(path, $"<Project>\n{import}  <PropertyGroup>\n    <WarningsNotAsErrors>$(WarningsNotAsErrors);{string.Join(";", ids.Order(StringComparer.Ordinal))}</WarningsNotAsErrors>\n  </PropertyGroup>\n</Project>\n");
+        var outside = string.Join(" and ", (leftAlone ?? []).Select(f => $"!$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)').StartsWith('{System.Security.SecurityElement.Escape(f.TrimEnd('/', '\\') + Path.DirectorySeparatorChar)}'))"));
+        File.WriteAllText(path, $"<Project>\n{import}  <PropertyGroup{(outside.Length > 0 ? $" Condition=\"{outside}\"" : string.Empty)}>\n    <WarningsNotAsErrors>$(WarningsNotAsErrors);{string.Join(";", ids.Order(StringComparer.Ordinal))}</WarningsNotAsErrors>\n  </PropertyGroup>\n</Project>\n");
         return path;
     }
 
@@ -423,5 +438,5 @@ internal static partial class FormatCommand
         }
     }
 
-    public sealed record BuildMessage(string Key, string Id, bool Error, string Shown, bool InSource = true, string Project = "");
+    public sealed record BuildMessage(string Key, string Id, bool Error, string Shown, bool InSource = true, string Project = "", string RelativePath = "");
 }
