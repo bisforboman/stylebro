@@ -36,6 +36,8 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 Import-Module (Join-Path $PSScriptRoot 'Fixtures.psm1') -Force
 
+# 'pwsh -File' passes '-Shape a,b' as one string.
+$Shape = @($Shape | ForEach-Object { $_ -split ',' } | Where-Object { $_ })
 $all = @(Get-ChildItem (Join-Path $PSScriptRoot 'shapes') -Filter '*.ps1' | Sort-Object Name)
 if ($List) { $all | ForEach-Object { $_.BaseName }; exit 0 }
 $chosen = @(for ($i = 0; $i -lt $all.Count; $i++) {
@@ -112,7 +114,9 @@ function Test-Verdict($result, [int]$expected, [string]$reason, $failures) {
         0 {
             # check: "Clean."; format: "Run N: 0 files changed, clean."; the preview: "clean after N runs".
             if ($result.Text -notmatch '(?m)^Clean\.|, clean\.$|clean after \d+ runs?') { $failures.Add("$name exited 0 without saying it is clean") }
-            if ($report -and ($report.clean -eq $false -or @($report.notChecked | Where-Object { $_ }).Count -gt 0)) { $failures.Add("$name exited 0 but its --json has clean=$($report.clean), $(@($report.notChecked).Count) notChecked") }
+            # Notes (IDE0049 on an SDK that ignores the multi-target guard, ...) say the verdict doesn't count them.
+            $gaps = @($report.notChecked | Where-Object { $_ -and $_ -notmatch "the verdict doesn't count" })
+            if ($report -and ($report.clean -eq $false -or $gaps.Count -gt 0)) { $failures.Add("$name exited 0 but its --json has clean=$($report.clean), notChecked: $($gaps -join '; ')") }
         }
         3 {
             if ($result.Text -notmatch 'Not verified') { $failures.Add("$name exited 3 without saying 'Not verified'") }
@@ -170,6 +174,16 @@ foreach ($file in $chosen) {
         git clone -q @cloneArgs $repo
         if ($LASTEXITCODE -ne 0) { throw 'git clone failed.' }
         $base = (git -C $repo rev-parse HEAD).Trim()
+
+        # The fixture itself builds (without warnings as errors), unless the shape says its build fails.
+        if (-not $spec.BuildFails) {
+            $untouched = Join-Path $dir 'untouched'
+            git clone -q $repo $untouched
+            $target = if ($spec.Target) { Join-Path $untouched $spec.Target } else { $untouched }
+            dotnet build $target --nologo -v q @($spec.BuildArgs | Where-Object { $_ }) *> (Join-Path $logs 'untouched-build.txt')
+            if ($LASTEXITCODE -ne 0) { throw "the untouched fixture doesn't build (log: $(Join-Path $logs 'untouched-build.txt'))" }
+            Remove-Item -Recurse -Force $untouched
+        }
         if ($spec.Before) { & $spec.Before $repo $context }
 
         # 1. The preview, before StyleBro is referenced.

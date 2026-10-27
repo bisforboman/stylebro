@@ -49,11 +49,7 @@ namespace Shared
   </ItemGroup>
 '@
         Set-Text $root 'src/Internal/Uses.cs' "namespace Internal;`n`npublic static class Uses`n{`n    public static int Four() => Shared.Helpers.Twice(2);`n}"
-        New-TestProject $root 'tests/Public.Tests/Public.Tests.csproj' -Frameworks 'net8.0;net10.0' -References '../../src/Public/Public.csproj', '../../src/Internal/Internal.csproj' -Extra @'
-  <ItemGroup>
-    <ProjectReference Update="../../src/Internal/Internal.csproj" Aliases="Internal" />
-  </ItemGroup>
-'@
+        New-TestProject $root 'tests/Public.Tests/Public.Tests.csproj' -Frameworks 'net8.0;net10.0' -References '../../src/Public/Public.csproj'
         Set-Text $root 'tests/Public.Tests/HelpersTests.cs' @'
 using Xunit;
 
