@@ -47,6 +47,11 @@ $chosen = @(for ($i = 0; $i -lt $all.Count; $i++) {
     })
 if ($Shape.Count -gt 0 -and $chosen.Count -ne $Shape.Count) { throw "Unknown shape among: $($Shape -join ', ') (-List lists them)." }
 
+# Build tools that integrate with CI (Nerdbank.GitVersioning writes Git* variables to $GITHUB_ENV) must not reach the job's
+# later steps, nor see a CI the fixture's user wouldn't have: the fixtures' commands don't get the step's files.
+$summary = $env:GITHUB_STEP_SUMMARY
+Remove-Item Env:GITHUB_ENV, Env:GITHUB_OUTPUT, Env:GITHUB_PATH, Env:GITHUB_STEP_SUMMARY -ErrorAction SilentlyContinue
+
 $Work = [IO.Path]::GetFullPath($Work)
 if ($Work.StartsWith($root + [IO.Path]::DirectorySeparatorChar)) { throw '-Work must be outside the repository (its props would leak into the fixtures).' }
 New-Item -ItemType Directory -Force $Work | Out-Null
@@ -238,7 +243,12 @@ foreach ($file in $chosen) {
             foreach ($step in 'format', 'check', 'check-build') {
                 $x = $runs[$a].Steps[$step]; $y = $runs[$b].Steps[$step]
                 if ($x.Code -ne $y.Code) { $failures.Add("$step exit codes differ: $a $($x.Code), $b $($y.Code)") }
-                if ((Canonical $x $runs[$a].Clone) -ne (Canonical $y $runs[$b].Clone)) { $failures.Add("$step --json differs between $a and $b ($($x.Json), $($y.Json))") }
+                $cx = Canonical $x $runs[$a].Clone
+                $cy = Canonical $y $runs[$b].Clone
+                if ($cx -ne $cy) {
+                    $lines = @(Compare-Object ($cx -split "`n") ($cy -split "`n") -SyncWindow 0 | Select-Object -First 12 | ForEach-Object { "      $(if ($_.SideIndicator -eq '<=') { $a } else { $b }): $($_.InputObject.Trim())" })
+                    $failures.Add("$step --json differs between $a and $b ($($x.Json), $($y.Json)):`n$($lines -join "`n")")
+                }
             }
 
             if ($runs[$a].Steps['tree'].Replace($runs[$a].Clone, '<root>') -ne $runs[$b].Steps['tree'].Replace($runs[$b].Clone, '<root>')) {
@@ -307,6 +317,6 @@ $table = @('| Shape | Result | Time |', '| --- | --- | --- |') + @($results | Fo
         "| $($_.Shape) | $(if ($_.Ok) { 'pass' } else { 'FAIL: ' + (($_.Failures | ForEach-Object { $_.Replace('|', '\|') }) -join '<br>') }) | $('{0:0} s' -f $_.Seconds) |"
     })
 $table | ForEach-Object { Write-Host $_ }
-if ($env:GITHUB_STEP_SUMMARY) { Add-Content $env:GITHUB_STEP_SUMMARY (@("### Fixtures (shard $Shard of $Shards)", '') + $table) }
+if ($summary) { Add-Content $summary (@("### Fixtures (shard $Shard of $Shards)", '') + $table) }
 Write-Host "Work folder: $Work"
 if (@($results | Where-Object { -not $_.Ok }).Count -gt 0) { exit 1 }
