@@ -256,7 +256,7 @@ foreach ($file in $chosen) {
                 $pattern = '(\.cs|stylebro\.baseline)$'
                 $fromPreview = @(git -C $applied status --porcelain --untracked-files=all | ForEach-Object { $_.Substring(3) } | Where-Object { $_ -match $pattern } | Sort-Object)
                 $fromFormat = @(git -C $formatted diff --name-only $base | Where-Object { $_ -match $pattern }) + @(git -C $formatted ls-files --others --exclude-standard | Where-Object { $_ -match $pattern }) | Sort-Object -Unique
-                $diff = Compare-Object $fromPreview $fromFormat
+                $diff = Compare-Object @($fromPreview | Where-Object { $_ }) @($fromFormat | Where-Object { $_ })
                 if ($diff) { $failures.Add("the preview and format changed different files: $(($diff | ForEach-Object { "$($_.SideIndicator) $($_.InputObject)" }) -join ', ')") }
                 foreach ($path in $fromPreview | Where-Object { $_ -in $fromFormat }) {
                     $p = Join-Path $applied $path; $f = Join-Path $formatted $path
