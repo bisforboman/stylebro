@@ -1,0 +1,46 @@
+  Determining projects to restore...
+/home/user/w57/ErrorProne/dotnet/src/ErrorProne.NET.CoreAnalyzers/ErrorProne.NET.CoreAnalyzers.csproj : warning NU1603: ErrorProne.NET.CoreAnalyzers.RenameToAvoidConflict depends on Microsoft.CodeAnalysis.Analyzers (>= 4.13.0) but Microsoft.CodeAnalysis.Analyzers 4.13.0 was not found. Microsoft.CodeAnalysis.Analyzers 4.14.0 was resolved instead. [/home/user/w57/ErrorProne/dotnet/src/ErrorProne.NET.sln]
+  Restored /home/user/w57/ErrorProne/dotnet/src/RoslynNunitTestRunner/ErrorProne.NET.TestHelpers.csproj (in 477 ms).
+  Restored /home/user/w57/ErrorProne/dotnet/src/ErrorProne.NET.CoreAnalyzers.CodeFixes/ErrorProne.NET.CoreAnalyzers.CodeFixes.csproj (in 479 ms).
+  Restored /home/user/w57/ErrorProne/dotnet/src/ErrorProne.NET.CoreAnalyzers/ErrorProne.NET.CoreAnalyzers.csproj (in 522 ms).
+  Restored /home/user/w57/ErrorProne/dotnet/src/ErrorProne.NET.CoreAnalyzers.Tests/ErrorProne.NET.CoreAnalyzers.Tests.csproj (in 548 ms).
+/home/user/w57/ErrorProne/dotnet/src/ErrorProne.NET.CoreAnalyzers/ErrorProne.NET.CoreAnalyzers.csproj : warning NU1603: ErrorProne.NET.CoreAnalyzers.RenameToAvoidConflict depends on Microsoft.CodeAnalysis.Analyzers (>= 4.13.0) but Microsoft.CodeAnalysis.Analyzers 4.13.0 was not found. Microsoft.CodeAnalysis.Analyzers 4.14.0 was resolved instead.
+  ErrorProne.NET.TestHelpers -> /home/user/w57/ErrorProne/dotnet/src/RoslynNunitTestRunner/bin/Release/netstandard2.0/ErrorProne.NET.TestHelpers.dll
+  MERGING: ErrorProne.NET.TestHelpers;RuntimeContracts into 
+  Added assembly '/home/user/w57/ErrorProne/dotnet/src/RoslynNunitTestRunner/bin/Release/netstandard2.0/ErrorProne.NET.TestHelpers.dll'
+  Added assembly '/root/.nuget/packages/runtimecontracts/0.5.0/lib/netstandard1.1/RuntimeContracts.dll'
+  Merging 2 assemblies to '/home/user/w57/ErrorProne/dotnet/src/RoslynNunitTestRunner/bin/Release/netstandard2.0/ErrorProne.NET.TestHelpers.dll'
+INFO: ------------- IL Repack Arguments -------------
+
+-----------------------------------------------
+INFO: Wrote /home/user/w57/ErrorProne/dotnet/src/RoslynNunitTestRunner/bin/Release/netstandard2.0/ErrorProne.NET.TestHelpers.dll
+  Merge succeeded in 1.4062475 s
+  ErrorProne.NET.CoreAnalyzers -> /home/user/w57/ErrorProne/dotnet/src/ErrorProne.NET.CoreAnalyzers/bin/Release/netstandard2.0/ErrorProne.Net.CoreAnalyzers.dll
+  MERGING: ErrorProne.Net.CoreAnalyzers;RuntimeContracts into 
+  Added assembly '/home/user/w57/ErrorProne/dotnet/src/ErrorProne.NET.CoreAnalyzers/bin/Release/netstandard2.0/ErrorProne.Net.CoreAnalyzers.dll'
+  Added assembly '/root/.nuget/packages/runtimecontracts/0.5.0/lib/netstandard1.1/RuntimeContracts.dll'
+  Merging 2 assemblies to '/home/user/w57/ErrorProne/dotnet/src/ErrorProne.NET.CoreAnalyzers/bin/Release/netstandard2.0/ErrorProne.Net.CoreAnalyzers.dll'
+INFO: ------------- IL Repack Arguments -------------
+
+-----------------------------------------------
+INFO: Wrote /home/user/w57/ErrorProne/dotnet/src/ErrorProne.NET.CoreAnalyzers/bin/Release/netstandard2.0/ErrorProne.Net.CoreAnalyzers.dll
+  Merge succeeded in 0.9110766 s
+  ErrorProne.NET.CoreAnalyzers.CodeFixes -> /home/user/w57/ErrorProne/dotnet/src/ErrorProne.NET.CoreAnalyzers.CodeFixes/bin/Release/netstandard2.0/ErrorProne.Net.CoreAnalyzers.CodeFixes.dll
+  MERGING: ErrorProne.Net.CoreAnalyzers.CodeFixes;RuntimeContracts into 
+  Added assembly '/home/user/w57/ErrorProne/dotnet/src/ErrorProne.NET.CoreAnalyzers.CodeFixes/bin/Release/netstandard2.0/ErrorProne.Net.CoreAnalyzers.CodeFixes.dll'
+  Added assembly '/root/.nuget/packages/runtimecontracts/0.5.0/lib/netstandard1.1/RuntimeContracts.dll'
+  Merging 2 assemblies to '/home/user/w57/ErrorProne/dotnet/src/ErrorProne.NET.CoreAnalyzers.CodeFixes/bin/Release/netstandard2.0/ErrorProne.Net.CoreAnalyzers.CodeFixes.dll'
+INFO: ------------- IL Repack Arguments -------------
+
+-----------------------------------------------
+INFO: Wrote /home/user/w57/ErrorProne/dotnet/src/ErrorProne.NET.CoreAnalyzers.CodeFixes/bin/Release/netstandard2.0/ErrorProne.Net.CoreAnalyzers.CodeFixes.dll
+  Merge succeeded in 0.6844666 s
+  Successfully created package '/home/user/w57/ErrorProne/dotnet/src/ErrorProne.NET.CoreAnalyzers.CodeFixes/bin/Release/ErrorProne.NET.CoreAnalyzers.0.9.0-beta.8.ga085ce4915.nupkg'.
+  ErrorProne.NET.CoreAnalyzers.Tests -> /home/user/w57/ErrorProne/dotnet/src/ErrorProne.NET.CoreAnalyzers.Tests/bin/Release/net9.0/ErrorProne.NET.CoreAnalyzers.Tests.dll
+Test run for /home/user/w57/ErrorProne/dotnet/src/ErrorProne.NET.CoreAnalyzers.Tests/bin/Release/net9.0/ErrorProne.NET.CoreAnalyzers.Tests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:   418, Skipped:     0, Total:   418, Duration: 19 s - ErrorProne.NET.CoreAnalyzers.Tests.dll (net9.0)

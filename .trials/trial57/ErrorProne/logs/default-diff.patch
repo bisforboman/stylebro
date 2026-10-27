@@ -1,0 +1,3486 @@
+diff --git a/src/.editorconfig b/src/.editorconfig
+index 3fe18bc..93014f4 100644
+--- a/src/.editorconfig
++++ b/src/.editorconfig
+@@ -217,4 +217,67 @@ dotnet_diagnostic.CA1062.severity = none
+ dotnet_diagnostic.CA1307.severity = none
+ 
+ # CA1051: Do not declare visible instance fields
+-dotnet_diagnostic.CA1051.severity = none
+\ No newline at end of file
++dotnet_diagnostic.CA1051.severity = none
++
++# BEGIN stylebro-migrate (stylebro-migrate init: built-in .NET rules for StyleBro's preset; edits inside are replaced)
++[*.cs]
++# Built-in .NET rules that cover StyleCop rules, at the preset's severities. Their options (brace placement, modifier
++# order, ...) come from StyleBro's preset. The severities have to be here: 'dotnet format' ignores rule severities in a
++# package's global config. Add <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> to report them on build too.
++
++# Braces (SA1503, SA1519, SA1520) are StyleBro's BRO1514-BRO1516: IDE0011's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0011.severity = none
++# Access modifiers (SA1400, SA1205) are StyleBro's BRO1404/BRO1007: IDE0040's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0040.severity = none
++# Modifier order: access modifier first, then static (SA1206, SA1207)
++dotnet_diagnostic.IDE0036.severity = warning
++# 'int' instead of 'Int32' (SA1121)
++dotnet_diagnostic.IDE0049.severity = warning
++# Unnecessary parentheses (SA1119) are StyleBro's BRO1405: IDE0047's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0047.severity = none
++# Parentheses that show precedence (SA1407, SA1408) are StyleBro's BRO1406/BRO1407: IDE0048's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0048.severity = none
++# Using placement (SA1200) is StyleBro's BRO1008: IDE0065's fix can change what names bind to (CS0104, CS0118)
++dotnet_diagnostic.IDE0065.severity = none
++# Blank lines (SA1507, SA1508, SA1513) are StyleBro's BRO1517-BRO1519: the SDK's fixes break multi-targeted projects
++dotnet_diagnostic.IDE2000.severity = none
++dotnet_diagnostic.IDE2002.severity = none
++dotnet_diagnostic.IDE2003.severity = none
++# 'this.' qualification isn't required (SA1101 is off in the preset)
++dotnet_diagnostic.IDE0009.severity = none
++
++# Conventions in this repository's code (stylebro-migrate init counted them; delete a line to have it counted again)
++# init: operators where a line wraps: at the end of the line in 106 of 124 places in your code
++dotnet_style_operator_placement_when_wrapping = end_of_line
++# init: '=>' where a line wraps: at the start of the line in 16 of 20 places in your code
++stylebro_arrow_placement_when_wrapping = beginning_of_line
++# init: multi-line initializers: your code mixes both forms (17 with a trailing comma, 6 without a trailing comma), so BRO1401 is off. To choose one: set stylebro_trailing_comma and remove the next line.
++dotnet_diagnostic.BRO1401.severity = none
++# init: empty strings: your code mixes both forms (1 string.Empty, 2 ""), so BRO1106 is off. To choose one: set stylebro_empty_string_style and remove the next line.
++dotnet_diagnostic.BRO1106.severity = none
++# init: null checks: your code mixes both forms (52 'is null', 120 '== null'), so BRO1133 is off. To choose one: set stylebro_null_check_style and remove the next line.
++dotnet_diagnostic.BRO1133.severity = none
++# init: <inheritdoc/> tags: '<inheritdoc />' in 57 of 60 places in your code
++stylebro_inheritdoc_style = spaced
++# init: switch sections: your code mixes both forms (29 after a blank line, 28 without a blank line), so BRO1526 is off. To choose one: set stylebro_blank_line_between_switch_sections and remove the next line.
++dotnet_diagnostic.BRO1526.severity = none
++# init: types' members: your code mixes both forms (31 in BRO1001's order, 42 in another order), so BRO1001 is off. To choose one: set dotnet_diagnostic.BRO1001.severity and remove the next line.
++dotnet_diagnostic.BRO1001.severity = none
++# init: lambda-first calls: rest on the lambda's last line in 3 of 3 calls in your code
++stylebro_allow_leading_multiline_lambda = true
++# init: property summaries: your code mixes both forms (4 starting with 'Gets'/'Sets', 1 in their own words), so BRO1604 is off. To choose one: set dotnet_diagnostic.BRO1604.severity and remove the next line.
++dotnet_diagnostic.BRO1604.severity = none
++# init: declarations with 2+ attributes: 3 of 3 in your code are combined ('[A, B]'), so BRO1102 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1102.severity = none
++# init: nested ifs BRO1149 would merge: kept, because your code has some (11 nested ifs; any 3 keep them: BRO1149 would merge each), so BRO1149 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1149.severity = none
++# init: keywords in doc comments: your code mixes both forms (13 '<see langword="null"/>', 10 '<c>null</c>'), so BRO1618 is off. To choose one: set dotnet_diagnostic.BRO1618.severity and remove the next line.
++dotnet_diagnostic.BRO1618.severity = none
++# init: tuple element names: your code mixes both forms (9 '(int Count, ...)', 6 '(int count, ...)'), so BRO1311 is off. To choose one: set stylebro_tuple_element_name_casing and remove the next line.
++dotnet_diagnostic.BRO1311.severity = none
++# Line endings: your .editorconfig says end_of_line = crlf, but git checks out 110 C# files with each machine's ending (a .gitattributes 'text' attribute without 'eol', or core.autocrlf), so Linux and macOS checkouts don't match it. Until that's settled, formatting and IDE0055 leave each file's endings as checked out. To settle it: '*.cs text eol=crlf' in .gitattributes (then 'git add --renormalize .'), or remove end_of_line from .editorconfig; then run bro again.
++end_of_line = unset
++dotnet_diagnostic.IDE0055.severity = suggestion
++# init: Final line breaks: your .editorconfig says insert_final_newline = false, but 41 of 110 C# files end with a line break: nothing enforced it, so insert_final_newline = unset is written for C# files and 'format' leaves each file's last line break (or its absence) as it is. To have insert_final_newline = false everywhere: put that line below the stylebro-migrate block, in a [*.cs] section (a later line wins; the block's own lines come back on the next init) and run 'bro format' (it rewrites the files).
++insert_final_newline = unset
++# END stylebro-migrate
+diff --git a/src/Directory.Build.props b/src/Directory.Build.props
+index 5ab56db..1a9d5a2 100644
+--- a/src/Directory.Build.props
++++ b/src/Directory.Build.props
+@@ -1,5 +1,6 @@
+ <Project>
+   <PropertyGroup>
++    <StyleBroPreset>1.0</StyleBroPreset>
+     <LangVersion>latest</LangVersion>
+     <Nullable>Enable</Nullable>
+     <DebugType>embedded</DebugType>
+@@ -26,4 +27,7 @@
+     <!-- Disabling the ILRepack target that is on by default once the ILRepack.Lib.MSBuild package is referenced. -->
+     <DoILRepack>false</DoILRepack>
+   </PropertyGroup>
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" PrivateAssets="all" />
++  </ItemGroup>
+ </Project>
+diff --git a/src/Directory.Packages.props b/src/Directory.Packages.props
+index 6137556..7de8352 100644
+--- a/src/Directory.Packages.props
++++ b/src/Directory.Packages.props
+@@ -23,4 +23,7 @@
+     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing.NUnit" Version="1.1.2" />
+     <PackageVersion Include="Microsoft.DotNet.PlatformAbstractions" Version="3.1.6" />
+   </ItemGroup>
++  <ItemGroup>
++    <PackageVersion Include="StyleBro.Analyzers" Version="0.8.0-trial57.1" />
++  </ItemGroup>
+ </Project>
+\ No newline at end of file
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.CodeFixes/AsyncAnalyzers/AddConfigureAwaitCodeFixProvider.cs b/src/ErrorProne.NET.CoreAnalyzers.CodeFixes/AsyncAnalyzers/AddConfigureAwaitCodeFixProvider.cs
+index 1ba9eb0..d000551 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.CodeFixes/AsyncAnalyzers/AddConfigureAwaitCodeFixProvider.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.CodeFixes/AsyncAnalyzers/AddConfigureAwaitCodeFixProvider.cs
+@@ -56,7 +56,8 @@ namespace ErrorProne.NET.AsyncAnalyzers
+             }
+ 
+             var awaitExpression = parent.AncestorsAndSelf()
+-                .OfType<AwaitExpressionSyntax>().First();
++                .OfType<AwaitExpressionSyntax>()
++                .First();
+ 
+             var newExpr = SyntaxFactory.InvocationExpression(
+                 SyntaxFactory.MemberAccessExpression(
+@@ -65,8 +66,7 @@ namespace ErrorProne.NET.AsyncAnalyzers
+                     SyntaxFactory.IdentifierName("ConfigureAwait")),
+                 SyntaxFactory.ArgumentList(
+                     SyntaxFactory.SingletonSeparatedList(
+-                        SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.FalseLiteralExpression))))
+-            );
++                        SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.FalseLiteralExpression)))));
+ 
+             var newAwaitExpression = awaitExpression.WithExpression(newExpr);
+             var newRoot = root.ReplaceNode(awaitExpression, newAwaitExpression);
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.CodeFixes/AsyncAnalyzers/RemoveConfigureAwaitCodeFixProvider.cs b/src/ErrorProne.NET.CoreAnalyzers.CodeFixes/AsyncAnalyzers/RemoveConfigureAwaitCodeFixProvider.cs
+index 3b66b13..25a12e0 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.CodeFixes/AsyncAnalyzers/RemoveConfigureAwaitCodeFixProvider.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.CodeFixes/AsyncAnalyzers/RemoveConfigureAwaitCodeFixProvider.cs
+@@ -62,6 +62,7 @@ namespace ErrorProne.NET.AsyncAnalyzers
+                     .Expression.Cast<InvocationExpressionSyntax>() // await fooBar.ConfigureAwait(false);
+                     .Expression.Cast<MemberAccessExpressionSyntax>()
+                     .Expression; // fooBar
++
+             // Need to remove a potential trailing new line.
+             newExpression = newExpression.WithTrailingTrivia();
+             var newAwaitExpression = awaitExpression.WithExpression(newExpression);
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.CodeFixes/CoreAnalyzers/ExceptionHandlingFixers.cs b/src/ErrorProne.NET.CoreAnalyzers.CodeFixes/CoreAnalyzers/ExceptionHandlingFixers.cs
+index a0bffcf..ac7dd35 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.CodeFixes/CoreAnalyzers/ExceptionHandlingFixers.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.CodeFixes/CoreAnalyzers/ExceptionHandlingFixers.cs
+@@ -46,9 +46,11 @@ namespace ErrorProne.NET.CoreAnalyzers
+ 
+             // Find the type declaration identified by the diagnostic.
+             var identifier = root
+-                ?.FindToken(location.SourceSpan.Start).Parent
++                ?.FindToken(location.SourceSpan.Start)
++                .Parent
+                 ?.AncestorsAndSelf()
+-                .OfType<IdentifierNameSyntax>().FirstOrDefault();
++                .OfType<IdentifierNameSyntax>()
++                .FirstOrDefault();
+             if (root is not null && identifier is { Parent: MemberAccessExpressionSyntax mae })
+             {
+                 var newRoot = root.ReplaceNode(mae, mae.Expression);
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/AddConfigureAwaitAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/AddConfigureAwaitAnalyzerTests.cs
+index 0123892..3803ef5 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/AddConfigureAwaitAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/AddConfigureAwaitAnalyzerTests.cs
+@@ -1,5 +1,5 @@
+-﻿using NUnit.Framework;
+-using System.Threading.Tasks;
++﻿using System.Threading.Tasks;
++using NUnit.Framework;
+ using VerifyCS = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.AsyncAnalyzers.ConfigureAwaitRequiredAnalyzer,
+     ErrorProne.NET.AsyncAnalyzers.AddConfigureAwaitCodeFixProvider>;
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/AddConfigureAwaitCodeFixProviderTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/AddConfigureAwaitCodeFixProviderTests.cs
+index 14d03fd..614a628 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/AddConfigureAwaitCodeFixProviderTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/AddConfigureAwaitCodeFixProviderTests.cs
+@@ -1,5 +1,5 @@
+-﻿using NUnit.Framework;
+-using System.Threading.Tasks;
++﻿using System.Threading.Tasks;
++using NUnit.Framework;
+ using VerifyCS = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.AsyncAnalyzers.ConfigureAwaitRequiredAnalyzer,
+     ErrorProne.NET.AsyncAnalyzers.AddConfigureAwaitCodeFixProvider>;
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/AsyncVoidDelegateAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/AsyncVoidDelegateAnalyzerTests.cs
+index 3fb03ff..cea5724 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/AsyncVoidDelegateAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/AsyncVoidDelegateAnalyzerTests.cs
+@@ -1,5 +1,5 @@
+-﻿using NUnit.Framework;
+-using System.Threading.Tasks;
++﻿using System.Threading.Tasks;
++using NUnit.Framework;
+ using Verify = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.AsyncAnalyzers.AsyncVoidDelegateAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/AsyncVoidMethodAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/AsyncVoidMethodAnalyzerTests.cs
+index e8fe588..db1729d 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/AsyncVoidMethodAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/AsyncVoidMethodAnalyzerTests.cs
+@@ -1,5 +1,5 @@
+-using NUnit.Framework;
+ using System.Threading.Tasks;
++using NUnit.Framework;
+ using Verify = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.AsyncAnalyzers.AsyncVoidMethodAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/CancellationTokenRegistrationAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/CancellationTokenRegistrationAnalyzerTests.cs
+index 71c3673..9cd2f9b 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/CancellationTokenRegistrationAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/CancellationTokenRegistrationAnalyzerTests.cs
+@@ -1,5 +1,5 @@
+-﻿using NUnit.Framework;
+-using System.Threading.Tasks;
++﻿using System.Threading.Tasks;
++using NUnit.Framework;
+ using Verify = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.AsyncAnalyzers.CancellationTokenRegistrationAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+@@ -23,7 +23,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task WarnOnInstanceCts()
+         {
+@@ -40,7 +40,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task WarnOnStaticCts()
+         {
+@@ -57,7 +57,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task WarnOnInstancePropCts()
+         {
+@@ -76,7 +76,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task WarnOnInstanceNonCts()
+         {
+@@ -97,7 +97,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task NoWarnOnLocalCts()
+         {
+@@ -114,7 +114,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task NoWarnWhenLocalDeclarationIsSeparateLocalCts()
+         {
+@@ -134,7 +134,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task NoWarnOnLocalToken()
+         {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/DoNotBlockUnnecessarilyInAsyncMethodsAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/DoNotBlockUnnecessarilyInAsyncMethodsAnalyzerTests.cs
+index 30054e9..d7fb5a5 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/DoNotBlockUnnecessarilyInAsyncMethodsAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/DoNotBlockUnnecessarilyInAsyncMethodsAnalyzerTests.cs
+@@ -4,7 +4,6 @@ using VerifyCS = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.AsyncAnalyzers.DoNotBlockUnnecessarilyInAsyncMethodsAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+ 
+-
+ namespace ErrorProne.NET.CoreAnalyzers.Tests.AsyncAnalyzers
+ {
+     [TestFixture]
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/DoNotReturnNullForTaskLikeAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/DoNotReturnNullForTaskLikeAnalyzerTests.cs
+index 51c7a5d..959c2d7 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/DoNotReturnNullForTaskLikeAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/DoNotReturnNullForTaskLikeAnalyzerTests.cs
+@@ -50,7 +50,7 @@ public class MyClass
+ }";
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task Warn_When_Null_Is_Returned_For_Task_Of_T_Expression_Body()
+         {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/DoNotUseAsyncDelegatesForLongRunningTasksAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/DoNotUseAsyncDelegatesForLongRunningTasksAnalyzerTests.cs
+index 89f30d0..aadf4c2 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/DoNotUseAsyncDelegatesForLongRunningTasksAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/DoNotUseAsyncDelegatesForLongRunningTasksAnalyzerTests.cs
+@@ -1,6 +1,6 @@
+ using System;
+-using NUnit.Framework;
+ using System.Threading.Tasks;
++using NUnit.Framework;
+ using Verify = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.AsyncAnalyzers.DoNotUseAsyncDelegatesForLongRunningTasksAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/DoNotUseThreadSleepAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/DoNotUseThreadSleepAnalyzerTests.cs
+index 961b60b..3cc1717 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/DoNotUseThreadSleepAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/DoNotUseThreadSleepAnalyzerTests.cs
+@@ -1,11 +1,10 @@
+-using NUnit.Framework;
+ using System.Threading.Tasks;
++using NUnit.Framework;
++using T = System.Threading.Thread;
+ using Verify = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.AsyncAnalyzers.DoNotUseThreadSleepAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+ 
+-using T = System.Threading.Thread;
+-
+ namespace ErrorProne.NET.CoreAnalyzers.Tests.AsyncAnalyzers
+ {
+     [TestFixture]
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/DoNotValidateArgumentsInAsyncMethodsAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/DoNotValidateArgumentsInAsyncMethodsAnalyzerTests.cs
+index a1837bd..d60e606 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/DoNotValidateArgumentsInAsyncMethodsAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/DoNotValidateArgumentsInAsyncMethodsAnalyzerTests.cs
+@@ -1,6 +1,6 @@
+ using System;
+-using NUnit.Framework;
+ using System.Threading.Tasks;
++using NUnit.Framework;
+ using Verify = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.AsyncAnalyzers.DoNotValidateArgumentsInAsyncMethodsAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+@@ -47,7 +47,7 @@ public class Test
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task WarnOnArgumentException_Via_Factory_Method_InPublicAsyncMethod()
+         {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/NullConditionalOperatorAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/NullConditionalOperatorAnalyzerTests.cs
+index a4caa51..4237fcc 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/NullConditionalOperatorAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/NullConditionalOperatorAnalyzerTests.cs
+@@ -1,5 +1,5 @@
+-﻿using NUnit.Framework;
+-using System.Threading.Tasks;
++﻿using System.Threading.Tasks;
++using NUnit.Framework;
+ using VerifyCS = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.AsyncAnalyzers.NullConditionalOperatorAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/RemoveConfigureAwaitAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/RemoveConfigureAwaitAnalyzerTests.cs
+index 2159294..6a05896 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/RemoveConfigureAwaitAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/RemoveConfigureAwaitAnalyzerTests.cs
+@@ -1,5 +1,5 @@
+-﻿using NUnit.Framework;
+-using System.Threading.Tasks;
++﻿using System.Threading.Tasks;
++using NUnit.Framework;
+ using VerifyCS = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.AsyncAnalyzers.RedundantConfigureAwaitFalseAnalyzer,
+     ErrorProne.NET.AsyncAnalyzers.RemoveConfigureAwaitCodeFixProvider>;
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/RemoveConfigureAwaitCodeFixProviderTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/RemoveConfigureAwaitCodeFixProviderTests.cs
+index 145f815..b8c85c5 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/RemoveConfigureAwaitCodeFixProviderTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/RemoveConfigureAwaitCodeFixProviderTests.cs
+@@ -1,5 +1,5 @@
+-﻿using NUnit.Framework;
+-using System.Threading.Tasks;
++﻿using System.Threading.Tasks;
++using NUnit.Framework;
+ using VerifyCS = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.AsyncAnalyzers.RedundantConfigureAwaitFalseAnalyzer,
+     ErrorProne.NET.AsyncAnalyzers.RemoveConfigureAwaitCodeFixProvider>;
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/TaskCompletionSourceRunContinuationsAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/TaskCompletionSourceRunContinuationsAnalyzerTests.cs
+index b7ee2f5..cb855de 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/TaskCompletionSourceRunContinuationsAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/TaskCompletionSourceRunContinuationsAnalyzerTests.cs
+@@ -23,7 +23,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task Warn_When_TaskCompletionSource_Created_Without_RunContinuationsAsynchronously()
+         {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/TaskEnumerableReEnumerationAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/TaskEnumerableReEnumerationAnalyzerTests.cs
+index a64ce97..2f174a6 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/TaskEnumerableReEnumerationAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/TaskEnumerableReEnumerationAnalyzerTests.cs
+@@ -1,5 +1,5 @@
+-using NUnit.Framework;
+ using System.Threading.Tasks;
++using NUnit.Framework;
+ using Verify = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.AsyncAnalyzers.TaskEnumerableReEnumerationAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/TaskInUsingBlockAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/TaskInUsingBlockAnalyzerTests.cs
+index 5ea5f53..c7b154c 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/TaskInUsingBlockAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/TaskInUsingBlockAnalyzerTests.cs
+@@ -1,5 +1,5 @@
+-﻿using NUnit.Framework;
+-using System.Threading.Tasks;
++﻿using System.Threading.Tasks;
++using NUnit.Framework;
+ using VerifyCS = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.AsyncAnalyzers.TaskInUsingBlockAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+@@ -64,7 +64,7 @@ public class MyClass
+ ";
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task Warn_On_Using_Task_In_Using_Statement2()
+         {
+@@ -84,7 +84,7 @@ public class MyClass
+ ";
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task Warn_On_Using_Task_In_Using_Statement_InFunc()
+         {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/TaskToStringConversionAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/TaskToStringConversionAnalyzerTests.cs
+index 6637d67..0d785a8 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/TaskToStringConversionAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/TaskToStringConversionAnalyzerTests.cs
+@@ -1,5 +1,5 @@
+-﻿using NUnit.Framework;
+-using System.Threading.Tasks;
++﻿using System.Threading.Tasks;
++using NUnit.Framework;
+ using Verify = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.AsyncAnalyzers.TaskInstanceToStringConversionAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+@@ -21,7 +21,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task InterpolatedStringConversionWithMethodCallAndLocal()
+         {
+@@ -38,7 +38,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task InterpolatedStringConversionWithVariable()
+         {
+@@ -50,7 +50,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task InterpolatedStringConversionInStringConcat()
+         {
+@@ -62,7 +62,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task InterpolatedStringConversionInStringConcat2()
+         {
+@@ -99,7 +99,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task NoWarnOnConversionToObjectMethodCall()
+         {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/ThreadUnsafeConcurrentCollectionUsageAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/ThreadUnsafeConcurrentCollectionUsageAnalyzerTests.cs
+index 478fdaf..9fa379f 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/ThreadUnsafeConcurrentCollectionUsageAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/ThreadUnsafeConcurrentCollectionUsageAnalyzerTests.cs
+@@ -1,5 +1,5 @@
+-﻿using NUnit.Framework;
+-using System.Threading.Tasks;
++﻿using System.Threading.Tasks;
++using NUnit.Framework;
+ using VerifyCS = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.AsyncAnalyzers.ConcurrentCollectionAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+@@ -26,7 +26,7 @@ public class MyClass
+ }";
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task NoWarn_On_ConcurrentDictionary_Keys_OrderBy()
+         {
+@@ -44,7 +44,7 @@ public class MyClass
+ 
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task NoWarn_On_ConcurrentDictionary_Local()
+         {
+@@ -62,7 +62,7 @@ public class MyClass
+ 
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task Warn_On_ConcurrentDictionary_ToList_And_ToArray()
+         {
+@@ -83,7 +83,7 @@ public class MyClass
+ 
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task Warn_On_ConcurrentDictionary_DifferentSources_ToList()
+         {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/DataContractSerializableMemberAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/DataContractSerializableMemberAnalyzerTests.cs
+index 1b30fc7..325eabe 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/DataContractSerializableMemberAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/DataContractSerializableMemberAnalyzerTests.cs
+@@ -1,6 +1,6 @@
++using System.Threading.Tasks;
+ using Microsoft.CodeAnalysis.CSharp;
+ using NUnit.Framework;
+-using System.Threading.Tasks;
+ using VerifyCS = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.CoreAnalyzers.DataContractSerializableMemberAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/DefaultEqualsOrHashCodeIsUsageAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/DefaultEqualsOrHashCodeIsUsageAnalyzerTests.cs
+index ef5017d..ee2ff14 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/DefaultEqualsOrHashCodeIsUsageAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/DefaultEqualsOrHashCodeIsUsageAnalyzerTests.cs
+@@ -23,19 +23,19 @@ namespace ErrorProne.NET.CoreAnalyzers.Tests.CoreAnalyzers
+ struct MyStruct {}
+ class AnotherStruct { private MyStruct ms; public override int GetHashCode() => [|ms.GetHashCode()|] ^ 42; }
+ ";
+-            
++
+             // Warn when used in another struct
+             yield return @"
+ struct MyStruct {}
+ struct AnotherStruct { private MyStruct ms; public override int GetHashCode() => [|ms.GetHashCode()|] ^ 42; }
+ ";
+-            
++
+             // Warn when used in another struct
+             yield return @"
+ struct MyStruct {}
+ struct AnotherStruct { private MyStruct ms; public override bool Equals(object other) => [|ms.Equals(other)|]; }
+ ";
+-            
++
+             // Warn When Equals is used for implementing IEquatable
+             yield return @"
+ struct MyStruct { }
+@@ -46,7 +46,7 @@ struct AnotherStruct : System.IEquatable<AnotherStruct>
+     public bool Equals(AnotherStruct another) => [|ms.Equals(another)|];
+ }
+ ";
+-            
++
+             // Warn When Equals is used in another position
+             yield return @"
+ struct MyStruct { }
+@@ -58,7 +58,7 @@ static class Example
+     }
+ }
+ ";
+-            
++
+             // Warn When GetHashCode is used in another position
+             yield return @"
+ struct MyStruct { }
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/DefaultToStringConversionAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/DefaultToStringConversionAnalyzerTests.cs
+index 4fe9e20..d84bc4c 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/DefaultToStringConversionAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/DefaultToStringConversionAnalyzerTests.cs
+@@ -1,5 +1,5 @@
+-﻿using NUnit.Framework;
+-using System.Threading.Tasks;
++﻿using System.Threading.Tasks;
++using NUnit.Framework;
+ using Verify = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.AsyncAnalyzers.DefaultToStringImplementationUsageAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+@@ -20,7 +20,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task NoWarnOnLast()
+         {
+@@ -36,7 +36,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task NoWarnOnEquality()
+         {
+@@ -48,7 +48,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task NoWarnOnCastFromObject()
+         {
+@@ -64,7 +64,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task NoWarnOnInterfaceOrAbstractClass()
+         {
+@@ -82,7 +82,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task NoWarnOnGenerics()
+         {
+@@ -102,7 +102,7 @@ class Test<T> {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task NullFieldAssignment()
+         {
+@@ -117,7 +117,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task InterpolatedStringConversionWithMethodCall()
+         {
+@@ -130,7 +130,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task InterpolatedStringConversionWithMethodCallForTuple()
+         {
+@@ -143,7 +143,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task InterpolatedStringConversionWithMethodCallForStruct()
+         {
+@@ -156,7 +156,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task InterpolatedStringConversionWithMethodCallAndLocal()
+         {
+@@ -173,7 +173,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task InterpolatedStringConversionWithVariable()
+         {
+@@ -185,7 +185,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task InterpolatedStringConversionInStringConcat()
+         {
+@@ -197,7 +197,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task InterpolatedStringConversionInStringConcat2()
+         {
+@@ -222,7 +222,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task InterpolatedStringConversionReturnExplicit()
+         {
+@@ -234,7 +234,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task StringBuilderAppend()
+         {
+@@ -258,7 +258,7 @@ class Test {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task NoWarnOnConversionToObjectMethodCall()
+         {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/EqualsMethodAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/EqualsMethodAnalyzerTests.cs
+index 389ea9a..d71b220 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/EqualsMethodAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/EqualsMethodAnalyzerTests.cs
+@@ -1,5 +1,5 @@
+-﻿using NUnit.Framework;
+-using System.Threading.Tasks;
++﻿using System.Threading.Tasks;
++using NUnit.Framework;
+ using VerifyCS = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.CoreAnalyzers.SuspiciousEqualsMethodAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+@@ -149,7 +149,7 @@ class FooBar
+ ";
+             await VerifyCS.VerifyAnalyzerAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task Warn_When_Only_Static_Members_Are_Used_For_Structs()
+         {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/EventSourceAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/EventSourceAnalyzerTests.cs
+index 1141b2d..395cd33 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/EventSourceAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/EventSourceAnalyzerTests.cs
+@@ -1,5 +1,5 @@
+-﻿using NUnit.Framework;
+-using System.Threading.Tasks;
++﻿using System.Threading.Tasks;
++using NUnit.Framework;
+ using VerifyCS = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.EventSourceAnalysis.EventSourceAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+@@ -25,7 +25,7 @@ public sealed class DemoEventSource : System.Diagnostics.Tracing.EventSource
+ 
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task Warn_On_Id_Mismatch_Core()
+         {
+@@ -52,7 +52,7 @@ public sealed class DemoEventSource : System.Diagnostics.Tracing.EventSource
+ 
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task Warn_On_Unsupported_Param_Type()
+         {
+@@ -201,7 +201,7 @@ public sealed class DemoEventSource : System.Diagnostics.Tracing.EventSource
+ 
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task Warn_On_Params_Mismatch()
+         {
+@@ -240,7 +240,7 @@ public sealed class DemoEventSource : System.Diagnostics.Tracing.EventSource
+ 
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task Warn_On_Duplicate_Id_In_Partial_Class()
+         {
+@@ -260,7 +260,7 @@ partial class DemoEventSource : System.Diagnostics.Tracing.EventSource
+ 
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task Warn_On_Missing_Write_Call()
+         {
+@@ -299,7 +299,7 @@ public sealed class DemoEventSource : System.Diagnostics.Tracing.EventSource
+ 
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task Warn_On_Incorrect_Usage_Of_RelativeActivityId()
+         {
+@@ -319,7 +319,7 @@ public sealed class DemoEventSource : System.Diagnostics.Tracing.EventSource
+ 
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task Warn_On_Id_Mismatch_Const()
+         {
+@@ -334,7 +334,7 @@ public sealed class DemoEventSource : System.Diagnostics.Tracing.EventSource
+ 
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task No_Warn_On_Correct_Id()
+         {
+@@ -366,7 +366,7 @@ public sealed class DemoEventSource : System.Diagnostics.Tracing.EventSource
+ 
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task No_Warn_On_Correct_Id_And_Params()
+         {
+@@ -425,6 +425,5 @@ public sealed class DemoEventSource : System.Diagnostics.Tracing.EventSource
+ 
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
+     }
+ }
+\ No newline at end of file
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/EventSourceSealedAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/EventSourceSealedAnalyzerTests.cs
+index 422c3fa..e8aa720 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/EventSourceSealedAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/EventSourceSealedAnalyzerTests.cs
+@@ -1,5 +1,5 @@
+-﻿using NUnit.Framework;
+-using System.Threading.Tasks;
++﻿using System.Threading.Tasks;
++using NUnit.Framework;
+ using VerifyCS = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.CoreAnalyzers.EventSourceSealedAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+@@ -20,7 +20,7 @@ public class [|DemoEventSource|] : System.Diagnostics.Tracing.EventSource
+ 
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task NoWarn_On_Sealed_Or_Abstract()
+         {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/FormatMethodArgumentsAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/FormatMethodArgumentsAnalyzerTests.cs
+index f6082d0..20dab64 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/FormatMethodArgumentsAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/FormatMethodArgumentsAnalyzerTests.cs
+@@ -43,8 +43,8 @@ namespace MyCorp.Logging {
+             return test.RunAsync();
+         }
+ 
+-        private static string EditorConfig(string formatMethods) =>
+-$@"root = true
++        private static string EditorConfig(string formatMethods)
++=> $@"root = true
+ [*.cs]
+ dotnet_diagnostic.epc41.format_methods = {formatMethods}
+ ";
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/HashTableIncompatibilityAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/HashTableIncompatibilityAnalyzerTests.cs
+index 0be556b..8ac1f3a 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/HashTableIncompatibilityAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/HashTableIncompatibilityAnalyzerTests.cs
+@@ -29,7 +29,7 @@ struct MyStruct {}
+ static class Ex {
+     private static [|System.Collections.Generic.HashSet<MyStruct>|] P() => null;
+ }";
+-            await VerifyCS.VerifyAsync(code); ;
++            await VerifyCS.VerifyAsync(code);
+         }
+ 
+         [TestCaseSource(nameof(GetHasDiagnosticCases))]
+@@ -39,34 +39,35 @@ static class Ex {
+         }
+ 
+         public static IEnumerable<string> GetHasDiagnosticCases()
+-        {   
++        {
+             // Warn on System.Tuple
+             yield return @"
+ struct MyStruct {}
+ static class Ex {
+     private static [|System.Collections.Generic.ISet<System.Tuple<MyStruct, int>>|] hs = null;
+ }";
++
+             // Warn on Tuple
+             yield return @"
+ struct MyStruct {}
+ static class Ex {
+     private static [|System.Collections.Generic.ISet<(MyStruct, int)>|] hs = null;
+ }";
+-            
++
+             // Warn on IDictionary
+             yield return @"
+ struct MyStruct {}
+ static class Ex {
+     private static [|System.Collections.Generic.IDictionary<MyStruct, int>|] hs = null;
+ }";
+-            
++
+             // Warn on ISet
+             yield return @"
+ struct MyStruct {}
+ static class Ex {
+     private static [|System.Collections.Generic.ISet<MyStruct>|] hs = null;
+ }";
+-            
++
+             // using
+             yield return @"
+ using C = [|System.Collections.Generic.HashSet<MyStruct>|];
+@@ -78,20 +79,20 @@ struct MyStruct {}
+ public interface IBar {}
+ abstract class Ex : [|System.Collections.Generic.HashSet<MyStruct>|], IBar {
+ }";
+-            
++
+             // Base type
+             yield return @"
+ struct MyStruct {}
+ abstract class Ex : [|System.Collections.Generic.HashSet<MyStruct>|] {
+ }";
+-            
++
+             // Implicitly typed local declaration
+             yield return @"
+ struct MyStruct {}
+ class Ex {
+     private void Foo() {[|var|] P = new System.Collections.Generic.HashSet<MyStruct>();}
+ }";
+-            
++
+             // Variable declaration
+             yield return @"
+ struct MyStruct {}
+@@ -103,7 +104,7 @@ struct MyStruct {}
+ class Ex {
+     private void Foo() {[|System.Collections.Generic.HashSet<MyStruct>|] P = null;}
+ }";
+-            
++
+             // Local method
+             yield return @"
+ struct MyStruct {}
+@@ -117,33 +118,35 @@ struct MyStruct {}
+ static class Ex {
+     private static [|System.Collections.Generic.HashSet<MyStruct>[]|] P() => null;
+ }";
+-            
++
+             // Method's return type
+             yield return @"
+ struct MyStruct {}
+ static class Ex {
+     private static [|System.Collections.Generic.HashSet<MyStruct>|] P() => null;
+ }";
++
+             // Method's parameter
+             yield return @"
+ struct MyStruct {}
+ static class Ex {
+     private static void Foo([|System.Collections.Generic.HashSet<MyStruct>|] arg) {}
+ }";
++
+             // Property
+             yield return @"
+ struct MyStruct {}
+ static class Ex {
+     private static [|System.Collections.Generic.HashSet<MyStruct>|] P {get;}
+ }";
+-            
++
+             // Property with getter and setter
+             yield return @"
+ struct MyStruct {}
+ static class Ex {
+     private static [|System.Collections.Generic.HashSet<MyStruct>|] P {get; set;}
+ }";
+-            
++
+             // Property with getter only
+             yield return @"
+ struct MyStruct {}
+@@ -157,35 +160,35 @@ struct MyStruct {}
+ static class Ex {
+     private static [|System.Collections.Immutable.ImmutableDictionary<MyStruct, int>|] hs = null;
+ }";
+-            
++
+             // ImmutableHashSet
+             yield return @"
+ struct MyStruct {}
+ static class Ex {
+     private static [|System.Collections.Immutable.ImmutableHashSet<MyStruct>|] hs = null;
+ }";
+-            
++
+             // ConcurrentDictionary
+             yield return @"
+ struct MyStruct {}
+ static class Ex {
+     private static [|System.Collections.Concurrent.ConcurrentDictionary<MyStruct, int>|] hs = null;
+ }";
+-            
++
+             // Dictionary
+             yield return @"
+ struct MyStruct {}
+ static class Ex {
+     private static [|System.Collections.Generic.Dictionary<MyStruct, int>|] hs = null;
+ }";
+-            
++
+             // Only GetHashCode
+             yield return @"
+ struct MyStruct {public override int GetHashCode() => 42;}
+ static class Ex {
+     private static [|System.Collections.Generic.HashSet<MyStruct>|] hs = null;
+ }";
+-            
++
+             // Only Equals
+             yield return @"
+ struct MyStruct {public override bool Equals(object other) => true;}
+@@ -193,7 +196,7 @@ static class Ex {
+     private static [|System.Collections.Generic.HashSet<MyStruct>|] hs = null;
+ }";
+         }
+-        
++
+         [TestCaseSource(nameof(GetNoDiagnosticCases))]
+         public async Task NoDiagnosticCases(string code)
+         {
+@@ -211,6 +214,7 @@ static class Ex {
+         Foo<System.Collections.Generic.IDictionary<MyStruct, int>>();
+     }
+ }";
++
+             // No diagnostic if both members are overriden
+             yield return @"
+ struct MyStruct { public override int GetHashCode() => 42; public override bool Equals(object other) => true;}
+@@ -245,13 +249,13 @@ struct MyStruct {}
+ static class Ex {
+     private static System.Collections.Generic.Dictionary<int, MyStruct> hs = null;
+ }";
+-            
++
+             // No diagnostic for second type parameter
+             yield return @"
+ static class Ex {
+     private static System.Collections.Generic.ISet<T> GetSet<T>() => null;
+ }";
+-            
++
+             // No diagnostic for T with constraint
+             yield return @"
+ static class Ex {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/MustUseResultAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/MustUseResultAnalyzerTests.cs
+index e30aadc..44b50d0 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/MustUseResultAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/MustUseResultAnalyzerTests.cs
+@@ -1,5 +1,5 @@
+-using NUnit.Framework;
+ using System.Threading.Tasks;
++using NUnit.Framework;
+ using VerifyCS = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.CoreAnalyzers.MustUseResultAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+@@ -51,7 +51,7 @@ public class Runner
+ 
+             await VerifyCS.VerifyAnalyzerAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task Method_With_MustUseResultAttribute_Can_Be_Observed_With_Suppression()
+         {
+@@ -79,7 +79,8 @@ public class Runner
+ 
+         [Test]
+         public async Task Method_Without_MustUseResultAttribute_Should_Not_Warn()
+-        {            string code = """
++        {
++            string code = """
+ public class Runner
+ {
+    public static int GetValue() => 42;
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/PrivateMethodMultipleEnumerationAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/PrivateMethodMultipleEnumerationAnalyzerTests.cs
+index eba2275..cfe90ba 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/PrivateMethodMultipleEnumerationAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/PrivateMethodMultipleEnumerationAnalyzerTests.cs
+@@ -1,5 +1,5 @@
+-using NUnit.Framework;
+ using System.Threading.Tasks;
++using NUnit.Framework;
+ using Verify = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.CoreAnalyzers.PrivateMethodMultipleEnumerationAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/QuadraticEnumerationAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/QuadraticEnumerationAnalyzerTests.cs
+index b8de13e..ae51ba2 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/QuadraticEnumerationAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/QuadraticEnumerationAnalyzerTests.cs
+@@ -1,5 +1,5 @@
+-using NUnit.Framework;
+ using System.Threading.Tasks;
++using NUnit.Framework;
+ using Verify = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.CoreAnalyzers.QuadraticEnumerationAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/SetContainsAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/SetContainsAnalyzerTests.cs
+index 1d5ba6a..12f617c 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/SetContainsAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/SetContainsAnalyzerTests.cs
+@@ -1,5 +1,5 @@
+-﻿using NUnit.Framework;
+-using System.Threading.Tasks;
++﻿using System.Threading.Tasks;
++using NUnit.Framework;
+ using VerifyCS = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.CoreAnalyzers.SetContainsAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+@@ -28,7 +28,7 @@ public class MyClass
+ 
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task Warn_On_Enumerable_Contains_With_Parameter()
+         {
+@@ -47,7 +47,7 @@ public class MyClass
+ 
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task Warn_On_Enumerable_Contains_For_HashSet_Of_int()
+         {
+@@ -66,7 +66,7 @@ public class MyClass
+ 
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task Warn_On_Enumerable_Contains_With_Local()
+         {
+@@ -86,7 +86,7 @@ public class MyClass
+ 
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task Warn_On_HashSet_Of_String_With_Extension_Method_Contains()
+         {
+@@ -106,7 +106,7 @@ public class MyClass
+ 
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task Warn_On_HashSet_Of_String_Contains_And_StringComparison()
+         {
+@@ -126,7 +126,7 @@ public class MyClass
+ 
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task Warn_On_ISet_Of_String_With_Extension_Method_Contains()
+         {
+@@ -146,7 +146,7 @@ public class MyClass
+ 
+             await VerifyCS.VerifyAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task Warn_On_CustomSet()
+         {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/SuspiciousExceptionHandling/OnlyMessageIsUsedTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/SuspiciousExceptionHandling/OnlyMessageIsUsedTests.cs
+index 8277775..1291f84 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/SuspiciousExceptionHandling/OnlyMessageIsUsedTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/SuspiciousExceptionHandling/OnlyMessageIsUsedTests.cs
+@@ -1,5 +1,5 @@
+-﻿using NUnit.Framework;
+-using System.Threading.Tasks;
++﻿using System.Threading.Tasks;
++using NUnit.Framework;
+ using VerifyCS = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.CoreAnalyzers.SuspiciousExceptionHandlingAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+@@ -64,6 +64,7 @@ class FooBar {
+ ";
+             await VerifyCS.VerifyAsync(code);
+         }
++
+         [Test]
+         public async Task Warn_On_Anonymous_Usage_Of_ExceptionMessage()
+         {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/SuspiciousExceptionHandling/RemoveExMessageCodeFixProviderTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/SuspiciousExceptionHandling/RemoveExMessageCodeFixProviderTests.cs
+index 1e30ae5..57b1f7c 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/SuspiciousExceptionHandling/RemoveExMessageCodeFixProviderTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/SuspiciousExceptionHandling/RemoveExMessageCodeFixProviderTests.cs
+@@ -1,5 +1,5 @@
+-﻿using NUnit.Framework;
+-using System.Threading.Tasks;
++﻿using System.Threading.Tasks;
++using NUnit.Framework;
+ using VerifyCS = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.CoreAnalyzers.SuspiciousExceptionHandlingAnalyzer,
+     ErrorProne.NET.CoreAnalyzers.ExceptionHandlingFixers>;
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/SuspiciousExceptionHandling/SwallowAllExceptionsAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/SuspiciousExceptionHandling/SwallowAllExceptionsAnalyzer.cs
+index 6bfb751..9168a50 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/SuspiciousExceptionHandling/SwallowAllExceptionsAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/SuspiciousExceptionHandling/SwallowAllExceptionsAnalyzer.cs
+@@ -4,8 +4,8 @@
+ //  
+ // --------------------------------------------------------------------
+ 
+-using NUnit.Framework;
+ using System.Threading.Tasks;
++using NUnit.Framework;
+ using VerifyCS = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.ExceptionsAnalyzers.SwallowAllExceptionsAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+@@ -64,7 +64,7 @@ class Test
+ }";
+             await VerifyCS.VerifyAnalyzerAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task NoWarnWhenExceptionIsReturned()
+         {
+@@ -80,7 +80,7 @@ class Test
+ }";
+             await VerifyCS.VerifyAnalyzerAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task WarnOnConditionalReturn()
+         {
+@@ -208,7 +208,7 @@ class Test
+ }";
+             await VerifyCS.VerifyAnalyzerAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task NoWarnIfExceptionWasObservedWithStringConcat()
+         {
+@@ -225,7 +225,7 @@ class Test
+ }";
+             await VerifyCS.VerifyAnalyzerAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task NoWarnIfExceptionWasObservedInLocalFunction()
+         {
+@@ -244,7 +244,7 @@ class Test
+ }";
+             await VerifyCS.VerifyAnalyzerAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task NoWarnIfExceptionWasObservedByCallingMethod()
+         {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/SuspiciousExceptionHandling/ThrowExAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/SuspiciousExceptionHandling/ThrowExAnalyzerTests.cs
+index 7ac0497..d8f6a58 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/SuspiciousExceptionHandling/ThrowExAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/SuspiciousExceptionHandling/ThrowExAnalyzerTests.cs
+@@ -4,8 +4,8 @@
+ //  
+ // --------------------------------------------------------------------
+ 
+-using NUnit.Framework;
+ using System.Threading.Tasks;
++using NUnit.Framework;
+ using VerifyCS = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.ExceptionsAnalyzers.ThrowExAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/UnobservedResultAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/UnobservedResultAnalyzerTests.cs
+index 8b0252f..3dd7ed3 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/UnobservedResultAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/CoreAnalyzers/UnobservedResultAnalyzerTests.cs
+@@ -1,5 +1,5 @@
+-﻿using NUnit.Framework;
+-using System.Threading.Tasks;
++﻿using System.Threading.Tasks;
++using NUnit.Framework;
+ using VerifyCS = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.CoreAnalyzers.UnobservedResultAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+@@ -60,7 +60,7 @@ class FooBar
+ ";
+             await VerifyCS.VerifyAnalyzerAsync(code);
+         }
+-        
++
+         [Test]
+         public async Task Result_That_Flows_Through_Extension_Method_Is_Observed()
+         {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/ExcludeFromCodeCoverageMessageAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/ExcludeFromCodeCoverageMessageAnalyzerTests.cs
+index 66c6aa3..4fc1feb 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/ExcludeFromCodeCoverageMessageAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/ExcludeFromCodeCoverageMessageAnalyzerTests.cs
+@@ -1,6 +1,6 @@
+ using System.Threading.Tasks;
+-using NUnit.Framework;
+ using Microsoft.CodeAnalysis.Testing;
++using NUnit.Framework;
+ using Verify = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.CoreAnalyzers.ExcludeFromCodeCoverageMessageAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/ExcludeFromCodeCoverageOnPartialClassAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/ExcludeFromCodeCoverageOnPartialClassAnalyzerTests.cs
+index 03fb14f..922fc2f 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/ExcludeFromCodeCoverageOnPartialClassAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/ExcludeFromCodeCoverageOnPartialClassAnalyzerTests.cs
+@@ -1,6 +1,6 @@
+-using NUnit.Framework;
+ using System.Threading.Tasks;
+ using ErrorProne.NET.CoreAnalyzers;
++using NUnit.Framework;
+ using Verify = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.CoreAnalyzers.ExcludeFromCodeCoverageOnPartialClassAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+@@ -21,7 +21,7 @@ public partial class C { }
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task WarnsWhenAttributeAppliedToOnePartOfPartialClass()
+         {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers.Tests/RecursiveCallAnalyzerTests.cs b/src/ErrorProne.NET.CoreAnalyzers.Tests/RecursiveCallAnalyzerTests.cs
+index 9b50ece..bde16b5 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers.Tests/RecursiveCallAnalyzerTests.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers.Tests/RecursiveCallAnalyzerTests.cs
+@@ -1,5 +1,5 @@
+-using NUnit.Framework;
+ using System.Threading.Tasks;
++using NUnit.Framework;
+ using Verify = ErrorProne.NET.TestHelpers.CSharpCodeFixVerifier<
+     ErrorProne.NET.CoreAnalyzers.RecursiveCallAnalyzer,
+     Microsoft.CodeAnalysis.Testing.EmptyCodeFixProvider>;
+@@ -106,7 +106,7 @@ class C {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task Warns_OnInvariantGuardedRecursiveCall_With_Named_Parameters()
+         {
+@@ -417,7 +417,7 @@ class C {
+ ";
+             await Verify.VerifyAsync(test);
+         }
+-        
++
+         [Test]
+         public async Task NoWarn_For_Factorial()
+         {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/AnalyzerConfigOptionsExtensions.cs b/src/ErrorProne.NET.CoreAnalyzers/AnalyzerConfigOptionsExtensions.cs
+index 9b47a81..132783c 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/AnalyzerConfigOptionsExtensions.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/AnalyzerConfigOptionsExtensions.cs
+@@ -16,8 +16,8 @@ namespace ErrorProne.NET.Core
+ 
+         public static AnalyzerConfigOptions? TryGetAnalyzerConfigOptions(this SymbolAnalysisContext context)
+         {
+-            if (context.Symbol.Locations is { IsDefaultOrEmpty: false } locations
+-                && locations[0] is { IsInSource: true } location)
++            if (context.Symbol.Locations is { IsDefaultOrEmpty: false } locations &&
++                locations[0] is { IsInSource: true } location)
+             {
+                 return context.Options.AnalyzerConfigOptionsProvider.GetOptions(location.SourceTree);
+             }
+@@ -26,7 +26,7 @@ namespace ErrorProne.NET.Core
+                 return null;
+             }
+         }
+-        
++
+         public static AnalyzerConfigOptions? TryGetAnalyzerConfigOptions(this SyntaxNode syntax, AnalyzerOptions options)
+         {
+             if (syntax.GetLocation().IsInSource)
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/AsyncVoidDelegateAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/AsyncVoidDelegateAnalyzer.cs
+index 561870f..9aa54b3 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/AsyncVoidDelegateAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/AsyncVoidDelegateAnalyzer.cs
+@@ -31,7 +31,7 @@ namespace ErrorProne.NET.AsyncAnalyzers
+ 
+         private void AnalyzerOperation(OperationAnalysisContext context)
+         {
+-            var anonymousFunction = (IAnonymousFunctionOperation) context.Operation;
++            var anonymousFunction = (IAnonymousFunctionOperation)context.Operation;
+             if (anonymousFunction.Symbol.IsAsync && anonymousFunction.Symbol.ReturnsVoid)
+             {
+                 context.ReportDiagnostic(Diagnostic.Create(Rule, anonymousFunction.Syntax.GetLocation()));
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/CancellationTokenRegistrationAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/CancellationTokenRegistrationAnalyzer.cs
+index 48884cd..51237ec 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/CancellationTokenRegistrationAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/CancellationTokenRegistrationAnalyzer.cs
+@@ -41,21 +41,21 @@ namespace ErrorProne.NET.AsyncAnalyzers
+ 
+         private void AnalyzeExpressionStatement(OperationAnalysisContext context)
+         {
+-            if (context.Operation is IExpressionStatementOperation expressionStatement
+-                && expressionStatement.Operation is IInvocationOperation invocation) 
++            if (context.Operation is IExpressionStatementOperation expressionStatement &&
++                expressionStatement.Operation is IInvocationOperation invocation)
+             {
+                 if (invocation.Type?.IsClrType(context.Compilation, typeof(CancellationTokenRegistration)) == true)
+                 {
+                     var semanticModel = context.Operation.SemanticModel;
+-                    
+ 
+                     var target = invocation.Instance;
++
+                     // Covering the cases like 'cts.Token.Register'.
+                     if (invocation.Instance is IPropertyReferenceOperation topLevelPropertyReference)
+                     {
+                         target = topLevelPropertyReference.Instance;
+                     }
+-                    
++
+                     // The diagnostics should be emitted only in some cases:
+                     // When a token is an argument, field, property, obtained from a method call
+                     // (not a local variable and not obtained from a local CancellationTokenSource).
+@@ -86,7 +86,7 @@ namespace ErrorProne.NET.AsyncAnalyzers
+                 }
+             }
+         }
+-        
++
+         private static IOperation? GetLocalReferenceDeclaringOperation(ILocalReferenceOperation localReference, SemanticModel semanticModel, CancellationToken token)
+         {
+             var localSymbolDeclaringSyntax = localReference.Local.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax(token);
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/DoNotBlockUnnecessarilyInAsyncMethodsAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/DoNotBlockUnnecessarilyInAsyncMethodsAnalyzer.cs
+index 08376b8..d15f0bf 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/DoNotBlockUnnecessarilyInAsyncMethodsAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/DoNotBlockUnnecessarilyInAsyncMethodsAnalyzer.cs
+@@ -1,8 +1,8 @@
++using ErrorProne.NET.Core;
++using ErrorProne.NET.CoreAnalyzers;
+ using Microsoft.CodeAnalysis;
+ using Microsoft.CodeAnalysis.Diagnostics;
+ using Microsoft.CodeAnalysis.Operations;
+-using ErrorProne.NET.Core;
+-using ErrorProne.NET.CoreAnalyzers;
+ 
+ namespace ErrorProne.NET.AsyncAnalyzers
+ {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/DoNotReturnNullForTaskLikeAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/DoNotReturnNullForTaskLikeAnalyzer.cs
+index 20664cb..f2426f5 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/DoNotReturnNullForTaskLikeAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/DoNotReturnNullForTaskLikeAnalyzer.cs
+@@ -1,8 +1,8 @@
++using ErrorProne.NET.Core;
++using ErrorProne.NET.CoreAnalyzers;
+ using Microsoft.CodeAnalysis;
+ using Microsoft.CodeAnalysis.Diagnostics;
+-using ErrorProne.NET.Core;
+ using Microsoft.CodeAnalysis.Operations;
+-using ErrorProne.NET.CoreAnalyzers;
+ 
+ namespace ErrorProne.NET.AsyncAnalyzers
+ {
+@@ -27,14 +27,14 @@ namespace ErrorProne.NET.AsyncAnalyzers
+         {
+             context.EnableConcurrentExecution();
+             context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
+-            
++
+             context.RegisterOperationAction(AnalyzeReturnOperation, OperationKind.Return);
+         }
+ 
+         private void AnalyzeReturnOperation(OperationAnalysisContext context)
+         {
+             var returnOperation = (IReturnOperation)context.Operation;
+-            
++
+             // In case of 'return;'
+             if (returnOperation.ReturnedValue == null)
+             {
+@@ -55,7 +55,7 @@ namespace ErrorProne.NET.AsyncAnalyzers
+             {
+                 return;
+             }
+-            
++
+             var returnedValueOperation = returnOperation.ReturnedValue;
+             IMethodSymbol? methodSymbol = returnedValueOperation.FindEnclosingMethodSymbol(context);
+             if (methodSymbol is not null && !methodSymbol.IsAsync)
+@@ -79,7 +79,7 @@ namespace ErrorProne.NET.AsyncAnalyzers
+                     if (returnedValueOperation.ConstantValue.HasValue && returnedValueOperation.ConstantValue.Value == null)
+                     {
+                         return true;
+-                    }                    
++                    }
+                 }
+ 
+                 // Case B: Check for the 'default' keyword used with a reference type.
+@@ -125,10 +125,7 @@ namespace ErrorProne.NET.AsyncAnalyzers
+                 }
+ 
+                 return false;
+-
+             }
+-
+-            
+         }
+     }
+ }
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/DoNotUseAsyncDelegatesForLongRunningTasksAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/DoNotUseAsyncDelegatesForLongRunningTasksAnalyzer.cs
+index 569d52a..7e18798 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/DoNotUseAsyncDelegatesForLongRunningTasksAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/DoNotUseAsyncDelegatesForLongRunningTasksAnalyzer.cs
+@@ -1,9 +1,9 @@
+ using System.Threading.Tasks;
+ using ErrorProne.NET.Core;
++using ErrorProne.NET.CoreAnalyzers;
+ using Microsoft.CodeAnalysis;
+ using Microsoft.CodeAnalysis.Diagnostics;
+ using Microsoft.CodeAnalysis.Operations;
+-using ErrorProne.NET.CoreAnalyzers;
+ 
+ namespace ErrorProne.NET.AsyncAnalyzers
+ {
+@@ -53,7 +53,7 @@ namespace ErrorProne.NET.AsyncAnalyzers
+         private static bool IsTaskFactoryStartNew(IInvocationOperation invocation, Compilation compilation)
+         {
+             var targetMethod = invocation.TargetMethod;
+-            
++
+             if (targetMethod.Name != "StartNew")
+             {
+                 return false;
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/DoNotUseThreadSleepAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/DoNotUseThreadSleepAnalyzer.cs
+index 24ae7ba..db06409 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/DoNotUseThreadSleepAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/DoNotUseThreadSleepAnalyzer.cs
+@@ -29,7 +29,7 @@ namespace ErrorProne.NET.AsyncAnalyzers
+         private static void AnalyzeInvocation(OperationAnalysisContext context)
+         {
+             var invocation = (IInvocationOperation)context.Operation;
+-            
++
+             // Check if this is Thread.Sleep call
+             if (!IsThreadSleepCall(invocation, context.Compilation))
+             {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/DoNotValidateArgumentsInAsyncMethodsAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/DoNotValidateArgumentsInAsyncMethodsAnalyzer.cs
+index c426c45..e1920c9 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/DoNotValidateArgumentsInAsyncMethodsAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/DoNotValidateArgumentsInAsyncMethodsAnalyzer.cs
+@@ -34,7 +34,7 @@ namespace ErrorProne.NET.AsyncAnalyzers
+         {
+             var throwOperation = (IThrowOperation)context.Operation;
+             var method = GetEnclosingMethod(throwOperation, context);
+-            
++
+             if (method == null || !ShouldAnalyze(method))
+             {
+                 return;
+@@ -51,7 +51,7 @@ namespace ErrorProne.NET.AsyncAnalyzers
+         {
+             var invocation = (IInvocationOperation)context.Operation;
+             var method = GetEnclosingMethod(invocation, context);
+-            
++
+             if (method == null || !ShouldAnalyze(method))
+             {
+                 return;
+@@ -96,6 +96,7 @@ namespace ErrorProne.NET.AsyncAnalyzers
+                 {
+                     return false;
+                 }
++
+                 type = type.ContainingType;
+             }
+ 
+@@ -133,7 +134,7 @@ namespace ErrorProne.NET.AsyncAnalyzers
+         private static bool IsArgumentValidationInvocation(IInvocationOperation invocation)
+         {
+             var targetMethod = invocation.TargetMethod;
+-            
++
+             // Checking for 'ThrowIf' methods
+ 
+             if (!targetMethod.Name.StartsWith("ThrowIf"))
+@@ -144,7 +145,7 @@ namespace ErrorProne.NET.AsyncAnalyzers
+             // This is 'ThrowIfNull' or similar methods
+ 
+             var typeName = targetMethod.ContainingType?.Name;
+-            if (typeName is nameof(ArgumentNullException) 
++            if (typeName is nameof(ArgumentNullException)
+                 or nameof(ArgumentException)
+                 or nameof(ArgumentOutOfRangeException))
+             {
+@@ -196,8 +197,10 @@ namespace ErrorProne.NET.AsyncAnalyzers
+                 {
+                     return true;
+                 }
++
+                 baseType = baseType.BaseType;
+             }
++
+             return false;
+         }
+ 
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/NullConditionalOperatorAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/NullConditionalOperatorAnalyzer.cs
+index ba88146..8a23388 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/NullConditionalOperatorAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/NullConditionalOperatorAnalyzer.cs
+@@ -26,12 +26,14 @@ namespace ErrorProne.NET.AsyncAnalyzers
+         protected override void InitializeCore(AnalysisContext context)
+         {
+             context.RegisterOperationAction(AnalyzeAwaitOperation, OperationKind.Await);
+-            //context.RegisterSyntaxNodeAction(AnalyzeAwaitExpression, SyntaxKind.AwaitExpression);
++
++            // context.RegisterSyntaxNodeAction(AnalyzeAwaitExpression, SyntaxKind.AwaitExpression);
+         }
+ 
+         private void AnalyzeAwaitOperation(OperationAnalysisContext context)
+         {
+-            var operation = (IAwaitOperation) context.Operation;
++            var operation = (IAwaitOperation)context.Operation;
++
+             // Check if the awaited operation is a conditional access operation
+             if (operation.Operation is IConditionalAccessOperation)
+             {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/RedundantConfigureAwaitFalseAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/RedundantConfigureAwaitFalseAnalyzer.cs
+index 2afa5aa..9b13d06 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/RedundantConfigureAwaitFalseAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/RedundantConfigureAwaitFalseAnalyzer.cs
+@@ -57,9 +57,10 @@ namespace ErrorProne.NET.AsyncAnalyzers
+ 
+                             var argsLocation = i.ArgumentList.GetLocation();
+                             var nameLocation = mae.Name.GetLocation().SourceSpan;
+-                            
++
+                             Contract.Assert(argsLocation.SourceTree != null);
+-                            location = Location.Create(argsLocation.SourceTree,
++                            location = Location.Create(
++                                argsLocation.SourceTree,
+                                 TextSpan.FromBounds(nameLocation.Start, argsLocation.SourceSpan.End));
+                         }
+ 
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/TaskCompletionSourceRunContinuationsAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/TaskCompletionSourceRunContinuationsAnalyzer.cs
+index 6e3fa28..2d79d2f 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/TaskCompletionSourceRunContinuationsAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/TaskCompletionSourceRunContinuationsAnalyzer.cs
+@@ -52,6 +52,7 @@ namespace ErrorProne.NET.AsyncAnalyzers
+                         }
+                     }
+                 }
++
+                 if (!hasRunContinuations)
+                 {
+                     context.ReportDiagnostic(Diagnostic.Create(Rule, objectCreation.Syntax.GetLocation()));
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/TaskEnumerableReEnumerationAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/TaskEnumerableReEnumerationAnalyzer.cs
+index 8fe6e8c..f77829e 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/TaskEnumerableReEnumerationAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/TaskEnumerableReEnumerationAnalyzer.cs
+@@ -115,14 +115,14 @@ namespace ErrorProne.NET.AsyncAnalyzers
+                         return;
+                     }
+ 
+-                    var initializer = declarator.Initializer?.Value
+-                                      ?? (declarator.Parent as IVariableDeclarationOperation)?.Initializer?.Value;
++                    var initializer = declarator.Initializer?.Value ??
++                                      (declarator.Parent as IVariableDeclarationOperation)?.Initializer?.Value;
+ 
+                     var tracker = GetOrCreate(trackers, symbol);
+                     var aliasRoot = EnumerationMethods.TryGetRootEnumerableSymbol(initializer, compilation);
+-                    if (aliasRoot is not null
+-                        && !SymbolEqualityComparer.Default.Equals(aliasRoot, symbol)
+-                        && IsTrackable(GetSymbolType(aliasRoot), compilation))
++                    if (aliasRoot is not null &&
++                        !SymbolEqualityComparer.Default.Equals(aliasRoot, symbol) &&
++                        IsTrackable(GetSymbolType(aliasRoot), compilation))
+                     {
+                         // Right-hand side is itself a trackable enumerable (a parameter or another local).
+                         // Make the two share a tracker so that subsequent enumerations on either name accrue
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/TaskInUsingBlockAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/TaskInUsingBlockAnalyzer.cs
+index c93dd5c..621c417 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/TaskInUsingBlockAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/TaskInUsingBlockAnalyzer.cs
+@@ -42,19 +42,22 @@ namespace ErrorProne.NET.AsyncAnalyzers
+                 var diagnostic = Diagnostic.Create(Rule, usingDeclarationOperation.Syntax.GetLocation());
+                 context.ReportDiagnostic(diagnostic);
+             }
+-            //AnalyzeCore(context,usingDeclarationOperation);
++
++            // AnalyzeCore(context,usingDeclarationOperation);
+         }
+ 
+         private void AnalyzeUsing(OperationAnalysisContext context)
+         {
+             IUsingOperation usingOperation = (IUsingOperation)context.Operation;
+             if (
++
+                 // This is needed to cover the case like 'using(GetTask()) {}'
+                 usingOperation.Resources.Type.IsTaskLike(context.Compilation) ||
+                 HasTaskLikeVariableDeclaration(usingOperation.Resources, context.Compilation))
+-                // usingOperation.Locals.Any(l => l.Type.IsTaskLike(context.Compilation)) ||
+-                
+-                //(usingOperation.Body as IBlockOperation)?.Locals.Any(l => l.Type.IsTaskLike(context.Compilation)) == true)
++
++            // usingOperation.Locals.Any(l => l.Type.IsTaskLike(context.Compilation)) ||
++
++            // (usingOperation.Body as IBlockOperation)?.Locals.Any(l => l.Type.IsTaskLike(context.Compilation)) == true)
+             {
+                 var diagnostic = Diagnostic.Create(Rule, usingOperation.Syntax.GetLocation());
+                 context.ReportDiagnostic(diagnostic);
+@@ -74,13 +77,10 @@ namespace ErrorProne.NET.AsyncAnalyzers
+                         break;
+                     }
+                 }
+-                else
++                else if (operation.Type.IsTaskLike(context.Compilation, TaskLikeTypes.TasksOnly))
+                 {
+-                    if (operation.Type.IsTaskLike(context.Compilation, TaskLikeTypes.TasksOnly))
+-                    {
+-                        var diagnostic = Diagnostic.Create(Rule, parentOperation.Syntax.GetLocation());
+-                        context.ReportDiagnostic(diagnostic);
+-                    }
++                    var diagnostic = Diagnostic.Create(Rule, parentOperation.Syntax.GetLocation());
++                    context.ReportDiagnostic(diagnostic);
+                 }
+             }
+         }
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/TaskInstanceToStringConversionAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/TaskInstanceToStringConversionAnalyzer.cs
+index d236e86..9d26367 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/TaskInstanceToStringConversionAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/AsyncAnalyzers/TaskInstanceToStringConversionAnalyzer.cs
+@@ -1,7 +1,7 @@
+ ﻿using System.Diagnostics.CodeAnalysis;
++using ErrorProne.NET.Core;
+ using Microsoft.CodeAnalysis;
+ using Microsoft.CodeAnalysis.Diagnostics;
+-using ErrorProne.NET.Core;
+ 
+ namespace ErrorProne.NET.AsyncAnalyzers
+ {
+@@ -23,7 +23,7 @@ namespace ErrorProne.NET.AsyncAnalyzers
+         {
+         }
+ 
+-        protected override bool TryCreateDiagnostic(Compilation compilation, ITypeSymbol type, Location location, [NotNullWhen(true)]out Diagnostic? diagnostic)
++        protected override bool TryCreateDiagnostic(Compilation compilation, ITypeSymbol type, Location location, [NotNullWhen(true)] out Diagnostic? diagnostic)
+         {
+             diagnostic = null;
+ 
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/BodySyntaxExtensions.cs b/src/ErrorProne.NET.CoreAnalyzers/BodySyntaxExtensions.cs
+index 0ab5f59..08a5fa0 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/BodySyntaxExtensions.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/BodySyntaxExtensions.cs
+@@ -6,7 +6,8 @@ namespace ErrorProne.NET.Core
+ {
+     public static class BodySyntaxExtensions
+     {
+-        public static MethodDeclarationSyntax? WithStatements(this MethodDeclarationSyntax method,
++        public static MethodDeclarationSyntax? WithStatements(
++            this MethodDeclarationSyntax method,
+             IEnumerable<StatementSyntax> statements)
+         {
+             if (method.Body == null)
+@@ -14,7 +15,7 @@ namespace ErrorProne.NET.Core
+                 return null;
+             }
+ 
+-            return method.WithBody(method.Body.WithStatements(new SyntaxList<StatementSyntax>().AddRange(statements)));
++            return method.WithBody(method.Body.WithStatements(default(SyntaxList<StatementSyntax>).AddRange(statements)));
+         }
+     }
+ }
+\ No newline at end of file
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/CastUtilities.cs b/src/ErrorProne.NET.CoreAnalyzers/CastUtilities.cs
+index a61354b..01ed37c 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/CastUtilities.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/CastUtilities.cs
+@@ -4,9 +4,10 @@ namespace ErrorProne.NET.Core
+ {
+     public static class CastUtilities
+     {
+-        public static T Cast<T>(this SyntaxNode node) where T : SyntaxNode
++        public static T Cast<T>(this SyntaxNode node)
++            where T : SyntaxNode
+         {
+-            return (T) node;
++            return (T)node;
+         }
+     }
+ }
+\ No newline at end of file
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/CompilationExtensions.cs b/src/ErrorProne.NET.CoreAnalyzers/CompilationExtensions.cs
+index 1aa5bb6..7a65779 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/CompilationExtensions.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/CompilationExtensions.cs
+@@ -12,7 +12,6 @@ namespace ErrorProne.NET.Core
+ {
+     public static class OperationExtensions
+     {
+-
+         /// <summary>
+         /// Finds the enclosing method symbol for the given operation.
+         /// </summary>
+@@ -43,6 +42,7 @@ namespace ErrorProne.NET.Core
+         }
+ 
+         public record struct ArgumentInfo(IOperation Operation, string? ParameterName);
++
+         public static List<ArgumentInfo> FlattenArguments(this IInvocationOperation invocation)
+         {
+             // In case of an invocation operation its possible that the last argument is a 'ParamArray'.
+@@ -153,8 +153,6 @@ namespace ErrorProne.NET.Core
+         }
+     }
+ 
+-    
+-
+     // Copied from internal ICompilationExtensions class from the roslyn codebase
+     public static class CompilationExtensions
+     {
+@@ -164,17 +162,16 @@ namespace ErrorProne.NET.Core
+             {
+                 return null;
+             }
+-            
++
+             var provider = WellKnownTypeProvider.GetOrCreate(compilation);
+             return provider.GetTypeByFullName(fullName!);
+         }
+-        
+-        
++
+         public static INamedTypeSymbol? GetTypeByClrType(this Compilation compilation, Type type)
+         {
+             return compilation.GetTypeByFullName(type.FullName);
+         }
+-        
++
+         public static INamedTypeSymbol? TaskType(this Compilation compilation)
+             => compilation.GetTypeByFullName(typeof(Task).FullName);
+ 
+@@ -183,7 +180,7 @@ namespace ErrorProne.NET.Core
+ 
+         public static INamedTypeSymbol? ValueTaskType(this Compilation compilation)
+             => compilation.GetTypeByFullName("System.Threading.Tasks.ValueTask");
+-        
++
+         public static INamedTypeSymbol? ValueTaskOfTType(this Compilation compilation)
+             => compilation.GetTypeByFullName("System.Threading.Tasks.ValueTask`1");
+ 
+@@ -192,14 +189,14 @@ namespace ErrorProne.NET.Core
+ 
+         public static bool IsClrType(this ISymbol type, Compilation compilation, Type clrType)
+             => type is ITypeSymbol ts && ts.OriginalDefinition.Equals(compilation.GetTypeByFullName(clrType.FullName), SymbolEqualityComparer.Default);
+-        
++
+         public static bool IsClrType(this ITypeSymbol? ts, Compilation compilation, Type clrType)
+             => ts?.OriginalDefinition.Equals(compilation.GetTypeByFullName(clrType.FullName), SymbolEqualityComparer.Default) == true;
+ 
+         public static bool IsGenericType(this ITypeSymbol? type, Compilation compilation, Type clrType)
+         {
+             Contract.Requires(clrType.IsGenericType);
+-            
++
+             var otherType = compilation.GetTypeByClrType(clrType);
+             if (type is INamedTypeSymbol nts)
+             {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/ConcurrencyAnalyzers/ConcurrentCollectionAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/ConcurrencyAnalyzers/ConcurrentCollectionAnalyzer.cs
+index 45b4cf5..41cf113 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/ConcurrencyAnalyzers/ConcurrentCollectionAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/ConcurrencyAnalyzers/ConcurrentCollectionAnalyzer.cs
+@@ -33,7 +33,7 @@ namespace ErrorProne.NET.AsyncAnalyzers
+             context.RegisterOperationAction(AnalyzeInvocationOperation, OperationKind.Invocation);
+         }
+ 
+-        private static readonly HashSet<string> ConcurrentDictionaryUnsafeLinqOperations = new HashSet<string>()
++        private static readonly HashSet<string> ConcurrentDictionaryUnsafeLinqOperations = new HashSet<string>
+         {
+             nameof(Enumerable.OrderBy),
+             nameof(Enumerable.OrderByDescending),
+@@ -75,7 +75,7 @@ namespace ErrorProne.NET.AsyncAnalyzers
+             }
+             catch (Exception e)
+             {
+-                //Debugger.Launch();
++                // Debugger.Launch();
+                 throw new Exception(e.StackTrace);
+             }
+         }
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/AbstractDefaultToStringImplementationUsageAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/AbstractDefaultToStringImplementationUsageAnalyzer.cs
+index a11cd08..edac591 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/AbstractDefaultToStringImplementationUsageAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/AbstractDefaultToStringImplementationUsageAnalyzer.cs
+@@ -19,7 +19,7 @@ namespace ErrorProne.NET.AsyncAnalyzers
+         {
+         }
+ 
+-        protected abstract bool TryCreateDiagnostic(Compilation compilation, ITypeSymbol type, Location location, [NotNullWhen(true)]out Diagnostic? diagnostic);
++        protected abstract bool TryCreateDiagnostic(Compilation compilation, ITypeSymbol type, Location location, [NotNullWhen(true)] out Diagnostic? diagnostic);
+ 
+         /// <inheritdoc />
+         protected override void InitializeCore(AnalysisContext context)
+@@ -75,11 +75,11 @@ namespace ErrorProne.NET.AsyncAnalyzers
+                 // like in "FooBar: " + FooBarAsync()
+                 // Or the type of the grand parent operation is string,
+                 // like in string.Format("{0}", FooBarAsync())
+-                if ((isToStringConversion(conversion.Parent)) && conversion.Operand.Type is not null)
++                if (isToStringConversion(conversion.Parent) && conversion.Operand.Type is not null)
+                 {
+                     if (TryCreateDiagnostic(
+                             context.Compilation,
+-                            conversion.Operand.Type, 
++                            conversion.Operand.Type,
+                             context.Operation.Syntax.GetLocation(),
+                             out var diagnostic))
+                     {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/DefaultEqualsOrHashCodeUsageAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/DefaultEqualsOrHashCodeUsageAnalyzer.cs
+index f7adb52..076d411 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/DefaultEqualsOrHashCodeUsageAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/DefaultEqualsOrHashCodeUsageAnalyzer.cs
+@@ -14,7 +14,7 @@ namespace ErrorProne.NET.CoreAnalyzers
+     {
+         /// <nodoc />
+         public static DiagnosticDescriptor Rule => DiagnosticDescriptors.EPC25;
+-        
++
+         /// <inheritdoc />
+         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
+ 
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/DefaultToStringImplementationUsageAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/DefaultToStringImplementationUsageAnalyzer.cs
+index 92a6c23..018461e 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/DefaultToStringImplementationUsageAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/DefaultToStringImplementationUsageAnalyzer.cs
+@@ -28,7 +28,7 @@ namespace ErrorProne.NET.AsyncAnalyzers
+         }
+ 
+         /// <inheritdoc />
+-        protected override bool TryCreateDiagnostic(Compilation compilation, ITypeSymbol type, Location location, [NotNullWhen(true)]out Diagnostic? diagnostic)
++        protected override bool TryCreateDiagnostic(Compilation compilation, ITypeSymbol type, Location location, [NotNullWhen(true)] out Diagnostic? diagnostic)
+         {
+             diagnostic = null;
+ 
+@@ -79,7 +79,7 @@ namespace ErrorProne.NET.AsyncAnalyzers
+             return false;
+         }
+ 
+-        private static bool NoToStringOverride(ITypeSymbol type, [NotNullWhen(true)]out ITypeSymbol? typeWithNoToString)
++        private static bool NoToStringOverride(ITypeSymbol type, [NotNullWhen(true)] out ITypeSymbol? typeWithNoToString)
+         {
+             typeWithNoToString = null;
+ 
+@@ -89,12 +89,9 @@ namespace ErrorProne.NET.AsyncAnalyzers
+                 var noToString = namedType.TupleElements.Select(te => te.Type).Where(t => !t.OverridesToString());
+                 typeWithNoToString = noToString.FirstOrDefault();
+             }
+-            else
++            else if (!type.OverridesToString())
+             {
+-                if (!type.OverridesToString())
+-                {
+-                    typeWithNoToString = type;
+-                }
++                typeWithNoToString = type;
+             }
+ 
+             return typeWithNoToString != null;
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/FormatMethodArgumentsAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/FormatMethodArgumentsAnalyzer.cs
+index f730441..661e142 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/FormatMethodArgumentsAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/FormatMethodArgumentsAnalyzer.cs
+@@ -103,8 +103,8 @@ namespace ErrorProne.NET.CoreAnalyzers
+                 return;
+             }
+ 
+-            if (formatArgument.Parameter is null
+-                || !TryCountTrailingArgs(invocation, formatArgument.Parameter.Ordinal, out var argCount))
++            if (formatArgument.Parameter is null ||
++                !TryCountTrailingArgs(invocation, formatArgument.Parameter.Ordinal, out var argCount))
+             {
+                 // Caller passed e.g. an opaque object[] for the params slot; cannot reason statically.
+                 return;
+@@ -215,8 +215,8 @@ namespace ErrorProne.NET.CoreAnalyzers
+ 
+                 // Exact match takes precedence over wildcard match.
+                 var exactKey = containing + "." + method.Name;
+-                if (entries.Exact.TryGetValue(exactKey, out var spec)
+-                    && TryResolveSpec(method, spec, out formatParamIndex))
++                if (entries.Exact.TryGetValue(exactKey, out var spec) &&
++                    TryResolveSpec(method, spec, out formatParamIndex))
+                 {
+                     return true;
+                 }
+@@ -375,12 +375,13 @@ namespace ErrorProne.NET.CoreAnalyzers
+                         var n = 0;
+                         while (i < format.Length && IsAsciiDigit(format[i]))
+                         {
+-                            n = n * 10 + (format[i] - '0');
++                            n = (n * 10) + (format[i] - '0');
+                             if (n > 1_000_000)
+                             {
+                                 // Way too large; treat as malformed to avoid pathological inputs.
+                                 return new Result(maxIndex, true, i);
+                             }
++
+                             i++;
+                         }
+ 
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/HashTableIncompatibilityAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/HashTableIncompatibilityAnalyzer.cs
+index ac4beaa..27f56e9 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/HashTableIncompatibilityAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/HashTableIncompatibilityAnalyzer.cs
+@@ -32,13 +32,13 @@ namespace ErrorProne.NET.CoreAnalyzers
+         private static readonly Dictionary<string, int> WellKnownHashTableTypes = new(
+             WellKnownHashTables()
+                 .ToDictionary(t => t.name.Remove(t.name.LastIndexOf("`")), t => t.arity));
+-        
++
+         private static readonly SymbolDisplayFormat SymbolDisplayFormat = new SymbolDisplayFormat(
+             typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces);
+ 
+         /// <nodoc />
+         public static DiagnosticDescriptor Rule => DiagnosticDescriptors.EPC24;
+-        
++
+         /// <inheritdoc />
+         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
+ 
+@@ -92,7 +92,7 @@ namespace ErrorProne.NET.CoreAnalyzers
+         {
+             if (context.SemanticModel.GetDeclaredSymbol(context.Node) is IMethodSymbol methodSymbol)
+             {
+-                var methodDeclarationSyntax = (LocalFunctionStatementSyntax) context.Node;
++                var methodDeclarationSyntax = (LocalFunctionStatementSyntax)context.Node;
+                 if (!methodSymbol.ReturnsVoid)
+                 {
+                     DoAnalyzeType(methodSymbol.ReturnType, methodDeclarationSyntax.ReturnType.GetLocation(), d => context.ReportDiagnostic(d));
+@@ -109,7 +109,7 @@ namespace ErrorProne.NET.CoreAnalyzers
+ 
+         private void AnalyzeUsingDirective(SyntaxNodeAnalysisContext context)
+         {
+-            var usingDirective = (UsingDirectiveSyntax) context.Node;
++            var usingDirective = (UsingDirectiveSyntax)context.Node;
+             if (context.SemanticModel.GetDeclaredSymbol(usingDirective) is { } alias)
+             {
+                 if (alias.Target is ITypeSymbol ts && usingDirective.Name is not null)
+@@ -121,8 +121,8 @@ namespace ErrorProne.NET.CoreAnalyzers
+ 
+         private void AnalyzeClassDeclaration(SyntaxNodeAnalysisContext context)
+         {
+-            var classDeclaration = (ClassDeclarationSyntax) context.Node;
+-            if (classDeclaration.BaseList != null && 
++            var classDeclaration = (ClassDeclarationSyntax)context.Node;
++            if (classDeclaration.BaseList != null &&
+                 context.SemanticModel.GetDeclaredSymbol(context.Node) is ITypeSymbol methodSymbol)
+             {
+                 foreach (var baseType in classDeclaration.BaseList.Types)
+@@ -138,7 +138,7 @@ namespace ErrorProne.NET.CoreAnalyzers
+ 
+         private void AnalyzeMethod(SymbolAnalysisContext context)
+         {
+-            if (context.Symbol is IMethodSymbol ms && 
++            if (context.Symbol is IMethodSymbol ms &&
+                 ms.TryGetDeclarationSyntax() is var syntax &&
+                 syntax != null)
+             {
+@@ -214,7 +214,7 @@ namespace ErrorProne.NET.CoreAnalyzers
+ 
+             return false;
+         }
+-        
++
+         private static (string name, int arity)[] WellKnownHashTables()
+         {
+             return Types.Select(t => (t.FullName, t.GenericTypeArguments.Length)).ToArray();
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/MustUseResultAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/MustUseResultAnalyzer.cs
+index 50b2aca..0c38624 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/MustUseResultAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/MustUseResultAnalyzer.cs
+@@ -46,7 +46,7 @@ namespace ErrorProne.NET.CoreAnalyzers
+                 var simpleMemberAccess = invocationSyntax.Expression as Microsoft.CodeAnalysis.CSharp.Syntax.MemberAccessExpressionSyntax;
+                 return (simpleMemberAccess?.Name ?? invocationSyntax.Expression).GetLocation();
+             }
+-            
++
+             return syntax.GetLocation();
+         }
+ 
+@@ -66,6 +66,7 @@ namespace ErrorProne.NET.CoreAnalyzers
+                 {
+                     return true;
+                 }
++
+                 current = current.OverriddenMethod;
+             }
+ 
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/PrivateMethodMultipleEnumerationAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/PrivateMethodMultipleEnumerationAnalyzer.cs
+index d359751..42a29e2 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/PrivateMethodMultipleEnumerationAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/PrivateMethodMultipleEnumerationAnalyzer.cs
+@@ -47,10 +47,14 @@ namespace ErrorProne.NET.CoreAnalyzers
+         {
+         }
+ 
+-        /// <summary>Maximum number of call sites a candidate may have before we skip it entirely.</summary>
++        /// <summary>
++        /// Maximum number of call sites a candidate may have before we skip it entirely.
++        /// </summary>
+         private const int MaxCallers = 3;
+ 
+-        /// <summary>Maximum number of provenance hops to follow back through local declarations.</summary>
++        /// <summary>
++        /// Maximum number of provenance hops to follow back through local declarations.
++        /// </summary>
+         private const int MaxProvenanceHops = 3;
+ 
+         /// <inheritdoc />
+@@ -221,7 +225,8 @@ namespace ErrorProne.NET.CoreAnalyzers
+ 
+             public void AddCallSite(IMethodSymbol method, int parameterOrdinal, IArgumentOperation argument)
+             {
+-                var bag = _callSites.GetOrAdd(new CandidateKey(method, parameterOrdinal),
++                var bag = _callSites.GetOrAdd(
++                    new CandidateKey(method, parameterOrdinal),
+                     _ => new ConcurrentBag<IArgumentOperation>());
+                 bag.Add(argument);
+             }
+@@ -377,11 +382,11 @@ namespace ErrorProne.NET.CoreAnalyzers
+         {
+             foreach (var op in body.EnumerateChildOperations())
+             {
+-                if (op is IVariableDeclaratorOperation declarator
+-                    && SymbolEqualityComparer.Default.Equals(declarator.Symbol, local))
++                if (op is IVariableDeclaratorOperation declarator &&
++                    SymbolEqualityComparer.Default.Equals(declarator.Symbol, local))
+                 {
+-                    return declarator.Initializer?.Value
+-                        ?? (declarator.Parent as IVariableDeclarationOperation)?.Initializer?.Value;
++                    return declarator.Initializer?.Value ??
++                        (declarator.Parent as IVariableDeclarationOperation)?.Initializer?.Value;
+                 }
+             }
+ 
+@@ -452,18 +457,19 @@ namespace ErrorProne.NET.CoreAnalyzers
+                 ParameterOrdinal = parameterOrdinal;
+             }
+ 
+-            public bool Equals(CandidateKey other) =>
+-                SymbolEqualityComparer.Default.Equals(Method, other.Method) &&
++            public bool Equals(CandidateKey other)
++                => SymbolEqualityComparer.Default.Equals(Method, other.Method) &&
+                 ParameterOrdinal == other.ParameterOrdinal;
+ 
+             public override bool Equals(object? obj) => obj is CandidateKey k && Equals(k);
+ 
+-            public override int GetHashCode() =>
+-                unchecked(SymbolEqualityComparer.Default.GetHashCode(Method) * 397 ^ ParameterOrdinal);
++            public override int GetHashCode()
++                => unchecked(SymbolEqualityComparer.Default.GetHashCode(Method) * 397 ^ ParameterOrdinal);
+ 
+             private sealed class CandidateKeyComparer : IEqualityComparer<CandidateKey>
+             {
+                 public bool Equals(CandidateKey x, CandidateKey y) => x.Equals(y);
++
+                 public int GetHashCode(CandidateKey obj) => obj.GetHashCode();
+             }
+         }
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/QuadraticEnumerationAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/QuadraticEnumerationAnalyzer.cs
+index 2d48f22..a1cdca8 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/QuadraticEnumerationAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/QuadraticEnumerationAnalyzer.cs
+@@ -86,7 +86,10 @@ namespace ErrorProne.NET.CoreAnalyzers
+                         var innerSource = EnumerationMethods.TryGetRootEnumerableSymbol(inner.Collection, context.Compilation);
+                         if (innerSource is not null && SymbolEqualityComparer.Default.Equals(innerSource, loopSource))
+                         {
+-                            Report(context, reported, inner.Collection.Syntax,
++                            Report(
++                                context,
++                                reported,
++                                inner.Collection.Syntax,
+                                 $"nested foreach iterates over the same source '{loopSource.Name}' twice (O(N²)).");
+                         }
+ 
+@@ -113,8 +116,8 @@ namespace ErrorProne.NET.CoreAnalyzers
+             // ------- Q1 & Q2: enumerating LINQ method called on some source ----------------------------
+             if (EnumerationMethods.IsEnumeratingLinqMethod(target, compilation))
+             {
+-                var sourceOp = invocation.Instance
+-                               ?? (invocation.Arguments.Length > 0 ? invocation.Arguments[0].Value : null);
++                var sourceOp = invocation.Instance ??
++                               (invocation.Arguments.Length > 0 ? invocation.Arguments[0].Value : null);
+                 if (sourceOp is null)
+                 {
+                     return;
+@@ -129,7 +132,10 @@ namespace ErrorProne.NET.CoreAnalyzers
+                 // Q1: same symbol as the outer foreach's collection.
+                 if (loopSource is not null && SymbolEqualityComparer.Default.Equals(rootSymbol, loopSource))
+                 {
+-                    Report(context, reported, invocation.Syntax,
++                    Report(
++                        context,
++                        reported,
++                        invocation.Syntax,
+                         $"LINQ method '{target.Name}' is called on the same enumerable '{rootSymbol.Name}' that is being iterated (O(N²)).");
+                     return;
+                 }
+@@ -147,7 +153,10 @@ namespace ErrorProne.NET.CoreAnalyzers
+                         return;
+                     }
+ 
+-                    Report(context, reported, invocation.Syntax,
++                    Report(
++                        context,
++                        reported,
++                        invocation.Syntax,
+                         $"LINQ method '{target.Name}' re-enumerates deferred IEnumerable '{rootSymbol.Name}' on every iteration; materialize it with .ToList()/.ToArray() before the loop.");
+                     return;
+                 }
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/SuspiciousEqualsMethodAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/SuspiciousEqualsMethodAnalyzer.cs
+index 9dece81..73166ff 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/SuspiciousEqualsMethodAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/SuspiciousEqualsMethodAnalyzer.cs
+@@ -70,10 +70,10 @@ namespace ErrorProne.NET.CoreAnalyzers
+                                 }
+ 
+                                 var bodyOrExpression = (SyntaxNode?)methodSyntax.Body ?? methodSyntax.ExpressionBody;
+-                                
++
+                                 Contract.Assert(bodyOrExpression != null);
+                                 var symbols = SymbolExtensions.GetAllUsedSymbols(context.Compilation, bodyOrExpression).ToList();
+-                                if (!symbols.Any(s => 
++                                if (!symbols.Any(s =>
+                                     s is IParameterSymbol p && p.ContainingSymbol.Equals(ms, SymbolEqualityComparer.Default) && !p.IsThis))
+                                 {
+                                     var location = ms.Parameters[0].Locations[0];
+@@ -144,17 +144,17 @@ namespace ErrorProne.NET.CoreAnalyzers
+             }
+ 
+             if (
+-                symbol is IMethodSymbol ms 
+-                && ms.Parameters.Length == 1 
+-                && (ms.Name == "Equals" || ms.Name == "CompareTo") 
+-                && symbol.ContainingType?.Equals(methodContainingType, SymbolEqualityComparer.Default) == true)
++                symbol is IMethodSymbol ms &&
++                ms.Parameters.Length == 1 &&
++                (ms.Name == "Equals" || ms.Name == "CompareTo") &&
++                symbol.ContainingType?.Equals(methodContainingType, SymbolEqualityComparer.Default) == true)
+             {
+                 // Special case for Equals(object) => this is MyT && Equals((MyT)other).
+                 return true;
+             }
+ 
+             if (!(
+-                symbol is IMethodSymbol or IPropertySymbol or IFieldSymbol or IEventSymbol or ILocalSymbol || 
++                symbol is IMethodSymbol or IPropertySymbol or IFieldSymbol or IEventSymbol or ILocalSymbol ||
+                 (symbol is IParameterSymbol ps && ps.IsThis)))
+             {
+                 // If symbol is not one of these, it is definitely not an instance member reference
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/UnobservedResultAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/UnobservedResultAnalyzer.cs
+index ea577d2..b6d0000 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/UnobservedResultAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/UnobservedResultAnalyzer.cs
+@@ -18,7 +18,7 @@ namespace ErrorProne.NET.CoreAnalyzers
+         private static DiagnosticDescriptor Rule => DiagnosticDescriptors.EPC13;
+ 
+         /// <nodoc />
+-        public UnobservedResultAnalyzer() 
++        public UnobservedResultAnalyzer()
+             : base(Rule)
+         {
+         }
+@@ -53,7 +53,7 @@ namespace ErrorProne.NET.CoreAnalyzers
+                 var simpleMemberAccess = invocationSyntax.Expression as Microsoft.CodeAnalysis.CSharp.Syntax.MemberAccessExpressionSyntax;
+                 return (simpleMemberAccess?.Name ?? invocationSyntax.Expression).GetLocation();
+             }
+-            
++
+             return syntax.GetLocation();
+         }
+ 
+@@ -83,7 +83,7 @@ namespace ErrorProne.NET.CoreAnalyzers
+                 {
+                     return false;
+                 }
+-                
++
+                 return true;
+             }
+ 
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/UnobservedResultAnalyzerBase.cs b/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/UnobservedResultAnalyzerBase.cs
+index e0d2874..a00fa4f 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/UnobservedResultAnalyzerBase.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/CoreAnalyzers/UnobservedResultAnalyzerBase.cs
+@@ -28,12 +28,13 @@ namespace ErrorProne.NET.CoreAnalyzers
+         private void AnalyzeExpressionStatement(OperationAnalysisContext context)
+         {
+             var expressionStatement = (IExpressionStatementOperation)context.Operation;
+-            
++
+             // Check if the expression statement contains an invocation that's not being used
+             if (expressionStatement.Operation is IInvocationOperation invocation)
+             {
+                 AnalyzeInvocation(invocation, context);
+             }
++
+             // Also check for await expressions that wrap invocations
+             else if (expressionStatement.Operation is IAwaitOperation awaitOperation)
+             {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/DiagnosticAnalyzerBase.cs b/src/ErrorProne.NET.CoreAnalyzers/DiagnosticAnalyzerBase.cs
+index 5c6b6b4..bc67f52 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/DiagnosticAnalyzerBase.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/DiagnosticAnalyzerBase.cs
+@@ -22,7 +22,7 @@ namespace ErrorProne.NET.CoreAnalyzers
+         {
+             SupportedDiagnostics = ImmutableArray.Create(descriptor);
+         }
+-        
++
+         /// <nodoc />
+         protected DiagnosticAnalyzerBase(params DiagnosticDescriptor[] diagnostics)
+         {
+@@ -33,7 +33,7 @@ namespace ErrorProne.NET.CoreAnalyzers
+         public sealed override void Initialize(AnalysisContext context)
+         {
+             context.EnableConcurrentExecution();
+-            
++
+             if (ReportDiagnosticsOnGeneratedCode)
+             {
+                 context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/DiagnosticDescriptors.cs b/src/ErrorProne.NET.CoreAnalyzers/DiagnosticDescriptors.cs
+index cf56702..3f99d7b 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/DiagnosticDescriptors.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/DiagnosticDescriptors.cs
+@@ -20,7 +20,9 @@ namespace ErrorProne.NET
+             nameof(EPC11),
+             title: "Suspicious equality implementation",
+             messageFormat: "Suspicious equality implementation: {0}",
+-            ErrorHandlingCategory, DiagnosticSeverity.Warning, isEnabledByDefault: true,
++            ErrorHandlingCategory,
++            DiagnosticSeverity.Warning,
++            isEnabledByDefault: true,
+             description: "Equals method that does not use any instance members or other instance is suspicious.",
+             helpLinkUri: GetHelpUri(nameof(EPC11)));
+ 
+@@ -39,7 +41,9 @@ namespace ErrorProne.NET
+             nameof(EPC13),
+             title: "Suspiciously unobserved result",
+             messageFormat: "The result of type '{0}' should be observed",
+-            ErrorHandlingCategory, DiagnosticSeverity.Warning, isEnabledByDefault: true,
++            ErrorHandlingCategory,
++            DiagnosticSeverity.Warning,
++            isEnabledByDefault: true,
+             description: "Return values of some methods should always be observed.",
+             helpLinkUri: GetHelpUri(nameof(EPC13)));
+ 
+@@ -61,7 +65,9 @@ namespace ErrorProne.NET
+             nameof(EPC15),
+             title: "ConfigureAwait(false) must be used",
+             messageFormat: "ConfigureAwait(false) must be used",
+-            AsyncCategory, DiagnosticSeverity.Info, isEnabledByDefault: true,
++            AsyncCategory,
++            DiagnosticSeverity.Info,
++            isEnabledByDefault: true,
+             description: "The assembly is configured to use .ConfigureAwait(false).",
+             helpLinkUri: GetHelpUri(nameof(EPC15)));
+ 
+@@ -70,7 +76,9 @@ namespace ErrorProne.NET
+             nameof(EPC16),
+             title: "Awaiting a result of a null-conditional expression will cause NullReferenceException",
+             messageFormat: "Awaiting a result of a null-conditional expression will cause NullReferenceException",
+-            AsyncCategory, DiagnosticSeverity.Warning, isEnabledByDefault: true,
++            AsyncCategory,
++            DiagnosticSeverity.Warning,
++            isEnabledByDefault: true,
+             description: "Null-conditional operator returns null when 'lhs' is null, causing NRE when a task is awaited.",
+             helpLinkUri: GetHelpUri(nameof(EPC16)));
+ 
+@@ -79,7 +87,9 @@ namespace ErrorProne.NET
+             nameof(EPC17),
+             title: "Avoid async-void delegates",
+             messageFormat: "Avoid async-void delegates",
+-            AsyncCategory, DiagnosticSeverity.Warning, isEnabledByDefault: true,
++            AsyncCategory,
++            DiagnosticSeverity.Warning,
++            isEnabledByDefault: true,
+             description: "Async-void delegates can cause application to crash.",
+             helpLinkUri: GetHelpUri(nameof(EPC17)));
+ 
+@@ -88,7 +98,9 @@ namespace ErrorProne.NET
+             nameof(EPC18),
+             title: "A task instance is implicitly converted to a string",
+             messageFormat: "A task instance is implicitly converted to a string",
+-            AsyncCategory, DiagnosticSeverity.Warning, isEnabledByDefault: true,
++            AsyncCategory,
++            DiagnosticSeverity.Warning,
++            isEnabledByDefault: true,
+             description: "An implicit conversion of a task instance to a string potentially indicates an lack of 'await'.",
+             helpLinkUri: GetHelpUri(nameof(EPC18)));
+ 
+@@ -97,7 +109,9 @@ namespace ErrorProne.NET
+             nameof(EPC19),
+             title: "Observe and Dispose a 'CancellationTokenRegistration' to avoid memory leaks",
+             messageFormat: "Observe and Dispose a 'CancellationTokenRegistration' to avoid memory leaks",
+-            CodeSmellCategory, DiagnosticSeverity.Info, isEnabledByDefault: true,
++            CodeSmellCategory,
++            DiagnosticSeverity.Info,
++            isEnabledByDefault: true,
+             description: "Failure to dispose 'CancellationTokenRegistration' may cause a memory leak if obtained from a non-local token.",
+             helpLinkUri: GetHelpUri(nameof(EPC19)));
+ 
+@@ -106,7 +120,9 @@ namespace ErrorProne.NET
+             nameof(EPC20),
+             title: "Avoid using default ToString implementation",
+             messageFormat: "A default ToString implementation is used for type {0}",
+-            CodeSmellCategory, DiagnosticSeverity.Warning, isEnabledByDefault: true,
++            CodeSmellCategory,
++            DiagnosticSeverity.Warning,
++            isEnabledByDefault: true,
+             description: "A default ToString implementation is rarely gives the result you need.",
+             helpLinkUri: GetHelpUri(nameof(EPC20)));
+ 
+@@ -115,7 +131,9 @@ namespace ErrorProne.NET
+             nameof(ERP021),
+             title: "Incorrect exception propagation",
+             messageFormat: "Incorrect exception propagation. Use 'throw;' instead.",
+-            ErrorHandlingCategory, DiagnosticSeverity.Warning, isEnabledByDefault: true,
++            ErrorHandlingCategory,
++            DiagnosticSeverity.Warning,
++            isEnabledByDefault: true,
+             description: "Incorrect exception propagation alters the stack trace of a thrown exception.",
+             helpLinkUri: GetHelpUri(nameof(ERP021)));
+ 
+@@ -124,7 +142,9 @@ namespace ErrorProne.NET
+             nameof(ERP022),
+             title: "Unobserved exception in a generic exception handler",
+             messageFormat: "An exit point '{0}' swallows an unobserved exception",
+-            ErrorHandlingCategory, DiagnosticSeverity.Warning, isEnabledByDefault: true,
++            ErrorHandlingCategory,
++            DiagnosticSeverity.Warning,
++            isEnabledByDefault: true,
+             description: "A generic catch block swallows an exception that was not observed.",
+             helpLinkUri: GetHelpUri(nameof(ERP022)));
+ 
+@@ -133,7 +153,9 @@ namespace ErrorProne.NET
+             nameof(EPC23),
+             title: "Avoid using Enumerable.Contains on HashSet<T>",
+             messageFormat: "Linear search via Enumerable.Contains is used instead of an instance Contains method",
+-            PerformanceCategory, DiagnosticSeverity.Warning, isEnabledByDefault: true,
++            PerformanceCategory,
++            DiagnosticSeverity.Warning,
++            isEnabledByDefault: true,
+             description: "Enumerable.Contains is less efficient since it scans all the entries in the hashset and allocates an iterator.",
+             helpLinkUri: GetHelpUri(nameof(EPC23)));
+ 
+@@ -142,25 +164,33 @@ namespace ErrorProne.NET
+             nameof(EPC24),
+             "A hash table \"unfriendly\" type is used as the key in a hash table",
+             "A struct '{0}' with a default {1} implementation is used as a key in a hash table",
+-            category: PerformanceCategory, DiagnosticSeverity.Warning, isEnabledByDefault: true,
++            category: PerformanceCategory,
++            DiagnosticSeverity.Warning,
++            isEnabledByDefault: true,
+             description: "The default implementation of 'Equals' and 'GetHashCode' for structs is inefficient and could cause severe performance issues.",
+             helpLinkUri: GetHelpUri(nameof(EPC24)));
+ 
+         /// <nodoc />
+         public static readonly DiagnosticDescriptor EPC25 =
+-            new DiagnosticDescriptor(nameof(EPC25),
++            new DiagnosticDescriptor(
++                nameof(EPC25),
+                 title: "Avoid using default Equals or HashCode implementation from structs",
+                 messageFormat: "The default 'ValueType.{0}' is used in {1}",
+-                category: PerformanceCategory, DiagnosticSeverity.Warning, isEnabledByDefault: true,
++                category: PerformanceCategory,
++                DiagnosticSeverity.Warning,
++                isEnabledByDefault: true,
+                 description: "The default implementation of 'Equals' and 'GetHashCode' for structs is inefficient and could cause severe performance issues.",
+                 helpLinkUri: GetHelpUri(nameof(EPC25)));
+ 
+         /// <nodoc />
+         public static readonly DiagnosticDescriptor EPC26 =
+-            new DiagnosticDescriptor(nameof(EPC26),
++            new DiagnosticDescriptor(
++                nameof(EPC26),
+                 title: "Do not use tasks in using block",
+                 messageFormat: "A Task was used in using block",
+-                category: AsyncCategory, DiagnosticSeverity.Warning, isEnabledByDefault: true,
++                category: AsyncCategory,
++                DiagnosticSeverity.Warning,
++                isEnabledByDefault: true,
+                 description: "Task implements IDisposable but should not be ever disposed explicitly.",
+                 helpLinkUri: GetHelpUri(nameof(EPC26)));
+ 
+@@ -257,7 +287,9 @@ namespace ErrorProne.NET
+             nameof(ERP031),
+             title: "The API is not thread-safe",
+             messageFormat: "The API is not thread-safe.{0}",
+-            ConcurrencyCategory, DiagnosticSeverity.Warning, isEnabledByDefault: true,
++            ConcurrencyCategory,
++            DiagnosticSeverity.Warning,
++            isEnabledByDefault: true,
+             description: "The API is not thread safe and can cause runtime failures.",
+             helpLinkUri: GetHelpUri(nameof(ERP031)));
+ 
+@@ -266,7 +298,9 @@ namespace ErrorProne.NET
+             nameof(ERP041),
+             title: "EventSource class should be sealed",
+             messageFormat: "{0}: {1}",
+-            CodeSmellCategory, DiagnosticSeverity.Info, isEnabledByDefault: true,
++            CodeSmellCategory,
++            DiagnosticSeverity.Info,
++            isEnabledByDefault: true,
+             description: "The event source implementation must follow special rules to avoid hitting runtime errors.",
+             helpLinkUri: GetHelpUri(nameof(ERP041)));
+ 
+@@ -275,7 +309,9 @@ namespace ErrorProne.NET
+             nameof(ERP042),
+             title: "EventSource implementation is not correct",
+             messageFormat: "{0}: {1}",
+-            CodeSmellCategory, DiagnosticSeverity.Warning, isEnabledByDefault: true,
++            CodeSmellCategory,
++            DiagnosticSeverity.Warning,
++            isEnabledByDefault: true,
+             description: "The event source implementation must follow special rules to avoid hitting runtime errors.",
+             helpLinkUri: GetHelpUri(nameof(ERP042)));
+ 
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/ErrorProneAttributes.cs b/src/ErrorProne.NET.CoreAnalyzers/ErrorProneAttributes.cs
+index 48fbe69..6c53c3a 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/ErrorProneAttributes.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/ErrorProneAttributes.cs
+@@ -1,8 +1,12 @@
+ ﻿namespace ErrorProne.NET.Core.Attributes
+ {
+     [System.AttributeUsage(System.AttributeTargets.Assembly)]
+-    public class UseConfigureAwaitFalseAttribute : System.Attribute { }
++    public class UseConfigureAwaitFalseAttribute : System.Attribute
++    {
++    }
+ 
+     [System.AttributeUsage(System.AttributeTargets.Method)]
+-    public class MustUseResultAttribute : System.Attribute { }
++    public class MustUseResultAttribute : System.Attribute
++    {
++    }
+ }
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/EventSourceAnalysis/EventSourceAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/EventSourceAnalysis/EventSourceAnalyzer.cs
+index e667602..033d961 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/EventSourceAnalysis/EventSourceAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/EventSourceAnalysis/EventSourceAnalyzer.cs
+@@ -25,7 +25,7 @@ namespace ErrorProne.NET.EventSourceAnalysis
+     /// 1. Classes should be sealed
+     ///    Note, a custom event source might not have 'EventSource' attribute. This is not required.
+     /// 2. All instance methods assumed to log data unless they are marked with the [NonEvent] attribute.
+-    /// 3. The same event id is passed in more than one method
++    /// 3. The same event id is passed in more than one method.
+     /// </remarks>
+     [DiagnosticAnalyzer(LanguageNames.CSharp)]
+     public sealed class EventSourceAnalyzer : DiagnosticAnalyzerBase
+@@ -35,7 +35,7 @@ namespace ErrorProne.NET.EventSourceAnalysis
+             IMethodSymbol MethodSymbol)
+         {
+             public ImmutableArray<IParameterSymbol> Parameters => MethodSymbol.Parameters;
+-        };
++        }
+ 
+         /// <nodoc />
+         public static DiagnosticDescriptor Rule => DiagnosticDescriptors.ERP042;
+@@ -201,7 +201,8 @@ namespace ErrorProne.NET.EventSourceAnalysis
+                         if (targetMethodName.Contains("WithRelatedActivityId"))
+                         {
+                             var guids = eventMethodInfo.Parameters
+-                                .Where(p => p.IsClrType(context.Compilation, typeof(Guid))).ToList();
++                                .Where(p => p.IsClrType(context.Compilation, typeof(Guid)))
++                                .ToList();
+ 
+                             var firstParam = eventMethodInfo.Parameters.FirstOrDefault();
+                             if (firstParam is null ||
+@@ -339,20 +340,17 @@ namespace ErrorProne.NET.EventSourceAnalysis
+             return null!;
+         }
+ 
+-
+         /// <summary>
+-        /// Returns true if 
++        /// Returns true if.
+         /// </summary>
+         /// <param name="invocation"></param>
+         /// <returns></returns>
+         private static bool IsEventMethod(IInvocationOperation invocation)
+         {
+-            //IMethodBodyOperation
++            // IMethodBodyOperation
+             return true;
+         }
+ 
+-
+-
+         private void AnalyzeInvocationOperation(OperationAnalysisContext context)
+         {
+             // Looking for 'Enumerable.Contains' call that passes an extra argument of type 'StringComparer'.
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/EventSourceAnalysis/EventSourceSealedAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/EventSourceAnalysis/EventSourceSealedAnalyzer.cs
+index e655be8..85244bd 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/EventSourceAnalysis/EventSourceSealedAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/EventSourceAnalysis/EventSourceSealedAnalyzer.cs
+@@ -45,7 +45,10 @@ namespace ErrorProne.NET.CoreAnalyzers
+                         location = cds.Identifier.GetLocation();
+                     }
+ 
+-                    context.ReportDiagnostic(Diagnostic.Create(Rule, location, classType.Name,
++                    context.ReportDiagnostic(Diagnostic.Create(
++                        Rule,
++                        location,
++                        classType.Name,
+                         "Event source types must be sealed or abstract"));
+                 }
+             }
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/ExceptionsAnalyzers/PreconditionsBlock.cs b/src/ErrorProne.NET.CoreAnalyzers/ExceptionsAnalyzers/PreconditionsBlock.cs
+index b928396..986f168 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/ExceptionsAnalyzers/PreconditionsBlock.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/ExceptionsAnalyzers/PreconditionsBlock.cs
+@@ -65,7 +65,7 @@ namespace ErrorProne.NET.ExceptionsAnalyzers
+                 // is when the if block has one statement and that statement is a throw of ArgumentException
+                 if (IsThrowArgumentExceptionStatement(throwStatementCandidate, semanticModel))
+                 {
+-                    preconditions.Add(new IfThrowPrecondition(statement, (ThrowStatementSyntax) throwStatementCandidate));
++                    preconditions.Add(new IfThrowPrecondition(statement, (ThrowStatementSyntax)throwStatementCandidate));
+                 }
+                 else
+                 {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/ExceptionsAnalyzers/SuspiciousExceptionHandlingAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/ExceptionsAnalyzers/SuspiciousExceptionHandlingAnalyzer.cs
+index dbb2e80..ffef92d 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/ExceptionsAnalyzers/SuspiciousExceptionHandlingAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/ExceptionsAnalyzers/SuspiciousExceptionHandlingAnalyzer.cs
+@@ -83,7 +83,8 @@ namespace ErrorProne.NET.CoreAnalyzers
+                     Contract.Assert(parent != null);
+                     Contract.Assert(messageUsage.Parent != null);
+ 
+-                    var messageSpan = Location.Create(context.Node.SyntaxTree,
++                    var messageSpan = Location.Create(
++                        context.Node.SyntaxTree,
+                         TextSpan.FromBounds(parent.Name.Span.Start, messageUsage.Parent.Name.Span.End));
+ 
+                     context.ReportDiagnostic(
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/ExceptionsAnalyzers/SwallowAllExceptionsAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/ExceptionsAnalyzers/SwallowAllExceptionsAnalyzer.cs
+index c328f3c..8b40216 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/ExceptionsAnalyzers/SwallowAllExceptionsAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/ExceptionsAnalyzers/SwallowAllExceptionsAnalyzer.cs
+@@ -96,7 +96,7 @@ namespace ErrorProne.NET.ExceptionsAnalyzers
+                     u.Parent is ArgumentSyntax || // Exception object was used directly
+                     u.Parent is AnonymousObjectMemberDeclaratorSyntax || // Was used as an anonymous object member
+                     u.Parent is AssignmentExpressionSyntax || // Was saved to field or local
+-                    // For instance in Console.WriteLine($"e = {e}");
++                                                              // For instance in Console.WriteLine($"e = {e}");
+                     u.Parent is InterpolationSyntax ||
+                     // or Inner exception, Message or other properties were used
+                     u.Parent is MemberAccessExpressionSyntax)
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/ExceptionsAnalyzers/ThrowExAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/ExceptionsAnalyzers/ThrowExAnalyzer.cs
+index c5457be..578f2e0 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/ExceptionsAnalyzers/ThrowExAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/ExceptionsAnalyzers/ThrowExAnalyzer.cs
+@@ -63,7 +63,6 @@ namespace ErrorProne.NET.ExceptionsAnalyzers
+ 
+                         context.ReportDiagnostic(diagnostic);
+                     }
+-
+                 }
+             }
+         }
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/ExcludeFromCodeCoverageMessageAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/ExcludeFromCodeCoverageMessageAnalyzer.cs
+index 370dedd..deafe9a 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/ExcludeFromCodeCoverageMessageAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/ExcludeFromCodeCoverageMessageAnalyzer.cs
+@@ -45,8 +45,8 @@ namespace ErrorProne.NET.CoreAnalyzers
+             // If no arguments, or only named arguments and none is Justification.
+             if (attributeSyntax.ArgumentList == null ||
+                 attributeSyntax.ArgumentList.Arguments.Count == 0 ||
+-                attributeSyntax.ArgumentList.Arguments.All(a => a.NameEquals != null) &&
+-                !attributeSyntax.ArgumentList.Arguments.Any(a => a.NameEquals != null && a.NameEquals.Name.Identifier.ValueText == "Justification"))
++                (attributeSyntax.ArgumentList.Arguments.All(a => a.NameEquals != null) &&
++                !attributeSyntax.ArgumentList.Arguments.Any(a => a.NameEquals != null && a.NameEquals.Name.Identifier.ValueText == "Justification")))
+             {
+                 context.ReportDiagnostic(Diagnostic.Create(
+                     DiagnosticDescriptors.EPC29,
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/ExcludeFromCodeCoverageOnPartialClassAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/ExcludeFromCodeCoverageOnPartialClassAnalyzer.cs
+index b5acb76..28fa74a 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/ExcludeFromCodeCoverageOnPartialClassAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/ExcludeFromCodeCoverageOnPartialClassAnalyzer.cs
+@@ -38,6 +38,7 @@ namespace ErrorProne.NET.CoreAnalyzers
+                         DiagnosticDescriptors.EPC28,
+                         location,
+                         namedType.Name));
++
+                     // The attribute can't be applied to multiple parts of a partial class, so we can exit early.
+                     return;
+                 }
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/FlowAnalysisExtensions.cs b/src/ErrorProne.NET.CoreAnalyzers/FlowAnalysisExtensions.cs
+index 2a5d91c..d414303 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/FlowAnalysisExtensions.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/FlowAnalysisExtensions.cs
+@@ -50,7 +50,7 @@ namespace ErrorProne.NET.Core
+             {
+                 return AnalyzeMethod(methodSyntax, model);
+             }
+-            
++
+             if (syntax is ArrowExpressionClauseSyntax aes)
+             {
+                 return model.AnalyzeDataFlow(aes.Expression);
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/MethodDeclarationSyntaxExtensions.cs b/src/ErrorProne.NET.CoreAnalyzers/MethodDeclarationSyntaxExtensions.cs
+index 8fe6b86..7f6912a 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/MethodDeclarationSyntaxExtensions.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/MethodDeclarationSyntaxExtensions.cs
+@@ -24,7 +24,7 @@ namespace ErrorProne.NET.Core
+             Contract.Ensures(Contract.Result<ArgumentListSyntax>() != null);
+ 
+             return SyntaxFactory.ArgumentList(
+-                new SeparatedSyntaxList<ArgumentSyntax>().AddRange(
++                default(SeparatedSyntaxList<ArgumentSyntax>).AddRange(
+                     parameters.Parameters.Select(p => SyntaxFactory.Argument(SyntaxFactory.IdentifierName(p.Identifier)))));
+         }
+ 
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/NamedSymbolExtensions.cs b/src/ErrorProne.NET.CoreAnalyzers/NamedSymbolExtensions.cs
+index c297eac..087051e 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/NamedSymbolExtensions.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/NamedSymbolExtensions.cs
+@@ -24,7 +24,7 @@ namespace ErrorProne.NET.Extensions
+ 
+         public static bool IsType(this INamedTypeSymbol namedType, Type type)
+         {
+-            //return namedType.MetadataName == type.AssemblyQualifiedName;
++            // return namedType.MetadataName == type.AssemblyQualifiedName;
+             return namedType.GetTypeQualifiedAssemblyName() == type.AssemblyQualifiedName;
+         }
+ 
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/NonNullableAttributes.cs b/src/ErrorProne.NET.CoreAnalyzers/NonNullableAttributes.cs
+index e107064..e033e6f 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/NonNullableAttributes.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/NonNullableAttributes.cs
+@@ -1,30 +1,40 @@
+ ﻿namespace System.Diagnostics.CodeAnalysis
+ {
+-    /// <summary>Specifies that null is allowed as an input even if the corresponding type disallows it.</summary>
++    /// <summary>
++    /// Specifies that null is allowed as an input even if the corresponding type disallows it.
++    /// </summary>
+     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Property, Inherited = false)]
+     internal sealed class AllowNullAttribute : Attribute
+     {
+     }
+ 
+-    /// <summary>Specifies that null is disallowed as an input even if the corresponding type allows it.</summary>
++    /// <summary>
++    /// Specifies that null is disallowed as an input even if the corresponding type allows it.
++    /// </summary>
+     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Property, Inherited = false)]
+     internal sealed class DisallowNullAttribute : Attribute
+     {
+     }
+ 
+-    /// <summary>Specifies that an output may be null even if the corresponding type disallows it.</summary>
++    /// <summary>
++    /// Specifies that an output may be null even if the corresponding type disallows it.
++    /// </summary>
+     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.ReturnValue, Inherited = false)]
+     internal sealed class MaybeNullAttribute : Attribute
+     {
+     }
+ 
+-    /// <summary>Specifies that an output will not be null even if the corresponding type allows it.</summary>
++    /// <summary>
++    /// Specifies that an output will not be null even if the corresponding type allows it.
++    /// </summary>
+     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.ReturnValue, Inherited = false)]
+     internal sealed class NotNullAttribute : Attribute
+     {
+     }
+ 
+-    /// <summary>Specifies that when a method returns <see cref="ReturnValue"/>, the parameter may be null even if the corresponding type disallows it.</summary>
++    /// <summary>
++    /// Specifies that when a method returns <see cref="ReturnValue"/>, the parameter may be null even if the corresponding type disallows it.
++    /// </summary>
+     [AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
+     internal sealed class MaybeNullWhenAttribute : Attribute
+     {
+@@ -36,11 +46,15 @@
+         /// </param>
+         public MaybeNullWhenAttribute(bool returnValue) => ReturnValue = returnValue;
+ 
+-        /// <summary>Gets the return value condition.</summary>
++        /// <summary>
++        /// Gets the return value condition.
++        /// </summary>
+         public bool ReturnValue { get; }
+     }
+ 
+-    /// <summary>Specifies that when a method returns <see cref="ReturnValue"/>, the parameter will not be null even if the corresponding type allows it.</summary>
++    /// <summary>
++    /// Specifies that when a method returns <see cref="ReturnValue"/>, the parameter will not be null even if the corresponding type allows it.
++    /// </summary>
+     [AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
+     internal sealed class NotNullWhenAttribute : Attribute
+     {
+@@ -52,11 +66,15 @@
+         /// </param>
+         public NotNullWhenAttribute(bool returnValue) => ReturnValue = returnValue;
+ 
+-        /// <summary>Gets the return value condition.</summary>
++        /// <summary>
++        /// Gets the return value condition.
++        /// </summary>
+         public bool ReturnValue { get; }
+     }
+ 
+-    /// <summary>Specifies that the output will be non-null if the named parameter is non-null.</summary>
++    /// <summary>
++    /// Specifies that the output will be non-null if the named parameter is non-null.
++    /// </summary>
+     [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.ReturnValue, AllowMultiple = true, Inherited = false)]
+     internal sealed class NotNullIfNotNullAttribute : Attribute
+     {
+@@ -68,17 +86,23 @@
+         /// </param>
+         public NotNullIfNotNullAttribute(string parameterName) => ParameterName = parameterName;
+ 
+-        /// <summary>Gets the associated parameter name.</summary>
++        /// <summary>
++        /// Gets the associated parameter name.
++        /// </summary>
+         public string ParameterName { get; }
+     }
+ 
+-    /// <summary>Applied to a method that will never return under any circumstance.</summary>
++    /// <summary>
++    /// Applied to a method that will never return under any circumstance.
++    /// </summary>
+     [AttributeUsage(AttributeTargets.Method, Inherited = false)]
+     internal sealed class DoesNotReturnAttribute : Attribute
+     {
+     }
+ 
+-    /// <summary>Specifies that the method will not return if the associated Boolean parameter is passed the specified value.</summary>
++    /// <summary>
++    /// Specifies that the method will not return if the associated Boolean parameter is passed the specified value.
++    /// </summary>
+     [AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
+     internal sealed class DoesNotReturnIfAttribute : Attribute
+     {
+@@ -91,7 +115,9 @@
+         /// </param>
+         public DoesNotReturnIfAttribute(bool parameterValue) => ParameterValue = parameterValue;
+ 
+-        /// <summary>Gets the condition parameter value.</summary>
++        /// <summary>
++        /// Gets the condition parameter value.
++        /// </summary>
+         public bool ParameterValue { get; }
+     }
+ }
+\ No newline at end of file
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/RecursiveCallAnalyzer.cs b/src/ErrorProne.NET.CoreAnalyzers/RecursiveCallAnalyzer.cs
+index e377839..7d2fac2 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/RecursiveCallAnalyzer.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/RecursiveCallAnalyzer.cs
+@@ -25,13 +25,13 @@ namespace ErrorProne.NET.CoreAnalyzers
+         {
+             var method = (IMethodSymbol)context.ContainingSymbol;
+             var methodBody = (IMethodBodyOperation)context.Operation;
+-            
++
+             // Find all ref parameters that have been "touched" (modified or passed to other methods)
+             var touchedRefParameters = GetTouchedRefParameters(methodBody, method);
+ 
+             // Parameters that are mutated anywhere in the body cannot make a guard "invariant".
+             var mutatedParameters = GetMutatedParameters(methodBody);
+-            
++
+             foreach (var invocation in methodBody.Descendants().OfType<IInvocationOperation>())
+             {
+                 // Calls inside a lambda or local function don't execute as part of this method's
+@@ -57,9 +57,8 @@ namespace ErrorProne.NET.CoreAnalyzers
+                     // But it is a very rare case, so we will ignore it for now.
+                     invocation.Arguments.Zip(method.Parameters, (arg, param) =>
+                         arg.Value is IParameterReferenceOperation paramRef &&
+-                        SymbolEqualityComparer.Default.Equals(paramRef.Parameter, param)
+-                    ).All(b => b) &&
+-                    
++                        SymbolEqualityComparer.Default.Equals(paramRef.Parameter, param)).All(b => b) &&
++
+                     // For ref parameters, check if they were touched before this call
+                     // If any ref parameter was touched, don't warn
+                     !HasTouchedRefParameterBeforeCall(invocation, method, touchedRefParameters) &&
+@@ -273,9 +272,9 @@ namespace ErrorProne.NET.CoreAnalyzers
+             {
+                 var arg = recursiveCall.Arguments[i];
+                 var param = method.Parameters[i];
+-                
++
+                 // If this is a ref parameter and it's passed as-is, check if it was touched
+-                if (param.RefKind == RefKind.Ref && 
++                if (param.RefKind == RefKind.Ref &&
+                     arg.Value is IParameterReferenceOperation paramRef &&
+                     SymbolEqualityComparer.Default.Equals(paramRef.Parameter, param) &&
+                     touchedRefParameters.Contains(param))
+@@ -283,7 +282,7 @@ namespace ErrorProne.NET.CoreAnalyzers
+                     return true;
+                 }
+             }
+-            
++
+             return false;
+         }
+ 
+@@ -310,6 +309,7 @@ namespace ErrorProne.NET.CoreAnalyzers
+                                 mutated.Add(deconstructedParam.Parameter);
+                             }
+                         }
++
+                         break;
+ 
+                     // Covers simple '=', compound '+=' etc., and coalesce '??=' assignments.
+@@ -334,7 +334,7 @@ namespace ErrorProne.NET.CoreAnalyzers
+         private static HashSet<IParameterSymbol> GetTouchedRefParameters(IMethodBodyOperation methodBody, IMethodSymbol method)
+         {
+             var touchedParams = new HashSet<IParameterSymbol>(SymbolEqualityComparer.Default);
+-            
++
+             // Look for assignments to ref parameters
+             foreach (var assignment in methodBody.Descendants().OfType<IAssignmentOperation>())
+             {
+@@ -344,7 +344,7 @@ namespace ErrorProne.NET.CoreAnalyzers
+                     touchedParams.Add(paramRef.Parameter);
+                 }
+             }
+-            
++
+             // Look for ref parameters being passed to other methods
+             foreach (var invocation in methodBody.Descendants().OfType<IInvocationOperation>())
+             {
+@@ -353,7 +353,7 @@ namespace ErrorProne.NET.CoreAnalyzers
+                 {
+                     continue;
+                 }
+-                
++
+                 foreach (var arg in invocation.Arguments)
+                 {
+                     // Check if a ref parameter is being passed as ref/out to another method
+@@ -366,7 +366,7 @@ namespace ErrorProne.NET.CoreAnalyzers
+                     }
+                 }
+             }
+-            
++
+             return touchedParams;
+         }
+ 
+@@ -380,7 +380,7 @@ namespace ErrorProne.NET.CoreAnalyzers
+ 
+             // For instance methods, check if the receiver is 'this' (implicit or explicit)
+             var receiver = invocation.Instance;
+-            
++
+             // If receiver is null, it means it's an implicit 'this' call (e.g., just Foo() instead of this.Foo())
+             if (receiver == null)
+             {
+@@ -388,7 +388,7 @@ namespace ErrorProne.NET.CoreAnalyzers
+             }
+ 
+             // If receiver is an explicit 'this' reference
+-            if (receiver is IInstanceReferenceOperation instanceRef && 
++            if (receiver is IInstanceReferenceOperation instanceRef &&
+                 instanceRef.ReferenceKind == InstanceReferenceKind.ContainingTypeInstance)
+             {
+                 return true;
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/StructSizeCalculator.cs b/src/ErrorProne.NET.CoreAnalyzers/StructSizeCalculator.cs
+index b3f1f2a..5f52729 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/StructSizeCalculator.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/StructSizeCalculator.cs
+@@ -1,11 +1,11 @@
+-﻿using Microsoft.CodeAnalysis;
+-using System;
++﻿using System;
+ using System.Collections.Concurrent;
+ using System.Collections.Generic;
+ using System.Diagnostics.ContractsLight;
+ using System.Linq;
+ using System.Runtime.CompilerServices;
+ using System.Runtime.InteropServices;
++using Microsoft.CodeAnalysis;
+ 
+ namespace ErrorProne.NET.Core
+ {
+@@ -89,10 +89,10 @@ namespace ErrorProne.NET.Core
+                 return false;
+             }
+ 
+-            if (type.IsReferenceType
+-                || type.TypeKind == TypeKind.Pointer
+-                || type.SpecialType == SpecialType.System_IntPtr
+-                || type.SpecialType == SpecialType.System_UIntPtr)
++            if (type.IsReferenceType ||
++                type.TypeKind == TypeKind.Pointer ||
++                type.SpecialType == SpecialType.System_IntPtr ||
++                type.SpecialType == SpecialType.System_UIntPtr)
+             {
+                 switch (compilation.Options.Platform)
+                 {
+@@ -167,7 +167,7 @@ namespace ErrorProne.NET.Core
+                     // In this case we need to adjust current size and capacity to larger bucket
+                     largestFieldSize = newLargestFieldSize;
+ 
+-                    int padding = (largestFieldSize - capacity % largestFieldSize)%largestFieldSize;
++                    int padding = (largestFieldSize - (capacity % largestFieldSize)) % largestFieldSize;
+                     var oldCapacity = capacity;
+ 
+                     capacity += padding;
+@@ -243,11 +243,10 @@ namespace ErrorProne.NET.Core
+                     // Just explicitly looking for 2 known properties.
+                     return type.GetMembers()
+                         .OfType<IPropertySymbol>()
+-                        .Where(p => 
+-                            !p.IsStatic && 
++                        .Where(p =>
++                            !p.IsStatic &&
+                             (p.Name == nameof(Nullable<int>.HasValue) || p.Name == nameof(Nullable<int>.Value)))
+                         .Select(p => p.Type);
+-                        
+                 }
+             }
+         }
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/SymbolAnalysisContextExtensions.cs b/src/ErrorProne.NET.CoreAnalyzers/SymbolAnalysisContextExtensions.cs
+index d386b5b..2c30baa 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/SymbolAnalysisContextExtensions.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/SymbolAnalysisContextExtensions.cs
+@@ -4,15 +4,15 @@
+ //  
+ // --------------------------------------------------------------------
+ 
++using System.Diagnostics.CodeAnalysis;
+ using Microsoft.CodeAnalysis;
+ using Microsoft.CodeAnalysis.Diagnostics;
+-using System.Diagnostics.CodeAnalysis;
+ 
+ namespace ErrorProne.NET.Core
+ {
+     public static class SymbolAnalysisContextExtensions
+     {
+-        public static bool TryGetSemanticModel(this SymbolAnalysisContext context, [NotNullWhen(true)]out SemanticModel? semanticModel)
++        public static bool TryGetSemanticModel(this SymbolAnalysisContext context, [NotNullWhen(true)] out SemanticModel? semanticModel)
+         {
+             if (context.Symbol.DeclaringSyntaxReferences.Length == 0)
+             {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/SymbolExtensions.cs b/src/ErrorProne.NET.CoreAnalyzers/SymbolExtensions.cs
+index bab4c3b..42d2328 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/SymbolExtensions.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/SymbolExtensions.cs
+@@ -30,7 +30,7 @@ namespace ErrorProne.NET.Core
+ 
+         public static bool IsConstructor(this ISymbol symbol)
+         {
+-            return (symbol is IMethodSymbol methodSymbol && methodSymbol.MethodKind == MethodKind.Constructor);
++            return symbol is IMethodSymbol methodSymbol && methodSymbol.MethodKind == MethodKind.Constructor;
+         }
+ 
+         /// <summary>
+@@ -61,9 +61,9 @@ namespace ErrorProne.NET.Core
+ 
+         public static bool IsDisposeMethod(this ISymbol symbol)
+         {
+-            if (symbol is IMethodSymbol method
+-                && method.Name == nameof(IDisposable.Dispose)
+-                && method.ContainingType.Interfaces.Any(i => i.Name == nameof(IDisposable)))
++            if (symbol is IMethodSymbol method &&
++                method.Name == nameof(IDisposable.Dispose) &&
++                method.ContainingType.Interfaces.Any(i => i.Name == nameof(IDisposable)))
+             {
+                 return true;
+             }
+@@ -108,8 +108,8 @@ namespace ErrorProne.NET.Core
+                         visibility = SymbolVisibility.Internal;
+                         break;
+ 
+-                    // For anything else (Public, Protected, ProtectedOrInternal), the
+-                    // symbol stays at the level we've gotten so far.
++                        // For anything else (Public, Protected, ProtectedOrInternal), the
++                        // symbol stays at the level we've gotten so far.
+                 }
+ 
+                 symbol = symbol.ContainingSymbol;
+@@ -141,12 +141,13 @@ namespace ErrorProne.NET.Core
+                                 yield return symbol;
+                             }
+                         }
++
+                         break;
+                 }
+             }
+         }
+ 
+-        public static bool TryGetMethodSyntax(this IMethodSymbol method, [NotNullWhen(true)]out MethodDeclarationSyntax? result)
++        public static bool TryGetMethodSyntax(this IMethodSymbol method, [NotNullWhen(true)] out MethodDeclarationSyntax? result)
+         {
+             result = method.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() as MethodDeclarationSyntax;
+             return result != null;
+@@ -218,11 +219,11 @@ namespace ErrorProne.NET.Core
+         /// </summary>
+         public static bool IsInterfaceImplementation(this IMethodSymbol method)
+             => IsInterfaceImplementation(method, out _);
+-        
++
+         /// <summary>
+         /// Returns true if a given <paramref name="method"/> is an implementation of an interface member.
+         /// </summary>
+-        public static bool IsInterfaceImplementation(this IMethodSymbol method, [NotNullWhen(true)]out ISymbol? implementedMethod)
++        public static bool IsInterfaceImplementation(this IMethodSymbol method, [NotNullWhen(true)] out ISymbol? implementedMethod)
+         {
+             if (method.MethodKind == MethodKind.ExplicitInterfaceImplementation)
+             {
+@@ -291,7 +292,7 @@ namespace ErrorProne.NET.Core
+         public static bool ExceptionFromCatchBlock(this ISymbol symbol)
+         {
+             return
+-                (symbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax()) is CatchDeclarationSyntax;
++                symbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() is CatchDeclarationSyntax;
+ 
+             // There is additional interface, called ILocalSymbolInternal
+             // that has IsCatch property, but, unfortunately, that interface is internal.
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/SyntaxFactoryExtensions.cs b/src/ErrorProne.NET.CoreAnalyzers/SyntaxFactoryExtensions.cs
+index 0f82f16..5df857d 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/SyntaxFactoryExtensions.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/SyntaxFactoryExtensions.cs
+@@ -51,7 +51,7 @@ namespace ErrorProne.NET.Extensions
+             var oldModifiers = methodDeclaration.Modifiers.Where(m => !VisibilityModifierKinds.Contains(m.Kind()));
+ 
+             var modifiers =
+-                new SyntaxTokenList()
++                default(SyntaxTokenList)
+                     .AddRange(GetModifiersFor(modifier))
+                     .AddRange(oldModifiers);
+ 
+@@ -63,19 +63,19 @@ namespace ErrorProne.NET.Extensions
+             var anonymousMethod = syntax as AnonymousMethodExpressionSyntax;
+             if (anonymousMethod != null)
+             {
+-                return anonymousMethod.WithAsyncKeyword(new SyntaxToken());
++                return anonymousMethod.WithAsyncKeyword(default);
+             }
+ 
+             var parens = syntax as ParenthesizedLambdaExpressionSyntax;
+             if (parens != null)
+             {
+-                return parens.WithAsyncKeyword(new SyntaxToken());
++                return parens.WithAsyncKeyword(default);
+             }
+ 
+             var simple = syntax as SimpleLambdaExpressionSyntax;
+             if (simple != null)
+             {
+-                return simple.WithAsyncKeyword(new SyntaxToken());
++                return simple.WithAsyncKeyword(default);
+             }
+ 
+             return syntax;
+@@ -86,7 +86,7 @@ namespace ErrorProne.NET.Extensions
+             Contract.Requires(methodDeclaration != null);
+             Contract.Ensures(Contract.Result<MethodDeclarationSyntax>() != null);
+ 
+-            return methodDeclaration.WithModifiers(new SyntaxTokenList().AddRange(methodDeclaration.Modifiers.Where(x => !predicate(x))));
++            return methodDeclaration.WithModifiers(default(SyntaxTokenList).AddRange(methodDeclaration.Modifiers.Where(x => !predicate(x))));
+         }
+ 
+         public static ConstructorDeclarationSyntax WithVisibilityModifier(this ConstructorDeclarationSyntax constructorDeclaration, VisibilityModifier modifier)
+@@ -96,7 +96,7 @@ namespace ErrorProne.NET.Extensions
+ 
+             var oldModifiers = constructorDeclaration.Modifiers.Where(m => !VisibilityModifierKinds.Contains(m.Kind()));
+             var modifiers =
+-                new SyntaxTokenList()
++                default(SyntaxTokenList)
+                     .AddRange(GetModifiersFor(modifier))
+                     .AddRange(oldModifiers);
+ 
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/SyntaxNodeExtensions.cs b/src/ErrorProne.NET.CoreAnalyzers/SyntaxNodeExtensions.cs
+index 3bc04f7..6174377 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/SyntaxNodeExtensions.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/SyntaxNodeExtensions.cs
+@@ -38,7 +38,7 @@ namespace ErrorProne.NET.Extensions
+ 
+             return isAutoProperty;
+         }
+-        
++
+         public static bool IsGetOnlyAutoProperty(this BasePropertyDeclarationSyntax property)
+         {
+             return property.IsAutoProperty() && !property.IsGetSetAutoProperty();
+@@ -53,7 +53,7 @@ namespace ErrorProne.NET.Extensions
+         {
+             return syntax.Modifiers.Any(m => m.IsKind(SyntaxKind.ReadOnlyKeyword));
+         }
+-        
++
+         public static bool MarkedWithReadOnlyModifier(this IPropertySymbol property)
+         {
+             return property.IsReadOnly && property
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/TaskTypeExtensions.cs b/src/ErrorProne.NET.CoreAnalyzers/TaskTypeExtensions.cs
+index c6a4b77..0eeb872 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/TaskTypeExtensions.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/TaskTypeExtensions.cs
+@@ -60,7 +60,7 @@ public static class TaskTypeExtensions
+         {
+             return true;
+         }
+-        
++
+         if ((typesToCheck & TaskLikeTypes.ValueTaskOfT) != 0 && type.OriginalDefinition.Equals(valueTaskOfTType, SymbolEqualityComparer.Default))
+         {
+             return true;
+@@ -75,8 +75,8 @@ public static class TaskTypeExtensions
+         return false;
+     }
+ 
+-    public static bool IsTaskLike(this ITypeSymbol? type, Compilation compilation) =>
+-        IsTaskLike(type, compilation, TaskLikeTypes.All);
++    public static bool IsTaskLike(this ITypeSymbol? type, Compilation compilation)
++        => IsTaskLike(type, compilation, TaskLikeTypes.All);
+ 
+     public static bool IsTaskCompletionSource(this ITypeSymbol? type, Compilation compilation)
+     {
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/TypeExtensions.cs b/src/ErrorProne.NET.CoreAnalyzers/TypeExtensions.cs
+index 38b89b9..5621666 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/TypeExtensions.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/TypeExtensions.cs
+@@ -10,7 +10,7 @@ namespace ErrorProne.NET.Core
+     {
+         private static readonly SymbolDisplayFormat SymbolDisplayFormat = new SymbolDisplayFormat(
+             typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces);
+-        
++
+         /// <summary>
+         /// Returns true if the given <paramref name="type"/> is an enum.
+         /// </summary>
+@@ -105,18 +105,19 @@ namespace ErrorProne.NET.Core
+                     {
+                         size = 0;
+                     }
++
+                     break;
+             }
+ 
+             return size != 0;
+         }
+ 
+-        public static bool IsStruct([NotNullWhen(true)]this ITypeSymbol? type)
++        public static bool IsStruct([NotNullWhen(true)] this ITypeSymbol? type)
+         {
+             return type != null && type.IsValueType && !type.IsEnum() && !(type is ITypeParameterSymbol);
+         }
+ 
+-        public static bool IsLargeStruct([NotNullWhen(true)]this ITypeSymbol? type, Compilation compilation, int threshold, out int estimatedSize)
++        public static bool IsLargeStruct([NotNullWhen(true)] this ITypeSymbol? type, Compilation compilation, int threshold, out int estimatedSize)
+         {
+             estimatedSize = 0;
+ 
+@@ -134,7 +135,8 @@ namespace ErrorProne.NET.Core
+             return estimatedSize >= threshold;
+         }
+ 
+-        public static bool HasDefaultEqualsOrHashCodeImplementations(this ITypeSymbol type,
++        public static bool HasDefaultEqualsOrHashCodeImplementations(
++            this ITypeSymbol type,
+             out ValueTypeEqualityImplementations valueTypeEquality)
+         {
+             valueTypeEquality = ValueTypeEqualityImplementations.All;
+@@ -204,10 +206,9 @@ namespace ErrorProne.NET.Core
+             {
+                 return type.GetMembers(nameof(ToString)).Any(m => m.IsOverride);
+             }
+-            
++
+             return EnumerateBaseTypesAndSelf(type)
+                 .Any(t => t.GetMembers(nameof(ToString)).Any(m => m.IsOverride));
+         }
+-
+     }
+ }
+\ No newline at end of file
+diff --git a/src/ErrorProne.NET.CoreAnalyzers/WellKnownTypesProvider.cs b/src/ErrorProne.NET.CoreAnalyzers/WellKnownTypesProvider.cs
+index 6d5c184..106111e 100644
+--- a/src/ErrorProne.NET.CoreAnalyzers/WellKnownTypesProvider.cs
++++ b/src/ErrorProne.NET.CoreAnalyzers/WellKnownTypesProvider.cs
+@@ -6,12 +6,12 @@ using Microsoft.CodeAnalysis;
+ namespace ErrorProne.NET.Core
+ {
+     /// <summary>
+-    /// A helper that provide 
++    /// A helper that provide.
+     /// </summary>
+     public class WellKnownTypeProvider
+     {
+-        private static readonly ConditionalWeakTable<Compilation, Lazy<WellKnownTypeProvider>> Cache = new ();
+-        
++        private static readonly ConditionalWeakTable<Compilation, Lazy<WellKnownTypeProvider>> Cache = new();
++
+         // Full name to symbol map.
+         private readonly ConcurrentDictionary<string, INamedTypeSymbol?> _fullNameToTypeMap;
+ 
+@@ -28,7 +28,8 @@ namespace ErrorProne.NET.Core
+             // using a trick with Lazy.
+             // In this case two instances of Lazy<WellKnownTypeProvider> may be created
+             // but only one of them will be observed by the caller.
+-            var cachedValue = Cache.GetValue(compilation,
++            var cachedValue = Cache.GetValue(
++                compilation,
+                 static compilation => new Lazy<WellKnownTypeProvider>(() => new WellKnownTypeProvider(compilation)));
+             return cachedValue.Value;
+         }
+diff --git a/src/RoslynNunitTestRunner/CSharpCodeFixVerifier`2+Test.cs b/src/RoslynNunitTestRunner/CSharpCodeFixVerifier`2+Test.cs
+index 8d9ad01..0366084 100644
+--- a/src/RoslynNunitTestRunner/CSharpCodeFixVerifier`2+Test.cs
++++ b/src/RoslynNunitTestRunner/CSharpCodeFixVerifier`2+Test.cs
+@@ -22,7 +22,6 @@ namespace ErrorProne.NET.TestHelpers
+                 },
+                 LanguageVersion = langVersion,
+                 ReferenceAssemblies = ReferenceAssemblies.Net.Net80
+-
+             }.WithoutGeneratedCodeVerification().RunAsync();
+         }
+ 
+diff --git a/src/RoslynNunitTestRunner/CSharpCodeFixVerifier`2.cs b/src/RoslynNunitTestRunner/CSharpCodeFixVerifier`2.cs
+index 846508d..5a1c2ee 100644
+--- a/src/RoslynNunitTestRunner/CSharpCodeFixVerifier`2.cs
++++ b/src/RoslynNunitTestRunner/CSharpCodeFixVerifier`2.cs
+@@ -1,11 +1,11 @@
+-﻿using Microsoft.CodeAnalysis;
++﻿using System.Threading.Tasks;
++using Microsoft.CodeAnalysis;
+ using Microsoft.CodeAnalysis.CodeFixes;
++using Microsoft.CodeAnalysis.CSharp;
+ using Microsoft.CodeAnalysis.CSharp.Testing;
+ using Microsoft.CodeAnalysis.Diagnostics;
+ using Microsoft.CodeAnalysis.Testing;
+ using Microsoft.CodeAnalysis.Testing.Verifiers;
+-using System.Threading.Tasks;
+-using Microsoft.CodeAnalysis.CSharp;
+ 
+ namespace ErrorProne.NET.TestHelpers
+ {
+diff --git a/src/RoslynNunitTestRunner/CodeFixTestExtensions.cs b/src/RoslynNunitTestRunner/CodeFixTestExtensions.cs
+index a17a81c..fdc87d2 100644
+--- a/src/RoslynNunitTestRunner/CodeFixTestExtensions.cs
++++ b/src/RoslynNunitTestRunner/CodeFixTestExtensions.cs
+@@ -43,21 +43,21 @@ internal sealed class DoNotUseConfigureAwaitAttribute : System.Attribute { }
+         [System.AttributeUsage(System.AttributeTargets.Struct)]
+         internal sealed class DoNotUseDefaultConstructionAttribute : System.Attribute
+         {
+-            public DoNotUseDefaultConstructionAttribute(string? message = null) {}
++            public DoNotUseDefaultConstructionAttribute(string? message = null)
++            {
++            }
+         }
+ 
+-        [DoNotUseDefaultConstruction()]
++        [DoNotUseDefaultConstruction]
+         public struct FooBar
+         {
+-            
+         }
+ 
+         [DoNotUseDefaultConstruction("Please use FooBar2.Create()")]
+         public struct FooBar2
+         {
+-            
+         }
+-        
++
+         public static TTest WithNonDefaultableAttribute<TTest>(this TTest test)
+             where TTest : CodeFixTest<DefaultVerifier>
+         {
+diff --git a/src/RoslynNunitTestRunner/WorkItemAttribute.cs b/src/RoslynNunitTestRunner/WorkItemAttribute.cs
+index 6196d28..f14e639 100644
+--- a/src/RoslynNunitTestRunner/WorkItemAttribute.cs
++++ b/src/RoslynNunitTestRunner/WorkItemAttribute.cs
+@@ -3,20 +3,14 @@
+ namespace ErrorProne.NET.TestHelpers
+ {
+     /// <summary>
+-    /// Used to tag test methods or types which are created for a given WorkItem
++    /// Used to tag test methods or types which are created for a given WorkItem.
+     /// </summary>
+     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
+     public sealed class WorkItemAttribute : Attribute
+     {
+-        public int Id
+-        {
+-            get;
+-        }
++        public int Id { get; }
+ 
+-        public string Location
+-        {
+-            get;
+-        }
++        public string Location { get; }
+ 
+         /// <summary>
+         /// Initializes a new instance of the <see cref="WorkItemAttribute"/>.
