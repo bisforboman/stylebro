@@ -1,6 +1,6 @@
 <Project>
   <ItemGroup>
-    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial57.1" PrivateAssets="all" />
+    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial57.2" PrivateAssets="all" />
   </ItemGroup>
 </Project>
 Conventions in the code (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).

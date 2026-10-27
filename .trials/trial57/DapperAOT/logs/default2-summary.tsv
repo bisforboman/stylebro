@@ -1,0 +1,15 @@
+preview	0	194s	bro preview init
+setup	0	10s	bash -c python3 /home/user/stylebro/.trials/trial57/addref.py Directory.Packages.props "<PackageVersion Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial57.2\" />" && python3 /home/user/stylebro/.trials/trial57/addref.py Directory.Build.props "<PackageReference Include=\"StyleBro.Analyzers\" PrivateAssets=\"all\" />" && git diff --stat && bro init --write
+check-prebuild	2	204s	bro check
+format	0	160s	bro format
+check	0	93s	bro check
+check-json	0
+checkbuild	3	167s	bro check --build
+checkbuild-json	3
+twae-Debug	1	7s	twae Debug
+test-Debug	0	56s	env CFG=Debug bash -c dotnet test test/Dapper.AOT.Test/Dapper.AOT.Test.csproj -c $CFG -f net10.0 --filter "FullyQualifiedName!~Integration"
+twae-Release	1	10s	twae Release
+test-Release	0	58s	env CFG=Release bash -c dotnet test test/Dapper.AOT.Test/Dapper.AOT.Test.csproj -c $CFG -f net10.0 --filter "FullyQualifiedName!~Integration"
+check-afterbuild	0	107s	bro check
+checkbuild-afterbuild	3	144s	bro check --build
+DONE

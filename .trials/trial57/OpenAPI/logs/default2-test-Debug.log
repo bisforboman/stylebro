@@ -1,0 +1,27 @@
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.402/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand57/microsoft-OpenAPI.NET'. [/home/user/w57/OpenAPI/default2/src/Microsoft.OpenApi/Microsoft.OpenApi.csproj::TargetFramework=netstandard2.0]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.402/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w57/OpenAPI/default2/src/Microsoft.OpenApi/Microsoft.OpenApi.csproj::TargetFramework=netstandard2.0]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.402/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand57/microsoft-OpenAPI.NET'. [/home/user/w57/OpenAPI/default2/src/Microsoft.OpenApi/Microsoft.OpenApi.csproj::TargetFramework=net8.0]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.402/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w57/OpenAPI/default2/src/Microsoft.OpenApi/Microsoft.OpenApi.csproj::TargetFramework=net8.0]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.402/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand57/microsoft-OpenAPI.NET'. [/home/user/w57/OpenAPI/default2/src/Microsoft.OpenApi.YamlReader/Microsoft.OpenApi.YamlReader.csproj::TargetFramework=netstandard2.0]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.402/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w57/OpenAPI/default2/src/Microsoft.OpenApi.YamlReader/Microsoft.OpenApi.YamlReader.csproj::TargetFramework=netstandard2.0]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.402/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand57/microsoft-OpenAPI.NET'. [/home/user/w57/OpenAPI/default2/src/Microsoft.OpenApi.YamlReader/Microsoft.OpenApi.YamlReader.csproj::TargetFramework=net8.0]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.402/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w57/OpenAPI/default2/src/Microsoft.OpenApi.YamlReader/Microsoft.OpenApi.YamlReader.csproj::TargetFramework=net8.0]
+Running tests from /home/user/w57/OpenAPI/default2/test/Microsoft.OpenApi.Readers.Tests/bin/Debug/net10.0/Microsoft.OpenApi.Readers.Tests.dll (net10.0|x64)
+Running tests from /home/user/w57/OpenAPI/default2/test/Microsoft.OpenApi.Tests/bin/Debug/net10.0/Microsoft.OpenApi.Tests.dll (net10.0|x64)
+[+134/x0/?0] Microsoft.OpenApi.Readers.Tests.dll (net10.0|x64)(2s)
+[+50/x0/?0] Microsoft.OpenApi.Tests.dll (net10.0|x64)(2s)
+
+/home/user/w57/OpenAPI/default2/test/Microsoft.OpenApi.Readers.Tests/bin/Debug/net10.0/Microsoft.OpenApi.Readers.Tests.dll (net10.0|x64) passed (4s 568ms)
+[+842/x0/?0] Microsoft.OpenApi.Tests.dll (net10.0|x64)(5s)
+
+/home/user/w57/OpenAPI/default2/test/Microsoft.OpenApi.Tests/bin/Debug/net10.0/Microsoft.OpenApi.Tests.dll (net10.0|x64) passed (7s 029ms)
+
+Test run summary: Passed!
+  /home/user/w57/OpenAPI/default2/test/Microsoft.OpenApi.Readers.Tests/bin/Debug/net10.0/Microsoft.OpenApi.Readers.Tests.dll (net10.0|x64) passed (4s 568ms)
+  /home/user/w57/OpenAPI/default2/test/Microsoft.OpenApi.Tests/bin/Debug/net10.0/Microsoft.OpenApi.Tests.dll (net10.0|x64) passed (7s 029ms)
+
+  total: 1945
+  failed: 0
+  succeeded: 1945
+  skipped: 0
+  duration: 7s 821ms

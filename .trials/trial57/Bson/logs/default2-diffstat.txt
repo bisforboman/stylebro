@@ -1,0 +1,23 @@
+ .../BsonDataReaderAsyncTests.cs                    | 44 ++++++-------
+ .../BsonDataReaderTests.cs                         | 44 ++++++-------
+ .../BsonDataWriterAsyncTests.cs                    |  2 +-
+ .../BsonDataWriterTests.cs                         | 14 ++---
+ Src/Newtonsoft.Json.Bson.Tests/TestFixtureBase.cs  |  7 +--
+ .../TestObjects/Product.cs                         |  2 +-
+ Src/Newtonsoft.Json.Bson/AsyncBinaryReader.cs      |  5 +-
+ Src/Newtonsoft.Json.Bson/BsonBinaryWriter.cs       | 24 ++++----
+ Src/Newtonsoft.Json.Bson/BsonDataObjectId.cs       |  2 +-
+ Src/Newtonsoft.Json.Bson/BsonDataReader.Async.cs   | 72 +++++++++++-----------
+ Src/Newtonsoft.Json.Bson/BsonDataReader.cs         |  4 +-
+ Src/Newtonsoft.Json.Bson/BsonDataWriter.Async.cs   | 11 ++--
+ Src/Newtonsoft.Json.Bson/BsonDataWriter.cs         |  1 +
+ Src/Newtonsoft.Json.Bson/BsonToken.cs              |  7 +++
+ .../Converters/BsonDataObjectIdConverter.cs        |  2 +-
+ .../Converters/BsonDataRegexConverter.cs           |  4 +-
+ Src/Newtonsoft.Json.Bson/Utilities/AsyncUtils.cs   |  7 +--
+ .../Utilities/Base64Encoder.cs                     |  2 +-
+ .../Utilities/DateTimeParser.cs                    | 70 ++++++++++-----------
+ .../Utilities/DateTimeUtils.cs                     | 69 ++++++++++-----------
+ .../Utilities/MiscellaneousUtils.cs                |  2 +-
+ Src/Newtonsoft.Json.Bson/Utilities/StringUtils.cs  |  4 +-
+ 22 files changed, 200 insertions(+), 199 deletions(-)

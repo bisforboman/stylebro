@@ -92,7 +92,7 @@ index 5ab56db..1a9d5a2 100644
 +  </ItemGroup>
  </Project>
 diff --git a/src/Directory.Packages.props b/src/Directory.Packages.props
-index 6137556..7de8352 100644
+index 6137556..79d2218 100644
 --- a/src/Directory.Packages.props
 +++ b/src/Directory.Packages.props
 @@ -23,4 +23,7 @@
@@ -100,7 +100,7 @@ index 6137556..7de8352 100644
      <PackageVersion Include="Microsoft.DotNet.PlatformAbstractions" Version="3.1.6" />
    </ItemGroup>
 +  <ItemGroup>
-+    <PackageVersion Include="StyleBro.Analyzers" Version="0.8.0-trial57.1" />
++    <PackageVersion Include="StyleBro.Analyzers" Version="0.8.0-trial57.2" />
 +  </ItemGroup>
  </Project>
 \ No newline at end of file

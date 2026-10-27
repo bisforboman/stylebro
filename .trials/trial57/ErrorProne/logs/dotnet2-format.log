@@ -1,0 +1,17 @@
+Using src/ErrorProne.NET.sln: no solution or project at the root, and it's the only solution one folder down.
+Fixing StyleBro's rules and the built-in rules init and migrate turn on (141 ids); --all applies every analyzer's and compiler fix.
+'dotnet format' had warnings loading the workspace; they don't stop the run. The restore warned too, likely the same: src/ErrorProne.NET.CoreAnalyzers/ErrorProne.NET.CoreAnalyzers.csproj: NU1603: ErrorProne.NET.CoreAnalyzers.RenameToAvoidConflict depends on Microsoft.CodeAnalysis.Analyzers (>= 4.13.0) but Microsoft.CodeAnalysis.Analyzers 4.13.0 was not found. Microsoft.CodeAnalysis.Analyzers 4.14.0 was resolved instead. To see them all, add '--verbosity diagnostic' to this 'bro format' command.
+Run 1: 98 files changed:
+  src/ErrorProne.NET.CoreAnalyzers.CodeFixes/AsyncAnalyzers/AddConfigureAwaitCodeFixProvider.cs
+  src/ErrorProne.NET.CoreAnalyzers.CodeFixes/AsyncAnalyzers/RemoveConfigureAwaitCodeFixProvider.cs
+  src/ErrorProne.NET.CoreAnalyzers.CodeFixes/CoreAnalyzers/ExceptionHandlingFixers.cs
+  src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/AddConfigureAwaitAnalyzerTests.cs
+  src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/AddConfigureAwaitCodeFixProviderTests.cs
+  src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/AsyncVoidDelegateAnalyzerTests.cs
+  src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/AsyncVoidMethodAnalyzerTests.cs
+  src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/CancellationTokenRegistrationAnalyzerTests.cs
+  src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/DoNotBlockUnnecessarilyInAsyncMethodsAnalyzerTests.cs
+  src/ErrorProne.NET.CoreAnalyzers.Tests/AsyncAnalyzers/DoNotReturnNullForTaskLikeAnalyzerTests.cs
+  ... and 88 more
+Checked 4 projects (run 1 of 1)
+Run 2: 0 files changed, clean.

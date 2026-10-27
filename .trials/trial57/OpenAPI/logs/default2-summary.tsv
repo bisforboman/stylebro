@@ -1,0 +1,12 @@
+preview	0	200s	bro preview init
+setup	0	9s	bash -c python3 /home/user/stylebro/.trials/trial57/addref.py Directory.Build.props "<PackageReference Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial57.2\" PrivateAssets=\"all\" />" && git diff --stat && bro init --write
+format	0	149s	bro format
+check	0	53s	bro check
+check-json	0
+checkbuild	0	204s	bro check --build
+checkbuild-json	0
+twae-Debug	0	29s	twae Debug
+test-Debug	0	14s	env CFG=Debug bash -c dotnet test --solution Microsoft.OpenApi.slnx -c $CFG
+twae-Release	0	24s	twae Release
+test-Release	0	15s	env CFG=Release bash -c dotnet test --solution Microsoft.OpenApi.slnx -c $CFG
+DONE

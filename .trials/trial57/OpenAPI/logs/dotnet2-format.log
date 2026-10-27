@@ -1,0 +1,37 @@
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+xUnit: xunit.analyzers 2.2.0 is restored here, and from 1.24 on its code fixes have no Fix All, which 'dotnet format' needs: its assertion fixes aren't applied (the build still reports their warnings; your IDE fixes them one at a time).
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net8.0, netstandard2.0).
+Configurations: runs for Release (resultsComparer) too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.
+Checked net8.0, Release (run 1 of 4)
+Checked netstandard2.0 (run 2 of 4)
+Checked net8.0 (run 3 of 4)
+Checked net10.0 (run 4 of 4)
+== net10.0 (3 project(s), 156 files with findings)
+'dotnet format' had warnings loading the workspace in its net10.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+== net8.0 (4 project(s), 242 files with findings)
+== netstandard2.0 (2 project(s), 233 files with findings)
+== net8.0, Release (1 project(s), 8 files with findings)
+Run 1: 400 files changed:
+  performance/benchmark/Descriptions.cs
+  performance/benchmark/EmptyModels.cs
+  performance/benchmark/Program.cs
+  performance/resultsComparer/handlers/CompareCommandHandler.cs
+  performance/resultsComparer/Logger.cs
+  performance/resultsComparer/models/BenchmarkReport.cs
+  performance/resultsComparer/policies/BaseBenchmarkComparisonPolicy.cs
+  performance/resultsComparer/policies/IBenchmarkComparisonPolicy.cs
+  performance/resultsComparer/policies/IdenticalMemoryUsagePolicy.cs
+  performance/resultsComparer/policies/PercentageMemoryUsagePolicy.cs
+  ... and 390 more
+Checked net8.0, Release (run 1 of 4)
+Checked netstandard2.0 (run 2 of 4)
+Checked net8.0 (run 3 of 4)
+Checked net10.0 (run 4 of 4)
+Run 2: 0 files changed, clean.
+Clean: 2 findings kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them (https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose).
+  src/Microsoft.OpenApi/Reader/JsonNodeHelper.cs(247,30): BRO1302 Rename 'JsonObject' to 'jsonObject'. Kept: code this format run doesn't load (another run's project, or a file outside the loaded projects) uses the name, so the rename would miss that use (first: test/Microsoft.OpenApi.Readers.Tests/YamlConverterTests.cs).
+  test/Microsoft.OpenApi.Tests/Models/OpenApiOperationTests.cs(90,41): BRO1309 Rename '_advancedOperationWithTagsAndSecurity' to 'AdvancedOperationWithTagsAndSecurity'. Kept: another property of the type keeps its name (it's in a string, a snapshot file or a XAML file, or it's snake_case), so all of them keep theirs.
+Baseline: stylebro.baseline: added 2 kept findings, so the build and 'format --verify-no-changes' skip them (new violations still fail; delete an entry to see it again) (https://bisforboman.github.io/stylebro/baseline/).
+Not checked: xunit.analyzers' rules: xunit.analyzers 2.2.0's fixes have no Fix All, so 'dotnet format' can't apply or check them (a note: the build still reports their warnings; the verdict doesn't count them)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

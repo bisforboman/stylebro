@@ -117,7 +117,7 @@ index 6efc588..f93022f 100644
  </Project>
 \ No newline at end of file
 diff --git a/Directory.Packages.props b/Directory.Packages.props
-index 3230925..0c1dc28 100644
+index 3230925..c97edc1 100644
 --- a/Directory.Packages.props
 +++ b/Directory.Packages.props
 @@ -39,4 +39,7 @@
@@ -125,31 +125,15 @@ index 3230925..0c1dc28 100644
      <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
    </ItemGroup>
 +  <ItemGroup>
-+    <PackageVersion Include="StyleBro.Analyzers" Version="0.8.0-trial57.1" />
++    <PackageVersion Include="StyleBro.Analyzers" Version="0.8.0-trial57.2" />
 +  </ItemGroup>
  </Project>
 \ No newline at end of file
 diff --git a/src/Dapper.AOT.Analyzers/AotGridReader.cs b/src/Dapper.AOT.Analyzers/AotGridReader.cs
-index b060670..b3be71d 100644
+index b060670..c7bc936 100644
 --- a/src/Dapper.AOT.Analyzers/AotGridReader.cs
 +++ b/src/Dapper.AOT.Analyzers/AotGridReader.cs
-@@ -8,7 +8,7 @@ namespace Dapper
- #if !DAPPERAOT_INTERNAL // used in integration tests
-     file
- #endif
--    sealed class AotWrappedDbDataReader : global::Dapper.WrappedDbDataReader, global::Dapper.IWrappedDataReader
-+    internal sealed class AotWrappedDbDataReader : global::Dapper.WrappedDbDataReader, global::Dapper.IWrappedDataReader
-     {   // provides IWrappedDataReader support for WrappedDbDataReader, used via QueryMultiple and ExecuteReader
-         global::System.Data.IDataReader global::Dapper.IWrappedDataReader.Reader => Reader;
-         global::System.Data.IDbCommand global::Dapper.IWrappedDataReader.Command => Command;
-@@ -17,16 +17,16 @@ namespace Dapper
- #if !DAPPERAOT_INTERNAL // used in integration tests
-     file
- #endif
--    sealed class AotGridReader : global::Dapper.SqlMapper.GridReader
-+    internal sealed class AotGridReader : global::Dapper.SqlMapper.GridReader
-     {   // provides GridReader support, used via QueryMultiple
-         public AotGridReader(
+@@ -23,10 +23,10 @@ namespace Dapper
              global::System.Data.Common.DbDataReader reader,
              global::System.Threading.CancellationToken cancellationToken = default)
              : base(reader is IWrappedDataReader wrapped ? wrapped.Command : null!, reader, null!, null, null, false, cancellationToken)
@@ -1462,19 +1446,6 @@ index 835470a..c9eb3cd 100644
          {
              if (!_hasInterceptsLocationAttribute)
              {
-diff --git a/src/Dapper.AOT.Analyzers/InGeneration/DapperHelpers.cs b/src/Dapper.AOT.Analyzers/InGeneration/DapperHelpers.cs
-index 217d9da..f5fa195 100644
---- a/src/Dapper.AOT.Analyzers/InGeneration/DapperHelpers.cs
-+++ b/src/Dapper.AOT.Analyzers/InGeneration/DapperHelpers.cs
-@@ -6,7 +6,7 @@
- #if !DAPPERAOT_INTERNAL
-     file
- #endif
--    static class DbStringHelpers
-+    internal static class DbStringHelpers
-     {
-         public static void ConfigureDbStringDbParameter(
-             global::System.Data.Common.DbParameter dbParameter,
 diff --git a/src/Dapper.AOT.Analyzers/IncludedGeneration.cs b/src/Dapper.AOT.Analyzers/IncludedGeneration.cs
 index 492599c..f96d961 100644
 --- a/src/Dapper.AOT.Analyzers/IncludedGeneration.cs
@@ -4838,31 +4809,6 @@ index d9b6a6c..f3c9db7 100644
                  }
                  else
                  {
-diff --git a/test/Dapper.AOT.Test/Interceptors/DbString.output.cs b/test/Dapper.AOT.Test/Interceptors/DbString.output.cs
-index 58aec28..24f0bc3 100644
---- a/test/Dapper.AOT.Test/Interceptors/DbString.output.cs
-+++ b/test/Dapper.AOT.Test/Interceptors/DbString.output.cs
-@@ -214,7 +214,7 @@ namespace Dapper.Aot.Generated
- #if !DAPPERAOT_INTERNAL
-     file
- #endif
--    static class DbStringHelpers
-+    internal static class DbStringHelpers
-     {
-         public static void ConfigureDbStringDbParameter(
-             global::System.Data.Common.DbParameter dbParameter,
-diff --git a/test/Dapper.AOT.Test/Interceptors/DbString.output.txt b/test/Dapper.AOT.Test/Interceptors/DbString.output.txt
-index 57518b1..b0047ff 100644
---- a/test/Dapper.AOT.Test/Interceptors/DbString.output.txt
-+++ b/test/Dapper.AOT.Test/Interceptors/DbString.output.txt
-@@ -2,3 +2,7 @@ Generator produced 1 diagnostics:
- 
- Hidden DAP000  L1 C1
- Dapper.AOT handled 2 of 2 enabled call-sites (0 unsupported API, 0 refused with diagnostics, 0 skipped silently) using 2 interceptors, 2 commands and 1 readers
-+Output code has 1 diagnostics from 'Dapper.AOT.Analyzers/Dapper.CodeAnalysis.DapperInterceptorGenerator/Test.generated.cs':
-+
-+Error CS9052 Dapper.AOT.Analyzers/Dapper.CodeAnalysis.DapperInterceptorGenerator/Test.generated.cs L217 C27
-+File-local type 'DbStringHelpers' cannot use accessibility modifiers.
 diff --git a/test/Dapper.AOT.Test/Interceptors/SqliteUsage.input.cs b/test/Dapper.AOT.Test/Interceptors/SqliteUsage.input.cs
 index 104439b..a434756 100644
 --- a/test/Dapper.AOT.Test/Interceptors/SqliteUsage.input.cs

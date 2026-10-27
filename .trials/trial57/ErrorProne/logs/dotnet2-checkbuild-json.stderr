@@ -1,0 +1,8 @@
+Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+Building ErrorProne.NET.sln in Debug, Release with warnings as errors, and a copy of HEAD to compare...
+Debug: no findings, no new errors (1 error the untouched code has too, not counted).
+  src/ErrorProne.NET.CoreAnalyzers/ErrorProne.NET.CoreAnalyzers.csproj: NU1603: Warning As Error: ErrorProne.NET.CoreAnalyzers.RenameToAvoidConflict depends on Microsoft.CodeAnalysis.Analyzers (>= 4.13.0) but Microsoft.CodeAnalysis.Analyzers 4.13.0 was not found. Microsoft.CodeAnalysis.Analyzers 4.14.0 was resolved instead.
+Release: no findings, no new errors (1 error the untouched code has too, not counted).
+  src/ErrorProne.NET.CoreAnalyzers/ErrorProne.NET.CoreAnalyzers.csproj: NU1603: Warning As Error: ErrorProne.NET.CoreAnalyzers.RenameToAvoidConflict depends on Microsoft.CodeAnalysis.Analyzers (>= 4.13.0) but Microsoft.CodeAnalysis.Analyzers 4.13.0 was not found. Microsoft.CodeAnalysis.Analyzers 4.14.0 was resolved instead.
+Formatting is clean. But:
+Not verified: the Debug, Release builds failed, as the untouched code's do (above), so they compiled nothing past their errors: fix them (a missing workload, a failed restore), then run again.
