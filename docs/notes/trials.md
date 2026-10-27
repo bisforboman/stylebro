@@ -1005,6 +1005,10 @@ engines (`.trials/README.md`, "Engine soak").
 - Found: `check --build` in a shallow clone of a git-height-versioned repository said "Not clean": its copy of HEAD had no
   `.git`, so Nerdbank.GitVersioning built there and the clone's identical failures counted as new.
   `FormatCommand.WithHistory` gives the copy the repository's history (`PreviewCommand.BorrowHistory`) and HEAD's index.
+- Found: the host engine DELETED a C# method in a solution whose C# tests reference a Visual Basic project: `FixOrder.FixersFor`
+  took every fixer for an id, so IDE0036's Visual Basic fixer ran after the C# one on the C# diagnostics (the VB build then
+  failed, BC30456). Only fixers exported for the diagnostics' languages run now (`FixOrder.LanguagesOf`). The old engine was
+  right; only the engine comparison and the VB build showed it.
   Everything else the first round flagged was the fixtures' own mistakes (a net8.0 test referencing a net10.0-only project,
   VB's `Lib` keyword, a lone CR ending a `//` comment, a missing `<Nullable>`), and StyleBro's verdicts named them honestly
   ("Not verified": the untouched build fails). The runner now builds each fixture untouched first.
