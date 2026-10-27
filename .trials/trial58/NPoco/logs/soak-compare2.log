@@ -33,3 +33,16 @@ Or undo this operation with:
 Turn off this advice by setting config variable advice.detachedHead to false
 
 == soak-src2: dotnet-format check
+== soak-src2: host check
+== soak-src2: dotnet-format format
+== soak-src2: host format
+== soak-src2: dotnet-format recheck
+== soak-src2: host recheck
+Times (soak-src2):
+  dotnet-format check       349.0 s
+  host check                148.4 s
+  dotnet-format format      317.7 s
+  host format               100.3 s
+  dotnet-format recheck      77.5 s
+  host recheck               61.4 s
+Same (soak-src2): exit codes, output, trees and reports.
