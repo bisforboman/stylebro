@@ -309,6 +309,11 @@ foreach ($file in $chosen) {
     else {
         Write-Host ("  FAIL {0} ({1:0} s)" -f $name, $seconds)
         $failures | ForEach-Object { Write-Host "    - $_" }
+        # The step logs' ends, for CI (artifacts aside): verdicts, kept findings, 'Not checked' lines.
+        foreach ($log in Get-ChildItem $logs -Filter '*.txt' | Sort-Object Name) {
+            Write-Host "    --- $($log.Name) (last 12 lines)"
+            Get-Content $log.FullName -Tail 12 | ForEach-Object { Write-Host "      $_" }
+        }
     }
 
     if (-not $Keep -and $failures.Count -eq 0) { Get-ChildItem $dir -Exclude 'logs' | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue }
