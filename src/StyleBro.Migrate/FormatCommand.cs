@@ -4471,7 +4471,8 @@ internal static partial class FormatCommand
         var verdicts = new List<string>();
         Action<string> runLog = hidden is null && !verify ? log : line =>
         {
-            if (verdicts.Count > 0 || line.StartsWith("Clean", StringComparison.Ordinal))
+            // With --build a Not-verified verdict waits for the builds too (AfterBuilds).
+            if (verdicts.Count > 0 || line.StartsWith("Clean", StringComparison.Ordinal) || (buildAll && line.StartsWith(NotVerifiedMarker, StringComparison.Ordinal)))
             {
                 verdicts.Add(line);
             }
@@ -4520,7 +4521,9 @@ internal static partial class FormatCommand
         }
 
         var buts = new[] { hidden, verify ? UncheckedLine(root, log) : null, verify ? CSharpierStep.CheckLine(root, log: log) : null, buildLine }.OfType<string>().ToList();
-        verdicts.Select((line, i) => i == 0 && buts.Count > 0 ? "Formatting is clean" + line.Substring("Clean".Length) + " But:" : hidden is null ? line : line.Replace(" changed, clean.", " changed.", StringComparison.Ordinal)).ToList().ForEach(log);
+        verdicts.Select((line, i) => i == 0 && buts.Count > 0 && line.StartsWith("Clean", StringComparison.Ordinal) ? "Formatting is clean" + line.Substring("Clean".Length) + " But:"
+            : line.StartsWith(NotVerifiedMarker, StringComparison.Ordinal) ? (workspaceForBuild is null ? line : AfterBuilds(line, buildLine is null))
+            : hidden is null ? line : line.Replace(" changed, clean.", " changed.", StringComparison.Ordinal)).ToList().ForEach(log);
         foreach (var line in buts)
         {
             log(line);

@@ -105,4 +105,30 @@ public sealed partial class MigrationTests
             folder == root ? (1, [.. Build(folder, workspace, configuration).Item2, $"{Path.Combine(folder, "Integration", "T.cs")}(2,1): error BRO1002: Add a space after '//' [{Path.Combine(folder, "Integration", "Integration.csproj")}]"]) : Build(folder, workspace, configuration);
         Assert.StartsWith("Not clean: the builds report 2 findings", FormatCommand.BuildCheckLine(root, solution, _ => { }, WithFinding, () => copy, () => ["Analyzers", "Integration", "Other"]), StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void CheckBuild_SaysNotVerifiedAfterTheBuilds()
+    {
+        // Newtonsoft.Json.Bson: netstandard1.3 doesn't load in 'dotnet format' (Not verified); 'check --build' said so before six
+        // clean builds, told to run 'bro check --build', and ended with the last build's line (owner, 2026-10-27: verdict last).
+        Write("Lib/Lib.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFramework>net10.0</TargetFramework>\n  </PropertyGroup>\n</Project>\n");
+        Write("Lib/C.cs", "namespace Lib;\n\npublic static class C\n{\n}\n");
+        Write("Lib.slnx", "<Solution>\n  <Project Path=\"Lib/Lib.csproj\" />\n</Solution>\n");
+        var gap = FormatCommand.Gap("Lib (netstandard1.3)", "'dotnet format' couldn't load it (references didn't load), so the code only that framework compiles");
+        var lines = new List<string>();
+
+        var code = FormatCommand.Run([root, "--verify-no-changes", FormatCommand.BuildOption], lines.Add, (_, output) =>
+        {
+            output?.Invoke(gap);
+            return 0;
+        });
+
+        Assert.Equal(FormatCommand.NotVerifiedExitCode, code);
+        Assert.Equal(FormatCommand.AfterBuilds(FormatCommand.NotVerifiedLine(1), buildsClean: true), lines[^1]);
+        Assert.Contains("StyleBro's rules at warning or error were checked there", lines[^1], StringComparison.Ordinal);
+        Assert.DoesNotContain("(bro check --build)", lines[^1], StringComparison.Ordinal);
+        Assert.True(lines.FindIndex(l => l.StartsWith("Building ", StringComparison.Ordinal)) < lines.Count - 1);
+        Assert.Single(lines, l => l.StartsWith(FormatCommand.NotVerifiedMarker, StringComparison.Ordinal));
+        Assert.Equal(FormatCommand.NotVerifiedLine(1).Replace(" The build may still report findings there: fix what's named, or build it (bro check --build).", string.Empty, StringComparison.Ordinal), FormatCommand.AfterBuilds(FormatCommand.NotVerifiedLine(1), buildsClean: false));
+    }
 }

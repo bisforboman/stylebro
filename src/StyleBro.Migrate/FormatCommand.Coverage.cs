@@ -64,7 +64,22 @@ internal static partial class FormatCommand
     /// <summary>The verdict when <paramref name="count"/> gaps are left (the lines above it).</summary>
     public static string NotVerifiedLine(int count) =>
         $"{NotVerifiedMarker} {count} part{(count == 1 ? " of the build wasn't" : "s of the build weren't")} checked (the '{NotCheckedPrefix}' line{(count == 1 ? string.Empty : "s")} above); the rest is clean. "
-        + "The build may still report findings there: fix what's named, or build it (bro check --build).";
+        + BuildMayReport;
+
+    /// <summary>How <see cref="NotVerifiedLine"/> ends: what to do about the parts it names.</summary>
+    private const string BuildMayReport = "The build may still report findings there: fix what's named, or build it (bro check --build).";
+
+    /// <summary>
+    /// <see cref="NotVerifiedLine"/> after the builds of 'check --build' (<paramref name="line"/>), which comes after them; <paramref name="buildsClean"/>: they found nothing (owner's
+    /// decision 2026-10-27; trial 57, Newtonsoft.Json.Bson: it came before six clean builds, said to run the command running,
+    /// and the output ended with the last build's line): what the builds checked there and what they don't.
+    /// </summary>
+    public static string AfterBuilds(string line, bool buildsClean) =>
+        !line.EndsWith(BuildMayReport, StringComparison.Ordinal) ? line
+            : buildsClean ? line.Substring(0, line.Length - BuildMayReport.Length)
+                + "The builds above compiled that code with warnings as errors: StyleBro's rules at warning or error were checked there, "
+                + "not the whitespace and the IDE fixes a build doesn't enforce (EnforceCodeStyleInBuild)."
+            : line.Substring(0, line.Length - BuildMayReport.Length).TrimEnd();
 
     /// <summary>The gap lines for the projects 'dotnet format' skipped (<see cref="Incomplete"/>'s arguments).</summary>
     public static List<string> SkippedGaps(IReadOnlyDictionary<string, SortedSet<string>> skipped, IReadOnlyDictionary<string, List<string>> frameworks, IReadOnlyCollection<string>? unsupported = null)
