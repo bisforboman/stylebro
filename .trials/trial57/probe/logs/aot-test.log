@@ -1,7 +1,0 @@
-Test run for /home/user/stylebro/.trials/trial57/probe/DapperLib_DapperAOT/test/Dapper.AOT.Test/bin/Debug/net10.0/Dapper.AOT.Test.dll (.NETCoreApp,Version=v10.0)
-VSTest version 18.0.2 (x64)
-
-Starting test execution, please wait...
-A total of 1 test files matched the specified pattern.
-
-Passed!  - Failed:     0, Passed:   372, Skipped:     0, Total:   372, Duration: 29 s - Dapper.AOT.Test.dll (net10.0)
