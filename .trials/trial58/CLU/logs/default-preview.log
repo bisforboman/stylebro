@@ -1,0 +1,118 @@
+Previewing 'bro init --write' and 'bro format' on a copy; nothing in /home/user/w58/CLU/default changes.
+Copying the repository to /tmp/stylebro-preview-IqIJTD/default... 0s
+Conventions in the code (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  set      private fields: 175 of 175 named '_field' -> the naming rule dotnet_naming_rule.private_fields_should_be_underscore decides: 175 follow it
+  set      '{' of multi-line blocks: 3534 of 3534 on its own line -> set in .editorconfig (all)
+  set      else/catch/finally after '}': 122 of 122 on a new line -> set in .editorconfig (true)
+  set      one-line if/else/loop/using/lock bodies: 534 of 593 with braces -> set in .editorconfig (true)
+  kept     one-line jumps ('if (x) return;'): 26 of 304 on the 'if' line without braces -> true (3 are enough)
+  off      operators where a line wraps: 96 at the start of the line, 50 at the end of the line -> BRO1520 is off
+  kept     '=>' where a line wraps: 110 of 122 at the start of the line -> beginning_of_line
+  off      '=' where a line wraps: 12 at the end of the line, 12 at the start of the line -> BRO1522 is off
+  off      multi-line initializers: 44 with a trailing comma, 123 without a trailing comma -> BRO1401 is off
+  off      empty strings: 20 string.Empty, 45 "" -> BRO1106 is off
+  kept     null checks: 320 of 323 '== null' -> equality_operator
+  default  one-line <summary> texts: 638 of 640 on three lines -> multi_line
+  kept     <inheritdoc/> tags: 52 of 52 '<inheritdoc />' -> spaced
+  set      default values: 24 of 30 'default' -> set in .editorconfig (true)
+  default  ')' of split lists: 217 of 224 after the last item -> last_item
+  off      split lists: 87 first item on the next line, 56 first item after '(' -> BRO1107 is off
+  default  ': base(...)'/': this(...)': 44 of 51 on its own line -> own_line
+  default  'where' constraints: 35 of 44 on their own line -> own_line
+  default  'new T { ... }' with an initializer: 149 of 194 without '()' -> omit
+  kept     switch sections: 69 of 77 without a blank line -> omit
+  set      files' using directives: 232 of 232 outside the namespace -> set in .editorconfig (outside_namespace)
+  too few  mixed arithmetic ('a + b * c'): 2 places -> default stays (always_for_clarity)
+  set      statements on their 'if'/loop/'case' line: 34 of 262 on their owner's line -> set in .editorconfig (true)
+  off      overrides/interface implementations: 77 with a doc comment, 60 without a doc comment -> BRO1601 is off
+  off      types' members: 176 in BRO1001's order, 121 in another order -> BRO1001 is off
+  mixed    overloads BRO1001 could split: 1 apart, 3 next to each other -> default stays (false)
+  default  split lists' items: 140 of 154 one per line -> warning
+  too few  unsigned literal suffixes: 1 place -> default stays (warning)
+  default  private-by-default members: 824 of 851 with 'private' -> for_non_interface_members
+  off      partial type parts: 1 with an access modifier, 2 without one ('partial class X') -> BRO1007 is off
+  off      internal-by-default types: 57 with 'internal', 30 without an access modifier -> BRO1404 is off
+  off      property summaries: 217 of 239 in their own words -> BRO1604 is off
+  default  adjacent locals of one type: 15 of 16 declared one by one -> warning
+  default  declarations with 2+ attributes: 180 of 202 one per list ('[A]' '[B]') -> warning
+  default  adjacent fields of one type: 25 of 25 declared one by one -> warning
+  set      private static fields: 11 of 11 with an 's_'/'t_' prefix -> a naming rule requires 's_', which BRO1307 keeps
+  default  built-in type names: 215 of 216 only keywords ('int') -> warning
+  both     empty blocks ('{ }'): 34 on two lines, 52 on one line -> both allowed
+  default  block-bodied properties/methods: 19 of 19 on several lines -> warning
+  default  statement blocks ('if (x) { y(); }'): 555 of 555 on several lines -> warning
+  default  auto-property accessors ('{ get; set; }'): 675 of 675 on one line -> warning
+  kept     C# files' line endings: 279 of 279 LF -> lf
+  default  statements after a block's '}': 445 of 526 after a blank line -> warning
+  off      nested ifs BRO1149 would merge: 12 nested -> BRO1149 is off
+  default  neighbouring members: 2173 of 2192 with a blank line between -> warning
+  default  doc comments below code: 538 of 544 after a blank line -> warning
+  default  '//' comments above code: 436 of 437 right above the code -> warning
+  default  '//' comments below code: 250 of 270 after a blank line -> warning
+  default  doc comment texts: 1173 of 1369 ending with a period -> warning
+  off      doc element order (typeparam, param, returns, exception, remarks, seealso): 8 in BRO1619's order, 10 in another order -> BRO1619 is off
+  off      keywords in doc comments: 9 of 9 '<c>null</c>' -> BRO1618 is off
+  off      non-private fields: 19 PascalCase or as your naming rule says, 7 named otherwise -> BRO1306 is off
+  default  doc comments above their element: 815 of 820 right above it -> warning
+  too few  primary-constructor parameter names: 1 parameter -> default stays (warning)
+  off      tuple element names: 11 '(int Count, ...)', 12 '(int count, ...)' -> BRO1311 is off
+  set      using directives: 193 of 193 files sorted, 109 of 109 with System first -> set in .editorconfig
+  set      private constants/static readonly fields: 18 fields -> a dotnet_naming_rule decides
+  default  spacing, control-flow keywords: 932 of 932 'if (x)' -> 'if (x)'
+  default  spacing, control-flow parentheses: 931 of 932 'if (x)' -> 'if (x)'
+  default  spacing, parenthesized expressions: 79 of 79 '(a + b)' -> '(a + b)'
+  default  spacing, cast parentheses: 133 of 133 '(int)x' -> '(int)x'
+  set      spacing, casts: 133 of 133 '(int)x' -> set in .editorconfig (false)
+  default  spacing, call arguments: 4981 of 4982 'F(x)' -> 'F(x)'
+  default  spacing, declared parameters: 807 of 807 'void F(int x)' -> 'void F(int x)'
+  note     your code looks like the Microsoft style (dotnet/runtime's: '_' fields, 's_' statics, no 'this.'): try 'bro init --style microsoft' (https://bisforboman.github.io/stylebro/styles/)
+Summary:
+  Kept your style for 33 settings: wrote stylebro_allow_single_line_jump_statements,
+    stylebro_arrow_placement_when_wrapping, stylebro_null_check_style, stylebro_inheritdoc_style,
+    stylebro_blank_line_between_switch_sections, end_of_line; 27 were already StyleBro's default.
+  Allowed both forms for 1 setting because your code mixes them: stylebro_allow_empty_single_line_blocks = true (empty
+    blocks ('{ }')).
+  Turned 12 rules off because your code mixes both forms: BRO1520 (operators where a line wraps),
+    BRO1522 ('=' where a line wraps), BRO1401 (multi-line initializers), BRO1106 (empty strings),
+    BRO1107 (split lists), BRO1601 (overrides/interface implementations), BRO1001 (types' members),
+    BRO1007 (partial type parts), BRO1404 (internal-by-default types), BRO1619 (doc element order (typeparam, param,
+    returns, exception, remarks, seealso)), BRO1306 (non-private fields), BRO1311 (tuple element names).
+  Turned 3 rules off because your code doesn't do what they enforce: BRO1604 (property summaries: 217 of 239 in their
+    own words), BRO1149 (nested ifs BRO1149 would merge: 12 nested),
+    BRO1618 (keywords in doc comments: 9 of 9 '<c>null</c>').
+  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
+  3 settings had fewer than 3 places to tell,
+    StyleBro's defaults stay: dotnet_style_parentheses_in_arithmetic_binary_operators,
+    dotnet_diagnostic.BRO1135.severity, dotnet_diagnostic.BRO1302.severity.
+Settings: 80 lines in .editorconfig; 4 lines in Directory.Build.props (StyleBro.Analyzers); 3 lines in docs/samples/Directory.Build.props (StyleBro.Analyzers)
+  StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial58.1 to Directory.Build.props, docs/samples/Directory.Build.props for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).
+Format run 1... 1m 16s
+Format run 2... 9s
+Format: 115 files, 532 reported changes, clean after 1 run
+  BRO1603  Documentation text should end with a ...    46 files
+  BRO1519  Closing brace should be followed by b...    30 files
+  BRO1517  Code should not contain multiple blan...    17 files
+  BRO1505  Elements should be separated by a bla...    12 files
+  BRO1503  Opening braces should not be followed...     9 files
+  BRO1504  Single-line comments should be preced...     9 files
+  BRO1111  Generic type constraints should be on...     8 files
+  BRO1108  Parameters should be on the same line...     7 files
+  BRO1102  Each attribute should be in its own b...     5 files
+  BRO1105  Constructor initializers should be on...     4 files
+  ... and 29 more rules
+Sample (BRO1603, src/CommandLineUtils/Abstractions/CommandLineContext.cs):
+  -        /// The current working directory. Defaults to <see cref="Directory.GetCurrentDirectory" />
+  +        /// The current working directory. Defaults to <see cref="Directory.GetCurrentDirectory" />.
+Sample (BRO1519, src/CommandLineUtils/Conventions/DefaultHelpOptionConvention.cs):
+  (adds a blank line)
+Sample (BRO1517, src/CommandLineUtils/Internal/ValueParsers/NullableValueParser.cs):
+  (removes a blank line)
+Clean: 2 findings kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them (https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose).
+  src/CommandLineUtils/Attributes/ArgumentAttribute.cs(29,40): BRO1603 End the documentation text with a period. Kept: the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test (first: test/CommandLineUtils.Tests/OptionAttributeTests.cs(364)).
+  src/CommandLineUtils/Attributes/ArgumentAttribute.cs(38,40): BRO1603 End the documentation text with a period. Kept: the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test (first: test/CommandLineUtils.Tests/OptionAttributeTests.cs(364)).
+Baseline (in the patch): stylebro.baseline: added 2 kept findings, so the build and 'format --verify-no-changes' skip them (new violations still fail; delete an entry to see it again) (https://bisforboman.github.io/stylebro/baseline/).
+Full diff: .git/stylebro-preview.patch (4,221 lines)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 1m 39s.
