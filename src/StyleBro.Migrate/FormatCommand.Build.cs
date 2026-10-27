@@ -127,6 +127,24 @@ internal static partial class FormatCommand
     }
 
     /// <summary>
+    /// Makes <paramref name="copy"/>, the copy of HEAD that check --build compares with, a git repository with
+    /// <paramref name="repository"/>'s history (<see cref="PreviewCommand.BorrowHistory"/>: objects, HEAD, remotes, shallow
+    /// boundary) and HEAD's tree in its index, so version tools build it as they build the repository. Without it
+    /// (fixture matrix, git-height-shallow): in a shallow clone Nerdbank.GitVersioning fails every build of the repository,
+    /// the copy without git built, and check --build said "Not clean" for errors the untouched code has too.
+    /// </summary>
+    public static void WithHistory(string copy, string repository)
+    {
+        if (PreviewCommand.Git(copy, "init", "-q") is not (0, _))
+        {
+            return;
+        }
+
+        PreviewCommand.BorrowHistory(copy, repository);
+        PreviewCommand.Git(copy, "read-tree", "HEAD");
+    }
+
+    /// <summary>
     /// --build: builds <paramref name="workspacePath"/> (under <paramref name="root"/>) in each of its configurations and
     /// returns what makes it not clean ("Not clean: ...") or not verified (<see cref="NotVerifiedMarker"/>: builds that failed
     /// like the untouched code's), null for nothing. <paramref name="build"/> stands in for 'dotnet build' (folder,
@@ -164,6 +182,7 @@ internal static partial class FormatCommand
             PreviewCommand.Copy(repository, untouched);
             PreviewCommand.CopyOutside(repository, untouched, temp, outside);
             ToHead(repository, untouched, changed);
+            WithHistory(untouched, repository);
         }
 
         log(untouched switch
