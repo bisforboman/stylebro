@@ -5735,7 +5735,9 @@ internal static partial class FormatCommand
             var several = plan is { Count: > 1 };
             var failed = runs
                 .SelectMany(r => r.Projects.Select(x => (r.Framework, r.Configuration, r.Run, Project: x)))
-                .AsParallel().AsOrdered().WithDegreeOfParallelism(Math.Max(1, Environment.ProcessorCount))
+                .AsParallel()
+                .AsOrdered()
+                .WithDegreeOfParallelism(Math.Max(1, Environment.ProcessorCount))
                 .Select(r =>
                 {
                     var own = projects[r.Project].Frameworks;

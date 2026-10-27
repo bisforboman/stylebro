@@ -34,6 +34,9 @@ internal static partial class FormatCommand
     /// <summary>How a gap line that is only a note ends (<see cref="Unverified"/>).</summary>
     private const string NoteEnd = "the verdict doesn't count them)";
 
+    /// <summary>How <see cref="NotVerifiedLine"/> ends: what to do about the parts it names.</summary>
+    private const string BuildMayReport = "The build may still report findings there: fix what's named, or build it (bro check --build).";
+
     /// <summary>A gap line: <paramref name="what"/> wasn't checked, <paramref name="why"/>.</summary>
     public static string Gap(string what, string why) => $"{NotCheckedPrefix} {what}: {why}";
 
@@ -66,13 +69,11 @@ internal static partial class FormatCommand
         $"{NotVerifiedMarker} {count} part{(count == 1 ? " of the build wasn't" : "s of the build weren't")} checked (the '{NotCheckedPrefix}' line{(count == 1 ? string.Empty : "s")} above); the rest is clean. "
         + BuildMayReport;
 
-    /// <summary>How <see cref="NotVerifiedLine"/> ends: what to do about the parts it names.</summary>
-    private const string BuildMayReport = "The build may still report findings there: fix what's named, or build it (bro check --build).";
-
     /// <summary>
-    /// <see cref="NotVerifiedLine"/> after the builds of 'check --build' (<paramref name="line"/>), which comes after them; <paramref name="buildsClean"/>: they found nothing (owner's
-    /// decision 2026-10-27; trial 57, Newtonsoft.Json.Bson: it came before six clean builds, said to run the command running,
-    /// and the output ended with the last build's line): what the builds checked there and what they don't.
+    /// <see cref="NotVerifiedLine"/> after the builds of 'check --build' (<paramref name="line"/>), which comes after them
+    /// (owner's decision 2026-10-27; trial 57, Newtonsoft.Json.Bson: it came before six clean builds, said to run the command
+    /// running, and the output ended with the last build's line): what the builds checked there and what they don't when they
+    /// found nothing (<paramref name="buildsClean"/>), else without the hint to build.
     /// </summary>
     public static string AfterBuilds(string line, bool buildsClean) =>
         !line.EndsWith(BuildMayReport, StringComparison.Ordinal) ? line
