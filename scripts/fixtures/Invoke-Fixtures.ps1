@@ -319,4 +319,6 @@ $table = @('| Shape | Result | Time |', '| --- | --- | --- |') + @($results | Fo
 $table | ForEach-Object { Write-Host $_ }
 if ($summary) { Add-Content $summary (@("### Fixtures (shard $Shard of $Shards)", '') + $table) }
 Write-Host "Work folder: $Work"
+# Explicit both ways: without 'exit', a pwsh step ends with the last native command's exit code.
 if (@($results | Where-Object { -not $_.Ok }).Count -gt 0) { exit 1 }
+exit 0
