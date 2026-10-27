@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.Host;
 
@@ -57,6 +58,12 @@ public sealed class AnalysisCache
             }
 
             missing = analyzers.Where(a => !cached.ByAnalyzer.ContainsKey(a)).Distinct().ToList();
+
+            // The suppressors asked for run with whatever has to run, cached or not: they act on the diagnostics of the run.
+            if (missing.Count > 0)
+            {
+                missing = [.. missing.Union(analyzers.OfType<DiagnosticSuppressor>())];
+            }
             compilerMissing = compilerKey is not null && !cached.Compiler.ContainsKey(compilerKey);
         }
 
@@ -75,7 +82,17 @@ public sealed class AnalysisCache
                 running?.Invoke(missing.Count);
                 var analysis = compilation.WithAnalyzers([.. missing], new CompilationWithAnalyzersOptions(project.AnalyzerOptions, null, concurrentAnalysis: true, logAnalyzerExecutionTime: false, reportSuppressedDiagnostics: false));
                 var result = await analysis.GetAnalysisResultAsync(cancellation).ConfigureAwait(false);
-                found = missing.ToImmutableDictionary(a => a, a => result.GetAllDiagnostics(a));
+
+                // An analysis result's diagnostics come before the suppressors (DiagnosticSuppressor: the baseline, generated and
+                // outside files); GetAnalyzerDiagnosticsAsync applies them, as dotnet format reads them. Without it the host's
+                // check listed a finding the baseline hides (fixture matrix, solution-in-subfolder, on SDK 10.0.4xx).
+                HashSet<(string, string?, TextSpan, string)>? visible = null;
+                if (missing.Any(a => a is DiagnosticSuppressor))
+                {
+                    visible = [.. (await analysis.GetAnalyzerDiagnosticsAsync(cancellation).ConfigureAwait(false)).Select(Identity)];
+                }
+
+                found = missing.ToImmutableDictionary(a => a, a => visible is null ? result.GetAllDiagnostics(a) : [.. result.GetAllDiagnostics(a).Where(d => visible.Contains(Identity(d)))]);
             }
 
             lock (this.results)
@@ -99,6 +116,9 @@ public sealed class AnalysisCache
             return Ordered(analyzers.Distinct().SelectMany(a => cached.ByAnalyzer[a]).Concat(compilerKey is null ? [] : cached.Compiler[compilerKey]));
         }
     }
+
+    // A diagnostic as the same finding in two reads of one analysis: id, file, span and message.
+    private static (string, string?, TextSpan, string) Identity(Diagnostic d) => (d.Id, d.Location.SourceTree?.FilePath, d.Location.SourceSpan, d.GetMessage());
 
     private sealed class Results((VersionStamp, VersionStamp, AnalyzerOptions) key)
     {

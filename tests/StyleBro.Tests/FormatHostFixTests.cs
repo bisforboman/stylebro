@@ -63,6 +63,32 @@ public sealed class FormatHostFixTests : IDisposable
     }
 
     [Fact]
+    public async Task TheCache_AppliesTheSuppressorsAskedFor()
+    {
+        // solution-in-subfolder on SDK 10.0.4xx: a finding the baseline (a DiagnosticSuppressor) hides was listed by the host's
+        // check, because an analysis result's diagnostics come before the suppressors. Also when the suppressor's own (empty)
+        // result was cached before the analyzer ran.
+        using var workspace = new AdhocWorkspace();
+        var lib = ProjectId.CreateNewId();
+        var solution = workspace.CurrentSolution
+            .AddProject(ProjectInfo.Create(lib, VersionStamp.Default, "Lib", "Lib", LanguageNames.CSharp))
+            .AddDocument(DocumentId.CreateNewId(lib), "A.cs", "class Shown { }\nclass Hidden { }", filePath: "/r/Lib/A.cs");
+        var project = solution.GetProject(lib)!;
+        var classes = new ClassAnalyzer("T1");
+        var hides = new HidingSuppressor("T1", "Hidden");
+
+        var both = await new AnalysisCache().GetAsync(project, [classes, hides], [], null, CancellationToken.None);
+        Assert.Equal(["Shown"], both.Select(d => d.GetMessage()));
+
+        var cache = new AnalysisCache();
+        Assert.Empty(await cache.GetAsync(project, [hides], [], null, CancellationToken.None));
+        Assert.Equal(["Shown"], (await cache.GetAsync(project, [classes, hides], [], null, CancellationToken.None)).Select(d => d.GetMessage()));
+
+        // Without the suppressor, the finding is there.
+        Assert.Equal(["Hidden", "Shown"], (await new AnalysisCache().GetAsync(project, [classes], [], null, CancellationToken.None)).Select(d => d.GetMessage()).Order(StringComparer.Ordinal));
+    }
+
+    [Fact]
     public async Task TheCache_RunsAnAnalyzer_OnlyOnContentItHasntSeen()
     {
         using var workspace = new AdhocWorkspace();
@@ -365,6 +391,21 @@ public sealed class FormatHostFixTests : IDisposable
 
         public override void ReportSuppressions(SuppressionAnalysisContext context)
         {
+        }
+    }
+
+    private sealed class HidingSuppressor(string id, string name) : DiagnosticSuppressor
+    {
+        private readonly SuppressionDescriptor descriptor = new("S" + id, id, "t");
+
+        public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions => [this.descriptor];
+
+        public override void ReportSuppressions(SuppressionAnalysisContext context)
+        {
+            foreach (var diagnostic in context.ReportedDiagnostics.Where(d => d.GetMessage() == name))
+            {
+                context.ReportSuppression(Suppression.Create(this.descriptor, diagnostic));
+            }
         }
     }
 #pragma warning restore RS1001, RS1017, RS1036
