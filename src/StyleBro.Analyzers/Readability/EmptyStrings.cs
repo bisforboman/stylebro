@@ -21,14 +21,17 @@ internal static class EmptyStrings
     /// <summary>
     /// An empty regular or verbatim string literal ("" or @"") outside a context that requires a constant.
     /// 'string.Empty' is not a constant, so attribute arguments, parameter defaults, case labels, patterns and
-    /// const declarations keep "". Interpolated ($""), UTF-8 (""u8) and raw literals are different kinds of literal.
+    /// const declarations keep "". Interpolated ($""), UTF-8 (""u8) and raw literals are different kinds of literal. Neither
+    /// form is replaced in an expression tree: a constant and a field access are different trees (owner's decision
+    /// 2026-10-27, trial 58).
     /// </summary>
-    public static bool ShouldReplace(LiteralExpressionSyntax literal)
+    public static bool ShouldReplace(LiteralExpressionSyntax literal, SemanticModel model, CancellationToken cancellationToken)
     {
         return literal.IsKind(SyntaxKind.StringLiteralExpression)
             && literal.Token.IsKind(SyntaxKind.StringLiteralToken)
             && literal.Token.ValueText.Length == 0
-            && !IsInConstantContext(literal);
+            && !IsInConstantContext(literal)
+            && !NullChecks.IsInExpressionTree(literal, model, cancellationToken);
     }
 
     /// <summary>
@@ -41,7 +44,8 @@ internal static class EmptyStrings
             && access.Name is IdentifierNameSyntax { Identifier.ValueText: "Empty" }
             && !access.DescendantTrivia().Any(t => access.Span.Contains(t.Span) && !t.IsKind(SyntaxKind.WhitespaceTrivia) && !t.IsKind(SyntaxKind.EndOfLineTrivia))
             && !IsInNameof(access)
-            && model.GetSymbolInfo(access, cancellationToken).Symbol is IFieldSymbol { ContainingType.SpecialType: SpecialType.System_String };
+            && model.GetSymbolInfo(access, cancellationToken).Symbol is IFieldSymbol { ContainingType.SpecialType: SpecialType.System_String }
+            && !NullChecks.IsInExpressionTree(access, model, cancellationToken);
     }
 
     private static bool IsInNameof(SyntaxNode node)

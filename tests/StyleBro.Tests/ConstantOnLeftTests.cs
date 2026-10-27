@@ -165,4 +165,35 @@ public class ConstantOnLeftTests
             bool M(int x, int y) => x == y || 1 == 2 || x == 1;
         }
         """);
+
+    [Fact]
+    public Task ExpressionTrees_KeepTheirOperands() => VerifyFixAsync(
+        """
+        using System;
+        using System.Linq;
+        using System.Linq.Expressions;
+
+        class C
+        {
+            // Trial 58 (ExpressionTreeToString): swapping changes the tree ('<=' becomes '>='; owner, 2026-10-27).
+            Expression<Func<DayOfWeek, bool>> e = d => DayOfWeek.Tuesday <= d;
+            Func<DayOfWeek, bool> f = d => {|BRO1103:DayOfWeek.Tuesday <= d|};
+
+            IQueryable<string> Q(IQueryable<string> q) => from s in q where 'c' == s[0] select s;
+        }
+        """,
+        """
+        using System;
+        using System.Linq;
+        using System.Linq.Expressions;
+
+        class C
+        {
+            // Trial 58 (ExpressionTreeToString): swapping changes the tree ('<=' becomes '>='; owner, 2026-10-27).
+            Expression<Func<DayOfWeek, bool>> e = d => DayOfWeek.Tuesday <= d;
+            Func<DayOfWeek, bool> f = d => d >= DayOfWeek.Tuesday;
+
+            IQueryable<string> Q(IQueryable<string> q) => from s in q where 'c' == s[0] select s;
+        }
+        """);
 }

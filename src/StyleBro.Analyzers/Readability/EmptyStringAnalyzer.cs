@@ -24,8 +24,8 @@ public sealed class EmptyStringAnalyzer : DiagnosticAnalyzer
             c =>
             {
                 var literal = (LiteralExpressionSyntax)c.Node;
-                if (EmptyStrings.ShouldReplace(literal)
-                    && !EmptyStrings.PrefersLiteral(c.Options.AnalyzerConfigOptionsProvider.GetOptions(literal.SyntaxTree)))
+                if (!EmptyStrings.PrefersLiteral(c.Options.AnalyzerConfigOptionsProvider.GetOptions(literal.SyntaxTree))
+                    && EmptyStrings.ShouldReplace(literal, c.SemanticModel, c.CancellationToken))
                 {
                     c.ReportDiagnostic(Diagnostic.Create(Descriptors.EmptyString, literal.GetLocation(), "string.Empty", literal.Token.Text));
                 }

@@ -12,7 +12,8 @@ internal static class ConstantComparisons
 {
     /// <summary>
     /// A comparison ('==', '!=', '&lt;', '&gt;', '&lt;=', '&gt;=') with a constant-like left operand and a
-    /// non-constant right operand, using an operator that is safe to call with its operands reversed.
+    /// non-constant right operand, using an operator that is safe to call with its operands reversed. Not in expression
+    /// trees: swapping the operands changes the tree the program sees (owner's decision 2026-10-27, trial 58).
     /// </summary>
     public static bool ShouldSwap(BinaryExpressionSyntax binary, SemanticModel model, System.Threading.CancellationToken cancellationToken)
     {
@@ -31,9 +32,10 @@ internal static class ConstantComparisons
             return false;
         }
 
-        return op.MethodKind == MethodKind.BuiltinOperator
-            || (op.MethodKind == MethodKind.UserDefinedOperator
-                && SymbolEqualityComparer.Default.Equals(op.ContainingAssembly, model.Compilation.ObjectType.ContainingAssembly));
+        return (op.MethodKind == MethodKind.BuiltinOperator
+                || (op.MethodKind == MethodKind.UserDefinedOperator
+                    && SymbolEqualityComparer.Default.Equals(op.ContainingAssembly, model.Compilation.ObjectType.ContainingAssembly)))
+            && !NullChecks.IsInExpressionTree(binary, model, cancellationToken);
     }
 
     /// <summary>'1 == x' becomes 'x == 1', and '0 &lt; x' becomes 'x &gt; 0'. Layout and comments stay in place.</summary>
