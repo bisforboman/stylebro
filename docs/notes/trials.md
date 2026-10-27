@@ -1010,9 +1010,13 @@ engines (`.trials/README.md`, "Engine soak").
   failed, BC30456). Only fixers exported for the diagnostics' languages run now (`FixOrder.LanguagesOf`). The old engine was
   right; only the engine comparison and the VB build showed it.
 - Found on CI's SDK 10.0.4xx only: after format baselined a kept finding, the host's `check` still listed it (the old engine
-  didn't). The host's fix steps analyzed with the analyzers that report the step's ids, which left out the baseline's
-  DiagnosticSuppressor; `check` finds kept findings by fixing a copy. `FixOrder.AnalyzersFor` keeps the ids' suppressors.
-  Locally (SDK 10.0.1xx loads no suppressors in `dotnet format`) both engines list it.
+  didn't). Two gaps let the baseline's DiagnosticSuppressor miss it: `AnalysisCache` ran a suppressor only when its own
+  (empty) result wasn't cached, and read each analyzer's diagnostics from the analysis result, before suppressions (it now
+  runs the suppressors asked for with every analysis and keeps what `GetAnalyzerDiagnosticsAsync` leaves); and the fix steps
+  analyzed with only the analyzers reporting the step's ids (`FixOrder.AnalyzersFor` keeps their suppressors). Locally
+  (SDK 10.0.1xx loads no suppressors in `dotnet format`) both engines list it; confirmed on CI.
+- Found by the real-world run (Newtonsoft.Json) on this PR: the fixer-language filter with no diagnostics left for an id
+  filtered out every fixer ("No associated code fix found", format didn't settle); no filter then (`FixOrder.LanguagesOf`).
 - CI lessons: a pwsh step without an explicit `exit 0` ends with the last native command's code; Nerdbank.GitVersioning
   under GITHUB_ACTIONS writes to `$GITHUB_ENV` (the runner clears the CI variables for the fixtures).
   Everything else the first round flagged was the fixtures' own mistakes (a net8.0 test referencing a net10.0-only project,
