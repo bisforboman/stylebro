@@ -4136,6 +4136,43 @@ internal static partial class FormatCommand
         }
     }
 
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, Lazy<string?>> LoadFailures = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// The error that stops <paramref name="fullPath"/>'s design-time build for <paramref name="framework"/> (and
+    /// <paramref name="configuration"/>) before the compiler's command line, as MSBuildWorkspace runs it; null when the command
+    /// line is there. Such a project loads in 'dotnet format' without its build settings, and only a "Warnings were encountered
+    /// while loading the workspace" line says so (trial 57, DapperAOT: Nerdbank.GitVersioning's "build ('-2') must be a
+    /// non-negative value" in a shallow clone; SourceLink's "has no remote" fails no target and the rules run).
+    /// </summary>
+    internal static string? LoadFailure(string fullPath, string framework, string configuration = "") =>
+        LoadFailures.GetOrAdd($"{fullPath}|{framework}|{configuration}", _ => new Lazy<string?>(() =>
+        {
+            try
+            {
+                var output = Capture(
+                    Path.GetDirectoryName(fullPath)!,
+                    [
+                        "msbuild",
+                        fullPath,
+                        .. framework.Length > 0 ? [$"-property:TargetFramework={framework}"] : Array.Empty<string>(),
+                        .. configuration.Length > 0 ? [$"-property:Configuration={SplitConfiguration(configuration).Configuration}", .. PlatformProperty(SplitConfiguration(configuration).Platform)] : Array.Empty<string>(),
+                        "-property:DesignTimeBuild=true",
+                        "-property:BuildingInsideVisualStudio=true",
+                        "-property:SkipCompilerExecution=true",
+                        "-property:ProvideCommandLineArgs=true",
+                        "-target:CoreCompile",
+                        "-getItem:CscCommandLineArgs",
+                        "-nologo",
+                    ]);
+                return null;
+            }
+            catch (ToolException e)
+            {
+                return FirstBuildError(e.Message) ?? "its design-time build failed";
+            }
+        })).Value;
+
     /// <summary>
     /// An MSBuild query (<c>msbuild ... -getProperty</c>) with <c>-restore:false</c>, unless it asks for a restore itself: a
     /// Directory.Build.rsp with <c>/Restore</c> made every query restore (trial 37, MSBuildSdks), and one with
@@ -4434,7 +4471,8 @@ internal static partial class FormatCommand
         var verdicts = new List<string>();
         Action<string> runLog = hidden is null && !verify ? log : line =>
         {
-            if (verdicts.Count > 0 || line.StartsWith("Clean", StringComparison.Ordinal))
+            // With --build a Not-verified verdict waits for the builds too (AfterBuilds).
+            if (verdicts.Count > 0 || line.StartsWith("Clean", StringComparison.Ordinal) || (buildAll && line.StartsWith(NotVerifiedMarker, StringComparison.Ordinal)))
             {
                 verdicts.Add(line);
             }
@@ -4483,7 +4521,9 @@ internal static partial class FormatCommand
         }
 
         var buts = new[] { hidden, verify ? UncheckedLine(root, log) : null, verify ? CSharpierStep.CheckLine(root, log: log) : null, buildLine }.OfType<string>().ToList();
-        verdicts.Select((line, i) => i == 0 && buts.Count > 0 ? "Formatting is clean" + line.Substring("Clean".Length) + " But:" : hidden is null ? line : line.Replace(" changed, clean.", " changed.", StringComparison.Ordinal)).ToList().ForEach(log);
+        verdicts.Select((line, i) => i == 0 && buts.Count > 0 && line.StartsWith("Clean", StringComparison.Ordinal) ? "Formatting is clean" + line.Substring("Clean".Length) + " But:"
+            : line.StartsWith(NotVerifiedMarker, StringComparison.Ordinal) ? (workspaceForBuild is null ? line : AfterBuilds(line, buildLine is null))
+            : hidden is null ? line : line.Replace(" changed, clean.", " changed.", StringComparison.Ordinal)).ToList().ForEach(log);
         foreach (var line in buts)
         {
             log(line);
@@ -5069,6 +5109,11 @@ internal static partial class FormatCommand
         var skipped = new Dictionary<string, SortedSet<string>>(StringComparer.OrdinalIgnoreCase);
         var unsupported = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
         var current = string.Empty;
+
+        // The runs (plan indices; -1 the one run of everything) whose workspace had load warnings: their projects are probed
+        // for a design-time build that failed (LoadFailure) once they're done.
+        var currentRun = -1;
+        var warnedRuns = new HashSet<int>();
         var restoreFailed = false;
         var crashed = false;
         var usageError = false;
@@ -5081,6 +5126,11 @@ internal static partial class FormatCommand
         {
             restoreFailed |= IsRestoreFailure(line);
             crashed |= IsCrash(line);
+            if (line.StartsWith(WorkspaceWarnings, StringComparison.Ordinal))
+            {
+                warnedRuns.Add(currentRun);
+            }
+
             usageError |= line.StartsWith("Unrecognized command or argument", StringComparison.Ordinal);
             if (line.Contains("error NU", StringComparison.Ordinal))
             {
@@ -5678,6 +5728,29 @@ internal static partial class FormatCommand
             .ToList();
         planPhase.Dispose();
 
+        // The projects of the runs with load warnings whose design-time build failed (LoadFailure): one gap per project, naming
+        // the runs ('net10.0', 'net48, Release').
+        List<string> FailedLoads(IEnumerable<(string Framework, string Configuration, string Run, List<string> Projects)> runs)
+        {
+            var several = plan is { Count: > 1 };
+            var failed = runs
+                .SelectMany(r => r.Projects.Select(x => (r.Framework, r.Configuration, r.Run, Project: x)))
+                .AsParallel()
+                .AsOrdered()
+                .WithDegreeOfParallelism(Math.Max(1, Environment.ProcessorCount))
+                .Select(r =>
+                {
+                    var own = projects[r.Project].Frameworks;
+                    var framework = r.Framework.Length == 0 ? (own.Length > 1 ? own[0] : string.Empty) : own.FirstOrDefault(f => NormalizeFramework(f) == r.Framework) ?? r.Framework;
+                    return (r.Run, r.Project, Message: LoadFailure(projects[r.Project].FullPath, framework, r.Configuration));
+                })
+                .Where(r => r.Message is not null)
+                .ToList();
+            return failed.GroupBy(r => r.Project, StringComparer.OrdinalIgnoreCase)
+                .Select(g => LoadFailureGap(Path.GetFileNameWithoutExtension(g.Key), several ? g.Select(r => r.Run).Distinct(StringComparer.Ordinal).ToList() : [], g.First().Message!))
+                .ToList();
+        }
+
         // Lines '#if' makes an if/else body in some runs and not in others (owner's decision 2026-10-16): each run indented them
         // its own way, undoing the run before (NLog never converged). They keep their indentation, and the whitespace findings
         // there don't count.
@@ -5761,6 +5834,7 @@ internal static partial class FormatCommand
 
                 Incomplete(skipped, new Dictionary<string, List<string>>(), unsupported).ForEach(log);
                 gaps.AddRange(SkippedGaps(skipped, new Dictionary<string, List<string>>(), unsupported));
+                gaps.AddRange(FailedLoads(warnedRuns.Contains(-1) ? [(string.Empty, string.Empty, string.Empty, projects.Keys.ToList())] : []));
                 Crashed(projects.Keys);
                 return Done(single);
             }
@@ -5942,6 +6016,7 @@ internal static partial class FormatCommand
             }
 
             current = plan[index].Framework;
+            currentRun = index;
             ran?.Lines.ForEach(Show);
             int code;
             using (ran is null ? PhaseTimes.Measure($"fix: {RunName(index)}") : null)
@@ -6110,6 +6185,7 @@ internal static partial class FormatCommand
             .ToDictionary(g => g.Key, g => g.Select(x => x.Framework).ToList(), StringComparer.OrdinalIgnoreCase);
         Incomplete(skipped, runFor, unsupported).ForEach(log);
         gaps.AddRange(SkippedGaps(skipped, runFor, unsupported));
+        gaps.AddRange(FailedLoads(warnedRuns.Where(i => i >= 0).Order().Select(i => (plan[i].Framework, plan[i].Configuration, RunName(i), plan[i].Projects))));
         return Done(exit);
     }
 

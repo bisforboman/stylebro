@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "command": "format",
+  "previewOf": null,
+  "path": "/home/user/w57/DapperAOT/default2",
+  "write": false,
+  "settings": [],
+  "conventions": [],
+  "sonar": null,
+  "agentsMd": null,
+  "runs": [
+    {
+      "run": 1,
+      "filesChanged": [],
+      "changesPerRule": {}
+    }
+  ],
+  "changesPerRule": {},
+  "filesPerRule": null,
+  "keptFindings": [
+    {
+      "path": "src/Dapper.AOT.Analyzers/CodeAnalysis/GlobalOptions.cs",
+      "line": 11,
+      "column": 29,
+      "rule": "BRO1308",
+      "reason": "UsedInProjectNotLoaded",
+      "reasonText": "code this format run doesn't load (another run's project, or a file outside the loaded projects) uses the name, so the rename would miss that use",
+      "message": "Rename 'GlobalOptions_DapperSqlSyntax' to 'GlobalOptionsDapperSqlSyntax'"
+    },
+    {
+      "path": "src/Dapper.AOT.Analyzers/CodeAnalysis/GlobalOptions.cs",
+      "line": 12,
+      "column": 29,
+      "rule": "BRO1308",
+      "reason": "UsedInProjectNotLoaded",
+      "reasonText": "code this format run doesn't load (another run's project, or a file outside the loaded projects) uses the name, so the rename would miss that use",
+      "message": "Rename 'GlobalOptions_DapperDebugSqlParseInputFlags' to 'GlobalOptionsDapperDebugSqlParseInputFlags'"
+    },
+    {
+      "path": "src/Dapper.AOT.Analyzers/CodeAnalysis/GlobalOptions.cs",
+      "line": 20,
+      "column": 29,
+      "rule": "BRO1308",
+      "reason": "UsedInProjectNotLoaded",
+      "reasonText": "code this format run doesn't load (another run's project, or a file outside the loaded projects) uses the name, so the rename would miss that use",
+      "message": "Rename 'ProjectProperties_EnableAotAnalyzer' to 'ProjectPropertiesEnableAotAnalyzer'"
+    }
+  ],
+  "patch": null,
+  "clean": true,
+  "exitCode": 0,
+  "notChecked": [
+    "xunit.analyzers' rules: xunit.analyzers 1.27.0's fixes have no Fix All, so 'dotnet format' can't apply or check them (a note: the build still reports their warnings; the verdict doesn't count them)",
+    "IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)"
+  ]
+}

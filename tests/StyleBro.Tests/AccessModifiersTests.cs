@@ -234,6 +234,65 @@ public class AccessModifiersTests
         """);
 
     [Fact]
+    public Task ModifiersInSkippedIfBranches_StayAsTheyAre() => VerifyFixAsync(
+        """
+        namespace N
+        {
+        #if NOT_DEFINED
+            file
+        #endif
+            static class Helpers
+            {
+            }
+
+            static
+        #if NOT_DEFINED
+            public
+        #endif
+            class Mixed
+            {
+            }
+
+        #if NOT_DEFINED
+            class Skipped
+            {
+            }
+        #endif
+            class {|BRO1404:Kept|}
+            {
+            }
+        }
+        """,
+        """
+        namespace N
+        {
+        #if NOT_DEFINED
+            file
+        #endif
+            static class Helpers
+            {
+            }
+
+            static
+        #if NOT_DEFINED
+            public
+        #endif
+            class Mixed
+            {
+            }
+
+        #if NOT_DEFINED
+            class Skipped
+            {
+            }
+        #endif
+            internal class Kept
+            {
+            }
+        }
+        """);
+
+    [Fact]
     public Task InterfaceMembers_NeedCSharp8_InEveryCopyOfTheFile()
     {
         // The file is compiled with C# 7.3 in another project too (net472's default): a modifier there doesn't compile.

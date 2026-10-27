@@ -1,0 +1,1269 @@
+diff --git a/Src/Newtonsoft.Json.Bson.Tests/BsonDataReaderAsyncTests.cs b/Src/Newtonsoft.Json.Bson.Tests/BsonDataReaderAsyncTests.cs
+index 2170f07..5d1e899 100644
+--- a/Src/Newtonsoft.Json.Bson.Tests/BsonDataReaderAsyncTests.cs
++++ b/Src/Newtonsoft.Json.Bson.Tests/BsonDataReaderAsyncTests.cs
+@@ -559,7 +559,7 @@ public async Task ReadRegexAsync()
+ 
+             Assert.IsTrue(await reader.ReadAsync());
+             Assert.AreEqual(JsonToken.String, reader.TokenType);
+-            Assert.AreEqual(@"/test/gim", reader.Value);
++            Assert.AreEqual("/test/gim", reader.Value);
+             Assert.AreEqual(typeof(string), reader.ValueType);
+ 
+             Assert.IsTrue(await reader.ReadAsync());
+@@ -588,7 +588,7 @@ public async Task ReadCodeAsync()
+ 
+             Assert.IsTrue(await reader.ReadAsync());
+             Assert.AreEqual(JsonToken.String, reader.TokenType);
+-            Assert.AreEqual(@"I am code!", reader.Value);
++            Assert.AreEqual("I am code!", reader.Value);
+             Assert.AreEqual(typeof(string), reader.ValueType);
+ 
+             Assert.IsTrue(await reader.ReadAsync());
+@@ -965,9 +965,9 @@ private async Task<string> WriteAndReadStringPropertyNameAsync(string val)
+         public async Task TestReadLenStringValueShortTripleByteAsync()
+         {
+             StringBuilder sb = new StringBuilder();
+-            //sb.Append('1',127); //first char of euro at the end of the boundry.
+-            //sb.Append(euro, 5);
+-            //sb.Append('1',128);
++            // sb.Append('1',127); //first char of euro at the end of the boundry.
++            // sb.Append(euro, 5);
++            // sb.Append('1',128);
+             sb.Append(Euro);
+ 
+             string expected = sb.ToString();
+@@ -978,13 +978,13 @@ public async Task TestReadLenStringValueShortTripleByteAsync()
+         public async Task TestReadLenStringValueTripleByteCharBufferBoundry0Async()
+         {
+             StringBuilder sb = new StringBuilder();
+-            sb.Append('1', 127); //first char of euro at the end of the boundry.
++            sb.Append('1', 127); // first char of euro at the end of the boundry.
+             sb.Append(Euro, 5);
+             sb.Append('1', 128);
+             sb.Append(Euro);
+ 
+             string expected = sb.ToString();
+-            Assert.AreEqual(expected, await  WriteAndReadStringValueAsync(expected));
++            Assert.AreEqual(expected, await WriteAndReadStringValueAsync(expected));
+         }
+ 
+         [Test]
+@@ -992,12 +992,12 @@ public async Task TestReadLenStringValueTripleByteCharBufferBoundry1Async()
+         {
+             StringBuilder sb = new StringBuilder();
+             sb.Append('1', 126);
+-            sb.Append(Euro, 5); //middle char of euro at the end of the boundry.
++            sb.Append(Euro, 5); // middle char of euro at the end of the boundry.
+             sb.Append('1', 128);
+             sb.Append(Euro);
+ 
+             string expected = sb.ToString();
+-            string result = await  WriteAndReadStringValueAsync(expected);
++            string result = await WriteAndReadStringValueAsync(expected);
+             Assert.AreEqual(expected, result);
+         }
+ 
+@@ -1005,10 +1005,10 @@ public async Task TestReadLenStringValueTripleByteCharBufferBoundry1Async()
+         public async Task TestReadLenStringValueTripleByteCharOneAsync()
+         {
+             StringBuilder sb = new StringBuilder();
+-            sb.Append(Euro, 1); //Just one triple byte char in the string.
++            sb.Append(Euro, 1); // Just one triple byte char in the string.
+ 
+             string expected = sb.ToString();
+-            Assert.AreEqual(expected, await  WriteAndReadStringValueAsync(expected));
++            Assert.AreEqual(expected, await WriteAndReadStringValueAsync(expected));
+         }
+ 
+         [Test]
+@@ -1016,19 +1016,19 @@ public async Task TestReadLenStringValueTripleByteCharBufferBoundry2Async()
+         {
+             StringBuilder sb = new StringBuilder();
+             sb.Append('1', 125);
+-            sb.Append(Euro, 5); //last char of the eruo at the end of the boundry.
++            sb.Append(Euro, 5); // last char of the eruo at the end of the boundry.
+             sb.Append('1', 128);
+             sb.Append(Euro);
+ 
+             string expected = sb.ToString();
+-            Assert.AreEqual(expected, await  WriteAndReadStringValueAsync(expected));
++            Assert.AreEqual(expected, await WriteAndReadStringValueAsync(expected));
+         }
+ 
+         [Test]
+         public async Task TestReadStringValueAsync()
+         {
+             string expected = "test";
+-            Assert.AreEqual(expected, await  WriteAndReadStringValueAsync(expected));
++            Assert.AreEqual(expected, await WriteAndReadStringValueAsync(expected));
+         }
+ 
+         [Test]
+@@ -1037,16 +1037,16 @@ public async Task TestReadStringValueLongAsync()
+             StringBuilder sb = new StringBuilder();
+             sb.Append('t', 150);
+             string expected = sb.ToString();
+-            Assert.AreEqual(expected, await  WriteAndReadStringValueAsync(expected));
++            Assert.AreEqual(expected, await WriteAndReadStringValueAsync(expected));
+         }
+ 
+         [Test]
+         public async Task TestReadStringPropertyNameShortTripleByteAsync()
+         {
+             StringBuilder sb = new StringBuilder();
+-            //sb.Append('1',127); //first char of euro at the end of the boundry.
+-            //sb.Append(euro, 5);
+-            //sb.Append('1',128);
++            // sb.Append('1',127); //first char of euro at the end of the boundry.
++            // sb.Append(euro, 5);
++            // sb.Append('1',128);
+             sb.Append(Euro);
+ 
+             string expected = sb.ToString();
+@@ -1057,7 +1057,7 @@ public async Task TestReadStringPropertyNameShortTripleByteAsync()
+         public async Task TestReadStringPropertyNameTripleByteCharBufferBoundry0Async()
+         {
+             StringBuilder sb = new StringBuilder();
+-            sb.Append('1', 127); //first char of euro at the end of the boundry.
++            sb.Append('1', 127); // first char of euro at the end of the boundry.
+             sb.Append(Euro, 5);
+             sb.Append('1', 128);
+             sb.Append(Euro);
+@@ -1072,7 +1072,7 @@ public async Task TestReadStringPropertyNameTripleByteCharBufferBoundry1Async()
+         {
+             StringBuilder sb = new StringBuilder();
+             sb.Append('1', 126);
+-            sb.Append(Euro, 5); //middle char of euro at the end of the boundry.
++            sb.Append(Euro, 5); // middle char of euro at the end of the boundry.
+             sb.Append('1', 128);
+             sb.Append(Euro);
+ 
+@@ -1084,7 +1084,7 @@ public async Task TestReadStringPropertyNameTripleByteCharBufferBoundry1Async()
+         public async Task TestReadStringPropertyNameTripleByteCharOneAsync()
+         {
+             StringBuilder sb = new StringBuilder();
+-            sb.Append(Euro, 1); //Just one triple byte char in the string.
++            sb.Append(Euro, 1); // Just one triple byte char in the string.
+ 
+             string expected = sb.ToString();
+             Assert.AreEqual(expected, await WriteAndReadStringPropertyNameAsync(expected));
+@@ -1095,7 +1095,7 @@ public async Task TestReadStringPropertyNameTripleByteCharBufferBoundry2Async()
+         {
+             StringBuilder sb = new StringBuilder();
+             sb.Append('1', 125);
+-            sb.Append(Euro, 5); //last char of the eruo at the end of the boundry.
++            sb.Append(Euro, 5); // last char of the eruo at the end of the boundry.
+             sb.Append('1', 128);
+             sb.Append(Euro);
+ 
+diff --git a/Src/Newtonsoft.Json.Bson.Tests/BsonDataReaderTests.cs b/Src/Newtonsoft.Json.Bson.Tests/BsonDataReaderTests.cs
+index 7a62e31..46b3d4e 100644
+--- a/Src/Newtonsoft.Json.Bson.Tests/BsonDataReaderTests.cs
++++ b/Src/Newtonsoft.Json.Bson.Tests/BsonDataReaderTests.cs
+@@ -57,7 +57,7 @@ public class BsonDataReaderTests : TestFixtureBase
+         [Test]
+         public void DeserializeLargeBsonObject()
+         {
+-            byte[] data = System.IO.File.ReadAllBytes(ResolvePath(@"SpaceShipV2.bson"));
++            byte[] data = System.IO.File.ReadAllBytes(ResolvePath("SpaceShipV2.bson"));
+ 
+             MemoryStream ms = new MemoryStream(data);
+             BsonDataReader reader = new BsonDataReader(ms);
+@@ -721,7 +721,7 @@ public void ReadRegex()
+ 
+             Assert.IsTrue(reader.Read());
+             Assert.AreEqual(JsonToken.String, reader.TokenType);
+-            Assert.AreEqual(@"/test/gim", reader.Value);
++            Assert.AreEqual("/test/gim", reader.Value);
+             Assert.AreEqual(typeof(string), reader.ValueType);
+ 
+             Assert.IsTrue(reader.Read());
+@@ -750,7 +750,7 @@ public void ReadCode()
+ 
+             Assert.IsTrue(reader.Read());
+             Assert.AreEqual(JsonToken.String, reader.TokenType);
+-            Assert.AreEqual(@"I am code!", reader.Value);
++            Assert.AreEqual("I am code!", reader.Value);
+             Assert.AreEqual(typeof(string), reader.ValueType);
+ 
+             Assert.IsTrue(reader.Read());
+@@ -1164,9 +1164,9 @@ private string WriteAndReadStringPropertyName(string val)
+         public void TestReadLenStringValueShortTripleByte()
+         {
+             StringBuilder sb = new StringBuilder();
+-            //sb.Append('1',127); //first char of euro at the end of the boundry.
+-            //sb.Append(euro, 5);
+-            //sb.Append('1',128);
++            // sb.Append('1',127); //first char of euro at the end of the boundry.
++            // sb.Append(euro, 5);
++            // sb.Append('1',128);
+             sb.Append(Euro);
+ 
+             string expected = sb.ToString();
+@@ -1177,7 +1177,7 @@ public void TestReadLenStringValueShortTripleByte()
+         public void TestReadLenStringValueTripleByteCharBufferBoundry0()
+         {
+             StringBuilder sb = new StringBuilder();
+-            sb.Append('1', 127); //first char of euro at the end of the boundry.
++            sb.Append('1', 127); // first char of euro at the end of the boundry.
+             sb.Append(Euro, 5);
+             sb.Append('1', 128);
+             sb.Append(Euro);
+@@ -1191,7 +1191,7 @@ public void TestReadLenStringValueTripleByteCharBufferBoundry1()
+         {
+             StringBuilder sb = new StringBuilder();
+             sb.Append('1', 126);
+-            sb.Append(Euro, 5); //middle char of euro at the end of the boundry.
++            sb.Append(Euro, 5); // middle char of euro at the end of the boundry.
+             sb.Append('1', 128);
+             sb.Append(Euro);
+ 
+@@ -1204,7 +1204,7 @@ public void TestReadLenStringValueTripleByteCharBufferBoundry1()
+         public void TestReadLenStringValueTripleByteCharOne()
+         {
+             StringBuilder sb = new StringBuilder();
+-            sb.Append(Euro, 1); //Just one triple byte char in the string.
++            sb.Append(Euro, 1); // Just one triple byte char in the string.
+ 
+             string expected = sb.ToString();
+             Assert.AreEqual(expected, WriteAndReadStringValue(expected));
+@@ -1215,7 +1215,7 @@ public void TestReadLenStringValueTripleByteCharBufferBoundry2()
+         {
+             StringBuilder sb = new StringBuilder();
+             sb.Append('1', 125);
+-            sb.Append(Euro, 5); //last char of the eruo at the end of the boundry.
++            sb.Append(Euro, 5); // last char of the eruo at the end of the boundry.
+             sb.Append('1', 128);
+             sb.Append(Euro);
+ 
+@@ -1243,9 +1243,9 @@ public void TestReadStringValueLong()
+         public void TestReadStringPropertyNameShortTripleByte()
+         {
+             StringBuilder sb = new StringBuilder();
+-            //sb.Append('1',127); //first char of euro at the end of the boundry.
+-            //sb.Append(euro, 5);
+-            //sb.Append('1',128);
++            // sb.Append('1',127); //first char of euro at the end of the boundry.
++            // sb.Append(euro, 5);
++            // sb.Append('1',128);
+             sb.Append(Euro);
+ 
+             string expected = sb.ToString();
+@@ -1256,7 +1256,7 @@ public void TestReadStringPropertyNameShortTripleByte()
+         public void TestReadStringPropertyNameTripleByteCharBufferBoundry0()
+         {
+             StringBuilder sb = new StringBuilder();
+-            sb.Append('1', 127); //first char of euro at the end of the boundry.
++            sb.Append('1', 127); // first char of euro at the end of the boundry.
+             sb.Append(Euro, 5);
+             sb.Append('1', 128);
+             sb.Append(Euro);
+@@ -1271,7 +1271,7 @@ public void TestReadStringPropertyNameTripleByteCharBufferBoundry1()
+         {
+             StringBuilder sb = new StringBuilder();
+             sb.Append('1', 126);
+-            sb.Append(Euro, 5); //middle char of euro at the end of the boundry.
++            sb.Append(Euro, 5); // middle char of euro at the end of the boundry.
+             sb.Append('1', 128);
+             sb.Append(Euro);
+ 
+@@ -1283,7 +1283,7 @@ public void TestReadStringPropertyNameTripleByteCharBufferBoundry1()
+         public void TestReadStringPropertyNameTripleByteCharOne()
+         {
+             StringBuilder sb = new StringBuilder();
+-            sb.Append(Euro, 1); //Just one triple byte char in the string.
++            sb.Append(Euro, 1); // Just one triple byte char in the string.
+ 
+             string expected = sb.ToString();
+             Assert.AreEqual(expected, WriteAndReadStringPropertyName(expected));
+@@ -1294,7 +1294,7 @@ public void TestReadStringPropertyNameTripleByteCharBufferBoundry2()
+         {
+             StringBuilder sb = new StringBuilder();
+             sb.Append('1', 125);
+-            sb.Append(Euro, 5); //last char of the eruo at the end of the boundry.
++            sb.Append(Euro, 5); // last char of the eruo at the end of the boundry.
+             sb.Append('1', 128);
+             sb.Append(Euro);
+ 
+@@ -1514,7 +1514,7 @@ public void DeserializeByteArrayWithTypeNameHandling()
+         [Test]
+         public void Utf8Text()
+         {
+-            string badText = System.IO.File.ReadAllText(ResolvePath(@"PoisonText.txt"));
++            string badText = System.IO.File.ReadAllText(ResolvePath("PoisonText.txt"));
+             var j = new JObject();
+             j["test"] = badText;
+ 
+@@ -1592,12 +1592,12 @@ public void DeserializeRegexBson()
+             Assert.AreEqual(RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase, c.Regex.Options);
+         }
+ 
+-        class Zoo
++        private class Zoo
+         {
+             public List<Animal> Animals { get; set; }
+         }
+ 
+-        class Animal
++        private class Animal
+         {
+             public Animal(string name)
+             {
+@@ -1607,7 +1607,7 @@ public Animal(string name)
+             public string Name { get; private set; }
+         }
+ 
+-        class Dog : Animal
++        private class Dog : Animal
+         {
+             public Dog(string name)
+                 : base(name)
+@@ -1615,7 +1615,7 @@ public Dog(string name)
+             }
+         }
+ 
+-        class Cat : Animal
++        private class Cat : Animal
+         {
+             public Cat(string name)
+                 : base(name)
+diff --git a/Src/Newtonsoft.Json.Bson.Tests/BsonDataWriterAsyncTests.cs b/Src/Newtonsoft.Json.Bson.Tests/BsonDataWriterAsyncTests.cs
+index d8d736b..791feb3 100644
+--- a/Src/Newtonsoft.Json.Bson.Tests/BsonDataWriterAsyncTests.cs
++++ b/Src/Newtonsoft.Json.Bson.Tests/BsonDataWriterAsyncTests.cs
+@@ -496,7 +496,7 @@ public async Task DateTimeZoneHandlingAsync()
+             await writer.WriteValueAsync(new DateTime(2000, 1, 1, 1, 1, 1, DateTimeKind.Unspecified));
+             await writer.WriteEndArrayAsync();
+ 
+-            Assert.AreEqual("10-00-00-00-09-30-00-C8-88-07-6B-DC-00-00-00-00", (BitConverter.ToString(ms.ToArray())));
++            Assert.AreEqual("10-00-00-00-09-30-00-C8-88-07-6B-DC-00-00-00-00", BitConverter.ToString(ms.ToArray()));
+         }
+ 
+ #if !PORTABLE || NETSTANDARD1_3 || NETSTANDARD2_0
+diff --git a/Src/Newtonsoft.Json.Bson.Tests/BsonDataWriterTests.cs b/Src/Newtonsoft.Json.Bson.Tests/BsonDataWriterTests.cs
+index 36f042f..15e937e 100644
+--- a/Src/Newtonsoft.Json.Bson.Tests/BsonDataWriterTests.cs
++++ b/Src/Newtonsoft.Json.Bson.Tests/BsonDataWriterTests.cs
+@@ -702,7 +702,7 @@ public void DateTimeZoneHandling()
+             writer.WriteValue(new DateTime(2000, 1, 1, 1, 1, 1, DateTimeKind.Unspecified));
+             writer.WriteEndArray();
+ 
+-            Assert.AreEqual("10-00-00-00-09-30-00-C8-88-07-6B-DC-00-00-00-00", (BitConverter.ToString(ms.ToArray())));
++            Assert.AreEqual("10-00-00-00-09-30-00-C8-88-07-6B-DC-00-00-00-00", BitConverter.ToString(ms.ToArray()));
+         }
+ 
+         public class RegexTestClass
+@@ -903,7 +903,7 @@ public void WriteByteArray()
+ 
+             writer.WriteStartObject();
+             writer.WritePropertyName("array0");
+-            writer.WriteValue(new byte[] {0, 1, 2, 3, 4, 5, 6, 7});
++            writer.WriteValue(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 });
+             writer.WritePropertyName("array1");
+             writer.WriteValue(default(byte[]));
+             writer.WriteEndObject();
+@@ -914,7 +914,7 @@ public void WriteByteArray()
+             Assert.AreEqual(JsonToken.StartObject, reader.TokenType);
+             Assert.IsTrue(reader.Read());
+             Assert.AreEqual(JsonToken.PropertyName, reader.TokenType);
+-            Assert.AreEqual(new byte[] {0, 1, 2, 3, 4, 5, 6, 7}, reader.ReadAsBytes());
++            Assert.AreEqual(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 }, reader.ReadAsBytes());
+             Assert.IsTrue(reader.Read());
+             Assert.AreEqual(JsonToken.PropertyName, reader.TokenType);
+             Assert.IsNull(reader.ReadAsBytes());
+@@ -930,7 +930,7 @@ public void WriteEndOnProperty()
+             writer.WritePropertyName("Blah");
+             writer.WriteEnd();
+ 
+-            Assert.AreEqual("0B-00-00-00-0A-42-6C-61-68-00-00", (BitConverter.ToString(ms.ToArray())));
++            Assert.AreEqual("0B-00-00-00-0A-42-6C-61-68-00-00", BitConverter.ToString(ms.ToArray()));
+         }
+ 
+         [Test]
+@@ -943,7 +943,7 @@ public void WriteEndOnProperty_Close()
+             writer.WritePropertyName("Blah");
+             writer.Close();
+ 
+-            Assert.AreEqual("0B-00-00-00-0A-42-6C-61-68-00-00", (BitConverter.ToString(ms.ToArray())));
++            Assert.AreEqual("0B-00-00-00-0A-42-6C-61-68-00-00", BitConverter.ToString(ms.ToArray()));
+         }
+ 
+         [Test]
+@@ -956,7 +956,7 @@ public void WriteEndOnProperty_Dispose()
+                 writer.WritePropertyName("Blah");
+             }
+ 
+-            Assert.AreEqual("0B-00-00-00-0A-42-6C-61-68-00-00", (BitConverter.ToString(ms.ToArray())));
++            Assert.AreEqual("0B-00-00-00-0A-42-6C-61-68-00-00", BitConverter.ToString(ms.ToArray()));
+         }
+ 
+         [Test]
+@@ -974,7 +974,7 @@ public void AutoCompleteOnClose_False()
+             }
+ 
+             // nothing is written because a BSON document needs to be completed before it can be written
+-            Assert.AreEqual(string.Empty, (BitConverter.ToString(ms.ToArray())));
++            Assert.AreEqual(string.Empty, BitConverter.ToString(ms.ToArray()));
+         }
+ #endif
+     }
+diff --git a/Src/Newtonsoft.Json.Bson.Tests/TestFixtureBase.cs b/Src/Newtonsoft.Json.Bson.Tests/TestFixtureBase.cs
+index 5a63e9a..836abba 100644
+--- a/Src/Newtonsoft.Json.Bson.Tests/TestFixtureBase.cs
++++ b/Src/Newtonsoft.Json.Bson.Tests/TestFixtureBase.cs
+@@ -277,10 +277,9 @@ protected void TestSetup()
+ #endif
+         {
+ #if !(DNXCORE50)
+-            //CultureInfo turkey = CultureInfo.CreateSpecificCulture("tr");
+-            //Thread.CurrentThread.CurrentCulture = turkey;
+-            //Thread.CurrentThread.CurrentUICulture = turkey;
+-
++            // CultureInfo turkey = CultureInfo.CreateSpecificCulture("tr");
++            // Thread.CurrentThread.CurrentCulture = turkey;
++            // Thread.CurrentThread.CurrentUICulture = turkey;
+             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+ #endif
+diff --git a/Src/Newtonsoft.Json.Bson.Tests/TestObjects/Product.cs b/Src/Newtonsoft.Json.Bson.Tests/TestObjects/Product.cs
+index bc7a5be..a9153a9 100644
+--- a/Src/Newtonsoft.Json.Bson.Tests/TestObjects/Product.cs
++++ b/Src/Newtonsoft.Json.Bson.Tests/TestObjects/Product.cs
+@@ -40,7 +40,7 @@ public override bool Equals(object obj)
+             {
+                 Product p = (Product)obj;
+ 
+-                return (p.Name == Name && p.ExpiryDate == ExpiryDate && p.Price == Price);
++                return p.Name == Name && p.ExpiryDate == ExpiryDate && p.Price == Price;
+             }
+ 
+             return base.Equals(obj);
+diff --git a/Src/Newtonsoft.Json.Bson/AsyncBinaryReader.cs b/Src/Newtonsoft.Json.Bson/AsyncBinaryReader.cs
+index 4b4e8a3..f9e9077 100644
+--- a/Src/Newtonsoft.Json.Bson/AsyncBinaryReader.cs
++++ b/Src/Newtonsoft.Json.Bson/AsyncBinaryReader.cs
+@@ -39,7 +39,8 @@ internal class AsyncBinaryReader : BinaryReader
+ 
+         private byte[] Buffer => _buffer ?? (_buffer = new byte[16]);
+ 
+-        public AsyncBinaryReader(Stream input) : base(input)
++        public AsyncBinaryReader(Stream input)
++            : base(input)
+         {
+         }
+ 
+@@ -140,7 +141,9 @@ public async Task<byte[]> ReadBytesAsync(int count, CancellationToken cancellati
+             {
+                 int n = await stream.ReadAsync(result, numRead, count, cancellationToken).ConfigureAwait(false);
+                 if (n == 0)
++                {
+                     break;
++                }
+                 numRead += n;
+                 count -= n;
+             } while (count > 0);
+diff --git a/Src/Newtonsoft.Json.Bson/BsonBinaryWriter.cs b/Src/Newtonsoft.Json.Bson/BsonBinaryWriter.cs
+index c9289bb..a44592d 100644
+--- a/Src/Newtonsoft.Json.Bson/BsonBinaryWriter.cs
++++ b/Src/Newtonsoft.Json.Bson/BsonBinaryWriter.cs
+@@ -86,7 +86,7 @@ private void WriteTokenInternal(BsonToken t)
+                     }
+                     _writer.Write((byte)0);
+                 }
+-                    break;
++                break;
+                 case BsonType.Array:
+                 {
+                     BsonArray value = (BsonArray)t;
+@@ -101,37 +101,37 @@ private void WriteTokenInternal(BsonToken t)
+                     }
+                     _writer.Write((byte)0);
+                 }
+-                    break;
++                break;
+                 case BsonType.Integer:
+                 {
+                     BsonValue value = (BsonValue)t;
+                     _writer.Write(Convert.ToInt32(value.Value, CultureInfo.InvariantCulture));
+                 }
+-                    break;
++                break;
+                 case BsonType.Long:
+                 {
+                     BsonValue value = (BsonValue)t;
+                     _writer.Write(Convert.ToInt64(value.Value, CultureInfo.InvariantCulture));
+                 }
+-                    break;
++                break;
+                 case BsonType.Number:
+                 {
+                     BsonValue value = (BsonValue)t;
+                     _writer.Write(Convert.ToDouble(value.Value, CultureInfo.InvariantCulture));
+                 }
+-                    break;
++                break;
+                 case BsonType.String:
+                 {
+                     BsonString value = (BsonString)t;
+                     WriteString((string)value.Value, value.ByteCount, value.CalculatedSize - 4);
+                 }
+-                    break;
++                break;
+                 case BsonType.Boolean:
+                 {
+                     BsonBoolean value = (BsonBoolean)t;
+                     _writer.Write((bool)value.Value);
+                 }
+-                    break;
++                break;
+                 case BsonType.Null:
+                 case BsonType.Undefined:
+                     break;
+@@ -140,7 +140,7 @@ private void WriteTokenInternal(BsonToken t)
+                     BsonValue value = (BsonValue)t;
+                     _writer.Write(TicksFromDateObject(value.Value));
+                 }
+-                    break;
++                break;
+                 case BsonType.Binary:
+                 {
+                     BsonBinary value = (BsonBinary)t;
+@@ -150,7 +150,7 @@ private void WriteTokenInternal(BsonToken t)
+                     _writer.Write((byte)value.BinaryType);
+                     _writer.Write(data);
+                 }
+-                    break;
++                break;
+                 case BsonType.Oid:
+                 {
+                     BsonValue value = (BsonValue)t;
+@@ -158,7 +158,7 @@ private void WriteTokenInternal(BsonToken t)
+                     byte[] data = (byte[])value.Value;
+                     _writer.Write(data);
+                 }
+-                    break;
++                break;
+                 case BsonType.Regex:
+                 {
+                     BsonRegex value = (BsonRegex)t;
+@@ -166,7 +166,7 @@ private void WriteTokenInternal(BsonToken t)
+                     WriteString((string)value.Pattern.Value, value.Pattern.ByteCount, null);
+                     WriteString((string)value.Options.Value, value.Options.ByteCount, null);
+                 }
+-                    break;
++                break;
+                 default:
+                     throw new ArgumentOutOfRangeException(nameof(t), "Unexpected token when writing BSON: {0}".FormatWith(CultureInfo.InvariantCulture, t.Type));
+             }
+@@ -235,7 +235,7 @@ private int CalculateSize(int stringByteCount)
+ 
+         private int CalculateSizeWithLength(int stringByteCount, bool includeSize)
+         {
+-            int baseSize = (includeSize)
++            int baseSize = includeSize
+                 ? 5 // size bytes + terminator
+                 : 1; // terminator
+ 
+diff --git a/Src/Newtonsoft.Json.Bson/BsonDataObjectId.cs b/Src/Newtonsoft.Json.Bson/BsonDataObjectId.cs
+index 702825d..036c426 100644
+--- a/Src/Newtonsoft.Json.Bson/BsonDataObjectId.cs
++++ b/Src/Newtonsoft.Json.Bson/BsonDataObjectId.cs
+@@ -34,7 +34,7 @@ namespace Newtonsoft.Json.Bson
+     public class BsonDataObjectId
+     {
+         /// <summary>
+-        /// Gets or sets the value of the Oid.
++        /// Gets the value of the Oid.
+         /// </summary>
+         /// <value>The value of the Oid.</value>
+         public byte[] Value { get; private set; }
+diff --git a/Src/Newtonsoft.Json.Bson/BsonDataReader.Async.cs b/Src/Newtonsoft.Json.Bson/BsonDataReader.Async.cs
+index 953da09..be31f3f 100644
+--- a/Src/Newtonsoft.Json.Bson/BsonDataReader.Async.cs
++++ b/Src/Newtonsoft.Json.Bson/BsonDataReader.Async.cs
+@@ -51,7 +51,7 @@ private Task<string> ReadElementAsync(CancellationToken cancellationToken)
+                 _currentElementType = typeReadTask.Result;
+                 return ReadStringAsync(cancellationToken);
+             }
+-            
++
+             return ReadElementAsync(typeReadTask, cancellationToken);
+         }
+ 
+@@ -357,7 +357,7 @@ private async Task ReadTypeTrulyAsync(BsonType type, CancellationToken cancellat
+                     PushContext(newContext);
+                     newContext.Length = await ReadInt32Async(cancellationToken).ConfigureAwait(false);
+                 }
+-                    break;
++                break;
+                 case BsonType.Array:
+                 {
+                     SetToken(JsonToken.StartArray);
+@@ -366,7 +366,7 @@ private async Task ReadTypeTrulyAsync(BsonType type, CancellationToken cancellat
+                     PushContext(newContext);
+                     newContext.Length = await ReadInt32Async(cancellationToken).ConfigureAwait(false);
+                 }
+-                    break;
++                break;
+                 case BsonType.Binary:
+                     Tuple<byte[], BsonBinaryType> data = await ReadBinaryAsync(cancellationToken).ConfigureAwait(false);
+ 
+@@ -399,7 +399,7 @@ private async Task ReadTypeTrulyAsync(BsonType type, CancellationToken cancellat
+                     string expression = await ReadStringAsync(cancellationToken).ConfigureAwait(false);
+                     string modifiers = await ReadStringAsync(cancellationToken).ConfigureAwait(false);
+ 
+-                    SetToken(JsonToken.String, @"/" + expression + @"/" + modifiers);
++                    SetToken(JsonToken.String, "/" + expression + "/" + modifiers);
+                     break;
+                 case BsonType.Code:
+                     SetToken(JsonToken.String, await ReadLengthStringAsync(cancellationToken).ConfigureAwait(false));
+@@ -692,45 +692,45 @@ private async Task<byte[]> DoReadAsBytesAsync(CancellationToken cancellationToke
+             switch (t)
+             {
+                 case JsonToken.StartObject:
+-                    {
+-                        await ReadIntoWrappedTypeObjectAsync(cancellationToken).ConfigureAwait(false);
+-
+-                        byte[] data = await ReadAsBytesAsync(cancellationToken).ConfigureAwait(false);
+-                        await ReaderReadAndAssertAsync(cancellationToken).ConfigureAwait(false);
++                {
++                    await ReadIntoWrappedTypeObjectAsync(cancellationToken).ConfigureAwait(false);
+ 
+-                        if (TokenType != JsonToken.EndObject)
+-                        {
+-                            throw ExceptionUtils.CreateJsonReaderException(this, "Error reading bytes. Unexpected token: {0}.".FormatWith(CultureInfo.InvariantCulture, TokenType));
+-                        }
++                    byte[] data = await ReadAsBytesAsync(cancellationToken).ConfigureAwait(false);
++                    await ReaderReadAndAssertAsync(cancellationToken).ConfigureAwait(false);
+ 
+-                        SetToken(JsonToken.Bytes, data, false);
+-                        return data;
++                    if (TokenType != JsonToken.EndObject)
++                    {
++                        throw ExceptionUtils.CreateJsonReaderException(this, "Error reading bytes. Unexpected token: {0}.".FormatWith(CultureInfo.InvariantCulture, TokenType));
+                     }
++
++                    SetToken(JsonToken.Bytes, data, false);
++                    return data;
++                }
+                 case JsonToken.String:
+-                    {
+-                        // attempt to convert possible base 64 or GUID string to bytes
+-                        // GUID has to have format 00000000-0000-0000-0000-000000000000
+-                        string s = (string)Value;
++                {
++                    // attempt to convert possible base 64 or GUID string to bytes
++                    // GUID has to have format 00000000-0000-0000-0000-000000000000
++                    string s = (string)Value;
+ 
+-                        byte[] data;
++                    byte[] data;
+ 
+-                        Guid g;
+-                        if (s.Length == 0)
+-                        {
+-                            data = CollectionUtils.ArrayEmpty<byte>();
+-                        }
+-                        else if (ConvertUtils.TryConvertGuid(s, out g))
+-                        {
+-                            data = g.ToByteArray();
+-                        }
+-                        else
+-                        {
+-                            data = Convert.FromBase64String(s);
+-                        }
+-
+-                        SetToken(JsonToken.Bytes, data, false);
+-                        return data;
++                    Guid g;
++                    if (s.Length == 0)
++                    {
++                        data = CollectionUtils.ArrayEmpty<byte>();
++                    }
++                    else if (ConvertUtils.TryConvertGuid(s, out g))
++                    {
++                        data = g.ToByteArray();
++                    }
++                    else
++                    {
++                        data = Convert.FromBase64String(s);
+                     }
++
++                    SetToken(JsonToken.Bytes, data, false);
++                    return data;
++                }
+                 case JsonToken.None:
+                 case JsonToken.Null:
+                 case JsonToken.EndArray:
+diff --git a/Src/Newtonsoft.Json.Bson/BsonDataReader.cs b/Src/Newtonsoft.Json.Bson/BsonDataReader.cs
+index 16d1e12..aca7805 100644
+--- a/Src/Newtonsoft.Json.Bson/BsonDataReader.cs
++++ b/Src/Newtonsoft.Json.Bson/BsonDataReader.cs
+@@ -553,7 +553,7 @@ private void ReadType(BsonType type)
+                     string expression = ReadString();
+                     string modifiers = ReadString();
+ 
+-                    string regex = @"/" + expression + @"/" + modifiers;
++                    string regex = "/" + expression + "/" + modifiers;
+                     SetToken(JsonToken.String, regex);
+                     break;
+                 case BsonType.Reference:
+@@ -765,7 +765,7 @@ private int GetLastFullCharStop(int start)
+             }
+             if (bis == start - lookbackPos)
+             {
+-                //Full character.
++                // Full character.
+                 return start;
+             }
+             else
+diff --git a/Src/Newtonsoft.Json.Bson/BsonDataWriter.Async.cs b/Src/Newtonsoft.Json.Bson/BsonDataWriter.Async.cs
+index f99b2b3..6bc7b5d 100644
+--- a/Src/Newtonsoft.Json.Bson/BsonDataWriter.Async.cs
++++ b/Src/Newtonsoft.Json.Bson/BsonDataWriter.Async.cs
+@@ -45,7 +45,7 @@ public partial class BsonDataWriter
+         /// <see cref="CloseAsync"/> and the final <see cref="WriteEndAsync(CancellationToken)"/>,
+         /// <see cref="WriteEndArrayAsync"/> or <see cref="WriteEndObjectAsync"/>
+         /// that finishes writing the document will write asynchronously. Derived classes will not write asynchronously.</remarks>
+-        public override Task FlushAsync(CancellationToken cancellationToken = new CancellationToken())
++        public override Task FlushAsync(CancellationToken cancellationToken = default(CancellationToken))
+         {
+             return _safeAsync ? _writer.FlushAsync(cancellationToken) : base.FlushAsync(cancellationToken);
+         }
+@@ -73,8 +73,9 @@ private bool WillCloseAll(BsonType type)
+ 
+             for (var token = _parent; token != _root; token = token.Parent)
+             {
+-                if (token.Type == type) // Will only close as far as here.
++                if (token.Type == type)
+                 {
++                    // Will only close as far as here.
+                     return false;
+                 }
+             }
+@@ -91,7 +92,7 @@ private bool WillCloseAll(BsonType type)
+         /// <see cref="CloseAsync"/> and the final <see cref="WriteEndAsync(CancellationToken)"/>,
+         /// <see cref="WriteEndArrayAsync"/> or <see cref="WriteEndObjectAsync"/>
+         /// that finishes writing the document will write asynchronously. Derived classes will not write asynchronously.</remarks>
+-        public override Task WriteEndArrayAsync(CancellationToken cancellationToken = new CancellationToken())
++        public override Task WriteEndArrayAsync(CancellationToken cancellationToken = default(CancellationToken))
+         {
+             return _safeAsync && WillCloseAll(BsonType.Array) ? CompleteAsync(cancellationToken) : base.WriteEndArrayAsync(cancellationToken);
+         }
+@@ -105,7 +106,7 @@ public override Task WriteEndArrayAsync(CancellationToken cancellationToken = ne
+         /// <see cref="CloseAsync"/> and the final <see cref="WriteEndAsync(CancellationToken)"/>,
+         /// <see cref="WriteEndArrayAsync"/> or <see cref="WriteEndObjectAsync"/>
+         /// that finishes writing the document will write asynchronously. Derived classes will not write asynchronously.</remarks>
+-        public override Task WriteEndObjectAsync(CancellationToken cancellationToken = new CancellationToken())
++        public override Task WriteEndObjectAsync(CancellationToken cancellationToken = default(CancellationToken))
+         {
+             return _safeAsync && WillCloseAll(BsonType.Object) ? CompleteAsync(cancellationToken) : base.WriteEndObjectAsync(cancellationToken);
+         }
+@@ -120,7 +121,7 @@ public override Task WriteEndObjectAsync(CancellationToken cancellationToken = n
+         /// <see cref="CloseAsync"/> and the final <see cref="WriteEndAsync(CancellationToken)"/>,
+         /// <see cref="WriteEndArrayAsync"/> or <see cref="WriteEndObjectAsync"/>
+         /// that finishes writing the document will write asynchronously. Derived classes will not write asynchronously.</remarks>
+-        public override Task CloseAsync(CancellationToken cancellationToken = new CancellationToken())
++        public override Task CloseAsync(CancellationToken cancellationToken = default(CancellationToken))
+         {
+             if (_safeAsync)
+             {
+diff --git a/Src/Newtonsoft.Json.Bson/BsonDataWriter.cs b/Src/Newtonsoft.Json.Bson/BsonDataWriter.cs
+index a6e42ce..eb42bc8 100644
+--- a/Src/Newtonsoft.Json.Bson/BsonDataWriter.cs
++++ b/Src/Newtonsoft.Json.Bson/BsonDataWriter.cs
+@@ -255,6 +255,7 @@ internal void AddToken(BsonToken token)
+         }
+ 
+         #region WriteValue methods
++
+         /// <summary>
+         /// Writes a <see cref="Object"/> value.
+         /// An error will raised if the value cannot be written as a single JSON token.
+diff --git a/Src/Newtonsoft.Json.Bson/BsonToken.cs b/Src/Newtonsoft.Json.Bson/BsonToken.cs
+index 2adbbfe..4044b9a 100644
+--- a/Src/Newtonsoft.Json.Bson/BsonToken.cs
++++ b/Src/Newtonsoft.Json.Bson/BsonToken.cs
+@@ -45,11 +45,13 @@ public void Add(string name, BsonToken token)
+             token.Parent = this;
+         }
+ 
++        /// <inheritdoc/>
+         public override BsonType Type
+         {
+             get { return BsonType.Object; }
+         }
+ 
++        /// <inheritdoc/>
+         public IEnumerator<BsonProperty> GetEnumerator()
+         {
+             return _children.GetEnumerator();
+@@ -71,11 +73,13 @@ public void Add(BsonToken token)
+             token.Parent = this;
+         }
+ 
++        /// <inheritdoc/>
+         public override BsonType Type
+         {
+             get { return BsonType.Array; }
+         }
+ 
++        /// <inheritdoc/>
+         public IEnumerator<BsonToken> GetEnumerator()
+         {
+             return _children.GetEnumerator();
+@@ -94,6 +98,7 @@ public BsonEmpty(BsonType type)
+             Type = type;
+         }
+ 
++        /// <inheritdoc/>
+         public override BsonType Type { get; }
+     }
+ 
+@@ -113,6 +118,7 @@ public object Value
+             get { return _value; }
+         }
+ 
++        /// <inheritdoc/>
+         public override BsonType Type
+         {
+             get { return _type; }
+@@ -161,6 +167,7 @@ public BsonRegex(string pattern, string options)
+             Options = new BsonString(options, false);
+         }
+ 
++        /// <inheritdoc/>
+         public override BsonType Type
+         {
+             get { return BsonType.Regex; }
+diff --git a/Src/Newtonsoft.Json.Bson/Converters/BsonDataObjectIdConverter.cs b/Src/Newtonsoft.Json.Bson/Converters/BsonDataObjectIdConverter.cs
+index 947eb8b..d97d1ea 100644
+--- a/Src/Newtonsoft.Json.Bson/Converters/BsonDataObjectIdConverter.cs
++++ b/Src/Newtonsoft.Json.Bson/Converters/BsonDataObjectIdConverter.cs
+@@ -84,7 +84,7 @@ public override object ReadJson(JsonReader reader, Type objectType, object exist
+         /// </returns>
+         public override bool CanConvert(Type objectType)
+         {
+-            return (objectType == typeof(BsonDataObjectId));
++            return objectType == typeof(BsonDataObjectId);
+         }
+     }
+ }
+\ No newline at end of file
+diff --git a/Src/Newtonsoft.Json.Bson/Converters/BsonDataRegexConverter.cs b/Src/Newtonsoft.Json.Bson/Converters/BsonDataRegexConverter.cs
+index 1aa989a..dbacad4 100644
+--- a/Src/Newtonsoft.Json.Bson/Converters/BsonDataRegexConverter.cs
++++ b/Src/Newtonsoft.Json.Bson/Converters/BsonDataRegexConverter.cs
+@@ -61,7 +61,7 @@ public override void WriteJson(JsonWriter writer, object value, JsonSerializer s
+ 
+         private bool HasFlag(RegexOptions options, RegexOptions flag)
+         {
+-            return ((options & flag) == flag);
++            return (options & flag) == flag;
+         }
+ 
+         private void WriteBson(BsonDataWriter writer, Regex regex)
+@@ -208,7 +208,7 @@ private Regex ReadRegexObject(JsonReader reader, JsonSerializer serializer)
+         /// </returns>
+         public override bool CanConvert(Type objectType)
+         {
+-            return (objectType == typeof(Regex));
++            return objectType == typeof(Regex);
+         }
+     }
+ }
+\ No newline at end of file
+diff --git a/Src/Newtonsoft.Json.Bson/Utilities/AsyncUtils.cs b/Src/Newtonsoft.Json.Bson/Utilities/AsyncUtils.cs
+index 58db1b5..cecc7da 100644
+--- a/Src/Newtonsoft.Json.Bson/Utilities/AsyncUtils.cs
++++ b/Src/Newtonsoft.Json.Bson/Utilities/AsyncUtils.cs
+@@ -37,7 +37,7 @@ internal static class AsyncUtils
+         // Pre-allocate to avoid wasted allocations.
+         public static readonly Task<bool> False = Task.FromResult(false);
+         public static readonly Task<bool> True = Task.FromResult(true);
+-        private static Task<string> s_EmptyString;
++        private static Task<string> _emptyString;
+ 
+         internal static Task<bool> ToAsync(this bool value) => value ? True : False;
+ 
+@@ -56,7 +56,7 @@ public static Task<T> CancelIfRequestedAsync<T>(this CancellationToken cancellat
+         public static Task FromCanceled(this CancellationToken cancellationToken)
+         {
+             Debug.Assert(cancellationToken.IsCancellationRequested);
+-            return new Task(() => {}, cancellationToken);
++            return new Task(() => { }, cancellationToken);
+         }
+ 
+         public static Task<T> FromCanceled<T>(this CancellationToken cancellationToken)
+@@ -70,8 +70,7 @@ public static Task<T> FromCanceled<T>(this CancellationToken cancellationToken)
+         // our own cached field for previous frameworks.
+         internal static readonly Task CompletedTask = Task.Delay(0);
+ 
+-        public static Task<string> EmptyString => s_EmptyString ?? (s_EmptyString = Task.FromResult(""));
+-
++        public static Task<string> EmptyString => _emptyString ?? (_emptyString = Task.FromResult(""));
+ 
+         public static Task WriteAsync(this TextWriter writer, char value, CancellationToken cancellationToken)
+         {
+diff --git a/Src/Newtonsoft.Json.Bson/Utilities/Base64Encoder.cs b/Src/Newtonsoft.Json.Bson/Utilities/Base64Encoder.cs
+index 2ba5b84..afd10a5 100644
+--- a/Src/Newtonsoft.Json.Bson/Utilities/Base64Encoder.cs
++++ b/Src/Newtonsoft.Json.Bson/Utilities/Base64Encoder.cs
+@@ -78,7 +78,7 @@ public void Encode(byte[] buffer, int index, int count)
+ 
+             if (_leftOverBytesCount > 0)
+             {
+-                if(FulfillFromLeftover(buffer, index, ref count))
++                if (FulfillFromLeftover(buffer, index, ref count))
+                 {
+                     return;
+                 }
+diff --git a/Src/Newtonsoft.Json.Bson/Utilities/DateTimeParser.cs b/Src/Newtonsoft.Json.Bson/Utilities/DateTimeParser.cs
+index 9bf0b36..23896b9 100644
+--- a/Src/Newtonsoft.Json.Bson/Utilities/DateTimeParser.cs
++++ b/Src/Newtonsoft.Json.Bson/Utilities/DateTimeParser.cs
+@@ -24,15 +24,15 @@ static DateTimeParser()
+             Lzyyyy_ = "yyyy-".Length;
+             Lzyyyy_MM = "yyyy-MM".Length;
+             Lzyyyy_MM_ = "yyyy-MM-".Length;
+-            Lzyyyy_MM_dd = "yyyy-MM-dd".Length;
+-            Lzyyyy_MM_ddT = "yyyy-MM-ddT".Length;
++            LzyyyyMmDd = "yyyy-MM-dd".Length;
++            LzyyyyMmDdT = "yyyy-MM-ddT".Length;
+             LzHH = "HH".Length;
+             LzHH_ = "HH:".Length;
+             LzHH_mm = "HH:mm".Length;
+             LzHH_mm_ = "HH:mm:".Length;
+-            LzHH_mm_ss = "HH:mm:ss".Length;
+-            Lz_ = "-".Length;
+-            Lz_zz = "-zz".Length;
++            LzHHMmSs = "HH:mm:ss".Length;
++            Lz = "-".Length;
++            LzZz = "-zz".Length;
+         }
+ 
+         public int Year;
+@@ -55,15 +55,15 @@ static DateTimeParser()
+         private static readonly int Lzyyyy_;
+         private static readonly int Lzyyyy_MM;
+         private static readonly int Lzyyyy_MM_;
+-        private static readonly int Lzyyyy_MM_dd;
+-        private static readonly int Lzyyyy_MM_ddT;
++        private static readonly int LzyyyyMmDd;
++        private static readonly int LzyyyyMmDdT;
+         private static readonly int LzHH;
+         private static readonly int LzHH_;
+         private static readonly int LzHH_mm;
+         private static readonly int LzHH_mm_;
+-        private static readonly int LzHH_mm_ss;
+-        private static readonly int Lz_;
+-        private static readonly int Lz_zz;
++        private static readonly int LzHHMmSs;
++        private static readonly int Lz;
++        private static readonly int LzZz;
+ 
+         private const short MaxFractionDigits = 7;
+ 
+@@ -72,7 +72,7 @@ public bool Parse(string text, int startIndex, int length)
+             _text = text;
+             _end = startIndex + length;
+ 
+-            if (ParseDate(startIndex) && ParseChar(Lzyyyy_MM_dd + startIndex, 'T') && ParseTimeAndZoneAndWhitespace(Lzyyyy_MM_ddT + startIndex))
++            if (ParseDate(startIndex) && ParseChar(LzyyyyMmDd + startIndex, 'T') && ParseTimeAndZoneAndWhitespace(LzyyyyMmDdT + startIndex))
+             {
+                 return true;
+             }
+@@ -82,21 +82,21 @@ public bool Parse(string text, int startIndex, int length)
+ 
+         private bool ParseDate(int start)
+         {
+-            return (Parse4Digit(start, out Year)
+-                    && 1 <= Year
++            return Parse4Digit(start, out Year)
++                    && Year >= 1
+                     && ParseChar(start + Lzyyyy, '-')
+                     && Parse2Digit(start + Lzyyyy_, out Month)
+-                    && 1 <= Month
++                    && Month >= 1
+                     && Month <= 12
+                     && ParseChar(start + Lzyyyy_MM, '-')
+                     && Parse2Digit(start + Lzyyyy_MM_, out Day)
+-                    && 1 <= Day
+-                    && Day <= DateTime.DaysInMonth(Year, Month));
++                    && Day >= 1
++                    && Day <= DateTime.DaysInMonth(Year, Month);
+         }
+ 
+         private bool ParseTimeAndZoneAndWhitespace(int start)
+         {
+-            return (ParseTime(ref start) && ParseZone(start));
++            return ParseTime(ref start) && ParseZone(start);
+         }
+ 
+         private bool ParseTime(ref int start)
+@@ -114,7 +114,7 @@ private bool ParseTime(ref int start)
+                 return false;
+             }
+ 
+-            start += LzHH_mm_ss;
++            start += LzHHMmSs;
+             if (ParseChar(start, '.'))
+             {
+                 Fraction = 0;
+@@ -164,19 +164,18 @@ private bool ParseZone(int start)
+                 else
+                 {
+                     if (start + 2 < _end
+-                        && Parse2Digit(start + Lz_, out ZoneHour)
++                        && Parse2Digit(start + Lz, out ZoneHour)
+                         && ZoneHour <= 99)
+                     {
+                         switch (ch)
+                         {
+                             case '-':
+                                 Zone = ParserTimeZone.LocalWestOfUtc;
+-                                start += Lz_zz;
++                                start += LzZz;
+                                 break;
+-
+                             case '+':
+                                 Zone = ParserTimeZone.LocalEastOfUtc;
+-                                start += Lz_zz;
++                                start += LzZz;
+                                 break;
+                         }
+                     }
+@@ -194,20 +193,17 @@ private bool ParseZone(int start)
+                                 start += 2;
+                             }
+                         }
+-                        else
++                        else if (start + 1 < _end
++                            && Parse2Digit(start, out ZoneMinute)
++                            && ZoneMinute <= 99)
+                         {
+-                            if (start + 1 < _end
+-                                && Parse2Digit(start, out ZoneMinute)
+-                                && ZoneMinute <= 99)
+-                            {
+-                                start += 2;
+-                            }
++                            start += 2;
+                         }
+                     }
+                 }
+             }
+ 
+-            return (start == _end);
++            return start == _end;
+         }
+ 
+         private bool Parse4Digit(int start, out int num)
+@@ -218,10 +214,10 @@ private bool Parse4Digit(int start, out int num)
+                 int digit2 = _text[start + 1] - '0';
+                 int digit3 = _text[start + 2] - '0';
+                 int digit4 = _text[start + 3] - '0';
+-                if (0 <= digit1 && digit1 < 10
+-                    && 0 <= digit2 && digit2 < 10
+-                    && 0 <= digit3 && digit3 < 10
+-                    && 0 <= digit4 && digit4 < 10)
++                if (digit1 >= 0 && digit1 < 10
++                    && digit2 >= 0 && digit2 < 10
++                    && digit3 >= 0 && digit3 < 10
++                    && digit4 >= 0 && digit4 < 10)
+                 {
+                     num = (((((digit1 * 10) + digit2) * 10) + digit3) * 10) + digit4;
+                     return true;
+@@ -237,8 +233,8 @@ private bool Parse2Digit(int start, out int num)
+             {
+                 int digit1 = _text[start] - '0';
+                 int digit2 = _text[start + 1] - '0';
+-                if (0 <= digit1 && digit1 < 10
+-                    && 0 <= digit2 && digit2 < 10)
++                if (digit1 >= 0 && digit1 < 10
++                    && digit2 >= 0 && digit2 < 10)
+                 {
+                     num = (digit1 * 10) + digit2;
+                     return true;
+@@ -250,7 +246,7 @@ private bool Parse2Digit(int start, out int num)
+ 
+         private bool ParseChar(int start, char ch)
+         {
+-            return (start < _end && _text[start] == ch);
++            return start < _end && _text[start] == ch;
+         }
+     }
+ }
+\ No newline at end of file
+diff --git a/Src/Newtonsoft.Json.Bson/Utilities/DateTimeUtils.cs b/Src/Newtonsoft.Json.Bson/Utilities/DateTimeUtils.cs
+index 750d639..1044103 100644
+--- a/Src/Newtonsoft.Json.Bson/Utilities/DateTimeUtils.cs
++++ b/Src/Newtonsoft.Json.Bson/Utilities/DateTimeUtils.cs
+@@ -114,10 +114,8 @@ private static DateTime SwitchToLocalTime(DateTime value)
+             {
+                 case DateTimeKind.Unspecified:
+                     return new DateTime(value.Ticks, DateTimeKind.Local);
+-
+                 case DateTimeKind.Utc:
+                     return value.ToLocalTime();
+-
+                 case DateTimeKind.Local:
+                     return value;
+             }
+@@ -130,10 +128,8 @@ private static DateTime SwitchToUtcTime(DateTime value)
+             {
+                 case DateTimeKind.Unspecified:
+                     return new DateTime(value.Ticks, DateTimeKind.Utc);
+-
+                 case DateTimeKind.Utc:
+                     return value;
+-
+                 case DateTimeKind.Local:
+                     return value.ToUniversalTime();
+             }
+@@ -187,7 +183,7 @@ internal static long ConvertDateTimeToJavaScriptTicks(DateTime dateTime)
+ 
+         internal static long ConvertDateTimeToJavaScriptTicks(DateTime dateTime, bool convertToUtc)
+         {
+-            long ticks = (convertToUtc) ? ToUniversalTicks(dateTime) : dateTime.Ticks;
++            long ticks = convertToUtc ? ToUniversalTicks(dateTime) : dateTime.Ticks;
+ 
+             return UniversialTicksToJavaScriptTicks(ticks);
+         }
+@@ -209,7 +205,7 @@ internal static DateTime ConvertJavaScriptTicksToDateTime(long javaScriptTicks)
+         #region Parse
+         internal static bool TryParseDateTimeIso(string text, DateTimeZoneHandling dateTimeZoneHandling, out DateTime dt)
+         {
+-            DateTimeParser dateTimeParser = new DateTimeParser();
++            DateTimeParser dateTimeParser = default(DateTimeParser);
+             if (!dateTimeParser.Parse(text, 0, text.Length))
+             {
+                 dt = default(DateTime);
+@@ -225,47 +221,46 @@ internal static bool TryParseDateTimeIso(string text, DateTimeZoneHandling dateT
+                 case ParserTimeZone.Utc:
+                     d = new DateTime(d.Ticks, DateTimeKind.Utc);
+                     break;
+-
+                 case ParserTimeZone.LocalWestOfUtc:
++                {
++                    TimeSpan offset = new TimeSpan(dateTimeParser.ZoneHour, dateTimeParser.ZoneMinute, 0);
++                    ticks = d.Ticks + offset.Ticks;
++                    if (ticks <= DateTime.MaxValue.Ticks)
++                    {
++                        d = new DateTime(ticks, DateTimeKind.Utc).ToLocalTime();
++                    }
++                    else
+                     {
+-                        TimeSpan offset = new TimeSpan(dateTimeParser.ZoneHour, dateTimeParser.ZoneMinute, 0);
+-                        ticks = d.Ticks + offset.Ticks;
+-                        if (ticks <= DateTime.MaxValue.Ticks)
++                        ticks += d.GetUtcOffset().Ticks;
++                        if (ticks > DateTime.MaxValue.Ticks)
+                         {
+-                            d = new DateTime(ticks, DateTimeKind.Utc).ToLocalTime();
++                            ticks = DateTime.MaxValue.Ticks;
+                         }
+-                        else
+-                        {
+-                            ticks += d.GetUtcOffset().Ticks;
+-                            if (ticks > DateTime.MaxValue.Ticks)
+-                            {
+-                                ticks = DateTime.MaxValue.Ticks;
+-                            }
+ 
+-                            d = new DateTime(ticks, DateTimeKind.Local);
+-                        }
+-                        break;
++                        d = new DateTime(ticks, DateTimeKind.Local);
+                     }
++                    break;
++                }
+                 case ParserTimeZone.LocalEastOfUtc:
++                {
++                    TimeSpan offset = new TimeSpan(dateTimeParser.ZoneHour, dateTimeParser.ZoneMinute, 0);
++                    ticks = d.Ticks - offset.Ticks;
++                    if (ticks >= DateTime.MinValue.Ticks)
++                    {
++                        d = new DateTime(ticks, DateTimeKind.Utc).ToLocalTime();
++                    }
++                    else
+                     {
+-                        TimeSpan offset = new TimeSpan(dateTimeParser.ZoneHour, dateTimeParser.ZoneMinute, 0);
+-                        ticks = d.Ticks - offset.Ticks;
+-                        if (ticks >= DateTime.MinValue.Ticks)
++                        ticks += d.GetUtcOffset().Ticks;
++                        if (ticks < DateTime.MinValue.Ticks)
+                         {
+-                            d = new DateTime(ticks, DateTimeKind.Utc).ToLocalTime();
++                            ticks = DateTime.MinValue.Ticks;
+                         }
+-                        else
+-                        {
+-                            ticks += d.GetUtcOffset().Ticks;
+-                            if (ticks < DateTime.MinValue.Ticks)
+-                            {
+-                                ticks = DateTime.MinValue.Ticks;
+-                            }
+ 
+-                            d = new DateTime(ticks, DateTimeKind.Local);
+-                        }
+-                        break;
++                        d = new DateTime(ticks, DateTimeKind.Local);
+                     }
++                    break;
++                }
+             }
+ 
+             dt = EnsureDateTime(d, dateTimeZoneHandling);
+@@ -275,7 +270,7 @@ internal static bool TryParseDateTimeIso(string text, DateTimeZoneHandling dateT
+ #if HAVE_DATE_TIME_OFFSET
+         internal static bool TryParseDateTimeOffsetIso(string text, out DateTimeOffset dt)
+         {
+-            DateTimeParser dateTimeParser = new DateTimeParser();
++            DateTimeParser dateTimeParser = default(DateTimeParser);
+             if (!dateTimeParser.Parse(text, 0, text.Length))
+             {
+                 dt = default(DateTimeOffset);
+@@ -523,7 +518,7 @@ private static bool TryParseDateTimeOffsetExact(string text, string dateFormatSt
+ 
+         private static bool TryReadOffset(string offsetText, int startIndex, out TimeSpan offset)
+         {
+-            bool negative = (offsetText[startIndex] == '-');
++            bool negative = offsetText[startIndex] == '-';
+ 
+             int hours;
+             if (int.TryParse(offsetText.Substring(startIndex + 1, 2), out hours))
+diff --git a/Src/Newtonsoft.Json.Bson/Utilities/MiscellaneousUtils.cs b/Src/Newtonsoft.Json.Bson/Utilities/MiscellaneousUtils.cs
+index 547a3ef..fdfd9f0 100644
+--- a/Src/Newtonsoft.Json.Bson/Utilities/MiscellaneousUtils.cs
++++ b/Src/Newtonsoft.Json.Bson/Utilities/MiscellaneousUtils.cs
+@@ -37,7 +37,7 @@ internal static class MiscellaneousUtils
+     {
+         public static ArgumentOutOfRangeException CreateArgumentOutOfRangeException(string paramName, object actualValue, string message)
+         {
+-            string newMessage = message + Environment.NewLine + @"Actual value was {0}.".FormatWith(CultureInfo.InvariantCulture, actualValue);
++            string newMessage = message + Environment.NewLine + "Actual value was {0}.".FormatWith(CultureInfo.InvariantCulture, actualValue);
+ 
+             return new ArgumentOutOfRangeException(paramName, newMessage);
+         }
+diff --git a/Src/Newtonsoft.Json.Bson/Utilities/StringUtils.cs b/Src/Newtonsoft.Json.Bson/Utilities/StringUtils.cs
+index 5b132d9..32551e7 100644
+--- a/Src/Newtonsoft.Json.Bson/Utilities/StringUtils.cs
++++ b/Src/Newtonsoft.Json.Bson/Utilities/StringUtils.cs
+@@ -70,12 +70,12 @@ private static string FormatWith(this string format, IFormatProvider provider, p
+ 
+         public static bool StartsWith(this string source, char value)
+         {
+-            return (source.Length > 0 && source[0] == value);
++            return source.Length > 0 && source[0] == value;
+         }
+ 
+         public static bool EndsWith(this string source, char value)
+         {
+-            return (source.Length > 0 && source[source.Length - 1] == value);
++            return source.Length > 0 && source[source.Length - 1] == value;
+         }
+     }
+ }
+\ No newline at end of file

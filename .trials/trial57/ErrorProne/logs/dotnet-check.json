@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "command": "format",
+  "previewOf": null,
+  "path": "/home/user/w57/ErrorProne/dotnet",
+  "write": false,
+  "settings": [],
+  "conventions": [],
+  "sonar": null,
+  "agentsMd": null,
+  "runs": [],
+  "changesPerRule": {},
+  "filesPerRule": null,
+  "keptFindings": [],
+  "patch": null,
+  "clean": true,
+  "exitCode": 0
+}

@@ -1,0 +1,6 @@
+build	0	15s	dotnet build src/ErrorProne.NET.sln -c Debug
+twae-Debug	1	5s	twae Debug
+test-Debug	0	36s	env CFG=Debug bash -c cd src && dotnet test ErrorProne.NET.sln -c $CFG
+twae-Release	1	2s	twae Release
+test-Release	0	36s	env CFG=Release bash -c cd src && dotnet test ErrorProne.NET.sln -c $CFG
+DONE

@@ -1,0 +1,43 @@
+Using Src/Newtonsoft.Json.Bson.slnx: no solution or project at the root, and it's the only solution one folder down.
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net45, net46, net6.0, net8.0, netstandard1.3, netstandard2.0).
+Checked netstandard1.3 (run 1 of 6)
+Checked net45 (run 2 of 6)
+Checked netstandard2.0 (run 3 of 6)
+Checked net6.0 (run 4 of 6)
+Checked net46 (run 5 of 6)
+Checked net8.0 (run 6 of 6)
+== net45 (1 project(s), 16 files with findings)
+== net46 (1 project(s), 6 files with findings)
+'dotnet format' had warnings loading the workspace in its net46 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+== net6.0 (1 project(s), 6 files with findings)
+== net8.0 (1 project(s), 6 files with findings)
+== netstandard1.3 (1 project(s), 16 files with findings)
+'dotnet format' skipped Newtonsoft.Json.Bson: MSBuild couldn't load it or a project it references for this run (often reference assemblies missing for its target framework). The restore isn't the cause; add '--verbosity diagnostic' to this 'bro format' command to see MSBuild's message ("Msbuild failed when processing the file ...") in its netstandard1.3 run.
+== netstandard2.0 (1 project(s), 16 files with findings)
+Partly incomplete: 'dotnet format' skipped Newtonsoft.Json.Bson for netstandard1.3 (references didn't load): code only that framework compiles (inside #if) wasn't formatted.
+Run 1: 22 files changed:
+  Src/Newtonsoft.Json.Bson.Tests/BsonDataReaderAsyncTests.cs
+  Src/Newtonsoft.Json.Bson.Tests/BsonDataReaderTests.cs
+  Src/Newtonsoft.Json.Bson.Tests/BsonDataWriterAsyncTests.cs
+  Src/Newtonsoft.Json.Bson.Tests/BsonDataWriterTests.cs
+  Src/Newtonsoft.Json.Bson.Tests/TestFixtureBase.cs
+  Src/Newtonsoft.Json.Bson.Tests/TestObjects/Product.cs
+  Src/Newtonsoft.Json.Bson/AsyncBinaryReader.cs
+  Src/Newtonsoft.Json.Bson/BsonBinaryWriter.cs
+  Src/Newtonsoft.Json.Bson/BsonDataObjectId.cs
+  Src/Newtonsoft.Json.Bson/BsonDataReader.Async.cs
+  ... and 12 more
+Checked netstandard1.3 (run 1 of 6)
+Checked net45 (run 2 of 6)
+Checked netstandard2.0 (run 3 of 6)
+Checked net6.0 (run 4 of 6)
+Checked net46 (run 5 of 6)
+Checked net8.0 (run 6 of 6)
+== netstandard1.3 (1 project(s))
+Partly incomplete: 'dotnet format' skipped Newtonsoft.Json.Bson for netstandard1.3 (references didn't load): code only that framework compiles (inside #if) wasn't formatted.
+Run 2: 0 files changed, but not everything was checked (below).
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Not checked: Newtonsoft.Json.Bson (netstandard1.3): 'dotnet format' couldn't load it (references didn't load), so the code only that framework compiles
+Not verified: 1 part of the build wasn't checked (the 'Not checked:' line above); the rest is clean. The build may still report findings there: fix what's named, or build it (bro check --build).

@@ -1,0 +1,26 @@
+{
+  "repo": "DapperLib/DapperAOT",
+  "branch": "main",
+  "commit": "93d99d36dd0142a07bf1b00567351f89b8dddb72",
+  "csFiles": 409,
+  "tags": [
+    "library",
+    "multi-target",
+    "generator",
+    "analyzer-project",
+    "if-in-bodies",
+    "item-functions",
+    "nbgv"
+  ],
+  "setups": "Dapper.AOT.slnx and Build.csproj at the root; Directory.Build.props (TreatWarningsAsErrors through WarningsAsErrors, SignAssembly), Directory.Packages.props (central package management), nuget.config with <clear/> and a packageSourceMapping '*' to nuget.org; Nerdbank.GitVersioning (version.json with versionHeightOffset -4); Dapper.AOT.Analyzers (netstandard2.0 Roslyn generator and analyzer, EnforceExtendedAnalyzerRules) whose InGeneration/*.cs templates are embedded resources compiled into the tests with DAPPERAOT_INTERNAL; Dapper.AOT net48;netstandard2.0;netcoreapp3.1;net6.0;net8.0;net10.0; tests net48;net8.0;net10.0; test/Dapper.AOT.Test.csproj sets DependentUpon with $([System.String]::Copy(%(Filename)).Replace(...)).",
+  "build": "ok with workaround",
+  "workaround": "a full clone (Nerdbank.GitVersioning: a shallow clone fails its design-time build); global.json 10.0.203 lowered; the trial feed needs a StyleBro.* packageSourceMapping; DOTNET_ROLL_FORWARD=Major",
+  "tests": "dotnet test test/Dapper.AOT.Test/Dapper.AOT.Test.csproj -f net10.0 --filter FullyQualifiedName!~Integration (the repo's CI step): 372 pass; Dapper.AOT.Test.Integration needs Docker (Testcontainers), left out",
+  "usedIn": "trial 57",
+  "verified": {
+    "by": "trial 57 session",
+    "date": "2026-10-27",
+    "sdks": "10.0.113, 8.0.132"
+  },
+  "notes": "Unquoted item metadata in a property function (trial 56's MSB4186 lens); a Nerdbank.GitVersioning setup with a negative height offset (copies and shallow clones fail its load); embedded-resource C# templates with '#if'-dependent modifiers; TWAE fails untouched on RS1032, so check --build is Not verified."
+}

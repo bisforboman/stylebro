@@ -1,0 +1,20 @@
+  Determining projects to restore...
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.TargetFrameworkInference.targets(200,5): warning NETSDK1215: Targeting .NET Standard prior to 2.0 is no longer recommended. See https://aka.ms/dotnet/dotnet-standard-guidance for more details. [/home/user/w57/Bson/dotnet2/Src/Newtonsoft.Json.Bson/Newtonsoft.Json.Bson.csproj::TargetFramework=netstandard1.3]
+  Restored /home/user/w57/Bson/dotnet2/Src/Newtonsoft.Json.Bson/Newtonsoft.Json.Bson.csproj (in 407 ms).
+  Restored /home/user/w57/Bson/dotnet2/Src/Newtonsoft.Json.Bson.Tests/Newtonsoft.Json.Bson.Tests.csproj (in 455 ms).
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.TargetFrameworkInference.targets(200,5): warning NETSDK1215: Targeting .NET Standard prior to 2.0 is no longer recommended. See https://aka.ms/dotnet/dotnet-standard-guidance for more details. [/home/user/w57/Bson/dotnet2/Src/Newtonsoft.Json.Bson/Newtonsoft.Json.Bson.csproj::TargetFramework=netstandard1.3]
+  Newtonsoft.Json.Bson -> /home/user/w57/Bson/dotnet2/Src/Newtonsoft.Json.Bson/bin/Release/net45/Newtonsoft.Json.Bson.dll
+  Newtonsoft.Json.Bson -> /home/user/w57/Bson/dotnet2/Src/Newtonsoft.Json.Bson/bin/Release/netstandard1.3/Newtonsoft.Json.Bson.dll
+  Newtonsoft.Json.Bson -> /home/user/w57/Bson/dotnet2/Src/Newtonsoft.Json.Bson/bin/Release/netstandard2.0/Newtonsoft.Json.Bson.dll
+  Newtonsoft.Json.Bson.Tests -> /home/user/w57/Bson/dotnet2/Src/Newtonsoft.Json.Bson.Tests/bin/Release/net8.0/Newtonsoft.Json.Bson.Tests.dll
+  Newtonsoft.Json.Bson.Tests -> /home/user/w57/Bson/dotnet2/Src/Newtonsoft.Json.Bson.Tests/bin/Release/net6.0/Newtonsoft.Json.Bson.Tests.dll
+  Newtonsoft.Json.Bson.Tests -> /home/user/w57/Bson/dotnet2/Src/Newtonsoft.Json.Bson.Tests/bin/Release/net46/Newtonsoft.Json.Bson.Tests.dll
+
+Build succeeded.
+
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.TargetFrameworkInference.targets(200,5): warning NETSDK1215: Targeting .NET Standard prior to 2.0 is no longer recommended. See https://aka.ms/dotnet/dotnet-standard-guidance for more details. [/home/user/w57/Bson/dotnet2/Src/Newtonsoft.Json.Bson/Newtonsoft.Json.Bson.csproj::TargetFramework=netstandard1.3]
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.TargetFrameworkInference.targets(200,5): warning NETSDK1215: Targeting .NET Standard prior to 2.0 is no longer recommended. See https://aka.ms/dotnet/dotnet-standard-guidance for more details. [/home/user/w57/Bson/dotnet2/Src/Newtonsoft.Json.Bson/Newtonsoft.Json.Bson.csproj::TargetFramework=netstandard1.3]
+    2 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:05.13

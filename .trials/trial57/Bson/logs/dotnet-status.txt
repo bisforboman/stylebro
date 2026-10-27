@@ -1,0 +1,24 @@
+ M Src/Newtonsoft.Json.Bson.Tests/BsonDataReaderAsyncTests.cs
+ M Src/Newtonsoft.Json.Bson.Tests/BsonDataReaderTests.cs
+ M Src/Newtonsoft.Json.Bson.Tests/BsonDataWriterAsyncTests.cs
+ M Src/Newtonsoft.Json.Bson.Tests/BsonDataWriterTests.cs
+ M Src/Newtonsoft.Json.Bson.Tests/TestFixtureBase.cs
+ M Src/Newtonsoft.Json.Bson.Tests/TestObjects/Product.cs
+ M Src/Newtonsoft.Json.Bson/AsyncBinaryReader.cs
+ M Src/Newtonsoft.Json.Bson/BsonBinaryWriter.cs
+ M Src/Newtonsoft.Json.Bson/BsonDataObjectId.cs
+ M Src/Newtonsoft.Json.Bson/BsonDataReader.Async.cs
+ M Src/Newtonsoft.Json.Bson/BsonDataReader.cs
+ M Src/Newtonsoft.Json.Bson/BsonDataWriter.Async.cs
+ M Src/Newtonsoft.Json.Bson/BsonDataWriter.cs
+ M Src/Newtonsoft.Json.Bson/BsonToken.cs
+ M Src/Newtonsoft.Json.Bson/Converters/BsonDataObjectIdConverter.cs
+ M Src/Newtonsoft.Json.Bson/Converters/BsonDataRegexConverter.cs
+ M Src/Newtonsoft.Json.Bson/Utilities/AsyncUtils.cs
+ M Src/Newtonsoft.Json.Bson/Utilities/Base64Encoder.cs
+ M Src/Newtonsoft.Json.Bson/Utilities/DateTimeParser.cs
+ M Src/Newtonsoft.Json.Bson/Utilities/DateTimeUtils.cs
+ M Src/Newtonsoft.Json.Bson/Utilities/MiscellaneousUtils.cs
+ M Src/Newtonsoft.Json.Bson/Utilities/StringUtils.cs
+?? .editorconfig
+?? Directory.Build.props

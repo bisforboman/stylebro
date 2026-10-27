@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "command": "format",
+  "previewOf": null,
+  "path": "/home/user/w57/OpenAPI/dotnet2",
+  "write": false,
+  "settings": [],
+  "conventions": [],
+  "sonar": null,
+  "agentsMd": null,
+  "runs": [
+    {
+      "run": 1,
+      "filesChanged": [],
+      "changesPerRule": {}
+    }
+  ],
+  "changesPerRule": {},
+  "filesPerRule": null,
+  "keptFindings": [
+    {
+      "path": "src/Microsoft.OpenApi/Reader/JsonNodeHelper.cs",
+      "line": 247,
+      "column": 30,
+      "rule": "BRO1302",
+      "reason": "UsedInProjectNotLoaded",
+      "reasonText": "code this format run doesn't load (another run's project, or a file outside the loaded projects) uses the name, so the rename would miss that use",
+      "message": "Rename 'JsonObject' to 'jsonObject'"
+    },
+    {
+      "path": "test/Microsoft.OpenApi.Tests/Models/OpenApiOperationTests.cs",
+      "line": 90,
+      "column": 41,
+      "rule": "BRO1309",
+      "reason": "OtherPropertyKept",
+      "reasonText": "another property of the type keeps its name (it's in a string, a snapshot file or a XAML file, or it's snake_case), so all of them keep theirs",
+      "message": "Rename '_advancedOperationWithTagsAndSecurity' to 'AdvancedOperationWithTagsAndSecurity'"
+    }
+  ],
+  "patch": null,
+  "clean": true,
+  "exitCode": 0,
+  "notChecked": [
+    "xunit.analyzers' rules: xunit.analyzers 2.2.0's fixes have no Fix All, so 'dotnet format' can't apply or check them (a note: the build still reports their warnings; the verdict doesn't count them)",
+    "IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)"
+  ]
+}

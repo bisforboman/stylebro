@@ -1,0 +1,34 @@
+Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net48, net6.0, net8.0, netcoreapp3.1, netstandard2.0). net6.0, net8.0: only the projects whose code compiles differently there.
+Configurations: runs for Release (Dapper.AOT, Dapper.AOT.Analyzers, Dapper.AOT.Test, UsageBenchmark) too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.
+Shared files: these projects compile the same files with other '#if' symbols or settings, so each group gets a run of its own (loaded together, 'dotnet format' crashes: https://github.com/dotnet/roslyn/issues/86001): Dapper.AOT, UsageLinker | UsageVanilla; Dapper.AOT.Analyzers | Dapper.AOT.
+Checked netcoreapp3.1, Release (run 1 of 15)
+Checked netstandard2.0, Release, part 1 of 2 (run 2 of 15)
+Checked netstandard2.0, Release, part 2 of 2 (run 3 of 15)
+Checked net10.0, Release (run 4 of 15)
+Checked net8.0 (run 5 of 15)
+Checked netcoreapp3.1 (run 6 of 15)
+Checked net48, Release (run 7 of 15)
+Checked netstandard2.0, part 1 of 2 (run 8 of 15)
+Checked net6.0, Release (run 9 of 15)
+Checked net10.0, part 1 of 2 (run 10 of 15)
+Checked net10.0, part 2 of 2 (run 11 of 15)
+Checked netstandard2.0, part 2 of 2 (run 12 of 15)
+Checked net8.0, Release (run 13 of 15)
+Checked net48 (run 14 of 15)
+Checked net6.0 (run 15 of 15)
+'dotnet format' had warnings loading the workspace in its net10.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+Not checked: xunit.analyzers' rules: xunit.analyzers 1.27.0's fixes have no Fix All, so 'dotnet format' can't apply or check them (a note: the build still reports their warnings; the verdict doesn't count them)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Not checked: Dapper.AOT (net10.0, part 1 of 2; net48; net6.0; netcoreapp3.1; netstandard2.0, part 2 of 2; net10.0, Release; net48, Release; net6.0, Release; netcoreapp3.1, Release; netstandard2.0, Release, part 2 of 2): MSBuild failed loading it (The "Nerdbank.GitVersioning.Tasks.GetBuildVersion" task failed unexpectedly), so 'dotnet format' had none of its build settings and StyleBro's rules didn't run there
+Not checked: Dapper.AOT.Test (net10.0, part 1 of 2; net48; net8.0; net10.0, Release; net48, Release; net8.0, Release): MSBuild failed loading it (The "Nerdbank.GitVersioning.Tasks.GetBuildVersion" task failed unexpectedly), so 'dotnet format' had none of its build settings and StyleBro's rules didn't run there
+Not checked: UsageBenchmark (net10.0, part 1 of 2; net10.0, Release): MSBuild failed loading it (The "Nerdbank.GitVersioning.Tasks.GetBuildVersion" task failed unexpectedly), so 'dotnet format' had none of its build settings and StyleBro's rules didn't run there
+Not checked: UsageLinker (net10.0, part 1 of 2): MSBuild failed loading it (The "Nerdbank.GitVersioning.Tasks.GetBuildVersion" task failed unexpectedly), so 'dotnet format' had none of its build settings and StyleBro's rules didn't run there
+Not checked: UsageVanilla (net10.0, part 2 of 2): MSBuild failed loading it (The "Nerdbank.GitVersioning.Tasks.GetBuildVersion" task failed unexpectedly), so 'dotnet format' had none of its build settings and StyleBro's rules didn't run there
+Not checked: Dapper.AOT.Test.Integration.Executables (net8.0): MSBuild failed loading it (The "Nerdbank.GitVersioning.Tasks.GetBuildVersion" task failed unexpectedly), so 'dotnet format' had none of its build settings and StyleBro's rules didn't run there
+Not checked: Dapper.AOT.Test.Integration (net8.0): MSBuild failed loading it (The "Nerdbank.GitVersioning.Tasks.GetBuildVersion" task failed unexpectedly), so 'dotnet format' had none of its build settings and StyleBro's rules didn't run there
+Not checked: docs (netstandard2.0, part 1 of 2): MSBuild failed loading it (The "Nerdbank.GitVersioning.Tasks.GetBuildVersion" task failed unexpectedly), so 'dotnet format' had none of its build settings and StyleBro's rules didn't run there
+Not checked: Dapper.Advisor (netstandard2.0, part 1 of 2): MSBuild failed loading it (The "Nerdbank.GitVersioning.Tasks.GetBuildVersion" task failed unexpectedly), so 'dotnet format' had none of its build settings and StyleBro's rules didn't run there
+Not checked: Dapper.AOT.Analyzers (netstandard2.0, part 1 of 2; netstandard2.0, Release, part 1 of 2): MSBuild failed loading it (The "Nerdbank.GitVersioning.Tasks.GetBuildVersion" task failed unexpectedly), so 'dotnet format' had none of its build settings and StyleBro's rules didn't run there
+Not verified: 10 parts of the build weren't checked (the 'Not checked:' lines above); the rest is clean. The build may still report findings there: fix what's named, or build it (bro check --build).

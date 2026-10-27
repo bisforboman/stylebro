@@ -1,0 +1,35 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.300/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand57/DapperLib-DapperAOT'. [/home/user/w57/DapperAOT/default2/src/Dapper.AOT.Analyzers/Dapper.AOT.Analyzers.csproj]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.300/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w57/DapperAOT/default2/src/Dapper.AOT.Analyzers/Dapper.AOT.Analyzers.csproj]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.300/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand57/DapperLib-DapperAOT'. [/home/user/w57/DapperAOT/default2/docs/docs.csproj]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.300/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w57/DapperAOT/default2/docs/docs.csproj]
+  docs -> /home/user/w57/DapperAOT/default2/docs/bin/Debug/netstandard2.0/docs.dll
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.300/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand57/DapperLib-DapperAOT'. [/home/user/w57/DapperAOT/default2/test/UsageVanilla/UsageVanilla.csproj]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.300/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w57/DapperAOT/default2/test/UsageVanilla/UsageVanilla.csproj]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.300/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand57/DapperLib-DapperAOT'. [/home/user/w57/DapperAOT/default2/test/UsageLinker/UsageLinker.csproj]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.300/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand57/DapperLib-DapperAOT'. [/home/user/w57/DapperAOT/default2/test/UsageBenchmark/UsageBenchmark.csproj]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.300/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w57/DapperAOT/default2/test/UsageBenchmark/UsageBenchmark.csproj]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.300/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w57/DapperAOT/default2/test/UsageLinker/UsageLinker.csproj]
+  UsageVanilla -> /home/user/w57/DapperAOT/default2/test/UsageVanilla/bin/Debug/net10.0/UsageVanilla.dll
+/home/user/w57/DapperAOT/default2/src/Dapper.AOT.Analyzers/CodeAnalysis/DapperAnalyzer.Diagnostics.cs(29,13): error RS1032: The diagnostic message should not contain any line return character nor any leading or trailing whitespaces and should either be a single sentence without a trailing period or a multi-sentences with a trailing period [/home/user/w57/DapperAOT/default2/src/Dapper.AOT.Analyzers/Dapper.AOT.Analyzers.csproj]
+  UsageBenchmark -> /home/user/w57/DapperAOT/default2/test/UsageBenchmark/bin/Debug/net10.0/UsageBenchmark.dll
+  UsageLinker -> /home/user/w57/DapperAOT/default2/test/UsageLinker/bin/Debug/net10.0/win-x64/UsageLinker.dll
+
+Build FAILED.
+
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.300/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand57/DapperLib-DapperAOT'. [/home/user/w57/DapperAOT/default2/src/Dapper.AOT.Analyzers/Dapper.AOT.Analyzers.csproj]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.300/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w57/DapperAOT/default2/src/Dapper.AOT.Analyzers/Dapper.AOT.Analyzers.csproj]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.300/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand57/DapperLib-DapperAOT'. [/home/user/w57/DapperAOT/default2/docs/docs.csproj]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.300/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w57/DapperAOT/default2/docs/docs.csproj]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.300/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand57/DapperLib-DapperAOT'. [/home/user/w57/DapperAOT/default2/test/UsageVanilla/UsageVanilla.csproj]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.300/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w57/DapperAOT/default2/test/UsageVanilla/UsageVanilla.csproj]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.300/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand57/DapperLib-DapperAOT'. [/home/user/w57/DapperAOT/default2/test/UsageLinker/UsageLinker.csproj]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.300/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand57/DapperLib-DapperAOT'. [/home/user/w57/DapperAOT/default2/test/UsageBenchmark/UsageBenchmark.csproj]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.300/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w57/DapperAOT/default2/test/UsageBenchmark/UsageBenchmark.csproj]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.300/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w57/DapperAOT/default2/test/UsageLinker/UsageLinker.csproj]
+/home/user/w57/DapperAOT/default2/src/Dapper.AOT.Analyzers/CodeAnalysis/DapperAnalyzer.Diagnostics.cs(29,13): error RS1032: The diagnostic message should not contain any line return character nor any leading or trailing whitespaces and should either be a single sentence without a trailing period or a multi-sentences with a trailing period [/home/user/w57/DapperAOT/default2/src/Dapper.AOT.Analyzers/Dapper.AOT.Analyzers.csproj]
+    10 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:07.20

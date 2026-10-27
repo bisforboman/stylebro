@@ -34,6 +34,9 @@ internal static partial class FormatCommand
     /// <summary>How a gap line that is only a note ends (<see cref="Unverified"/>).</summary>
     private const string NoteEnd = "the verdict doesn't count them)";
 
+    /// <summary>How <see cref="NotVerifiedLine"/> ends: what to do about the parts it names.</summary>
+    private const string BuildMayReport = "The build may still report findings there: fix what's named, or build it (bro check --build).";
+
     /// <summary>A gap line: <paramref name="what"/> wasn't checked, <paramref name="why"/>.</summary>
     public static string Gap(string what, string why) => $"{NotCheckedPrefix} {what}: {why}";
 
@@ -64,7 +67,20 @@ internal static partial class FormatCommand
     /// <summary>The verdict when <paramref name="count"/> gaps are left (the lines above it).</summary>
     public static string NotVerifiedLine(int count) =>
         $"{NotVerifiedMarker} {count} part{(count == 1 ? " of the build wasn't" : "s of the build weren't")} checked (the '{NotCheckedPrefix}' line{(count == 1 ? string.Empty : "s")} above); the rest is clean. "
-        + "The build may still report findings there: fix what's named, or build it (bro check --build).";
+        + BuildMayReport;
+
+    /// <summary>
+    /// <see cref="NotVerifiedLine"/> after the builds of 'check --build' (<paramref name="line"/>), which comes after them
+    /// (owner's decision 2026-10-27; trial 57, Newtonsoft.Json.Bson: it came before six clean builds, said to run the command
+    /// running, and the output ended with the last build's line): what the builds checked there and what they don't when they
+    /// found nothing (<paramref name="buildsClean"/>), else without the hint to build.
+    /// </summary>
+    public static string AfterBuilds(string line, bool buildsClean) =>
+        !line.EndsWith(BuildMayReport, StringComparison.Ordinal) ? line
+            : buildsClean ? line.Substring(0, line.Length - BuildMayReport.Length)
+                + "The builds above compiled that code with warnings as errors: StyleBro's rules at warning or error were checked there, "
+                + "not the whitespace and the IDE fixes a build doesn't enforce (EnforceCodeStyleInBuild)."
+            : line.Substring(0, line.Length - BuildMayReport.Length).TrimEnd();
 
     /// <summary>The gap lines for the projects 'dotnet format' skipped (<see cref="Incomplete"/>'s arguments).</summary>
     public static List<string> SkippedGaps(IReadOnlyDictionary<string, SortedSet<string>> skipped, IReadOnlyDictionary<string, List<string>> frameworks, IReadOnlyCollection<string>? unsupported = null)
@@ -79,6 +95,25 @@ internal static partial class FormatCommand
                 : Gap($"{s.Key} ({string.Join(", ", s.Value.Where(f => f.Length > 0))})", why + ", so the code only that framework compiles"))
             .ToList();
     }
+
+    /// <summary>
+    /// The gap line for a project whose design-time build failed (<see cref="LoadFailure"/>) in the runs named by <paramref name="where"/>
+    /// ('net10.0', 'net48, Release'; empty: the only run): 'dotnet format' loaded it without its compiler's command line, so
+    /// none of its build settings (the preset, the .editorconfig, the '#if' symbols) applied and StyleBro's rules didn't run
+    /// there (owner's decision 2026-10-27; trial 57, DapperAOT: Nerdbank.GitVersioning's negative build number in a shallow clone).
+    /// </summary>
+    public static string LoadFailureGap(string project, IReadOnlyCollection<string> where, string message) =>
+        Gap(where.Count == 0 ? project : $"{project} ({string.Join("; ", where)})", $"MSBuild failed loading it ({message.TrimEnd('.')}), so 'dotnet format' had none of its build settings and StyleBro's rules didn't run there");
+
+    /// <summary>
+    /// The first error of a failed design-time build's <paramref name="output"/> ('error : build ('-2') must be a non-negative
+    /// value. (Parameter 'build')'), without its code and project; null without one.
+    /// </summary>
+    public static string? FirstBuildError(string output) =>
+        output.Split('\n').Select(l => System.Text.RegularExpressions.Regex.Match(l, @"(?:^|:\s)error(?: [A-Za-z]+\d+)?\s*:\s*(?<message>.+?)(?:\s+\[[^\]]*\])?\s*$"))
+            .Where(m => m.Success)
+            .Select(m => m.Groups["message"].Value.Trim())
+            .FirstOrDefault(m => m.Length > 0);
 
     /// <summary>The gap lines for the projects that need workload packs this machine lacks (project path relative to the root).</summary>
     public static List<string> WorkloadGaps(IEnumerable<(string Project, string[] Packs)> projects) =>

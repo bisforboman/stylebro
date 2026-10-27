@@ -1,0 +1,6 @@
+build	0	27s	dotnet build Microsoft.OpenApi.slnx -c Debug
+twae-Debug	0	20s	twae Debug
+test-Debug	0	17s	env CFG=Debug bash -c dotnet test --solution Microsoft.OpenApi.slnx -c $CFG
+twae-Release	0	26s	twae Release
+test-Release	0	13s	env CFG=Release bash -c dotnet test --solution Microsoft.OpenApi.slnx -c $CFG
+DONE

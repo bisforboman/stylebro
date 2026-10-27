@@ -81,6 +81,9 @@ it. Each part they couldn't check gets a `Not checked: <what>: <why>` line befor
 
 - a project `dotnet format` couldn't load (references didn't load, a reference to an F# project), in every run or for
   some target frameworks (`Incomplete:` / `Partly incomplete:` above it);
+- a project whose design-time build fails while it loads (in a run whose load warned), for example Nerdbank.GitVersioning
+  in a shallow clone: it loads without its build settings, so StyleBro's rules don't run there (`MSBuild failed loading it`,
+  with MSBuild's error);
 - a project that needs a workload this machine doesn't have (Android, iOS, ...);
 - a project the build compiles that the solution doesn't list, which no run loads (a multi-targeted one), or which only
   the default configuration's run formats while its `#if` code depends on the configuration;

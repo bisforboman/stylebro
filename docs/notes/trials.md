@@ -944,3 +944,47 @@ engines (`.trials/README.md`, "Engine soak").
 - Environment: SDK 10.0.113 + 8.0.132 and pwsh were there; FusionCache's tests use MTP (`dotnet test --solution`); DynamicData needs a
   full clone (Nerdbank.GitVersioning) and DOTNET_ROLL_FORWARD=Major (net9.0 tests); a new build of the tool went to its own tool folder
   so running chains kept theirs; `pkill -f` with the pattern in the same command killed the calling shell (CLAUDE.md's gotcha).
+
+## Trial 57 (2026-10-27, not clean: owner "Not clean", tally 0; host soak: clean, the second clean soak with the host as the default)
+
+- Repos (three random plus one targeted): JamesNK/Newtonsoft.Json.Bson, microsoft/OpenAPI.NET, sergeyteplyakov/ErrorProne.NET
+  (random, seed 57: draws 5, 47, 75 of 79 entries; 5 and 47 walked past the used entries and dotNext (1,160 files),
+  fluentmigrator (1,248 files, net48, databases) and PropertyChanged (net48 everywhere) to 68 and 69; only entries 70, 73, 74,
+  76-78 are unused now; `.trials/trial57/logs/picks.md`), DapperLib/DapperAOT (targeted at trial 56's MSB4186 retry:
+  `$([System.String]::Copy(%(Filename)).Replace(...))` in its test project; ~50 repositories scanned with `scan.py`, leading
+  commas in code are rare: Mapster (trial 11) was the only fit; added to the pool). Tested main 9e5b542 (after #308). Logs:
+  `.trials/trial57/<repo>/logs/` (round 1 `default`/`dotnet` on 0.8.0-trial57.1, round 2 `default2`/`dotnet2` on .2).
+- One session, two chains (base, default = host, `--engine dotnet-format` on fresh clones, then `Compare-Format.ps1`). Wall
+  clock: 05:40 start (waited for #308 until 06:32), runs 06:35-08:28, fixes, round 2 09:16-11:07.
+- DapperAOT: one test failed after format (CS9052 in generated code): BRO1404 added `internal` to an embedded-resource
+  template's `#if !DAPPERAOT_INTERNAL` / `file` / `#endif` / `static class DbStringHelpers`, which its tests compile with the
+  symbol defined. BRO1404 skips modifiers that depend on `#if` now.
+- DapperAOT: the preview listed 164 files, format then changed 186. The preview's copy had a git history of its own two
+  commits, so Nerdbank.GitVersioning's `versionHeightOffset: -4` gave a negative build number, the design-time build of
+  Dapper.AOT.Analyzers stopped before the compiler's command line, and the project loaded without its settings: no BRO
+  findings there, and only the load-warning note said anything. A depth-1 clone (CI's checkout) did the same: `format` then
+  `check` said "Clean." with 22 files of findings left. Owner's decisions: such a project is `Not checked` with MSBuild's error
+  (a design-time probe for the runs whose load warned; SourceLink's "has no remote" fails no target and isn't one), and the
+  preview's copy borrows the repository's objects, HEAD, remotes and shallow boundary. Round 2: previews matched format on
+  all four; the shallow clone says Not verified (exit 3) with the same 10 gaps on both engines.
+- DapperAOT: `check --build` after the trial's builds said "Not clean" (7 CS0234 in Dapper.AOT.Test.Integration), the next run
+  "Not verified": after a design-time load MSBuild compiled that project without the reference that failed (RS1032, untouched
+  too), where the HEAD copy's build never compiled it. Owner: such errors are `Not compared` and Not verified. Trial 56's
+  lens held: `check` before format, after format and after the builds ran without MSB4186.
+- Newtonsoft.Json.Bson: netstandard1.3 doesn't load in `dotnet format` (Not verified by design, as trials 31/43/47); `check
+  --build` printed that verdict before six clean builds, with a hint to run `check --build`, and ended on a build's line.
+  Owner: the verdict comes after the builds now and says what they checked.
+- OpenAPI.NET: 400 files, clean after one run, 2 kept findings baselined (a public parameter named like a type an unloaded
+  file uses, kept by design). ErrorProne.NET: 98 files; TWAE fails untouched on NU1603, check --build Not verified, honest.
+  The TWAE builds failed untouched on ErrorProne.NET and DapperAOT and matched after the fixes; every test suite matched
+  the untouched code on both rounds (round 1 DapperAOT: the CS9052 test).
+- Host soak: no fallback to dotnet format; trees, exit codes, verdicts, --json, builds and tests identical on all four in both
+  rounds, Compare-Format Same eight times. DapperAOT round 2's check --build named Dapper.AOT.Test.Integration as not compared
+  in the host clone only: MSBuild's state after the earlier loads, as in round 1 on both engines, same verdict. Format (s,
+  host/dotnet-format, trial runs r1; r2): Bson 42/118; 51/160, OpenAPI.NET 151/283; 149/360, ErrorProne.NET 38/58; 39/70,
+  DapperAOT 147/764; 160/727. Soak format r2: 41/122, 133/332, 35/59, 115/569.
+- Environment: SDK 10.0.113 + 8.0.132 and pwsh were there; blocked feeds (myget for Json.Bson, dnceng dotnet-tools for
+  ErrorProne.NET) removed in the clones; global.json files lowered; DapperAOT needs a full clone and a `StyleBro.*`
+  packageSourceMapping for the trial feed (`addfeed.py`); `dotnet test` reads global.json from the current folder (run it in
+  the repository); running the whole of a third-party test suite was refused once by the auto-mode check (DapperAOT, whose
+  Integration tests need Docker anyway): its CI's unit-test step instead. A watcher with `pgrep -f` matched itself again.

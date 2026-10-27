@@ -1,0 +1,12 @@
+preview	3	129s	bro preview init --engine dotnet-format
+setup	0	6s	bash -c printf "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial57.2\" PrivateAssets=\"all\" />\n  </ItemGroup>\n</Project>\n" > Directory.Build.props && cat Directory.Build.props && bro init --write
+format	3	160s	bro format --engine dotnet-format
+check	3	58s	bro check --engine dotnet-format
+check-json	3
+checkbuild	3	175s	bro check --build --engine dotnet-format
+checkbuild-json	3
+twae-Debug	0	7s	twae Debug
+test-Debug	0	9s	env CFG=Debug bash -c cd Src && dotnet test Newtonsoft.Json.Bson.slnx -c $CFG
+twae-Release	0	5s	twae Release
+test-Release	0	10s	env CFG=Release bash -c cd Src && dotnet test Newtonsoft.Json.Bson.slnx -c $CFG
+DONE

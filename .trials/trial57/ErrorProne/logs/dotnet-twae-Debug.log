@@ -1,0 +1,12 @@
+  Determining projects to restore...
+/home/user/w57/ErrorProne/dotnet/src/ErrorProne.NET.CoreAnalyzers/ErrorProne.NET.CoreAnalyzers.csproj : error NU1603: Warning As Error: ErrorProne.NET.CoreAnalyzers.RenameToAvoidConflict depends on Microsoft.CodeAnalysis.Analyzers (>= 4.13.0) but Microsoft.CodeAnalysis.Analyzers 4.13.0 was not found. Microsoft.CodeAnalysis.Analyzers 4.14.0 was resolved instead. [/home/user/w57/ErrorProne/dotnet/src/ErrorProne.NET.sln]
+  Failed to restore /home/user/w57/ErrorProne/dotnet/src/ErrorProne.NET.CoreAnalyzers/ErrorProne.NET.CoreAnalyzers.csproj (in 488 ms).
+  3 of 4 projects are up-to-date for restore.
+
+Build FAILED.
+
+/home/user/w57/ErrorProne/dotnet/src/ErrorProne.NET.CoreAnalyzers/ErrorProne.NET.CoreAnalyzers.csproj : error NU1603: Warning As Error: ErrorProne.NET.CoreAnalyzers.RenameToAvoidConflict depends on Microsoft.CodeAnalysis.Analyzers (>= 4.13.0) but Microsoft.CodeAnalysis.Analyzers 4.13.0 was not found. Microsoft.CodeAnalysis.Analyzers 4.14.0 was resolved instead. [/home/user/w57/ErrorProne/dotnet/src/ErrorProne.NET.sln]
+    0 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:02.26
