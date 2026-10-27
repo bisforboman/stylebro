@@ -38,6 +38,61 @@ public sealed class FormatHostFixTests : IDisposable
     }
 
     [Fact]
+    public void AFixer_ForAnotherLanguage_IsLeftOut()
+    {
+        // The visual-basic fixture: with a Visual Basic project in the workspace, IDE0036's VB fixer ran after the C# one on the
+        // C# diagnostics and deleted the method whose modifiers it was handed.
+        CodeFixProvider[] fixers = [new CSharpFixer("X1"), new BasicFixer("X1"), new Fixer("X1")];
+
+        Assert.Equal([typeof(CSharpFixer), typeof(Fixer)], FixOrder.FixersFor("X1", fixers, [LanguageNames.CSharp]).Select(f => f.GetType()));
+        Assert.Equal([typeof(BasicFixer), typeof(Fixer)], FixOrder.FixersFor("X1", fixers, [LanguageNames.VisualBasic]).Select(f => f.GetType()));
+        Assert.Equal(3, FixOrder.FixersFor("X1", fixers, [LanguageNames.CSharp, LanguageNames.VisualBasic]).Count);
+        Assert.Equal(3, FixOrder.FixersFor("X1", fixers).Count);
+
+        // No diagnostics left for the id (Newtonsoft.Json: "No associated code fix found"): every fixer stays.
+        Assert.Equal(3, FixOrder.FixersFor("X1", fixers, FixOrder.LanguagesOf([])).Count);
+        Assert.Equal(2, FixOrder.FixersFor("X1", fixers, FixOrder.LanguagesOf([LanguageNames.CSharp, LanguageNames.CSharp])).Count);
+    }
+
+    [Fact]
+    public void AFixStepsAnalysis_KeepsTheSuppressorsOfItsIds()
+    {
+        // solution-in-subfolder on SDK 10.0.4xx: the baseline is a suppressor, which reports no diagnostic of its own; dropped
+        // from a fix step, the check's copy listed a baselined kept finding again.
+        DiagnosticAnalyzer[] analyzers = [new ClassAnalyzer("T1"), new ClassAnalyzer("T2"), new Suppressor("T1"), new Suppressor("T2")];
+
+        var kept = FixOrder.AnalyzersFor(analyzers, new HashSet<string> { "T1" });
+
+        Assert.Collection(kept, a => Assert.Same(analyzers[0], a), a => Assert.Same(analyzers[2], a));
+    }
+
+    [Fact]
+    public async Task TheCache_AppliesTheSuppressorsAskedFor()
+    {
+        // solution-in-subfolder on SDK 10.0.4xx: a finding the baseline (a DiagnosticSuppressor) hides was listed by the host's
+        // check, because an analysis result's diagnostics come before the suppressors. Also when the suppressor's own (empty)
+        // result was cached before the analyzer ran.
+        using var workspace = new AdhocWorkspace();
+        var lib = ProjectId.CreateNewId();
+        var solution = workspace.CurrentSolution
+            .AddProject(ProjectInfo.Create(lib, VersionStamp.Default, "Lib", "Lib", LanguageNames.CSharp))
+            .AddDocument(DocumentId.CreateNewId(lib), "A.cs", "class Shown { }\nclass Hidden { }", filePath: "/r/Lib/A.cs");
+        var project = solution.GetProject(lib)!;
+        var classes = new ClassAnalyzer("T1");
+        var hides = new HidingSuppressor("T1", "Hidden");
+
+        var both = await new AnalysisCache().GetAsync(project, [classes, hides], [], null, CancellationToken.None);
+        Assert.Equal(["Shown"], both.Select(d => d.GetMessage()));
+
+        var cache = new AnalysisCache();
+        Assert.Empty(await cache.GetAsync(project, [hides], [], null, CancellationToken.None));
+        Assert.Equal(["Shown"], (await cache.GetAsync(project, [classes, hides], [], null, CancellationToken.None)).Select(d => d.GetMessage()));
+
+        // Without the suppressor, the finding is there.
+        Assert.Equal(["Hidden", "Shown"], (await new AnalysisCache().GetAsync(project, [classes], [], null, CancellationToken.None)).Select(d => d.GetMessage()).Order(StringComparer.Ordinal));
+    }
+
+    [Fact]
     public async Task TheCache_RunsAnAnalyzer_OnlyOnContentItHasntSeen()
     {
         using var workspace = new AdhocWorkspace();
@@ -299,6 +354,26 @@ public sealed class FormatHostFixTests : IDisposable
         public override Task RegisterCodeFixesAsync(CodeFixContext context) => Task.CompletedTask;
     }
 
+    [ExportCodeFixProvider(LanguageNames.CSharp)]
+    private sealed class CSharpFixer(params string[] ids) : CodeFixProvider
+    {
+        public override ImmutableArray<string> FixableDiagnosticIds => [.. ids];
+
+        public override FixAllProvider? GetFixAllProvider() => null;
+
+        public override Task RegisterCodeFixesAsync(CodeFixContext context) => Task.CompletedTask;
+    }
+
+    [ExportCodeFixProvider(LanguageNames.VisualBasic)]
+    private sealed class BasicFixer(params string[] ids) : CodeFixProvider
+    {
+        public override ImmutableArray<string> FixableDiagnosticIds => [.. ids];
+
+        public override FixAllProvider? GetFixAllProvider() => null;
+
+        public override Task RegisterCodeFixesAsync(CodeFixContext context) => Task.CompletedTask;
+    }
+
 #pragma warning disable RS1001, RS1017, RS1036 // A test analyzer.
     private sealed class ClassAnalyzer(string id) : DiagnosticAnalyzer
     {
@@ -311,6 +386,30 @@ public sealed class FormatHostFixTests : IDisposable
             context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
             context.EnableConcurrentExecution();
             context.RegisterSyntaxNodeAction(c => c.ReportDiagnostic(Diagnostic.Create(this.descriptor, ((ClassDeclarationSyntax)c.Node).Identifier.GetLocation(), ((ClassDeclarationSyntax)c.Node).Identifier.Text)), SyntaxKind.ClassDeclaration);
+        }
+    }
+
+    private sealed class Suppressor(string id) : DiagnosticSuppressor
+    {
+        public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions => [new SuppressionDescriptor("S" + id, id, "t")];
+
+        public override void ReportSuppressions(SuppressionAnalysisContext context)
+        {
+        }
+    }
+
+    private sealed class HidingSuppressor(string id, string name) : DiagnosticSuppressor
+    {
+        private readonly SuppressionDescriptor descriptor = new("S" + id, id, "t");
+
+        public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions => [this.descriptor];
+
+        public override void ReportSuppressions(SuppressionAnalysisContext context)
+        {
+            foreach (var diagnostic in context.ReportedDiagnostics.Where(d => d.GetMessage() == name))
+            {
+                context.ReportSuppression(Suppression.Create(this.descriptor, diagnostic));
+            }
         }
     }
 #pragma warning restore RS1001, RS1017, RS1036

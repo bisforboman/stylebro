@@ -988,3 +988,44 @@ engines (`.trials/README.md`, "Engine soak").
   packageSourceMapping for the trial feed (`addfeed.py`); `dotnet test` reads global.json from the current folder (run it in
   the repository); running the whole of a third-party test suite was refused once by the auto-mode check (DapperAOT, whose
   Integration tests need Docker anyway): its CI's unit-test step instead. A watcher with `pgrep -f` matched itself again.
+
+## Fixture matrix (2026-10-27, owner: "fixture matrix first, then trials")
+
+- Why: every trial since 46 was not clean, about half of each trial's repositories needed a fix, and each fix became a one-off
+  unit test. `scripts/fixtures/` (README there) covers each recurring CLASS of repository shape end to end: tiny generated
+  repositories run through preview, init/migrate, format, check, check --build (both engines), a TWAE build and their own
+  tests, with packages packed from the commit. Each asserts honest verdicts and exit codes, one-run convergence, preview =
+  format (C# files and baselines), builds and tests green, and identical trees, exit codes and --json on both engines.
+- Shapes (24): basic; git state: git-height-history, git-height-shallow (Nerdbank.GitVersioning), built-checkout (MSB4184 and
+  MSB4186 on an already-built checkout); committed or generated files: committed-nupkg, t4-outputs, designer-files,
+  generated-name-in-project, in-solution-generator; line endings and encoding: line-endings, crlf-under-text-auto, encoding;
+  multi-targeting: two-paths, trimmer-like (`packages/Fixture.Trimmer`, ReferenceTrimmer's props/targets shape); layout:
+  subfolder-props, solution-in-subfolder, unlisted-projects, solution-filter; other: design-time-failure, if-dependent,
+  visual-basic, xunit-analyzers, xunit-no-fixall, stylecop-cpm (path B under central package management).
+- Found: `check --build` in a shallow clone of a git-height-versioned repository said "Not clean": its copy of HEAD had no
+  `.git`, so Nerdbank.GitVersioning built there and the clone's identical failures counted as new.
+  `FormatCommand.WithHistory` gives the copy the repository's history (`PreviewCommand.BorrowHistory`) and HEAD's index.
+- Found: the host engine DELETED a C# method in a solution whose C# tests reference a Visual Basic project: `FixOrder.FixersFor`
+  took every fixer for an id, so IDE0036's Visual Basic fixer ran after the C# one on the C# diagnostics (the VB build then
+  failed, BC30456). Only fixers exported for the diagnostics' languages run now (`FixOrder.LanguagesOf`). The old engine was
+  right; only the engine comparison and the VB build showed it.
+- Found on CI's SDK 10.0.4xx only: after format baselined a kept finding, the host's `check` still listed it (the old engine
+  didn't). Two gaps let the baseline's DiagnosticSuppressor miss it: `AnalysisCache` ran a suppressor only when its own
+  (empty) result wasn't cached, and read each analyzer's diagnostics from the analysis result, before suppressions (it now
+  runs the suppressors asked for with every analysis and keeps what `GetAnalyzerDiagnosticsAsync` leaves); and the fix steps
+  analyzed with only the analyzers reporting the step's ids (`FixOrder.AnalyzersFor` keeps their suppressors). Locally
+  (SDK 10.0.1xx loads no suppressors in `dotnet format`) both engines list it; confirmed on CI.
+- Found by the real-world run (Newtonsoft.Json) on this PR: the fixer-language filter with no diagnostics left for an id
+  filtered out every fixer ("No associated code fix found", format didn't settle); no filter then (`FixOrder.LanguagesOf`).
+- CI lessons: a pwsh step without an explicit `exit 0` ends with the last native command's code; Nerdbank.GitVersioning
+  under GITHUB_ACTIONS writes to `$GITHUB_ENV` (the runner clears the CI variables for the fixtures).
+  Everything else the first round flagged was the fixtures' own mistakes (a net8.0 test referencing a net10.0-only project,
+  VB's `Lib` keyword, a lone CR ending a `//` comment, a missing `<Nullable>`), and StyleBro's verdicts named them honestly
+  ("Not verified": the untouched build fails). The runner now builds each fixture untouched first.
+- Held as designed (now asserted): IDE0049's held-back note on SDK 10.0.1xx; a lone CR in a string makes the file "Not checked"
+  (exit 3) everywhere; xunit.analyzers 1.24+ in any project drops the xUnit ids for the whole run with a note (trial 44: a
+  mixed repository leaves the older project's fixable xUnit findings too); a solution filter checks what it lists; the
+  in-solution generator fixture is clean (no Release-only differences).
+- Cost: about 2.5-5 minutes per shape (two `check --build`s are half of it), about 80 minutes serial; CI runs six shards
+  (decision 2026-10-27: required on src/ PRs, nightly on main).
+- From now on: a trial finding that comes from the repository's shape adds a shape (`.trials/README.md`, step 4).

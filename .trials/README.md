@@ -44,7 +44,13 @@ used or rejected), `pool/` (checked candidates, tagged) and `random.json` (the f
    fourth repository is targeted at the last trial's fixes (a pool entry if one fits).
 3. Record each repository's commit, and why it was chosen, in the trial's logs; in the trial's PR add the four to
    `used.tsv` (and set `usedIn` on their pool entries).
-4. When the owner has given the verdict, the trial's PR adds its `## Trial NN` section (repositories, fixes, verdict and
+4. **A fixture for every new shape** (2026-10-27): a finding that comes from the repository's SHAPE (git state, committed
+   or generated files, line endings and encodings, multi-targeting, settings files and solution layout, ...), not from one
+   rule's code, adds a shape to the fixture matrix ([`scripts/fixtures/`](../scripts/fixtures/README.md)) in the fix's PR,
+   besides the unit test: a tiny repository that fails before the fix and passes after it, run with
+   `pwsh scripts/fixtures/Invoke-Fixtures.ps1 -Shape <name>`. A rule's own bug (a fix order, a rename) stays a unit test,
+   FixOrderTests case or Messy sample. Before a trial, the matrix runs green on the commit tested (CI's `fixtures` check).
+5. When the owner has given the verdict, the trial's PR adds its `## Trial NN` section (repositories, fixes, verdict and
    tally, environment notes) at the end of `docs/notes/trials.md` (not CLAUDE.md, since 2026-10-23).
 
 ## Where trials run (owner's decision, 2026-10-17)

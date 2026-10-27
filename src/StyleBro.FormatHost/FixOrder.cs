@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis.CodeFixes;
+using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace StyleBro.Host;
 
@@ -22,10 +24,37 @@ public static class FixOrder
     /// The fixers for <paramref name="id"/>, each type once. dotnet format collects every project's fixers and calls each one's
     /// Fix All (17 calls per id on Newtonsoft.Json, docs/proposals/fix-loop-costs-2026-10.md): only the first changes anything,
     /// since the others get the diagnostics of the documents the first one replaced. IDE0005's fixer reports
-    /// 'RemoveUnnecessaryImportsFixable', as dotnet format matches it.
+    /// 'RemoveUnnecessaryImportsFixable', as dotnet format matches it. With <paramref name="languages"/> (the languages of the
+    /// projects the diagnostics are in), only fixers exported for one of them (or for no language in particular): a C# project
+    /// next to a Visual Basic one got the VB fixer of IDE0036 after the C# one, and it deleted the C# method whose modifiers it
+    /// was handed (fixture matrix, visual-basic).
     /// </summary>
-    public static List<CodeFixProvider> FixersFor(string id, IEnumerable<CodeFixProvider> fixers) =>
+    public static List<CodeFixProvider> FixersFor(string id, IEnumerable<CodeFixProvider> fixers, IReadOnlyCollection<string>? languages = null) =>
         [.. fixers.Where(f => f.FixableDiagnosticIds.Contains(id) || (id == "IDE0005" && f.FixableDiagnosticIds.Contains("RemoveUnnecessaryImportsFixable")))
+            .Where(f => languages is null || LanguagesOf(f) is not { Count: > 0 } own || own.Overlaps(languages))
             .GroupBy(f => f.GetType())
             .Select(g => g.First())];
+
+    /// <summary>
+    /// The analyzers that report <paramref name="ids"/>, and the suppressors that can suppress them: a suppressor reports no
+    /// diagnostic of its own, and without it the baseline's suppressor (BaselineSuppressor) didn't run in a fix step, so the
+    /// fix of a check's copy listed a baselined kept finding again where 'dotnet format' didn't (fixture matrix,
+    /// solution-in-subfolder, on SDK 10.0.4xx).
+    /// </summary>
+    public static ImmutableArray<DiagnosticAnalyzer> AnalyzersFor(IEnumerable<DiagnosticAnalyzer> analyzers, IReadOnlySet<string> ids) =>
+        [.. analyzers.Where(a => a is DiagnosticSuppressor suppressor
+            ? suppressor.SupportedSuppressions.Any(s => ids.Contains(s.SuppressedDiagnosticId))
+            : a.SupportedDiagnostics.Any(d => ids.Contains(d.Id)))];
+
+    /// <summary>
+    /// The languages of a step's diagnostics for <see cref="FixersFor"/>, or null (every fixer) when there are none: a round
+    /// can leave an id nothing to fix, and an empty set filtered out every fixer, which said "No associated code fix found"
+    /// (Newtonsoft.Json's real-world run, BRO1513 and BRO1516).
+    /// </summary>
+    public static IReadOnlyCollection<string>? LanguagesOf(IEnumerable<string> languages) =>
+        languages.ToHashSet(StringComparer.Ordinal) is { Count: > 0 } set ? set : null;
+
+    /// <summary>The languages <paramref name="fixer"/> is exported for (its ExportCodeFixProvider attributes), empty without one.</summary>
+    public static HashSet<string> LanguagesOf(CodeFixProvider fixer) =>
+        new(fixer.GetType().GetCustomAttributes(typeof(ExportCodeFixProviderAttribute), inherit: false).OfType<ExportCodeFixProviderAttribute>().SelectMany(a => a.Languages), StringComparer.Ordinal);
 }

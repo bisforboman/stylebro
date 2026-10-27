@@ -1,0 +1,95 @@
+name: Fixtures
+
+# The fixture matrix (scripts/fixtures): tiny repositories in the shapes that kept breaking first-run trials, each run through
+# preview, init/migrate, format, check, check --build (both engines), a TreatWarningsAsErrors build and its tests, with
+# freshly packed StyleBro packages. Owner's decision 2026-10-27 (docs/decisions/): a required check (`fixtures`) that does
+# the work on pull requests changing src/, the fixtures or the build settings (.github/changes.sh `fixtures`), and on a
+# nightly run on main (a failure opens or updates the issue "Nightly fixture run failed"). The shapes are split over
+# parallel shards (sorted by name, index modulo the shard count).
+on:
+  pull_request:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: fixtures-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-26.04
+    outputs:
+      fixtures: ${{ steps.changes.outputs.fixtures }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - id: changes
+        run: bash .github/changes.sh
+
+  shard:
+    name: fixtures shard ${{ matrix.shard }}
+    needs: changes
+    runs-on: ubuntu-26.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5]
+    steps:
+      - name: Skipped (nothing the fixtures run changed)
+        if: needs.changes.outputs.fixtures == 'false'
+        run: echo "Neither src/, the fixtures nor the build settings changed."
+
+      - uses: actions/checkout@v7
+        if: needs.changes.outputs.fixtures != 'false'
+
+      # The fixtures' tests run on net8.0 and net10.0.
+      - uses: actions/setup-dotnet@v6
+        if: needs.changes.outputs.fixtures != 'false'
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Run the fixtures
+        if: needs.changes.outputs.fixtures != 'false'
+        shell: pwsh
+        run: ./scripts/fixtures/Invoke-Fixtures.ps1 -Shard ${{ matrix.shard }} -Shards 6 -Work '${{ runner.temp }}/fixtures'
+
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: fixtures-shard-${{ matrix.shard }}
+          path: ${{ runner.temp }}/fixtures/*/logs
+          if-no-files-found: ignore
+
+  # The required check. `always()` so a failed or cancelled shard fails it instead of skipping it.
+  fixtures:
+    needs: [changes, shard]
+    if: always()
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Check the shards
+        run: |
+          echo "Changes: ${{ needs.changes.result }}, shards: ${{ needs.shard.result }}"
+          test "${{ needs.changes.result }}" = success
+          test "${{ needs.shard.result }}" = success
+
+  # A failed nightly run opens the issue "Nightly fixture run failed", or comments on it while it is open.
+  nightly-issue:
+    needs: fixtures
+    if: ${{ failure() && github.event_name == 'schedule' }}
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      issues: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - run: bash .github/nightly-issue.sh "Nightly fixture run failed"
+        env:
+          GH_TOKEN: ${{ github.token }}

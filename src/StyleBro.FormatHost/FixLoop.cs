@@ -171,7 +171,7 @@ internal sealed class FixLoop(DotnetFormat format, AnalysisCache cache, Func<str
         {
             if (step.WithIds.TryGetValue(project.Id, out var had) && ids.Where(had.Contains).ToHashSet(StringComparer.Ordinal) is { Count: > 0 } wanted)
             {
-                var analyzers = step.ProjectAnalyzers[project.Id].Where(a => a.SupportedDiagnostics.Any(d => wanted.Contains(d.Id))).ToImmutableArray();
+                var analyzers = FixOrder.AnalyzersFor(step.ProjectAnalyzers[project.Id], wanted);
                 foreach (var diagnostic in await this.AnalyzeAsync(analyzers, project, step.Paths, step.Severity, step.CompilerIds, step.Logger, cancellation).ConfigureAwait(false))
                 {
                     if (wanted.Contains(diagnostic.Id))
@@ -188,7 +188,7 @@ internal sealed class FixLoop(DotnetFormat format, AnalysisCache cache, Func<str
     // The id's fixers on 'solution' (each type once, FixOrder), or null when nothing is left to fix or no fixer changed anything.
     private async Task<Solution?> ApplyAsync(Step step, string id, List<(Project Project, Diagnostic Diagnostic)> diagnostics, Solution solution, CancellationToken cancellation)
     {
-        var fixers = FixOrder.FixersFor(id, step.Fixers);
+        var fixers = FixOrder.FixersFor(id, step.Fixers, FixOrder.LanguagesOf(diagnostics.Select(d => d.Project.Language)));
         if (fixers.Count == 0)
         {
             step.Logger.LogWarning(format.Text("Unable_to_fix_0_No_associated_code_fix_found"), id);

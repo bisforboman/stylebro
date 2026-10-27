@@ -1,0 +1,15 @@
+<!-- A package shaped like ReferenceTrimmer (trial 54, Dapper): build/ props define what build/ and buildMultiTargeting/
+     targets need, so a project that imports the targets without the props fails. Packed by Invoke-Fixtures.ps1. -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <Description>Fixture package for StyleBro's fixture matrix.</Description>
+    <Authors>StyleBro</Authors>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="build/**" Pack="true" PackagePath="build" />
+    <None Include="buildMultiTargeting/**" Pack="true" PackagePath="buildMultiTargeting" />
+  </ItemGroup>
+</Project>
