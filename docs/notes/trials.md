@@ -945,7 +945,7 @@ engines (`.trials/README.md`, "Engine soak").
   full clone (Nerdbank.GitVersioning) and DOTNET_ROLL_FORWARD=Major (net9.0 tests); a new build of the tool went to its own tool folder
   so running chains kept theirs; `pkill -f` with the pattern in the same command killed the calling shell (CLAUDE.md's gotcha).
 
-## Trial 57 (2026-10-27, verdict pending; host soak: verdict pending)
+## Trial 57 (2026-10-27, not clean: owner "Not clean", tally 0; host soak: clean, the second clean soak with the host as the default)
 
 - Repos (three random plus one targeted): JamesNK/Newtonsoft.Json.Bson, microsoft/OpenAPI.NET, sergeyteplyakov/ErrorProne.NET
   (random, seed 57: draws 5, 47, 75 of 79 entries; 5 and 47 walked past the used entries and dotNext (1,160 files),
