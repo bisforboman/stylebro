@@ -1167,6 +1167,11 @@ internal static class PreviewCommand
     public static void MakeRepository(string folder, IReadOnlyCollection<string>? ignoredTracked = null, IReadOnlyCollection<string>? excluded = null, string? source = null)
     {
         GitChecked(folder, "init", "-q");
+        if (source is not null)
+        {
+            BorrowHistory(folder, source);
+        }
+
         if (source is not null && Git(source, "ls-files", "--eol", "-z") is (0, var eol) && CommittedWithCrLf(eol).ToList() is { Count: > 0 } kept)
         {
             File.AppendAllLines(Path.Combine(folder, ".git", "info", "attributes"), kept.Select(p => $"/{p} -text"));
@@ -1185,6 +1190,42 @@ internal static class PreviewCommand
         var copied = string.Concat((excluded ?? []).Select(f => $"/{f}/\n"));
         File.AppendAllText(Path.Combine(folder, ".git", "info", "exclude"), "\nbin/\nobj/\n" + packages + copied);
         Commit(folder, "baseline");
+    }
+
+    /// <summary>
+    /// Gives the new repository in <paramref name="folder"/> the history of <paramref name="source"/>'s: its objects (git
+    /// alternates, nothing copied), its HEAD commit as the start, its remotes' URLs and its shallow boundary. Version tools see
+    /// what they see in the repository (owner's decision 2026-10-27; trial 57, DapperAOT: in a copy with two commits,
+    /// Nerdbank.GitVersioning's versionHeightOffset -4 made the build number negative, the analyzer project loaded without its
+    /// settings and the preview missed 22 files format then changed). A source without a commit gives nothing.
+    /// </summary>
+    public static void BorrowHistory(string folder, string source)
+    {
+        if (Git(source, "rev-parse", "--verify", "-q", "HEAD^{commit}") is not (0, var head)
+            || Git(source, "rev-parse", "--path-format=absolute", "--git-common-dir") is not (0, var common))
+        {
+            return;
+        }
+
+        var objects = Path.Combine(common.Trim(), "objects");
+        File.WriteAllText(Path.Combine(folder, ".git", "objects", "info", "alternates"), objects + "\n");
+        var shallow = Path.Combine(common.Trim(), "shallow");
+        if (File.Exists(shallow))
+        {
+            File.Copy(shallow, Path.Combine(folder, ".git", "shallow"), overwrite: true);
+        }
+
+        GitChecked(folder, "update-ref", "HEAD", head.Trim());
+        if (Git(source, "remote") is (0, var remotes))
+        {
+            foreach (var remote in remotes.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                if (Git(source, "remote", "get-url", remote) is (0, var url))
+                {
+                    GitChecked(folder, "remote", "add", remote, url.Trim());
+                }
+            }
+        }
     }
 
     /// <summary>

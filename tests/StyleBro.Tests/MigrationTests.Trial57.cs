@@ -26,4 +26,45 @@ public sealed partial class MigrationTests
         Assert.StartsWith("Not checked: Lib: ", FormatCommand.LoadFailureGap("Lib", [], "x"), StringComparison.Ordinal);
         Assert.Single(FormatCommand.Unverified([gap]));
     }
+
+    [Fact]
+    public void ThePreviewsCopy_StartsFromTheRepositorysHistory()
+    {
+        // DapperAOT: the copy's repository had two commits of its own, so Nerdbank.GitVersioning's versionHeightOffset -4 made
+        // the build number negative there (and SourceLink found no remote): the analyzer project loaded without its settings,
+        // and the preview missed 22 files. The copy borrows the repository's objects, starts from its HEAD, keeps its remote.
+        Write("App/C.cs", "class C\n{\n}\n");
+        PreviewCommand.MakeRepository(root);
+        Write("App/D.cs", "class D\n{\n}\n");
+        PreviewCommand.MakeRepository(root); // a second commit (git init again keeps the repository)
+        Assert.Equal(0, PreviewCommand.Git(root, "remote", "add", "origin", "https://github.com/example/app.git").Code);
+        var head = PreviewCommand.Git(root, "rev-parse", "HEAD").Output.Trim();
+        File.WriteAllText(Path.Combine(root, "App", "C.cs"), "class C\n{\n    int x;\n}\n"); // not committed
+
+        var copy = Path.Combine(root, "..", Path.GetFileName(root) + "-copy");
+        var shallow = Path.Combine(root, "..", Path.GetFileName(root) + "-shallow");
+        var shallowCopy = Path.Combine(root, "..", Path.GetFileName(root) + "-shallow-copy");
+        try
+        {
+            PreviewCommand.Copy(root, copy);
+            PreviewCommand.MakeRepository(copy, source: root);
+
+            Assert.Equal("3", PreviewCommand.Git(copy, "rev-list", "--count", "HEAD").Output.Trim());
+            Assert.Equal(head, PreviewCommand.Git(copy, "rev-parse", "HEAD~1").Output.Trim());
+            Assert.Equal("App/C.cs", PreviewCommand.Git(copy, "diff", "--name-only", "HEAD~1", "HEAD").Output.Trim());
+            Assert.Equal("https://github.com/example/app.git", PreviewCommand.Git(copy, "remote", "get-url", "origin").Output.Trim());
+
+            // A shallow clone (CI's checkouts) stays shallow: its boundary comes along, so the history ends where it does there.
+            Assert.Equal(0, PreviewCommand.Git(root, "clone", "-q", "--depth", "1", $"file://{root}", shallow).Code);
+            PreviewCommand.Copy(shallow, shallowCopy);
+            PreviewCommand.MakeRepository(shallowCopy, source: shallow);
+            Assert.Equal((0, "2"), (PreviewCommand.Git(shallowCopy, "rev-list", "--count", "HEAD").Code, PreviewCommand.Git(shallowCopy, "rev-list", "--count", "HEAD").Output.Trim()));
+        }
+        finally
+        {
+            DeleteFolder(copy);
+            DeleteFolder(shallow);
+            DeleteFolder(shallowCopy);
+        }
+    }
 }
