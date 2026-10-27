@@ -1,0 +1,6 @@
+build	0	29s	dotnet build NPoco.sln -c Debug
+twae-Debug	0	30s	twae Debug
+test-Debug	1	28s	env CFG=Debug bash -c dotnet test NPoco.sln -c $CFG
+twae-Release	0	18s	twae Release
+test-Release	1	25s	env CFG=Release bash -c dotnet test NPoco.sln -c $CFG
+DONE

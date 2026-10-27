@@ -4,3 +4,9 @@ format	0	215s	bro format --engine dotnet-format
 check	0	39s	bro check --engine dotnet-format
 check-json	0
 checkbuild	0	375s	bro check --build --engine dotnet-format
+checkbuild-json	0
+twae-Debug	0	25s	twae Debug
+test-Debug	1	21s	env CFG=Debug bash -c dotnet test CommandLineUtils.sln -c $CFG
+twae-Release	0	26s	twae Release
+test-Release	1	25s	env CFG=Release bash -c dotnet test CommandLineUtils.sln -c $CFG
+DONE

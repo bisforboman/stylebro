@@ -3,4 +3,4 @@ SLN=NPoco.sln
 TESTS='dotnet test NPoco.sln -c $CFG'
 PREVIEW=init
 PREP="sed -i 's/\"TestDBType\": 2/\"TestDBType\": 1/' test/NPoco.Tests/config.json"
-SETUP='printf "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial58.1\" PrivateAssets=\"all\" />\n  </ItemGroup>\n</Project>\n" > Directory.Build.props && cat Directory.Build.props && bro init --write'
+SETUP='printf "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial58.2\" PrivateAssets=\"all\" />\n  </ItemGroup>\n</Project>\n" > Directory.Build.props && cat Directory.Build.props && bro init --write'
