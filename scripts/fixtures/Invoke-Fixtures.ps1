@@ -55,8 +55,8 @@ if (-not $Feed) {
     $Feed = Join-Path $Work 'feed'
     $Version = "0.0.0-fixture.$((Get-Date).ToUniversalTime().ToString('yyyyMMddHHmmss'))"
     Write-Host "== Packing $Version into $Feed"
-    foreach ($project in @('src/StyleBro.Package', 'src/StyleBro.Migrate') + @(Get-ChildItem (Join-Path $PSScriptRoot 'packages') -Directory | ForEach-Object FullName)) {
-        dotnet pack (Join-Path $root $project) -c Release -o $Feed -p:Version=$Version --nologo -v q | Out-Host
+    foreach ($project in @((Join-Path $root 'src/StyleBro.Package'), (Join-Path $root 'src/StyleBro.Migrate')) + @(Get-ChildItem (Join-Path $PSScriptRoot 'packages') -Directory | ForEach-Object FullName)) {
+        dotnet pack $project -c Release -o $Feed -p:Version=$Version --nologo -v q | Out-Host
         if ($LASTEXITCODE -ne 0) { throw "Packing $project failed." }
     }
 }
