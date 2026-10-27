@@ -1,10 +1,12 @@
 # Trials 23, 42, 44, 45, 56: a source generator built in the same solution. format builds it first (its output is an
-# analyzer of the other projects); in Release configurations format can't load the generator's projects and says so (Not
-# verified, by design), check builds them and is clean.
+# analyzer of the other projects; the code using what it generates must compile), then checks everything. (Trials 44, 45
+# and 56 saw "Not verified" for generator projects in Release configurations that differ from Debug; here they don't.)
 @{
     Description = 'an in-solution source generator referenced as an analyzer'
-    Expect = @{ format = 3; check = 0; 'check-build' = 0 }
-    Reasons = @{ format = 'Not checked' }
+    Assert = {
+        param($repo)
+        if ((Get-Content -Raw (Join-Path $repo 'src/App/Greeter.cs')) -match 'static public') { 'the code using the generated class was not formatted' }
+    }
     Create = {
         param($root)
         New-Project $root 'src/Generator/Generator.csproj' -Frameworks 'netstandard2.0' -Properties ([ordered]@{ IsRoslynComponent = 'true'; EnforceExtendedAnalyzerRules = 'true'; LangVersion = 'latest' }) -Packages ([ordered]@{ 'Microsoft.CodeAnalysis.CSharp' = '4.8.0' }) -Extra @'
