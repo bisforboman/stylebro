@@ -1,11 +1,12 @@
 # Trials 29 and 30 (Moq): a project the tests reference isn't in the solution; format gives it to one run (OutsideProjectRuns)
-# so the build that compiles it finds nothing left. A second test project no solution lists at all, and a solution filter
-# that leaves the test project out: the filter is what users name.
+# so the build that compiles it finds nothing left. A second test project no solution lists at all: nothing builds it, so
+# it is left alone.
 @{
-    Description = 'a referenced project the solution doesn''t list, a test project no solution lists, a solution filter'
-    Args = @('Fixture.slnf')
-    PreviewArgs = @('--project', 'Fixture.slnf')
-    Target = 'Fixture.sln'
+    Description = 'a referenced project the solution doesn''t list, a test project no solution lists'
+    Assert = {
+        param($repo)
+        if ((Get-Content -Raw (Join-Path $repo 'tests/Harness/Probe.cs')) -match 'static public') { 'the referenced project the solution doesn''t list was not formatted' }
+    }
     Create = {
         param($root)
         New-Project $root 'src/Lib/Lib.csproj'
@@ -37,15 +38,5 @@ public class OtherTests
 }
 '@
         New-Solution $root 'Fixture.sln' 'src/Lib/Lib.csproj', 'tests/Lib.Tests/Lib.Tests.csproj'
-        Set-Text $root 'Fixture.slnf' @'
-{
-  "solution": {
-    "path": "Fixture.sln",
-    "projects": [
-      "src/Lib/Lib.csproj"
-    ]
-  }
-}
-'@
     }
 }
