@@ -280,7 +280,9 @@ output is missing (`Generators: building Gen first`), so the generated code is p
 checks: without it, a rename of a member that code uses broke the build. `--verify-no-changes`, `--diff` and
 `baseline` do the same.
 Visual Basic projects are left alone: `format` and `--verify-no-changes` run on the C# projects only (`Visual Basic:
-...`), and a C# member a `.vb` file uses keeps its name (a kept finding).
+...`), and a C# member a `.vb` file uses keeps its name (a kept finding). With `--engine dotnet-format`, C# projects that
+reference a Visual Basic project are left out too and named as `Not checked` (`dotnet format` runs Visual Basic fixes on
+their C# code there); the default engine checks them.
 Review the diff and commit it. In an established codebase, land that commit when few pull requests are open (they
 will conflict with it), and add its hash to `.git-blame-ignore-revs` so `git blame` skips it (GitHub reads that file
 too; locally: `git config blame.ignoreRevsFile .git-blame-ignore-revs`). In a large codebase you may not want one big

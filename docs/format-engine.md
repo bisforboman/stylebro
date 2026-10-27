@@ -95,6 +95,10 @@ copies before their runs, as it does on disk today.
   repository with many projects and frameworks needs more memory than one `dotnet format` process did.
 - **An in-solution analyzer or generator** is loaded once per command: a fix to its own code takes effect in the next
   `bro format`, not in the next run of the same command.
+- **Fixers per language.** It calls only the fixers exported for the language of the code with the findings. `dotnet
+  format` calls every fixer of a rule, so where a C# project references a Visual Basic one, the Visual Basic fix of a rule
+  both languages have (IDE0036) also ran on C# code and could delete a member; with `--engine dotnet-format`, such C#
+  projects are left out and named as `Not checked`.
 - **`--timings`** shows the workspace loads as `host: load workspace (<configuration>)` and each formatter of a fix run as
   `host: fix <formatter>`.
 
