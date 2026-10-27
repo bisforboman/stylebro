@@ -1,5 +1,6 @@
 # Trial 23: Visual Basic projects are left alone (no whole run, '--exclude **/*.vb', a .vb a fix reached is put back), and a
-# C# rename doesn't break the VB code that uses the name. A VB project references the C# library, which is formatted.
+# C# rename doesn't break the VB code that uses the name. A VB project references the C# library, which is formatted. (The
+# namespace isn't 'Lib': a Visual Basic keyword.)
 @{
     Description = 'a Visual Basic project next to C#'
     Assert = {
@@ -9,12 +10,12 @@
     Create = {
         param($root)
         New-Project $root 'src/Lib/Lib.csproj'
-        Set-Messy $root 'src/Lib/Calc.cs' -Namespace 'Lib'
+        Set-Messy $root 'src/Lib/Calc.cs' -Namespace 'CsLib'
         New-Project $root 'src/VbApp/VbApp.vbproj' -References '../Lib/Lib.csproj' -Properties ([ordered]@{ RootNamespace = 'VbApp' })
         Set-Text $root 'src/VbApp/Module1.vb' @'
 Public Module Module1
     Public Function Four() As Integer
-        Return Lib.Calc.Twice(2)
+        Return CsLib.Calc.Twice(2)
     End Function
 End Module
 '@
