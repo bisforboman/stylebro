@@ -1,0 +1,45 @@
+  Determining projects to restore...
+  Restored /home/user/cand58/schotime-NPoco/src/NPoco/NPoco.csproj (in 1.98 sec).
+  Restored /home/user/cand58/schotime-NPoco/src/NPoco.FluentSql/NPoco.FluentSql.csproj (in 1.98 sec).
+  Restored /home/user/cand58/schotime-NPoco/src/NPoco.JsonNet/NPoco.JsonNet.csproj (in 1.98 sec).
+  Restored /home/user/cand58/schotime-NPoco/src/NPoco.Abstractions/NPoco.Abstractions.csproj (in 5 ms).
+  Restored /home/user/cand58/schotime-NPoco/src/NPoco.SqlServer.SystemData/NPoco.SqlServer.SystemData.csproj (in 716 ms).
+  Restored /home/user/cand58/schotime-NPoco/src/NPoco.SqlServer/NPoco.SqlServer.csproj (in 2.62 sec).
+  Restored /home/user/cand58/schotime-NPoco/test/NPoco.Tests/NPoco.Tests.csproj (in 4.74 sec).
+  NPoco.Abstractions -> /home/user/cand58/schotime-NPoco/src/NPoco.Abstractions/bin/Debug/netstandard2.0/NPoco.Abstractions.dll
+  NPoco.Abstractions -> /home/user/cand58/schotime-NPoco/src/NPoco.Abstractions/bin/Debug/netstandard2.1/NPoco.Abstractions.dll
+  NPoco.Abstractions -> /home/user/cand58/schotime-NPoco/src/NPoco.Abstractions/bin/Debug/net10.0/NPoco.Abstractions.dll
+  NPoco -> /home/user/cand58/schotime-NPoco/src/NPoco/bin/Debug/netstandard2.1/NPoco.dll
+  NPoco.Abstractions -> /home/user/cand58/schotime-NPoco/src/NPoco.Abstractions/bin/Debug/net462/NPoco.Abstractions.dll
+  NPoco.Abstractions -> /home/user/cand58/schotime-NPoco/src/NPoco.Abstractions/bin/Debug/net8.0/NPoco.Abstractions.dll
+  NPoco -> /home/user/cand58/schotime-NPoco/src/NPoco/bin/Debug/net10.0/NPoco.dll
+  NPoco.FluentSql -> /home/user/cand58/schotime-NPoco/src/NPoco.FluentSql/bin/Debug/netstandard2.1/NPoco.FluentSql.dll
+  NPoco -> /home/user/cand58/schotime-NPoco/src/NPoco/bin/Debug/netstandard2.0/NPoco.dll
+  NPoco.JsonNet -> /home/user/cand58/schotime-NPoco/src/NPoco.JsonNet/bin/Debug/net10.0/NPoco.JsonNet.dll
+  NPoco.JsonNet -> /home/user/cand58/schotime-NPoco/src/NPoco.JsonNet/bin/Debug/netstandard2.1/NPoco.JsonNet.dll
+  NPoco.SqlServer -> /home/user/cand58/schotime-NPoco/src/NPoco.SqlServer/bin/Debug/netstandard2.0/NPoco.SqlServer.dll
+  NPoco.SqlServer -> /home/user/cand58/schotime-NPoco/src/NPoco.SqlServer/bin/Debug/netstandard2.1/NPoco.SqlServer.dll
+  NPoco.SqlServer -> /home/user/cand58/schotime-NPoco/src/NPoco.SqlServer/bin/Debug/net10.0/NPoco.SqlServer.dll
+  NPoco.FluentSql -> /home/user/cand58/schotime-NPoco/src/NPoco.FluentSql/bin/Debug/net10.0/NPoco.FluentSql.dll
+  NPoco.SqlServer.SystemData -> /home/user/cand58/schotime-NPoco/src/NPoco.SqlServer.SystemData/bin/Debug/netstandard2.1/NPoco.SqlServer.SystemData.dll
+  NPoco -> /home/user/cand58/schotime-NPoco/src/NPoco/bin/Debug/net462/NPoco.dll
+  NPoco.FluentSql -> /home/user/cand58/schotime-NPoco/src/NPoco.FluentSql/bin/Debug/netstandard2.0/NPoco.FluentSql.dll
+  NPoco.SqlServer.SystemData -> /home/user/cand58/schotime-NPoco/src/NPoco.SqlServer.SystemData/bin/Debug/netstandard2.0/NPoco.SqlServer.SystemData.dll
+  NPoco -> /home/user/cand58/schotime-NPoco/src/NPoco/bin/Debug/net8.0/NPoco.dll
+  NPoco.JsonNet -> /home/user/cand58/schotime-NPoco/src/NPoco.JsonNet/bin/Debug/netstandard2.0/NPoco.JsonNet.dll
+  NPoco.SqlServer -> /home/user/cand58/schotime-NPoco/src/NPoco.SqlServer/bin/Debug/net8.0/NPoco.SqlServer.dll
+  NPoco.JsonNet -> /home/user/cand58/schotime-NPoco/src/NPoco.JsonNet/bin/Debug/net8.0/NPoco.JsonNet.dll
+  NPoco.SqlServer.SystemData -> /home/user/cand58/schotime-NPoco/src/NPoco.SqlServer.SystemData/bin/Debug/net8.0/NPoco.SqlServer.SystemData.dll
+  NPoco.FluentSql -> /home/user/cand58/schotime-NPoco/src/NPoco.FluentSql/bin/Debug/net8.0/NPoco.FluentSql.dll
+  NPoco.SqlServer.SystemData -> /home/user/cand58/schotime-NPoco/src/NPoco.SqlServer.SystemData/bin/Debug/net10.0/NPoco.SqlServer.SystemData.dll
+  NPoco.JsonNet -> /home/user/cand58/schotime-NPoco/src/NPoco.JsonNet/bin/Debug/net462/NPoco.JsonNet.dll
+  NPoco.SqlServer.SystemData -> /home/user/cand58/schotime-NPoco/src/NPoco.SqlServer.SystemData/bin/Debug/net462/NPoco.SqlServer.SystemData.dll
+  NPoco.SqlServer -> /home/user/cand58/schotime-NPoco/src/NPoco.SqlServer/bin/Debug/net462/NPoco.SqlServer.dll
+  NPoco.FluentSql -> /home/user/cand58/schotime-NPoco/src/NPoco.FluentSql/bin/Debug/net462/NPoco.FluentSql.dll
+  NPoco.Tests -> /home/user/cand58/schotime-NPoco/test/NPoco.Tests/bin/Debug/net10.0/NPoco.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:27.37

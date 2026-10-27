@@ -1,0 +1,13 @@
+== lightinject-build: dotnet build /home/user/cand58/seesharper-LightInject/LightInject.sln -p:NuGetAudit=false (19:05:11)
+   exit 0 (19:05:34) 0 error lines
+== lightinject-test: bash -c cd /home/user/cand58/seesharper-LightInject && dotnet test LightInject.sln --no-build (19:05:34)
+   exit 1 (19:06:04) 341 error lines
+== clu-build: dotnet build /home/user/cand58/natemcmaster-CommandLineUtils/CommandLineUtils.sln -p:NuGetAudit=false (19:06:04)
+   exit 0 (19:06:26) 0 error lines
+== clu-test: bash -c cd /home/user/cand58/natemcmaster-CommandLineUtils && dotnet test CommandLineUtils.sln --no-build (19:06:26)
+   exit 1 (19:06:33) 0 error lines
+== npoco-build: dotnet build /home/user/cand58/schotime-NPoco/NPoco.sln -p:NuGetAudit=false (19:06:33)
+   exit 0 (19:07:01) 0 error lines
+== npoco-test: bash -c cd /home/user/cand58/schotime-NPoco && dotnet test NPoco.sln --no-build (19:07:01)
+   exit 1 (19:07:11) 0 error lines
+done

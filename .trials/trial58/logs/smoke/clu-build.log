@@ -1,0 +1,23 @@
+  Determining projects to restore...
+  Restored /home/user/cand58/natemcmaster-CommandLineUtils/src/Hosting.CommandLine/McMaster.Extensions.Hosting.CommandLine.csproj (in 3.95 sec).
+  Restored /home/user/cand58/natemcmaster-CommandLineUtils/test/CommandLineUtils.Tests/McMaster.Extensions.CommandLineUtils.Tests.csproj (in 3.98 sec).
+  Restored /home/user/cand58/natemcmaster-CommandLineUtils/src/CommandLineUtils/McMaster.Extensions.CommandLineUtils.csproj (in 3.96 sec).
+  Restored /home/user/cand58/natemcmaster-CommandLineUtils/test/Hosting.CommandLine.Tests/McMaster.Extensions.Hosting.CommandLine.Tests.csproj (in 3.99 sec).
+  Restored /home/user/cand58/natemcmaster-CommandLineUtils/src/CommandLineUtils.Generators/McMaster.Extensions.CommandLineUtils.Generators.csproj (in 2.2 sec).
+  McMaster.Extensions.CommandLineUtils.Generators -> /home/user/cand58/natemcmaster-CommandLineUtils/.build/bin/McMaster.Extensions.CommandLineUtils.Generators/Debug/netstandard2.0/McMaster.Extensions.CommandLineUtils.Generators.dll
+  McMaster.Extensions.CommandLineUtils -> /home/user/cand58/natemcmaster-CommandLineUtils/.build/bin/McMaster.Extensions.CommandLineUtils/Debug/net472/McMaster.Extensions.CommandLineUtils.dll
+  McMaster.Extensions.CommandLineUtils -> /home/user/cand58/natemcmaster-CommandLineUtils/.build/bin/McMaster.Extensions.CommandLineUtils/Debug/net8.0/McMaster.Extensions.CommandLineUtils.dll
+  McMaster.Extensions.Hosting.CommandLine -> /home/user/cand58/natemcmaster-CommandLineUtils/.build/bin/McMaster.Extensions.Hosting.CommandLine/Debug/net8.0/McMaster.Extensions.Hosting.CommandLine.dll
+  McMaster.Extensions.Hosting.CommandLine -> /home/user/cand58/natemcmaster-CommandLineUtils/.build/bin/McMaster.Extensions.Hosting.CommandLine/Debug/net472/McMaster.Extensions.Hosting.CommandLine.dll
+  McMaster.Extensions.Hosting.CommandLine.Tests -> /home/user/cand58/natemcmaster-CommandLineUtils/.build/bin/McMaster.Extensions.Hosting.CommandLine.Tests/Debug/net10.0/McMaster.Extensions.Hosting.CommandLine.Tests.dll
+  McMaster.Extensions.CommandLineUtils.Tests -> /home/user/cand58/natemcmaster-CommandLineUtils/.build/bin/McMaster.Extensions.CommandLineUtils.Tests/Debug/net10.0/McMaster.Extensions.CommandLineUtils.Tests.dll
+  McMaster.Extensions.Hosting.CommandLine.Tests -> /home/user/cand58/natemcmaster-CommandLineUtils/.build/bin/McMaster.Extensions.Hosting.CommandLine.Tests/Debug/net8.0/McMaster.Extensions.Hosting.CommandLine.Tests.dll
+  McMaster.Extensions.CommandLineUtils.Tests -> /home/user/cand58/natemcmaster-CommandLineUtils/.build/bin/McMaster.Extensions.CommandLineUtils.Tests/Debug/net472/McMaster.Extensions.CommandLineUtils.Tests.dll
+  McMaster.Extensions.CommandLineUtils.Tests -> /home/user/cand58/natemcmaster-CommandLineUtils/.build/bin/McMaster.Extensions.CommandLineUtils.Tests/Debug/net8.0/McMaster.Extensions.CommandLineUtils.Tests.dll
+  McMaster.Extensions.Hosting.CommandLine.Tests -> /home/user/cand58/natemcmaster-CommandLineUtils/.build/bin/McMaster.Extensions.Hosting.CommandLine.Tests/Debug/net472/McMaster.Extensions.Hosting.CommandLine.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:21.57
