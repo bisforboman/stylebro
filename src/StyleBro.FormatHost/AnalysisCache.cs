@@ -64,6 +64,7 @@ public sealed class AnalysisCache
             {
                 missing = [.. missing.Union(analyzers.OfType<DiagnosticSuppressor>())];
             }
+
             compilerMissing = compilerKey is not null && !cached.Compiler.ContainsKey(compilerKey);
         }
 
