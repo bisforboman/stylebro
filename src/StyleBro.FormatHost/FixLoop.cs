@@ -171,7 +171,7 @@ internal sealed class FixLoop(DotnetFormat format, AnalysisCache cache, Func<str
         {
             if (step.WithIds.TryGetValue(project.Id, out var had) && ids.Where(had.Contains).ToHashSet(StringComparer.Ordinal) is { Count: > 0 } wanted)
             {
-                var analyzers = step.ProjectAnalyzers[project.Id].Where(a => a.SupportedDiagnostics.Any(d => wanted.Contains(d.Id))).ToImmutableArray();
+                var analyzers = FixOrder.AnalyzersFor(step.ProjectAnalyzers[project.Id], wanted);
                 foreach (var diagnostic in await this.AnalyzeAsync(analyzers, project, step.Paths, step.Severity, step.CompilerIds, step.Logger, cancellation).ConfigureAwait(false))
                 {
                     if (wanted.Contains(diagnostic.Id))

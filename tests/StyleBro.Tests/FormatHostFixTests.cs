@@ -51,6 +51,18 @@ public sealed class FormatHostFixTests : IDisposable
     }
 
     [Fact]
+    public void AFixStepsAnalysis_KeepsTheSuppressorsOfItsIds()
+    {
+        // solution-in-subfolder on SDK 10.0.4xx: the baseline is a suppressor, which reports no diagnostic of its own; dropped
+        // from a fix step, the check's copy listed a baselined kept finding again.
+        DiagnosticAnalyzer[] analyzers = [new ClassAnalyzer("T1"), new ClassAnalyzer("T2"), new Suppressor("T1"), new Suppressor("T2")];
+
+        var kept = FixOrder.AnalyzersFor(analyzers, new HashSet<string> { "T1" });
+
+        Assert.Collection(kept, a => Assert.Same(analyzers[0], a), a => Assert.Same(analyzers[2], a));
+    }
+
+    [Fact]
     public async Task TheCache_RunsAnAnalyzer_OnlyOnContentItHasntSeen()
     {
         using var workspace = new AdhocWorkspace();
@@ -344,6 +356,15 @@ public sealed class FormatHostFixTests : IDisposable
             context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
             context.EnableConcurrentExecution();
             context.RegisterSyntaxNodeAction(c => c.ReportDiagnostic(Diagnostic.Create(this.descriptor, ((ClassDeclarationSyntax)c.Node).Identifier.GetLocation(), ((ClassDeclarationSyntax)c.Node).Identifier.Text)), SyntaxKind.ClassDeclaration);
+        }
+    }
+
+    private sealed class Suppressor(string id) : DiagnosticSuppressor
+    {
+        public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions => [new SuppressionDescriptor("S" + id, id, "t")];
+
+        public override void ReportSuppressions(SuppressionAnalysisContext context)
+        {
         }
     }
 #pragma warning restore RS1001, RS1017, RS1036

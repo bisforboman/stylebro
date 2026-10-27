@@ -50,7 +50,8 @@ if ($Shape.Count -gt 0 -and $chosen.Count -ne $Shape.Count) { throw "Unknown sha
 # Build tools that integrate with CI (Nerdbank.GitVersioning writes Git* variables to $GITHUB_ENV) must not reach the job's
 # later steps, nor see a CI the fixture's user wouldn't have: the fixtures' commands don't get the step's files.
 $summary = $env:GITHUB_STEP_SUMMARY
-Remove-Item Env:GITHUB_ENV, Env:GITHUB_OUTPUT, Env:GITHUB_PATH, Env:GITHUB_STEP_SUMMARY -ErrorAction SilentlyContinue
+# Nor a CI at all: with GITHUB_ACTIONS set and no $GITHUB_ENV, Nerdbank.GitVersioning's build failed.
+Remove-Item Env:GITHUB_ENV, Env:GITHUB_OUTPUT, Env:GITHUB_PATH, Env:GITHUB_STEP_SUMMARY, Env:GITHUB_ACTIONS, Env:CI -ErrorAction SilentlyContinue
 
 $Work = [IO.Path]::GetFullPath($Work)
 if ($Work.StartsWith($root + [IO.Path]::DirectorySeparatorChar)) { throw '-Work must be outside the repository (its props would leak into the fixtures).' }

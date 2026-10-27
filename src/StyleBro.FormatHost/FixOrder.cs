@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis.CodeFixes;
+using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace StyleBro.Host;
 
@@ -32,6 +34,17 @@ public static class FixOrder
             .Where(f => languages is null || LanguagesOf(f) is not { Count: > 0 } own || own.Overlaps(languages))
             .GroupBy(f => f.GetType())
             .Select(g => g.First())];
+
+    /// <summary>
+    /// The analyzers that report <paramref name="ids"/>, and the suppressors that can suppress them: a suppressor reports no
+    /// diagnostic of its own, and without it the baseline's suppressor (BaselineSuppressor) didn't run in a fix step, so the
+    /// fix of a check's copy listed a baselined kept finding again where 'dotnet format' didn't (fixture matrix,
+    /// solution-in-subfolder, on SDK 10.0.4xx).
+    /// </summary>
+    public static ImmutableArray<DiagnosticAnalyzer> AnalyzersFor(IEnumerable<DiagnosticAnalyzer> analyzers, IReadOnlySet<string> ids) =>
+        [.. analyzers.Where(a => a is DiagnosticSuppressor suppressor
+            ? suppressor.SupportedSuppressions.Any(s => ids.Contains(s.SuppressedDiagnosticId))
+            : a.SupportedDiagnostics.Any(d => ids.Contains(d.Id)))];
 
     /// <summary>The languages <paramref name="fixer"/> is exported for (its ExportCodeFixProvider attributes), empty without one.</summary>
     public static HashSet<string> LanguagesOf(CodeFixProvider fixer) =>

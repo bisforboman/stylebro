@@ -7,3 +7,5 @@
   both languages have (modifier order, IDE0036) ran the Visual Basic fix on C# code too.
 - With `--engine dotnet-format`, C# projects that reference a Visual Basic project are now left out and named as not
   checked, because `dotnet format` itself has the same bug there; the default engine checks them.
+- **`bro check`** no longer lists findings kept on purpose that `bro format` has already put into the baseline (with the
+  default engine on .NET SDK 10.0.4xx).
