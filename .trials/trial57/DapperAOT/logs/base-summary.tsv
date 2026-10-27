@@ -1,0 +1,6 @@
+build	0	21s	dotnet build Dapper.AOT.slnx -c Debug
+twae-Debug	1	13s	twae Debug
+test-Debug	0	42s	env CFG=Debug bash -c dotnet test test/Dapper.AOT.Test/Dapper.AOT.Test.csproj -c $CFG -f net10.0 --filter "FullyQualifiedName!~Integration"
+twae-Release	1	7s	twae Release
+test-Release	0	34s	env CFG=Release bash -c dotnet test test/Dapper.AOT.Test/Dapper.AOT.Test.csproj -c $CFG -f net10.0 --filter "FullyQualifiedName!~Integration"
+DONE

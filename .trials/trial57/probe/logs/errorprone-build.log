@@ -1,0 +1,40 @@
+  Determining projects to restore...
+  Restored /home/user/stylebro/.trials/trial57/probe/ErrorProne.NET/src/RoslynNunitTestRunner/ErrorProne.NET.TestHelpers.csproj (in 389 ms).
+  Restored /home/user/stylebro/.trials/trial57/probe/ErrorProne.NET/src/ErrorProne.NET.CoreAnalyzers.Tests/ErrorProne.NET.CoreAnalyzers.Tests.csproj (in 383 ms).
+  Restored /home/user/stylebro/.trials/trial57/probe/ErrorProne.NET/src/ErrorProne.NET.CoreAnalyzers.CodeFixes/ErrorProne.NET.CoreAnalyzers.CodeFixes.csproj (in 375 ms).
+/home/user/stylebro/.trials/trial57/probe/ErrorProne.NET/src/ErrorProne.NET.CoreAnalyzers/ErrorProne.NET.CoreAnalyzers.csproj : warning NU1603: ErrorProne.NET.CoreAnalyzers.RenameToAvoidConflict depends on Microsoft.CodeAnalysis.Analyzers (>= 4.13.0) but Microsoft.CodeAnalysis.Analyzers 4.13.0 was not found. Microsoft.CodeAnalysis.Analyzers 4.14.0 was resolved instead. [/home/user/stylebro/.trials/trial57/probe/ErrorProne.NET/src/ErrorProne.NET.sln]
+  Restored /home/user/stylebro/.trials/trial57/probe/ErrorProne.NET/src/ErrorProne.NET.CoreAnalyzers/ErrorProne.NET.CoreAnalyzers.csproj (in 1.61 sec).
+/home/user/stylebro/.trials/trial57/probe/ErrorProne.NET/src/ErrorProne.NET.CoreAnalyzers/ErrorProne.NET.CoreAnalyzers.csproj : warning NU1603: ErrorProne.NET.CoreAnalyzers.RenameToAvoidConflict depends on Microsoft.CodeAnalysis.Analyzers (>= 4.13.0) but Microsoft.CodeAnalysis.Analyzers 4.13.0 was not found. Microsoft.CodeAnalysis.Analyzers 4.14.0 was resolved instead.
+  ErrorProne.NET.TestHelpers -> /home/user/stylebro/.trials/trial57/probe/ErrorProne.NET/src/RoslynNunitTestRunner/bin/Debug/netstandard2.0/ErrorProne.NET.TestHelpers.dll
+  MERGING: ErrorProne.NET.TestHelpers;RuntimeContracts into 
+  Added assembly '/home/user/stylebro/.trials/trial57/probe/ErrorProne.NET/src/RoslynNunitTestRunner/bin/Debug/netstandard2.0/ErrorProne.NET.TestHelpers.dll'
+  Added assembly '/root/.nuget/packages/runtimecontracts/0.5.0/lib/netstandard1.1/RuntimeContracts.dll'
+  Merging 2 assemblies to '/home/user/stylebro/.trials/trial57/probe/ErrorProne.NET/src/RoslynNunitTestRunner/bin/Debug/netstandard2.0/ErrorProne.NET.TestHelpers.dll'
+INFO: ------------- IL Repack Arguments -------------
+
+-----------------------------------------------
+INFO: Wrote /home/user/stylebro/.trials/trial57/probe/ErrorProne.NET/src/RoslynNunitTestRunner/bin/Debug/netstandard2.0/ErrorProne.NET.TestHelpers.dll
+  Merge succeeded in 0.9960192 s
+  ErrorProne.NET.CoreAnalyzers -> /home/user/stylebro/.trials/trial57/probe/ErrorProne.NET/src/ErrorProne.NET.CoreAnalyzers/bin/Debug/netstandard2.0/ErrorProne.Net.CoreAnalyzers.dll
+  MERGING: ErrorProne.Net.CoreAnalyzers;RuntimeContracts into 
+  Added assembly '/home/user/stylebro/.trials/trial57/probe/ErrorProne.NET/src/ErrorProne.NET.CoreAnalyzers/bin/Debug/netstandard2.0/ErrorProne.Net.CoreAnalyzers.dll'
+  Added assembly '/root/.nuget/packages/runtimecontracts/0.5.0/lib/netstandard1.1/RuntimeContracts.dll'
+  Merging 2 assemblies to '/home/user/stylebro/.trials/trial57/probe/ErrorProne.NET/src/ErrorProne.NET.CoreAnalyzers/bin/Debug/netstandard2.0/ErrorProne.Net.CoreAnalyzers.dll'
+  Merge succeeded in 0.4962958 s
+  ErrorProne.NET.CoreAnalyzers.CodeFixes -> /home/user/stylebro/.trials/trial57/probe/ErrorProne.NET/src/ErrorProne.NET.CoreAnalyzers.CodeFixes/bin/Debug/netstandard2.0/ErrorProne.Net.CoreAnalyzers.CodeFixes.dll
+  MERGING: ErrorProne.Net.CoreAnalyzers.CodeFixes;RuntimeContracts into 
+  Added assembly '/home/user/stylebro/.trials/trial57/probe/ErrorProne.NET/src/ErrorProne.NET.CoreAnalyzers.CodeFixes/bin/Debug/netstandard2.0/ErrorProne.Net.CoreAnalyzers.CodeFixes.dll'
+  Added assembly '/root/.nuget/packages/runtimecontracts/0.5.0/lib/netstandard1.1/RuntimeContracts.dll'
+  Merging 2 assemblies to '/home/user/stylebro/.trials/trial57/probe/ErrorProne.NET/src/ErrorProne.NET.CoreAnalyzers.CodeFixes/bin/Debug/netstandard2.0/ErrorProne.Net.CoreAnalyzers.CodeFixes.dll'
+  Merge succeeded in 0.6619984 s
+  Successfully created package '/home/user/stylebro/.trials/trial57/probe/ErrorProne.NET/src/ErrorProne.NET.CoreAnalyzers.CodeFixes/bin/Debug/ErrorProne.NET.CoreAnalyzers.0.9.0-beta.7.nupkg'.
+  ErrorProne.NET.CoreAnalyzers.Tests -> /home/user/stylebro/.trials/trial57/probe/ErrorProne.NET/src/ErrorProne.NET.CoreAnalyzers.Tests/bin/Debug/net9.0/ErrorProne.NET.CoreAnalyzers.Tests.dll
+
+Build succeeded.
+
+/home/user/stylebro/.trials/trial57/probe/ErrorProne.NET/src/ErrorProne.NET.CoreAnalyzers/ErrorProne.NET.CoreAnalyzers.csproj : warning NU1603: ErrorProne.NET.CoreAnalyzers.RenameToAvoidConflict depends on Microsoft.CodeAnalysis.Analyzers (>= 4.13.0) but Microsoft.CodeAnalysis.Analyzers 4.13.0 was not found. Microsoft.CodeAnalysis.Analyzers 4.14.0 was resolved instead. [/home/user/stylebro/.trials/trial57/probe/ErrorProne.NET/src/ErrorProne.NET.sln]
+/home/user/stylebro/.trials/trial57/probe/ErrorProne.NET/src/ErrorProne.NET.CoreAnalyzers/ErrorProne.NET.CoreAnalyzers.csproj : warning NU1603: ErrorProne.NET.CoreAnalyzers.RenameToAvoidConflict depends on Microsoft.CodeAnalysis.Analyzers (>= 4.13.0) but Microsoft.CodeAnalysis.Analyzers 4.13.0 was not found. Microsoft.CodeAnalysis.Analyzers 4.14.0 was resolved instead.
+    2 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:10.71

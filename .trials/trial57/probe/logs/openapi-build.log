@@ -1,0 +1,25 @@
+  Determining projects to restore...
+  Restored /home/user/stylebro/.trials/trial57/probe/OpenAPI.NET/performance/resultsComparer/resultsComparer.csproj (in 2.28 sec).
+  Restored /home/user/stylebro/.trials/trial57/probe/OpenAPI.NET/src/Microsoft.OpenApi/Microsoft.OpenApi.csproj (in 38 ms).
+  Restored /home/user/stylebro/.trials/trial57/probe/OpenAPI.NET/src/Microsoft.OpenApi.YamlReader/Microsoft.OpenApi.YamlReader.csproj (in 2.4 sec).
+  Restored /home/user/stylebro/.trials/trial57/probe/OpenAPI.NET/test/Microsoft.OpenApi.Trimming.Tests/Microsoft.OpenApi.Trimming.Tests.csproj (in 2.5 sec).
+  Restored /home/user/stylebro/.trials/trial57/probe/OpenAPI.NET/test/Microsoft.OpenApi.Tests/Microsoft.OpenApi.Tests.csproj (in 4.55 sec).
+  Restored /home/user/stylebro/.trials/trial57/probe/OpenAPI.NET/test/Microsoft.OpenApi.Readers.Tests/Microsoft.OpenApi.Readers.Tests.csproj (in 2.14 sec).
+  Restored /home/user/stylebro/.trials/trial57/probe/OpenAPI.NET/performance/benchmark/PerformanceTests.csproj (in 3.81 sec).
+  resultsComparer -> /home/user/stylebro/.trials/trial57/probe/OpenAPI.NET/performance/resultsComparer/bin/Debug/net8.0/resultsComparer.dll
+  Microsoft.OpenApi -> /home/user/stylebro/.trials/trial57/probe/OpenAPI.NET/src/Microsoft.OpenApi/bin/Debug/netstandard2.0/Microsoft.OpenApi.dll
+  Microsoft.OpenApi -> /home/user/stylebro/.trials/trial57/probe/OpenAPI.NET/src/Microsoft.OpenApi/bin/Debug/net8.0/Microsoft.OpenApi.dll
+  Microsoft.OpenApi.YamlReader -> /home/user/stylebro/.trials/trial57/probe/OpenAPI.NET/src/Microsoft.OpenApi.YamlReader/bin/Debug/netstandard2.0/Microsoft.OpenApi.YamlReader.dll
+  Microsoft.OpenApi.YamlReader -> /home/user/stylebro/.trials/trial57/probe/OpenAPI.NET/src/Microsoft.OpenApi.YamlReader/bin/Debug/net8.0/Microsoft.OpenApi.YamlReader.dll
+  Successfully created package '/home/user/stylebro/.trials/trial57/probe/OpenAPI.NET/src/Microsoft.OpenApi/bin/Debug/Microsoft.OpenApi.3.11.0.nupkg'.
+  Microsoft.OpenApi.Trimming.Tests -> /home/user/stylebro/.trials/trial57/probe/OpenAPI.NET/test/Microsoft.OpenApi.Trimming.Tests/bin/Debug/net10.0/Microsoft.OpenApi.Trimming.Tests.dll
+  PerformanceTests -> /home/user/stylebro/.trials/trial57/probe/OpenAPI.NET/performance/benchmark/bin/Debug/net8.0/PerformanceTests.dll
+  Microsoft.OpenApi.Tests -> /home/user/stylebro/.trials/trial57/probe/OpenAPI.NET/test/Microsoft.OpenApi.Tests/bin/Debug/net10.0/Microsoft.OpenApi.Tests.dll
+  Microsoft.OpenApi.Readers.Tests -> /home/user/stylebro/.trials/trial57/probe/OpenAPI.NET/test/Microsoft.OpenApi.Readers.Tests/bin/Debug/net10.0/Microsoft.OpenApi.Readers.Tests.dll
+  Successfully created package '/home/user/stylebro/.trials/trial57/probe/OpenAPI.NET/src/Microsoft.OpenApi.YamlReader/bin/Debug/Microsoft.OpenApi.YamlReader.3.11.0.nupkg'.
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:32.27
