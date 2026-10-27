@@ -63,6 +63,9 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   operators/finalizers aren't checked); partial types are BRO1007's. The fix inserts the symbol's DeclaredAccessibility
   (the default, or another part's) before the first modifier, after attributes. Parity `access-modifiers`: 15/15,
   identical. `init`/migrate write IDE0040 = none, which also fixes SA1205-without-SA1400 (only partial types now).
+  Trial 57 (DapperAOT): no finding when the modifiers depend on `#if` (a skipped branch holding only modifiers before the
+  declaration, or a directive between its modifiers, `HasConditionalModifiers`): an embedded-resource template's
+  `#if !DAPPERAOT_INTERNAL` / `file` / `#endif` / `static class` got `internal` in the tests' copy, `file internal` (CS9052).
 - **BRO1405** (SA1119, 2026-10-03, `Maintainability/Parentheses.cs`, replaces IDE0047): StyleCop's exact logic (simple
   expressions always, operator expressions only where nothing binds to them; IDE0047 also removed `a ?? (b ?? c)`, the
   old migration difference in Polly). Guard: the enclosing statement/member re-parsed without the parentheses must be
