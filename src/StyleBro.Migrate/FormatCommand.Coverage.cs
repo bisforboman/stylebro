@@ -80,6 +80,25 @@ internal static partial class FormatCommand
             .ToList();
     }
 
+    /// <summary>
+    /// The gap line for a project whose design-time build failed (<see cref="LoadFailure"/>) in the runs named by <paramref name="where"/>
+    /// ('net10.0', 'net48, Release'; empty: the only run): 'dotnet format' loaded it without its compiler's command line, so
+    /// none of its build settings (the preset, the .editorconfig, the '#if' symbols) applied and StyleBro's rules didn't run
+    /// there (owner's decision 2026-10-27; trial 57, DapperAOT: Nerdbank.GitVersioning's negative build number in a shallow clone).
+    /// </summary>
+    public static string LoadFailureGap(string project, IReadOnlyCollection<string> where, string message) =>
+        Gap(where.Count == 0 ? project : $"{project} ({string.Join("; ", where)})", $"MSBuild failed loading it ({message.TrimEnd('.')}), so 'dotnet format' had none of its build settings and StyleBro's rules didn't run there");
+
+    /// <summary>
+    /// The first error of a failed design-time build's <paramref name="output"/> ('error : build ('-2') must be a non-negative
+    /// value. (Parameter 'build')'), without its code and project; null without one.
+    /// </summary>
+    public static string? FirstBuildError(string output) =>
+        output.Split('\n').Select(l => System.Text.RegularExpressions.Regex.Match(l, @"(?:^|:\s)error(?: [A-Za-z]+\d+)?\s*:\s*(?<message>.+?)(?:\s+\[[^\]]*\])?\s*$"))
+            .Where(m => m.Success)
+            .Select(m => m.Groups["message"].Value.Trim())
+            .FirstOrDefault(m => m.Length > 0);
+
     /// <summary>The gap lines for the projects that need workload packs this machine lacks (project path relative to the root).</summary>
     public static List<string> WorkloadGaps(IEnumerable<(string Project, string[] Packs)> projects) =>
         projects.Select(p => Gap(p.Project, $"it needs {string.Join(", ", p.Packs)}, which this machine doesn't have installed")).ToList();

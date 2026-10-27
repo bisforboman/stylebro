@@ -393,6 +393,33 @@ public sealed class FormatHostTests : IDisposable
         Assert.Null(host.Run(solution, root, [], [], [], ["format", solution, "--no-restore", "--binarylog", "x.binlog"], _ => { }));
     }
 
+    // Against the SDK on this machine (trial 57, DapperAOT): a project whose design-time build fails before the compiler's
+    // command line (Nerdbank.GitVersioning's negative build number in a shallow clone) loads without its build settings, and
+    // only "Warnings were encountered while loading the workspace" said so: check said Clean. Both engines name it now and say
+    // Not verified; a project that loads is not named.
+    [Theory]
+    [InlineData("host")]
+    [InlineData("dotnet-format")]
+    public void AProjectWhoseDesignTimeBuildFails_IsNamed_AndTheCheckIsNotVerified(string engine)
+    {
+        var root = this.NewFolder();
+        var analyzer = $"  <ItemGroup>\n    <Analyzer Include=\"{typeof(StyleBro.Analyzers.Maintainability.AccessModifiersAnalyzer).Assembly.Location}\" />\n  </ItemGroup>\n";
+        Write(root, ".editorconfig", "root = true\n\n[*.cs]\nindent_style = space\n");
+        Write(root, "App.slnx", "<Solution>\n  <Project Path=\"Lib/Lib.csproj\" />\n  <Project Path=\"Ok/Ok.csproj\" />\n</Solution>\n");
+        Write(root, "Lib/Lib.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFramework>net10.0</TargetFramework>\n  </PropertyGroup>\n" + analyzer + "  <Target Name=\"Version\" BeforeTargets=\"CoreCompile\" Condition=\"'$(DesignTimeBuild)' == 'true'\">\n    <Error Text=\"build ('-2') must be a non-negative value.\" />\n  </Target>\n</Project>\n");
+        Write(root, "Lib/C.cs", "namespace Lib;\n\npublic static class C\n{\n}\n");
+        Write(root, "Ok/Ok.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFramework>net10.0</TargetFramework>\n  </PropertyGroup>\n" + analyzer + "</Project>\n");
+        Write(root, "Ok/D.cs", "namespace Ok;\n\npublic static class D\n{\n}\n");
+        Assert.Equal(0, Dotnet(root, out _, "restore", "App.slnx"));
+
+        var lines = new List<string>();
+        var code = FormatCommand.Run([Path.Combine(root, "App.slnx"), "--verify-no-changes", "--no-restore", "--engine", engine], lines.Add);
+
+        Assert.True(code == FormatCommand.NotVerifiedExitCode, string.Join("\n", lines));
+        Assert.Contains(FormatCommand.LoadFailureGap("Lib", [], "build ('-2') must be a non-negative value."), lines);
+        Assert.DoesNotContain(lines, l => l.StartsWith(FormatCommand.NotCheckedPrefix + " Ok", StringComparison.Ordinal));
+    }
+
     // Against the SDK on this machine: a fix run in the host writes what 'dotnet format' writes, the next run of the same host
     // sees it (and what else changed on disk), and a framework's fix reaches the other frameworks' copies of the file.
     [Fact]
