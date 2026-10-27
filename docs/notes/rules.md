@@ -487,7 +487,9 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   `accessor-layout`: 8/8 positions, output not compared.
 - **Batch 2** (2026-10-01). Lists (`Readability/ListGaps.cs`, same list kinds as BRO1107): **BRO1116** (SA1112) `()`
   not split, not attributes (like StyleCop); **BRO1117** (SA1113) comma ends the previous item's line (its edit also
-  drops blank lines before the item, else BRO1119 needs a 2nd run); **BRO1118/BRO1119** (SA1114/SA1115, no StyleCop
+  drops blank lines before the item, else BRO1119 needs a 2nd run; an item on a line below its comma keeps its own
+  indentation, trial 56: after BRO1108 split FusionCache's `x: 1` / `, token: 2` at column 0, BRO1117 gave `token:` the
+  comma's empty indentation, so the result depended on fix order); **BRO1118/BRO1119** (SA1114/SA1115, no StyleCop
   fix) blank lines after `(`/after a comma removed (only whole blank lines, so a comment on its own line blocks it).
   Comments (`Readability/CommentText.cs`): **BRO1005** (SA1004) a missing space after `///` anywhere, but several
   spaces only before a TOP-LEVEL tag (`///   <param>`); indented text/nested tags and `<code>` are fine (probed; the

@@ -1,0 +1,132 @@
+49149c49149
+< index b038e3b..a9d3f0a 100644
+---
+> index b038e3b..a88cf29 100644
+49161c49161
+< +cancellationToken: TestContext.Current.CancellationToken
+---
+> +			cancellationToken: TestContext.Current.CancellationToken
+49284c49284
+< index ffcff5b..28a0f65 100644
+---
+> index ffcff5b..837a945 100644
+49315c49315
+< +token: TestContext.Current.CancellationToken
+---
+> +				token: TestContext.Current.CancellationToken
+49708c49708
+< index d2d0f91..be8f759 100644
+---
+> index d2d0f91..124c3ea 100644
+49858c49858
+< +token: TestContext.Current.CancellationToken
+---
+> +			token: TestContext.Current.CancellationToken
+49869c49869
+< +token: TestContext.Current.CancellationToken
+---
+> +			token: TestContext.Current.CancellationToken
+50080c50080
+< index 42757a7..955ae9b 100644
+---
+> index 42757a7..63ed466 100644
+50230c50230
+< +token: TestContext.Current.CancellationToken
+---
+> +			token: TestContext.Current.CancellationToken
+50241c50241
+< +token: TestContext.Current.CancellationToken
+---
+> +			token: TestContext.Current.CancellationToken
+50452c50452
+< index 4cbc0c3..87402d0 100644
+---
+> index 4cbc0c3..c81eb82 100644
+50465c50465
+< +token: TestContext.Current.CancellationToken
+---
+> +			token: TestContext.Current.CancellationToken
+50712c50712
+< index 245d8b0..7a8f937 100644
+---
+> index 245d8b0..a1b7cb4 100644
+50725c50725
+< +token: TestContext.Current.CancellationToken
+---
+> +			token: TestContext.Current.CancellationToken
+50963c50963
+< index b88a1e0..3c53c92 100644
+---
+> index b88a1e0..bfbd213 100644
+50976c50976
+< +token: TestContext.Current.CancellationToken
+---
+> +				token: TestContext.Current.CancellationToken
+51032c51032
+< +token: TestContext.Current.CancellationToken
+---
+> +			token: TestContext.Current.CancellationToken
+51063c51063
+< +token: TestContext.Current.CancellationToken
+---
+> +			token: TestContext.Current.CancellationToken
+51086c51086
+< +token: TestContext.Current.CancellationToken
+---
+> +			token: TestContext.Current.CancellationToken
+51121a51122,51125
+> -				{
+> -					throw new Exception("Factory failed");
+> -				}
+> -				finally
+51126,51129d51129
+< -					throw new Exception("Factory failed");
+< -				}
+< -				finally
+< -				{
+51347c51347
+< +token: TestContext.Current.CancellationToken
+---
+> +			token: TestContext.Current.CancellationToken
+51358c51358
+< +token: TestContext.Current.CancellationToken
+---
+> +			token: TestContext.Current.CancellationToken
+51433c51433
+< index 8147705..ae71aff 100644
+---
+> index 8147705..3e2d37b 100644
+51446c51446
+< +token: TestContext.Current.CancellationToken
+---
+> +				token: TestContext.Current.CancellationToken
+51502c51502
+< +token: TestContext.Current.CancellationToken
+---
+> +			token: TestContext.Current.CancellationToken
+51533c51533
+< +token: TestContext.Current.CancellationToken
+---
+> +			token: TestContext.Current.CancellationToken
+51556c51556
+< +token: TestContext.Current.CancellationToken
+---
+> +			token: TestContext.Current.CancellationToken
+51592a51593,51596
+> -				{
+> -					throw new Exception("Factory failed");
+> -				}
+> -				finally
+51597,51600d51600
+< -					throw new Exception("Factory failed");
+< -				}
+< -				finally
+< -				{
+51807c51807
+< +token: TestContext.Current.CancellationToken
+---
+> +			token: TestContext.Current.CancellationToken
+51818c51818
+< +token: TestContext.Current.CancellationToken
+---
+> +			token: TestContext.Current.CancellationToken

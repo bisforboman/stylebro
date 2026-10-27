@@ -1,0 +1,47 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  SerializerPayloadGenerator -> /home/user/w56/FusionCache/dotnet/tests/SerializerPayloadGenerator/bin/Debug/net10.0/SerializerPayloadGenerator.dll
+  ZiggyCreatures.FusionCache -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache/bin/Debug/netstandard2.0/ZiggyCreatures.FusionCache.dll
+  ZiggyCreatures.FusionCache.Backplane.Memory -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Backplane.Memory/bin/Debug/netstandard2.0/ZiggyCreatures.FusionCache.Backplane.Memory.dll
+  ZiggyCreatures.FusionCache.Serialization.ProtoBufNet -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Serialization.ProtoBufNet/bin/Debug/netstandard2.0/ZiggyCreatures.FusionCache.Serialization.ProtoBufNet.dll
+  ZiggyCreatures.FusionCache.Locking.Distributed.Memory -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Locking.Distributed.Memory/bin/Debug/netstandard2.0/ZiggyCreatures.FusionCache.Locking.Distributed.Memory.dll
+  ZiggyCreatures.FusionCache.Locking.Distributed.Redis -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Locking.Distributed.Redis/bin/Debug/netstandard2.0/ZiggyCreatures.FusionCache.Locking.Distributed.Redis.dll
+  ZiggyCreatures.FusionCache.OpenTelemetry -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.OpenTelemetry/bin/Debug/netstandard2.0/ZiggyCreatures.FusionCache.OpenTelemetry.dll
+  ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack/bin/Debug/netstandard2.1/ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack.dll
+  ZiggyCreatures.FusionCache.Serialization.ServiceStackJson -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Serialization.ServiceStackJson/bin/Debug/netstandard2.0/ZiggyCreatures.FusionCache.Serialization.ServiceStackJson.dll
+  ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack/bin/Debug/net7.0/ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack.dll
+  ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis/bin/Debug/netstandard2.0/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis.dll
+  ZiggyCreatures.FusionCache -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache/bin/Debug/net10.0/ZiggyCreatures.FusionCache.dll
+  ZiggyCreatures.FusionCache.Locking.AsyncKeyed -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Locking.AsyncKeyed/bin/Debug/netstandard2.0/ZiggyCreatures.FusionCache.Locking.AsyncKeyed.dll
+  ZiggyCreatures.FusionCache.Chaos -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Chaos/bin/Debug/netstandard2.0/ZiggyCreatures.FusionCache.Chaos.dll
+  ZiggyCreatures.FusionCache.Serialization.NewtonsoftJson -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Serialization.NewtonsoftJson/bin/Debug/netstandard2.0/ZiggyCreatures.FusionCache.Serialization.NewtonsoftJson.dll
+  ZiggyCreatures.FusionCache.AspNetCore.OutputCaching -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.AspNetCore.OutputCaching/bin/Debug/net7.0/ZiggyCreatures.FusionCache.AspNetCore.OutputCaching.dll
+  ZiggyCreatures.FusionCache -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache/bin/Debug/net8.0/ZiggyCreatures.FusionCache.dll
+  ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack/bin/Debug/net10.0/ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack.dll
+  ZiggyCreatures.FusionCache.Locking.AsyncKeyed -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Locking.AsyncKeyed/bin/Debug/net10.0/ZiggyCreatures.FusionCache.Locking.AsyncKeyed.dll
+  ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack/bin/Debug/net10.0/ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack.dll
+  ZiggyCreatures.FusionCache.Serialization.SystemTextJson -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Serialization.SystemTextJson/bin/Debug/netstandard2.0/ZiggyCreatures.FusionCache.Serialization.SystemTextJson.dll
+  ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack/bin/Debug/netstandard2.0/ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack.dll
+  ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis/bin/Debug/net10.0/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis.dll
+  ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack/bin/Debug/net7.0/ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack.dll
+  ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack/bin/Debug/net8.0/ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack.dll
+  ZiggyCreatures.FusionCache.Locking.AsyncKeyed -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Locking.AsyncKeyed/bin/Debug/net8.0/ZiggyCreatures.FusionCache.Locking.AsyncKeyed.dll
+  ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack/bin/Debug/net8.0/ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack.dll
+  ZiggyCreatures.FusionCache.AspNetCore.OutputCaching -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.AspNetCore.OutputCaching/bin/Debug/net8.0/ZiggyCreatures.FusionCache.AspNetCore.OutputCaching.dll
+  ZiggyCreatures.FusionCache -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache/bin/Debug/net9.0/ZiggyCreatures.FusionCache.dll
+  ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis/bin/Debug/net8.0/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis.dll
+  ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis/bin/Debug/net9.0/ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis.dll
+  ZiggyCreatures.FusionCache.Simulator -> /home/user/w56/FusionCache/dotnet/tests/ZiggyCreatures.FusionCache.Simulator/bin/Debug/net10.0/ZiggyCreatures.FusionCache.Simulator.dll
+  AOTTester -> /home/user/w56/FusionCache/dotnet/tests/AOTTester/bin/Debug/net10.0/linux-x64/AOTTester.dll
+  ZiggyCreatures.FusionCache.Locking.AsyncKeyed -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.Locking.AsyncKeyed/bin/Debug/net9.0/ZiggyCreatures.FusionCache.Locking.AsyncKeyed.dll
+  ZiggyCreatures.FusionCache.Tests -> /home/user/w56/FusionCache/dotnet/tests/ZiggyCreatures.FusionCache.Tests/bin/Debug/net10.0/ZiggyCreatures.FusionCache.Tests.dll
+  ZiggyCreatures.FusionCache.AspNetCore.OutputCaching -> /home/user/w56/FusionCache/dotnet/src/ZiggyCreatures.FusionCache.AspNetCore.OutputCaching/bin/Debug/net10.0/ZiggyCreatures.FusionCache.AspNetCore.OutputCaching.dll
+  ZiggyCreatures.FusionCache.Benchmarks -> /home/user/w56/FusionCache/dotnet/benchmarks/ZiggyCreatures.FusionCache.Benchmarks/bin/Debug/net10.0/ZiggyCreatures.FusionCache.Benchmarks.dll
+  ZiggyCreatures.FusionCache.Playground -> /home/user/w56/FusionCache/dotnet/tests/ZiggyCreatures.FusionCache.Playground/bin/Debug/net10.0/ZiggyCreatures.FusionCache.Playground.dll
+  WebAppTest -> /home/user/w56/FusionCache/dotnet/tests/WebAppTest/bin/Debug/net10.0/WebAppTest.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:32.03

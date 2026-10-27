@@ -1,0 +1,361 @@
+Checking StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Not built: build/, tests/NetEscapades.EnumGenerators.Nuget.AnalyzerTests/, tests/NetEscapades.EnumGenerators.Nuget.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.Interceptors.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.Interceptors.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard/: no configuration of NetEscapades.EnumGenerators.sln builds their projects, so 'dotnet restore' skips them and 'format' leaves them alone. Where a Directory.Build.props above brings StyleBro into their builds, format each on their own: 'bro format build/_build.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.AnalyzerTests/NetEscapades.EnumGenerators.Nuget.AnalyzerTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.IntegrationTests/NetEscapades.EnumGenerators.Nuget.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.Interceptors.IntegrationTests/NetEscapades.EnumGenerators.Nuget.Interceptors.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.Interceptors.IntegrationTests/NetEscapades.EnumGenerators.Nuget.NetStandard.Interceptors.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.IntegrationTests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets.IntegrationTests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard/NetEscapades.EnumGenerators.Nuget.NetStandard.csproj'.
+Generators: building NetEscapades.EnumGenerators.Attributes, NetEscapades.EnumGenerators.Interceptors.Attributes first (in the default configuration, the one 'dotnet format' loads): the code uses them as a source generator, and without their output the generated code would be missing from the checks.
+Configurations: NetEscapades.EnumGenerators.IntegrationTests, NetEscapades.EnumGenerators.Interceptors.IntegrationTests, NetEscapades.EnumGenerators.NetStandard, NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests and 2 more: they take an in-solution source generator, so a build of their other configurations checks the code only those compile ('#if !DEBUG') at the end too.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net451, net48, net6.0, net7.0, netstandard2.0). net5.0, net8.0, net9.0, netcoreapp2.1, netcoreapp3.1: no run of their own, the code compiles the same as for another framework of the same kind (the same '#if' symbols tested, files and settings). net10.0, net7.0: only the projects whose code compiles differently there.
+Shared files: these projects compile the same files with other '#if' symbols or settings, so each group gets a run of its own (loaded together, 'dotnet format' crashes: https://github.com/dotnet/roslyn/issues/86001): NetEscapades.EnumGenerators.IntegrationTests | NetEscapades.EnumGenerators.NetStandard.IntegrationTests | NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests | NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests | NetEscapades.EnumGenerators.Tests; NetEscapades.EnumGenerators.IntegrationTests, NetEscapades.EnumGenerators.Interceptors.IntegrationTests | NetEscapades.EnumGenerators.NetStandard.IntegrationTests | NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests | NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests | NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests; NetEscapades.EnumGenerators.IntegrationTests | NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests; NetEscapades.EnumGenerators.Generators, NetEscapades.EnumGenerators.Interceptors, NetEscapades.EnumGenerators.NetStandard.SystemMemory | NetEscapades.EnumGenerators.NetStandard.
+Checked net7.0, part 1 of 2 (run 1 of 16)
+Checked net6.0, part 2 of 5 (run 2 of 16)
+Checked net10.0, part 1 of 5 (run 3 of 16)
+Checked net10.0, part 5 of 5 (run 4 of 16)
+Checked net451 (run 5 of 16)
+Checked net6.0, part 3 of 5 (run 6 of 16)
+Checked net7.0, part 2 of 2 (run 7 of 16)
+Checked net10.0, part 2 of 5 (run 8 of 16)
+Checked net48 (run 9 of 16)
+Checked net6.0, part 4 of 5 (run 10 of 16)
+Checked netstandard2.0, part 1 of 2 (run 11 of 16)
+Checked net10.0, part 3 of 5 (run 12 of 16)
+Checked net6.0, part 5 of 5 (run 13 of 16)
+Checked netstandard2.0, part 2 of 2 (run 14 of 16)
+Checked net10.0, part 4 of 5 (run 15 of 16)
+Checked net6.0, part 1 of 5 (run 16 of 16)
+Formatting a copy: net48 (1 project(s), 1 file with findings)
+Formatting a copy: net6.0, part 1 of 5 (5 project(s), 1 file with findings)
+The dotnet runtime version is '10.0.13'.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.stylebro-format-0.slnf'.
+Loading workspace.
+Project NetEscapades.EnumGenerators.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.editorconfig'.
+Found project reference without a matching metadata reference: /home/user/w56/EnumGen/parity/soak-src-dotnet-format/src/NetEscapades.EnumGenerators.RuntimeDependencies/NetEscapades.EnumGenerators.RuntimeDependencies.csproj
+Found project reference without a matching metadata reference: /home/user/w56/EnumGen/parity/soak-src-dotnet-format/src/NetEscapades.EnumGenerators.Attributes/NetEscapades.EnumGenerators.Attributes.csproj
+Project NetEscapades.EnumGenerators.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/tests/NetEscapades.EnumGenerators.IntegrationTests/.editorconfig'.
+Project NetEscapades.EnumGenerators.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/tests/NetEscapades.EnumGenerators.IntegrationTests/.globalconfig'.
+Project NetEscapades.EnumGenerators.IntegrationTests is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project NetEscapades.EnumGenerators.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.IntegrationTests/debug_net10.0/NetEscapades.EnumGenerators.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.IntegrationTests is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_10_default.globalconfig'.
+Project NetEscapades.EnumGenerators.Attributes(netstandard2.0) is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.editorconfig'.
+Project NetEscapades.EnumGenerators.Attributes(netstandard2.0) is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project NetEscapades.EnumGenerators.Attributes(netstandard2.0) is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.Attributes/debug_netstandard2.0/NetEscapades.EnumGenerators.Attributes.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.Attributes(net451) is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.editorconfig'.
+Project NetEscapades.EnumGenerators.Attributes(net451) is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project NetEscapades.EnumGenerators.Attributes(net451) is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.Attributes/debug_net451/NetEscapades.EnumGenerators.Attributes.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.Generators is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.editorconfig'.
+Project NetEscapades.EnumGenerators.Generators is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project NetEscapades.EnumGenerators.Generators is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.Generators/debug/NetEscapades.EnumGenerators.Generators.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.RuntimeDependencies(netstandard2.0) is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.editorconfig'.
+Project NetEscapades.EnumGenerators.RuntimeDependencies(netstandard2.0) is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project NetEscapades.EnumGenerators.RuntimeDependencies(netstandard2.0) is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.RuntimeDependencies/debug_netstandard2.0/NetEscapades.EnumGenerators.RuntimeDependencies.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.RuntimeDependencies(net451) is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.editorconfig'.
+Project NetEscapades.EnumGenerators.RuntimeDependencies(net451) is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project NetEscapades.EnumGenerators.RuntimeDependencies(net451) is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.RuntimeDependencies/debug_net451/NetEscapades.EnumGenerators.RuntimeDependencies.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 8692ms.
+Determining formattable files.
+Complete in 632ms.
+Running formatters.
+Running Code Style analysis.
+Determining diagnostics...
+Running 2 analyzers on NetEscapades.EnumGenerators.IntegrationTests.
+Complete in 5669ms.
+Analysis complete in 5675ms.
+Running Analyzer Reference analysis.
+Running 89 analyzers on NetEscapades.EnumGenerators.IntegrationTests.
+Complete in 6646ms.
+Analysis complete in 6647ms.
+Complete in 14681ms.
+Formatted 0 of 153 files.
+Format complete in 24005ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.stylebro-format-1.slnf'.
+Project NetEscapades.EnumGenerators.NetStandard is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.editorconfig'.
+Project NetEscapades.EnumGenerators.NetStandard is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/tests/NetEscapades.EnumGenerators.IntegrationTests/.editorconfig'.
+Project NetEscapades.EnumGenerators.NetStandard is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/tests/NetEscapades.EnumGenerators.IntegrationTests/.globalconfig'.
+Project NetEscapades.EnumGenerators.NetStandard is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project NetEscapades.EnumGenerators.NetStandard is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.NetStandard/debug_netstandard2.0/NetEscapades.EnumGenerators.NetStandard.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.NetStandard is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_10_all_warnaserror.globalconfig'.
+Project NetEscapades.EnumGenerators.NetStandard.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.editorconfig'.
+Project NetEscapades.EnumGenerators.NetStandard.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/tests/NetEscapades.EnumGenerators.IntegrationTests/.editorconfig'.
+Project NetEscapades.EnumGenerators.NetStandard.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/tests/NetEscapades.EnumGenerators.IntegrationTests/.globalconfig'.
+Project NetEscapades.EnumGenerators.NetStandard.IntegrationTests is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project NetEscapades.EnumGenerators.NetStandard.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.NetStandard.IntegrationTests/debug_net10.0/NetEscapades.EnumGenerators.NetStandard.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.NetStandard.IntegrationTests is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_10_default.globalconfig'.
+Complete in 10505ms.
+Complete in 1016ms.
+Running 2 analyzers on NetEscapades.EnumGenerators.NetStandard.IntegrationTests.
+Complete in 7557ms.
+Analysis complete in 7557ms.
+Running 89 analyzers on NetEscapades.EnumGenerators.NetStandard.IntegrationTests.
+Complete in 3984ms.
+Analysis complete in 3984ms.
+Complete in 13533ms.
+Formatted 0 of 155 files.
+Format complete in 25055ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.stylebro-format-2.slnf'.
+Found project reference without a matching metadata reference: /home/user/w56/EnumGen/parity/soak-src-dotnet-format/tests/Dependencies.SystemMemory/Dependencies.SystemMemory.csproj
+Project NetEscapades.EnumGenerators.NetStandard.SystemMemory is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.editorconfig'.
+Project NetEscapades.EnumGenerators.NetStandard.SystemMemory is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/tests/NetEscapades.EnumGenerators.IntegrationTests/.editorconfig'.
+Project NetEscapades.EnumGenerators.NetStandard.SystemMemory is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/tests/NetEscapades.EnumGenerators.IntegrationTests/.globalconfig'.
+Project NetEscapades.EnumGenerators.NetStandard.SystemMemory is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project NetEscapades.EnumGenerators.NetStandard.SystemMemory is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.NetStandard.SystemMemory/debug_netstandard2.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.NetStandard.SystemMemory is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_10_all_warnaserror.globalconfig'.
+Project NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.editorconfig'.
+Project NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/tests/NetEscapades.EnumGenerators.IntegrationTests/.editorconfig'.
+Project NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/tests/NetEscapades.EnumGenerators.IntegrationTests/.globalconfig'.
+Project NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/debug_net10.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_10_default.globalconfig'.
+Project Dependencies.SystemMemory is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project Dependencies.SystemMemory is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/Dependencies.SystemMemory/debug_netstandard2.0/Dependencies.SystemMemory.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 9107ms.
+Complete in 902ms.
+Running 2 analyzers on NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.
+Complete in 6959ms.
+Analysis complete in 6959ms.
+Running 89 analyzers on NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.
+Complete in 4576ms.
+Analysis complete in 4577ms.
+Complete in 14066ms.
+Formatted 0 of 156 files.
+Format complete in 24076ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.stylebro-format-3.slnf'.
+Project NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.editorconfig'.
+Project NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/tests/NetEscapades.EnumGenerators.IntegrationTests/.editorconfig'.
+Project NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/tests/NetEscapades.EnumGenerators.IntegrationTests/.globalconfig'.
+Project NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests/debug_net10.0/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_10_default.globalconfig'.
+Complete in 9631ms.
+Complete in 1366ms.
+Running 2 analyzers on NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.
+Complete in 4162ms.
+Analysis complete in 4162ms.
+Running 89 analyzers on NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.
+Complete in 6246ms.
+Analysis complete in 6246ms.
+Complete in 12498ms.
+Formatted 0 of 143 files.
+Format complete in 23496ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.stylebro-format-4.slnf'.
+Project NetEscapades.EnumGenerators.Tests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.editorconfig'.
+Found project reference without a matching metadata reference: /home/user/w56/EnumGen/parity/soak-src-dotnet-format/src/NetEscapades.EnumGenerators.Interceptors.Attributes/NetEscapades.EnumGenerators.Interceptors.Attributes.csproj
+Found project reference without a matching metadata reference: /home/user/w56/EnumGen/parity/soak-src-dotnet-format/src/NetEscapades.EnumGenerators.Generators/NetEscapades.EnumGenerators.Generators.csproj
+Found project reference without a matching metadata reference: /home/user/w56/EnumGen/parity/soak-src-dotnet-format/src/NetEscapades.EnumGenerators/NetEscapades.EnumGenerators.csproj
+Found project reference without a matching metadata reference: /home/user/w56/EnumGen/parity/soak-src-dotnet-format/src/NetEscapades.EnumGenerators.Interceptors/NetEscapades.EnumGenerators.Interceptors.csproj
+Project NetEscapades.EnumGenerators.Tests is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project NetEscapades.EnumGenerators.Tests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.Tests/debug_net10.0/NetEscapades.EnumGenerators.Tests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.Tests is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_10_default.globalconfig'.
+Project NetEscapades.EnumGenerators.Interceptors is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.editorconfig'.
+Project NetEscapades.EnumGenerators.Interceptors is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project NetEscapades.EnumGenerators.Interceptors is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.Interceptors/debug/NetEscapades.EnumGenerators.Interceptors.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project NetEscapades.EnumGenerators is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators/debug/NetEscapades.EnumGenerators.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.Interceptors.Attributes(netstandard2.0) is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.editorconfig'.
+Project NetEscapades.EnumGenerators.Interceptors.Attributes(netstandard2.0) is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project NetEscapades.EnumGenerators.Interceptors.Attributes(netstandard2.0) is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.Interceptors.Attributes/debug_netstandard2.0/NetEscapades.EnumGenerators.Interceptors.Attributes.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.Interceptors.Attributes(net451) is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.editorconfig'.
+Project NetEscapades.EnumGenerators.Interceptors.Attributes(net451) is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project NetEscapades.EnumGenerators.Interceptors.Attributes(net451) is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.Interceptors.Attributes/debug_net451/NetEscapades.EnumGenerators.Interceptors.Attributes.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 10863ms.
+Complete in 798ms.
+Running 2 analyzers on NetEscapades.EnumGenerators.Tests.
+Complete in 4713ms.
+Analysis complete in 4713ms.
+Running 89 analyzers on NetEscapades.EnumGenerators.Tests.
+Complete in 7263ms.
+Analysis complete in 7263ms.
+Complete in 14103ms.
+Formatted 0 of 242 files.
+Format complete in 25764ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.stylebro-format-5.slnf'.
+Project NetEscapades.EnumGenerators.Attributes is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.editorconfig'.
+Project NetEscapades.EnumGenerators.Attributes is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project NetEscapades.EnumGenerators.Attributes is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.Attributes/debug_net451/NetEscapades.EnumGenerators.Attributes.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.Interceptors.Attributes is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.editorconfig'.
+Project NetEscapades.EnumGenerators.Interceptors.Attributes is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project NetEscapades.EnumGenerators.Interceptors.Attributes is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.Interceptors.Attributes/debug_net451/NetEscapades.EnumGenerators.Interceptors.Attributes.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.RuntimeDependencies is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.editorconfig'.
+Project NetEscapades.EnumGenerators.RuntimeDependencies is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project NetEscapades.EnumGenerators.RuntimeDependencies is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.RuntimeDependencies/debug_net451/NetEscapades.EnumGenerators.RuntimeDependencies.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 5910ms.
+Complete in 678ms.
+Running 2 analyzers on NetEscapades.EnumGenerators.Attributes.
+Running 2 analyzers on NetEscapades.EnumGenerators.Interceptors.Attributes.
+Running 2 analyzers on NetEscapades.EnumGenerators.RuntimeDependencies.
+Complete in 1845ms.
+Analysis complete in 1845ms.
+Running 74 analyzers on NetEscapades.EnumGenerators.Attributes.
+Running 74 analyzers on NetEscapades.EnumGenerators.Interceptors.Attributes.
+Running 74 analyzers on NetEscapades.EnumGenerators.RuntimeDependencies.
+Complete in 1487ms.
+Analysis complete in 1487ms.
+Complete in 4660ms.
+Formatted 0 of 12 files.
+Format complete in 11248ms.
+== net48 (1 project(s))
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.stylebro-format-6.slnf'.
+Unresolved metadata reference removed from project: /home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/bin/NetEscapades.EnumGenerators.RuntimeDependencies/debug_net451/NetEscapades.EnumGenerators.RuntimeDependencies.dll
+Project NetEscapades.EnumGenerators.Benchmarks is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.editorconfig'.
+Project NetEscapades.EnumGenerators.Benchmarks is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project NetEscapades.EnumGenerators.Benchmarks is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/tests/NetEscapades.EnumGenerators.Benchmarks/obj/Debug/net48/NetEscapades.EnumGenerators.Benchmarks.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 11973ms.
+Complete in 581ms.
+Running 2 analyzers on NetEscapades.EnumGenerators.Benchmarks.
+Complete in 2978ms.
+Analysis complete in 2993ms.
+Running 74 analyzers on NetEscapades.EnumGenerators.Benchmarks.
+Complete in 2060ms.
+Analysis complete in 2060ms.
+Complete in 6806ms.
+Formatted code file '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs'.
+Formatted 1 of 135 files.
+Format complete in 19361ms.
+== net6.0, part 1 of 5 (5 project(s))
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.stylebro-format-7.slnf'.
+Project NetEscapades.EnumGenerators.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.IntegrationTests/debug_net6.0/NetEscapades.EnumGenerators.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.IntegrationTests is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_6_default.globalconfig'.
+Project NetEscapades.EnumGenerators.Tests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.Tests/debug_net6.0/NetEscapades.EnumGenerators.Tests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.Tests is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_6_default.globalconfig'.
+Project NetEscapades.EnumGenerators.Benchmarks is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/tests/NetEscapades.EnumGenerators.Benchmarks/obj/Debug/net6.0/NetEscapades.EnumGenerators.Benchmarks.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.Benchmarks is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_6_default.globalconfig'.
+Project ToStringFastExample is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.editorconfig'.
+Project ToStringFastExample is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project ToStringFastExample is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/ToStringFastExample/debug_net6.0/ToStringFastExample.GeneratedMSBuildEditorConfig.editorconfig'.
+Project ToStringFastExample is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_6_default.globalconfig'.
+Project NetEscapades.EnumGenerators.Interceptors.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.editorconfig'.
+Project NetEscapades.EnumGenerators.Interceptors.IntegrationTests is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project NetEscapades.EnumGenerators.Interceptors.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.Interceptors.IntegrationTests/debug_net6.0/NetEscapades.EnumGenerators.Interceptors.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.Interceptors.IntegrationTests is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_6_default.globalconfig'.
+Complete in 19432ms.
+Complete in 959ms.
+Running 2 analyzers on ToStringFastExample.
+Running 2 analyzers on NetEscapades.EnumGenerators.Interceptors.IntegrationTests.
+Complete in 8259ms.
+Analysis complete in 8262ms.
+Running 74 analyzers on ToStringFastExample.
+Running 89 analyzers on NetEscapades.EnumGenerators.Interceptors.IntegrationTests.
+Complete in 9772ms.
+Analysis complete in 9772ms.
+Complete in 20670ms.
+Formatted 1 of 279 files.
+Format complete in 41061ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.stylebro-format-8.slnf'.
+Project NetEscapades.EnumGenerators.NetStandard.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.NetStandard.IntegrationTests/debug_net6.0/NetEscapades.EnumGenerators.NetStandard.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.NetStandard.IntegrationTests is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_6_default.globalconfig'.
+Complete in 10421ms.
+Complete in 746ms.
+Complete in 3901ms.
+Analysis complete in 3901ms.
+Complete in 5042ms.
+Analysis complete in 5042ms.
+Complete in 10656ms.
+Format complete in 21824ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.stylebro-format-9.slnf'.
+Project NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.editorconfig'.
+Project NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial56.1/build/presets/stylebro.1.0.globalconfig'.
+Project NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests/debug_net6.0/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_6_default.globalconfig'.
+Complete in 11757ms.
+Complete in 289ms.
+Running 2 analyzers on NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.
+Complete in 4189ms.
+Analysis complete in 4189ms.
+Running 89 analyzers on NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.
+Complete in 1019ms.
+Analysis complete in 1019ms.
+Complete in 6716ms.
+Formatted 0 of 229 files.
+Format complete in 18763ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.stylebro-format-10.slnf'.
+Project NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/debug_net6.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_6_default.globalconfig'.
+Complete in 11030ms.
+Complete in 1069ms.
+Complete in 3982ms.
+Analysis complete in 3982ms.
+Complete in 3263ms.
+Analysis complete in 3263ms.
+Complete in 9239ms.
+Format complete in 21339ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.stylebro-format-11.slnf'.
+Project NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests/debug_net6.0/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_6_default.globalconfig'.
+Complete in 10238ms.
+Complete in 865ms.
+Complete in 4469ms.
+Analysis complete in 4469ms.
+Complete in 5157ms.
+Analysis complete in 5157ms.
+Complete in 11546ms.
+Format complete in 22649ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.stylebro-format-12.slnf'.
+Project NetEscapades.EnumGenerators.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.IntegrationTests/debug_net7.0/NetEscapades.EnumGenerators.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.IntegrationTests is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_7_default.globalconfig'.
+Complete in 8528ms.
+Complete in 1330ms.
+Complete in 3244ms.
+Analysis complete in 3245ms.
+Complete in 6701ms.
+Analysis complete in 6701ms.
+Complete in 11891ms.
+Format complete in 21750ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.stylebro-format-13.slnf'.
+Project NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests/debug_net7.0/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_7_default.globalconfig'.
+Complete in 9439ms.
+Complete in 641ms.
+Complete in 4425ms.
+Analysis complete in 4433ms.
+Complete in 5752ms.
+Analysis complete in 5752ms.
+Complete in 12759ms.
+Format complete in 22839ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.stylebro-format-14.slnf'.
+Project NetEscapades.EnumGenerators.Attributes is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.Attributes/debug_netstandard2.0/NetEscapades.EnumGenerators.Attributes.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.Interceptors.Attributes is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.Interceptors.Attributes/debug_netstandard2.0/NetEscapades.EnumGenerators.Interceptors.Attributes.GeneratedMSBuildEditorConfig.editorconfig'.
+Project NetEscapades.EnumGenerators.RuntimeDependencies is using configuration from '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/artifacts/obj/NetEscapades.EnumGenerators.RuntimeDependencies/debug_netstandard2.0/NetEscapades.EnumGenerators.RuntimeDependencies.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 9674ms.
+Complete in 1095ms.
+Running 2 analyzers on NetEscapades.EnumGenerators.Interceptors.
+Running 2 analyzers on NetEscapades.EnumGenerators.NetStandard.SystemMemory.
+Running 2 analyzers on NetEscapades.EnumGenerators.Generators.
+Complete in 4509ms.
+Analysis complete in 4516ms.
+Running 74 analyzers on NetEscapades.EnumGenerators.Interceptors.
+Running 74 analyzers on NetEscapades.EnumGenerators.NetStandard.SystemMemory.
+Running 74 analyzers on NetEscapades.EnumGenerators.Generators.
+Complete in 9866ms.
+Analysis complete in 9866ms.
+Complete in 16515ms.
+Formatted 0 of 213 files.
+Format complete in 27284ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-dotnet-format/.stylebro-format-15.slnf'.
+Complete in 8431ms.
+Complete in 1076ms.
+Running 2 analyzers on NetEscapades.EnumGenerators.NetStandard.
+Complete in 4158ms.
+Analysis complete in 4158ms.
+Running 74 analyzers on NetEscapades.EnumGenerators.NetStandard.
+Complete in 2716ms.
+Analysis complete in 2716ms.
+Complete in 8694ms.
+Formatted 0 of 125 files.
+Format complete in 18201ms.
+Building NetEscapades.EnumGenerators.IntegrationTests in Release to check it (it takes an in-solution source generator)...
+Building NetEscapades.EnumGenerators.Interceptors.IntegrationTests in Release to check it (it takes an in-solution source generator)...
+Building NetEscapades.EnumGenerators.NetStandard in Release to check it (it takes an in-solution source generator)...
+Building NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests in Release to check it (it takes an in-solution source generator)...
+Building NetEscapades.EnumGenerators.NetStandard.SystemMemory in Release to check it (it takes an in-solution source generator)...
+Building NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests in Release to check it (it takes an in-solution source generator)...
+Release build of NetEscapades.EnumGenerators.IntegrationTests: no findings.
+Release build of NetEscapades.EnumGenerators.Interceptors.IntegrationTests: no findings.
+Release build of NetEscapades.EnumGenerators.NetStandard: no findings.
+Release build of NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests: no findings.
+Release build of NetEscapades.EnumGenerators.NetStandard.SystemMemory: no findings.
+Release build of NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests: no findings.
+Clean: 6 findings kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them (https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose).
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(26,38): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(53,38): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(73,36): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(109,36): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(300,36): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(421,36): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

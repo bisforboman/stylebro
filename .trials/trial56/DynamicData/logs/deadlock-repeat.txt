@@ -1,0 +1,6 @@
+base run 1: Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1
+base run 2: Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1
+base run 3: Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1
+dotnet run 1: Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1
+dotnet run 2: Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1
+dotnet run 3: Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1

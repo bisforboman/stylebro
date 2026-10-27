@@ -1,0 +1,5 @@
+build rc=0
+test rc=1
+format rc=2
+changelog rc=0
+SC-DONE

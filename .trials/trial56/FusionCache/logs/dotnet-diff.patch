@@ -1,0 +1,1 @@
+round 1 (0.8.0-trial56.1): the host run's tree; the dotnet-format run's differs only as round1-default-vs-dotnet-diff.txt shows (BRO1117 column-0 items); round 2 default2-diff.patch is the final tree. Removed to save space.

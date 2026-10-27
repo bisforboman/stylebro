@@ -1,0 +1,6 @@
+build	0	46s	dotnet build ZiggyCreatures.FusionCache.slnx -c Debug
+twae-Debug	0	61s	twae Debug
+test-Debug	2	1237s	env CFG=Debug bash -c dotnet test --solution ZiggyCreatures.FusionCache.slnx -c $CFG
+twae-Release	0	27s	twae Release
+test-Release	2	981s	env CFG=Release bash -c dotnet test --solution ZiggyCreatures.FusionCache.slnx -c $CFG
+DONE

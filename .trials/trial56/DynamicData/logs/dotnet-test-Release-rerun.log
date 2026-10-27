@@ -1,0 +1,63 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  DynamicData -> /home/user/w56/DynamicData/dotnet/src/DynamicData/bin/Release/netstandard2.0/DynamicData.dll
+  DynamicData -> /home/user/w56/DynamicData/dotnet/src/DynamicData/bin/Release/net8.0/DynamicData.dll
+  DynamicData -> /home/user/w56/DynamicData/dotnet/src/DynamicData/bin/Release/net9.0/DynamicData.dll
+  DynamicData -> /home/user/w56/DynamicData/dotnet/src/DynamicData/bin/Release/net6.0/DynamicData.dll
+  DynamicData -> /home/user/w56/DynamicData/dotnet/src/DynamicData/bin/Release/net10.0/DynamicData.dll
+  DynamicData -> /home/user/w56/DynamicData/dotnet/src/DynamicData/bin/Release/net462/DynamicData.dll
+  DynamicData -> /home/user/w56/DynamicData/dotnet/src/DynamicData/bin/Release/net7.0/DynamicData.dll
+  DynamicData.Tests -> /home/user/w56/DynamicData/dotnet/src/DynamicData.Tests/bin/Release/net9.0/DynamicData.Tests.dll
+Test run for /home/user/w56/DynamicData/dotnet/src/DynamicData.Tests/bin/Release/net9.0/DynamicData.Tests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:04.50]     DynamicData.Tests.Cache.SizeLimitFixture.OnCompleteIsInvokedWhenSourceIsDisposed [SKIP]
+  Skipped DynamicData.Tests.Cache.SizeLimitFixture.OnCompleteIsInvokedWhenSourceIsDisposed [1 ms]
+[xUnit.net 00:00:05.83]     DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithKey.ReevaluatorThrows_ExceptionPropagates [SKIP]
+[xUnit.net 00:00:05.84]     DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithKey.ReevaluatorEmitsImmediately_ItemDoesNotRefresh [SKIP]
+[xUnit.net 00:00:05.84]     DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithKey.ReevaluatorFails_ErrorPropagates [SKIP]
+  Skipped DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithKey.ReevaluatorThrows_ExceptionPropagates [1 ms]
+  Skipped DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithKey.ReevaluatorEmitsImmediately_ItemDoesNotRefresh [1 ms]
+  Skipped DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithKey.ReevaluatorFails_ErrorPropagates [1 ms]
+[xUnit.net 00:00:23.87]     DynamicData.Tests.Cache.AutoRefreshFixture+WithPropertyAccessor.PropertyAccessorIsNull_ThrowsException [SKIP]
+  Skipped DynamicData.Tests.Cache.AutoRefreshFixture+WithPropertyAccessor.PropertyAccessorIsNull_ThrowsException [1 ms]
+[xUnit.net 00:00:23.96]     DynamicData.Tests.AggregationTests.AvgFixture+ForCache+ForAggregateChangeSet.SourceIsEmpty_ConfiguredEmptyValueIsEmitted [SKIP]
+  Skipped DynamicData.Tests.AggregationTests.AvgFixture+ForCache+ForAggregateChangeSet.SourceIsEmpty_ConfiguredEmptyValueIsEmitted [1 ms]
+[xUnit.net 00:00:23.97]     DynamicData.Tests.AggregationTests.AvgFixture+ForCache+ForAggregateChangeSet.ItemIsRefreshed_AverageReevaluatesMutatedValue [SKIP]
+[xUnit.net 00:00:23.98]     DynamicData.Tests.AggregationTests.AvgFixture+ForCache+ForAggregateChangeSet.EmptySourceCompletes_ConfiguredEmptyValueAndCompletionPropagate [SKIP]
+  Skipped DynamicData.Tests.AggregationTests.AvgFixture+ForCache+ForAggregateChangeSet.ItemIsRefreshed_AverageReevaluatesMutatedValue [1 ms]
+  Skipped DynamicData.Tests.AggregationTests.AvgFixture+ForCache+ForAggregateChangeSet.EmptySourceCompletes_ConfiguredEmptyValueAndCompletionPropagate [1 ms]
+[xUnit.net 00:00:24.03]     DynamicData.Tests.AggregationTests.AvgFixture+ForList+ForAggregateChangeSet.EmptySourceCompletes_ConfiguredEmptyValueAndCompletionPropagate [SKIP]
+  Skipped DynamicData.Tests.AggregationTests.AvgFixture+ForList+ForAggregateChangeSet.EmptySourceCompletes_ConfiguredEmptyValueAndCompletionPropagate [1 ms]
+[xUnit.net 00:00:24.17]     DynamicData.Tests.AggregationTests.AvgFixture+ForList+ForAggregateChangeSet.SourceIsEmpty_ConfiguredEmptyValueIsEmitted [SKIP]
+  Skipped DynamicData.Tests.AggregationTests.AvgFixture+ForList+ForAggregateChangeSet.SourceIsEmpty_ConfiguredEmptyValueIsEmitted [1 ms]
+[xUnit.net 00:00:24.20]     DynamicData.Tests.AggregationTests.AvgFixture+ForList+ForAggregateChangeSet.ItemIsRefreshed_AverageReevaluatesMutatedValue [SKIP]
+  Skipped DynamicData.Tests.AggregationTests.AvgFixture+ForList+ForAggregateChangeSet.ItemIsRefreshed_AverageReevaluatesMutatedValue [1 ms]
+[xUnit.net 00:00:24.63]     DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithoutKey.ReevaluatorThrows_ExceptionPropagates [SKIP]
+  Skipped DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithoutKey.ReevaluatorThrows_ExceptionPropagates [1 ms]
+[xUnit.net 00:00:24.65]     DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithoutKey.ReevaluatorIsNull_ThrowsException [SKIP]
+[xUnit.net 00:00:24.66]     DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithoutKey.ReevaluatorEmitsImmediately_ItemDoesNotRefresh [SKIP]
+  Skipped DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithoutKey.ReevaluatorIsNull_ThrowsException [1 ms]
+  Skipped DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithoutKey.ReevaluatorEmitsImmediately_ItemDoesNotRefresh [1 ms]
+[xUnit.net 00:00:24.67]     DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithoutKey.ReevaluatorFails_ErrorPropagates [SKIP]
+  Skipped DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithoutKey.ReevaluatorFails_ErrorPropagates [1 ms]
+[xUnit.net 00:01:34.05]     DynamicData.Tests.Internal.CacheParentSubscriptionFixture.DeadlockProof_CrossFeedingSubscriptions [FAIL]
+  Failed DynamicData.Tests.Internal.CacheParentSubscriptionFixture.DeadlockProof_CrossFeedingSubscriptions [30 s]
+  Error Message:
+   Expected finished to refer to System.Threading.Tasks.Task+WhenAllPromise {Status=WaitingForActivation} because cross-feeding CacheParentSubscriptions should not deadlock, but found System.Threading.Tasks.Task+DelayPromise {Status=RanToCompletion}.
+  Stack Trace:
+     at FluentAssertions.Execution.LateBoundTestFramework.Throw(String message)
+   at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+   at FluentAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+   at FluentAssertions.Primitives.ReferenceTypeAssertions`2.BeSameAs(TSubject expected, String because, Object[] becauseArgs)
+   at DynamicData.Tests.Internal.CacheParentSubscriptionFixture.DeadlockProof_CrossFeedingSubscriptions() in /home/user/w56/DynamicData/dotnet/src/DynamicData.Tests/Internal/CacheParentSubscriptionFixture.cs:line 258
+--- End of stack trace from previous location ---
+[xUnit.net 00:09:02.68]     DynamicData.Tests.Binding.WhenPropertyChangedFixture+IntegrationTests.AutoRefreshThenFilter_DualSubscribers_AllItemsObserved [SKIP]
+  Skipped DynamicData.Tests.Binding.WhenPropertyChangedFixture+IntegrationTests.AutoRefreshThenFilter_DualSubscribers_AllItemsObserved [1 ms]
+[xUnit.net 00:09:07.56]     DynamicData.Tests.Binding.WhenPropertyChangedFixture+IntegrationTests.AutoRefreshThenFilter_ConcurrentAddsAndPropertyActivation_AllItemsObserved [SKIP]
+  Skipped DynamicData.Tests.Binding.WhenPropertyChangedFixture+IntegrationTests.AutoRefreshThenFilter_ConcurrentAddsAndPropertyActivation_AllItemsObserved [1 ms]
+Data collector 'Blame' message: All tests finished running, Sequence file will not be generated.
+
+Failed!  - Failed:     1, Passed:  2630, Skipped:    17, Total:  2648, Duration: 10 m 32 s - DynamicData.Tests.dll (net9.0)

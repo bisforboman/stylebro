@@ -1,0 +1,245 @@
+Checking StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Not built: build/, tests/NetEscapades.EnumGenerators.Nuget.AnalyzerTests/, tests/NetEscapades.EnumGenerators.Nuget.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.Interceptors.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.Interceptors.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets.IntegrationTests/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory/, tests/NetEscapades.EnumGenerators.Nuget.NetStandard/: no configuration of NetEscapades.EnumGenerators.sln builds their projects, so 'dotnet restore' skips them and 'format' leaves them alone. Where a Directory.Build.props above brings StyleBro into their builds, format each on their own: 'bro format build/_build.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.AnalyzerTests/NetEscapades.EnumGenerators.Nuget.AnalyzerTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.IntegrationTests/NetEscapades.EnumGenerators.Nuget.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.Interceptors.IntegrationTests/NetEscapades.EnumGenerators.Nuget.Interceptors.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.Interceptors.IntegrationTests/NetEscapades.EnumGenerators.Nuget.NetStandard.Interceptors.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.IntegrationTests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets.IntegrationTests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets.IntegrationTests.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.PrivateAssets.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory/NetEscapades.EnumGenerators.Nuget.NetStandard.SystemMemory.csproj', 'bro format tests/NetEscapades.EnumGenerators.Nuget.NetStandard/NetEscapades.EnumGenerators.Nuget.NetStandard.csproj'.
+Generators: building NetEscapades.EnumGenerators.Attributes, NetEscapades.EnumGenerators.Interceptors.Attributes first (in the default configuration, the one 'dotnet format' loads): the code uses them as a source generator, and without their output the generated code would be missing from the checks.
+Configurations: NetEscapades.EnumGenerators.IntegrationTests, NetEscapades.EnumGenerators.Interceptors.IntegrationTests, NetEscapades.EnumGenerators.NetStandard, NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests and 2 more: they take an in-solution source generator, so a build of their other configurations checks the code only those compile ('#if !DEBUG') at the end too.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net451, net48, net6.0, net7.0, netstandard2.0). net5.0, net8.0, net9.0, netcoreapp2.1, netcoreapp3.1: no run of their own, the code compiles the same as for another framework of the same kind (the same '#if' symbols tested, files and settings). net10.0, net7.0: only the projects whose code compiles differently there.
+Shared files: these projects compile the same files with other '#if' symbols or settings, so each group gets a run of its own (loaded together, 'dotnet format' crashes: https://github.com/dotnet/roslyn/issues/86001): NetEscapades.EnumGenerators.IntegrationTests | NetEscapades.EnumGenerators.NetStandard.IntegrationTests | NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests | NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests | NetEscapades.EnumGenerators.Tests; NetEscapades.EnumGenerators.IntegrationTests, NetEscapades.EnumGenerators.Interceptors.IntegrationTests | NetEscapades.EnumGenerators.NetStandard.IntegrationTests | NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests | NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests | NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests; NetEscapades.EnumGenerators.IntegrationTests | NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests; NetEscapades.EnumGenerators.Generators, NetEscapades.EnumGenerators.Interceptors, NetEscapades.EnumGenerators.NetStandard.SystemMemory | NetEscapades.EnumGenerators.NetStandard.
+Checked net6.0, part 2 of 5 (run 1 of 16)
+Checked net10.0, part 5 of 5 (run 2 of 16)
+Checked net7.0, part 1 of 2 (run 3 of 16)
+Checked net451 (run 4 of 16)
+Checked net10.0, part 1 of 5 (run 5 of 16)
+Checked net48 (run 6 of 16)
+Checked net6.0, part 3 of 5 (run 7 of 16)
+Checked net10.0, part 2 of 5 (run 8 of 16)
+Checked net7.0, part 2 of 2 (run 9 of 16)
+Checked net6.0, part 4 of 5 (run 10 of 16)
+Checked net10.0, part 3 of 5 (run 11 of 16)
+Checked net6.0, part 5 of 5 (run 12 of 16)
+Checked net6.0, part 1 of 5 (run 13 of 16)
+Checked net10.0, part 4 of 5 (run 14 of 16)
+Checked netstandard2.0, part 1 of 2 (run 15 of 16)
+Checked netstandard2.0, part 2 of 2 (run 16 of 16)
+Formatting a copy: net48 (1 project(s), 1 file with findings)
+Formatting a copy: net6.0, part 1 of 5 (5 project(s), 1 file with findings)
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-host/.stylebro-format-0.slnf'.
+Loading workspace.
+Complete in 17602ms.
+Determining formattable files.
+Complete in 941ms.
+Running formatters.
+Running Code Style analysis.
+Determining diagnostics...
+Running 2 analyzers on NetEscapades.EnumGenerators.IntegrationTests.
+Complete in 2414ms.
+Analysis complete in 2414ms.
+Running Analyzer Reference analysis.
+Running 89 analyzers on NetEscapades.EnumGenerators.IntegrationTests.
+Complete in 6806ms.
+Analysis complete in 6806ms.
+Complete in 10048ms.
+Formatted 0 of 32 files.
+Format complete in 28591ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-host/.stylebro-format-1.slnf'.
+Complete in 12ms.
+Complete in 110ms.
+Running 2 analyzers on NetEscapades.EnumGenerators.NetStandard.IntegrationTests.
+Complete in 890ms.
+Analysis complete in 890ms.
+Running 89 analyzers on NetEscapades.EnumGenerators.NetStandard.IntegrationTests.
+Complete in 1570ms.
+Analysis complete in 1571ms.
+Complete in 2602ms.
+Formatted 0 of 34 files.
+Format complete in 2724ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-host/.stylebro-format-2.slnf'.
+Found project reference without a matching metadata reference: /home/user/w56/EnumGen/parity/soak-src-host/tests/Dependencies.SystemMemory/Dependencies.SystemMemory.csproj
+Complete in 15ms.
+Complete in 332ms.
+Running 2 analyzers on NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.
+Complete in 2170ms.
+Analysis complete in 2170ms.
+Running 89 analyzers on NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.
+Complete in 3401ms.
+Analysis complete in 3401ms.
+Complete in 6197ms.
+Formatted 0 of 35 files.
+Format complete in 6544ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-host/.stylebro-format-3.slnf'.
+Complete in 18ms.
+Complete in 144ms.
+Running 2 analyzers on NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.
+Complete in 3500ms.
+Analysis complete in 3500ms.
+Running 89 analyzers on NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.
+Complete in 4702ms.
+Analysis complete in 4702ms.
+Complete in 9032ms.
+Formatted 0 of 27 files.
+Format complete in 9194ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-host/.stylebro-format-4.slnf'.
+Found project reference without a matching metadata reference: /home/user/w56/EnumGen/parity/soak-src-host/src/NetEscapades.EnumGenerators/NetEscapades.EnumGenerators.csproj
+Complete in 17597ms.
+Complete in 1294ms.
+Running 2 analyzers on NetEscapades.EnumGenerators.Tests.
+Complete in 2036ms.
+Analysis complete in 2037ms.
+Running 89 analyzers on NetEscapades.EnumGenerators.Tests.
+Complete in 5652ms.
+Analysis complete in 5652ms.
+Complete in 8558ms.
+Formatted 0 of 230 files.
+Format complete in 27449ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-host/.stylebro-format-5.slnf'.
+Complete in 14ms.
+Complete in 46ms.
+Running 2 analyzers on NetEscapades.EnumGenerators.Attributes.
+Running 2 analyzers on NetEscapades.EnumGenerators.Interceptors.Attributes.
+Running 2 analyzers on NetEscapades.EnumGenerators.RuntimeDependencies.
+Complete in 113ms.
+Analysis complete in 114ms.
+Running 74 analyzers on NetEscapades.EnumGenerators.Attributes.
+Running 74 analyzers on NetEscapades.EnumGenerators.Interceptors.Attributes.
+Running 74 analyzers on NetEscapades.EnumGenerators.RuntimeDependencies.
+Complete in 321ms.
+Analysis complete in 322ms.
+Complete in 580ms.
+Formatted 0 of 12 files.
+Format complete in 640ms.
+== net48 (1 project(s))
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-host/.stylebro-format-6.slnf'.
+Complete in 9ms.
+Complete in 27ms.
+Running 2 analyzers on NetEscapades.EnumGenerators.Benchmarks.
+Complete in 316ms.
+Analysis complete in 316ms.
+Running 74 analyzers on NetEscapades.EnumGenerators.Benchmarks.
+Complete in 225ms.
+Analysis complete in 225ms.
+Complete in 644ms.
+Formatted code file '/home/user/w56/EnumGen/parity/soak-src-host/tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs'.
+Formatted 1 of 14 files.
+Format complete in 680ms.
+== net6.0, part 1 of 5 (5 project(s))
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-host/.stylebro-format-7.slnf'.
+Found project reference without a matching metadata reference: /home/user/w56/EnumGen/parity/soak-src-host/src/NetEscapades.EnumGenerators.RuntimeDependencies/NetEscapades.EnumGenerators.RuntimeDependencies.csproj
+Found project reference without a matching metadata reference: /home/user/w56/EnumGen/parity/soak-src-host/src/NetEscapades.EnumGenerators.Attributes/NetEscapades.EnumGenerators.Attributes.csproj
+Found project reference without a matching metadata reference: /home/user/w56/EnumGen/parity/soak-src-host/src/NetEscapades.EnumGenerators.Interceptors.Attributes/NetEscapades.EnumGenerators.Interceptors.Attributes.csproj
+Found project reference without a matching metadata reference: /home/user/w56/EnumGen/parity/soak-src-host/src/NetEscapades.EnumGenerators.Interceptors/NetEscapades.EnumGenerators.Interceptors.csproj
+Complete in 21ms.
+Complete in 137ms.
+Running 2 analyzers on ToStringFastExample.
+Running 2 analyzers on NetEscapades.EnumGenerators.Interceptors.IntegrationTests.
+Complete in 4014ms.
+Analysis complete in 4014ms.
+Running 74 analyzers on ToStringFastExample.
+Running 89 analyzers on NetEscapades.EnumGenerators.Interceptors.IntegrationTests.
+Complete in 11965ms.
+Analysis complete in 11965ms.
+Complete in 16377ms.
+Formatted 1 of 267 files.
+Format complete in 16536ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-host/.stylebro-format-8.slnf'.
+Complete in 17603ms.
+Complete in 345ms.
+Complete in 2327ms.
+Analysis complete in 2327ms.
+Complete in 4315ms.
+Analysis complete in 4315ms.
+Complete in 8151ms.
+Format complete in 26099ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-host/.stylebro-format-9.slnf'.
+Complete in 54ms.
+Complete in 94ms.
+Running 2 analyzers on NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.
+Complete in 1971ms.
+Analysis complete in 1971ms.
+Running 89 analyzers on NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.
+Complete in 344ms.
+Analysis complete in 344ms.
+Complete in 2990ms.
+Formatted 0 of 21 files.
+Format complete in 3138ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-host/.stylebro-format-10.slnf'.
+Complete in 19ms.
+Complete in 76ms.
+Complete in 1203ms.
+Analysis complete in 1203ms.
+Complete in 1866ms.
+Analysis complete in 1866ms.
+Complete in 3695ms.
+Format complete in 3790ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-host/.stylebro-format-11.slnf'.
+Complete in 34ms.
+Complete in 100ms.
+Complete in 1319ms.
+Analysis complete in 1328ms.
+Complete in 6778ms.
+Analysis complete in 6778ms.
+Complete in 8566ms.
+Format complete in 8700ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-host/.stylebro-format-12.slnf'.
+Complete in 17601ms.
+Complete in 546ms.
+Complete in 2322ms.
+Analysis complete in 2322ms.
+Complete in 5965ms.
+Analysis complete in 5965ms.
+Complete in 9601ms.
+Format complete in 27748ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-host/.stylebro-format-13.slnf'.
+Complete in 13ms.
+Complete in 347ms.
+Complete in 973ms.
+Analysis complete in 973ms.
+Complete in 2888ms.
+Analysis complete in 2888ms.
+Complete in 4005ms.
+Format complete in 4366ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-host/.stylebro-format-14.slnf'.
+Complete in 10ms.
+Running 2 analyzers on NetEscapades.EnumGenerators.Interceptors.
+Running 2 analyzers on NetEscapades.EnumGenerators.NetStandard.SystemMemory.
+Running 2 analyzers on NetEscapades.EnumGenerators.Generators.
+Complete in 5164ms.
+Analysis complete in 5164ms.
+Running 74 analyzers on NetEscapades.EnumGenerators.Interceptors.
+Running 74 analyzers on NetEscapades.EnumGenerators.NetStandard.SystemMemory.
+Running 74 analyzers on NetEscapades.EnumGenerators.Generators.
+Complete in 10294ms.
+Analysis complete in 10294ms.
+Complete in 16017ms.
+Formatted 0 of 213 files.
+Format complete in 16040ms.
+Formatting code files in workspace '/home/user/w56/EnumGen/parity/soak-src-host/.stylebro-format-15.slnf'.
+Complete in 26ms.
+Complete in 0ms.
+Running 2 analyzers on NetEscapades.EnumGenerators.NetStandard.
+Complete in 270ms.
+Analysis complete in 270ms.
+Running 74 analyzers on NetEscapades.EnumGenerators.NetStandard.
+Complete in 881ms.
+Analysis complete in 881ms.
+Formatted 0 of 13 files.
+Format complete in 1229ms.
+Building NetEscapades.EnumGenerators.IntegrationTests in Release to check it (it takes an in-solution source generator)...
+Building NetEscapades.EnumGenerators.Interceptors.IntegrationTests in Release to check it (it takes an in-solution source generator)...
+Building NetEscapades.EnumGenerators.NetStandard in Release to check it (it takes an in-solution source generator)...
+Building NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests in Release to check it (it takes an in-solution source generator)...
+Building NetEscapades.EnumGenerators.NetStandard.SystemMemory in Release to check it (it takes an in-solution source generator)...
+Building NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests in Release to check it (it takes an in-solution source generator)...
+Release build of NetEscapades.EnumGenerators.IntegrationTests: no findings.
+Release build of NetEscapades.EnumGenerators.Interceptors.IntegrationTests: no findings.
+Release build of NetEscapades.EnumGenerators.NetStandard: no findings.
+Release build of NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests: no findings.
+Release build of NetEscapades.EnumGenerators.NetStandard.SystemMemory: no findings.
+Release build of NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests: no findings.
+Clean: 6 findings kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them (https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose).
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(26,38): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(53,38): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(73,36): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(109,36): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(300,36): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+  tests/NetEscapades.EnumGenerators.Benchmarks/Program.cs(421,36): BRO1306 Rename '_enum' to 'Enum'. Kept: at a use of the name, the new name would mean something else.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

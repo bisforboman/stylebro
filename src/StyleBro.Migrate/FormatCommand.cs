@@ -4149,13 +4149,15 @@ internal static partial class FormatCommand
 
     /// <summary>
     /// A failed MSBuild query without a target (<paramref name="arguments"/>) again with one that does nothing, when its
-    /// <paramref name="output"/> is an error evaluating a Condition (MSB4184), else null (<see cref="Capture"/>):
-    /// InitializeSourceControlInformation is empty in the targets of single- and multi-targeted projects alike.
+    /// <paramref name="output"/> is an error evaluating a Condition (MSB4184) or a property function (MSB4186), else null
+    /// (<see cref="Capture"/>): InitializeSourceControlInformation is empty in the targets of single- and multi-targeted
+    /// projects alike.
     /// </summary>
     public static string[]? WithEmptyTarget(IReadOnlyList<string> arguments, string output) =>
         arguments.Count > 0 && arguments[0] == "msbuild"
             && !arguments.Any(a => a.StartsWith("-target:", StringComparison.OrdinalIgnoreCase) || a.StartsWith("-t:", StringComparison.OrdinalIgnoreCase) || a.StartsWith("/t:", StringComparison.OrdinalIgnoreCase) || a.StartsWith("/target:", StringComparison.OrdinalIgnoreCase))
-            && output.Contains("error MSB4184", StringComparison.Ordinal)
+            && (output.Contains("error MSB4184", StringComparison.Ordinal)
+                || output.Contains("error MSB4186", StringComparison.Ordinal))
             ? [.. arguments, "-target:InitializeSourceControlInformation"]
             : null;
 
@@ -4180,7 +4182,10 @@ internal static partial class FormatCommand
         // A query without a target evaluates the project as an editor sees it, every item's Condition included, also inside a
         // group whose own Condition is false (trial 42, PolyShim: VersionGreaterThanOrEquals($(TargetFrameworkVersion), '4.5')
         // under a .NETFramework-only group failed on the outer evaluation, MSB4184, so init and format stopped at the first
-        // query). A build's evaluation skips such items: the same query again with a target that does nothing.
+        // query). A build's evaluation skips such items: the same query again with a target that does nothing. Also a property
+        // function in item metadata (trial 56, DynamicData: Regex.Replace(%(Filename), ...) in src/Directory.Build.targets got
+        // '.NETCoreApp,Version=v9.0.AssemblyAttributes' on the outer evaluation of the built test project, whose comma split
+        // the arguments, MSB4186, so check stopped at its first query after format's builds).
         if (process.ExitCode != 0 && WithEmptyTarget(arguments, output + errors) is { } retry)
         {
             return Capture(directory, retry);

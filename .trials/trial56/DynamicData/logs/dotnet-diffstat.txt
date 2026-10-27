@@ -1,0 +1,26 @@
+ .editorconfig                                      |  320 +++++
+ src/Directory.Build.props                          |    1 +
+ src/Directory.Packages.props                       |    2 +-
+ .../Binding/ObservableCollectionAdaptor.cs         |    4 +-
+ src/DynamicData/Cache/Internal/ExpireAfter.cs      |   14 +-
+ src/DynamicData/Cache/Internal/Filter.Dynamic.cs   |    6 +-
+ src/DynamicData/Cache/Internal/Filter.cs           |   14 +-
+ src/DynamicData/Cache/Internal/FilterImmutable.cs  |    2 +-
+ .../Cache/Internal/MergeManyCacheChangeSets.cs     |    2 +-
+ .../MergeManyCacheChangeSetsSourceCompare.cs       |    8 +-
+ src/DynamicData/Cache/Internal/TransformMany.cs    |  446 +++----
+ .../Cache/Internal/UniquenessEnforcer.cs           |    8 +-
+ src/DynamicData/Cache/ObservableCache.cs           |   62 +-
+ src/DynamicData/Cache/PageContext.cs               |    6 +-
+ src/DynamicData/Cache/Tests/ChangeSetAggregator.cs |    2 +-
+ src/DynamicData/Cache/VirtualContext.cs            |    6 +-
+ src/DynamicData/Kernel/EnumerableEx.cs             |    4 +-
+ src/DynamicData/List/Internal/ExpireAfter.cs       |    2 +-
+ src/DynamicData/List/Internal/Filter.cs            |   14 +-
+ src/DynamicData/List/Internal/OnItemAdded.cs       |   78 +-
+ src/DynamicData/List/Internal/OnItemRefreshed.cs   |   52 +-
+ src/DynamicData/List/Internal/OnItemRemoved.cs     |  114 +-
+ src/DynamicData/List/Internal/TransformMany.cs     |  462 +++----
+ src/DynamicData/List/ListEx.cs                     | 1284 ++++++++++----------
+ src/DynamicData/Platforms/net45/ParallelType.cs    |    2 +-
+ 25 files changed, 1616 insertions(+), 1299 deletions(-)

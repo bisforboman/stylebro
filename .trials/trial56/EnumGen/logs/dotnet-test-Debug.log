@@ -1,0 +1,340 @@
+  Determining projects to restore...
+  Restored /home/user/w56/EnumGen/dotnet/tests/NetEscapades.EnumGenerators.NetStandard/NetEscapades.EnumGenerators.NetStandard.csproj (in 486 ms).
+  Restored /home/user/w56/EnumGen/dotnet/tests/NetEscapades.EnumGenerators.NetStandard.SystemMemory/NetEscapades.EnumGenerators.NetStandard.SystemMemory.csproj (in 488 ms).
+  Restored /home/user/w56/EnumGen/dotnet/tests/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.csproj (in 692 ms).
+  Restored /home/user/w56/EnumGen/dotnet/tests/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.csproj (in 124 ms).
+  Restored /home/user/w56/EnumGen/dotnet/tests/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.csproj (in 127 ms).
+  Restored /home/user/w56/EnumGen/dotnet/tests/NetEscapades.EnumGenerators.Interceptors.IntegrationTests/NetEscapades.EnumGenerators.Interceptors.IntegrationTests.csproj (in 42 ms).
+  Restored /home/user/w56/EnumGen/dotnet/tests/NetEscapades.EnumGenerators.IntegrationTests/NetEscapades.EnumGenerators.IntegrationTests.csproj (in 59 ms).
+  Restored /home/user/w56/EnumGen/dotnet/tests/NetEscapades.EnumGenerators.Tests/NetEscapades.EnumGenerators.Tests.csproj (in 790 ms).
+  Restored /home/user/w56/EnumGen/dotnet/tests/NetEscapades.EnumGenerators.NetStandard.IntegrationTests/NetEscapades.EnumGenerators.NetStandard.IntegrationTests.csproj (in 58 ms).
+  Restored /home/user/w56/EnumGen/dotnet/src/NetEscapades.EnumGenerators/NetEscapades.EnumGenerators.csproj (in 3 ms).
+  Restored /home/user/w56/EnumGen/dotnet/tests/Dependencies.SystemMemory/Dependencies.SystemMemory.csproj (in 3 ms).
+  Restored /home/user/w56/EnumGen/dotnet/src/NetEscapades.EnumGenerators.RuntimeDependencies/NetEscapades.EnumGenerators.RuntimeDependencies.csproj (in 21 ms).
+  Restored /home/user/w56/EnumGen/dotnet/src/NetEscapades.EnumGenerators.Interceptors.Attributes/NetEscapades.EnumGenerators.Interceptors.Attributes.csproj (in 6 ms).
+  Restored /home/user/w56/EnumGen/dotnet/src/NetEscapades.EnumGenerators.Attributes/NetEscapades.EnumGenerators.Attributes.csproj (in 4 ms).
+  Restored /home/user/w56/EnumGen/dotnet/src/NetEscapades.EnumGenerators.Interceptors/NetEscapades.EnumGenerators.Interceptors.csproj (in 73 ms).
+  Restored /home/user/w56/EnumGen/dotnet/src/NetEscapades.EnumGenerators.Generators/NetEscapades.EnumGenerators.Generators.csproj (in 66 ms).
+  Restored /home/user/w56/EnumGen/dotnet/tests/NetEscapades.EnumGenerators.Benchmarks/NetEscapades.EnumGenerators.Benchmarks.csproj (in 230 ms).
+  Restored /home/user/w56/EnumGen/dotnet/samples/ToStringFastExample/ToStringFastExample.csproj (in 77 ms).
+  NetEscapades.EnumGenerators.RuntimeDependencies -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.RuntimeDependencies/debug_netstandard2.0/NetEscapades.EnumGenerators.RuntimeDependencies.dll
+  NetEscapades.EnumGenerators.Interceptors.Attributes -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Interceptors.Attributes/debug_netstandard2.0/NetEscapades.EnumGenerators.Interceptors.Attributes.dll
+  NetEscapades.EnumGenerators.Attributes -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Attributes/debug_netstandard2.0/NetEscapades.EnumGenerators.Attributes.dll
+  NetEscapades.EnumGenerators.RuntimeDependencies -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.RuntimeDependencies/debug_net451/NetEscapades.EnumGenerators.RuntimeDependencies.dll
+  NetEscapades.EnumGenerators.Attributes -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Attributes/debug_net451/NetEscapades.EnumGenerators.Attributes.dll
+  NetEscapades.EnumGenerators.Generators -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Generators/debug/NetEscapades.EnumGenerators.Generators.dll
+  NetEscapades.EnumGenerators.Benchmarks -> /home/user/w56/EnumGen/dotnet/tests/NetEscapades.EnumGenerators.Benchmarks/bin/Debug/net6.0/NetEscapades.EnumGenerators.Benchmarks.dll
+  NetEscapades.EnumGenerators.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.IntegrationTests/debug_net9.0/NetEscapades.EnumGenerators.IntegrationTests.dll
+  NetEscapades.EnumGenerators.Benchmarks -> /home/user/w56/EnumGen/dotnet/tests/NetEscapades.EnumGenerators.Benchmarks/bin/Debug/net48/NetEscapades.EnumGenerators.Benchmarks.exe
+  NetEscapades.EnumGenerators.NetStandard -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard/debug_netstandard2.0/NetEscapades.EnumGenerators.NetStandard.dll
+  NetEscapades.EnumGenerators.NetStandard.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.IntegrationTests/debug_net10.0/NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll
+  NetEscapades.EnumGenerators.Interceptors.Attributes -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Interceptors.Attributes/debug_net451/NetEscapades.EnumGenerators.Interceptors.Attributes.dll
+  NetEscapades.EnumGenerators.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.IntegrationTests/debug_net7.0/NetEscapades.EnumGenerators.IntegrationTests.dll
+  NetEscapades.EnumGenerators.Benchmarks -> /home/user/w56/EnumGen/dotnet/tests/NetEscapades.EnumGenerators.Benchmarks/bin/Debug/net10.0/NetEscapades.EnumGenerators.Benchmarks.dll
+  NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests/debug_net8.0/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.IntegrationTests/debug_net9.0/NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll
+  NetEscapades.EnumGenerators -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators/debug/NetEscapades.EnumGenerators.dll
+  NetEscapades.EnumGenerators.NetStandard.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.IntegrationTests/debug_net8.0/NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll
+  NetEscapades.EnumGenerators.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.IntegrationTests/debug_net8.0/NetEscapades.EnumGenerators.IntegrationTests.dll
+  NetEscapades.EnumGenerators.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.IntegrationTests/debug_net10.0/NetEscapades.EnumGenerators.IntegrationTests.dll
+  NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests/debug_net7.0/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll
+  NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests/debug_net9.0/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll
+  NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests/debug_net10.0/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.IntegrationTests/debug_net6.0/NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.IntegrationTests/debug_net7.0/NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll
+  NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests/debug_net6.0/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll
+  NetEscapades.EnumGenerators.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.IntegrationTests/debug_net6.0/NetEscapades.EnumGenerators.IntegrationTests.dll
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests/debug_net6.0/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll (.NETCoreApp,Version=v6.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.IntegrationTests/debug_net6.0/NetEscapades.EnumGenerators.IntegrationTests.dll (.NETCoreApp,Version=v6.0)
+  Dependencies.SystemMemory -> /home/user/w56/EnumGen/dotnet/artifacts/bin/Dependencies.SystemMemory/debug_netstandard2.0/Dependencies.SystemMemory.dll
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.IntegrationTests/debug_net7.0/NetEscapades.EnumGenerators.IntegrationTests.dll (.NETCoreApp,Version=v7.0)
+VSTest version 18.0.2 (x64)
+VSTest version 18.0.2 (x64)
+
+
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.IntegrationTests/debug_net8.0/NetEscapades.EnumGenerators.IntegrationTests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+Starting test execution, please wait...
+VSTest version 18.0.2 (x64)
+
+A total of 1 test files matched the specified pattern.
+Starting test execution, please wait...
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:  2325, Skipped:     0, Total:  2325, Duration: 2 s - NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll (net6.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.IntegrationTests/debug_net9.0/NetEscapades.EnumGenerators.IntegrationTests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:  4816, Skipped:     0, Total:  4816, Duration: 4 s - NetEscapades.EnumGenerators.IntegrationTests.dll (net8.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.IntegrationTests/debug_net10.0/NetEscapades.EnumGenerators.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+
+Passed!  - Failed:     0, Passed:  4815, Skipped:     0, Total:  4815, Duration: 5 s - NetEscapades.EnumGenerators.IntegrationTests.dll (net6.0)
+
+Passed!  - Failed:     0, Passed:  4816, Skipped:     0, Total:  4816, Duration: 4 s - NetEscapades.EnumGenerators.IntegrationTests.dll (net7.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests/debug_net7.0/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll (.NETCoreApp,Version=v7.0)
+VSTest version 18.0.2 (x64)
+
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests/debug_net8.0/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:  4816, Skipped:     0, Total:  4816, Duration: 4 s - NetEscapades.EnumGenerators.IntegrationTests.dll (net9.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests/debug_net9.0/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 18.0.2 (x64)
+
+
+Passed!  - Failed:     0, Passed:  2326, Skipped:     0, Total:  2326, Duration: 3 s - NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll (net7.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests/debug_net10.0/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+
+Passed!  - Failed:     0, Passed:  2326, Skipped:     0, Total:  2326, Duration: 4 s - NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll (net8.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.IntegrationTests/debug_net6.0/NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll (.NETCoreApp,Version=v6.0)
+A total of 1 test files matched the specified pattern.
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:  4816, Skipped:     0, Total:  4816, Duration: 3 s - NetEscapades.EnumGenerators.IntegrationTests.dll (net10.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.IntegrationTests/debug_net7.0/NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll (.NETCoreApp,Version=v7.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:  2326, Skipped:     0, Total:  2326, Duration: 1 s - NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll (net10.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.IntegrationTests/debug_net8.0/NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+
+Passed!  - Failed:     0, Passed:  2318, Skipped:     0, Total:  2318, Duration: 2 s - NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll (net6.0)
+Starting test execution, please wait...
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.IntegrationTests/debug_net9.0/NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll (.NETCoreApp,Version=v9.0)
+A total of 1 test files matched the specified pattern.
+VSTest version 18.0.2 (x64)
+
+
+Passed!  - Failed:     0, Passed:  2326, Skipped:     0, Total:  2326, Duration: 1 s - NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll (net9.0)
+  NetEscapades.EnumGenerators.NetStandard.SystemMemory -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.SystemMemory/debug_netstandard2.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.dll
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.IntegrationTests/debug_net10.0/NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+
+Passed!  - Failed:     0, Passed:  2319, Skipped:     0, Total:  2319, Duration: 1 s - NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll (net7.0)
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:  2319, Skipped:     0, Total:  2319, Duration: 1 s - NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll (net9.0)
+
+Passed!  - Failed:     0, Passed:  2319, Skipped:     0, Total:  2319, Duration: 1 s - NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll (net8.0)
+
+Passed!  - Failed:     0, Passed:  2319, Skipped:     0, Total:  2319, Duration: 771 ms - NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll (net10.0)
+  NetEscapades.EnumGenerators.Interceptors -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Interceptors/debug/NetEscapades.EnumGenerators.Interceptors.dll
+  NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/debug_net9.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll
+  ToStringFastExample -> /home/user/w56/EnumGen/dotnet/artifacts/bin/ToStringFastExample/debug_netcoreapp2.1/ToStringFastExample.dll
+  ToStringFastExample -> /home/user/w56/EnumGen/dotnet/artifacts/bin/ToStringFastExample/debug_net8.0/ToStringFastExample.dll
+  ToStringFastExample -> /home/user/w56/EnumGen/dotnet/artifacts/bin/ToStringFastExample/debug_netcoreapp3.1/ToStringFastExample.dll
+  ToStringFastExample -> /home/user/w56/EnumGen/dotnet/artifacts/bin/ToStringFastExample/debug_net5.0/ToStringFastExample.dll
+  ToStringFastExample -> /home/user/w56/EnumGen/dotnet/artifacts/bin/ToStringFastExample/debug_net7.0/ToStringFastExample.dll
+  NetEscapades.EnumGenerators.Tests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Tests/debug_net6.0/NetEscapades.EnumGenerators.Tests.dll
+  ToStringFastExample -> /home/user/w56/EnumGen/dotnet/artifacts/bin/ToStringFastExample/debug_net6.0/ToStringFastExample.dll
+  NetEscapades.EnumGenerators.Interceptors.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Interceptors.IntegrationTests/debug_net8.0/NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests/debug_net6.0/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests/debug_net7.0/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/debug_net6.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/debug_net10.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/debug_net7.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll
+  NetEscapades.EnumGenerators.Tests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Tests/debug_net10.0/NetEscapades.EnumGenerators.Tests.dll
+  NetEscapades.EnumGenerators.Tests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Tests/debug_net8.0/NetEscapades.EnumGenerators.Tests.dll
+  NetEscapades.EnumGenerators.Tests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Tests/debug_net9.0/NetEscapades.EnumGenerators.Tests.dll
+  NetEscapades.EnumGenerators.Interceptors.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Interceptors.IntegrationTests/debug_net7.0/NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll
+  NetEscapades.EnumGenerators.Interceptors.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Interceptors.IntegrationTests/debug_net6.0/NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll
+  NetEscapades.EnumGenerators.Interceptors.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Interceptors.IntegrationTests/debug_net9.0/NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests/debug_net8.0/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll
+  NetEscapades.EnumGenerators.Interceptors.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Interceptors.IntegrationTests/debug_net10.0/NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll
+  NetEscapades.EnumGenerators.Tests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Tests/debug_net7.0/NetEscapades.EnumGenerators.Tests.dll
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Interceptors.IntegrationTests/debug_net7.0/NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll (.NETCoreApp,Version=v7.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Tests/debug_net6.0/NetEscapades.EnumGenerators.Tests.dll (.NETCoreApp,Version=v6.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Interceptors.IntegrationTests/debug_net6.0/NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll (.NETCoreApp,Version=v6.0)
+  NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests/debug_net9.0/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+  NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests/debug_net10.0/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+  NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests -> /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/debug_net8.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/debug_net6.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll (.NETCoreApp,Version=v6.0)
+Starting test execution, please wait...
+VSTest version 18.0.2 (x64)
+
+A total of 1 test files matched the specified pattern.
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:01.75]     NetEscapades.EnumGenerators.Interceptors.IntegrationTests.InterceptorTests.CallingNonInterceptableEnumIsNotIntercepted [SKIP]
+  Skipped NetEscapades.EnumGenerators.Interceptors.IntegrationTests.InterceptorTests.CallingNonInterceptableEnumIsNotIntercepted [1 ms]
+[xUnit.net 00:00:02.28]     NetEscapades.EnumGenerators.Interceptors.IntegrationTests.InterceptorTests.CallingNonInterceptableEnumIsNotIntercepted [SKIP]
+  Skipped NetEscapades.EnumGenerators.Interceptors.IntegrationTests.InterceptorTests.CallingNonInterceptableEnumIsNotIntercepted [1 ms]
+
+Passed!  - Failed:     0, Passed:    14, Skipped:     1, Total:    15, Duration: 158 ms - NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll (net7.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/debug_net7.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll (.NETCoreApp,Version=v7.0)
+
+Passed!  - Failed:     0, Passed:    14, Skipped:     1, Total:    15, Duration: 46 ms - NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll (net6.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/debug_net8.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:  4808, Skipped:     0, Total:  4808, Duration: 2 s - NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll (net6.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/debug_net9.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:  4809, Skipped:     0, Total:  4809, Duration: 3 s - NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll (net8.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/debug_net10.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:  4809, Skipped:     0, Total:  4809, Duration: 4 s - NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll (net7.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Tests/debug_net7.0/NetEscapades.EnumGenerators.Tests.dll (.NETCoreApp,Version=v7.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:  4809, Skipped:     0, Total:  4809, Duration: 2 s - NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll (net9.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Tests/debug_net8.0/NetEscapades.EnumGenerators.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:  4809, Skipped:     0, Total:  4809, Duration: 3 s - NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll (net10.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Tests/debug_net9.0/NetEscapades.EnumGenerators.Tests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:   411, Skipped:     0, Total:   411, Duration: 4 m 8 s - NetEscapades.EnumGenerators.Tests.dll (net6.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests/debug_net6.0/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll (.NETCoreApp,Version=v6.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:02.72]     NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.InterceptorTests.CallingNonInterceptableEnumIsNotIntercepted [SKIP]
+  Skipped NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.InterceptorTests.CallingNonInterceptableEnumIsNotIntercepted [1 ms]
+
+Passed!  - Failed:     0, Passed:     7, Skipped:     1, Total:     8, Duration: 108 ms - NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll (net6.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests/debug_net7.0/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll (.NETCoreApp,Version=v7.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:01.85]     NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.InterceptorTests.CallingNonInterceptableEnumIsNotIntercepted [SKIP]
+  Skipped NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.InterceptorTests.CallingNonInterceptableEnumIsNotIntercepted [1 ms]
+
+Passed!  - Failed:     0, Passed:     7, Skipped:     1, Total:     8, Duration: 77 ms - NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll (net7.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests/debug_net8.0/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:   409, Skipped:     0, Total:   409, Duration: 3 m 56 s - NetEscapades.EnumGenerators.Tests.dll (net9.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests/debug_net9.0/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:01.46]     NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.InterceptorTests.CallingNonInterceptableEnumIsNotIntercepted [SKIP]
+
+Passed!  - Failed:     0, Passed:   411, Skipped:     0, Total:   411, Duration: 4 m 2 s - NetEscapades.EnumGenerators.Tests.dll (net8.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests/debug_net10.0/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+  Skipped NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.InterceptorTests.CallingNonInterceptableEnumIsNotIntercepted [1 ms]
+
+Passed!  - Failed:     0, Passed:     7, Skipped:     1, Total:     8, Duration: 17 ms - NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll (net8.0)
+VSTest version 18.0.2 (x64)
+
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Tests/debug_net10.0/NetEscapades.EnumGenerators.Tests.dll (.NETCoreApp,Version=v10.0)
+
+Passed!  - Failed:     0, Passed:   411, Skipped:     0, Total:   411, Duration: 4 m 9 s - NetEscapades.EnumGenerators.Tests.dll (net7.0)
+VSTest version 18.0.2 (x64)
+
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Interceptors.IntegrationTests/debug_net8.0/NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll (.NETCoreApp,Version=v8.0)
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Starting test execution, please wait...
+[xUnit.net 00:00:00.81]     NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.InterceptorTests.CallingNonInterceptableEnumIsNotIntercepted [SKIP]
+A total of 1 test files matched the specified pattern.
+  Skipped NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.InterceptorTests.CallingNonInterceptableEnumIsNotIntercepted [1 ms]
+
+Passed!  - Failed:     0, Passed:     7, Skipped:     1, Total:     8, Duration: 19 ms - NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll (net9.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Interceptors.IntegrationTests/debug_net9.0/NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll (.NETCoreApp,Version=v9.0)
+[xUnit.net 00:00:00.95]     NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.InterceptorTests.CallingNonInterceptableEnumIsNotIntercepted [SKIP]
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+  Skipped NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.InterceptorTests.CallingNonInterceptableEnumIsNotIntercepted [1 ms]
+
+A total of 1 test files matched the specified pattern.
+Passed!  - Failed:     0, Passed:     7, Skipped:     1, Total:     8, Duration: 50 ms - NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll (net10.0)
+Test run for /home/user/w56/EnumGen/dotnet/artifacts/bin/NetEscapades.EnumGenerators.Interceptors.IntegrationTests/debug_net10.0/NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.97]     NetEscapades.EnumGenerators.Interceptors.IntegrationTests.InterceptorTests.CallingNonInterceptableEnumIsNotIntercepted [SKIP]
+  Skipped NetEscapades.EnumGenerators.Interceptors.IntegrationTests.InterceptorTests.CallingNonInterceptableEnumIsNotIntercepted [1 ms]
+
+Passed!  - Failed:     0, Passed:    14, Skipped:     1, Total:    15, Duration: 114 ms - NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll (net8.0)
+[xUnit.net 00:00:00.74]     NetEscapades.EnumGenerators.Interceptors.IntegrationTests.InterceptorTests.CallingNonInterceptableEnumIsNotIntercepted [SKIP]
+  Skipped NetEscapades.EnumGenerators.Interceptors.IntegrationTests.InterceptorTests.CallingNonInterceptableEnumIsNotIntercepted [1 ms]
+[xUnit.net 00:00:01.10]     NetEscapades.EnumGenerators.Interceptors.IntegrationTests.InterceptorTests.CallingNonInterceptableEnumIsNotIntercepted [SKIP]
+
+Passed!  - Failed:     0, Passed:    14, Skipped:     1, Total:    15, Duration: 83 ms - NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll (net10.0)
+  Skipped NetEscapades.EnumGenerators.Interceptors.IntegrationTests.InterceptorTests.CallingNonInterceptableEnumIsNotIntercepted [1 ms]
+
+Passed!  - Failed:     0, Passed:    14, Skipped:     1, Total:    15, Duration: 90 ms - NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll (net9.0)
+
+Passed!  - Failed:     0, Passed:   409, Skipped:     0, Total:   409, Duration: 58 s - NetEscapades.EnumGenerators.Tests.dll (net10.0)

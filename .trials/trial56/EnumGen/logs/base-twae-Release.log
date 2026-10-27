@@ -1,0 +1,81 @@
+  Determining projects to restore...
+  Restored /home/user/w56/EnumGen/base/src/NetEscapades.EnumGenerators.Generators/NetEscapades.EnumGenerators.Generators.csproj (in 273 ms).
+  Restored /home/user/w56/EnumGen/base/src/NetEscapades.EnumGenerators.Interceptors.Attributes/NetEscapades.EnumGenerators.Interceptors.Attributes.csproj (in 271 ms).
+  Restored /home/user/w56/EnumGen/base/tests/Dependencies.SystemMemory/Dependencies.SystemMemory.csproj (in 271 ms).
+  Restored /home/user/w56/EnumGen/base/src/NetEscapades.EnumGenerators/NetEscapades.EnumGenerators.csproj (in 4 ms).
+  Restored /home/user/w56/EnumGen/base/src/NetEscapades.EnumGenerators.Attributes/NetEscapades.EnumGenerators.Attributes.csproj (in 5 ms).
+  Restored /home/user/w56/EnumGen/base/src/NetEscapades.EnumGenerators.RuntimeDependencies/NetEscapades.EnumGenerators.RuntimeDependencies.csproj (in 4 ms).
+  Restored /home/user/w56/EnumGen/base/tests/NetEscapades.EnumGenerators.NetStandard.IntegrationTests/NetEscapades.EnumGenerators.NetStandard.IntegrationTests.csproj (in 323 ms).
+  Restored /home/user/w56/EnumGen/base/tests/NetEscapades.EnumGenerators.NetStandard/NetEscapades.EnumGenerators.NetStandard.csproj (in 3 ms).
+  Restored /home/user/w56/EnumGen/base/src/NetEscapades.EnumGenerators.Interceptors/NetEscapades.EnumGenerators.Interceptors.csproj (in 17 ms).
+  Restored /home/user/w56/EnumGen/base/samples/ToStringFastExample/ToStringFastExample.csproj (in 31 ms).
+  Restored /home/user/w56/EnumGen/base/tests/NetEscapades.EnumGenerators.Interceptors.IntegrationTests/NetEscapades.EnumGenerators.Interceptors.IntegrationTests.csproj (in 13 ms).
+  Restored /home/user/w56/EnumGen/base/tests/NetEscapades.EnumGenerators.IntegrationTests/NetEscapades.EnumGenerators.IntegrationTests.csproj (in 21 ms).
+  Restored /home/user/w56/EnumGen/base/tests/NetEscapades.EnumGenerators.NetStandard.SystemMemory/NetEscapades.EnumGenerators.NetStandard.SystemMemory.csproj (in 5 ms).
+  Restored /home/user/w56/EnumGen/base/tests/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.csproj (in 13 ms).
+  Restored /home/user/w56/EnumGen/base/tests/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.csproj (in 20 ms).
+  Restored /home/user/w56/EnumGen/base/tests/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.csproj (in 18 ms).
+  Restored /home/user/w56/EnumGen/base/tests/NetEscapades.EnumGenerators.Benchmarks/NetEscapades.EnumGenerators.Benchmarks.csproj (in 96 ms).
+  Restored /home/user/w56/EnumGen/base/tests/NetEscapades.EnumGenerators.Tests/NetEscapades.EnumGenerators.Tests.csproj (in 200 ms).
+  NetEscapades.EnumGenerators.RuntimeDependencies -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.RuntimeDependencies/release_netstandard2.0/NetEscapades.EnumGenerators.RuntimeDependencies.dll
+  NetEscapades.EnumGenerators.Attributes -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.Attributes/release_netstandard2.0/NetEscapades.EnumGenerators.Attributes.dll
+  NetEscapades.EnumGenerators.RuntimeDependencies -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.RuntimeDependencies/release_net451/NetEscapades.EnumGenerators.RuntimeDependencies.dll
+  NetEscapades.EnumGenerators.Interceptors.Attributes -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.Interceptors.Attributes/release_netstandard2.0/NetEscapades.EnumGenerators.Interceptors.Attributes.dll
+  NetEscapades.EnumGenerators.Attributes -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.Attributes/release_net451/NetEscapades.EnumGenerators.Attributes.dll
+  NetEscapades.EnumGenerators.Interceptors.Attributes -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.Interceptors.Attributes/release_net451/NetEscapades.EnumGenerators.Interceptors.Attributes.dll
+  Dependencies.SystemMemory -> /home/user/w56/EnumGen/base/artifacts/bin/Dependencies.SystemMemory/release_netstandard2.0/Dependencies.SystemMemory.dll
+  NetEscapades.EnumGenerators.Generators -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.Generators/release/NetEscapades.EnumGenerators.Generators.dll
+  NetEscapades.EnumGenerators.NetStandard -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.NetStandard/release_netstandard2.0/NetEscapades.EnumGenerators.NetStandard.dll
+  NetEscapades.EnumGenerators.Benchmarks -> /home/user/w56/EnumGen/base/tests/NetEscapades.EnumGenerators.Benchmarks/bin/Release/net48/NetEscapades.EnumGenerators.Benchmarks.exe
+  NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests/release_net7.0/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll
+  NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests/release_net10.0/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll
+  NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests/release_net9.0/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll
+  NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests/release_net8.0/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll
+  NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests/release_net6.0/NetEscapades.EnumGenerators.PrivateAssets.IntegrationTests.dll
+  NetEscapades.EnumGenerators.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.IntegrationTests/release_net8.0/NetEscapades.EnumGenerators.IntegrationTests.dll
+  NetEscapades.EnumGenerators -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators/release/NetEscapades.EnumGenerators.dll
+  NetEscapades.EnumGenerators.Benchmarks -> /home/user/w56/EnumGen/base/tests/NetEscapades.EnumGenerators.Benchmarks/bin/Release/net6.0/NetEscapades.EnumGenerators.Benchmarks.dll
+  NetEscapades.EnumGenerators.NetStandard.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.IntegrationTests/release_net6.0/NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.IntegrationTests/release_net7.0/NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll
+  NetEscapades.EnumGenerators.Benchmarks -> /home/user/w56/EnumGen/base/tests/NetEscapades.EnumGenerators.Benchmarks/bin/Release/net10.0/NetEscapades.EnumGenerators.Benchmarks.dll
+  NetEscapades.EnumGenerators.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.IntegrationTests/release_net9.0/NetEscapades.EnumGenerators.IntegrationTests.dll
+  NetEscapades.EnumGenerators.Interceptors -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.Interceptors/release/NetEscapades.EnumGenerators.Interceptors.dll
+  ToStringFastExample -> /home/user/w56/EnumGen/base/artifacts/bin/ToStringFastExample/release_netcoreapp2.1/ToStringFastExample.dll
+  NetEscapades.EnumGenerators.NetStandard.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.IntegrationTests/release_net9.0/NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll
+  ToStringFastExample -> /home/user/w56/EnumGen/base/artifacts/bin/ToStringFastExample/release_net5.0/ToStringFastExample.dll
+  NetEscapades.EnumGenerators.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.IntegrationTests/release_net10.0/NetEscapades.EnumGenerators.IntegrationTests.dll
+  NetEscapades.EnumGenerators.Tests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.Tests/release_net8.0/NetEscapades.EnumGenerators.Tests.dll
+  ToStringFastExample -> /home/user/w56/EnumGen/base/artifacts/bin/ToStringFastExample/release_net6.0/ToStringFastExample.dll
+  NetEscapades.EnumGenerators.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.IntegrationTests/release_net7.0/NetEscapades.EnumGenerators.IntegrationTests.dll
+  NetEscapades.EnumGenerators.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.IntegrationTests/release_net6.0/NetEscapades.EnumGenerators.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests/release_net9.0/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll
+  NetEscapades.EnumGenerators.Tests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.Tests/release_net9.0/NetEscapades.EnumGenerators.Tests.dll
+  NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests/release_net6.0/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll
+  NetEscapades.EnumGenerators.Interceptors.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.Interceptors.IntegrationTests/release_net9.0/NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll
+  ToStringFastExample -> /home/user/w56/EnumGen/base/artifacts/bin/ToStringFastExample/release_net8.0/ToStringFastExample.dll
+  NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests/release_net8.0/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll
+  NetEscapades.EnumGenerators.Interceptors.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.Interceptors.IntegrationTests/release_net8.0/NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.IntegrationTests/release_net8.0/NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests/release_net10.0/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.IntegrationTests/release_net10.0/NetEscapades.EnumGenerators.NetStandard.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.SystemMemory -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.SystemMemory/release_netstandard2.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.dll
+  NetEscapades.EnumGenerators.Tests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.Tests/release_net10.0/NetEscapades.EnumGenerators.Tests.dll
+  NetEscapades.EnumGenerators.Interceptors.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.Interceptors.IntegrationTests/release_net6.0/NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll
+  NetEscapades.EnumGenerators.Interceptors.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.Interceptors.IntegrationTests/release_net7.0/NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll
+  NetEscapades.EnumGenerators.Interceptors.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.Interceptors.IntegrationTests/release_net10.0/NetEscapades.EnumGenerators.Interceptors.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests/release_net7.0/NetEscapades.EnumGenerators.NetStandard.Interceptors.IntegrationTests.dll
+  NetEscapades.EnumGenerators.Tests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.Tests/release_net7.0/NetEscapades.EnumGenerators.Tests.dll
+  ToStringFastExample -> /home/user/w56/EnumGen/base/artifacts/bin/ToStringFastExample/release_netcoreapp3.1/ToStringFastExample.dll
+  NetEscapades.EnumGenerators.Tests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.Tests/release_net6.0/NetEscapades.EnumGenerators.Tests.dll
+  NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/release_net6.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/release_net9.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/release_net7.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll
+  ToStringFastExample -> /home/user/w56/EnumGen/base/artifacts/bin/ToStringFastExample/release_net7.0/ToStringFastExample.dll
+  NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/release_net8.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll
+  NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests -> /home/user/w56/EnumGen/base/artifacts/bin/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests/release_net10.0/NetEscapades.EnumGenerators.NetStandard.SystemMemory.IntegrationTests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:22.44

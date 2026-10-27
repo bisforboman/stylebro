@@ -1,0 +1,46 @@
+Using src/DynamicData.sln: no solution or project at the root, and it's the only solution one folder down.
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (163 ids); --all applies every analyzer's and compiler fix.
+Leaving alone: src/DynamicData.Benchmarks/, src/DynamicData.Tests/: StyleCop didn't run there, so the migration set nothing up there (the stylebro-migrate block in .editorconfig names them).
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net462, net6.0, net7.0, net8.0, net9.0, netstandard2.0).
+Configurations: runs for Release (DynamicData, DynamicData.Tests) too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.
+Checked net9.0, Release (run 1 of 9)
+Checked netstandard2.0, Release (run 2 of 9)
+Checked net10.0 (run 3 of 9)
+Checked net7.0 (run 4 of 9)
+Checked net9.0 (run 5 of 9)
+Checked net8.0 (run 6 of 9)
+Checked net462 (run 7 of 9)
+Checked netstandard2.0 (run 8 of 9)
+Checked net6.0 (run 9 of 9)
+== net10.0 (1 project(s), 22 files with findings)
+== net462 (1 project(s), 22 files with findings)
+== net6.0 (1 project(s), 22 files with findings)
+== net7.0 (1 project(s), 22 files with findings)
+== net8.0 (1 project(s), 22 files with findings)
+== net9.0 (3 project(s), 22 files with findings)
+== netstandard2.0 (1 project(s), 22 files with findings)
+== netstandard2.0, Release (1 project(s), 22 files with findings)
+Run 1: 22 files changed:
+  src/DynamicData/Binding/ObservableCollectionAdaptor.cs
+  src/DynamicData/Cache/Internal/ExpireAfter.cs
+  src/DynamicData/Cache/Internal/Filter.cs
+  src/DynamicData/Cache/Internal/Filter.Dynamic.cs
+  src/DynamicData/Cache/Internal/FilterImmutable.cs
+  src/DynamicData/Cache/Internal/MergeManyCacheChangeSets.cs
+  src/DynamicData/Cache/Internal/MergeManyCacheChangeSetsSourceCompare.cs
+  src/DynamicData/Cache/Internal/TransformMany.cs
+  src/DynamicData/Cache/Internal/UniquenessEnforcer.cs
+  src/DynamicData/Cache/ObservableCache.cs
+  ... and 12 more
+Checked net9.0, Release (run 1 of 9)
+Checked net7.0 (run 2 of 9)
+Checked netstandard2.0, Release (run 3 of 9)
+Checked net9.0 (run 4 of 9)
+Checked net8.0 (run 5 of 9)
+Checked netstandard2.0 (run 6 of 9)
+Checked net10.0 (run 7 of 9)
+Checked net462 (run 8 of 9)
+Checked net6.0 (run 9 of 9)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

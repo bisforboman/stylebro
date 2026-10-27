@@ -1,0 +1,23 @@
+{
+  "repo": "reactiveui/DynamicData",
+  "branch": "main",
+  "commit": "65016e5ba22a7c889b0a06cc1094e389281612c3",
+  "csFiles": 881,
+  "tags": [
+    "stylecop",
+    "library",
+    "multi-target",
+    "solution-in-subfolder"
+  ],
+  "setups": "The only solution is src/DynamicData.sln; src/ holds Directory.Build.props/.targets, Directory.Packages.props (central package management with GlobalPackageReference: StyleCop.Analyzers 1.2.0-beta.556, Roslynator.Analyzers, Nerdbank.GitVersioning, SourceLink) and stylecop.json; .editorconfig at the root. Library netstandard2.0;net462;net6.0;net7.0;net8.0;net9.0;net10.0, tests and benchmarks net9.0. Builds with about 5,000 warnings (StyleCop, Roslynator, xUnit1031).",
+  "build": "ok with workaround",
+  "workaround": "a full clone (Nerdbank.GitVersioning, version.json at the root); no .NET 9 runtime on the trial machine: DOTNET_ROLL_FORWARD=Major",
+  "tests": "dotnet test src/DynamicData.sln: 2,614 pass, 17 skipped (net9.0, about 2.5 minutes)",
+  "usedIn": "trial 56",
+  "verified": {
+    "by": "trial 56 session",
+    "date": "2026-10-26",
+    "sdks": "10.0.113, 8.0.132"
+  },
+  "notes": "Only solution one folder below the root (trial 55's baseline location fix); StyleCop through GlobalPackageReference in src/Directory.Packages.props (migrate)."
+}

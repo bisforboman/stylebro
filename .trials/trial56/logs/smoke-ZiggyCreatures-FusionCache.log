@@ -1,0 +1,32 @@
+== build
+  ZiggyCreatures.FusionCache.Locking.Distributed.Memory -> /home/user/cand/ZiggyCreatures-FusionCache/src/ZiggyCreatures.FusionCache.Locking.Distributed.Memory/bin/Debug/netstandard2.0/ZiggyCreatures.FusionCache.Locking.Distributed.Memory.dll
+  ZiggyCreatures.FusionCache.Locking.AsyncKeyed -> /home/user/cand/ZiggyCreatures-FusionCache/src/ZiggyCreatures.FusionCache.Locking.AsyncKeyed/bin/Debug/netstandard2.0/ZiggyCreatures.FusionCache.Locking.AsyncKeyed.dll
+  ZiggyCreatures.FusionCache.Chaos -> /home/user/cand/ZiggyCreatures-FusionCache/src/ZiggyCreatures.FusionCache.Chaos/bin/Debug/netstandard2.0/ZiggyCreatures.FusionCache.Chaos.dll
+  AOTTester -> /home/user/cand/ZiggyCreatures-FusionCache/tests/AOTTester/bin/Debug/net10.0/linux-x64/AOTTester.dll
+  WebAppTest -> /home/user/cand/ZiggyCreatures-FusionCache/tests/WebAppTest/bin/Debug/net10.0/WebAppTest.dll
+  ZiggyCreatures.FusionCache.Benchmarks -> /home/user/cand/ZiggyCreatures-FusionCache/benchmarks/ZiggyCreatures.FusionCache.Benchmarks/bin/Debug/net10.0/ZiggyCreatures.FusionCache.Benchmarks.dll
+  ZiggyCreatures.FusionCache.Simulator -> /home/user/cand/ZiggyCreatures-FusionCache/tests/ZiggyCreatures.FusionCache.Simulator/bin/Debug/net10.0/ZiggyCreatures.FusionCache.Simulator.dll
+  ZiggyCreatures.FusionCache.Playground -> /home/user/cand/ZiggyCreatures-FusionCache/tests/ZiggyCreatures.FusionCache.Playground/bin/Debug/net10.0/ZiggyCreatures.FusionCache.Playground.dll
+  ZiggyCreatures.FusionCache.Tests -> /home/user/cand/ZiggyCreatures-FusionCache/tests/ZiggyCreatures.FusionCache.Tests/bin/Debug/net10.0/ZiggyCreatures.FusionCache.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:33.90
+build rc 0
+== test
+failed FusionCacheTests.AutoRecoveryTests.CanHandleIssuesWithBothDistributedCacheAndBackplane(serializerType: NeueccMessagePack) (2s 308ms)
+    WARN 2026-10-26T02:17:35.678Z: FUSION [N=FusionCache I=0HNPJ0S5D5N6K] (O=0HNPJ0S5D5N8F K=MyCache:foo): [DC] an error occurred while setting entry in distributed
+    WARN 2026-10-26T02:17:35.679Z: FUSION [N=FusionCache I=0HNPJ0S5D5N6J] (O=0HNPJ0S5D5N8H K=MyCache:__fc:t:!): [DC] an error occurred while getting entry from distributed
+    WARN 2026-10-26T02:17:35.680Z: FUSION [N=FusionCache I=0HNPJ0S5D5N6J] (O=0HNPJ0S5D5N8I K=MyCache:__fc:t:*): [DC] an error occurred while getting entry from distributed
+failed FusionCacheTests.L1L2Tests.CanRemoveByTagAsync(serializerType: NewtonsoftJson) (10s 945ms)
+failed FusionCacheTests.L1Tests.CanHandleEagerRefreshWithFailingFactoryAsync (8s 317ms)
+    WARN 2026-10-26T02:17:47.589Z: FUSION [N=FusionCache I=0HNPJ0S5D5NEK] (O=0HNPJ0S5D5OV1 K=foo): an error occurred while calling the factory
+failed FusionCacheTests.L1L2Tests.CanHandleEagerRefresh(serializerType: ProtoBufNet) (3s 436ms)
+/home/user/cand/ZiggyCreatures-FusionCache/tests/ZiggyCreatures.FusionCache.Tests/bin/Debug/net10.0/ZiggyCreatures.FusionCache.Tests.dll (net10.0|x64) failed with 4 error(s) (16m 02s 810ms)
+Test run summary: Failed!
+  failed: 4
+  succeeded: 1621
+  skipped: 0
+test rc 2

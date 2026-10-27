@@ -1,0 +1,74 @@
+[trimmed by trim.py from 5086 lines: first 20, errors and warnings by code, failing tests, last 40]
+  Determining projects to restore...
+  Restored /home/user/w56/DynamicData/dotnet/src/DynamicData.Tests/DynamicData.Tests.csproj (in 521 ms).
+  Restored /home/user/w56/DynamicData/dotnet/src/DynamicData.Benchmarks/DynamicData.Benchmarks.csproj (in 524 ms).
+  Restored /home/user/w56/DynamicData/dotnet/src/DynamicData/DynamicData.csproj (in 669 ms).
+/home/user/w56/DynamicData/dotnet/src/DynamicData/Cache/ObservableCacheEx.Adapt.cs(20,52): warning CS1584: XML comment has syntactically incorrect cref attribute 'IObservable{IChangeSet{TObject, TKey}}' [/home/user/w56/DynamicData/dotnet/src/DynamicData/DynamicData.csproj::TargetFramework=net8.0]
+/home/user/w56/DynamicData/dotnet/src/DynamicData/Cache/ObservableCacheEx.Adapt.cs(20,64): warning CS1658: Type parameter declaration must be an identifier not a type. See also error CS0081. [/home/user/w56/DynamicData/dotnet/src/DynamicData/DynamicData.csproj::TargetFramework=net8.0]
+/home/user/w56/DynamicData/dotnet/src/DynamicData/Cache/ObservableCacheEx.Adapt.cs(43,52): warning CS1584: XML comment has syntactically incorrect cref attribute 'IObservable{ISortedChangeSet{TObject, TKey}}' [/home/user/w56/DynamicData/dotnet/src/DynamicData/DynamicData.csproj::TargetFramework=net8.0]
+/home/user/w56/DynamicData/dotnet/src/DynamicData/Cache/ObservableCacheEx.Adapt.cs(43,64): warning CS1658: Type parameter declaration must be an identifier not a type. See also error CS0081. [/home/user/w56/DynamicData/dotnet/src/DynamicData/DynamicData.csproj::TargetFramework=net8.0]
+/home/user/w56/DynamicData/dotnet/src/DynamicData/Cache/ObservableCacheEx.And.cs(20,52): warning CS1584: XML comment has syntactically incorrect cref attribute 'IObservable{IChangeSet{TObject, TKey}}' [/home/user/w56/DynamicData/dotnet/src/DynamicData/DynamicData.csproj::TargetFramework=net8.0]
+/home/user/w56/DynamicData/dotnet/src/DynamicData/Cache/ObservableCacheEx.And.cs(20,64): warning CS1658: Type parameter declaration must be an identifier not a type. See also error CS0081. [/home/user/w56/DynamicData/dotnet/src/DynamicData/DynamicData.csproj::TargetFramework=net8.0]
+/home/user/w56/DynamicData/dotnet/src/DynamicData/Cache/ObservableCacheEx.And.cs(21,56): warning CS1584: XML comment has syntactically incorrect cref attribute 'IObservable{IChangeSet{TObject, TKey}}' [/home/user/w56/DynamicData/dotnet/src/DynamicData/DynamicData.csproj::TargetFramework=net8.0]
+/home/user/w56/DynamicData/dotnet/src/DynamicData/Cache/ObservableCacheEx.And.cs(21,68): warning CS1658: Type parameter declaration must be an identifier not a type. See also error CS0081. [/home/user/w56/DynamicData/dotnet/src/DynamicData/DynamicData.csproj::TargetFramework=net8.0]
+/home/user/w56/DynamicData/dotnet/src/DynamicData/Cache/ObservableCacheEx.And.cs(82,46): warning CS1584: XML comment has syntactically incorrect cref attribute 'IObservableList{IObservableCache{TObject, TKey}}' [/home/user/w56/DynamicData/dotnet/src/DynamicData/DynamicData.csproj::TargetFramework=net8.0]
+/home/user/w56/DynamicData/dotnet/src/DynamicData/Cache/ObservableCacheEx.And.cs(82,62): warning CS1658: Type parameter declaration must be an identifier not a type. See also error CS0081. [/home/user/w56/DynamicData/dotnet/src/DynamicData/DynamicData.csproj::TargetFramework=net8.0]
+/home/user/w56/DynamicData/dotnet/src/DynamicData/Cache/ObservableCacheEx.And.cs(99,46): warning CS1584: XML comment has syntactically incorrect cref attribute 'IObservableList{ISourceCache{TObject, TKey}}' [/home/user/w56/DynamicData/dotnet/src/DynamicData/DynamicData.csproj::TargetFramework=net8.0]
+/home/user/w56/DynamicData/dotnet/src/DynamicData/Cache/ObservableCacheEx.And.cs(99,62): warning CS1658: Type parameter declaration must be an identifier not a type. See also error CS0081. [/home/user/w56/DynamicData/dotnet/src/DynamicData/DynamicData.csproj::TargetFramework=net8.0]
+/home/user/w56/DynamicData/dotnet/src/DynamicData/Cache/ObservableCacheEx.AsObservableCache.cs(38,52): warning CS1584: XML comment has syntactically incorrect cref attribute 'IObservable{IChangeSet{TObject, TKey}}' [/home/user/w56/DynamicData/dotnet/src/DynamicData/DynamicData.csproj::TargetFramework=net8.0]
+/home/user/w56/DynamicData/dotnet/src/DynamicData/Cache/ObservableCacheEx.AsObservableCache.cs(38,64): warning CS1658: Type parameter declaration must be an identifier not a type. See also error CS0081. [/home/user/w56/DynamicData/dotnet/src/DynamicData/DynamicData.csproj::TargetFramework=net8.0]
+/home/user/w56/DynamicData/dotnet/src/DynamicData/Cache/ObservableCacheEx.AsyncDisposeMany.cs(26,52): warning CS1584: XML comment has syntactically incorrect cref attribute 'IObservable{IChangeSet{TObject, TKey}}' [/home/user/w56/DynamicData/dotnet/src/DynamicData/DynamicData.csproj::TargetFramework=net8.0]
+/home/user/w56/DynamicData/dotnet/src/DynamicData/Cache/ObservableCacheEx.AsyncDisposeMany.cs(26,64): warning CS1658: Type parameter declaration must be an identifier not a type. See also error CS0081. [/home/user/w56/DynamicData/dotnet/src/DynamicData/DynamicData.csproj::TargetFramework=net8.0]
+
+[errors and warnings by code]
+    2435 warning CS1658
+    2400 warning CS1584
+      98 warning CS0419
+      59 warning CS1574
+      30 warning CS8714
+       7 warning CS0618
+       6 warning xUnit1031
+
+[failing tests]
+
+[last 40 lines]
+  DynamicData.Tests -> /home/user/w56/DynamicData/dotnet/src/DynamicData.Tests/bin/Release/net9.0/DynamicData.Tests.dll
+Test run for /home/user/w56/DynamicData/dotnet/src/DynamicData.Tests/bin/Release/net9.0/DynamicData.Tests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:05.93]     DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithoutKey.ReevaluatorThrows_ExceptionPropagates [SKIP]
+  Skipped DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithoutKey.ReevaluatorThrows_ExceptionPropagates [1 ms]
+[xUnit.net 00:00:05.98]     DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithoutKey.ReevaluatorIsNull_ThrowsException [SKIP]
+[xUnit.net 00:00:05.99]     DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithoutKey.ReevaluatorEmitsImmediately_ItemDoesNotRefresh [SKIP]
+  Skipped DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithoutKey.ReevaluatorIsNull_ThrowsException [1 ms]
+  Skipped DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithoutKey.ReevaluatorEmitsImmediately_ItemDoesNotRefresh [1 ms]
+[xUnit.net 00:00:06.01]     DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithoutKey.ReevaluatorFails_ErrorPropagates [SKIP]
+  Skipped DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithoutKey.ReevaluatorFails_ErrorPropagates [1 ms]
+[xUnit.net 00:00:16.92]     DynamicData.Tests.Cache.SizeLimitFixture.OnCompleteIsInvokedWhenSourceIsDisposed [SKIP]
+  Skipped DynamicData.Tests.Cache.SizeLimitFixture.OnCompleteIsInvokedWhenSourceIsDisposed [1 ms]
+[xUnit.net 00:00:19.82]     DynamicData.Tests.AggregationTests.AvgFixture+ForCache+ForAggregateChangeSet.SourceIsEmpty_ConfiguredEmptyValueIsEmitted [SKIP]
+[xUnit.net 00:00:19.82]     DynamicData.Tests.AggregationTests.AvgFixture+ForCache+ForAggregateChangeSet.ItemIsRefreshed_AverageReevaluatesMutatedValue [SKIP]
+[xUnit.net 00:00:19.82]     DynamicData.Tests.AggregationTests.AvgFixture+ForCache+ForAggregateChangeSet.EmptySourceCompletes_ConfiguredEmptyValueAndCompletionPropagate [SKIP]
+  Skipped DynamicData.Tests.AggregationTests.AvgFixture+ForCache+ForAggregateChangeSet.SourceIsEmpty_ConfiguredEmptyValueIsEmitted [1 ms]
+  Skipped DynamicData.Tests.AggregationTests.AvgFixture+ForCache+ForAggregateChangeSet.ItemIsRefreshed_AverageReevaluatesMutatedValue [1 ms]
+  Skipped DynamicData.Tests.AggregationTests.AvgFixture+ForCache+ForAggregateChangeSet.EmptySourceCompletes_ConfiguredEmptyValueAndCompletionPropagate [1 ms]
+[xUnit.net 00:00:58.77]     DynamicData.Tests.Cache.AutoRefreshFixture+WithPropertyAccessor.PropertyAccessorIsNull_ThrowsException [SKIP]
+  Skipped DynamicData.Tests.Cache.AutoRefreshFixture+WithPropertyAccessor.PropertyAccessorIsNull_ThrowsException [1 ms]
+[xUnit.net 00:01:00.66]     DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithKey.ReevaluatorThrows_ExceptionPropagates [SKIP]
+  Skipped DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithKey.ReevaluatorThrows_ExceptionPropagates [1 ms]
+[xUnit.net 00:01:00.67]     DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithKey.ReevaluatorEmitsImmediately_ItemDoesNotRefresh [SKIP]
+[xUnit.net 00:01:00.67]     DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithKey.ReevaluatorFails_ErrorPropagates [SKIP]
+  Skipped DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithKey.ReevaluatorEmitsImmediately_ItemDoesNotRefresh [1 ms]
+  Skipped DynamicData.Tests.Cache.AutoRefreshOnObservableFixture+WithKey.ReevaluatorFails_ErrorPropagates [1 ms]
+[xUnit.net 00:01:08.34]     DynamicData.Tests.AggregationTests.AvgFixture+ForList+ForAggregateChangeSet.EmptySourceCompletes_ConfiguredEmptyValueAndCompletionPropagate [SKIP]
+[xUnit.net 00:01:08.34]     DynamicData.Tests.AggregationTests.AvgFixture+ForList+ForAggregateChangeSet.SourceIsEmpty_ConfiguredEmptyValueIsEmitted [SKIP]
+  Skipped DynamicData.Tests.AggregationTests.AvgFixture+ForList+ForAggregateChangeSet.EmptySourceCompletes_ConfiguredEmptyValueAndCompletionPropagate [1 ms]
+  Skipped DynamicData.Tests.AggregationTests.AvgFixture+ForList+ForAggregateChangeSet.SourceIsEmpty_ConfiguredEmptyValueIsEmitted [1 ms]
+[xUnit.net 00:01:08.35]     DynamicData.Tests.AggregationTests.AvgFixture+ForList+ForAggregateChangeSet.ItemIsRefreshed_AverageReevaluatesMutatedValue [SKIP]
+  Skipped DynamicData.Tests.AggregationTests.AvgFixture+ForList+ForAggregateChangeSet.ItemIsRefreshed_AverageReevaluatesMutatedValue [1 ms]
+The active test run was aborted. Reason: Test host process crashed
+
+Passed!  - Failed:     0, Passed:  2547, Skipped:    15, Total:  2562, Duration: 3 m 19 s - DynamicData.Tests.dll (net9.0)
+Test Run Aborted.

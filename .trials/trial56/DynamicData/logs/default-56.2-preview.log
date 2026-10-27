@@ -1,0 +1,26 @@
+Previewing 'bro migrate --write' and 'bro format' on a copy; nothing in /home/user/w56/DynamicData/default changes.
+Copying the repository to /tmp/stylebro-preview-GoAOEM/default... 0s
+Warning: Not restored: src/DynamicData/DynamicData.csproj. A package can bring a global config that sets StyleCop's rules (GlobalAnalyzerConfigFiles), and it is read from the restore: run 'dotnet restore', then this again.
+Settings: 320 lines in .editorconfig; 1 line in src/Directory.Build.props (StyleBroPreset=none); 1 line in src/Directory.Packages.props (StyleBro.Analyzers)
+  StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial56.2 to src/Directory.Packages.props for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).
+Format run 1... 2m 45s
+Format run 2... 33s
+Format: 22 files, 1,255 reported changes, clean after 1 run
+  ENDOFLINE                                              9 files
+  IDE0055  Whitespace and formatting                    8 files
+  BRO1109  Opening parenthesis or bracket should...     2 files
+  BRO1110  Closing parenthesis or bracket should...     2 files
+  BRO1606  Constructor summary documentation sho...     2 files
+  FINALNEWLINE                                              1 file
+Sample (ENDOFLINE, src/DynamicData/Cache/Internal/ExpireAfter.cs):
+  (changes only line endings or whitespace)
+Sample (IDE0055, src/DynamicData/Cache/Internal/Filter.Dynamic.cs):
+  -                #if SUPPORTS_DICTIONARY_MUTATION_DURING_ENUMERATION
+  +#if SUPPORTS_DICTIONARY_MUTATION_DURING_ENUMERATION
+Sample (BRO1109, src/DynamicData/Cache/PageContext.cs; BRO1110 changed this file too):
+  -    internal static readonly PageContext<TObject> Empty = new
+  -    (
+  +    internal static readonly PageContext<TObject> Empty = new(
+Full diff: .git/stylebro-preview.patch (3,139 lines)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 3m 24s.

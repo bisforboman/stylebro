@@ -1,0 +1,2 @@
+host rc=0
+dotnet rc=0

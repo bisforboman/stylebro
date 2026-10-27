@@ -902,3 +902,45 @@ engines (`.trials/README.md`, "Engine soak").
   CPM repos get step 1 as PackageVersion + PackageReference; `EnableWindowsTargeting=true` for protobuf-net.Grpc; ZLinq is TWAE
   under CI=true. Running chains rewrite their tracked logs, so the stop hook kept asking to commit: in-progress logs stay
   untracked until their chain ends. One worker restart (nothing lost).
+
+## Trial 56 (2026-10-26, not clean: owner "Not clean", tally 0; host soak: clean, the first clean soak with the host as the default)
+
+- Repos (three random plus one targeted): robinrodricks/FluentFTP, ZiggyCreatures/FusionCache,
+  andrewlock/NetEscapades.EnumGenerators (random, seed 56: draws 71, 1, 60 of 79 entries; draw 71, NickCraver/StackExchange.Exceptional,
+  skipped: its solution has an ASP.NET MVC5 project (MSBuild.SDK.SystemWeb) and net462-net48 targets, a host repository; walks to 72,
+  63, 64; `.trials/trial56/logs/picks.md`), reactiveui/DynamicData (targeted at trial 55's baseline location fix: the only solution is
+  `src/DynamicData.sln`, StyleCop through GlobalPackageReference, so migrate; no pool entry fit, added). #306's two-path view came with
+  FusionCache (net10.0 projects reach the core, which has net10.0, through netstandard2.0-only plugins); no repository had a generated
+  file named inside a longer project name (`scan2.py`). Tested main 61b1a6e (after #306). Findings: `.trials/trial56/*/logs/`.
+- One session, two chains (base, default = host, `--engine dotnet-format` on fresh clones, then `Compare-Format.ps1`), builds
+  0.8.0-trial56.1, .2 and .3 (the fixes). Wall clock: 02:00 start; the container was reclaimed after 08:24 (files kept, runs lost) and
+  the unfinished steps ran again 20:05-22:31.
+- FusionCache: the engines' trees differed in 8 test files. The untouched code has `, token: TestContext.Current.CancellationToken);`
+  at column 0; when BRO1108 split the list before BRO1117 moved the comma up, BRO1117 gave the item the comma's empty indentation, so
+  the result depended on fix order (in round 1's soak both engines happened to leave column 0; FixOrderTests reproduced it). An item on
+  a line below its comma keeps its own indentation now; on 0.8.0-trial56.3 both engines indent it, identical trees, soak Same.
+- DynamicData: `bro check` and `check --build` stopped at their first project query (MSB4186) once format's builds had left
+  DynamicData.Tests' restore and build output: `src/Directory.Build.targets` sets DependentUpon with `Regex.Replace(%(Filename), ...)`,
+  and the outer evaluation without a target got `.NETCoreApp,Version=v9.0.AssemblyAttributes`, whose comma split the arguments (a
+  build evaluates fine). Any user who had built the repository would have hit it in format too. The query is retried with the empty
+  target, as trial 42 did for MSB4184; then check said Clean and check --build Not verified (exit 3: 4,870 TWAE errors the untouched code
+  has keep the tests from compiling), honest. Migrate: 22 files, 54 CRLF files converted as announced; preview matched format.
+- EnumGenerators: the trial's own setup first put the reference only in the root Directory.Build.props; build/ and the Benchmarks folder
+  have their own that don't import it (rerun as the docs say). A spot run of that half setup: format, check and check --build name the
+  Benchmarks project "without StyleBro"; init doesn't (its EnforceCodeStyleInBuild tip even names that props file), left as is.
+  Format Not verified for six Release configurations of in-solution generator projects, check builds them: Clean. 6 kept BRO1306
+  (`_enum`) baselined.
+- FluentFTP: no findings beyond format's changes (404 files, clean after one run); check --build Not verified (its untouched CS0067,
+  CS8425, CA2022 under TWAE stop four projects compiling), honest. The TWAE builds failed untouched on FluentFTP and DynamicData and
+  matched after the fixes; the tests matched (FluentFTP's 3 timeout tests need a network; FusionCache's and DynamicData's
+  concurrency tests are flaky untouched; one DynamicData Release run hung in a deadlock-probe test and was killed, its rerun had that
+  test fail on its timeout, and it passed 3 of 3 alone on both the untouched and the formatted code).
+- Host soak: no fallback to dotnet format. EnumGenerators' load-warning note sat after another run's header (the host prints it when its
+  load ends; host runs differ among themselves): `Compare-Format.ps1` compares that line as unordered now; both engines listed the
+  same warnings (dotnet format one more). FusionCache's tree difference was the fix-order bug above (not an engine difference). After the
+  fixes all four identical on both engines (trees, exit codes, verdicts, --json, builds, tests). Format (s, host/dotnet-format, trial
+  runs): EnumGenerators 121/423, FluentFTP 202/648, FusionCache 99/185, DynamicData 263/527; soak format 112/368, 123/452, 105/180,
+  135/435.
+- Environment: SDK 10.0.113 + 8.0.132 and pwsh were there; FusionCache's tests use MTP (`dotnet test --solution`); DynamicData needs a
+  full clone (Nerdbank.GitVersioning) and DOTNET_ROLL_FORWARD=Major (net9.0 tests); a new build of the tool went to its own tool folder
+  so running chains kept theirs; `pkill -f` with the pattern in the same command killed the calling shell (CLAUDE.md's gotcha).
