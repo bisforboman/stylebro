@@ -5,3 +5,5 @@
   fail the same way and those errors aren't counted as new.
 - **`bro format`** no longer deletes C# members in a solution that also has a Visual Basic project: the fixes of rules
   both languages have (modifier order, IDE0036) ran the Visual Basic fix on C# code too.
+- With `--engine dotnet-format`, C# projects that reference a Visual Basic project are now left out and named as not
+  checked, because `dotnet format` itself has the same bug there; the default engine checks them.

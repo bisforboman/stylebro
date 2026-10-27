@@ -44,4 +44,19 @@ public sealed partial class MigrationTests
             DeleteFolder(clone);
         }
     }
+
+    [Fact]
+    public void ReachingVisualBasic_FollowsCSharpReferences()
+    {
+        var projects = new Dictionary<string, (string FullPath, string[] References)>
+        {
+            ["Lib"] = ("/r/Lib/Lib.csproj", []),
+            ["Tests"] = ("/r/Tests/Tests.csproj", ["/r/Vb/Vb.vbproj", "/r/Lib/Lib.csproj"]),
+            ["Outer"] = ("/r/Outer/Outer.csproj", ["/r/Tests/Tests.csproj"]),
+            ["Cycle"] = ("/r/Cycle/Cycle.csproj", ["/r/Cycle/Cycle.csproj", "/r/Lib/Lib.csproj"]),
+        };
+
+        Assert.Equal(["Outer", "Tests"], FormatCommand.ReachingVisualBasic(projects).Order(StringComparer.Ordinal));
+        Assert.Equal("Not checked: tests/Tests.csproj: it references a Visual Basic project, where 'dotnet format' (--engine dotnet-format) also runs Visual Basic fixes on C# code, so it is left out; the default engine checks it", FormatCommand.VisualBasicEngineGap(["tests/Tests.csproj"]));
+    }
 }

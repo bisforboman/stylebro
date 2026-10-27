@@ -127,9 +127,12 @@ function Test-Verdict($result, [int]$expected, [string]$reason, $failures) {
     if ($reason -and $result.Text -notmatch $reason) { $failures.Add("$name's output doesn't match /$reason/ (log: $($result.Log))") }
 }
 
-function Expected($spec, [string]$step) {
-    $value = if ($spec.Expect -and $spec.Expect.Contains($step)) { $spec.Expect[$step] } else { 0 }
-    $reason = if ($spec.Reasons -and $spec.Reasons.Contains($step)) { $spec.Reasons[$step] } else { $null }
+# The exit code and output pattern a step expects: the engine's own (EngineExpect/EngineReasons, keyed by engine) first.
+function Expected($spec, [string]$step, [string]$engine = '') {
+    $expect = if ($engine -and $spec.EngineExpect -and $spec.EngineExpect.Contains($engine)) { $spec.EngineExpect[$engine] } else { $spec.Expect }
+    $reasons = if ($engine -and $spec.EngineReasons -and $spec.EngineReasons.Contains($engine)) { $spec.EngineReasons[$engine] } else { $spec.Reasons }
+    $value = if ($expect -and $expect.Contains($step)) { $expect[$step] } else { 0 }
+    $reason = if ($reasons -and $reasons.Contains($step)) { $reasons[$step] } else { $null }
     return $value, $reason
 }
 
@@ -215,7 +218,7 @@ foreach ($file in $chosen) {
             foreach ($step in 'format', 'check', 'check-build') {
                 [string[]]$arguments = switch ($step) { 'format' { @('format') } 'check' { @('check') } 'check-build' { @('check', '--build') } }
                 $result = Run-Bro $clone $logs "$engine-$step" ($arguments + @($spec.Args | Where-Object { $_ }) + $option)
-                $expected, $reason = Expected $spec $step
+                $expected, $reason = Expected $spec $step $engine
                 Test-Verdict $result $expected $reason $failures
                 $steps[$step] = $result
                 if ($step -eq 'format') { $steps['tree'] = Tree $clone }
@@ -229,8 +232,8 @@ foreach ($file in $chosen) {
             $runs[$engine] = [pscustomobject]@{ Clone = $clone; Steps = $steps }
         }
 
-        # Both engines: the same trees, exit codes and reports.
-        if ($runs.Count -eq 2) {
+        # Both engines: the same trees, exit codes and reports (unless the shape says why they differ: EnginesDiffer).
+        if ($runs.Count -eq 2 -and -not $spec.EnginesDiffer) {
             $a, $b = @($runs.Keys)
             foreach ($step in 'format', 'check', 'check-build') {
                 $x = $runs[$a].Steps[$step]; $y = $runs[$b].Steps[$step]

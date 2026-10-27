@@ -53,6 +53,8 @@ One file per shape in `shapes/`, returning a hashtable; its header comment names
 | `Reference` | `{ param($repo, $context) }` adds StyleBro.Analyzers `$context.Version` (default: the root Directory.Build.props) |
 | `Args`, `PreviewArgs` | extra arguments for format/check and for the preview (a solution filter, `--project`) |
 | `Expect`, `Reasons` | exit codes and output patterns per step: `preview`, `format`, `check`, `check-build` (the preview defaults to format's) |
+| `EngineExpect`, `EngineReasons` | the same per engine (`@{ 'dotnet-format' = @{ format = 3 } }`), where a decision makes the engines differ |
+| `EnginesDiffer` | why the engines' trees and reports may differ (skips that comparison; the per-engine expectations still hold) |
 | `InitReason` | a pattern init's (or migrate's) output must match: a note it must give |
 | `Target`, `BuildArgs` | what the TWAE build and the tests run on (default: the root) |
 | `BuildFails` | the reason the repository's own build fails, before and after StyleBro |

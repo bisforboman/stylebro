@@ -3036,6 +3036,33 @@ internal static partial class FormatCommand
             .ToList();
     }
 
+    /// <summary>
+    /// The keys of the C# <paramref name="projects"/> whose load reaches a Visual Basic project: one of their project
+    /// references, transitively through the other C# projects listed, is a .vbproj.
+    /// </summary>
+    public static List<string> ReachingVisualBasic(IReadOnlyDictionary<string, (string FullPath, string[] References)> projects)
+    {
+        var byPath = projects.ToDictionary(p => Path.GetFullPath(p.Value.FullPath), p => p.Value.References, StringComparer.OrdinalIgnoreCase);
+        var memo = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+        bool Reaches(string path)
+        {
+            if (memo.TryGetValue(path, out var known))
+            {
+                return known;
+            }
+
+            memo[path] = false; // a cycle reaches nothing new
+            var references = byPath.TryGetValue(path, out var own) ? own : [];
+            return memo[path] = references.Any(r => r.EndsWith(".vbproj", StringComparison.OrdinalIgnoreCase) || Reaches(Path.GetFullPath(r)));
+        }
+
+        return [.. projects.Where(p => Reaches(Path.GetFullPath(p.Value.FullPath))).Select(p => p.Key)];
+    }
+
+    /// <summary>The 'Not checked:' line for the C# projects --engine dotnet-format leaves out because their load reaches Visual Basic.</summary>
+    public static string VisualBasicEngineGap(IReadOnlyCollection<string> projects) =>
+        Gap(ShortList(projects), $"{(projects.Count == 1 ? "it references" : "they reference")} a Visual Basic project, where 'dotnet format' (--engine {DotnetFormatEngine}) also runs Visual Basic fixes on C# code, so {(projects.Count == 1 ? "it is" : "they are")} left out; the default engine checks {(projects.Count == 1 ? "it" : "them")}");
+
     /// <summary>Whether a file is a Traversal project (Microsoft.Build.Traversal: a .proj that only lists projects to build).</summary>
     public static bool IsTraversal(string path) =>
         path.EndsWith(".proj", StringComparison.OrdinalIgnoreCase) && File.Exists(path) && File.ReadAllText(path).Contains("Microsoft.Build.Traversal", StringComparison.OrdinalIgnoreCase);
@@ -5469,6 +5496,28 @@ internal static partial class FormatCommand
         }
 
         using var visualBasicFiles = visualBasic.Count > 0 ? new UntouchedFiles(root, ".vb", log) : null;
+
+        // The old engine and Visual Basic (owner's decision 2026-10-27, fixture matrix): 'dotnet format' calls every fixer of an
+        // id, so where a run loads a VB project (a C# project references one), IDE0036's VB fixer ran on the C# diagnostics too and
+        // deleted a C# method. The C# projects whose load reaches one are left out of its runs and named; the host checks them.
+        if (CurrentEngine == DotnetFormatEngine && ReachingVisualBasic(projects.ToDictionary(p => p.Key, p => (p.Value.FullPath, p.Value.References), projects.Comparer)) is { Count: > 0 } reaching)
+        {
+            var reachingNames = reaching.Select(k => Path.GetRelativePath(root, projects[k].FullPath).Replace('\\', '/')).Order(StringComparer.OrdinalIgnoreCase).ToList();
+            gaps.Add(VisualBasicEngineGap(reachingNames));
+            projects = new(projects, projects.Comparer); // the list is cached for the process
+            reaching.ForEach(k => projects.Remove(k));
+            if (projects.Count == 0)
+            {
+                return Done(NotVerifiedExitCode);
+            }
+
+            var reachingFolders = reachingNames.Select(n => Path.GetDirectoryName(n)!.Replace('\\', '/')).Where(f => f.Length > 0 && !f.StartsWith("..", StringComparison.Ordinal)).Select(f => f + "/").Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            if (reachingFolders.Count > 0)
+            {
+                Exclude(reachingFolders);
+                excluded.AddRange(reachingFolders);
+            }
+        }
 
         // Files the projects compile from outside the repository ('..\..\outside\Shared.cs' linked in): someone else's code, like
         // a submodule's (owner's decision 2026-10-16). They were rewritten without being listed; now they're put back after the
