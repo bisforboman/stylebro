@@ -68,7 +68,7 @@ if (-not (Test-Path (Join-Path $toolPath 'bro*'))) {
 }
 
 $bro = Join-Path $toolPath 'bro'
-$context = [pscustomobject]@{ Version = $Version; Feed = $Feed; Work = $Work }
+$context = [pscustomobject]@{ Version = $Version; Feed = $Feed; Work = $Work; Bro = $bro }
 $results = [Collections.Generic.List[object]]::new()
 
 function Run-Bro([string]$clone, [string]$logs, [string]$step, [string[]]$arguments) {
@@ -181,9 +181,11 @@ foreach ($file in $chosen) {
         Test-Verdict $preview $expected $reason $failures
         $patch = Join-Path $repo '.git/stylebro-preview.patch'
 
-        # 2. Step 1 of getting-started and init/migrate --write, committed.
-        if ($spec.Reference) { & $spec.Reference $repo $context } else { Add-Reference $repo }
+        # 2. Step 1 of getting-started and init --write; migrate --write and then the package swap (docs/migrating.md), committed.
+        $reference = { if ($spec.Reference) { & $spec.Reference $repo $context } else { Add-Reference $repo } }
+        if (-not $spec.Migrate) { & $reference }
         $init = Run-Bro $repo $logs $command @($command, '--write')
+        if ($spec.Migrate) { & $reference }
         if ($init.Code -ne 0) { $failures.Add("$command --write exited $($init.Code) (log: $($init.Log))") }
         if ($spec.InitReason -and $init.Text -notmatch $spec.InitReason) { $failures.Add("$command's output doesn't match /$($spec.InitReason)/ (log: $($init.Log))") }
         Save-Commit $repo "stylebro $command"

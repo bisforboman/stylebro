@@ -1,0 +1,5 @@
+<Project>
+  <Target Name="FixtureTrimmerCheck" BeforeTargets="CoreCompile;DispatchToInnerBuilds">
+    <Error Condition="'$(FixtureTrimmerTasks)' == ''" Text="Fixture.Trimmer's targets were imported without its props (TargetFramework '$(TargetFramework)')." />
+  </Target>
+</Project>
