@@ -1,0 +1,6 @@
+preview	0	191s	bro preview init
+setup	0	11s	bash -c printf "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial58.2\" PrivateAssets=\"all\" />\n  </ItemGroup>\n</Project>\n" > Directory.Build.props && cat Directory.Build.props && bro init --write
+format	0	201s	bro format
+check	0	105s	bro check
+check-json	0
+checkbuild	0	266s	bro check --build

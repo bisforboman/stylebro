@@ -1,0 +1,9 @@
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (163 ids); --all applies every analyzer's and compiler fix.
+Leaving alone: src/LightInject.Benchmarks/, src/LightInject.Tests/: StyleCop didn't run there, so the migration set nothing up there (the stylebro-migrate block in .editorconfig names them).
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net462, net8.0, netstandard2.0).
+Checked netstandard2.0 (run 1 of 3)
+Checked net462 (run 2 of 3)
+Checked net8.0 (run 3 of 3)
+Run 1: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

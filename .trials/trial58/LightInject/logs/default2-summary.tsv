@@ -1,0 +1,12 @@
+preview	0	41s	bro preview migrate
+setup	0	7s	bash -c bro migrate . --write && sed -i "s#<PackageReference Include=\"StyleCop.Analyzers\" Version=\"1.1.118\">#<PackageReference Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial58.2\">#" src/LightInject/LightInject.csproj && git diff --stat
+format	0	31s	bro format
+check	0	32s	bro check
+check-json	0
+checkbuild	0	244s	bro check --build
+checkbuild-json	0
+twae-Debug	1	16s	twae Debug
+test-Debug	0	193s	env CFG=Debug bash -c cd src/LightInject.Tests && PATH=$HOME/.dotnet/tools:$PATH dotnet test -c $CFG
+twae-Release	1	16s	twae Release
+test-Release	0	269s	env CFG=Release bash -c cd src/LightInject.Tests && PATH=$HOME/.dotnet/tools:$PATH dotnet test -c $CFG
+DONE

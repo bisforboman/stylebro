@@ -83,4 +83,26 @@ Summary:
   note     Final line breaks: your .editorconfig says insert_final_newline = true, and 12 of 92 C# files end without a line break: 'format' adds a last line break to them. To keep that out of the formatting changes, change them in a commit of their own first.
 Settings: 71 lines in .editorconfig; 9 lines in Directory.Build.props (StyleBro.Analyzers)
   StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial58.2 to Directory.Build.props for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).
-Format run 1... 
+Format run 1... 50s
+Format run 2... 4s
+Format: 72 files, 508 reported changes, clean after 1 run
+  IMPORTS                                              46 files
+  IDE0055  Whitespace and formatting                   35 files
+  BRO1505  Elements should be separated by a bla...    25 files
+  BRO1002  Single-line comments should begin wit...    13 files
+  FINALNEWLINE                                             12 files
+  BRO1401  Use a trailing comma in multi-line in...    11 files
+  BRO1404  Access modifier should be declared          10 files
+  BRO1503  Opening braces should not be followed...    10 files
+  BRO1526  Blank line between switch sections           6 files
+  BRO1504  Single-line comments should be preced...     4 files
+  ... and 18 more rules
+Sample (IMPORTS, TestObjects/FactoryMethods/MakeBinary.cs):
+  -using static System.Linq.Expressions.Expression;
+Sample (IDE0055, Library/Renderers.cs):
+  (removes trailing whitespace)
+Sample (BRO1505, Library/CodeWriterVisitors/VBExpressionMetadata.cs):
+  (adds a blank line)
+Full diff: .git/stylebro-preview.patch (4,062 lines)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 1m 0s.

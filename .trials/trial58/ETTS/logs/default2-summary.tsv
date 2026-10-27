@@ -1,0 +1,12 @@
+preview	0	61s	bro preview init
+setup	0	5s	bash -c printf "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial58.2\" PrivateAssets=\"all\" />\n  </ItemGroup>\n</Project>\n" > Directory.Build.props && cat Directory.Build.props && bro init --write
+format	0	72s	bro format
+check	0	35s	bro check
+check-json	0
+checkbuild	3	191s	bro check --build
+checkbuild-json	3
+twae-Debug	1	20s	twae Debug
+test-Debug	1	20s	env CFG=Debug bash -c dotnet test Tests/Tests.csproj -c $CFG -f net6.0
+twae-Release	1	15s	twae Release
+test-Release	1	17s	env CFG=Release bash -c dotnet test Tests/Tests.csproj -c $CFG -f net6.0
+DONE

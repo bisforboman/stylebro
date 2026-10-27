@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "command": "format",
+  "previewOf": null,
+  "path": "/home/user/w58/CLU/dotnet2",
+  "write": false,
+  "settings": [],
+  "conventions": [],
+  "sonar": null,
+  "agentsMd": null,
+  "runs": [
+    {
+      "run": 1,
+      "filesChanged": [],
+      "changesPerRule": {}
+    }
+  ],
+  "changesPerRule": {},
+  "filesPerRule": null,
+  "keptFindings": [
+    {
+      "path": "src/CommandLineUtils/Attributes/ArgumentAttribute.cs",
+      "line": 29,
+      "column": 40,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    },
+    {
+      "path": "src/CommandLineUtils/Attributes/ArgumentAttribute.cs",
+      "line": 38,
+      "column": 40,
+      "rule": "BRO1603",
+      "reason": "DocumentationTextInString",
+      "reasonText": "the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test",
+      "message": "End the documentation text with a period"
+    }
+  ],
+  "patch": null,
+  "clean": true,
+  "exitCode": 0,
+  "notChecked": [
+    "IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)"
+  ]
+}

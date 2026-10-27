@@ -3,4 +3,8 @@ Copying the repository to /tmp/stylebro-preview-DgxuXP/default2... 0s
 Warning: Not restored: src/LightInject/LightInject.csproj. A package can bring a global config that sets StyleCop's rules (GlobalAnalyzerConfigFiles), and it is read from the restore: run 'dotnet restore', then this again.
 Settings: 330 lines in .editorconfig; 6 lines in Directory.Build.props (StyleBroPreset=none); suppressions carried over: 2 [SuppressMessage]
   StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial58.2 to src/LightInject/LightInject.csproj for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).
-Format run 1... 
+Format run 1... 32s
+Format: 0 files, 0 reported changes, nothing to change
+Full diff: .git/stylebro-preview.patch (377 lines)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 40s.
