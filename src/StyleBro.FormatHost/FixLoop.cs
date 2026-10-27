@@ -188,7 +188,7 @@ internal sealed class FixLoop(DotnetFormat format, AnalysisCache cache, Func<str
     // The id's fixers on 'solution' (each type once, FixOrder), or null when nothing is left to fix or no fixer changed anything.
     private async Task<Solution?> ApplyAsync(Step step, string id, List<(Project Project, Diagnostic Diagnostic)> diagnostics, Solution solution, CancellationToken cancellation)
     {
-        var fixers = FixOrder.FixersFor(id, step.Fixers, diagnostics.Select(d => d.Project.Language).ToHashSet(StringComparer.Ordinal));
+        var fixers = FixOrder.FixersFor(id, step.Fixers, FixOrder.LanguagesOf(diagnostics.Select(d => d.Project.Language)));
         if (fixers.Count == 0)
         {
             step.Logger.LogWarning(format.Text("Unable_to_fix_0_No_associated_code_fix_found"), id);

@@ -48,6 +48,10 @@ public sealed class FormatHostFixTests : IDisposable
         Assert.Equal([typeof(BasicFixer), typeof(Fixer)], FixOrder.FixersFor("X1", fixers, [LanguageNames.VisualBasic]).Select(f => f.GetType()));
         Assert.Equal(3, FixOrder.FixersFor("X1", fixers, [LanguageNames.CSharp, LanguageNames.VisualBasic]).Count);
         Assert.Equal(3, FixOrder.FixersFor("X1", fixers).Count);
+
+        // No diagnostics left for the id (Newtonsoft.Json: "No associated code fix found"): every fixer stays.
+        Assert.Equal(3, FixOrder.FixersFor("X1", fixers, FixOrder.LanguagesOf([])).Count);
+        Assert.Equal(2, FixOrder.FixersFor("X1", fixers, FixOrder.LanguagesOf([LanguageNames.CSharp, LanguageNames.CSharp])).Count);
     }
 
     [Fact]

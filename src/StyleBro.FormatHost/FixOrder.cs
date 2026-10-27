@@ -46,6 +46,14 @@ public static class FixOrder
             ? suppressor.SupportedSuppressions.Any(s => ids.Contains(s.SuppressedDiagnosticId))
             : a.SupportedDiagnostics.Any(d => ids.Contains(d.Id)))];
 
+    /// <summary>
+    /// The languages of a step's diagnostics for <see cref="FixersFor"/>, or null (every fixer) when there are none: a round
+    /// can leave an id nothing to fix, and an empty set filtered out every fixer, which said "No associated code fix found"
+    /// (Newtonsoft.Json's real-world run, BRO1513 and BRO1516).
+    /// </summary>
+    public static IReadOnlyCollection<string>? LanguagesOf(IEnumerable<string> languages) =>
+        languages.ToHashSet(StringComparer.Ordinal) is { Count: > 0 } set ? set : null;
+
     /// <summary>The languages <paramref name="fixer"/> is exported for (its ExportCodeFixProvider attributes), empty without one.</summary>
     public static HashSet<string> LanguagesOf(CodeFixProvider fixer) =>
         new(fixer.GetType().GetCustomAttributes(typeof(ExportCodeFixProviderAttribute), inherit: false).OfType<ExportCodeFixProviderAttribute>().SelectMany(a => a.Languages), StringComparer.Ordinal);
