@@ -54,7 +54,8 @@ bro preview format                # only the format run
 ```
 
 The preview copies the repository to a temporary folder (git's tracked and untracked files, not the ignored ones; the
-working trees of submodules too), runs the command there, then `bro format` until a run changes nothing,
+working trees of submodules too; its git repository starts from yours, with your history, remotes and shallow boundary, so
+version tools see the same history), runs the command there, then `bro format` until a run changes nothing,
 and deletes the copy. Your repository isn't touched. If it doesn't reference StyleBro.Analyzers yet, the copy gets the
 reference from [step 1](#1-add-the-package) (the tool's own version) and the output says so. It prints a summary and
 writes the full diff to `.git/stylebro-preview.patch` in the repository's git folder, where it isn't an untracked file

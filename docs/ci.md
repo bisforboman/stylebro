@@ -66,7 +66,11 @@ saw, `#if !DEBUG` code for example. Any other error fails only when it is new: t
 (the working tree is never touched) don't have it, compared by file, rule and message (a fix may move the line). Errors
 the untouched code has too are counted but don't fail it, and without git every error does. A build that fails like the
 untouched code's (a missing workload at the restore, a compile error) checked only what built before the error: the
-check then ends "Not verified" (exit code 3), naming the projects a failed one kept from compiling (`Didn't compile: App`). IDE fixes
+check then ends "Not verified" (exit code 3), naming the projects a failed one kept from compiling (`Didn't compile: App`).
+Errors in a project the untouched code's build didn't compile (a project it needs failed there) have nothing to compare
+with: `Not compared: App`, and "Not verified" too. With other parts unchecked, the "Not verified" verdict comes after the
+builds and says what they checked there (StyleBro's rules at warning or error, not whitespace and IDE fixes a build doesn't
+enforce). IDE fixes
 `format` holds back on this .NET SDK (IDE0049) are only a note and don't change the verdict; when every project sets
 `EnforceCodeStyleInBuild` and every file has the rule at warning or error, the check also says the builds checked them.
 Tests aren't run. It takes a
