@@ -1,0 +1,7 @@
+Test run for /home/user/stylebro/.trials/trial57/probe/ErrorProne.NET/src/ErrorProne.NET.CoreAnalyzers.Tests/bin/Debug/net9.0/ErrorProne.NET.CoreAnalyzers.Tests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:   418, Skipped:     0, Total:   418, Duration: 20 s - ErrorProne.NET.CoreAnalyzers.Tests.dll (net9.0)
