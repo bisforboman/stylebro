@@ -1,0 +1,12 @@
+preview	0	98s	bro preview init
+setup	0	9s	bash -c python3 /home/user/stylebro/.trials/trial59/addref.py src/Directory.Build.props "<PackageReference Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial59.2\" PrivateAssets=\"all\" />" && git diff --stat && bro init --write
+format	0	95s	bro format
+check	0	67s	bro check
+check-json	0
+checkbuild	0	258s	bro check --build
+checkbuild-json	0
+twae-Debug	0	35s	twae Debug
+test-Debug	1	35s	env CFG=Debug bash -c dotnet test src/DelegateDecompiler.Tests/DelegateDecompiler.Tests.csproj -c $CFG -f net8.0; dotnet test src/DelegateDecompiler.Tests.VB/DelegateDecompiler.Tests.VB.vbproj -c $CFG
+twae-Release	0	31s	twae Release
+test-Release	1	44s	env CFG=Release bash -c dotnet test src/DelegateDecompiler.Tests/DelegateDecompiler.Tests.csproj -c $CFG -f net8.0; dotnet test src/DelegateDecompiler.Tests.VB/DelegateDecompiler.Tests.VB.vbproj -c $CFG
+DONE

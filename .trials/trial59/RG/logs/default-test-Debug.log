@@ -1,0 +1,1843 @@
+/root/.nuget/packages/microsoft.build.framework/18.11.0/buildTransitive/net461/Microsoft.Build.Framework.targets(4,5): warning : Microsoft.Build.Framework 18.11.0-1.26512.6 doesn't support net47 and has not been tested with it. Consider upgrading your TargetFramework to net472 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [/home/user/w59/RG/default/src/ReportGenerator.Console/ReportGenerator.Console.Net.csproj]
+/root/.nuget/packages/microsoft.build.utilities.core/18.11.0/buildTransitive/net461/Microsoft.Build.Utilities.Core.targets(4,5): warning : Microsoft.Build.Utilities.Core 18.11.0-1.26512.6 doesn't support net47 and has not been tested with it. Consider upgrading your TargetFramework to net472 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [/home/user/w59/RG/default/src/ReportGenerator.Console/ReportGenerator.Console.Net.csproj]
+/root/.nuget/packages/microsoft.net.stringtools/18.11.0/buildTransitive/netcoreapp2.0/Microsoft.NET.StringTools.targets(4,5): warning : Microsoft.NET.StringTools 18.11.0-1.26512.6 doesn't support net8.0 and has not been tested with it. Consider upgrading your TargetFramework to net11.0 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [/home/user/w59/RG/default/src/ReportGenerator.Core.Test/ReportGenerator.Core.Test.csproj]
+/root/.nuget/packages/microsoft.build.framework/18.11.0/buildTransitive/netcoreapp2.0/Microsoft.Build.Framework.targets(4,5): warning : Microsoft.Build.Framework 18.11.0-1.26512.6 doesn't support net8.0 and has not been tested with it. Consider upgrading your TargetFramework to net11.0 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [/home/user/w59/RG/default/src/ReportGenerator.Core.Test/ReportGenerator.Core.Test.csproj]
+/root/.nuget/packages/microsoft.build.utilities.core/18.11.0/buildTransitive/netcoreapp2.0/Microsoft.Build.Utilities.Core.targets(4,5): warning : Microsoft.Build.Utilities.Core 18.11.0-1.26512.6 doesn't support net8.0 and has not been tested with it. Consider upgrading your TargetFramework to net11.0 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [/home/user/w59/RG/default/src/ReportGenerator.Core.Test/ReportGenerator.Core.Test.csproj]
+/root/.nuget/packages/microsoft.net.stringtools/18.11.0/buildTransitive/netcoreapp2.0/Microsoft.NET.StringTools.targets(4,5): warning : Microsoft.NET.StringTools 18.11.0-1.26512.6 doesn't support net8.0 and has not been tested with it. Consider upgrading your TargetFramework to net11.0 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [/home/user/w59/RG/default/src/ReportGenerator.Console.NetCore/ReportGenerator.Console.NetCore.csproj::TargetFramework=net8.0]
+/root/.nuget/packages/microsoft.build.framework/18.11.0/buildTransitive/netcoreapp2.0/Microsoft.Build.Framework.targets(4,5): warning : Microsoft.Build.Framework 18.11.0-1.26512.6 doesn't support net8.0 and has not been tested with it. Consider upgrading your TargetFramework to net11.0 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [/home/user/w59/RG/default/src/ReportGenerator.Console.NetCore/ReportGenerator.Console.NetCore.csproj::TargetFramework=net8.0]
+/root/.nuget/packages/microsoft.build.utilities.core/18.11.0/buildTransitive/netcoreapp2.0/Microsoft.Build.Utilities.Core.targets(4,5): warning : Microsoft.Build.Utilities.Core 18.11.0-1.26512.6 doesn't support net8.0 and has not been tested with it. Consider upgrading your TargetFramework to net11.0 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [/home/user/w59/RG/default/src/ReportGenerator.Console.NetCore/ReportGenerator.Console.NetCore.csproj::TargetFramework=net8.0]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.403/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand59/danielpalme-ReportGenerator'. [/home/user/w59/RG/default/src/ReportGenerator.Core/ReportGenerator.Core.csproj]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.403/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w59/RG/default/src/ReportGenerator.Core/ReportGenerator.Core.csproj]
+/root/.nuget/packages/microsoft.net.stringtools/18.11.0/buildTransitive/netcoreapp2.0/Microsoft.NET.StringTools.targets(4,5): warning : Microsoft.NET.StringTools 18.11.0-1.26512.6 doesn't support net9.0 and has not been tested with it. Consider upgrading your TargetFramework to net11.0 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [/home/user/w59/RG/default/src/ReportGenerator.Console.NetCore/ReportGenerator.Console.NetCore.csproj::TargetFramework=net9.0]
+/root/.nuget/packages/microsoft.build.framework/18.11.0/buildTransitive/netcoreapp2.0/Microsoft.Build.Framework.targets(4,5): warning : Microsoft.Build.Framework 18.11.0-1.26512.6 doesn't support net9.0 and has not been tested with it. Consider upgrading your TargetFramework to net11.0 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [/home/user/w59/RG/default/src/ReportGenerator.Console.NetCore/ReportGenerator.Console.NetCore.csproj::TargetFramework=net9.0]
+/root/.nuget/packages/microsoft.build.utilities.core/18.11.0/buildTransitive/netcoreapp2.0/Microsoft.Build.Utilities.Core.targets(4,5): warning : Microsoft.Build.Utilities.Core 18.11.0-1.26512.6 doesn't support net9.0 and has not been tested with it. Consider upgrading your TargetFramework to net11.0 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [/home/user/w59/RG/default/src/ReportGenerator.Console.NetCore/ReportGenerator.Console.NetCore.csproj::TargetFramework=net9.0]
+/root/.nuget/packages/microsoft.net.stringtools/18.11.0/buildTransitive/netcoreapp2.0/Microsoft.NET.StringTools.targets(4,5): warning : Microsoft.NET.StringTools 18.11.0-1.26512.6 doesn't support net10.0 and has not been tested with it. Consider upgrading your TargetFramework to net11.0 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [/home/user/w59/RG/default/src/ReportGenerator.Console.NetCore/ReportGenerator.Console.NetCore.csproj::TargetFramework=net10.0]
+/root/.nuget/packages/microsoft.build.utilities.core/18.11.0/buildTransitive/netcoreapp2.0/Microsoft.Build.Utilities.Core.targets(4,5): warning : Microsoft.Build.Utilities.Core 18.11.0-1.26512.6 doesn't support net10.0 and has not been tested with it. Consider upgrading your TargetFramework to net11.0 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [/home/user/w59/RG/default/src/ReportGenerator.Console.NetCore/ReportGenerator.Console.NetCore.csproj::TargetFramework=net10.0]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.403/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand59/danielpalme-ReportGenerator'. [/home/user/w59/RG/default/src/ReportGenerator.DotnetCorePluginLoader/ReportGenerator.DotnetCorePluginLoader.csproj::TargetFramework=net8.0]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.403/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w59/RG/default/src/ReportGenerator.DotnetCorePluginLoader/ReportGenerator.DotnetCorePluginLoader.csproj::TargetFramework=net8.0]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.403/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand59/danielpalme-ReportGenerator'. [/home/user/w59/RG/default/src/ReportGenerator.DotnetCorePluginLoader/ReportGenerator.DotnetCorePluginLoader.csproj::TargetFramework=net9.0]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.403/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w59/RG/default/src/ReportGenerator.DotnetCorePluginLoader/ReportGenerator.DotnetCorePluginLoader.csproj::TargetFramework=net9.0]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.403/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand59/danielpalme-ReportGenerator'. [/home/user/w59/RG/default/src/ReportGenerator.DotnetCorePluginLoader/ReportGenerator.DotnetCorePluginLoader.csproj::TargetFramework=net10.0]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.403/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w59/RG/default/src/ReportGenerator.DotnetCorePluginLoader/ReportGenerator.DotnetCorePluginLoader.csproj::TargetFramework=net10.0]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.403/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand59/danielpalme-ReportGenerator'. [/home/user/w59/RG/default/src/ReportGenerator.DotnetGlobalTool/ReportGenerator.DotnetGlobalTool.csproj::TargetFramework=net10.0]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.403/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w59/RG/default/src/ReportGenerator.DotnetGlobalTool/ReportGenerator.DotnetGlobalTool.csproj::TargetFramework=net10.0]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.403/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand59/danielpalme-ReportGenerator'. [/home/user/w59/RG/default/src/ReportGenerator.MSBuild/ReportGenerator.MSBuild.csproj]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.403/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w59/RG/default/src/ReportGenerator.MSBuild/ReportGenerator.MSBuild.csproj]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.403/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand59/danielpalme-ReportGenerator'. [/home/user/w59/RG/default/src/ReportGenerator.DotnetGlobalTool/ReportGenerator.DotnetGlobalTool.csproj::TargetFramework=net8.0]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.403/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w59/RG/default/src/ReportGenerator.DotnetGlobalTool/ReportGenerator.DotnetGlobalTool.csproj::TargetFramework=net8.0]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.403/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand59/danielpalme-ReportGenerator'. [/home/user/w59/RG/default/src/ReportGenerator.Console.NetCore/ReportGenerator.Console.NetCore.csproj::TargetFramework=net10.0]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.403/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w59/RG/default/src/ReportGenerator.Console.NetCore/ReportGenerator.Console.NetCore.csproj::TargetFramework=net10.0]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.403/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand59/danielpalme-ReportGenerator'. [/home/user/w59/RG/default/src/ReportGenerator.Core.Test/ReportGenerator.Core.Test.csproj]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.403/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w59/RG/default/src/ReportGenerator.Core.Test/ReportGenerator.Core.Test.csproj]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.403/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand59/danielpalme-ReportGenerator'. [/home/user/w59/RG/default/src/ReportGenerator.DotnetGlobalTool/ReportGenerator.DotnetGlobalTool.csproj::TargetFramework=net9.0]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.403/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w59/RG/default/src/ReportGenerator.DotnetGlobalTool/ReportGenerator.DotnetGlobalTool.csproj::TargetFramework=net9.0]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.403/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand59/danielpalme-ReportGenerator'. [/home/user/w59/RG/default/src/ReportGenerator.Console.NetCore/ReportGenerator.Console.NetCore.csproj::TargetFramework=net8.0]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.403/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand59/danielpalme-ReportGenerator'. [/home/user/w59/RG/default/src/ReportGenerator.Console.NetCore/ReportGenerator.Console.NetCore.csproj::TargetFramework=net9.0]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.403/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w59/RG/default/src/ReportGenerator.Console.NetCore/ReportGenerator.Console.NetCore.csproj::TargetFramework=net9.0]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.403/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w59/RG/default/src/ReportGenerator.Console.NetCore/ReportGenerator.Console.NetCore.csproj::TargetFramework=net8.0]
+Running tests from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+skipped Palmmedia.ReportGenerator.Core.Test.MsBuildTest.ExecuteMSBuildScript_NetCore (0ms)
+  Not working with Github Action
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+skipped Palmmedia.ReportGenerator.Core.Test.MsBuildTest.ExecuteMSBuildScript_NetFull (0ms)
+  Not working with Github Action
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+failed Palmmedia.ReportGenerator.Core.Test.Common.FileHelperTest.GetEncoding(file: "ansii.txt", encoding: UTF8EncodingSealed { BodyName = "utf-8", CodePage = 65001, DecoderFallback = DecoderReplacementFallback { DefaultString = "�", MaxCharCount = 1 }, EncoderFallback = EncoderReplacementFallback { DefaultString = "�", MaxCharCount = 1 }, EncodingName = "Unicode (UTF-8)", ··· }) (1ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.IO.DirectoryNotFoundException : Could not find a part of the path '/home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/Common\Encodings/ansii.txt'.
+    at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+    at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+    at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+    at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+    at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+    at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access)
+    at Palmmedia.ReportGenerator.Core.Common.FileHelper.GetEncodingByBOM(String filename) in /home/user/w59/RG/default/src/ReportGenerator.Core/Common/FileHelper.cs:57
+    at Palmmedia.ReportGenerator.Core.Common.FileHelper.GetEncoding(String filename) in /home/user/w59/RG/default/src/ReportGenerator.Core/Common/FileHelper.cs:20
+    at Palmmedia.ReportGenerator.Core.Test.Common.FileHelperTest.GetEncoding(String file, Encoding encoding) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Common/FileHelperTest.cs:17
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Common.FileHelperTest.GetEncoding(file: "ascii.txt", encoding: UTF8EncodingSealed { BodyName = "utf-8", CodePage = 65001, DecoderFallback = DecoderReplacementFallback { DefaultString = "�", MaxCharCount = 1 }, EncoderFallback = EncoderReplacementFallback { DefaultString = "�", MaxCharCount = 1 }, EncodingName = "Unicode (UTF-8)", ··· }) (0ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.IO.DirectoryNotFoundException : Could not find a part of the path '/home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/Common\Encodings/ascii.txt'.
+    at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+    at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+    at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+    at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+    at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+    at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access)
+    at Palmmedia.ReportGenerator.Core.Common.FileHelper.GetEncodingByBOM(String filename) in /home/user/w59/RG/default/src/ReportGenerator.Core/Common/FileHelper.cs:57
+    at Palmmedia.ReportGenerator.Core.Common.FileHelper.GetEncoding(String filename) in /home/user/w59/RG/default/src/ReportGenerator.Core/Common/FileHelper.cs:20
+    at Palmmedia.ReportGenerator.Core.Test.Common.FileHelperTest.GetEncoding(String file, Encoding encoding) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Common/FileHelperTest.cs:17
+    at InvokeStub_FileHelperTest.GetEncoding(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Palmmedia.ReportGenerator.Core.Test.Common.FileHelperTest.GetEncoding(file: "latin1.txt", encoding: Latin1EncodingSealed { BodyName = "iso-8859-1", CodePage = 28591, DecoderFallback = DecoderReplacementFallback { DefaultString = "?", MaxCharCount = 1 }, EncoderFallback = EncoderLatin1BestFitFallback { MaxCharCount = 1 }, EncodingName = "Western European (ISO)", ··· }) (0ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.IO.DirectoryNotFoundException : Could not find a part of the path '/home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/Common\Encodings/latin1.txt'.
+    at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+    at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+    at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+    at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+    at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+    at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access)
+    at Palmmedia.ReportGenerator.Core.Common.FileHelper.GetEncodingByBOM(String filename) in /home/user/w59/RG/default/src/ReportGenerator.Core/Common/FileHelper.cs:57
+    at Palmmedia.ReportGenerator.Core.Common.FileHelper.GetEncoding(String filename) in /home/user/w59/RG/default/src/ReportGenerator.Core/Common/FileHelper.cs:20
+    at Palmmedia.ReportGenerator.Core.Test.Common.FileHelperTest.GetEncoding(String file, Encoding encoding) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Common/FileHelperTest.cs:17
+    at InvokeStub_FileHelperTest.GetEncoding(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Palmmedia.ReportGenerator.Core.Test.Common.FileHelperTest.GetEncoding(file: "unicode_uft16_be.txt", encoding: UnicodeEncoding { BodyName = "utf-16BE", CodePage = 1201, DecoderFallback = DecoderReplacementFallback { DefaultString = "�", MaxCharCount = 1 }, EncoderFallback = EncoderReplacementFallback { DefaultString = "�", MaxCharCount = 1 }, EncodingName = "Unicode (Big-Endian)", ··· }) (0ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.IO.DirectoryNotFoundException : Could not find a part of the path '/home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/Common\Encodings/unicode_uft16_be.txt'.
+    at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+    at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+    at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+    at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+    at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+    at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access)
+    at Palmmedia.ReportGenerator.Core.Common.FileHelper.GetEncodingByBOM(String filename) in /home/user/w59/RG/default/src/ReportGenerator.Core/Common/FileHelper.cs:57
+    at Palmmedia.ReportGenerator.Core.Common.FileHelper.GetEncoding(String filename) in /home/user/w59/RG/default/src/ReportGenerator.Core/Common/FileHelper.cs:20
+    at Palmmedia.ReportGenerator.Core.Test.Common.FileHelperTest.GetEncoding(String file, Encoding encoding) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Common/FileHelperTest.cs:17
+    at InvokeStub_FileHelperTest.GetEncoding(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Palmmedia.ReportGenerator.Core.Test.Common.FileHelperTest.GetEncoding(file: "unicode_uft16_le.txt", encoding: UnicodeEncoding { BodyName = "utf-16", CodePage = 1200, DecoderFallback = DecoderReplacementFallback { DefaultString = "�", MaxCharCount = 1 }, EncoderFallback = EncoderReplacementFallback { DefaultString = "�", MaxCharCount = 1 }, EncodingName = "Unicode", ··· }) (0ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.IO.DirectoryNotFoundException : Could not find a part of the path '/home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/Common\Encodings/unicode_uft16_le.txt'.
+    at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+    at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+    at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+    at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+    at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+    at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access)
+    at Palmmedia.ReportGenerator.Core.Common.FileHelper.GetEncodingByBOM(String filename) in /home/user/w59/RG/default/src/ReportGenerator.Core/Common/FileHelper.cs:57
+    at Palmmedia.ReportGenerator.Core.Common.FileHelper.GetEncoding(String filename) in /home/user/w59/RG/default/src/ReportGenerator.Core/Common/FileHelper.cs:20
+    at Palmmedia.ReportGenerator.Core.Test.Common.FileHelperTest.GetEncoding(String file, Encoding encoding) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Common/FileHelperTest.cs:17
+    at InvokeStub_FileHelperTest.GetEncoding(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Palmmedia.ReportGenerator.Core.Test.Common.FileHelperTest.GetEncoding(file: "utf8.txt", encoding: UTF8EncodingSealed { BodyName = "utf-8", CodePage = 65001, DecoderFallback = DecoderReplacementFallback { DefaultString = "�", MaxCharCount = 1 }, EncoderFallback = EncoderReplacementFallback { DefaultString = "�", MaxCharCount = 1 }, EncodingName = "Unicode (UTF-8)", ··· }) (0ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.IO.DirectoryNotFoundException : Could not find a part of the path '/home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/Common\Encodings/utf8.txt'.
+    at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+    at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+    at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+    at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+    at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+    at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access)
+    at Palmmedia.ReportGenerator.Core.Common.FileHelper.GetEncodingByBOM(String filename) in /home/user/w59/RG/default/src/ReportGenerator.Core/Common/FileHelper.cs:57
+    at Palmmedia.ReportGenerator.Core.Common.FileHelper.GetEncoding(String filename) in /home/user/w59/RG/default/src/ReportGenerator.Core/Common/FileHelper.cs:20
+    at Palmmedia.ReportGenerator.Core.Test.Common.FileHelperTest.GetEncoding(String file, Encoding encoding) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Common/FileHelperTest.cs:17
+    at InvokeStub_FileHelperTest.GetEncoding(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Palmmedia.ReportGenerator.Core.Test.Common.FileHelperTest.GetEncoding(file: "utf8_bom.txt", encoding: UTF8EncodingSealed { BodyName = "utf-8", CodePage = 65001, DecoderFallback = DecoderReplacementFallback { DefaultString = "�", MaxCharCount = 1 }, EncoderFallback = EncoderReplacementFallback { DefaultString = "�", MaxCharCount = 1 }, EncodingName = "Unicode (UTF-8)", ··· }) (0ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.IO.DirectoryNotFoundException : Could not find a part of the path '/home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/Common\Encodings/utf8_bom.txt'.
+    at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+    at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+    at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+    at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+    at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+    at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access)
+    at Palmmedia.ReportGenerator.Core.Common.FileHelper.GetEncodingByBOM(String filename) in /home/user/w59/RG/default/src/ReportGenerator.Core/Common/FileHelper.cs:57
+    at Palmmedia.ReportGenerator.Core.Common.FileHelper.GetEncoding(String filename) in /home/user/w59/RG/default/src/ReportGenerator.Core/Common/FileHelper.cs:20
+    at Palmmedia.ReportGenerator.Core.Test.Common.FileHelperTest.GetEncoding(String file, Encoding encoding) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Common/FileHelperTest.cs:17
+    at InvokeStub_FileHelperTest.GetEncoding(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.JaCoCoParserTest.NumberOfLineVisitsTest (219ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.JaCoCoParserTest.GetFileAnalysis(IEnumerable`1 assemblies, String className, String fileName) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/JaCoCoParserTest.cs:158
+    at Palmmedia.ReportGenerator.Core.Test.Parser.JaCoCoParserTest.NumberOfLineVisitsTest() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/JaCoCoParserTest.cs:51
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.JaCoCoParserTest.LineVisitStatusTest (12ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.JaCoCoParserTest.GetFileAnalysis(IEnumerable`1 assemblies, String className, String fileName) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/JaCoCoParserTest.cs:158
+    at Palmmedia.ReportGenerator.Core.Test.Parser.JaCoCoParserTest.LineVisitStatusTest() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/JaCoCoParserTest.cs:64
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.JaCoCoParserTest.MethodMetricsTest (11ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.JaCoCoParserTest.MethodMetricsTest() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/JaCoCoParserTest.cs:131
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.JaCoCoParserTest.CodeElementsTest (6ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.JaCoCoParserTest.GetFile(IEnumerable`1 assemblies, String className, String fileName) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/JaCoCoParserTest.cs:153
+    at Palmmedia.ReportGenerator.Core.Test.Parser.JaCoCoParserTest.CodeElementsTest() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/JaCoCoParserTest.cs:149
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.ReportConfigurationValidatorTest.Validate_InvalidHistoryDirectory_ValidationFails (2ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Assert.False() Failure
+  Expected: False
+  Actual:   True
+    at Palmmedia.ReportGenerator.Core.Test.ReportConfigurationValidatorTest.Validate_InvalidHistoryDirectory_ValidationFails() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/ReportConfigurationValidatorTest.cs:166
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.ReportConfigurationValidatorTest.Validate_InvalidTargetDirectory_ValidationFails (1ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Assert.False() Failure
+  Expected: False
+  Actual:   True
+    at Palmmedia.ReportGenerator.Core.Test.ReportConfigurationValidatorTest.Validate_InvalidTargetDirectory_ValidationFails() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/ReportConfigurationValidatorTest.cs:124
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.CoberturaParserTest.CodeElementsTest (13ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.CoberturaParserTest.GetFile(IEnumerable`1 assemblies, String className, String fileName) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/CoberturaParserTest.cs:254
+    at Palmmedia.ReportGenerator.Core.Test.Parser.CoberturaParserTest.CodeElementsTest() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/CoberturaParserTest.cs:250
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.CoberturaParserTest.NumberOfLineVisitsTest (10ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.CoberturaParserTest.GetFileAnalysis(IEnumerable`1 assemblies, String className, String fileName) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/CoberturaParserTest.cs:259
+    at Palmmedia.ReportGenerator.Core.Test.Parser.CoberturaParserTest.NumberOfLineVisitsTest() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/CoberturaParserTest.cs:54
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.CoberturaParserTest.MethodMetricsTest (23ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.CoberturaParserTest.MethodMetricsTest() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/CoberturaParserTest.cs:134
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.CoberturaParserTest.LineVisitStatusTest (12ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.CoberturaParserTest.GetFileAnalysis(IEnumerable`1 assemblies, String className, String fileName) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/CoberturaParserTest.cs:259
+    at Palmmedia.ReportGenerator.Core.Test.Parser.CoberturaParserTest.LineVisitStatusTest() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/CoberturaParserTest.cs:67
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.CoberturaParserTest.MethodMetricsTest_2(assemblyName: "Test", className: "Test.AbstractClass_SampleImpl1", filePath: "C:\\temp\\AbstractClass.cs", methodName: "Method1()", expectedMethodMetrics: 3, expectedComplexity: 1, expectedLineCoverage: 0, expectedBranchCoverage: 100, expectedCrapScore: 2) (34ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.CoberturaParserTest.MethodMetricsTest_2(String assemblyName, String className, String filePath, String methodName, Int32 expectedMethodMetrics, Double expectedComplexity, Double expectedLineCoverage, Double expectedBranchCoverage, Double expectedCrapScore) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/CoberturaParserTest.cs:170
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithManyArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.CoberturaParserTest.MethodMetricsTest_2(assemblyName: "Test", className: "Test.Program", filePath: "C:\\temp\\Program.cs", methodName: "Main(System.String[])", expectedMethodMetrics: 4, expectedComplexity: 1, expectedLineCoverage: 90, expectedBranchCoverage: 100, expectedCrapScore: 1) (16ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.CoberturaParserTest.MethodMetricsTest_2(String assemblyName, String className, String filePath, String methodName, Int32 expectedMethodMetrics, Double expectedComplexity, Double expectedLineCoverage, Double expectedBranchCoverage, Double expectedCrapScore) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/CoberturaParserTest.cs:170
+    at InvokeStub_CoberturaParserTest.MethodMetricsTest_2(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithManyArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.CoberturaParserTest.MethodMetricsTest_2(assemblyName: "Test", className: "Test.PartialClass", filePath: "C:\\temp\\PartialClass.cs", methodName: "set_SomeProperty(System.Int32)", expectedMethodMetrics: 4, expectedComplexity: 2, expectedLineCoverage: 66.659999999999997, expectedBranchCoverage: 50, expectedCrapScore: 2) (12ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.CoberturaParserTest.MethodMetricsTest_2(String assemblyName, String className, String filePath, String methodName, Int32 expectedMethodMetrics, Double expectedComplexity, Double expectedLineCoverage, Double expectedBranchCoverage, Double expectedCrapScore) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/CoberturaParserTest.cs:170
+    at InvokeStub_CoberturaParserTest.MethodMetricsTest_2(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithManyArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.CoberturaParserTest.MethodMetricsTest_2(assemblyName: "Test", className: "Test.AbstractClass", filePath: "C:\\temp\\AbstractClass.cs", methodName: ".ctor()", expectedMethodMetrics: 1, expectedComplexity: 1, expectedLineCoverage: 100, expectedBranchCoverage: 100, expectedCrapScore: 1) (13ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.CoberturaParserTest.MethodMetricsTest_2(String assemblyName, String className, String filePath, String methodName, Int32 expectedMethodMetrics, Double expectedComplexity, Double expectedLineCoverage, Double expectedBranchCoverage, Double expectedCrapScore) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/CoberturaParserTest.cs:170
+    at InvokeStub_CoberturaParserTest.MethodMetricsTest_2(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithManyArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.CoberturaParserTest.MethodMetricsTest_2(assemblyName: "Test", className: "Test.TestClass", filePath: "C:\\temp\\TestClass.cs", methodName: "SampleFunction()", expectedMethodMetrics: 7, expectedComplexity: 4, expectedLineCoverage: 80, expectedBranchCoverage: 50, expectedCrapScore: 4) (18ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.CoberturaParserTest.MethodMetricsTest_2(String assemblyName, String className, String filePath, String methodName, Int32 expectedMethodMetrics, Double expectedComplexity, Double expectedLineCoverage, Double expectedBranchCoverage, Double expectedCrapScore) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/CoberturaParserTest.cs:170
+    at InvokeStub_CoberturaParserTest.MethodMetricsTest_2(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithManyArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.Preprocessing.JaCoCoReportPreprocessorTest.Execute_FullFilePathApplied (2ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Assert.True() Failure
+  Expected: True
+  Actual:   False
+    at Palmmedia.ReportGenerator.Core.Test.Parser.Preprocessing.JaCoCoReportPreprocessorTest.Execute_FullFilePathApplied() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/Preprocessing/JaCoCoReportPreprocessorTest.cs:33
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Common.GlobbingFileSearchTest.GetFiles_RelativePath_DllFound (5ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Assert.Contains() Failure: Filter not matched in collection
+  Collection: []
+    at Palmmedia.ReportGenerator.Core.Test.Common.GlobbingFileSearchTest.GetFiles_RelativePath_DllFound() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Common/GlobbingFileSearchTest.cs:52
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+[+183/x24/?2] ReportGenerator.Core.Test.dll (net8.0|x64)(2s)
+
+failed Palmmedia.ReportGenerator.Core.Test.Parser.ParserResultTest.NumberOfLineVisitsTest_WithPreprocessing (42ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.ParserResultTest.NumberOfLineVisitsTest_WithPreprocessing() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/ParserResultTest.cs:164
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.ParserResultTest.NumberOfLineVisitsTest_WithoutPreprocessing (39ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.ParserResultTest.NumberOfLineVisitsTest_WithoutPreprocessing() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/ParserResultTest.cs:122
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.MProfParserTest.NumberOfLineVisitsTest (5ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.MProfParserTest.NumberOfLineVisitsTest() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/MProfParserTest.cs:50
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.OpenCoverParserTest.NumberOfLineVisitsTest_WithoutPreprocessing (23ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.OpenCoverParserTest.NumberOfLineVisitsTest_WithoutPreprocessing() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/OpenCoverParserTest.cs:98
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.OpenCoverParserTest.NumberOfLineVisitsTest_WithPreprocessing (20ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.OpenCoverParserTest.NumberOfLineVisitsTest_WithPreprocessing() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/OpenCoverParserTest.cs:140
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.Preprocessing.CoberturaReportPreprocessorTest.Execute_FullFilePathApplied (1ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Assert.True() Failure
+  Expected: True
+  Actual:   False
+    at Palmmedia.ReportGenerator.Core.Test.Parser.Preprocessing.CoberturaReportPreprocessorTest.Execute_FullFilePathApplied() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/Preprocessing/CoberturaReportPreprocessorTest.cs:39
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.Preprocessing.CoberturaReportPreprocessorTest.Execute_FullFilePathApplied_MultiSource (1ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Assert.True() Failure
+  Expected: True
+  Actual:   False
+    at Palmmedia.ReportGenerator.Core.Test.Parser.Preprocessing.CoberturaReportPreprocessorTest.Execute_FullFilePathApplied_MultiSource() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/Preprocessing/CoberturaReportPreprocessorTest.cs:61
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Common.WildCardFileSearchTest.GetFiles_OnlyUNCPathWithoutFilePattern_ArgumentException (6ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(System.ArgumentException)
+    at Palmmedia.ReportGenerator.Core.Test.Common.WildCardFileSearchTest.GetFiles_OnlyUNCPathWithoutFilePattern_ArgumentException() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Common/WildCardFileSearchTest.cs:43
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Common.WildCardFileSearchTest.GetFiles_OnlyDriveWithoutFilePattern_ArgumentException (1ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(System.ArgumentException)
+    at Palmmedia.ReportGenerator.Core.Test.Common.WildCardFileSearchTest.GetFiles_OnlyDriveWithoutFilePattern_ArgumentException() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Common/WildCardFileSearchTest.cs:37
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Common.WildCardFileSearchTest.GetFiles_RelativePath_DllFound (0ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Assert.Contains() Failure: Filter not matched in collection
+  Collection: []
+    at Palmmedia.ReportGenerator.Core.Test.Common.WildCardFileSearchTest.GetFiles_RelativePath_DllFound() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Common/WildCardFileSearchTest.cs:82
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Common.WildCardFileSearchTest.GetFiles_FilePatternInvalid_ArgumentException (0ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(System.ArgumentException)
+    at Palmmedia.ReportGenerator.Core.Test.Common.WildCardFileSearchTest.GetFiles_FilePatternInvalid_ArgumentException() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Common/WildCardFileSearchTest.cs:31
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.LCovParserTest.LineVisitStatusTest (2ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.LCovParserTest.GetFileAnalysis(IEnumerable`1 assemblies, String className, String fileName) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/LCovParserTest.cs:183
+    at Palmmedia.ReportGenerator.Core.Test.Parser.LCovParserTest.LineVisitStatusTest() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/LCovParserTest.cs:82
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.LCovParserTest.NumberOfLineVisitsTest (2ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.LCovParserTest.GetFileAnalysis(IEnumerable`1 assemblies, String className, String fileName) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/LCovParserTest.cs:183
+    at Palmmedia.ReportGenerator.Core.Test.Parser.LCovParserTest.NumberOfLineVisitsTest() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/LCovParserTest.cs:48
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.LCovParserTest.CodeElementsTest (1ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.LCovParserTest.GetFile(IEnumerable`1 assemblies, String className, String fileName) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/LCovParserTest.cs:178
+    at Palmmedia.ReportGenerator.Core.Test.Parser.LCovParserTest.CodeElementsTest() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/LCovParserTest.cs:164
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.LCovParserTest.GetCoverableLinesOfClassTest (1ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.LCovParserTest.GetCoverableLinesOfClassTest() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/LCovParserTest.cs:137
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.LCovParserTest.GetCoverageQuotaOfClassTest (1ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.LCovParserTest.GetCoverageQuotaOfClassTest() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/LCovParserTest.cs:146
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.LCovParserTest.MethodMetricsTest (1ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.LCovParserTest.MethodMetricsTest() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/LCovParserTest.cs:155
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.LCovParserTest.FilesOfClassTest (1ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.LCovParserTest.FilesOfClassTest() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/LCovParserTest.cs:109
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.GCovParserTest.MethodMetricsTest (5ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.GCovParserTest.MethodMetricsTest() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/GCovParserTest.cs:134
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.GCovParserTest.LineVisitStatusTest (1ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.GCovParserTest.GetFileAnalysis(IEnumerable`1 assemblies, String className, String fileName) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/GCovParserTest.cs:152
+    at Palmmedia.ReportGenerator.Core.Test.Parser.GCovParserTest.LineVisitStatusTest() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/GCovParserTest.cs:62
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.GCovParserTest.CodeElementsTest (1ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.GCovParserTest.GetFile(IEnumerable`1 assemblies, String className, String fileName) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/GCovParserTest.cs:147
+    at Palmmedia.ReportGenerator.Core.Test.Parser.GCovParserTest.CodeElementsTest() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/GCovParserTest.cs:143
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.GCovParserTest.GetCoverageQuotaOfClassTest (1ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.GCovParserTest.GetCoverageQuotaOfClassTest() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/GCovParserTest.cs:125
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.GCovParserTest.NumberOfLineVisitsTest (0ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.GCovParserTest.GetFileAnalysis(IEnumerable`1 assemblies, String className, String fileName) in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/GCovParserTest.cs:152
+    at Palmmedia.ReportGenerator.Core.Test.Parser.GCovParserTest.NumberOfLineVisitsTest() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/GCovParserTest.cs:50
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.GCovParserTest.FilesOfClassTest (1ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.GCovParserTest.FilesOfClassTest() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/GCovParserTest.cs:89
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.GCovParserTest.GetCoverableLinesOfClassTest (0ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Xunit.MicrosoftTestingPlatform.XunitException: System.InvalidOperationException : Sequence contains no matching element
+    at System.Linq.ThrowHelper.ThrowNoMatchException()
+    at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+    at Palmmedia.ReportGenerator.Core.Test.Parser.GCovParserTest.GetCoverableLinesOfClassTest() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/GCovParserTest.cs:116
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+[+320/x49/?2] ReportGenerator.Core.Test.dll (net8.0|x64)(5s)
+
+failed Palmmedia.ReportGenerator.Core.Test.Parser.Analysis.CodeFileTest.AnalyzeFile_ExistingFile_AnalysisIsReturned (1ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Assert.Null() Failure: Value is not null
+  Expected: null
+  Actual:   "File 'C:\\temp\\Program.cs' does not exist (any more"···
+    at Palmmedia.ReportGenerator.Core.Test.Parser.Analysis.CodeFileTest.AnalyzeFile_ExistingFile_AnalysisIsReturned() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/Analysis/CodeFileTest.cs:278
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+failed Palmmedia.ReportGenerator.Core.Test.Parser.Analysis.CodeFileTest.AddCoverageByTestMethod_AddCoverageByTestMethodForExistingMethod_CoverageInformationIsMerged (21ms)
+  from /home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64)
+  Assert.Equal() Failure: Collections differ
+             ↓ (pos 0)
+  Expected: [0, 1, -1, 1, 0, ···]
+  Actual:   []
+    at Palmmedia.ReportGenerator.Core.Test.Parser.Analysis.CodeFileTest.AddCoverageByTestMethod_AddCoverageByTestMethodForExistingMethod_CoverageInformationIsMerged() in /home/user/w59/RG/default/src/ReportGenerator.Core.Test/Parser/Analysis/CodeFileTest.cs:443
+    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+/home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/ReportGenerator.Core.Test.dll (net8.0|x64) failed with 51 error(s) (5s 860ms)
+Exit code: 2
+  Standard output: 2026-10-28T09:34:28: Loading report '/tmp/c1b61580-80e4-4103-8d67-3a7a1961784e/coverage.cobertura.xml' 1/1 in memory
+  2026-10-28T09:34:29: Preprocessing report
+  2026-10-28T09:34:29: Initiating parser for Cobertura
+  2026-10-28T09:34:29: Current Assembly: Sample
+  2026-10-28T09:34:29: Finished parsing '/tmp/c1b61580-80e4-4103-8d67-3a7a1961784e/coverage.cobertura.xml' 1/1
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Current Assembly: OutwardPaymentDocumentProcessing
+  2026-10-28T09:34:29: Current Assembly: test
+  2026-10-28T09:34:29: Starting merging result 1
+  2026-10-28T09:34:29: Finished merging result 1
+  2026-10-28T09:34:29: Current Assembly: test/sub
+  2026-10-28T09:34:29: Initializing report builders for report types: Html
+  2026-10-28T09:34:29: Analyzing 1 classes
+  2026-10-28T09:34:29: Creating report 1/1 (Assembly: Sample, Class: Source)
+  2026-10-28T09:34:29: Writing report file 'Sample_Source.html'
+  2026-10-28T09:34:29: Current Assembly: test
+  2026-10-28T09:34:29: Current Assembly: test/sub
+  2026-10-28T09:34:29: Current Assembly: test
+  2026-10-28T09:34:29: Current Assembly: test/sub
+  2026-10-28T09:34:29: Current Assembly: test
+  2026-10-28T09:34:29: Current Assembly: test/sub
+  2026-10-28T09:34:29: Current Assembly: test
+  2026-10-28T09:34:29: Current Assembly: test/sub
+  2026-10-28T09:34:29: Current Assembly: test
+  2026-10-28T09:34:29: Current Assembly: test/sub
+  2026-10-28T09:34:29: Current Assembly: test
+  2026-10-28T09:34:29: Current Assembly: test/sub
+  2026-10-28T09:34:29: Current Assembly: test
+  2026-10-28T09:34:29: Current Assembly: test/sub
+  2026-10-28T09:34:29: Current Assembly: test
+  2026-10-28T09:34:29: Current Assembly: test/sub
+  2026-10-28T09:34:29: Creating summary
+  2026-10-28T09:34:29: Current Assembly: test
+  2026-10-28T09:34:29: Current Assembly: test/sub
+  2026-10-28T09:34:29: Writing report file '/tmp/c1b61580-80e4-4103-8d67-3a7a1961784e/report/index.html'
+  2026-10-28T09:34:29: Initializing report builders for report types: Html
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/NCover1.5.8.xml' 1/1 in memory
+  2026-10-28T09:34:29: Initiating parser for NCover
+  2026-10-28T09:34:29: Initializing report builders for report types: Latex
+  2026-10-28T09:34:29: Current Assembly: Test
+  2026-10-28T09:34:29: The default report builder for report type 'Latex' was replaced.
+  2026-10-28T09:34:29: Finished parsing '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/NCover1.5.8.xml' 1/1
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Starting merging result 1
+  2026-10-28T09:34:29: Finished merging result 1
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/OpenCover.xml' 1/1 in memory
+  2026-10-28T09:34:29: Preprocessing report
+  2026-10-28T09:34:29: Initiating parser for OpenCover
+  2026-10-28T09:34:29: Current Assembly: Test
+  2026-10-28T09:34:29: Finished parsing '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/OpenCover.xml' 1/1
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Starting merging result 1
+  2026-10-28T09:34:29: Finished merging result 1
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/dotCover.xml' 1/1 in memory
+  2026-10-28T09:34:29: Preprocessing report
+  2026-10-28T09:34:29: Initiating parser for dotCover
+  2026-10-28T09:34:29: Loading report '/tmp/804ba6b3-5c5e-4d3e-a0bf-1584973cfe4b/coverage.cobertura.xml' 1/1 in memory
+  2026-10-28T09:34:29: Preprocessing report
+  2026-10-28T09:34:29: Initiating parser for Cobertura
+  2026-10-28T09:34:29: Current Assembly: Sample
+  2026-10-28T09:34:29: Current Assembly: Test
+  2026-10-28T09:34:29: Finished parsing '/tmp/804ba6b3-5c5e-4d3e-a0bf-1584973cfe4b/coverage.cobertura.xml' 1/1
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Starting merging result 1
+  2026-10-28T09:34:29: Finished merging result 1
+  2026-10-28T09:34:29: Loading report '/tmp/b81953c5-cec2-4b60-a3bf-e39cf99d22f3/coverage.cobertura.xml' 1/1 in memory
+  2026-10-28T09:34:29: Preprocessing report
+  2026-10-28T09:34:29: Initiating parser for Cobertura
+  2026-10-28T09:34:29: Current Assembly: Sample
+  2026-10-28T09:34:29: Finished parsing '/tmp/b81953c5-cec2-4b60-a3bf-e39cf99d22f3/coverage.cobertura.xml' 1/1
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Starting merging result 1
+  2026-10-28T09:34:29: Finished merging result 1
+  2026-10-28T09:34:29: Initializing report builders for report types: Html
+  2026-10-28T09:34:29: Analyzing 1 classes
+  2026-10-28T09:34:29: Creating report 1/1 (Assembly: Sample, Class: Source)
+  2026-10-28T09:34:29: CUSTOM_FILE_READER_ERROR
+  2026-10-28T09:34:29: Writing report file 'Sample_Source.html'
+  2026-10-28T09:34:29: Current Assembly: UnitTests
+  2026-10-28T09:34:29: Finished parsing '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/dotCover.xml' 1/1
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Starting merging result 1
+  2026-10-28T09:34:29: Finished merging result 1
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/VisualStudio2010.coveragexml' 1/1 in memory
+  2026-10-28T09:34:29: Creating summary
+  2026-10-28T09:34:29: Writing report file '/tmp/b81953c5-cec2-4b60-a3bf-e39cf99d22f3/report/index.html'
+  2026-10-28T09:34:29: Initiating parser for Visual Studio
+  2026-10-28T09:34:29: Current Assembly: Test.exe
+  2026-10-28T09:34:29: Loading report '/tmp/f974bfba-66a9-4d87-95db-e7a44b965e50/coverage.cobertura.xml' 1/1 in memory
+  2026-10-28T09:34:29: Preprocessing report
+  2026-10-28T09:34:29: Initiating parser for Cobertura
+  2026-10-28T09:34:29: Current Assembly: Sample
+  2026-10-28T09:34:29: Finished parsing '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/VisualStudio2010.coveragexml' 1/1
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Finished parsing '/tmp/f974bfba-66a9-4d87-95db-e7a44b965e50/coverage.cobertura.xml' 1/1
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Starting merging result 1
+  2026-10-28T09:34:29: Finished merging result 1
+  2026-10-28T09:34:29: Starting merging result 1
+  2026-10-28T09:34:29: Finished merging result 1
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/DynamicCodeCoverage.xml' 1/1 in memory
+  2026-10-28T09:34:29: Initializing report builders for report types: Html
+  2026-10-28T09:34:29: Analyzing 1 classes
+  2026-10-28T09:34:29: Creating report 1/1 (Assembly: Sample, Class: Source)
+  2026-10-28T09:34:29: Writing report file 'Sample_Source.html'
+  2026-10-28T09:34:29: Creating summary
+  2026-10-28T09:34:29: Writing report file '/tmp/f974bfba-66a9-4d87-95db-e7a44b965e50/report/index.html'
+  2026-10-28T09:34:29: Initiating parser for Dynamic Code Coverage
+  2026-10-28T09:34:29: Current Assembly: test.exe
+  2026-10-28T09:34:29: Finished parsing '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/DynamicCodeCoverage.xml' 1/1
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Starting merging result 1
+  2026-10-28T09:34:29: Finished merging result 1
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/mprof-report.xml' 1/1 in memory
+  2026-10-28T09:34:29: Initiating parser for mprof
+  2026-10-28T09:34:29: Current Assembly: Test
+  2026-10-28T09:34:29: Finished parsing '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/mprof-report.xml' 1/1
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Starting merging result 1
+  2026-10-28T09:34:29: Finished merging result 1
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/Java/Reports/Cobertura2.1.1.xml' 1/1 in memory
+  2026-10-28T09:34:29: Preprocessing report
+  2026-10-28T09:34:29: Initiating parser for Cobertura
+  2026-10-28T09:34:29: Current Assembly: test
+  2026-10-28T09:34:29: Current Assembly: test.sub
+  2026-10-28T09:34:29: Finished parsing '/home/user/w59/RG/default/src/Testprojects/Java/Reports/Cobertura2.1.1.xml' 1/1
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Starting merging result 1
+  2026-10-28T09:34:29: Finished merging result 1
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/C++/Reports/Cobertura_CPPCoverage.xml' 1/1 in memory
+  2026-10-28T09:34:29: Preprocessing report
+  2026-10-28T09:34:29: Initiating parser for Cobertura
+  2026-10-28T09:34:29: Current Assembly: Program.exe
+  2026-10-28T09:34:29: Finished parsing '/home/user/w59/RG/default/src/Testprojects/C++/Reports/Cobertura_CPPCoverage.xml' 1/1
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Starting merging result 1
+  2026-10-28T09:34:29: Finished merging result 1
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/Java/Reports/JaCoCo0.8.3.xml' 1/1 in memory
+  2026-10-28T09:34:29: Preprocessing report
+  2026-10-28T09:34:29: Initiating parser for JaCoCo
+  2026-10-28T09:34:29: Current Assembly: test
+  2026-10-28T09:34:29: Current Assembly: test/sub
+  2026-10-28T09:34:29: Finished parsing '/home/user/w59/RG/default/src/Testprojects/Java/Reports/JaCoCo0.8.3.xml' 1/1
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Starting merging result 1
+  2026-10-28T09:34:29: Finished merging result 1
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/Java/Reports/Clover_OpenClover4.3.1.xml' 1/1 in memory
+  2026-10-28T09:34:29: Preprocessing report
+  2026-10-28T09:34:29: Initiating parser for Clover
+  2026-10-28T09:34:29: Current Assembly: test
+  2026-10-28T09:34:29: Current Assembly: test.sub
+  2026-10-28T09:34:29: Finished parsing '/home/user/w59/RG/default/src/Testprojects/Java/Reports/Clover_OpenClover4.3.1.xml' 1/1
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Starting merging result 1
+  2026-10-28T09:34:29: Finished merging result 1
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/lcov.info' 1/1 in memory
+  2026-10-28T09:34:29: Initiating parser for LCov
+  2026-10-28T09:34:29: Finished parsing '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/lcov.info' 1/1
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Starting merging result 1
+  2026-10-28T09:34:29: Finished merging result 1
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/C++/Reports/gcov/basic/main.cpp.gcov' 1/1 in memory
+  2026-10-28T09:34:29: Preprocessing report
+  2026-10-28T09:34:29: Initiating parser for GCov
+  2026-10-28T09:34:29: Finished parsing '/home/user/w59/RG/default/src/Testprojects/C++/Reports/gcov/basic/main.cpp.gcov' 1/1
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Starting merging result 1
+  2026-10-28T09:34:29: Finished merging result 1
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/Partcover2.3.xml' 1/1 in memory
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/Partcover2.2.xml' 1/1 in memory
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/MultiNCover1.5.8.xml' 1/1 in memory
+  2026-10-28T09:34:29: Initiating parser for NCover
+  2026-10-28T09:34:29: Current Assembly: Test
+  2026-10-28T09:34:29: Initiating parser for NCover
+  2026-10-28T09:34:29: Current Assembly: Test
+  2026-10-28T09:34:29: Finished parsing '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/MultiNCover1.5.8.xml' 1/1
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Starting merging result 1
+  2026-10-28T09:34:29: Finished merging result 1
+  2026-10-28T09:34:29: Starting merging result 2
+  2026-10-28T09:34:29: Finished merging result 2
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/MultiOpenCover.xml' 1/1 in memory
+  2026-10-28T09:34:29: Preprocessing report
+  2026-10-28T09:34:29: Initiating parser for OpenCover
+  2026-10-28T09:34:29: Current Assembly: Test
+  2026-10-28T09:34:29: Preprocessing report
+  2026-10-28T09:34:29: Initiating parser for OpenCover
+  2026-10-28T09:34:29: Current Assembly: Test
+  2026-10-28T09:34:29: Finished parsing '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/MultiOpenCover.xml' 1/1
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Starting merging result 1
+  2026-10-28T09:34:29: Finished merging result 1
+  2026-10-28T09:34:29: Starting merging result 2
+  2026-10-28T09:34:29: Finished merging result 2
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/MultidotCover.xml' 1/1 in memory
+  2026-10-28T09:34:29: Preprocessing report
+  2026-10-28T09:34:29: Initiating parser for dotCover
+  2026-10-28T09:34:29: Current Assembly: Test
+  2026-10-28T09:34:29: Preprocessing report
+  2026-10-28T09:34:29: Initiating parser for dotCover
+  2026-10-28T09:34:29: Current Assembly: Test
+  2026-10-28T09:34:29: Finished parsing '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/MultidotCover.xml' 1/1
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Starting merging result 1
+  2026-10-28T09:34:29: Finished merging result 1
+  2026-10-28T09:34:29: Starting merging result 2
+  2026-10-28T09:34:29: Finished merging result 2
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/MultiVisualStudio2010.coveragexml' 1/1 in memory
+  2026-10-28T09:34:29: Initiating parser for Visual Studio
+  2026-10-28T09:34:29: Current Assembly: Test.exe
+  2026-10-28T09:34:29: Initiating parser for Visual Studio
+  2026-10-28T09:34:29: Current Assembly: Test.exe
+  2026-10-28T09:34:29: Finished parsing '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/MultiVisualStudio2010.coveragexml' 1/1
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Starting merging result 1
+  2026-10-28T09:34:29: Finished merging result 1
+  2026-10-28T09:34:29: Starting merging result 2
+  2026-10-28T09:34:29: Finished merging result 2
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/MultiDynamicCodeCoverage.xml' 1/1 in memory
+  2026-10-28T09:34:29: Initiating parser for Dynamic Code Coverage
+  2026-10-28T09:34:29: Current Assembly: test.exe
+  2026-10-28T09:34:29: Initiating parser for Dynamic Code Coverage
+  2026-10-28T09:34:29: Current Assembly: test.exe
+  2026-10-28T09:34:29: Finished parsing '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/MultiDynamicCodeCoverage.xml' 1/1
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Starting merging result 1
+  2026-10-28T09:34:29: Finished merging result 1
+  2026-10-28T09:34:29: Starting merging result 2
+  2026-10-28T09:34:29: Finished merging result 2
+  2026-10-28T09:34:29: Loading report '' 1/1 in memory
+  2026-10-28T09:34:29: Error during reading report '' (Size: -): The value cannot be an empty string. (Parameter 'path')
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/MultiPartcover2.3.xml' 1/1 in memory
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/MultiPartcover2.2.xml' 1/1 in memory
+  2026-10-28T09:34:29: Parsing of 1 files completed
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/NCover1.5.8.xml' 1/2 in memory
+  2026-10-28T09:34:29: Initiating parser for NCover
+  2026-10-28T09:34:29: Current Assembly: Test
+  2026-10-28T09:34:29: Finished parsing '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/NCover1.5.8.xml' 1/2
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/MultiOpenCover.xml' 2/2 in memory
+  2026-10-28T09:34:29: Starting merging result 1
+  2026-10-28T09:34:29: Finished merging result 1
+  2026-10-28T09:34:29: Preprocessing report
+  2026-10-28T09:34:29: Initiating parser for OpenCover
+  2026-10-28T09:34:29: Current Assembly: Test
+  2026-10-28T09:34:29: Preprocessing report
+  2026-10-28T09:34:29: Initiating parser for OpenCover
+  2026-10-28T09:34:29: Current Assembly: Test
+  2026-10-28T09:34:29: Finished parsing '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/MultiOpenCover.xml' 2/2
+  2026-10-28T09:34:29: Parsing of 2 files completed
+  2026-10-28T09:34:29: Starting merging result 2
+  2026-10-28T09:34:29: Finished merging result 2
+  2026-10-28T09:34:29: Starting merging result 3
+  2026-10-28T09:34:29: Finished merging result 3
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/OpenCover.xml' 1/2 in memory
+  2026-10-28T09:34:29: Preprocessing report
+  2026-10-28T09:34:29: Initiating parser for OpenCover
+  2026-10-28T09:34:29: Current Assembly: Test
+  2026-10-28T09:34:29: Finished parsing '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/OpenCover.xml' 1/2
+  2026-10-28T09:34:29: Loading report '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/NCover1.5.8.xml' 2/2 in memory
+  2026-10-28T09:34:29: Starting merging result 1
+  2026-10-28T09:34:29: Finished merging result 1
+  2026-10-28T09:34:29: Initiating parser for NCover
+  2026-10-28T09:34:29: Current Assembly: Test
+  2026-10-28T09:34:29: Finished parsing '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/NCover1.5.8.xml' 2/2
+  2026-10-28T09:34:29: Parsing of 2 files completed
+  2026-10-28T09:34:29: Starting merging result 2
+  2026-10-28T09:34:29: Finished merging result 2
+  2026-10-28T09:34:29: The filter 'Test' is invalid. Filters must start with '+' or '-'.
+  2026-10-28T09:34:29: The filter 'Test2' is invalid. Filters must start with '+' or '-'.
+  2026-10-28T09:34:29: The filter 'Test3' is invalid. Filters must start with '+' or '-'.
+  2026-10-28T09:34:30: No report files specified.
+  2026-10-28T09:34:30: The report file '123.xml' is invalid. File does not exist (Full path: '/home/user/w59/RG/default/src/ReportGenerator.Core.Test/bin/Debug/123.xml').
+  2026-10-28T09:34:30: No report files specified.
+  2026-10-28T09:34:30: The filter 'Test' is invalid. Filters must start with '+' or '-'.
+  2026-10-28T09:34:30: The filter 'Test2' is invalid. Filters must start with '+' or '-'.
+  2026-10-28T09:34:30: Unknown report type 'DoesNotExist'.
+  2026-10-28T09:34:30: No target directory specified.
+  2026-10-28T09:34:30: The plugin 'notexistingplugin.dll' does not exist.
+  2026-10-28T09:34:30: The plugin 'notexistingplugin.dll' does not exist.
+  2026-10-28T09:34:30: The source code directory 'C:\doesnotexist' does not exist.
+  2026-10-28T09:34:30: Current Assembly: Test.exe
+  2026-10-28T09:34:30: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:30: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:30: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:30: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:30: Current Assembly: Test.exe
+  2026-10-28T09:34:30: Current Assembly: Test.exe
+  2026-10-28T09:34:30: Current Assembly: Test.exe
+  2026-10-28T09:34:30: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:30: Current Assembly: Test.exe
+  2026-10-28T09:34:30: Current Assembly: Test.exe
+  2026-10-28T09:34:30: Current Assembly: Test.exe
+  2026-10-28T09:34:30: Current Assembly: Test.exe
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:30: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:30: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:30: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: test
+  2026-10-28T09:34:30: Current Assembly: test.sub
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: ComponentsTests/app
+  2026-10-28T09:34:30: Current Assembly: test
+  2026-10-28T09:34:30: Current Assembly: test.sub
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: ComponentsTests/app
+  2026-10-28T09:34:30: Current Assembly: test
+  2026-10-28T09:34:30: Current Assembly: test.sub
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: ComponentsTests/app
+  2026-10-28T09:34:30: Current Assembly: test
+  2026-10-28T09:34:30: Current Assembly: test.sub
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: ComponentsTests/app
+  2026-10-28T09:34:30: Current Assembly: test
+  2026-10-28T09:34:30: Current Assembly: test.sub
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: ComponentsTests/app
+  2026-10-28T09:34:30: Current Assembly: test
+  2026-10-28T09:34:30: Current Assembly: test.sub
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: ComponentsTests/app
+  2026-10-28T09:34:30: Current Assembly: test
+  2026-10-28T09:34:30: Current Assembly: test.sub
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: ComponentsTests/app
+  2026-10-28T09:34:30: Current Assembly: test
+  2026-10-28T09:34:30: Current Assembly: test.sub
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: ComponentsTests/app
+  2026-10-28T09:34:30: Current Assembly: test
+  2026-10-28T09:34:30: Current Assembly: test.sub
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: ComponentsTests/app
+  2026-10-28T09:34:30: Current Assembly: test
+  2026-10-28T09:34:30: Current Assembly: test.sub
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: ComponentsTests/app
+  2026-10-28T09:34:30: Current Assembly: test
+  2026-10-28T09:34:30: Current Assembly: test.sub
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: ComponentsTests/app
+  2026-10-28T09:34:30: Current Assembly: test
+  2026-10-28T09:34:30: Current Assembly: test.sub
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: ComponentsTests/app
+  2026-10-28T09:34:30: Current Assembly: test
+  2026-10-28T09:34:30: Current Assembly: test.sub
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: ComponentsTests/app
+  2026-10-28T09:34:30: Current Assembly: test
+  2026-10-28T09:34:30: Current Assembly: test.sub
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: ComponentsTests/app
+  2026-10-28T09:34:30: Current Assembly: test
+  2026-10-28T09:34:30: Current Assembly: test.sub
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: ComponentsTests/app
+  2026-10-28T09:34:30: Current Assembly: test
+  2026-10-28T09:34:30: Current Assembly: test.sub
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: ComponentsTests/app
+  2026-10-28T09:34:30: Current Assembly: test
+  2026-10-28T09:34:30: Current Assembly: test.sub
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: ComponentsTests/app
+  2026-10-28T09:34:30: Current Assembly: Coasterbeispiel - XML4ReportGenerator
+  2026-10-28T09:34:30: Current Assembly: Coasterbeispiel - XML4ReportGenerator
+  2026-10-28T09:34:30: File 'C:\temp\PassengerScan.cpp' does not exist (any more).
+  2026-10-28T09:34:30: Current Assembly: Coasterbeispiel - XML4ReportGenerator
+  2026-10-28T09:34:30: Current Assembly: Coasterbeispiel - XML4ReportGenerator
+  2026-10-28T09:34:30: Current Assembly: Coasterbeispiel - XML4ReportGenerator
+  2026-10-28T09:34:30: Current Assembly: Coasterbeispiel - XML4ReportGenerator
+  2026-10-28T09:34:30: Current Assembly: Coasterbeispiel - XML4ReportGenerator
+  2026-10-28T09:34:30: File 'C:\temp\PassengerScan.cpp' does not exist (any more).
+  2026-10-28T09:34:30: Current Assembly: Coasterbeispiel - XML4ReportGenerator
+  2026-10-28T09:34:30: Current Assembly: Coasterbeispiel - XML4ReportGenerator
+  2026-10-28T09:34:30: Current Assembly: Coasterbeispiel - XML4ReportGenerator
+  2026-10-28T09:34:30: Current Assembly: org.scoverage.samples
+  2026-10-28T09:34:30: Current Assembly: org.scoverage.samples.ignored
+  2026-10-28T09:34:30: Current Assembly: subpackage2.validators
+  2026-10-28T09:34:30: Current Assembly: org.scoverage.samples
+  2026-10-28T09:34:30: Current Assembly: org.scoverage.samples.ignored
+  2026-10-28T09:34:30: Current Assembly: subpackage2.validators
+  2026-10-28T09:34:30: Current Assembly: org.scoverage.samples
+  2026-10-28T09:34:30: Current Assembly: org.scoverage.samples.ignored
+  2026-10-28T09:34:30: Current Assembly: subpackage2.validators
+  2026-10-28T09:34:30: Current Assembly: org.scoverage.samples
+  2026-10-28T09:34:30: Current Assembly: org.scoverage.samples.ignored
+  2026-10-28T09:34:30: Current Assembly: subpackage2.validators
+  2026-10-28T09:34:30: Current Assembly: org.scoverage.samples
+  2026-10-28T09:34:30: Current Assembly: org.scoverage.samples.ignored
+  2026-10-28T09:34:30: Current Assembly: subpackage2.validators
+  2026-10-28T09:34:30: File 'C:\temp\src\main\scala\org\scoverage\samples\QuoteGenerator.scala' does not exist (any more).
+  2026-10-28T09:34:30: Current Assembly: org.scoverage.samples
+  2026-10-28T09:34:30: Current Assembly: org.scoverage.samples.ignored
+  2026-10-28T09:34:30: Current Assembly: subpackage2.validators
+  2026-10-28T09:34:30: Current Assembly: org.scoverage.samples
+  2026-10-28T09:34:30: Current Assembly: org.scoverage.samples.ignored
+  2026-10-28T09:34:30: Current Assembly: subpackage2.validators
+  2026-10-28T09:34:30: Current Assembly: org.scoverage.samples
+  2026-10-28T09:34:30: Current Assembly: org.scoverage.samples.ignored
+  2026-10-28T09:34:30: Current Assembly: subpackage2.validators
+  2026-10-28T09:34:30: File 'C:\temp\src\main\scala\org\scoverage\samples\QuoteGenerator.scala' does not exist (any more).
+  2026-10-28T09:34:30: Current Assembly: org.scoverage.samples
+  2026-10-28T09:34:30: Current Assembly: org.scoverage.samples.ignored
+  2026-10-28T09:34:30: Current Assembly: subpackage2.validators
+  2026-10-28T09:34:30: Current Assembly: org.scoverage.samples
+  2026-10-28T09:34:30: Current Assembly: org.scoverage.samples.ignored
+  2026-10-28T09:34:30: Current Assembly: subpackage2.validators
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:30: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:30: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:30: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:30: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:30: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:30: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:31: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:31: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:31: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:31: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Loading report '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/MultiOpenCover.xml' 1/1 in memory
+  2026-10-28T09:34:31: Preprocessing report
+  2026-10-28T09:34:31: Initiating parser for OpenCover
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Preprocessing report
+  2026-10-28T09:34:31: Initiating parser for OpenCover
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Finished parsing '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/MultiOpenCover.xml' 1/1
+  2026-10-28T09:34:31: Parsing of 1 files completed
+  2026-10-28T09:34:31: Starting merging result 1
+  2026-10-28T09:34:31: Finished merging result 1
+  2026-10-28T09:34:31: Starting merging result 2
+  2026-10-28T09:34:31: Finished merging result 2
+  2026-10-28T09:34:31: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Loading report '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/MultiOpenCover.xml' 1/1 in memory
+  2026-10-28T09:34:31: Preprocessing report
+  2026-10-28T09:34:31: Initiating parser for OpenCover
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Preprocessing report
+  2026-10-28T09:34:31: Initiating parser for OpenCover
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Finished parsing '/home/user/w59/RG/default/src/Testprojects/CSharp/Reports/MultiOpenCover.xml' 1/1
+  2026-10-28T09:34:31: Parsing of 1 files completed
+  2026-10-28T09:34:31: Starting merging result 1
+  2026-10-28T09:34:31: Finished merging result 1
+  2026-10-28T09:34:31: Starting merging result 2
+  2026-10-28T09:34:31: Finished merging result 2
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:31: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:31: Current Assembly: test.exe
+  2026-10-28T09:34:31: Current Assembly: test.exe
+  2026-10-28T09:34:31: Current Assembly: test.exe
+  2026-10-28T09:34:31: Current Assembly: test.exe
+  2026-10-28T09:34:31: Current Assembly: test.exe
+  2026-10-28T09:34:31: Current Assembly: test.exe
+  2026-10-28T09:34:31: Current Assembly: test.exe
+  2026-10-28T09:34:31: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:31: Current Assembly: test.exe
+  2026-10-28T09:34:31: Current Assembly: test.exe
+  2026-10-28T09:34:31: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:31: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:31: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:31: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:31: Current Assembly: test.exe
+  2026-10-28T09:34:31: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:31: Current Assembly: test.exe
+  2026-10-28T09:34:31: Current Assembly: test.exe
+  2026-10-28T09:34:31: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:31: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:31: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:31: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:31: Current Assembly: test.exe
+  2026-10-28T09:34:31: Current Assembly: test.exe
+  2026-10-28T09:34:31: Current Assembly: test.exe
+  2026-10-28T09:34:31: Current Assembly: test.exe
+  2026-10-28T09:34:31: Current Assembly: test.exe
+  2026-10-28T09:34:31: Current Assembly: test.exe
+  2026-10-28T09:34:31: Current Assembly: test
+  2026-10-28T09:34:31: Current Assembly: test.sub
+  2026-10-28T09:34:31: Current Assembly: test
+  2026-10-28T09:34:31: Current Assembly: test.sub
+  2026-10-28T09:34:31: Current Assembly: test
+  2026-10-28T09:34:31: Current Assembly: test.sub
+  2026-10-28T09:34:31: Current Assembly: test
+  2026-10-28T09:34:31: Current Assembly: test.sub
+  2026-10-28T09:34:31: Current Assembly: test
+  2026-10-28T09:34:31: Current Assembly: test.sub
+  2026-10-28T09:34:31: File 'C:\temp\test\TestClass.java' does not exist (any more).
+  2026-10-28T09:34:31: Current Assembly: test
+  2026-10-28T09:34:31: Current Assembly: test.sub
+  2026-10-28T09:34:31: Current Assembly: test
+  2026-10-28T09:34:31: Current Assembly: test.sub
+  2026-10-28T09:34:31: Current Assembly: test
+  2026-10-28T09:34:31: Current Assembly: test.sub
+  2026-10-28T09:34:31: Current Assembly: test
+  2026-10-28T09:34:31: Current Assembly: test.sub
+  2026-10-28T09:34:31: File 'C:\temp\test\TestClass.java' does not exist (any more).
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:31: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:31: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:31: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:31: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:31: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:31: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:31: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:31: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: UnitTests
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: UnitTests
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: UnitTests
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: UnitTests
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: UnitTests
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: UnitTests
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: UnitTests
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: UnitTests
+  2026-10-28T09:34:31: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:31: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:31: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:31: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: UnitTests
+  2026-10-28T09:34:31: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:31: Current Assembly: Test
+  2026-10-28T09:34:31: Current Assembly: UnitTests
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  ##teamcity[buildStatisticValue key='CodeCoverageS' value='67.53']
+  ##teamcity[buildStatisticValue key='CodeCoverageAbsSCovered' value='131']
+  ##teamcity[buildStatisticValue key='CodeCoverageAbsSTotal' value='194']
+  ##teamcity[buildStatisticValue key='CodeCoverageR' value='62.50']
+  ##teamcity[buildStatisticValue key='CodeCoverageAbsRCovered' value='5']
+  ##teamcity[buildStatisticValue key='CodeCoverageAbsRTotal' value='8']
+  ##teamcity[buildStatisticValue key='CodeCoverageC' value='81.25']
+  ##teamcity[buildStatisticValue key='CodeCoverageAbsCCovered' value='13']
+  ##teamcity[buildStatisticValue key='CodeCoverageAbsCTotal' value='16']
+  ##teamcity[buildStatisticValue key='CodeCoverageM' value='63.64']
+  ##teamcity[buildStatisticValue key='CodeCoverageAbsMCovered' value='35']
+  ##teamcity[buildStatisticValue key='CodeCoverageAbsMTotal' value='55']
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: Unable to generate report 'TextDeltaSummary'. No historic coverage to compare.
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:32: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: Unable to generate report 'MarkdownDeltaSummary'. No historic coverage to compare.
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AbstractClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AnalyzerTestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\AsyncClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\ClassWithExcludes.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Contract.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\CodeContract_Target.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\GenericClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClassWithAutoProperties2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\NotMatchingFileName.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\PartialClass2.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\TestClass.cs' does not exist (any more).
+  2026-10-28T09:34:33: Some error
+  2026-10-28T09:34:33: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\Program.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\Other.cs' does not exist (any more).
+  2026-10-28T09:34:33: File 'C:\temp\Program.cs' does not exist (any more).
+  
+  Error output: fatal: could not open 'src/ReportGenerator.Core.Test/bin/Debug/C:\temp\AbstractClass.cs' for reading: No such file or directory
+  fatal: could not open 'src/ReportGenerator.Core.Test/bin/Debug/C:\temp\GenericClass.cs' for reading: No such file or directory
+  fatal: could not open 'src/ReportGenerator.Core.Test/bin/Debug/C:\temp\AnalyzerTestClass.cs' for reading: No such file or directory
+  fatal: could not open 'src/ReportGenerator.Core.Test/bin/Debug/C:\temp\AsyncClass.cs' for reading: No such file or directory
+  fatal: could not open 'src/ReportGenerator.Core.Test/bin/Debug/C:\temp\ClassWithExcludes.cs' for reading: No such file or directory
+  fatal: could not open 'src/ReportGenerator.Core.Test/bin/Debug/C:\temp\CodeContract_Contract.cs' for reading: No such file or directory
+  fatal: could not open 'src/ReportGenerator.Core.Test/bin/Debug/C:\temp\CodeContract_Target.cs' for reading: No such file or directory
+  fatal: could not open 'src/ReportGenerator.Core.Test/bin/Debug/C:\temp\PartialClass.cs' for reading: No such file or directory
+  fatal: could not open 'src/ReportGenerator.Core.Test/bin/Debug/C:\temp\PartialClass2.cs' for reading: No such file or directory
+  fatal: could not open 'src/ReportGenerator.Core.Test/bin/Debug/C:\temp\PartialClassWithAutoProperties.cs' for reading: No such file or directory
+  fatal: could not open 'src/ReportGenerator.Core.Test/bin/Debug/C:\temp\PartialClassWithAutoProperties2.cs' for reading: No such file or directory
+  fatal: could not open 'src/ReportGenerator.Core.Test/bin/Debug/C:\temp\Program.cs' for reading: No such file or directory
+  fatal: could not open 'src/ReportGenerator.Core.Test/bin/Debug/C:\temp\NotMatchingFileName.cs' for reading: No such file or directory
+  fatal: could not open 'src/ReportGenerator.Core.Test/bin/Debug/C:\temp\TestClass.cs' for reading: No such file or directory
+  fatal: could not open 'src/ReportGenerator.Core.Test/bin/Debug/C:\temp\TestClass2.cs' for reading: No such file or directory
+  
+
+Test run summary: Failed!
+  total: 388
+  failed: 51
+  succeeded: 335
+  skipped: 2
+  duration: 6s 176ms
+Test run completed with non-success exit code: 2 (see: https://aka.ms/testingplatform/exitcodes)

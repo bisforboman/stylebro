@@ -1,0 +1,6 @@
+build	1	18s	dotnet build src/SharpYaml.slnx -c Debug
+twae-Debug	1	23s	twae Debug
+test-Debug	1	13s	env CFG=Debug bash -c cd src && dotnet test SharpYaml.slnx -c $CFG
+twae-Release	0	22s	twae Release
+test-Release	0	23s	env CFG=Release bash -c cd src && dotnet test SharpYaml.slnx -c $CFG
+DONE

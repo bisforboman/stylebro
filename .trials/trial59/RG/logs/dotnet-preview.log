@@ -1,0 +1,36 @@
+Previewing 'bro migrate --write' and 'bro format' on a copy; nothing in /home/user/w59/RG/dotnet changes.
+Copying the repository to /tmp/stylebro-preview-GWXwQa/dotnet... 0s
+Warning: Not restored: src/ReportGenerator.Core/ReportGenerator.Core.csproj. A package can bring a global config that sets StyleCop's rules (GlobalAnalyzerConfigFiles), and it is read from the restore: run 'dotnet restore', then this again.
+Settings: 329 lines in .editorconfig; 175 lines in src/.editorconfig; 1 line in src/Directory.Build.props (StyleBroPreset=none)
+  StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial59.1 to src/ReportGenerator.Core/ReportGenerator.Core.csproj for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).
+Format run 1... 1m 27s
+Format run 2... 36s
+Format: 46 files, 47 reported changes, clean after 1 run
+  FINALNEWLINE                                             29 files
+  BRO1001  Members should be ordered                   13 files
+  BRO1603  Documentation text should end with a ...     2 files
+  BRO1606  Constructor summary documentation sho...     2 files
+  BRO1108  Parameters should be on the same line...     1 file
+Sample (FINALNEWLINE, src/ReportGenerator.Core/CodeAnalysis/RiskHotspotsAnalysisThresholds.cs):
+  (adds the final newline)
+Sample (BRO1001, src/ReportGenerator.Core/Common/Glob.cs):
+  -        private RegexOrString CreateRegexOrString(string pattern)
+  -        {
+  -            if (!RegexOrStringCache.TryGetValue(pattern, out RegexOrString regexOrString))
+  -            {
+  -                regexOrString = new RegexOrString(GlobToRegex(pattern), pattern, this.IgnoreCase, compileRegex: true);
+  -                RegexOrStringCache[pattern] = regexOrString;
+  -            }
+  -
+  -            return regexOrString;
+  -        }
+  -
+  -        private IEnumerable<FileSystemInfo> Expand(string path, bool dirOnly)
+    ...
+Sample (BRO1603, src/ReportGenerator.Core/Parser/Analysis/CodeFile.cs):
+  -        /// >0: Number of visits
+  +        /// >0: Number of visits.
+Full diff: .git/stylebro-preview.patch (3,412 lines)
+Not checked: xunit.analyzers' rules: xunit.analyzers 2.2.0's fixes have no Fix All, so 'dotnet format' can't apply or check them (a note: the build still reports their warnings; the verdict doesn't count them)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 2m 16s.

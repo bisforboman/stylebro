@@ -1,0 +1,28 @@
+Running tests from /home/user/w59/Bullseye/dotnet/tests/Tests/bin/Debug/net8.0/Tests.dll (net8.0|x64)
+Running tests from /home/user/w59/Bullseye/dotnet/tests/Tests/bin/Debug/net9.0/Tests.dll (net10.0|x64)
+Running tests from /home/user/w59/Bullseye/dotnet/tests/Tests.Internal/bin/Debug/net8.0/Tests.Internal.dll (net8.0|x64)
+Running tests from /home/user/w59/Bullseye/dotnet/tests/Tests/bin/Debug/net10.0/Tests.dll (net10.0|x64)
+/home/user/w59/Bullseye/dotnet/tests/Tests.Internal/bin/Debug/net8.0/Tests.Internal.dll (net8.0|x64) passed (1s 169ms)
+Running tests from /home/user/w59/Bullseye/dotnet/tests/Tests.Internal/bin/Debug/net9.0/Tests.Internal.dll (net10.0|x64)
+/home/user/w59/Bullseye/dotnet/tests/Tests/bin/Debug/net8.0/Tests.dll (net8.0|x64) passed (2s 129ms)
+/home/user/w59/Bullseye/dotnet/tests/Tests/bin/Debug/net10.0/Tests.dll (net10.0|x64) passed (1s 956ms)
+Running tests from /home/user/w59/Bullseye/dotnet/tests/Tests.Internal/bin/Debug/net10.0/Tests.Internal.dll (net10.0|x64)
+/home/user/w59/Bullseye/dotnet/tests/Tests/bin/Debug/net9.0/Tests.dll (net10.0|x64) passed (2s 368ms)
+/home/user/w59/Bullseye/dotnet/tests/Tests.Internal/bin/Debug/net9.0/Tests.Internal.dll (net10.0|x64) passed (936ms)
+[+0/x0/?0] Tests.Internal.dll (net10.0|x64)(0s)
+
+/home/user/w59/Bullseye/dotnet/tests/Tests.Internal/bin/Debug/net10.0/Tests.Internal.dll (net10.0|x64) passed (707ms)
+
+Test run summary: Passed!
+  /home/user/w59/Bullseye/dotnet/tests/Tests.Internal/bin/Debug/net9.0/Tests.Internal.dll (net10.0|x64) passed (936ms)
+  /home/user/w59/Bullseye/dotnet/tests/Tests/bin/Debug/net10.0/Tests.dll (net10.0|x64) passed (1s 956ms)
+  /home/user/w59/Bullseye/dotnet/tests/Tests/bin/Debug/net9.0/Tests.dll (net10.0|x64) passed (2s 368ms)
+  /home/user/w59/Bullseye/dotnet/tests/Tests.Internal/bin/Debug/net10.0/Tests.Internal.dll (net10.0|x64) passed (707ms)
+  /home/user/w59/Bullseye/dotnet/tests/Tests.Internal/bin/Debug/net8.0/Tests.Internal.dll (net8.0|x64) passed (1s 169ms)
+  /home/user/w59/Bullseye/dotnet/tests/Tests/bin/Debug/net8.0/Tests.dll (net8.0|x64) passed (2s 129ms)
+
+  total: 213
+  failed: 0
+  succeeded: 213
+  skipped: 0
+  duration: 3s 461ms

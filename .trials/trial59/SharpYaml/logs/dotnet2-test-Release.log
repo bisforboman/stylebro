@@ -1,0 +1,21 @@
+  Determining projects to restore...
+  Restored /home/user/w59/SharpYaml/dotnet2/src/SharpYaml.AotSmokeLib/SharpYaml.AotSmokeLib.csproj (in 464 ms).
+  Restored /home/user/w59/SharpYaml/dotnet2/src/SharpYaml.FeatureSwitchSmoke/SharpYaml.FeatureSwitchSmoke.csproj (in 467 ms).
+  Restored /home/user/w59/SharpYaml/dotnet2/src/SharpYaml.Benchmarks/SharpYaml.Benchmarks.csproj (in 501 ms).
+  Restored /home/user/w59/SharpYaml/dotnet2/src/SharpYaml.Tests/SharpYaml.Tests.csproj (in 542 ms).
+  Restored /home/user/w59/SharpYaml/dotnet2/src/SharpYaml.AotSmoke/SharpYaml.AotSmoke.csproj (in 31 ms).
+  Restored /home/user/w59/SharpYaml/dotnet2/src/SharpYaml.SourceGenerator/SharpYaml.SourceGenerator.csproj (in 39 ms).
+  Restored /home/user/w59/SharpYaml/dotnet2/src/SharpYaml/SharpYaml.csproj (in 50 ms).
+  SharpYaml.SourceGenerator -> /home/user/w59/SharpYaml/dotnet2/src/SharpYaml.SourceGenerator/bin/Release/netstandard2.0/SharpYaml.SourceGenerator.dll
+  SharpYaml -> /home/user/w59/SharpYaml/dotnet2/src/SharpYaml/bin/Release/net8.0/SharpYaml.dll
+  SharpYaml -> /home/user/w59/SharpYaml/dotnet2/src/SharpYaml/bin/Release/net10.0/SharpYaml.dll
+  SharpYaml -> /home/user/w59/SharpYaml/dotnet2/src/SharpYaml/bin/Release/netstandard2.0/SharpYaml.dll
+  SharpYaml.FeatureSwitchSmoke -> /home/user/w59/SharpYaml/dotnet2/src/SharpYaml.FeatureSwitchSmoke/bin/Release/net10.0/SharpYaml.FeatureSwitchSmoke.dll
+  SharpYaml.Tests -> /home/user/w59/SharpYaml/dotnet2/src/SharpYaml.Tests/bin/Release/net10.0/SharpYaml.Tests.dll
+Test run for /home/user/w59/SharpYaml/dotnet2/src/SharpYaml.Tests/bin/Release/net10.0/SharpYaml.Tests.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:   886, Skipped:     0, Total:   886, Duration: 12 s - SharpYaml.Tests.dll (net10.0)

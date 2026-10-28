@@ -1,0 +1,23 @@
+ .editorconfig                                      |  52 ++++++++
+ Directory.Build.props                              |  68 +++++-----
+ Directory.Packages.props                           |  39 +++---
+ fixtures/Fixtures.Xunit/packages.lock.json         |  18 +++
+ .../SmokeTests.CommandLine/packages.lock.json      |   6 +
+ smoke-tests/SmokeTests.McMaster/packages.lock.json |   6 +
+ smoke-tests/SmokeTests.Parallel/packages.lock.json |   6 +
+ smoke-tests/SmokeTests/Program.cs                  |   6 +-
+ smoke-tests/SmokeTests/packages.lock.json          |   6 +
+ src/Bullseye/Internal/ActionTarget.cs              |   9 +-
+ src/Bullseye/Internal/ArgsParser.cs                |   4 +-
+ src/Bullseye/Internal/NativeMethodsWrapper.cs      |   4 +-
+ src/Bullseye/Internal/Output.Results.cs            |  38 +++---
+ src/Bullseye/Internal/Output.cs                    | 141 +++++++++++----------
+ src/Bullseye/Internal/TargetCollection.cs          |   8 +-
+ src/Bullseye/Options.Creation.cs                   |   4 +-
+ src/Bullseye/Palette.cs                            |   2 +-
+ src/Bullseye/packages.lock.json                    |  18 +++
+ tests/Tests.Internal/OutputTests.cs                |   3 +
+ tests/Tests.Internal/packages.lock.json            |  18 +++
+ tests/Tests/Dependencies.cs                        |  12 +-
+ tests/Tests/packages.lock.json                     |  18 +++
+ 22 files changed, 326 insertions(+), 160 deletions(-)

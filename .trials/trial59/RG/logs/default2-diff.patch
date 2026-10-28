@@ -1,0 +1,3078 @@
+diff --git a/src/.editorconfig b/src/.editorconfig
+index 41ca3d5c..b9b9d4b7 100644
+--- a/src/.editorconfig
++++ b/src/.editorconfig
+@@ -206,3 +206,178 @@ dotnet_naming_style.begins_with_i.required_prefix = I
+ dotnet_naming_style.begins_with_i.required_suffix = 
+ dotnet_naming_style.begins_with_i.word_separator = 
+ dotnet_naming_style.begins_with_i.capitalization = pascal_case
++
++# BEGIN stylebro-migrate
++# Generated from this repository's StyleCop settings by bro migrate. Run it again to update; edits
++# between these markers are overwritten.
++[*.cs]
++# StyleBro rules: on when StyleCop enforced every rule they replace.
++dotnet_diagnostic.BRO1001.severity = warning
++dotnet_diagnostic.BRO1002.severity = warning
++dotnet_diagnostic.BRO1003.severity = warning
++dotnet_diagnostic.BRO1004.severity = warning
++dotnet_diagnostic.BRO1005.severity = warning
++dotnet_diagnostic.BRO1006.severity = warning
++dotnet_diagnostic.BRO1007.severity = warning
++dotnet_diagnostic.BRO1008.severity = none
++dotnet_diagnostic.BRO1101.severity = warning
++dotnet_diagnostic.BRO1102.severity = warning
++dotnet_diagnostic.BRO1103.severity = warning
++dotnet_diagnostic.BRO1104.severity = warning
++dotnet_diagnostic.BRO1105.severity = warning
++dotnet_diagnostic.BRO1106.severity = warning
++dotnet_diagnostic.BRO1107.severity = warning
++dotnet_diagnostic.BRO1108.severity = warning
++dotnet_diagnostic.BRO1109.severity = warning
++dotnet_diagnostic.BRO1110.severity = warning
++dotnet_diagnostic.BRO1111.severity = warning
++dotnet_diagnostic.BRO1112.severity = warning
++dotnet_diagnostic.BRO1113.severity = warning
++dotnet_diagnostic.BRO1114.severity = warning
++dotnet_diagnostic.BRO1115.severity = warning
++dotnet_diagnostic.BRO1116.severity = warning
++dotnet_diagnostic.BRO1117.severity = warning
++dotnet_diagnostic.BRO1118.severity = warning
++dotnet_diagnostic.BRO1119.severity = warning
++dotnet_diagnostic.BRO1120.severity = warning
++dotnet_diagnostic.BRO1121.severity = warning
++dotnet_diagnostic.BRO1122.severity = warning
++dotnet_diagnostic.BRO1123.severity = none
++dotnet_diagnostic.BRO1124.severity = none
++dotnet_diagnostic.BRO1125.severity = warning
++dotnet_diagnostic.BRO1126.severity = warning
++dotnet_diagnostic.BRO1127.severity = warning
++dotnet_diagnostic.BRO1128.severity = warning
++dotnet_diagnostic.BRO1129.severity = warning
++dotnet_diagnostic.BRO1130.severity = warning
++dotnet_diagnostic.BRO1131.severity = warning
++dotnet_diagnostic.BRO1132.severity = warning
++dotnet_diagnostic.BRO1133.severity = none
++dotnet_diagnostic.BRO1134.severity = none
++dotnet_diagnostic.BRO1135.severity = none
++dotnet_diagnostic.BRO1136.severity = none
++dotnet_diagnostic.BRO1137.severity = none
++dotnet_diagnostic.BRO1138.severity = none
++dotnet_diagnostic.BRO1139.severity = none
++dotnet_diagnostic.BRO1140.severity = none
++dotnet_diagnostic.BRO1141.severity = none
++dotnet_diagnostic.BRO1142.severity = none
++dotnet_diagnostic.BRO1143.severity = none
++dotnet_diagnostic.BRO1144.severity = none
++dotnet_diagnostic.BRO1145.severity = none
++dotnet_diagnostic.BRO1146.severity = none
++dotnet_diagnostic.BRO1147.severity = none
++dotnet_diagnostic.BRO1148.severity = none
++dotnet_diagnostic.BRO1149.severity = none
++dotnet_diagnostic.BRO1150.severity = none
++dotnet_diagnostic.BRO1151.severity = none
++dotnet_diagnostic.BRO1301.severity = warning
++dotnet_diagnostic.BRO1302.severity = warning
++dotnet_diagnostic.BRO1303.severity = warning
++dotnet_diagnostic.BRO1304.severity = warning
++dotnet_diagnostic.BRO1305.severity = warning
++dotnet_diagnostic.BRO1306.severity = warning
++dotnet_diagnostic.BRO1307.severity = warning
++dotnet_diagnostic.BRO1308.severity = warning
++dotnet_diagnostic.BRO1309.severity = warning
++dotnet_diagnostic.BRO1310.severity = none
++dotnet_diagnostic.BRO1311.severity = none
++dotnet_diagnostic.BRO1312.severity = warning
++dotnet_diagnostic.BRO1313.severity = none
++dotnet_diagnostic.BRO1314.severity = none
++dotnet_diagnostic.BRO1401.severity = none
++dotnet_diagnostic.BRO1402.severity = warning
++dotnet_diagnostic.BRO1403.severity = warning
++dotnet_diagnostic.BRO1404.severity = warning
++dotnet_diagnostic.BRO1405.severity = warning
++dotnet_diagnostic.BRO1406.severity = warning
++dotnet_diagnostic.BRO1407.severity = warning
++dotnet_diagnostic.BRO1408.severity = none
++dotnet_diagnostic.BRO1409.severity = none
++dotnet_diagnostic.BRO1410.severity = none
++dotnet_diagnostic.BRO1501.severity = warning
++dotnet_diagnostic.BRO1502.severity = warning
++dotnet_diagnostic.BRO1503.severity = warning
++dotnet_diagnostic.BRO1504.severity = warning
++dotnet_diagnostic.BRO1505.severity = warning
++dotnet_diagnostic.BRO1506.severity = warning
++dotnet_diagnostic.BRO1507.severity = warning
++dotnet_diagnostic.BRO1508.severity = warning
++dotnet_diagnostic.BRO1509.severity = warning
++dotnet_diagnostic.BRO1510.severity = warning
++dotnet_diagnostic.BRO1511.severity = warning
++dotnet_diagnostic.BRO1512.severity = warning
++dotnet_diagnostic.BRO1513.severity = warning
++dotnet_diagnostic.BRO1514.severity = warning
++dotnet_diagnostic.BRO1515.severity = warning
++dotnet_diagnostic.BRO1516.severity = warning
++dotnet_diagnostic.BRO1517.severity = warning
++dotnet_diagnostic.BRO1518.severity = warning
++dotnet_diagnostic.BRO1519.severity = warning
++dotnet_diagnostic.BRO1520.severity = none
++dotnet_diagnostic.BRO1521.severity = none
++dotnet_diagnostic.BRO1522.severity = none
++dotnet_diagnostic.BRO1523.severity = none
++dotnet_diagnostic.BRO1524.severity = none
++dotnet_diagnostic.BRO1525.severity = none
++dotnet_diagnostic.BRO1526.severity = none
++dotnet_diagnostic.BRO1527.severity = none
++dotnet_diagnostic.BRO1601.severity = warning
++dotnet_diagnostic.BRO1602.severity = warning
++dotnet_diagnostic.BRO1603.severity = warning
++dotnet_diagnostic.BRO1604.severity = warning
++dotnet_diagnostic.BRO1605.severity = warning
++dotnet_diagnostic.BRO1606.severity = warning
++dotnet_diagnostic.BRO1607.severity = warning
++dotnet_diagnostic.BRO1608.severity = warning
++dotnet_diagnostic.BRO1609.severity = warning
++dotnet_diagnostic.BRO1610.severity = warning
++dotnet_diagnostic.BRO1611.severity = warning
++dotnet_diagnostic.BRO1612.severity = warning
++dotnet_diagnostic.BRO1613.severity = warning
++dotnet_diagnostic.BRO1614.severity = warning
++dotnet_diagnostic.BRO1615.severity = none
++dotnet_diagnostic.BRO1616.severity = none
++dotnet_diagnostic.BRO1617.severity = none
++dotnet_diagnostic.BRO1618.severity = none
++dotnet_diagnostic.BRO1619.severity = none
++stylebro_member_order = field, constructor, finalizer, delegate, event, enum, interface, property, indexer, conversion, operator, extension, method, struct, class
++stylebro_member_access_order = public, internal, protected_internal, protected, private_protected, private
++stylebro_member_constants_first = true
++stylebro_member_static_first = true
++stylebro_member_readonly_first = true
++stylebro_private_field_naming = camelCase
++stylebro_private_mutable_static_field_naming = camelCase
++stylebro_private_static_field_naming = PascalCase
++stylebro_allow_leading_underscore_in_pascal_fields = false
++stylebro_document_exposed_elements = true
++stylebro_document_internal_elements = true
++stylebro_document_private_elements = false
++stylebro_allow_consecutive_usings = true
++stylebro_blank_line_below_standalone_comments = remove
++stylebro_trailing_comma_switch_expressions = false
++stylebro_trailing_comma_with_expressions = false
++stylebro_punctuation_check_enum_members = false
++
++# Built-in .NET rules, with the severity of the StyleCop rules they cover.
++dotnet_diagnostic.IDE0055.severity = warning
++dotnet_diagnostic.IDE0011.severity = none
++csharp_prefer_braces = true
++dotnet_diagnostic.IDE0040.severity = none
++dotnet_diagnostic.IDE0036.severity = warning
++dotnet_diagnostic.IDE0049.severity = warning
++dotnet_diagnostic.IDE0047.severity = none
++dotnet_diagnostic.IDE0048.severity = none
++dotnet_diagnostic.IDE0065.severity = none
++dotnet_diagnostic.IDE2000.severity = none
++dotnet_style_allow_multiple_blank_lines_experimental = false
++dotnet_diagnostic.IDE2002.severity = none
++csharp_style_allow_blank_lines_between_consecutive_braces_experimental = false
++dotnet_diagnostic.IDE2003.severity = none
++dotnet_style_allow_statement_immediately_after_block_experimental = false
++dotnet_diagnostic.IDE0009.severity = warning
++dotnet_diagnostic.IDE0003.severity = none
++dotnet_diagnostic.IDE0073.severity = none
++end_of_line = lf
++insert_final_newline = true
++# END stylebro-migrate
+diff --git a/src/Directory.Build.props b/src/Directory.Build.props
+index 0100a4e0..471e380b 100644
+--- a/src/Directory.Build.props
++++ b/src/Directory.Build.props
+@@ -1,5 +1,6 @@
+ <Project>
+   <PropertyGroup>
++    <StyleBroPreset>none</StyleBroPreset>
+     <SignAssembly>true</SignAssembly>
+     <DebugType>Embedded</DebugType>
+     <EmbedAllSources>True</EmbedAllSources>
+diff --git a/src/ReportGenerator.Core/CodeAnalysis/RiskHotspotsAnalysisThresholds.cs b/src/ReportGenerator.Core/CodeAnalysis/RiskHotspotsAnalysisThresholds.cs
+index 5e40ab2c..cd2456f8 100644
+--- a/src/ReportGenerator.Core/CodeAnalysis/RiskHotspotsAnalysisThresholds.cs
++++ b/src/ReportGenerator.Core/CodeAnalysis/RiskHotspotsAnalysisThresholds.cs
+@@ -35,4 +35,4 @@ namespace Palmmedia.ReportGenerator.Core.CodeAnalysis
+         /// </summary>
+         public decimal? MaximumThresholdForNPathComplexity { get; set; }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/CodeAnalysis/RiskHotspotsAnalyzer.cs b/src/ReportGenerator.Core/CodeAnalysis/RiskHotspotsAnalyzer.cs
+index 4d1b4d5a..77143992 100644
+--- a/src/ReportGenerator.Core/CodeAnalysis/RiskHotspotsAnalyzer.cs
++++ b/src/ReportGenerator.Core/CodeAnalysis/RiskHotspotsAnalyzer.cs
+@@ -131,4 +131,4 @@ namespace Palmmedia.ReportGenerator.Core.CodeAnalysis
+             return result;
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/Common/Glob.cs b/src/ReportGenerator.Core/Common/Glob.cs
+index 8b9aa7eb..84e9057b 100644
+--- a/src/ReportGenerator.Core/Common/Glob.cs
++++ b/src/ReportGenerator.Core/Common/Glob.cs
+@@ -127,119 +127,6 @@ namespace Palmmedia.ReportGenerator.Core.Common
+             return this.Expand(this.Pattern, false);
+         }
+ 
+-        private RegexOrString CreateRegexOrString(string pattern)
+-        {
+-            if (!RegexOrStringCache.TryGetValue(pattern, out RegexOrString regexOrString))
+-            {
+-                regexOrString = new RegexOrString(GlobToRegex(pattern), pattern, this.IgnoreCase, compileRegex: true);
+-                RegexOrStringCache[pattern] = regexOrString;
+-            }
+-
+-            return regexOrString;
+-        }
+-
+-        private IEnumerable<FileSystemInfo> Expand(string path, bool dirOnly)
+-        {
+-            if (string.IsNullOrEmpty(path))
+-            {
+-                yield break;
+-            }
+-
+-            // stop looking if there are no more glob characters in the path.
+-            // but only if ignoring case because FileSystemInfo.Exists always ignores case.
+-            if (this.IgnoreCase && path.IndexOfAny(GlobCharacters) < 0)
+-            {
+-                FileSystemInfo fsi = null;
+-                bool exists = false;
+-
+-                fsi = dirOnly ? (FileSystemInfo)new DirectoryInfo(path) : new FileInfo(path);
+-                exists = fsi.Exists;
+-
+-                if (exists)
+-                {
+-                    yield return fsi;
+-                }
+-
+-                yield break;
+-            }
+-
+-            string parent = Path.GetDirectoryName(path);
+-
+-            if (parent == null)
+-            {
+-                DirectoryInfo dir = new DirectoryInfo(path);
+-
+-                if (dir != null)
+-                {
+-                    yield return dir;
+-                }
+-
+-                yield break;
+-            }
+-
+-            if (parent == string.Empty)
+-            {
+-                parent = Directory.GetCurrentDirectory();
+-            }
+-
+-            var child = Path.GetFileName(path);
+-
+-            // handle groups that contain folders
+-            // child will contain unmatched closing brace
+-            if (child.Count(c => c == '}') > child.Count(c => c == '{'))
+-            {
+-                foreach (var group in Ungroup(path))
+-                {
+-                    foreach (var item in this.Expand(group, dirOnly))
+-                    {
+-                        yield return item;
+-                    }
+-                }
+-
+-                yield break;
+-            }
+-
+-            if (child == "**")
+-            {
+-                foreach (DirectoryInfo dir in this.Expand(parent, true).DistinctBy(d => d.FullName).Cast<DirectoryInfo>())
+-                {
+-                    yield return dir;
+-
+-                    foreach (var subDir in GetDirectories(dir))
+-                    {
+-                        yield return subDir;
+-                    }
+-                }
+-
+-                yield break;
+-            }
+-
+-            var childRegexes = Ungroup(child).Select(s => this.CreateRegexOrString(s)).ToList();
+-
+-            foreach (DirectoryInfo parentDir in this.Expand(parent, true).DistinctBy(d => d.FullName).Cast<DirectoryInfo>())
+-            {
+-                IEnumerable<FileSystemInfo> fileSystemEntries = dirOnly ? parentDir.EnumerateDirectories() : parentDir.EnumerateFileSystemInfos();
+-
+-                foreach (var fileSystemEntry in fileSystemEntries)
+-                {
+-                    if (childRegexes.Any(r => r.IsMatch(fileSystemEntry.Name)))
+-                    {
+-                        yield return fileSystemEntry;
+-                    }
+-                }
+-
+-                if (childRegexes.Any(r => r.Pattern == @"^\.\.$"))
+-                {
+-                    yield return parentDir.Parent ?? parentDir;
+-                }
+-
+-                if (childRegexes.Any(r => r.Pattern == @"^\.$"))
+-                {
+-                    yield return parentDir;
+-                }
+-            }
+-        }
+-
+         private static string GlobToRegex(string glob)
+         {
+             var regex = new StringBuilder();
+@@ -401,6 +288,119 @@ namespace Palmmedia.ReportGenerator.Core.Common
+             }
+         }
+ 
++        private RegexOrString CreateRegexOrString(string pattern)
++        {
++            if (!RegexOrStringCache.TryGetValue(pattern, out RegexOrString regexOrString))
++            {
++                regexOrString = new RegexOrString(GlobToRegex(pattern), pattern, this.IgnoreCase, compileRegex: true);
++                RegexOrStringCache[pattern] = regexOrString;
++            }
++
++            return regexOrString;
++        }
++
++        private IEnumerable<FileSystemInfo> Expand(string path, bool dirOnly)
++        {
++            if (string.IsNullOrEmpty(path))
++            {
++                yield break;
++            }
++
++            // stop looking if there are no more glob characters in the path.
++            // but only if ignoring case because FileSystemInfo.Exists always ignores case.
++            if (this.IgnoreCase && path.IndexOfAny(GlobCharacters) < 0)
++            {
++                FileSystemInfo fsi = null;
++                bool exists = false;
++
++                fsi = dirOnly ? (FileSystemInfo)new DirectoryInfo(path) : new FileInfo(path);
++                exists = fsi.Exists;
++
++                if (exists)
++                {
++                    yield return fsi;
++                }
++
++                yield break;
++            }
++
++            string parent = Path.GetDirectoryName(path);
++
++            if (parent == null)
++            {
++                DirectoryInfo dir = new DirectoryInfo(path);
++
++                if (dir != null)
++                {
++                    yield return dir;
++                }
++
++                yield break;
++            }
++
++            if (parent == string.Empty)
++            {
++                parent = Directory.GetCurrentDirectory();
++            }
++
++            var child = Path.GetFileName(path);
++
++            // handle groups that contain folders
++            // child will contain unmatched closing brace
++            if (child.Count(c => c == '}') > child.Count(c => c == '{'))
++            {
++                foreach (var group in Ungroup(path))
++                {
++                    foreach (var item in this.Expand(group, dirOnly))
++                    {
++                        yield return item;
++                    }
++                }
++
++                yield break;
++            }
++
++            if (child == "**")
++            {
++                foreach (DirectoryInfo dir in this.Expand(parent, true).DistinctBy(d => d.FullName).Cast<DirectoryInfo>())
++                {
++                    yield return dir;
++
++                    foreach (var subDir in GetDirectories(dir))
++                    {
++                        yield return subDir;
++                    }
++                }
++
++                yield break;
++            }
++
++            var childRegexes = Ungroup(child).Select(s => this.CreateRegexOrString(s)).ToList();
++
++            foreach (DirectoryInfo parentDir in this.Expand(parent, true).DistinctBy(d => d.FullName).Cast<DirectoryInfo>())
++            {
++                IEnumerable<FileSystemInfo> fileSystemEntries = dirOnly ? parentDir.EnumerateDirectories() : parentDir.EnumerateFileSystemInfos();
++
++                foreach (var fileSystemEntry in fileSystemEntries)
++                {
++                    if (childRegexes.Any(r => r.IsMatch(fileSystemEntry.Name)))
++                    {
++                        yield return fileSystemEntry;
++                    }
++                }
++
++                if (childRegexes.Any(r => r.Pattern == @"^\.\.$"))
++                {
++                    yield return parentDir.Parent ?? parentDir;
++                }
++
++                if (childRegexes.Any(r => r.Pattern == @"^\.$"))
++                {
++                    yield return parentDir;
++                }
++            }
++        }
++
+         private class RegexOrString
+         {
+             public RegexOrString(string pattern, string rawString, bool ignoreCase, bool compileRegex)
+diff --git a/src/ReportGenerator.Core/Help.cs b/src/ReportGenerator.Core/Help.cs
+index 7a514c15..2595320c 100644
+--- a/src/ReportGenerator.Core/Help.cs
++++ b/src/ReportGenerator.Core/Help.cs
+@@ -106,4 +106,4 @@ namespace Palmmedia.ReportGenerator.Core
+             Console.WriteLine("   \"-reports:coverage.xml\" \"-targetdir:C:\\report\" \"-assemblyfilters:+Included;-Excluded.*\"");
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/Licensing/SignatureType.cs b/src/ReportGenerator.Core/Licensing/SignatureType.cs
+index 332ea62e..1b7e25b9 100644
+--- a/src/ReportGenerator.Core/Licensing/SignatureType.cs
++++ b/src/ReportGenerator.Core/Licensing/SignatureType.cs
+@@ -15,4 +15,4 @@
+         /// </summary>
+         public const string Sha256 = "Sha256";
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/LowCoverageException.cs b/src/ReportGenerator.Core/LowCoverageException.cs
+index a67cdfa2..78d16b5d 100644
+--- a/src/ReportGenerator.Core/LowCoverageException.cs
++++ b/src/ReportGenerator.Core/LowCoverageException.cs
+@@ -34,4 +34,4 @@ namespace Palmmedia.ReportGenerator.Core
+         {
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/MinimumCoverageThresholdsValidator.cs b/src/ReportGenerator.Core/MinimumCoverageThresholdsValidator.cs
+index 16246aa9..90496295 100644
+--- a/src/ReportGenerator.Core/MinimumCoverageThresholdsValidator.cs
++++ b/src/ReportGenerator.Core/MinimumCoverageThresholdsValidator.cs
+@@ -82,4 +82,4 @@ namespace Palmmedia.ReportGenerator.Core
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/Parser/Analysis/CodeFile.cs b/src/ReportGenerator.Core/Parser/Analysis/CodeFile.cs
+index 74c251a4..383c149f 100644
+--- a/src/ReportGenerator.Core/Parser/Analysis/CodeFile.cs
++++ b/src/ReportGenerator.Core/Parser/Analysis/CodeFile.cs
+@@ -37,7 +37,7 @@ namespace Palmmedia.ReportGenerator.Core.Parser.Analysis
+         /// Array containing the coverage information by line number.
+         /// -1: Not coverable
+         /// 0: Not visited
+-        /// >0: Number of visits
++        /// >0: Number of visits.
+         /// </summary>
+         private ILineInfo<int> lineCoverage;
+ 
+diff --git a/src/ReportGenerator.Core/Parser/Analysis/CtcDetails.cs b/src/ReportGenerator.Core/Parser/Analysis/CtcDetails.cs
+index 0a5ac42b..b4fdd0e4 100644
+--- a/src/ReportGenerator.Core/Parser/Analysis/CtcDetails.cs
++++ b/src/ReportGenerator.Core/Parser/Analysis/CtcDetails.cs
+@@ -80,4 +80,4 @@ namespace Palmmedia.ReportGenerator.Core.Parser.Analysis
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/Parser/Analysis/CtcProbeDetail.cs b/src/ReportGenerator.Core/Parser/Analysis/CtcProbeDetail.cs
+index e52645b0..c1ad86d2 100644
+--- a/src/ReportGenerator.Core/Parser/Analysis/CtcProbeDetail.cs
++++ b/src/ReportGenerator.Core/Parser/Analysis/CtcProbeDetail.cs
+@@ -45,4 +45,4 @@ namespace Palmmedia.ReportGenerator.Core.Parser.Analysis
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/Parser/Analysis/LineCoverage/ArrayBasedLineInfo.cs b/src/ReportGenerator.Core/Parser/Analysis/LineCoverage/ArrayBasedLineInfo.cs
+index 13e30f7c..3b172158 100644
+--- a/src/ReportGenerator.Core/Parser/Analysis/LineCoverage/ArrayBasedLineInfo.cs
++++ b/src/ReportGenerator.Core/Parser/Analysis/LineCoverage/ArrayBasedLineInfo.cs
+@@ -20,7 +20,7 @@ namespace Palmmedia.ReportGenerator.Core.Parser.Analysis.LineCoverage
+         private readonly T defaultValue;
+ 
+         /// <summary>
+-        /// Initializes a new instance of the <see cref="ArrayBasedLineInfo&lt;T&gt;"/> class.
++        /// Initializes a new instance of the <see cref="ArrayBasedLineInfo{T}"/> class.
+         /// </summary>
+         /// <param name="length">The number of elements to allocate for the internal data array. Must be non-negative.</param>
+         /// <param name="defaultValue">The default value to initialize each element with.</param>
+diff --git a/src/ReportGenerator.Core/Parser/Analysis/LineCoverage/DictionaryBasedLineInfo.cs b/src/ReportGenerator.Core/Parser/Analysis/LineCoverage/DictionaryBasedLineInfo.cs
+index 93d983b2..e86675aa 100644
+--- a/src/ReportGenerator.Core/Parser/Analysis/LineCoverage/DictionaryBasedLineInfo.cs
++++ b/src/ReportGenerator.Core/Parser/Analysis/LineCoverage/DictionaryBasedLineInfo.cs
+@@ -24,7 +24,7 @@ namespace Palmmedia.ReportGenerator.Core.Parser.Analysis.LineCoverage
+         private readonly T defaultValue;
+ 
+         /// <summary>
+-        /// Initializes a new instance of the <see cref="DictionaryBasedLineInfo&lt;T&gt;"/> class.
++        /// Initializes a new instance of the <see cref="DictionaryBasedLineInfo{T}"/> class.
+         /// </summary>
+         /// <param name="length">The number of elements to allocate for the internal data array. Must be non-negative.</param>
+         /// <param name="defaultValue">The default value to initialize each element with.</param>
+diff --git a/src/ReportGenerator.Core/Parser/Analysis/MetricMergeOrder.cs b/src/ReportGenerator.Core/Parser/Analysis/MetricMergeOrder.cs
+index 0ea8bbdb..ce51e1e7 100644
+--- a/src/ReportGenerator.Core/Parser/Analysis/MetricMergeOrder.cs
++++ b/src/ReportGenerator.Core/Parser/Analysis/MetricMergeOrder.cs
+@@ -15,4 +15,4 @@ namespace Palmmedia.ReportGenerator.Core.Parser.Analysis
+         /// </summary>
+         LowerIsBetter
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/Parser/CloverParser.cs b/src/ReportGenerator.Core/Parser/CloverParser.cs
+index 630e5f7a..e604b170 100644
+--- a/src/ReportGenerator.Core/Parser/CloverParser.cs
++++ b/src/ReportGenerator.Core/Parser/CloverParser.cs
+@@ -96,105 +96,6 @@ namespace Palmmedia.ReportGenerator.Core.Parser
+             return result;
+         }
+ 
+-        /// <summary>
+-        /// Processes the given assembly.
+-        /// </summary>
+-        /// <param name="modules">The modules.</param>
+-        /// <param name="assemblyName">Name of the assembly.</param>
+-        /// <returns>The <see cref="Assembly"/>.</returns>
+-        private Assembly ProcessAssembly(XElement[] modules, string assemblyName)
+-        {
+-            Logger.DebugFormat(Resources.CurrentAssembly, assemblyName);
+-
+-            var files = modules
+-                .Where(m => m.Attribute("name").Value.Equals(assemblyName))
+-                .Elements("file")
+-                .Where(f => this.FileFilter.IsElementIncludedInReport(f.Attribute("name").Value))
+-                .OrderBy(f => f.Attribute("name").Value)
+-                .ToArray();
+-
+-            var assembly = new Assembly(assemblyName);
+-
+-            Parallel.ForEach(files, file => this.ProcessFile(assembly, file));
+-
+-            return assembly;
+-        }
+-
+-        /// <summary>
+-        /// Processes the file.
+-        /// </summary>
+-        /// <param name="assembly">The assembly.</param>
+-        /// <param name="fileElement">The file element.</param>
+-        private void ProcessFile(Assembly assembly, XElement fileElement)
+-        {
+-            string className = fileElement.Attribute("name").Value;
+-
+-            int indexOfJava = className.LastIndexOf(".java");
+-
+-            if (indexOfJava > 0)
+-            {
+-                className = className.Substring(0, indexOfJava);
+-            }
+-
+-            if (!this.ClassFilter.IsElementIncludedInReport(className))
+-            {
+-                return;
+-            }
+-
+-            var @class = new Class(className, assembly);
+-
+-            var lines = fileElement.Elements("line")
+-                .ToArray();
+-
+-            var linesOfFile = lines
+-                .Where(line => line.Attribute("type").Value == "stmt")
+-                .Select(line => new
+-                {
+-                    LineNumber = int.Parse(line.Attribute("num").Value, CultureInfo.InvariantCulture),
+-                    Visits = line.Attribute("count").Value.ParseLargeInteger()
+-                })
+-                .OrderBy(seqpnt => seqpnt.LineNumber)
+-                .ToArray();
+-
+-            var branches = GetBranches(lines);
+-
+-            var coverage = LineInfoFactory.Create<int>(0, -1);
+-            var lineVisitStatus = LineInfoFactory.Create<LineVisitStatus>(0, LineVisitStatus.NotCoverable);
+-
+-            if (linesOfFile.Length > 0)
+-            {
+-                coverage = LineInfoFactory.Create<int>(linesOfFile[linesOfFile.LongLength - 1].LineNumber + 1, -1);
+-                lineVisitStatus = LineInfoFactory.Create<LineVisitStatus>(linesOfFile[linesOfFile.LongLength - 1].LineNumber + 1, LineVisitStatus.NotCoverable);
+-
+-                foreach (var line in linesOfFile)
+-                {
+-                    coverage[line.LineNumber] = line.Visits;
+-
+-                    bool partiallyCovered = false;
+-
+-                    if (branches.TryGetValue(line.LineNumber, out ICollection<Branch> branchesOfLine))
+-                    {
+-                        partiallyCovered = branchesOfLine.Any(b => b.BranchVisits == 0);
+-                    }
+-
+-                    LineVisitStatus statusOfLine = line.Visits > 0 ? (partiallyCovered ? LineVisitStatus.PartiallyCovered : LineVisitStatus.Covered) : LineVisitStatus.NotCovered;
+-                    lineVisitStatus[line.LineNumber] = statusOfLine;
+-                }
+-            }
+-
+-            var methodsOfFile = lines
+-                .Where(line => line.Attribute("type").Value == "method")
+-                .ToArray();
+-
+-            var codeFile = new CodeFile(fileElement.Attribute("path").Value, coverage, lineVisitStatus, branches);
+-
+-            SetCodeElements(codeFile, methodsOfFile, coverage.Length - 1);
+-
+-            @class.AddFile(codeFile);
+-
+-            assembly.AddClass(@class);
+-        }
+-
+         /// <summary>
+         /// Gets the branches by line number.
+         /// </summary>
+@@ -313,5 +214,104 @@ namespace Palmmedia.ReportGenerator.Core.Parser
+                     codeFile.CoverageQuotaInRange(codeElement.FirstLine, lastLine)));
+             }
+         }
++
++        /// <summary>
++        /// Processes the given assembly.
++        /// </summary>
++        /// <param name="modules">The modules.</param>
++        /// <param name="assemblyName">Name of the assembly.</param>
++        /// <returns>The <see cref="Assembly"/>.</returns>
++        private Assembly ProcessAssembly(XElement[] modules, string assemblyName)
++        {
++            Logger.DebugFormat(Resources.CurrentAssembly, assemblyName);
++
++            var files = modules
++                .Where(m => m.Attribute("name").Value.Equals(assemblyName))
++                .Elements("file")
++                .Where(f => this.FileFilter.IsElementIncludedInReport(f.Attribute("name").Value))
++                .OrderBy(f => f.Attribute("name").Value)
++                .ToArray();
++
++            var assembly = new Assembly(assemblyName);
++
++            Parallel.ForEach(files, file => this.ProcessFile(assembly, file));
++
++            return assembly;
++        }
++
++        /// <summary>
++        /// Processes the file.
++        /// </summary>
++        /// <param name="assembly">The assembly.</param>
++        /// <param name="fileElement">The file element.</param>
++        private void ProcessFile(Assembly assembly, XElement fileElement)
++        {
++            string className = fileElement.Attribute("name").Value;
++
++            int indexOfJava = className.LastIndexOf(".java");
++
++            if (indexOfJava > 0)
++            {
++                className = className.Substring(0, indexOfJava);
++            }
++
++            if (!this.ClassFilter.IsElementIncludedInReport(className))
++            {
++                return;
++            }
++
++            var @class = new Class(className, assembly);
++
++            var lines = fileElement.Elements("line")
++                .ToArray();
++
++            var linesOfFile = lines
++                .Where(line => line.Attribute("type").Value == "stmt")
++                .Select(line => new
++                {
++                    LineNumber = int.Parse(line.Attribute("num").Value, CultureInfo.InvariantCulture),
++                    Visits = line.Attribute("count").Value.ParseLargeInteger()
++                })
++                .OrderBy(seqpnt => seqpnt.LineNumber)
++                .ToArray();
++
++            var branches = GetBranches(lines);
++
++            var coverage = LineInfoFactory.Create<int>(0, -1);
++            var lineVisitStatus = LineInfoFactory.Create<LineVisitStatus>(0, LineVisitStatus.NotCoverable);
++
++            if (linesOfFile.Length > 0)
++            {
++                coverage = LineInfoFactory.Create<int>(linesOfFile[linesOfFile.LongLength - 1].LineNumber + 1, -1);
++                lineVisitStatus = LineInfoFactory.Create<LineVisitStatus>(linesOfFile[linesOfFile.LongLength - 1].LineNumber + 1, LineVisitStatus.NotCoverable);
++
++                foreach (var line in linesOfFile)
++                {
++                    coverage[line.LineNumber] = line.Visits;
++
++                    bool partiallyCovered = false;
++
++                    if (branches.TryGetValue(line.LineNumber, out ICollection<Branch> branchesOfLine))
++                    {
++                        partiallyCovered = branchesOfLine.Any(b => b.BranchVisits == 0);
++                    }
++
++                    LineVisitStatus statusOfLine = line.Visits > 0 ? (partiallyCovered ? LineVisitStatus.PartiallyCovered : LineVisitStatus.Covered) : LineVisitStatus.NotCovered;
++                    lineVisitStatus[line.LineNumber] = statusOfLine;
++                }
++            }
++
++            var methodsOfFile = lines
++                .Where(line => line.Attribute("type").Value == "method")
++                .ToArray();
++
++            var codeFile = new CodeFile(fileElement.Attribute("path").Value, coverage, lineVisitStatus, branches);
++
++            SetCodeElements(codeFile, methodsOfFile, coverage.Length - 1);
++
++            @class.AddFile(codeFile);
++
++            assembly.AddClass(@class);
++        }
+     }
+ }
+diff --git a/src/ReportGenerator.Core/Parser/CoberturaParser.cs b/src/ReportGenerator.Core/Parser/CoberturaParser.cs
+index f9578fdb..5cd40083 100644
+--- a/src/ReportGenerator.Core/Parser/CoberturaParser.cs
++++ b/src/ReportGenerator.Core/Parser/CoberturaParser.cs
+@@ -105,6 +105,113 @@ namespace Palmmedia.ReportGenerator.Core.Parser
+             return result;
+         }
+ 
++        private static decimal? ParseCoberturaDecimalValue(string value)
++        {
++            decimal? result = null;
++            if (!"NaN".Equals(value, StringComparison.OrdinalIgnoreCase))
++            {
++                result = decimal.Parse(value.Replace(',', '.'), NumberStyles.Number | NumberStyles.AllowExponent, CultureInfo.InvariantCulture);
++            }
++
++            return result;
++        }
++
++        private static decimal? GetCoberturaDecimalValue(string value)
++        {
++            decimal? result = ParseCoberturaDecimalValue(value);
++            if (result.HasValue)
++            {
++                result = Math.Round(result.Value, 2, MidpointRounding.AwayFromZero);
++            }
++
++            return result;
++        }
++
++        private static decimal? GetCoberturaDecimalPercentageValue(string value)
++        {
++            decimal? result = ParseCoberturaDecimalValue(value);
++            if (result.HasValue)
++            {
++                result = Math.Round(result.Value * 100, 2, MidpointRounding.AwayFromZero);
++            }
++
++            return result;
++        }
++
++        /// <summary>
++        /// Gets the branches by line number.
++        /// </summary>
++        /// <param name="lines">The lines.</param>
++        /// <returns>The branches by line number.</returns>
++        private static Dictionary<int, ICollection<Branch>> GetBranches(IEnumerable<XElement> lines)
++        {
++            var result = new Dictionary<int, ICollection<Branch>>();
++
++            foreach (var line in lines)
++            {
++                if (line.Attribute("condition-coverage") == null
++                    || line.Attribute("branch") == null
++                    || !line.Attribute("branch").Value.Equals("true", StringComparison.OrdinalIgnoreCase))
++                {
++                    continue;
++                }
++
++                var match = BranchCoverageRegex.Match(line.Attribute("condition-coverage").Value);
++
++                if (match.Success)
++                {
++                    int lineNumber = int.Parse(line.Attribute("number").Value, CultureInfo.InvariantCulture);
++
++                    int numberOfCoveredBranches = match.Groups["NumberOfCoveredBranches"].Value.ParseLargeInteger();
++                    int numberOfTotalBranches = match.Groups["NumberOfTotalBranches"].Value.ParseLargeInteger();
++
++                    var branches = new HashSet<Branch>();
++
++                    for (int i = 0; i < numberOfTotalBranches; i++)
++                    {
++                        string identifier = string.Format(
++                            CultureInfo.InvariantCulture,
++                            "{0}_{1}",
++                            lineNumber,
++                            i);
++
++                        branches.Add(new Branch(i < numberOfCoveredBranches ? 1 : 0, identifier));
++                    }
++
++                    /* If cobertura file is merged from different files, a class and therefore each line can exist several times.
++                     * The best result is used. */
++                    if (result.TryGetValue(lineNumber, out ICollection<Branch> existingBranches))
++                    {
++                        if (numberOfCoveredBranches > existingBranches.Count(b => b.BranchVisits == 1))
++                        {
++                            result[lineNumber] = branches;
++                        }
++                    }
++                    else
++                    {
++                        result.Add(lineNumber, branches);
++                    }
++                }
++            }
++
++            return result;
++        }
++
++        private static string GetShortMethodName(string fullName)
++        {
++            int indexOpen = fullName.IndexOf('(');
++
++            if (indexOpen <= 0)
++            {
++                return fullName;
++            }
++
++            int indexClose = fullName.IndexOf(')');
++            string signature = indexClose - indexOpen > 1 ? "(...)" : "()";
++
++            return $"{fullName.Substring(0, indexOpen)}{signature}";
++        }
++
+         /// <summary>
+         /// Processes the given assembly.
+         /// </summary>
+@@ -347,113 +454,6 @@ namespace Palmmedia.ReportGenerator.Core.Parser
+             }
+         }
+ 
+-        private static decimal? ParseCoberturaDecimalValue(string value)
+-        {
+-            decimal? result = null;
+-            if (!"NaN".Equals(value, StringComparison.OrdinalIgnoreCase))
+-            {
+-                result = decimal.Parse(value.Replace(',', '.'), NumberStyles.Number | NumberStyles.AllowExponent, CultureInfo.InvariantCulture);
+-            }
+-
+-            return result;
+-        }
+-
+-        private static decimal? GetCoberturaDecimalValue(string value)
+-        {
+-            decimal? result = ParseCoberturaDecimalValue(value);
+-            if (result.HasValue)
+-            {
+-                result = Math.Round(result.Value, 2, MidpointRounding.AwayFromZero);
+-            }
+-
+-            return result;
+-        }
+-
+-        private static decimal? GetCoberturaDecimalPercentageValue(string value)
+-        {
+-            decimal? result = ParseCoberturaDecimalValue(value);
+-            if (result.HasValue)
+-            {
+-                result = Math.Round(result.Value * 100, 2, MidpointRounding.AwayFromZero);
+-            }
+-
+-            return result;
+-        }
+-
+-        /// <summary>
+-        /// Gets the branches by line number.
+-        /// </summary>
+-        /// <param name="lines">The lines.</param>
+-        /// <returns>The branches by line number.</returns>
+-        private static Dictionary<int, ICollection<Branch>> GetBranches(IEnumerable<XElement> lines)
+-        {
+-            var result = new Dictionary<int, ICollection<Branch>>();
+-
+-            foreach (var line in lines)
+-            {
+-                if (line.Attribute("condition-coverage") == null
+-                    || line.Attribute("branch") == null
+-                    || !line.Attribute("branch").Value.Equals("true", StringComparison.OrdinalIgnoreCase))
+-                {
+-                    continue;
+-                }
+-
+-                var match = BranchCoverageRegex.Match(line.Attribute("condition-coverage").Value);
+-
+-                if (match.Success)
+-                {
+-                    int lineNumber = int.Parse(line.Attribute("number").Value, CultureInfo.InvariantCulture);
+-
+-                    int numberOfCoveredBranches = match.Groups["NumberOfCoveredBranches"].Value.ParseLargeInteger();
+-                    int numberOfTotalBranches = match.Groups["NumberOfTotalBranches"].Value.ParseLargeInteger();
+-
+-                    var branches = new HashSet<Branch>();
+-
+-                    for (int i = 0; i < numberOfTotalBranches; i++)
+-                    {
+-                        string identifier = string.Format(
+-                            CultureInfo.InvariantCulture,
+-                            "{0}_{1}",
+-                            lineNumber,
+-                            i);
+-
+-                        branches.Add(new Branch(i < numberOfCoveredBranches ? 1 : 0, identifier));
+-                    }
+-
+-                    /* If cobertura file is merged from different files, a class and therefore each line can exist several times.
+-                     * The best result is used. */
+-                    if (result.TryGetValue(lineNumber, out ICollection<Branch> existingBranches))
+-                    {
+-                        if (numberOfCoveredBranches > existingBranches.Count(b => b.BranchVisits == 1))
+-                        {
+-                            result[lineNumber] = branches;
+-                        }
+-                    }
+-                    else
+-                    {
+-                        result.Add(lineNumber, branches);
+-                    }
+-                }
+-            }
+-
+-            return result;
+-        }
+-
+-        private static string GetShortMethodName(string fullName)
+-        {
+-            int indexOpen = fullName.IndexOf('(');
+-
+-            if (indexOpen <= 0)
+-            {
+-                return fullName;
+-            }
+-
+-            int indexClose = fullName.IndexOf(')');
+-            string signature = indexClose - indexOpen > 1 ? "(...)" : "()";
+-
+-            return $"{fullName.Substring(0, indexOpen)}{signature}";
+-        }
+-
+         /// <summary>
+         /// Extracts the methods/properties of the given <see cref="XElement">XElements</see>.
+         /// </summary>
+diff --git a/src/ReportGenerator.Core/Parser/CoverageReportParser.cs b/src/ReportGenerator.Core/Parser/CoverageReportParser.cs
+index 2a480722..71acec2c 100644
+--- a/src/ReportGenerator.Core/Parser/CoverageReportParser.cs
++++ b/src/ReportGenerator.Core/Parser/CoverageReportParser.cs
+@@ -244,6 +244,36 @@ namespace Palmmedia.ReportGenerator.Core.Parser
+             return finalResult;
+         }
+ 
++        /// <summary>
++        /// Get the file size in human readable format.
++        /// If size information is not available (e.g. IOException), '-' is returned.
++        /// </summary>
++        /// <param name="fileName">The name of the file.</param>
++        /// <returns>The file size.</returns>
++        private static string GetHumanReadableFileSize(string fileName)
++        {
++            try
++            {
++                long byteCount = new FileInfo(fileName).Length;
++
++                string[] suffixes = { "B", "KB", "MB", "GB", "TB", "PB", "EB" };
++
++                if (byteCount == 0)
++                {
++                    return "0" + suffixes[0];
++                }
++
++                long bytes = Math.Abs(byteCount);
++                int place = Convert.ToInt32(Math.Floor(Math.Log(bytes, 1024)));
++                double num = Math.Round(bytes / Math.Pow(1024, place), 1);
++                return (Math.Sign(byteCount) * num).ToString() + suffixes[place];
++            }
++            catch (Exception)
++            {
++                return "-";
++            }
++        }
++
+         /// <summary>
+         /// Creates the consumer which merges the results.
+         /// </summary>
+@@ -586,35 +616,5 @@ namespace Palmmedia.ReportGenerator.Core.Parser
+                 yield return result;
+             }
+         }
+-
+-        /// <summary>
+-        /// Get the file size in human readable format.
+-        /// If size information is not available (e.g. IOException), '-' is returned.
+-        /// </summary>
+-        /// <param name="fileName">The name of the file.</param>
+-        /// <returns>The file size.</returns>
+-        private static string GetHumanReadableFileSize(string fileName)
+-        {
+-            try
+-            {
+-                long byteCount = new FileInfo(fileName).Length;
+-
+-                string[] suffixes = { "B", "KB", "MB", "GB", "TB", "PB", "EB" };
+-
+-                if (byteCount == 0)
+-                {
+-                    return "0" + suffixes[0];
+-                }
+-
+-                long bytes = Math.Abs(byteCount);
+-                int place = Convert.ToInt32(Math.Floor(Math.Log(bytes, 1024)));
+-                double num = Math.Round(bytes / Math.Pow(1024, place), 1);
+-                return (Math.Sign(byteCount) * num).ToString() + suffixes[place];
+-            }
+-            catch (Exception)
+-            {
+-                return "-";
+-            }
+-        }
+     }
+ }
+diff --git a/src/ReportGenerator.Core/Parser/CtcParser.cs b/src/ReportGenerator.Core/Parser/CtcParser.cs
+index 4c038573..687b9522 100644
+--- a/src/ReportGenerator.Core/Parser/CtcParser.cs
++++ b/src/ReportGenerator.Core/Parser/CtcParser.cs
+@@ -64,108 +64,6 @@ namespace Palmmedia.ReportGenerator.Core.Parser
+             return result;
+         }
+ 
+-        /// <summary>
+-        /// Processes the given assembly.
+-        /// </summary>
+-        /// <param name="modules">The modules.</param>
+-        /// <param name="assemblyName">Name of the assembly.</param>
+-        /// <returns>The <see cref="Assembly"/>.</returns>
+-        private Assembly ProcessAssembly(XElement[] modules, string assemblyName)
+-        {
+-            Logger.DebugFormat(Resources.CurrentAssembly, assemblyName);
+-
+-            var files = modules
+-                .Where(m => m.Attribute("projectName").Value.Equals(assemblyName))
+-                .Elements("file")
+-                .Where(f => this.FileFilter.IsElementIncludedInReport(f.Attribute("name").Value))
+-                .OrderBy(f => f.Attribute("name").Value)
+-                .ToArray();
+-
+-            var assembly = new Assembly(assemblyName);
+-
+-            Parallel.ForEach(files, file => this.ProcessFile(assembly, file));
+-
+-            return assembly;
+-        }
+-
+-        /// <summary>
+-        /// Processes the file.
+-        /// </summary>
+-        /// <param name="assembly">The assembly.</param>
+-        /// <param name="fileElement">The file element.</param>
+-        private void ProcessFile(Assembly assembly, XElement fileElement)
+-        {
+-            string className = fileElement.Attribute("name").Value;
+-
+-            int indexOfFileExtension = className.LastIndexOf(".");
+-
+-            if (indexOfFileExtension > 0)
+-            {
+-                className = className.Substring(0, indexOfFileExtension);
+-            }
+-
+-            if (!this.ClassFilter.IsElementIncludedInReport(className))
+-            {
+-                return;
+-            }
+-
+-            var @class = new Class(className, assembly);
+-
+-            var lines = fileElement.Elements("function")
+-                .Where(f => !string.IsNullOrEmpty(f.Attribute("name")?.Value))
+-                .Elements("line")
+-                .ToArray();
+-
+-            var linesOfFile = lines
+-                .Where(line => line.Attribute("codeType").Value == "Executable")
+-                .Select(line => new
+-                {
+-                    LineNumber = int.Parse(line.Attribute("number").Value, CultureInfo.InvariantCulture),
+-                    Visits = line.Attribute("isExecuted").Value == "Executed" ? 1 : 0
+-                })
+-                .OrderBy(seqpnt => seqpnt.LineNumber)
+-                .ToArray();
+-            var branches = GetBranches(lines);
+-
+-            var coverage = LineInfoFactory.Create<int>(0, -1);
+-            var lineVisitStatus = LineInfoFactory.Create<LineVisitStatus>(0, LineVisitStatus.NotCoverable);
+-
+-            if (linesOfFile.Length > 0)
+-            {
+-                coverage = LineInfoFactory.Create<int>(linesOfFile[linesOfFile.LongLength - 1].LineNumber + 1, -1);
+-                lineVisitStatus = LineInfoFactory.Create<LineVisitStatus>(linesOfFile[linesOfFile.LongLength - 1].LineNumber + 1, LineVisitStatus.NotCoverable);
+-
+-                foreach (var line in linesOfFile)
+-                {
+-                    coverage[line.LineNumber] = line.Visits;
+-
+-                    bool partiallyCovered = false;
+-
+-                    if (branches.TryGetValue(line.LineNumber, out ICollection<Branch> branchesOfLine))
+-                    {
+-                        partiallyCovered = branchesOfLine.Any(b => b.BranchVisits == 0);
+-                    }
+-
+-                    LineVisitStatus statusOfLine = line.Visits > 0 ? (partiallyCovered ? LineVisitStatus.PartiallyCovered : LineVisitStatus.Covered) : LineVisitStatus.NotCovered;
+-                    lineVisitStatus[line.LineNumber] = statusOfLine;
+-                }
+-            }
+-
+-            var methodsOfFile = fileElement
+-                .Elements("function")
+-                .ToArray();
+-
+-            var codeFile = new CodeFile(fileElement.Attribute("location").Value, coverage, lineVisitStatus, branches);
+-
+-            SetMethodMetrics(codeFile, methodsOfFile);
+-            SetCodeElements(codeFile, methodsOfFile);
+-            SetCtcDetails(codeFile, methodsOfFile);
+-
+-            @class.AddFile(codeFile);
+-
+-            assembly.AddClass(@class);
+-        }
+-
+         /// <summary>
+         /// Extracts the metrics from the given <see cref="XElement">XElements</see>.
+         /// </summary>
+@@ -403,5 +301,107 @@ namespace Palmmedia.ReportGenerator.Core.Parser
+ 
+             return result;
+         }
++
++        /// <summary>
++        /// Processes the given assembly.
++        /// </summary>
++        /// <param name="modules">The modules.</param>
++        /// <param name="assemblyName">Name of the assembly.</param>
++        /// <returns>The <see cref="Assembly"/>.</returns>
++        private Assembly ProcessAssembly(XElement[] modules, string assemblyName)
++        {
++            Logger.DebugFormat(Resources.CurrentAssembly, assemblyName);
++
++            var files = modules
++                .Where(m => m.Attribute("projectName").Value.Equals(assemblyName))
++                .Elements("file")
++                .Where(f => this.FileFilter.IsElementIncludedInReport(f.Attribute("name").Value))
++                .OrderBy(f => f.Attribute("name").Value)
++                .ToArray();
++
++            var assembly = new Assembly(assemblyName);
++
++            Parallel.ForEach(files, file => this.ProcessFile(assembly, file));
++
++            return assembly;
++        }
++
++        /// <summary>
++        /// Processes the file.
++        /// </summary>
++        /// <param name="assembly">The assembly.</param>
++        /// <param name="fileElement">The file element.</param>
++        private void ProcessFile(Assembly assembly, XElement fileElement)
++        {
++            string className = fileElement.Attribute("name").Value;
++
++            int indexOfFileExtension = className.LastIndexOf(".");
++
++            if (indexOfFileExtension > 0)
++            {
++                className = className.Substring(0, indexOfFileExtension);
++            }
++
++            if (!this.ClassFilter.IsElementIncludedInReport(className))
++            {
++                return;
++            }
++
++            var @class = new Class(className, assembly);
++
++            var lines = fileElement.Elements("function")
++                .Where(f => !string.IsNullOrEmpty(f.Attribute("name")?.Value))
++                .Elements("line")
++                .ToArray();
++
++            var linesOfFile = lines
++                .Where(line => line.Attribute("codeType").Value == "Executable")
++                .Select(line => new
++                {
++                    LineNumber = int.Parse(line.Attribute("number").Value, CultureInfo.InvariantCulture),
++                    Visits = line.Attribute("isExecuted").Value == "Executed" ? 1 : 0
++                })
++                .OrderBy(seqpnt => seqpnt.LineNumber)
++                .ToArray();
++            var branches = GetBranches(lines);
++
++            var coverage = LineInfoFactory.Create<int>(0, -1);
++            var lineVisitStatus = LineInfoFactory.Create<LineVisitStatus>(0, LineVisitStatus.NotCoverable);
++
++            if (linesOfFile.Length > 0)
++            {
++                coverage = LineInfoFactory.Create<int>(linesOfFile[linesOfFile.LongLength - 1].LineNumber + 1, -1);
++                lineVisitStatus = LineInfoFactory.Create<LineVisitStatus>(linesOfFile[linesOfFile.LongLength - 1].LineNumber + 1, LineVisitStatus.NotCoverable);
++
++                foreach (var line in linesOfFile)
++                {
++                    coverage[line.LineNumber] = line.Visits;
++
++                    bool partiallyCovered = false;
++
++                    if (branches.TryGetValue(line.LineNumber, out ICollection<Branch> branchesOfLine))
++                    {
++                        partiallyCovered = branchesOfLine.Any(b => b.BranchVisits == 0);
++                    }
++
++                    LineVisitStatus statusOfLine = line.Visits > 0 ? (partiallyCovered ? LineVisitStatus.PartiallyCovered : LineVisitStatus.Covered) : LineVisitStatus.NotCovered;
++                    lineVisitStatus[line.LineNumber] = statusOfLine;
++                }
++            }
++
++            var methodsOfFile = fileElement
++                .Elements("function")
++                .ToArray();
++
++            var codeFile = new CodeFile(fileElement.Attribute("location").Value, coverage, lineVisitStatus, branches);
++
++            SetMethodMetrics(codeFile, methodsOfFile);
++            SetCodeElements(codeFile, methodsOfFile);
++            SetCtcDetails(codeFile, methodsOfFile);
++
++            @class.AddFile(codeFile);
++
++            assembly.AddClass(@class);
++        }
+     }
+ }
+diff --git a/src/ReportGenerator.Core/Parser/DynamicCodeCoverageParser.cs b/src/ReportGenerator.Core/Parser/DynamicCodeCoverageParser.cs
+index dba559ca..20d85024 100644
+--- a/src/ReportGenerator.Core/Parser/DynamicCodeCoverageParser.cs
++++ b/src/ReportGenerator.Core/Parser/DynamicCodeCoverageParser.cs
+@@ -82,91 +82,6 @@ namespace Palmmedia.ReportGenerator.Core.Parser
+             return result;
+         }
+ 
+-        /// <summary>
+-        /// Processes the given assembly.
+-        /// </summary>
+-        /// <param name="module">The module.</param>
+-        /// <returns>The <see cref="Assembly"/>.</returns>
+-        private Assembly ProcessAssembly(XElement module)
+-        {
+-            string assemblyName = module.Attribute("name").Value;
+-
+-            Logger.DebugFormat(Resources.CurrentAssembly, assemblyName);
+-
+-            var classes = module
+-                .Elements("functions")
+-                .Elements("function")
+-                .Select(f => Tuple.Create(
+-                    DynamicCodeCoverageClassNameParser.ParseClassName(
+-                        f.Attribute("type_name").Value,
+-                        f.Attribute("namespace")?.Value), f))
+-                .Where(c => this.ClassFilter.IsElementIncludedInReport(c.Item1.FullName))
+-                .OrderBy(c => c.Item1.Namespace)
+-                .ThenBy(c => c.Item1.Name)
+-                .ToArray();
+-
+-            var assembly = new Assembly(assemblyName);
+-
+-            var files = module
+-                .Elements("source_files")
+-                .Elements("source_file")
+-                .ToArray();
+-
+-            Parallel.ForEach(classes.Where(c => c.Item1.Include).DistinctBy(c => c.Item1), @class =>
+-            {
+-                var functions = classes.Where(c => c.Item1.Equals(@class.Item1)).Select(c => c.Item2).ToArray();
+-                this.ProcessClass(module, assembly, @class.Item1, files, functions);
+-            });
+-
+-            return assembly;
+-        }
+-
+-        /// <summary>
+-        /// Processes the given class.
+-        /// </summary>
+-        /// <param name="module">The module.</param>
+-        /// <param name="assembly">The assembly.</param>
+-        /// <param name="classWithNamespace">The class.</param>
+-        /// <param name="files">The files.</param>
+-        /// <param name="functions">The functions of the class.</param>
+-        private void ProcessClass(
+-            XElement module,
+-            Assembly assembly,
+-            DynamicCodeCoverageClassNameParserResult classWithNamespace,
+-            XElement[] files,
+-            XElement[] functions)
+-        {
+-            var fileIdsOfClass = functions
+-                .Elements("ranges")
+-                .Elements("range")
+-                .Select(r => r.Attribute("source_id").Value)
+-                .Distinct()
+-                .ToArray();
+-
+-            var filteredFilesOfClass = fileIdsOfClass
+-                .Select(fileId =>
+-                    new
+-                    {
+-                        FileId = fileId,
+-                        FilePath = files.First(f => f.Attribute("id").Value == fileId).Attribute("path").Value
+-                    })
+-                .Where(f => this.FileFilter.IsElementIncludedInReport(f.FilePath))
+-                .ToArray();
+-
+-            // If all files are removed by filters, then the whole class is omitted
+-            if ((fileIdsOfClass.Length == 0 && !this.FileFilter.HasCustomFilters) || filteredFilesOfClass.Length > 0)
+-            {
+-                var @class = new Class(classWithNamespace.FullName, assembly);
+-
+-                foreach (var file in filteredFilesOfClass)
+-                {
+-                    @class.AddFile(ProcessFile(module, file.FileId, functions, file.FilePath));
+-                }
+-
+-                assembly.AddClass(@class);
+-            }
+-        }
+-
+         /// <summary>
+         /// Processes the file.
+         /// </summary>
+@@ -342,5 +257,91 @@ namespace Palmmedia.ReportGenerator.Core.Parser
+ 
+             return methodName;
+         }
++
++        /// <summary>
++        /// Processes the given assembly.
++        /// </summary>
++        /// <param name="module">The module.</param>
++        /// <returns>The <see cref="Assembly"/>.</returns>
++        private Assembly ProcessAssembly(XElement module)
++        {
++            string assemblyName = module.Attribute("name").Value;
++
++            Logger.DebugFormat(Resources.CurrentAssembly, assemblyName);
++
++            var classes = module
++                .Elements("functions")
++                .Elements("function")
++                .Select(f => Tuple.Create(
++                    DynamicCodeCoverageClassNameParser.ParseClassName(
++                        f.Attribute("type_name").Value,
++                        f.Attribute("namespace")?.Value),
++                    f))
++                .Where(c => this.ClassFilter.IsElementIncludedInReport(c.Item1.FullName))
++                .OrderBy(c => c.Item1.Namespace)
++                .ThenBy(c => c.Item1.Name)
++                .ToArray();
++
++            var assembly = new Assembly(assemblyName);
++
++            var files = module
++                .Elements("source_files")
++                .Elements("source_file")
++                .ToArray();
++
++            Parallel.ForEach(classes.Where(c => c.Item1.Include).DistinctBy(c => c.Item1), @class =>
++            {
++                var functions = classes.Where(c => c.Item1.Equals(@class.Item1)).Select(c => c.Item2).ToArray();
++                this.ProcessClass(module, assembly, @class.Item1, files, functions);
++            });
++
++            return assembly;
++        }
++
++        /// <summary>
++        /// Processes the given class.
++        /// </summary>
++        /// <param name="module">The module.</param>
++        /// <param name="assembly">The assembly.</param>
++        /// <param name="classWithNamespace">The class.</param>
++        /// <param name="files">The files.</param>
++        /// <param name="functions">The functions of the class.</param>
++        private void ProcessClass(
++            XElement module,
++            Assembly assembly,
++            DynamicCodeCoverageClassNameParserResult classWithNamespace,
++            XElement[] files,
++            XElement[] functions)
++        {
++            var fileIdsOfClass = functions
++                .Elements("ranges")
++                .Elements("range")
++                .Select(r => r.Attribute("source_id").Value)
++                .Distinct()
++                .ToArray();
++
++            var filteredFilesOfClass = fileIdsOfClass
++                .Select(fileId =>
++                    new
++                    {
++                        FileId = fileId,
++                        FilePath = files.First(f => f.Attribute("id").Value == fileId).Attribute("path").Value
++                    })
++                .Where(f => this.FileFilter.IsElementIncludedInReport(f.FilePath))
++                .ToArray();
++
++            // If all files are removed by filters, then the whole class is omitted
++            if ((fileIdsOfClass.Length == 0 && !this.FileFilter.HasCustomFilters) || filteredFilesOfClass.Length > 0)
++            {
++                var @class = new Class(classWithNamespace.FullName, assembly);
++
++                foreach (var file in filteredFilesOfClass)
++                {
++                    @class.AddFile(ProcessFile(module, file.FileId, functions, file.FilePath));
++                }
++
++                assembly.AddClass(@class);
++            }
++        }
+     }
+ }
+diff --git a/src/ReportGenerator.Core/Parser/FileReading/LocalFileReader.cs b/src/ReportGenerator.Core/Parser/FileReading/LocalFileReader.cs
+index 14cad0af..eca0f062 100644
+--- a/src/ReportGenerator.Core/Parser/FileReading/LocalFileReader.cs
++++ b/src/ReportGenerator.Core/Parser/FileReading/LocalFileReader.cs
+@@ -109,36 +109,6 @@ namespace Palmmedia.ReportGenerator.Core.Parser.FileReading
+             }
+         }
+ 
+-        private string MapPath(string path)
+-        {
+-            if (File.Exists(path))
+-            {
+-                return path;
+-            }
+-
+-            if (path.StartsWith("/_") && DeterministicPathRegex.IsMatch(path))
+-            {
+-                path = path.Substring(path.IndexOf("/", 2) + 1);
+-
+-                if (File.Exists(path))
+-                {
+-                    return path;
+-                }
+-
+-                if (this.sourceDirectories.Count == 0)
+-                {
+-                    return MapPath(path, DeterministicSourceDirectories);
+-                }
+-            }
+-
+-            if (this.sourceDirectories.Count > 0)
+-            {
+-                return MapPath(path, this.sourceDirectories);
+-            }
+-
+-            return path;
+-        }
+-
+         private static string MapPath(string path, IEnumerable<string> directories)
+         {
+             /*
+@@ -173,6 +143,56 @@ namespace Palmmedia.ReportGenerator.Core.Parser.FileReading
+             return path;
+         }
+ 
++        /// <summary>
++        /// Checks if the file ends with a newline character.
++        /// </summary>
++        /// <param name="path">The path of the file.</param>
++        /// <returns>True if the file ends with a newline character, otherwise false.</returns>
++        private static bool FileEndsWithNewline(string path)
++        {
++            using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
++            {
++                if (fs.Length == 0)
++                {
++                    return false;
++                }
++
++                fs.Seek(-1, SeekOrigin.End);
++                int lastByte = fs.ReadByte();
++                return lastByte == '\n' || lastByte == '\r';
++            }
++        }
++
++        private string MapPath(string path)
++        {
++            if (File.Exists(path))
++            {
++                return path;
++            }
++
++            if (path.StartsWith("/_") && DeterministicPathRegex.IsMatch(path))
++            {
++                path = path.Substring(path.IndexOf("/", 2) + 1);
++
++                if (File.Exists(path))
++                {
++                    return path;
++                }
++
++                if (this.sourceDirectories.Count == 0)
++                {
++                    return MapPath(path, DeterministicSourceDirectories);
++                }
++            }
++
++            if (this.sourceDirectories.Count > 0)
++            {
++                return MapPath(path, this.sourceDirectories);
++            }
++
++            return path;
++        }
++
+         /// <summary>
+         /// Reads all lines of a file, preserving a trailing empty line if present.
+         /// </summary>
+@@ -204,25 +224,5 @@ namespace Palmmedia.ReportGenerator.Core.Parser.FileReading
+ 
+             return lines.ToArray();
+         }
+-
+-        /// <summary>
+-        /// Checks if the file ends with a newline character.
+-        /// </summary>
+-        /// <param name="path">The path of the file.</param>
+-        /// <returns>True if the file ends with a newline character, otherwise false.</returns>
+-        private static bool FileEndsWithNewline(string path)
+-        {
+-            using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+-            {
+-                if (fs.Length == 0)
+-                {
+-                    return false;
+-                }
+-
+-                fs.Seek(-1, SeekOrigin.End);
+-                int lastByte = fs.ReadByte();
+-                return lastByte == '\n' || lastByte == '\r';
+-            }
+-        }
+     }
+ }
+diff --git a/src/ReportGenerator.Core/Parser/Filtering/DefaultFilter.cs b/src/ReportGenerator.Core/Parser/Filtering/DefaultFilter.cs
+index 10dbc822..a9100e18 100644
+--- a/src/ReportGenerator.Core/Parser/Filtering/DefaultFilter.cs
++++ b/src/ReportGenerator.Core/Parser/Filtering/DefaultFilter.cs
+@@ -122,4 +122,4 @@ namespace Palmmedia.ReportGenerator.Core.Parser.Filtering
+             return new Regex($"^{filter}$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/Parser/JaCoCoParser.cs b/src/ReportGenerator.Core/Parser/JaCoCoParser.cs
+index 1c050093..e640a68c 100644
+--- a/src/ReportGenerator.Core/Parser/JaCoCoParser.cs
++++ b/src/ReportGenerator.Core/Parser/JaCoCoParser.cs
+@@ -94,82 +94,6 @@ namespace Palmmedia.ReportGenerator.Core.Parser
+             return result;
+         }
+ 
+-        /// <summary>
+-        /// Processes the given assembly.
+-        /// </summary>
+-        /// <param name="modules">The modules.</param>
+-        /// <param name="assemblyName">Name of the assembly.</param>
+-        /// <returns>The <see cref="Assembly"/>.</returns>
+-        private Assembly ProcessAssembly(XElement[] modules, string assemblyName)
+-        {
+-            Logger.DebugFormat(Resources.CurrentAssembly, assemblyName);
+-
+-            var classNames = modules
+-                .Where(m => m.Attribute("name").Value.Equals(assemblyName))
+-                .Elements("class")
+-                .Select(c => c.Attribute("name").Value)
+-                .Where(c => !c.Contains("$"))
+-                .Distinct()
+-                .Where(c => this.ClassFilter.IsElementIncludedInReport(c))
+-                .OrderBy(name => name)
+-                .ToArray();
+-
+-            var assembly = new Assembly(assemblyName);
+-
+-            Parallel.ForEach(classNames, className => this.ProcessClass(modules, assembly, className));
+-
+-            return assembly;
+-        }
+-
+-        /// <summary>
+-        /// Processes the given class.
+-        /// </summary>
+-        /// <param name="modules">The modules.</param>
+-        /// <param name="assembly">The assembly.</param>
+-        /// <param name="className">Name of the class.</param>
+-        private void ProcessClass(XElement[] modules, Assembly assembly, string className)
+-        {
+-            var classes = modules
+-                .Where(m => m.Attribute("name").Value.Equals(assembly.Name))
+-                .Elements("class")
+-                .Where(c => c.Attribute("name").Value.Equals(className)
+-                            || c.Attribute("name").Value.StartsWith(className + "$", StringComparison.Ordinal))
+-                .ToArray();
+-
+-            var files = classes
+-                .Select(c => c.Attribute("sourcefilename")?.Value)
+-                .Where(f => f != null) // This attribute is not present in older JaCoCo versions
+-                .Distinct()
+-                .ToArray();
+-
+-            var filteredFiles = files
+-                .Where(f => this.FileFilter.IsElementIncludedInReport(f))
+-                .ToArray();
+-
+-            // If all files are removed by filters, then the whole class is omitted
+-            if ((files.Length == 0 && !this.FileFilter.HasCustomFilters) || filteredFiles.Length > 0)
+-            {
+-                var @class = new Class(className, assembly);
+-
+-                foreach (var file in filteredFiles)
+-                {
+-                    var codeFile = ProcessFile(modules, @class, file, out int numberOrLines);
+-
+-                    var methodsOfFile = classes
+-                        .Where(c => c.Attribute("sourcefilename") != null && c.Attribute("sourcefilename").Value.Equals(file))
+-                        .Elements("method")
+-                        .ToArray();
+-
+-                    SetMethodMetrics(codeFile, methodsOfFile);
+-                    SetCodeElements(codeFile, methodsOfFile, numberOrLines);
+-
+-                    @class.AddFile(codeFile);
+-                }
+-
+-                assembly.AddClass(@class);
+-            }
+-        }
+-
+         /// <summary>
+         /// Processes the file.
+         /// </summary>
+@@ -371,6 +295,82 @@ namespace Palmmedia.ReportGenerator.Core.Parser
+             return result;
+         }
+ 
++        /// <summary>
++        /// Processes the given assembly.
++        /// </summary>
++        /// <param name="modules">The modules.</param>
++        /// <param name="assemblyName">Name of the assembly.</param>
++        /// <returns>The <see cref="Assembly"/>.</returns>
++        private Assembly ProcessAssembly(XElement[] modules, string assemblyName)
++        {
++            Logger.DebugFormat(Resources.CurrentAssembly, assemblyName);
++
++            var classNames = modules
++                .Where(m => m.Attribute("name").Value.Equals(assemblyName))
++                .Elements("class")
++                .Select(c => c.Attribute("name").Value)
++                .Where(c => !c.Contains("$"))
++                .Distinct()
++                .Where(c => this.ClassFilter.IsElementIncludedInReport(c))
++                .OrderBy(name => name)
++                .ToArray();
++
++            var assembly = new Assembly(assemblyName);
++
++            Parallel.ForEach(classNames, className => this.ProcessClass(modules, assembly, className));
++
++            return assembly;
++        }
++
++        /// <summary>
++        /// Processes the given class.
++        /// </summary>
++        /// <param name="modules">The modules.</param>
++        /// <param name="assembly">The assembly.</param>
++        /// <param name="className">Name of the class.</param>
++        private void ProcessClass(XElement[] modules, Assembly assembly, string className)
++        {
++            var classes = modules
++                .Where(m => m.Attribute("name").Value.Equals(assembly.Name))
++                .Elements("class")
++                .Where(c => c.Attribute("name").Value.Equals(className)
++                            || c.Attribute("name").Value.StartsWith(className + "$", StringComparison.Ordinal))
++                .ToArray();
++
++            var files = classes
++                .Select(c => c.Attribute("sourcefilename")?.Value)
++                .Where(f => f != null) // This attribute is not present in older JaCoCo versions
++                .Distinct()
++                .ToArray();
++
++            var filteredFiles = files
++                .Where(f => this.FileFilter.IsElementIncludedInReport(f))
++                .ToArray();
++
++            // If all files are removed by filters, then the whole class is omitted
++            if ((files.Length == 0 && !this.FileFilter.HasCustomFilters) || filteredFiles.Length > 0)
++            {
++                var @class = new Class(className, assembly);
++
++                foreach (var file in filteredFiles)
++                {
++                    var codeFile = ProcessFile(modules, @class, file, out int numberOrLines);
++
++                    var methodsOfFile = classes
++                        .Where(c => c.Attribute("sourcefilename") != null && c.Attribute("sourcefilename").Value.Equals(file))
++                        .Elements("method")
++                        .ToArray();
++
++                    SetMethodMetrics(codeFile, methodsOfFile);
++                    SetCodeElements(codeFile, methodsOfFile, numberOrLines);
++
++                    @class.AddFile(codeFile);
++                }
++
++                assembly.AddClass(@class);
++            }
++        }
++
+         /// <summary>
+         /// Represents the coverage information of a line.
+         /// </summary>
+diff --git a/src/ReportGenerator.Core/Parser/MProfParser.cs b/src/ReportGenerator.Core/Parser/MProfParser.cs
+index d20a13a1..f01b9f2c 100644
+--- a/src/ReportGenerator.Core/Parser/MProfParser.cs
++++ b/src/ReportGenerator.Core/Parser/MProfParser.cs
+@@ -76,66 +76,6 @@ namespace Palmmedia.ReportGenerator.Core.Parser
+             return result;
+         }
+ 
+-        /// <summary>
+-        /// Processes the given assembly.
+-        /// </summary>
+-        /// <param name="methods">The methods.</param>
+-        /// <param name="assemblyName">Name of the assembly.</param>
+-        /// <returns>The <see cref="Assembly"/>.</returns>
+-        private Assembly ProcessAssembly(XElement[] methods, string assemblyName)
+-        {
+-            Logger.DebugFormat(Resources.CurrentAssembly, assemblyName);
+-
+-            var classNames = methods
+-                .Where(m => m.Attribute("assembly").Value.Equals(assemblyName))
+-                .Select(m => m.Attribute("class").Value)
+-                .Where(c => !c.Contains(".`1c__") && c != "`1")
+-                .Distinct()
+-                .Where(c => this.ClassFilter.IsElementIncludedInReport(c))
+-                .OrderBy(name => name)
+-                .ToArray();
+-
+-            var assembly = new Assembly(assemblyName);
+-
+-            Parallel.ForEach(classNames, className => this.ProcessClass(methods, assembly, className));
+-
+-            return assembly;
+-        }
+-
+-        /// <summary>
+-        /// Processes the given class.
+-        /// </summary>
+-        /// <param name="methods">The methods.</param>
+-        /// <param name="assembly">The assembly.</param>
+-        /// <param name="className">Name of the class.</param>
+-        private void ProcessClass(XElement[] methods, Assembly assembly, string className)
+-        {
+-            var filesOfClass = methods
+-                .Where(m => m.Attribute("assembly").Value.Equals(assembly.Name))
+-                .Where(m => m.Attribute("class").Value.Equals(className, StringComparison.Ordinal))
+-                .Where(m => m.Attribute("filename").Value.Length > 0)
+-                .Select(m => m.Attribute("filename").Value)
+-                .Distinct()
+-                .ToArray();
+-
+-            var filteredFilesOfClass = filesOfClass
+-                .Where(f => this.FileFilter.IsElementIncludedInReport(f))
+-                .ToArray();
+-
+-            // If all files are removed by filters, then the whole class is omitted
+-            if ((filesOfClass.Length == 0 && !this.FileFilter.HasCustomFilters) || filteredFilesOfClass.Length > 0)
+-            {
+-                var @class = new Class(className, assembly);
+-
+-                foreach (var file in filteredFilesOfClass)
+-                {
+-                    @class.AddFile(ProcessFile(methods, @class, file));
+-                }
+-
+-                assembly.AddClass(@class);
+-            }
+-        }
+-
+         /// <summary>
+         /// Processes the file.
+         /// </summary>
+@@ -229,5 +169,65 @@ namespace Palmmedia.ReportGenerator.Core.Parser
+                 }
+             }
+         }
++
++        /// <summary>
++        /// Processes the given assembly.
++        /// </summary>
++        /// <param name="methods">The methods.</param>
++        /// <param name="assemblyName">Name of the assembly.</param>
++        /// <returns>The <see cref="Assembly"/>.</returns>
++        private Assembly ProcessAssembly(XElement[] methods, string assemblyName)
++        {
++            Logger.DebugFormat(Resources.CurrentAssembly, assemblyName);
++
++            var classNames = methods
++                .Where(m => m.Attribute("assembly").Value.Equals(assemblyName))
++                .Select(m => m.Attribute("class").Value)
++                .Where(c => !c.Contains(".`1c__") && c != "`1")
++                .Distinct()
++                .Where(c => this.ClassFilter.IsElementIncludedInReport(c))
++                .OrderBy(name => name)
++                .ToArray();
++
++            var assembly = new Assembly(assemblyName);
++
++            Parallel.ForEach(classNames, className => this.ProcessClass(methods, assembly, className));
++
++            return assembly;
++        }
++
++        /// <summary>
++        /// Processes the given class.
++        /// </summary>
++        /// <param name="methods">The methods.</param>
++        /// <param name="assembly">The assembly.</param>
++        /// <param name="className">Name of the class.</param>
++        private void ProcessClass(XElement[] methods, Assembly assembly, string className)
++        {
++            var filesOfClass = methods
++                .Where(m => m.Attribute("assembly").Value.Equals(assembly.Name))
++                .Where(m => m.Attribute("class").Value.Equals(className, StringComparison.Ordinal))
++                .Where(m => m.Attribute("filename").Value.Length > 0)
++                .Select(m => m.Attribute("filename").Value)
++                .Distinct()
++                .ToArray();
++
++            var filteredFilesOfClass = filesOfClass
++                .Where(f => this.FileFilter.IsElementIncludedInReport(f))
++                .ToArray();
++
++            // If all files are removed by filters, then the whole class is omitted
++            if ((filesOfClass.Length == 0 && !this.FileFilter.HasCustomFilters) || filteredFilesOfClass.Length > 0)
++            {
++                var @class = new Class(className, assembly);
++
++                foreach (var file in filteredFilesOfClass)
++                {
++                    @class.AddFile(ProcessFile(methods, @class, file));
++                }
++
++                assembly.AddClass(@class);
++            }
++        }
+     }
+ }
+diff --git a/src/ReportGenerator.Core/Parser/NCoverParser.cs b/src/ReportGenerator.Core/Parser/NCoverParser.cs
+index 31f7b62d..82321e50 100644
+--- a/src/ReportGenerator.Core/Parser/NCoverParser.cs
++++ b/src/ReportGenerator.Core/Parser/NCoverParser.cs
+@@ -76,69 +76,6 @@ namespace Palmmedia.ReportGenerator.Core.Parser
+             return result;
+         }
+ 
+-        /// <summary>
+-        /// Processes the given assembly.
+-        /// </summary>
+-        /// <param name="modules">The modules.</param>
+-        /// <param name="assemblyName">Name of the assembly.</param>
+-        /// <returns>The <see cref="Assembly"/>.</returns>
+-        private Assembly ProcessAssembly(XElement[] modules, string assemblyName)
+-        {
+-            Logger.DebugFormat(Resources.CurrentAssembly, assemblyName);
+-
+-            var classNames = modules
+-                .Where(module => module.Attribute("assembly").Value.Equals(assemblyName))
+-                .Elements("method")
+-                .Where(m => m.Attribute("excluded").Value == "false")
+-                .Select(method => method.Attribute("class").Value)
+-                .Where(value => !value.Contains("__") && !value.Contains("+"))
+-                .Distinct()
+-                .Where(c => this.ClassFilter.IsElementIncludedInReport(c))
+-                .OrderBy(name => name)
+-                .ToArray();
+-
+-            var assembly = new Assembly(assemblyName);
+-
+-            Parallel.ForEach(classNames, className => this.ProcessClass(modules, assembly, className));
+-
+-            return assembly;
+-        }
+-
+-        /// <summary>
+-        /// Processes the given class.
+-        /// </summary>
+-        /// <param name="modules">The modules.</param>
+-        /// <param name="assembly">The assembly.</param>
+-        /// <param name="className">Name of the class.</param>
+-        private void ProcessClass(XElement[] modules, Assembly assembly, string className)
+-        {
+-            var filesOfClass = modules
+-                .Where(module => module.Attribute("assembly").Value.Equals(assembly.Name)).Elements("method")
+-                .Where(method => method.Attribute("class").Value.Equals(className))
+-                .Where(m => m.Attribute("excluded").Value == "false")
+-                .Elements("seqpnt")
+-                .Select(seqpnt => seqpnt.Attribute("document").Value)
+-                .Distinct()
+-                .ToArray();
+-
+-            var filteredFilesOfClass = filesOfClass
+-                .Where(f => this.FileFilter.IsElementIncludedInReport(f))
+-                .ToArray();
+-
+-            // If all files are removed by filters, then the whole class is omitted
+-            if ((filesOfClass.Length == 0 && !this.FileFilter.HasCustomFilters) || filteredFilesOfClass.Length > 0)
+-            {
+-                var @class = new Class(className, assembly);
+-
+-                foreach (var file in filteredFilesOfClass)
+-                {
+-                    @class.AddFile(ProcessFile(modules, @class, file));
+-                }
+-
+-                assembly.AddClass(@class);
+-            }
+-        }
+-
+         /// <summary>
+         /// Processes the file.
+         /// </summary>
+@@ -240,5 +177,68 @@ namespace Palmmedia.ReportGenerator.Core.Parser
+                 }
+             }
+         }
++
++        /// <summary>
++        /// Processes the given assembly.
++        /// </summary>
++        /// <param name="modules">The modules.</param>
++        /// <param name="assemblyName">Name of the assembly.</param>
++        /// <returns>The <see cref="Assembly"/>.</returns>
++        private Assembly ProcessAssembly(XElement[] modules, string assemblyName)
++        {
++            Logger.DebugFormat(Resources.CurrentAssembly, assemblyName);
++
++            var classNames = modules
++                .Where(module => module.Attribute("assembly").Value.Equals(assemblyName))
++                .Elements("method")
++                .Where(m => m.Attribute("excluded").Value == "false")
++                .Select(method => method.Attribute("class").Value)
++                .Where(value => !value.Contains("__") && !value.Contains("+"))
++                .Distinct()
++                .Where(c => this.ClassFilter.IsElementIncludedInReport(c))
++                .OrderBy(name => name)
++                .ToArray();
++
++            var assembly = new Assembly(assemblyName);
++
++            Parallel.ForEach(classNames, className => this.ProcessClass(modules, assembly, className));
++
++            return assembly;
++        }
++
++        /// <summary>
++        /// Processes the given class.
++        /// </summary>
++        /// <param name="modules">The modules.</param>
++        /// <param name="assembly">The assembly.</param>
++        /// <param name="className">Name of the class.</param>
++        private void ProcessClass(XElement[] modules, Assembly assembly, string className)
++        {
++            var filesOfClass = modules
++                .Where(module => module.Attribute("assembly").Value.Equals(assembly.Name)).Elements("method")
++                .Where(method => method.Attribute("class").Value.Equals(className))
++                .Where(m => m.Attribute("excluded").Value == "false")
++                .Elements("seqpnt")
++                .Select(seqpnt => seqpnt.Attribute("document").Value)
++                .Distinct()
++                .ToArray();
++
++            var filteredFilesOfClass = filesOfClass
++                .Where(f => this.FileFilter.IsElementIncludedInReport(f))
++                .ToArray();
++
++            // If all files are removed by filters, then the whole class is omitted
++            if ((filesOfClass.Length == 0 && !this.FileFilter.HasCustomFilters) || filteredFilesOfClass.Length > 0)
++            {
++                var @class = new Class(className, assembly);
++
++                foreach (var file in filteredFilesOfClass)
++                {
++                    @class.AddFile(ProcessFile(modules, @class, file));
++                }
++
++                assembly.AddClass(@class);
++            }
++        }
+     }
+ }
+diff --git a/src/ReportGenerator.Core/Parser/OpenCoverParser.cs b/src/ReportGenerator.Core/Parser/OpenCoverParser.cs
+index 43a620ea..41fe932d 100644
+--- a/src/ReportGenerator.Core/Parser/OpenCoverParser.cs
++++ b/src/ReportGenerator.Core/Parser/OpenCoverParser.cs
+@@ -137,132 +137,6 @@ namespace Palmmedia.ReportGenerator.Core.Parser
+             return result;
+         }
+ 
+-        /// <summary>
+-        /// Processes the given assembly.
+-        /// </summary>
+-        /// <param name="assemblyModules">The modules belonging to a assembly name.</param>
+-        /// <param name="files">The files.</param>
+-        /// <param name="trackedMethods">The tracked methods.</param>
+-        /// <param name="assemblyName">Name of the assembly.</param>
+-        /// <returns>The <see cref="Assembly"/>.</returns>
+-        private Assembly ProcessAssembly(IDictionary<string, XElement[]> assemblyModules, XElement[] files, IDictionary<string, string> trackedMethods, string assemblyName)
+-        {
+-            Logger.DebugFormat(Resources.CurrentAssembly, assemblyName);
+-
+-            var fileIdsByFilename = assemblyModules[assemblyName]
+-                .Elements("Files")
+-                .Elements("File")
+-                .GroupBy(f => f.Attribute("fullPath").Value)
+-                .ToDictionary(g => g.Key, g => new FileElement(g));
+-
+-            var classNames = assemblyModules[assemblyName]
+-                .Elements("Classes")
+-                .Elements("Class")
+-                .Where(c => c.Attribute("skippedDueTo") == null)
+-                .Where(c => !c.Element("FullName").Value.Contains("<>f__AnonymousType"))
+-                .Where(c => c.Element("Methods").Elements("Method").Any())
+-                .Select(c =>
+-                    {
+-                        string fullname = c.Element("FullName").Value;
+-                        int nestedClassSeparatorIndex = fullname.IndexOf('/');
+-                        if (nestedClassSeparatorIndex > -1)
+-                        {
+-                            string className = fullname.Substring(0, nestedClassSeparatorIndex);
+-                            return Tuple.Create(className, className);
+-                        }
+-
+-                        if (fullname.Contains("<"))
+-                        {
+-                            var match = AsyncClassRegex.Match(fullname);
+-
+-                            if (match.Success)
+-                            {
+-                                return Tuple.Create(
+-                                    match.Groups["ClassName"].Value,
+-                                    match.Groups["ClassName"].Value + match.Groups["GenericTypes"].Value);
+-                            }
+-                        }
+-
+-                        return Tuple.Create(fullname, fullname);
+-                    })
+-                .Where(c => !c.Item1.Contains("<") || GenericClassRegex.IsMatch(c.Item1))
+-                .Select(i => i.Item1)
+-                .Distinct()
+-                .Where(c => this.ClassFilter.IsElementIncludedInReport(c))
+-                .OrderBy(name => name)
+-                .ToArray();
+-
+-            var assembly = new Assembly(assemblyName);
+-
+-            Parallel.ForEach(classNames, className => this.ProcessClass(assemblyModules, files, trackedMethods, fileIdsByFilename, assembly, className));
+-
+-            return assembly;
+-        }
+-
+-        /// <summary>
+-        /// Processes the given class.
+-        /// </summary>
+-        /// <param name="assemblyModules">The modules belonging to a assembly name.</param>
+-        /// <param name="files">The files.</param>
+-        /// <param name="trackedMethods">The tracked methods.</param>
+-        /// <param name="fileIdsByFilename">Dictionary containing the file ids by filename.</param>
+-        /// <param name="assembly">The assembly.</param>
+-        /// <param name="className">Name of the class.</param>
+-        private void ProcessClass(IDictionary<string, XElement[]> assemblyModules, XElement[] files, IDictionary<string, string> trackedMethods, Dictionary<string, FileElement> fileIdsByFilename, Assembly assembly, string className)
+-        {
+-            var methods = assemblyModules[assembly.Name]
+-                .Elements("Classes")
+-                .Elements("Class")
+-                .Where(c => c.Element("FullName").Value.Equals(className)
+-                            || c.Element("FullName").Value.StartsWith(className + "/", StringComparison.Ordinal)
+-                            || c.Element("FullName").Value.StartsWith(className + ".", StringComparison.Ordinal))
+-                .Elements("Methods")
+-                .Elements("Method")
+-                .Where(m => m.Attribute("skippedDueTo") == null)
+-                .ToArray();
+-
+-            var fileIdsOfClassInSequencePoints = methods
+-                .Elements("SequencePoints")
+-                .Elements("SequencePoint")
+-                .Select(seqpnt => seqpnt.Attribute("fileid")?.Value)
+-                .Where(seqpnt => seqpnt != null && seqpnt != "0")
+-                .ToArray();
+-
+-            // Only required for backwards compatibility, older versions of OpenCover did not apply fileid for partial classes
+-            var fileIdsOfClassInFileRef = methods
+-                .Select(m => m.Element("FileRef")?.Attribute("uid").Value)
+-                .Where(m => m != null)
+-                .ToArray();
+-
+-            var fileIdsOfClass = fileIdsOfClassInSequencePoints
+-                .Concat(fileIdsOfClassInFileRef)
+-                .Distinct()
+-                .ToHashSet();
+-
+-            var filesOfClass = files
+-                .Where(file => fileIdsOfClass.Contains(file.Attribute("uid").Value))
+-                .Select(file => file.Attribute("fullPath").Value)
+-                .Distinct()
+-                .ToArray();
+-
+-            var filteredFilesOfClass = filesOfClass
+-                .Where(f => this.FileFilter.IsElementIncludedInReport(f))
+-                .ToArray();
+-
+-            // If all files are removed by filters, then the whole class is omitted
+-            if ((filesOfClass.Length == 0 && !this.FileFilter.HasCustomFilters) || filteredFilesOfClass.Length > 0)
+-            {
+-                var @class = new Class(className, assembly);
+-
+-                foreach (var file in filteredFilesOfClass)
+-                {
+-                    @class.AddFile(ProcessFile(trackedMethods, fileIdsByFilename[file], file, methods));
+-                }
+-
+-                assembly.AddClass(@class);
+-            }
+-        }
+-
+         /// <summary>
+         /// Processes the file.
+         /// </summary>
+@@ -623,6 +497,132 @@ namespace Palmmedia.ReportGenerator.Core.Parser
+             return fullName;
+         }
+ 
++        /// <summary>
++        /// Processes the given assembly.
++        /// </summary>
++        /// <param name="assemblyModules">The modules belonging to a assembly name.</param>
++        /// <param name="files">The files.</param>
++        /// <param name="trackedMethods">The tracked methods.</param>
++        /// <param name="assemblyName">Name of the assembly.</param>
++        /// <returns>The <see cref="Assembly"/>.</returns>
++        private Assembly ProcessAssembly(IDictionary<string, XElement[]> assemblyModules, XElement[] files, IDictionary<string, string> trackedMethods, string assemblyName)
++        {
++            Logger.DebugFormat(Resources.CurrentAssembly, assemblyName);
++
++            var fileIdsByFilename = assemblyModules[assemblyName]
++                .Elements("Files")
++                .Elements("File")
++                .GroupBy(f => f.Attribute("fullPath").Value)
++                .ToDictionary(g => g.Key, g => new FileElement(g));
++
++            var classNames = assemblyModules[assemblyName]
++                .Elements("Classes")
++                .Elements("Class")
++                .Where(c => c.Attribute("skippedDueTo") == null)
++                .Where(c => !c.Element("FullName").Value.Contains("<>f__AnonymousType"))
++                .Where(c => c.Element("Methods").Elements("Method").Any())
++                .Select(c =>
++                    {
++                        string fullname = c.Element("FullName").Value;
++                        int nestedClassSeparatorIndex = fullname.IndexOf('/');
++                        if (nestedClassSeparatorIndex > -1)
++                        {
++                            string className = fullname.Substring(0, nestedClassSeparatorIndex);
++                            return Tuple.Create(className, className);
++                        }
++
++                        if (fullname.Contains("<"))
++                        {
++                            var match = AsyncClassRegex.Match(fullname);
++
++                            if (match.Success)
++                            {
++                                return Tuple.Create(
++                                    match.Groups["ClassName"].Value,
++                                    match.Groups["ClassName"].Value + match.Groups["GenericTypes"].Value);
++                            }
++                        }
++
++                        return Tuple.Create(fullname, fullname);
++                    })
++                .Where(c => !c.Item1.Contains("<") || GenericClassRegex.IsMatch(c.Item1))
++                .Select(i => i.Item1)
++                .Distinct()
++                .Where(c => this.ClassFilter.IsElementIncludedInReport(c))
++                .OrderBy(name => name)
++                .ToArray();
++
++            var assembly = new Assembly(assemblyName);
++
++            Parallel.ForEach(classNames, className => this.ProcessClass(assemblyModules, files, trackedMethods, fileIdsByFilename, assembly, className));
++
++            return assembly;
++        }
++
++        /// <summary>
++        /// Processes the given class.
++        /// </summary>
++        /// <param name="assemblyModules">The modules belonging to a assembly name.</param>
++        /// <param name="files">The files.</param>
++        /// <param name="trackedMethods">The tracked methods.</param>
++        /// <param name="fileIdsByFilename">Dictionary containing the file ids by filename.</param>
++        /// <param name="assembly">The assembly.</param>
++        /// <param name="className">Name of the class.</param>
++        private void ProcessClass(IDictionary<string, XElement[]> assemblyModules, XElement[] files, IDictionary<string, string> trackedMethods, Dictionary<string, FileElement> fileIdsByFilename, Assembly assembly, string className)
++        {
++            var methods = assemblyModules[assembly.Name]
++                .Elements("Classes")
++                .Elements("Class")
++                .Where(c => c.Element("FullName").Value.Equals(className)
++                            || c.Element("FullName").Value.StartsWith(className + "/", StringComparison.Ordinal)
++                            || c.Element("FullName").Value.StartsWith(className + ".", StringComparison.Ordinal))
++                .Elements("Methods")
++                .Elements("Method")
++                .Where(m => m.Attribute("skippedDueTo") == null)
++                .ToArray();
++
++            var fileIdsOfClassInSequencePoints = methods
++                .Elements("SequencePoints")
++                .Elements("SequencePoint")
++                .Select(seqpnt => seqpnt.Attribute("fileid")?.Value)
++                .Where(seqpnt => seqpnt != null && seqpnt != "0")
++                .ToArray();
++
++            // Only required for backwards compatibility, older versions of OpenCover did not apply fileid for partial classes
++            var fileIdsOfClassInFileRef = methods
++                .Select(m => m.Element("FileRef")?.Attribute("uid").Value)
++                .Where(m => m != null)
++                .ToArray();
++
++            var fileIdsOfClass = fileIdsOfClassInSequencePoints
++                .Concat(fileIdsOfClassInFileRef)
++                .Distinct()
++                .ToHashSet();
++
++            var filesOfClass = files
++                .Where(file => fileIdsOfClass.Contains(file.Attribute("uid").Value))
++                .Select(file => file.Attribute("fullPath").Value)
++                .Distinct()
++                .ToArray();
++
++            var filteredFilesOfClass = filesOfClass
++                .Where(f => this.FileFilter.IsElementIncludedInReport(f))
++                .ToArray();
++
++            // If all files are removed by filters, then the whole class is omitted
++            if ((filesOfClass.Length == 0 && !this.FileFilter.HasCustomFilters) || filteredFilesOfClass.Length > 0)
++            {
++                var @class = new Class(className, assembly);
++
++                foreach (var file in filteredFilesOfClass)
++                {
++                    @class.AddFile(ProcessFile(trackedMethods, fileIdsByFilename[file], file, methods));
++                }
++
++                assembly.AddClass(@class);
++            }
++        }
++
+         private class FileElement
+         {
+             /// <summary>
+diff --git a/src/ReportGenerator.Core/Parser/ParserResult.cs b/src/ReportGenerator.Core/Parser/ParserResult.cs
+index b093227a..8134babc 100644
+--- a/src/ReportGenerator.Core/Parser/ParserResult.cs
++++ b/src/ReportGenerator.Core/Parser/ParserResult.cs
+@@ -219,4 +219,4 @@ namespace Palmmedia.ReportGenerator.Core.Parser
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/Parser/Preprocessing/DotCoverReportPreprocessor.cs b/src/ReportGenerator.Core/Parser/Preprocessing/DotCoverReportPreprocessor.cs
+index 40505b0b..e5efe5e4 100644
+--- a/src/ReportGenerator.Core/Parser/Preprocessing/DotCoverReportPreprocessor.cs
++++ b/src/ReportGenerator.Core/Parser/Preprocessing/DotCoverReportPreprocessor.cs
+@@ -145,4 +145,4 @@ namespace Palmmedia.ReportGenerator.Core.Parser.Preprocessing
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/Parser/SCoverageParser.cs b/src/ReportGenerator.Core/Parser/SCoverageParser.cs
+index 48d71a97..8ca35106 100644
+--- a/src/ReportGenerator.Core/Parser/SCoverageParser.cs
++++ b/src/ReportGenerator.Core/Parser/SCoverageParser.cs
+@@ -80,6 +80,142 @@ namespace Palmmedia.ReportGenerator.Core.Parser
+             return result;
+         }
+ 
++        /// <summary>
++        /// Extracts the metrics from the given <see cref="XElement">XElements</see>.
++        /// </summary>
++        /// <param name="codeFile">The code file.</param>
++        /// <param name="methodsOfFile">The methods of the file.</param>
++        private static void SetMethodMetrics(CodeFile codeFile, IEnumerable<XElement> methodsOfFile)
++        {
++            foreach (var method in methodsOfFile)
++            {
++                string methodName = method.Attribute("name").Value;
++
++                string shortName = GetShortMethodName(methodName);
++
++                var metrics = new List<Metric>();
++
++                var statementRate = method.Attribute("statement-rate");
++
++                decimal? coveragePercent = null;
++                if (statementRate != null)
++                {
++                    coveragePercent = decimal.Parse(statementRate.Value, CultureInfo.InvariantCulture);
++
++                    metrics.Add(Metric.Statement(coveragePercent));
++                }
++
++                var branchRate = method.Attribute("branch-rate");
++
++                if (branchRate != null)
++                {
++                    decimal? value = decimal.Parse(branchRate.Value, CultureInfo.InvariantCulture);
++
++                    metrics.Add(Metric.BranchCoverage(value));
++                }
++
++                var methodMetric = new MethodMetric(methodName, shortName, metrics);
++
++                var line = method
++                    .Elements("statements")
++                    .Elements("statement")
++                    .FirstOrDefault();
++
++                if (line != null)
++                {
++                    methodMetric.Line = int.Parse(line.Attribute("line").Value, CultureInfo.InvariantCulture);
++                }
++
++                codeFile.AddMethodMetric(methodMetric);
++            }
++        }
++
++        /// <summary>
++        /// Gets the branches by line number.
++        /// </summary>
++        /// <param name="lines">The lines.</param>
++        /// <returns>The branches by line number.</returns>
++        private static Dictionary<int, ICollection<Branch>> GetBranches(IEnumerable<XElement> lines)
++        {
++            var result = new Dictionary<int, ICollection<Branch>>();
++
++            var linesWithBranches = lines
++                .Where(l => l.Attribute("branch").Value == "true")
++                .GroupBy(l => l.Attribute("line").Value)
++                .ToArray();
++
++            foreach (var lineGroup in linesWithBranches)
++            {
++                var branches = new HashSet<Branch>();
++
++                foreach (var line in lineGroup)
++                {
++                    string identifier = string.Format(
++                        CultureInfo.InvariantCulture,
++                        "{0}_{1}_{2}",
++                        lineGroup.Key,
++                        line.Attribute("start"),
++                        line.Attribute("end"));
++
++                    int lineCount = int.Parse(line.Attribute("invocation-count").Value, CultureInfo.InvariantCulture);
++
++                    branches.Add(new Branch(lineCount, identifier));
++                }
++
++                result.Add(int.Parse(lineGroup.Key, CultureInfo.InvariantCulture), branches);
++            }
++
++            return result;
++        }
++
++        private static string GetShortMethodName(string fullName)
++        {
++            int indexOpen = fullName.IndexOf('(');
++
++            if (indexOpen <= 0)
++            {
++                return fullName;
++            }
++
++            int indexClose = fullName.IndexOf(')');
++            string signature = indexClose - indexOpen > 1 ? "(...)" : "()";
++
++            return $"{fullName.Substring(0, indexOpen)}{signature}";
++        }
++
++        /// <summary>
++        /// Extracts the methods/properties of the given <see cref="XElement">XElements</see>.
++        /// </summary>
++        /// <param name="codeFile">The code file.</param>
++        /// <param name="methodsOfFile">The methods of the file.</param>
++        private static void SetCodeElements(CodeFile codeFile, IEnumerable<XElement> methodsOfFile)
++        {
++            foreach (var method in methodsOfFile)
++            {
++                string methodName = method.Attribute("name").Value;
++
++                var lines = method.Elements("statements")
++                    .Elements("statement")
++                    .Select(line => int.Parse(line.Attribute("line").Value, CultureInfo.InvariantCulture))
++                    .OrderBy(line => line)
++                    .ToArray();
++
++                if (lines.Length > 0)
++                {
++                    int firstLine = lines[0];
++                    int lastLine = lines[lines.Length - 1];
++
++                    codeFile.AddCodeElement(new CodeElement(
++                        methodName,
++                        methodName,
++                        CodeElementType.Method,
++                        firstLine,
++                        lastLine,
++                        codeFile.CoverageQuotaInRange(firstLine, lastLine)));
++                }
++            }
++        }
++
+         /// <summary>
+         /// Processes the given assembly.
+         /// </summary>
+@@ -228,141 +364,5 @@ namespace Palmmedia.ReportGenerator.Core.Parser
+ 
+             return codeFile;
+         }
+-
+-        /// <summary>
+-        /// Extracts the metrics from the given <see cref="XElement">XElements</see>.
+-        /// </summary>
+-        /// <param name="codeFile">The code file.</param>
+-        /// <param name="methodsOfFile">The methods of the file.</param>
+-        private static void SetMethodMetrics(CodeFile codeFile, IEnumerable<XElement> methodsOfFile)
+-        {
+-            foreach (var method in methodsOfFile)
+-            {
+-                string methodName = method.Attribute("name").Value;
+-
+-                string shortName = GetShortMethodName(methodName);
+-
+-                var metrics = new List<Metric>();
+-
+-                var statementRate = method.Attribute("statement-rate");
+-
+-                decimal? coveragePercent = null;
+-                if (statementRate != null)
+-                {
+-                    coveragePercent = decimal.Parse(statementRate.Value, CultureInfo.InvariantCulture);
+-
+-                    metrics.Add(Metric.Statement(coveragePercent));
+-                }
+-
+-                var branchRate = method.Attribute("branch-rate");
+-
+-                if (branchRate != null)
+-                {
+-                    decimal? value = decimal.Parse(branchRate.Value, CultureInfo.InvariantCulture);
+-
+-                    metrics.Add(Metric.BranchCoverage(value));
+-                }
+-
+-                var methodMetric = new MethodMetric(methodName, shortName, metrics);
+-
+-                var line = method
+-                    .Elements("statements")
+-                    .Elements("statement")
+-                    .FirstOrDefault();
+-
+-                if (line != null)
+-                {
+-                    methodMetric.Line = int.Parse(line.Attribute("line").Value, CultureInfo.InvariantCulture);
+-                }
+-
+-                codeFile.AddMethodMetric(methodMetric);
+-            }
+-        }
+-
+-        /// <summary>
+-        /// Gets the branches by line number.
+-        /// </summary>
+-        /// <param name="lines">The lines.</param>
+-        /// <returns>The branches by line number.</returns>
+-        private static Dictionary<int, ICollection<Branch>> GetBranches(IEnumerable<XElement> lines)
+-        {
+-            var result = new Dictionary<int, ICollection<Branch>>();
+-
+-            var linesWithBranches = lines
+-                .Where(l => l.Attribute("branch").Value == "true")
+-                .GroupBy(l => l.Attribute("line").Value)
+-                .ToArray();
+-
+-            foreach (var lineGroup in linesWithBranches)
+-            {
+-                var branches = new HashSet<Branch>();
+-
+-                foreach (var line in lineGroup)
+-                {
+-                    string identifier = string.Format(
+-                        CultureInfo.InvariantCulture,
+-                        "{0}_{1}_{2}",
+-                        lineGroup.Key,
+-                        line.Attribute("start"),
+-                        line.Attribute("end"));
+-
+-                    int lineCount = int.Parse(line.Attribute("invocation-count").Value, CultureInfo.InvariantCulture);
+-
+-                    branches.Add(new Branch(lineCount, identifier));
+-                }
+-
+-                result.Add(int.Parse(lineGroup.Key, CultureInfo.InvariantCulture), branches);
+-            }
+-
+-            return result;
+-        }
+-
+-        private static string GetShortMethodName(string fullName)
+-        {
+-            int indexOpen = fullName.IndexOf('(');
+-
+-            if (indexOpen <= 0)
+-            {
+-                return fullName;
+-            }
+-
+-            int indexClose = fullName.IndexOf(')');
+-            string signature = indexClose - indexOpen > 1 ? "(...)" : "()";
+-
+-            return $"{fullName.Substring(0, indexOpen)}{signature}";
+-        }
+-
+-        /// <summary>
+-        /// Extracts the methods/properties of the given <see cref="XElement">XElements</see>.
+-        /// </summary>
+-        /// <param name="codeFile">The code file.</param>
+-        /// <param name="methodsOfFile">The methods of the file.</param>
+-        private static void SetCodeElements(CodeFile codeFile, IEnumerable<XElement> methodsOfFile)
+-        {
+-            foreach (var method in methodsOfFile)
+-            {
+-                string methodName = method.Attribute("name").Value;
+-
+-                var lines = method.Elements("statements")
+-                    .Elements("statement")
+-                    .Select(line => int.Parse(line.Attribute("line").Value, CultureInfo.InvariantCulture))
+-                    .OrderBy(line => line)
+-                    .ToArray();
+-
+-                if (lines.Length > 0)
+-                {
+-                    int firstLine = lines[0];
+-                    int lastLine = lines[lines.Length - 1];
+-
+-                    codeFile.AddCodeElement(new CodeElement(
+-                        methodName,
+-                        methodName,
+-                        CodeElementType.Method,
+-                        firstLine,
+-                        lastLine,
+-                        codeFile.CoverageQuotaInRange(firstLine, lastLine)));
+-                }
+-            }
+-        }
+     }
+ }
+diff --git a/src/ReportGenerator.Core/Parser/VisualStudioParser.cs b/src/ReportGenerator.Core/Parser/VisualStudioParser.cs
+index 1e93105e..4b5ea175 100644
+--- a/src/ReportGenerator.Core/Parser/VisualStudioParser.cs
++++ b/src/ReportGenerator.Core/Parser/VisualStudioParser.cs
+@@ -92,89 +92,6 @@ namespace Palmmedia.ReportGenerator.Core.Parser
+             return result;
+         }
+ 
+-        /// <summary>
+-        /// Processes the given assembly.
+-        /// </summary>
+-        /// <param name="modules">The modules.</param>
+-        /// <param name="files">The files.</param>
+-        /// <param name="assemblyName">Name of the assembly.</param>
+-        /// <returns>The <see cref="Assembly"/>.</returns>
+-        private Assembly ProcessAssembly(XElement[] modules, XElement[] files, string assemblyName)
+-        {
+-            Logger.DebugFormat(Resources.CurrentAssembly, assemblyName);
+-
+-            var classNames = modules
+-                .Where(m => m.Element("ModuleName").Value.Equals(assemblyName))
+-                .Elements("NamespaceTable")
+-                .Elements("Class")
+-                .Elements("ClassName")
+-                .Where(c => !c.Value.Contains("<>")
+-                    && !c.Value.StartsWith("$", StringComparison.OrdinalIgnoreCase))
+-                .Select(c =>
+-                {
+-                    string fullname = c.Value;
+-                    int nestedClassSeparatorIndex = fullname.IndexOf('.');
+-                    fullname = nestedClassSeparatorIndex > -1 ? fullname.Substring(0, nestedClassSeparatorIndex) : fullname;
+-                    return c.Parent.Parent.Element("NamespaceName").Value + "." + fullname;
+-                })
+-                .Distinct()
+-                .Where(c => this.ClassFilter.IsElementIncludedInReport(c))
+-                .OrderBy(name => name)
+-                .ToArray();
+-
+-            var assembly = new Assembly(assemblyName);
+-
+-            Parallel.ForEach(classNames, className => this.ProcessClass(modules, files, assembly, className));
+-
+-            return assembly;
+-        }
+-
+-        /// <summary>
+-        /// Processes the given class.
+-        /// </summary>
+-        /// <param name="modules">The modules.</param>
+-        /// <param name="files">The files.</param>
+-        /// <param name="assembly">The assembly.</param>
+-        /// <param name="className">Name of the class.</param>
+-        private void ProcessClass(XElement[] modules, XElement[] files, Assembly assembly, string className)
+-        {
+-            var fileIdsOfClass = modules
+-                .Where(m => m.Element("ModuleName").Value.Equals(assembly.Name))
+-                .Elements("NamespaceTable")
+-                .Elements("Class")
+-                .Where(c => (c.Parent.Element("NamespaceName").Value + "." + c.Element("ClassName").Value).Equals(className, StringComparison.Ordinal)
+-                            || (c.Parent.Element("NamespaceName").Value + "." + c.Element("ClassName").Value).StartsWith(className + ".", StringComparison.Ordinal))
+-                .Elements("Method")
+-                .Elements("Lines")
+-                .Elements("SourceFileID")
+-                .Select(m => m.Value)
+-                .Distinct()
+-                .ToArray();
+-
+-            var filteredFilesOfClass = fileIdsOfClass
+-                .Select(fileId =>
+-                    new
+-                    {
+-                        FileId = fileId,
+-                        FilePath = files.First(f => f.Element("SourceFileID").Value == fileId).Element("SourceFileName").Value
+-                    })
+-                .Where(f => this.FileFilter.IsElementIncludedInReport(f.FilePath))
+-                .ToArray();
+-
+-            // If all files are removed by filters, then the whole class is omitted
+-            if ((fileIdsOfClass.Length == 0 && !this.FileFilter.HasCustomFilters) || filteredFilesOfClass.Length > 0)
+-            {
+-                var @class = new Class(className, assembly);
+-
+-                foreach (var file in filteredFilesOfClass)
+-                {
+-                    @class.AddFile(ProcessFile(modules, file.FileId, @class, file.FilePath));
+-                }
+-
+-                assembly.AddClass(@class);
+-            }
+-        }
+-
+         /// <summary>
+         /// Processes the file.
+         /// </summary>
+@@ -387,5 +304,88 @@ namespace Palmmedia.ReportGenerator.Core.Parser
+ 
+             return methodName;
+         }
++
++        /// <summary>
++        /// Processes the given assembly.
++        /// </summary>
++        /// <param name="modules">The modules.</param>
++        /// <param name="files">The files.</param>
++        /// <param name="assemblyName">Name of the assembly.</param>
++        /// <returns>The <see cref="Assembly"/>.</returns>
++        private Assembly ProcessAssembly(XElement[] modules, XElement[] files, string assemblyName)
++        {
++            Logger.DebugFormat(Resources.CurrentAssembly, assemblyName);
++
++            var classNames = modules
++                .Where(m => m.Element("ModuleName").Value.Equals(assemblyName))
++                .Elements("NamespaceTable")
++                .Elements("Class")
++                .Elements("ClassName")
++                .Where(c => !c.Value.Contains("<>")
++                    && !c.Value.StartsWith("$", StringComparison.OrdinalIgnoreCase))
++                .Select(c =>
++                {
++                    string fullname = c.Value;
++                    int nestedClassSeparatorIndex = fullname.IndexOf('.');
++                    fullname = nestedClassSeparatorIndex > -1 ? fullname.Substring(0, nestedClassSeparatorIndex) : fullname;
++                    return c.Parent.Parent.Element("NamespaceName").Value + "." + fullname;
++                })
++                .Distinct()
++                .Where(c => this.ClassFilter.IsElementIncludedInReport(c))
++                .OrderBy(name => name)
++                .ToArray();
++
++            var assembly = new Assembly(assemblyName);
++
++            Parallel.ForEach(classNames, className => this.ProcessClass(modules, files, assembly, className));
++
++            return assembly;
++        }
++
++        /// <summary>
++        /// Processes the given class.
++        /// </summary>
++        /// <param name="modules">The modules.</param>
++        /// <param name="files">The files.</param>
++        /// <param name="assembly">The assembly.</param>
++        /// <param name="className">Name of the class.</param>
++        private void ProcessClass(XElement[] modules, XElement[] files, Assembly assembly, string className)
++        {
++            var fileIdsOfClass = modules
++                .Where(m => m.Element("ModuleName").Value.Equals(assembly.Name))
++                .Elements("NamespaceTable")
++                .Elements("Class")
++                .Where(c => (c.Parent.Element("NamespaceName").Value + "." + c.Element("ClassName").Value).Equals(className, StringComparison.Ordinal)
++                            || (c.Parent.Element("NamespaceName").Value + "." + c.Element("ClassName").Value).StartsWith(className + ".", StringComparison.Ordinal))
++                .Elements("Method")
++                .Elements("Lines")
++                .Elements("SourceFileID")
++                .Select(m => m.Value)
++                .Distinct()
++                .ToArray();
++
++            var filteredFilesOfClass = fileIdsOfClass
++                .Select(fileId =>
++                    new
++                    {
++                        FileId = fileId,
++                        FilePath = files.First(f => f.Element("SourceFileID").Value == fileId).Element("SourceFileName").Value
++                    })
++                .Where(f => this.FileFilter.IsElementIncludedInReport(f.FilePath))
++                .ToArray();
++
++            // If all files are removed by filters, then the whole class is omitted
++            if ((fileIdsOfClass.Length == 0 && !this.FileFilter.HasCustomFilters) || filteredFilesOfClass.Length > 0)
++            {
++                var @class = new Class(className, assembly);
++
++                foreach (var file in filteredFilesOfClass)
++                {
++                    @class.AddFile(ProcessFile(modules, file.FileId, @class, file.FilePath));
++                }
++
++                assembly.AddClass(@class);
++            }
++        }
+     }
+ }
+diff --git a/src/ReportGenerator.Core/Properties/AssemblyInfo.cs b/src/ReportGenerator.Core/Properties/AssemblyInfo.cs
+index 4ebb8641..dadc270a 100644
+--- a/src/ReportGenerator.Core/Properties/AssemblyInfo.cs
++++ b/src/ReportGenerator.Core/Properties/AssemblyInfo.cs
+@@ -1,2 +1,2 @@
+ [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ReportGenerator.Core.Test, PublicKey=002400000480000094000000060200000024000052534131000400000100010001b2e0fd2c33078e5bc48ce0c850634f8a79a3e7c08bd7a53cc76c3c25eca25d2c27627b530c50827d4dcbf41f6a1081c92168062637702f099169f2aaff1152b54fdf8f6d80184fe12493a047260f9d84b957300de136bdbe90b0b3deec03ed4478e5c7ee9b3f8871b2ad8035f395ebbca57e895b05cb9ffa9c7b1fcc2709a9")]
+-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("DynamicProxyGenAssembly2,PublicKey=0024000004800000940000000602000000240000525341310004000001000100c547cac37abd99c8db225ef2f6c8a3602f3b3606cc9891605d02baa56104f4cfc0734aa39b93bf7852f7d9266654753cc297e7d2edfe0bac1cdcf9f717241550e0a7b191195b7667bb4f64bcb8e2121380fd1d9d46ad2d92d2d15605093924cceaf74c4861eff62abf69b9291ed0a340e113be11e6a7d3113e92484cf7045cc7")]
+\ No newline at end of file
++[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("DynamicProxyGenAssembly2,PublicKey=0024000004800000940000000602000000240000525341310004000001000100c547cac37abd99c8db225ef2f6c8a3602f3b3606cc9891605d02baa56104f4cfc0734aa39b93bf7852f7d9266654753cc297e7d2edfe0bac1cdcf9f717241550e0a7b191195b7667bb4f64bcb8e2121380fd1d9d46ad2d92d2d15605093924cceaf74c4861eff62abf69b9291ed0a340e113be11e6a7d3113e92484cf7045cc7")]
+diff --git a/src/ReportGenerator.Core/ReportConfigurationBuilder.cs b/src/ReportGenerator.Core/ReportConfigurationBuilder.cs
+index 86714643..884a1490 100644
+--- a/src/ReportGenerator.Core/ReportConfigurationBuilder.cs
++++ b/src/ReportGenerator.Core/ReportConfigurationBuilder.cs
+@@ -332,4 +332,4 @@ namespace Palmmedia.ReportGenerator.Core
+             return this.Create(namedArguments);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/ReportContext.cs b/src/ReportGenerator.Core/ReportContext.cs
+index 725a407b..7c214394 100644
+--- a/src/ReportGenerator.Core/ReportContext.cs
++++ b/src/ReportGenerator.Core/ReportContext.cs
+@@ -58,4 +58,4 @@ namespace Palmmedia.ReportGenerator.Core
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/ReportGenerator.Core.csproj b/src/ReportGenerator.Core/ReportGenerator.Core.csproj
+index 1c450461..e6cc31cc 100644
+--- a/src/ReportGenerator.Core/ReportGenerator.Core.csproj
++++ b/src/ReportGenerator.Core/ReportGenerator.Core.csproj
+@@ -89,7 +89,7 @@
+     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.14" />
+     <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="10.0.14" />
+     <PackageReference Include="System.Text.Json" Version="10.0.14" />
+-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial59.2">
+       <PrivateAssets>all</PrivateAssets>
+       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+     </PackageReference>
+diff --git a/src/ReportGenerator.Core/Reporting/Builders/BadgeReportBuilder.cs b/src/ReportGenerator.Core/Reporting/Builders/BadgeReportBuilder.cs
+index 83a1cf22..ae90c78b 100644
+--- a/src/ReportGenerator.Core/Reporting/Builders/BadgeReportBuilder.cs
++++ b/src/ReportGenerator.Core/Reporting/Builders/BadgeReportBuilder.cs
+@@ -448,4 +448,4 @@ namespace Palmmedia.ReportGenerator.Core.Reporting.Builders
+                 text);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/Reporting/Builders/CJsonReportBuilder.cs b/src/ReportGenerator.Core/Reporting/Builders/CJsonReportBuilder.cs
+index 970872ad..03d0b3a0 100644
+--- a/src/ReportGenerator.Core/Reporting/Builders/CJsonReportBuilder.cs
++++ b/src/ReportGenerator.Core/Reporting/Builders/CJsonReportBuilder.cs
+@@ -171,4 +171,4 @@ namespace Palmmedia.ReportGenerator.Core.Reporting.Builders
+             public int CoveredBranches { get; set; }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/Reporting/Builders/HtmlInlineAzurePipelinesDarkReportBuilder.cs b/src/ReportGenerator.Core/Reporting/Builders/HtmlInlineAzurePipelinesDarkReportBuilder.cs
+index 98b15691..85cc9e41 100644
+--- a/src/ReportGenerator.Core/Reporting/Builders/HtmlInlineAzurePipelinesDarkReportBuilder.cs
++++ b/src/ReportGenerator.Core/Reporting/Builders/HtmlInlineAzurePipelinesDarkReportBuilder.cs
+@@ -67,4 +67,4 @@ namespace Palmmedia.ReportGenerator.Core.Reporting.Builders
+                 true);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/Reporting/Builders/HtmlInlineAzurePipelinesLightReportBuilder.cs b/src/ReportGenerator.Core/Reporting/Builders/HtmlInlineAzurePipelinesLightReportBuilder.cs
+index 8b281f8c..c95ba3e6 100644
+--- a/src/ReportGenerator.Core/Reporting/Builders/HtmlInlineAzurePipelinesLightReportBuilder.cs
++++ b/src/ReportGenerator.Core/Reporting/Builders/HtmlInlineAzurePipelinesLightReportBuilder.cs
+@@ -67,4 +67,4 @@ namespace Palmmedia.ReportGenerator.Core.Reporting.Builders
+                 true);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/Reporting/Builders/HtmlInlineAzurePipelinesReportBuilder.cs b/src/ReportGenerator.Core/Reporting/Builders/HtmlInlineAzurePipelinesReportBuilder.cs
+index 576f95b5..6eae43cb 100644
+--- a/src/ReportGenerator.Core/Reporting/Builders/HtmlInlineAzurePipelinesReportBuilder.cs
++++ b/src/ReportGenerator.Core/Reporting/Builders/HtmlInlineAzurePipelinesReportBuilder.cs
+@@ -67,4 +67,4 @@ namespace Palmmedia.ReportGenerator.Core.Reporting.Builders
+                 true);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/Reporting/Builders/MhtmlReportBuilder.cs b/src/ReportGenerator.Core/Reporting/Builders/MhtmlReportBuilder.cs
+index 928d876f..01e88170 100644
+--- a/src/ReportGenerator.Core/Reporting/Builders/MhtmlReportBuilder.cs
++++ b/src/ReportGenerator.Core/Reporting/Builders/MhtmlReportBuilder.cs
+@@ -326,4 +326,4 @@ namespace Palmmedia.ReportGenerator.Core.Reporting.Builders
+             public bool VerbosityLevelValid => this.reportConfiguration.VerbosityLevelValid;
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/Reporting/Builders/OpenCoverReportBuilder.cs b/src/ReportGenerator.Core/Reporting/Builders/OpenCoverReportBuilder.cs
+index 519a3973..e9751860 100644
+--- a/src/ReportGenerator.Core/Reporting/Builders/OpenCoverReportBuilder.cs
++++ b/src/ReportGenerator.Core/Reporting/Builders/OpenCoverReportBuilder.cs
+@@ -337,7 +337,7 @@ namespace Palmmedia.ReportGenerator.Core.Reporting.Builders
+         /// <param name="coverableLines">The coverable lines.</param>
+         /// <param name="methodVisits">The number of method visits.</param>
+         /// <param name="coveredBranches">The covered branches.</param>
+-        /// <param name="totalBranches">The ´total branches.</param>
++        /// <param name="totalBranches">The ï¿½total branches.</param>
+         private void AddSequenceAndBranchPoints(
+             XElement sequencePointsElement,
+             XElement branchPointsElement,
+@@ -419,4 +419,4 @@ namespace Palmmedia.ReportGenerator.Core.Reporting.Builders
+             return (total == 0) ? 0m : MathExtensions.CalculatePercentage(covered, total);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/Reporting/Builders/PngChartReportBuilder.cs b/src/ReportGenerator.Core/Reporting/Builders/PngChartReportBuilder.cs
+index dbf583db..d7135d75 100644
+--- a/src/ReportGenerator.Core/Reporting/Builders/PngChartReportBuilder.cs
++++ b/src/ReportGenerator.Core/Reporting/Builders/PngChartReportBuilder.cs
+@@ -55,4 +55,4 @@ namespace Palmmedia.ReportGenerator.Core.Reporting.Builders
+             Logger.Warn("Report type 'PngChart' is no longer supported. Please use 'SvgChart' instead.");
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/Reporting/Builders/SvgChartReportBuilder.cs b/src/ReportGenerator.Core/Reporting/Builders/SvgChartReportBuilder.cs
+index 7656527a..680e321e 100644
+--- a/src/ReportGenerator.Core/Reporting/Builders/SvgChartReportBuilder.cs
++++ b/src/ReportGenerator.Core/Reporting/Builders/SvgChartReportBuilder.cs
+@@ -120,4 +120,4 @@ namespace Palmmedia.ReportGenerator.Core.Reporting.Builders
+             return result;
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/Reporting/History/HistoryParser.cs b/src/ReportGenerator.Core/Reporting/History/HistoryParser.cs
+index de7765fa..c64acc91 100644
+--- a/src/ReportGenerator.Core/Reporting/History/HistoryParser.cs
++++ b/src/ReportGenerator.Core/Reporting/History/HistoryParser.cs
+@@ -177,4 +177,4 @@ namespace Palmmedia.ReportGenerator.Core.Reporting.History
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/Reporting/History/HistoryReportGenerator.cs b/src/ReportGenerator.Core/Reporting/History/HistoryReportGenerator.cs
+index 75aef3ed..9a134edd 100644
+--- a/src/ReportGenerator.Core/Reporting/History/HistoryReportGenerator.cs
++++ b/src/ReportGenerator.Core/Reporting/History/HistoryReportGenerator.cs
+@@ -120,4 +120,4 @@ namespace Palmmedia.ReportGenerator.Core.Reporting.History
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/Reporting/History/IHistoryStorage.cs b/src/ReportGenerator.Core/Reporting/History/IHistoryStorage.cs
+index 6cfb5863..8a469735 100644
+--- a/src/ReportGenerator.Core/Reporting/History/IHistoryStorage.cs
++++ b/src/ReportGenerator.Core/Reporting/History/IHistoryStorage.cs
+@@ -28,4 +28,4 @@ namespace Palmmedia.ReportGenerator.Core.Reporting.History
+         /// <param name="fileName">Name of the file.</param>
+         void SaveFile(Stream stream, string fileName);
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/Reporting/ReportGenerator.cs b/src/ReportGenerator.Core/Reporting/ReportGenerator.cs
+index 72999067..24310c7e 100644
+--- a/src/ReportGenerator.Core/Reporting/ReportGenerator.cs
++++ b/src/ReportGenerator.Core/Reporting/ReportGenerator.cs
+@@ -130,4 +130,4 @@ namespace Palmmedia.ReportGenerator.Core.Reporting
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/RiskhotspotThresholdException.cs b/src/ReportGenerator.Core/RiskhotspotThresholdException.cs
+index c2a75ba9..ecd7158d 100644
+--- a/src/ReportGenerator.Core/RiskhotspotThresholdException.cs
++++ b/src/ReportGenerator.Core/RiskhotspotThresholdException.cs
+@@ -34,4 +34,4 @@ namespace Palmmedia.ReportGenerator.Core
+         {
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/ReportGenerator.Core/Settings.cs b/src/ReportGenerator.Core/Settings.cs
+index c87b7a16..33cf589a 100644
+--- a/src/ReportGenerator.Core/Settings.cs
++++ b/src/ReportGenerator.Core/Settings.cs
+@@ -62,7 +62,7 @@ namespace Palmmedia.ReportGenerator.Core
+         /// <summary>
+         ///  Gets or sets custom headers (e.g. authentication headers) for remote requests.
+         ///  Format: key1=value1;key2=value2
+-        ///  Example: Authorization=Bearer ~JWT~
++        ///  Example: Authorization=Bearer ~JWT~.
+         /// </summary>
+         public string CustomHeadersForRemoteFiles { get; set; }
+ 

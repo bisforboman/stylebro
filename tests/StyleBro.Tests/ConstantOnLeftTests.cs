@@ -196,4 +196,41 @@ public class ConstantOnLeftTests
             IQueryable<string> Q(IQueryable<string> q) => from s in q where 'c' == s[0] select s;
         }
         """);
+
+    [Fact]
+    public Task ExpressionTreeTwins_KeepTheirOperands() => VerifyFixAsync(
+        """
+        using System;
+        using System.Linq.Expressions;
+
+        enum E { Foo, Bar }
+
+        class C
+        {
+            // Trial 59 (DelegateDecompiler): the delegate is decompiled and compared with its twin tree (owner, 2026-10-28).
+            void M()
+            {
+                Expression<Func<E, bool>> expected = x => E.Bar == x;
+                Func<E, bool> compiled = x => E.Bar == x;
+                Func<E, bool> other = x => {|BRO1103:E.Foo == x|};
+            }
+        }
+        """,
+        """
+        using System;
+        using System.Linq.Expressions;
+
+        enum E { Foo, Bar }
+
+        class C
+        {
+            // Trial 59 (DelegateDecompiler): the delegate is decompiled and compared with its twin tree (owner, 2026-10-28).
+            void M()
+            {
+                Expression<Func<E, bool>> expected = x => E.Bar == x;
+                Func<E, bool> compiled = x => E.Bar == x;
+                Func<E, bool> other = x => x == E.Foo;
+            }
+        }
+        """);
 }

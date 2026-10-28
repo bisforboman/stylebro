@@ -1,0 +1,39 @@
+Using src/ReportGenerator.slnx: no solution or project at the root, and it's the only solution one folder down.
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (163 ids); --all applies every analyzer's and compiler fix.
+Leaving alone: src/ReportGenerator.Console/, src/ReportGenerator.Console.NetCore/, src/ReportGenerator.Core.Test/, src/ReportGenerator.DotnetCorePluginLoader/, src/ReportGenerator.DotnetGlobalTool/, src/ReportGenerator.MSBuild/, src/Testprojects/: StyleCop didn't run there, so the migration set nothing up there (the stylebro-migrate block in .editorconfig names them).
+xUnit: xunit.analyzers 2.2.0 is restored here, and from 1.24 on its code fixes have no Fix All, which 'dotnet format' needs: its assertion fixes aren't applied (the build still reports their warnings; your IDE fixes them one at a time).
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net47, net8.0, net9.0, netstandard2.0).
+Configurations: runs for Release (ReportGenerator.Core, ReportGenerator.Core.Test) too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.
+Checked net8.0 (run 1 of 7)
+Checked net10.0 (run 2 of 7)
+Checked net47 (run 3 of 7)
+Checked net9.0 (run 4 of 7)
+Checked netstandard2.0 (run 5 of 7)
+Checked net8.0, Release (run 6 of 7)
+Checked netstandard2.0, Release (run 7 of 7)
+'dotnet format' had warnings loading the workspace in its net10.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+== netstandard2.0 (2 project(s), 46 files with findings)
+== netstandard2.0, Release (1 project(s), 46 files with findings)
+Run 1: 46 files changed:
+  src/ReportGenerator.Core/CodeAnalysis/RiskHotspotsAnalysisThresholds.cs
+  src/ReportGenerator.Core/CodeAnalysis/RiskHotspotsAnalyzer.cs
+  src/ReportGenerator.Core/Common/Glob.cs
+  src/ReportGenerator.Core/Help.cs
+  src/ReportGenerator.Core/Licensing/SignatureType.cs
+  src/ReportGenerator.Core/LowCoverageException.cs
+  src/ReportGenerator.Core/MinimumCoverageThresholdsValidator.cs
+  src/ReportGenerator.Core/Parser/Analysis/CodeFile.cs
+  src/ReportGenerator.Core/Parser/Analysis/CtcDetails.cs
+  src/ReportGenerator.Core/Parser/Analysis/CtcProbeDetail.cs
+  ... and 36 more
+Checked net10.0 (run 1 of 7)
+Checked net8.0 (run 2 of 7)
+Checked net9.0 (run 3 of 7)
+Checked net47 (run 4 of 7)
+Checked netstandard2.0, Release (run 5 of 7)
+Checked netstandard2.0 (run 6 of 7)
+Checked net8.0, Release (run 7 of 7)
+Run 2: 0 files changed, clean.
+Not checked: xunit.analyzers' rules: xunit.analyzers 2.2.0's fixes have no Fix All, so 'dotnet format' can't apply or check them (a note: the build still reports their warnings; the verdict doesn't count them)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

@@ -1,0 +1,6 @@
+build	1	4s	dotnet build DelegateDecompiler.sln -c Debug
+twae-Debug	0	46s	twae Debug
+test-Debug	1	34s	env CFG=Debug bash -c dotnet test src/DelegateDecompiler.Tests/DelegateDecompiler.Tests.csproj -c $CFG -f net8.0; dotnet test src/DelegateDecompiler.Tests.VB/DelegateDecompiler.Tests.VB.vbproj -c $CFG
+twae-Release	0	23s	twae Release
+test-Release	1	23s	env CFG=Release bash -c dotnet test src/DelegateDecompiler.Tests/DelegateDecompiler.Tests.csproj -c $CFG -f net8.0; dotnet test src/DelegateDecompiler.Tests.VB/DelegateDecompiler.Tests.VB.vbproj -c $CFG
+DONE

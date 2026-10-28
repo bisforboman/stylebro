@@ -1,0 +1,17 @@
+== bullseye-build: dotnet build /home/user/cand59/adamralph-bullseye/Bullseye.slnx -p:NuGetAudit=false (09:19:50)
+   exit 0 (09:20:52) 0 error lines
+== bullseye-test: bash -c cd /home/user/cand59/adamralph-bullseye && dotnet test --solution Bullseye.slnx --no-build (09:20:52)
+   exit 0 (09:20:57) 0 error lines
+== sharpyaml-build: dotnet build /home/user/cand59/xoofx-SharpYaml/src/SharpYaml.slnx -p:NuGetAudit=false (09:20:57)
+   exit 1 (09:21:17) 4 error lines
+== sharpyaml-test: bash -c cd /home/user/cand59/xoofx-SharpYaml/src && dotnet test SharpYaml.slnx --no-build (09:21:17)
+   exit 1 (09:21:18) 0 error lines
+== rg-build: dotnet build /home/user/cand59/danielpalme-ReportGenerator/src/ReportGenerator.slnx -p:NuGetAudit=false (09:21:18)
+   exit 0 (09:21:32) 0 error lines
+== rg-test: bash -c cd /home/user/cand59/danielpalme-ReportGenerator/src && dotnet test --solution ReportGenerator.slnx --no-build (09:21:32)
+   exit 2 (09:21:40) 0 error lines
+== dd-build: dotnet build /home/user/cand59/hazzik-DelegateDecompiler/DelegateDecompiler.sln -p:NuGetAudit=false (09:21:40)
+   exit 0 (09:22:16) 0 error lines
+== dd-test: bash -c cd /home/user/cand59/hazzik-DelegateDecompiler && dotnet test DelegateDecompiler.sln --no-build (09:22:16)
+   exit 1 (09:23:48) 357 error lines
+SMOKE-DONE

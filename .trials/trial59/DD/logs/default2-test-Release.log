@@ -1,0 +1,1536 @@
+  Determining projects to restore...
+  Restored /home/user/w59/DD/default2/src/DelegateDecompiler.Tests/DelegateDecompiler.Tests.csproj (in 1.15 sec).
+  Restored /home/user/w59/DD/default2/src/DelegateDecompiler/DelegateDecompiler.csproj (in 1.16 sec).
+  DelegateDecompiler -> /home/user/w59/DD/default2/src/DelegateDecompiler/bin/Release/netstandard2.1/DelegateDecompiler.dll
+  DelegateDecompiler.Tests -> /home/user/w59/DD/default2/src/DelegateDecompiler.Tests/bin/Release/net8.0/DelegateDecompiler.Tests.dll
+Test run for /home/user/w59/DD/default2/src/DelegateDecompiler.Tests/bin/Release/net8.0/DelegateDecompiler.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+("E is child of " + ("C is child of " + "A".ToString()).ToString())
+("E is child of " + ("C is child of " + "A".ToString()).ToString())
+
+IIF((this Is X), "X", IIF((this Is A), "A", null))
+IIF((this Is X), "X", IIF((this Is A), "A", null))
+
+IIF((this Is F`1), ("F is child of " + ("C is child of " + "A".ToString()).ToString()), IIF((this Is E), ("E is child of " + ("C is child of " + "A".ToString()).ToString()), IIF((this Is D), ("D is child of " + ("C is child of " + "A".ToString()).ToString()), ("C is child of " + "A".ToString()))))
+IIF((this Is F`1), ("F is child of " + ("C is child of " + "A".ToString()).ToString()), IIF((this Is E), ("E is child of " + ("C is child of " + "A".ToString()).ToString()), IIF((this Is D), ("D is child of " + ("C is child of " + "A".ToString()).ToString()), ("C is child of " + "A".ToString()))))
+
+IIF((this Is F`1), "F", IIF((this Is E), "E", IIF((this Is D), "D", IIF((this Is C`1), "C", IIF((this Is B), "B", null)))))
+IIF((this Is F`1), "F", IIF((this Is E), "E", IIF((this Is D), "D", IIF((this Is C`1), "C", IIF((this Is B), "B", null)))))
+
+IIF((this Is F`1), Convert(this, F`1).Me, IIF((this Is E), Convert(this, E).Me, IIF((this Is D), Convert(this, D).Me, IIF((this Is C`1), Convert(this, C`1).Me, IIF((this Is B), Convert(this, B).Me, null)))))
+IIF((this Is F`1), Convert(this, F`1).Me, IIF((this Is E), Convert(this, E).Me, IIF((this Is D), Convert(this, D).Me, IIF((this Is C`1), Convert(this, C`1).Me, IIF((this Is B), Convert(this, B).Me, null)))))
+
+IIF((this Is Z), "Z", IIF((this Is Y2), "Y2", IIF((this Is Y1), "Y1", IIF((this Is Y), "Y", IIF((this Is X), "X", IIF((this Is F`1), "F", IIF((this Is E), "E", IIF((this Is D), "D", IIF((this Is C`1), "C", IIF((this Is B), "B", IIF((this Is A), "A", null)))))))))))
+IIF((this Is Z), "Z", IIF((this Is Y2), "Y2", IIF((this Is Y1), "Y1", IIF((this Is Y), "Y", IIF((this Is X), "X", IIF((this Is F`1), "F", IIF((this Is E), "E", IIF((this Is D), "D", IIF((this Is C`1), "C", IIF((this Is B), "B", IIF((this Is A), "A", null)))))))))))
+
+IIF((this Is F`1), "F", IIF((this Is E), "E", IIF((this Is D), "D", IIF((this Is C`1), "C", IIF((this Is B), "B", "A")))))
+IIF((this Is F`1), "F", IIF((this Is E), "E", IIF((this Is D), "D", IIF((this Is C`1), "C", IIF((this Is B), "B", "A")))))
+
+IIF((this Is F`1), ("F is child of " + ("C is child of " + "A".ToString()).ToString()), IIF((this Is E), ("E is child of " + ("C is child of " + "A".ToString()).ToString()), IIF((this Is D), ("D is child of " + ("C is child of " + "A".ToString()).ToString()), IIF((this Is C`1), ("C is child of " + "A".ToString()), IIF((this Is B), ("B is child of " + "A".ToString()), "A")))))
+IIF((this Is F`1), ("F is child of " + ("C is child of " + "A".ToString()).ToString()), IIF((this Is E), ("E is child of " + ("C is child of " + "A".ToString()).ToString()), IIF((this Is D), ("D is child of " + ("C is child of " + "A".ToString()).ToString()), IIF((this Is C`1), ("C is child of " + "A".ToString()), IIF((this Is B), ("B is child of " + "A".ToString()), "A")))))
+
+"A"
+"A"
+
+IIF((this Is F`1), ("F is child of " + ("C is child of " + "A".ToString()).ToString()), IIF((this Is E), ("E is child of " + ("C is child of " + "A".ToString()).ToString()), IIF((this Is D), ("D is child of " + ("C is child of " + "A".ToString()).ToString()), IIF((this Is C`1), ("C is child of " + "A".ToString()), IIF((this Is B), ("B is child of " + "A".ToString()), "A")))))
+IIF((this Is F`1), ("F is child of " + ("C is child of " + "A".ToString()).ToString()), IIF((this Is E), ("E is child of " + ("C is child of " + "A".ToString()).ToString()), IIF((this Is D), ("D is child of " + ("C is child of " + "A".ToString()).ToString()), IIF((this Is C`1), ("C is child of " + "A".ToString()), IIF((this Is B), ("B is child of " + "A".ToString()), "A")))))
+
+new [] {new TestClass(), x}
+new [] {new TestClass(), x}
+
+new [] {x, 2}
+new [] {x, 2}
+
+new [] {x, 2, 3, 4}
+new [] {x, 2, 3, 4}
+
+new [] {1, 2, 3, 4, x}
+new [] {1, 2, 3, 4, x}
+
+new System.Int32[](10)
+new System.Int32[](10)
+
+new [] {1}
+new [] {1}
+
+new [] {1, 2}
+new [] {1, 2}
+
+new [] {1, 2, 3}
+new [] {1, 2, 3}
+
+new [] {}
+new [] {}
+
+new [] {}
+new System.Int32[](0)
+new [] {}
+
+new System.Int32[](1)
+new System.Int32[](1)
+
+new System.Int32[](x)
+new System.Int32[](x)
+
+False
+(False AndAlso b.Invoke())
+False
+
+False
+(False AndAlso b)
+False
+
+False
+(False And b)
+False
+
+Not(b.Invoke())
+(False == b.Invoke())
+Not(b.Invoke())
+
+Not(b)
+(False == b)
+Not(b)
+
+b.Invoke()
+(False OrElse b.Invoke())
+b.Invoke()
+
+b
+(False OrElse b)
+b
+
+b.Invoke()
+(False Or b.Invoke())
+b.Invoke()
+
+b
+(False Or b)
+b
+
+  Skipped TestFalseAndFunc [< 1 ms]
+(x.Invoke() AndAlso y.Invoke())
+(x.Invoke() AndAlso y.Invoke())
+
+b.Invoke()
+(b.Invoke() AndAlso True)
+b.Invoke()
+
+(x.Invoke() And y.Invoke())
+(x.Invoke() And y.Invoke())
+
+b.Invoke()
+(b.Invoke() And True)
+b.Invoke()
+
+Not(b.Invoke())
+(b.Invoke() == False)
+Not(b.Invoke())
+
+(x.Invoke() == y.Invoke())
+(x.Invoke() == y.Invoke())
+
+b.Invoke()
+(b.Invoke() == True)
+b.Invoke()
+
+  Skipped TestFuncAndAlsoFalse [< 1 ms]
+  Skipped TestFuncAndFalse [< 1 ms]
+b.Invoke()
+(b.Invoke() OrElse False)
+b.Invoke()
+
+(x.Invoke() OrElse y.Invoke())
+(x.Invoke() OrElse y.Invoke())
+
+b.Invoke()
+(b.Invoke() Or False)
+b.Invoke()
+
+(x.Invoke() Or y.Invoke())
+(x.Invoke() Or y.Invoke())
+
+(b.Invoke() Or True)
+(b.Invoke() Or True)
+True
+
+(x And y)
+(x AndAlso y)
+(x And y)
+
+b
+(b AndAlso True)
+b
+
+  Skipped TestFuncOrElseTrue [< 1 ms]
+  Skipped TestParameterAndAlsoFalse [< 1 ms]
+False
+(b And False)
+False
+
+(x And y)
+(x And y)
+
+b
+(b And True)
+b
+
+Not(b)
+(b == False)
+Not(b)
+
+(x == y)
+(x == y)
+
+b
+(b == True)
+b
+
+b
+(b OrElse False)
+b
+
+(x Or y)
+(x OrElse y)
+(x Or y)
+
+  Skipped TestParameterOrElseTrue [< 1 ms]
+b
+(b Or False)
+b
+
+(x Or y)
+(x Or y)
+
+(b Or True)
+(b Or True)
+True
+
+b.Invoke()
+(True AndAlso b.Invoke())
+b.Invoke()
+
+b
+(True AndAlso b)
+b
+
+b.Invoke()
+(True And b.Invoke())
+b.Invoke()
+
+b
+(True And b)
+b
+
+b.Invoke()
+(True == b.Invoke())
+b.Invoke()
+
+b
+(True == b)
+b
+
+True
+(True OrElse b.Invoke())
+True
+
+True
+(True OrElse b)
+True
+
+(True Or b.Invoke())
+(True Or b.Invoke())
+True
+
+(True Or b)
+(True Or b)
+True
+
+value(DelegateDecompiler.Tests.ClosuresTest).y
+value(DelegateDecompiler.Tests.ClosuresTest).y
+
+  Skipped CanUseFieldAndStaticFieldAndVariableClosures [< 1 ms]
+  Skipped CanUseFieldAndVariableClosures [< 1 ms]
+  Skipped CanUseRefFieldAndStaticFieldAndVariableClosures [< 1 ms]
+  Skipped CanUseRefFieldAndVariableClosures [< 1 ms]
+value(DelegateDecompiler.Tests.ClosuresTest).instanceTestClass
+value(DelegateDecompiler.Tests.ClosuresTest).instanceTestClass
+
+ClosuresTest.z
+ClosuresTest.z
+
+value(DelegateDecompiler.Tests.ClosuresTest+<>c__DisplayClass9_0).x
+value(DelegateDecompiler.Tests.ClosuresTest+<>c__DisplayClass9_0).x
+
+ClosuresTest.z
+ClosuresTest.z
+
+value(DelegateDecompiler.Tests.ClosuresTest+<>c__DisplayClass4_0).x
+value(DelegateDecompiler.Tests.ClosuresTest+<>c__DisplayClass4_0).x
+
+IIF((x == y), x, y)
+IIF((x == y), x, y)
+
+IIF((x >= y), x, y)
+IIF((x >= y), x, y)
+
+IIF((x > y), x, y)
+IIF((x > y), x, y)
+
+IIF((x <= y), x, y)
+IIF((x <= y), x, y)
+
+IIF((x < y), x, y)
+IIF((x < y), x, y)
+
+IIF((x != y), x, y)
+IIF((x != y), x, y)
+
+(x == y)
+(x == y)
+
+(x >= y)
+(x >= y)
+
+(x > y)
+(x > y)
+
+(x <= y)
+(x <= y)
+
+(x < y)
+(x < y)
+
+((e.From == p) AndAlso (p < e.To))
+((e.From == p) AndAlso (p < e.To))
+
+((e.From > p) AndAlso (p < e.To))
+((e.From > p) AndAlso (p < e.To))
+
+((e.From >= p) AndAlso (p < e.To))
+((e.From >= p) AndAlso (p < e.To))
+
+((e.From < p) AndAlso (p < e.To))
+((e.From < p) AndAlso (p < e.To))
+
+((e.From <= p) AndAlso (p < e.To))
+((e.From <= p) AndAlso (p < e.To))
+
+((e.From != p) AndAlso (p < e.To))
+((e.From != p) AndAlso (p < e.To))
+
+(((a + b) + IIF((a >= b), 2, 1)) + 10)
+(((a + b) + IIF((a >= b), 2, 1)) + 10)
+
+IIF((x == "Yes"), Convert(True, Nullable`1), IIF((x == "No"), Convert(False, Nullable`1), null))
+IIF((x == "Yes"), Convert(True, Nullable`1), IIF((x == "No"), Convert(False, Nullable`1), null))
+
+IIF(x.HasValue, IIF(x.Value, "Yes", IIF(x.HasValue, "No", null)), IIF(x.HasValue, "No", null))
+IIF((x.HasValue AndAlso x.Value), "Yes", IIF(x.HasValue, "No", null))
+IIF(x.HasValue, IIF(x.Value, "Yes", IIF(x.HasValue, "No", null)), IIF(x.HasValue, "No", null))
+
+(IIF((x <= 3), IIF((x <= 3), 2, 3), 1) == 1)
+(IIF((x <= 3), IIF((x <= 3), 2, 3), 1) == 1)
+
+((e ?? 100) == 100)
+((e ?? 100) == 100)
+
+((e.From == p) OrElse (p < e.To))
+((e.From == p) OrElse (p < e.To))
+
+((e.From > p) OrElse (p < e.To))
+((e.From > p) OrElse (p < e.To))
+
+((e.From >= p) OrElse (p < e.To))
+((e.From >= p) OrElse (p < e.To))
+
+((e.From < p) OrElse (p < e.To))
+((e.From < p) OrElse (p < e.To))
+
+((e.From <= p) OrElse (p < e.To))
+((e.From <= p) OrElse (p < e.To))
+
+((e.From != p) OrElse (p < e.To))
+((e.From != p) OrElse (p < e.To))
+
+((e.FirstName != null) AndAlso e.FirstName.Contains("Test"))
+((e.FirstName != null) AndAlso e.FirstName.Contains("Test"))
+
+(e.FirstName ?? String.Empty).Contains("Test")
+(e.FirstName ?? String.Empty).Contains("Test")
+
+(e.FirstName ?? e.LastName)
+(e.FirstName ?? e.LastName)
+
+IIF((a >= b), b, a)
+IIF((a >= b), b, a)
+
+IIF((a >= b), b, a)
+IIF((a >= b), b, a)
+
+IIF((e.FirstName != null), e.FirstName, e.LastName)
+IIF((e.FirstName != null), e.FirstName, e.LastName)
+
+IIF((e.FirstName == null), e.LastName, e.FirstName)
+IIF((e.FirstName == null), e.LastName, e.FirstName)
+
+((e.FirstName == null) OrElse e.FirstName.Contains("Test"))
+((e.FirstName == null) OrElse e.FirstName.Contains("Test"))
+
+((e.FirstName != null) AndAlso (e.FirstName.Contains("Test") AndAlso Not(e.IsBlocked)))
+((e.FirstName != null) AndAlso (e.FirstName.Contains("Test") AndAlso Not(e.IsBlocked)))
+
+  Skipped TwoIifs2 [< 1 ms]
+(Convert(dt, Nullable`1) < AddYears(Convert(DateTime.Now, Nullable`1), Convert(-10, Nullable`1)))
+(Convert(dt, Nullable`1) < AddYears(Convert(DateTime.Now, Nullable`1), Convert(-10, Nullable`1)))
+
+Convert((Convert(dt, Nullable`1) < AddYears(Convert(DateTime.Now, Nullable`1), Convert(-10, Nullable`1))), Nullable`1)
+Convert((Convert(dt, Nullable`1) < AddYears(Convert(DateTime.Now, Nullable`1), Convert(-10, Nullable`1))), Nullable`1)
+
+Convert(x, Nullable`1)
+Convert(x, Nullable`1)
+
+(x / y)
+(x / y)
+
+(x / Convert(y, Nullable`1))
+(x / Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) / y)
+(Convert(x, Nullable`1) / y)
+
+  Skipped TestToString [< 1 ms]
+(x == y)
+(x == y)
+
+(x == Convert(y, Nullable`1))
+(x == Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) == y)
+(Convert(x, Nullable`1) == y)
+
+(x > y)
+(x > y)
+
+(x > Convert(y, Nullable`1))
+(x > Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) > y)
+(Convert(x, Nullable`1) > y)
+
+(x >= y)
+(x >= y)
+
+(x >= Convert(y, Nullable`1))
+(x >= Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) >= y)
+(Convert(x, Nullable`1) >= y)
+
+(x < y)
+(x < y)
+
+(x < Convert(y, Nullable`1))
+(x < Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) < y)
+(Convert(x, Nullable`1) < y)
+
+(x <= y)
+(x <= y)
+
+(x <= Convert(y, Nullable`1))
+(x <= Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) <= y)
+(Convert(x, Nullable`1) <= y)
+
+(x - y)
+(x - y)
+
+(x - Convert(y, Nullable`1))
+(x - Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) - y)
+(Convert(x, Nullable`1) - y)
+
+(x * y)
+(x * y)
+
+(x * Convert(y, Nullable`1))
+(x * Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) * y)
+(Convert(x, Nullable`1) * y)
+
+(x != y)
+(x != y)
+
+(x != Convert(y, Nullable`1))
+(x != Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) != y)
+(Convert(x, Nullable`1) != y)
+
+(x + y)
+(x + y)
+
+(x + Convert(y, Nullable`1))
+(x + Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) + y)
+(Convert(x, Nullable`1) + y)
+
+((x + y) + z)
+((x + y) + z)
+
+IIF((x == y), x, y)
+IIF((x == y), x, y)
+
+IIF((x >= y), x, y)
+IIF((x >= y), x, y)
+
+IIF((x > y), x, y)
+IIF((x > y), x, y)
+
+IIF((x <= y), x, y)
+IIF((x <= y), x, y)
+
+IIF((x < y), x, y)
+IIF((x < y), x, y)
+
+IIF((x != y), x, y)
+IIF((x != y), x, y)
+
+(x == y)
+(x == y)
+
+(x >= y)
+(x >= y)
+
+(x > y)
+(x > y)
+
+(x <= y)
+(x <= y)
+
+(x < y)
+(x < y)
+
+new Decimal(121, 0, 0, False, 2)
+1.21
+new Decimal(121, 0, 0, False, 2)
+
+new Decimal(121, 0, 0, False, 2)
+1.21
+new Decimal(121, 0, 0, False, 2)
+
+(x / y)
+(x / y)
+
+(x * y)
+(x * y)
+
+(x * Convert(y, Decimal))
+(x * Convert(y, Decimal))
+
+(x.StartDate >= DateTime.Now)
+(x.StartDate >= DateTime.Now)
+
+(x.EndDate.GetValueOrDefault() <= DateTime.Now)
+(x.EndDate.GetValueOrDefault() <= DateTime.Now)
+
+new TestClass()
+new TestClass()
+
+o
+o
+
+(x + y)
+(x + y)
+
+(x + 1)
+(x + 1)
+
+(x + 127)
+(x + 127)
+
+(x + 128)
+(x + 128)
+
+(x + 65535)
+(x + 65535)
+
+(x & y)
+(x & y)
+
+(x | y)
+(x | y)
+
+Convert(x, Object)
+Convert(x, Object)
+
+Convert(x, DecompileExtensionsTests)
+Convert(x, DecompileExtensionsTests)
+
+Convert(x, Int64)
+Convert(x, Int64)
+
+Convert(x, Int32)
+Convert(x, Int32)
+
+(x / y)
+(x / y)
+
+x.ToString()
+x.ToString()
+
+x.ToString(culture)
+x.ToString(culture)
+
+x.ToString(CultureInfo.InvariantCulture)
+x.ToString(CultureInfo.InvariantCulture)
+
+x.HasValue
+x.HasValue
+
+x[0]
+x[0]
+
+x[0]
+x[0]
+
+Convert(x[0], Int32)
+Convert(x[0], Int32)
+
+Convert(ArrayLength(x), Int32)
+Convert(ArrayLength(x), Int32)
+
+Add(x, y)
+Add(x, y)
+
+(x * y)
+(x * y)
+
+-x
+-x
+
+Not(x)
+Not(x)
+
+(x % y)
+(x % y)
+
+(x << (y & 31))
+(x << (y & 31))
+
+(x >> (y & 31))
+(x >> (y & 31))
+
+(x - y)
+(x - y)
+
+(x ^ y)
+(x ^ y)
+
+new TestClass() {StartDate = DateTime.Now}
+new TestClass() {StartDate = DateTime.Now}
+
+new TestClass() {StartDate = value(DelegateDecompiler.Tests.DecompileExtensionsTests+<>c__DisplayClass37_0).date}
+new TestClass() {StartDate = value(DelegateDecompiler.Tests.DecompileExtensionsTests+<>c__DisplayClass37_0).date}
+
+new TestClass() {StartDate = x, EndDate = Convert(y, Nullable`1)}
+new TestClass() {StartDate = x, EndDate = Convert(y, Nullable`1)}
+
+(x + y)
+(x + y)
+
+((x + y) + z)
+((x + y) + z)
+
+x.get_Item("A")
+x.get_Item("A")
+
+(Convert((Convert(x, Nullable`1) ?? Foo), Int32) == 1)
+(Convert(Convert(x, Nullable`1), Nullable`1) == Convert(Bar, Nullable`1))
+(Convert((Convert(x, Nullable`1) ?? Foo), Int32) == 1)
+
+new [] {Foo, Bar}.Contains(x)
+new [] {Foo, Bar}.Contains(x)
+
+Round(x, 3, AwayFromZero)
+Round(x, 3, AwayFromZero)
+
+(Convert(x, Nullable`1) == Convert(y, Nullable`1))
+(Convert(x, Nullable`1) == Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) == Convert(Foo, Nullable`1))
+(Convert(x, Nullable`1) == Convert(Foo, Nullable`1))
+
+(Convert(x, Int32) == 10)
+(Convert(x, Int32) == 10)
+
+(Convert(x, Int32) > 10)
+(Convert(x, Int32) > 10)
+
+(Convert(x, Int32) % 10)
+(Convert(x, Int32) % 10)
+
+(Convert(x, Int32) - 10)
+(Convert(x, Int32) - 10)
+
+Convert((2 & Convert(x, Int32)), TestFlagEnum)
+Convert((2 & Convert(x, Int32)), TestFlagEnum)
+
+(1 == Convert(x, Int32))
+(1 == Convert(x, Int32))
+(1 == Convert(x, Int32))
+
+Bar.HasFlag(Convert(x, Enum))
+Bar.HasFlag(Convert(x, Enum))
+
+(1 != Convert(x, Int32))
+(1 != Convert(x, Int32))
+(1 != Convert(x, Int32))
+
+Convert((2 | Convert(x, Int32)), TestFlagEnum)
+Convert((2 | Convert(x, Int32)), TestFlagEnum)
+
+Convert((Convert(x, Int32) & 2), TestFlagEnum)
+Convert((Convert(x, Int32) & 2), TestFlagEnum)
+
+Convert((Convert(x, Int32) & Convert(x, Int32)), TestFlagEnum)
+Convert((Convert(x, Int32) & Convert(x, Int32)), TestFlagEnum)
+
+GenericMethod(x)
+GenericMethod(x)
+
+TestEnumMethod(x)
+TestEnumMethod(x)
+
+EnumMethod(Convert(x, Enum))
+EnumMethod(Convert(x, Enum))
+
+Int16Method(Convert(x, Int16))
+Int16Method(Convert(x, Int16))
+
+Int32Method(Convert(x, Int32))
+Int32Method(Convert(x, Int32))
+
+Int64Method(Convert(x, Int64))
+Int64Method(Convert(x, Int64))
+
+ObjectMethod(Convert(x, Object))
+ObjectMethod(Convert(x, Object))
+
+(Convert(x, Int32) == 1)
+(Convert(x, Int32) == 1)
+(Convert(x, Int32) == 1)
+
+x.HasFlag(Convert(Bar, Enum))
+x.HasFlag(Convert(Bar, Enum))
+
+x.HasFlag(Convert(x, Enum))
+x.HasFlag(Convert(x, Enum))
+
+(Convert(x, Int32) != 1)
+(Convert(x, Int32) != 1)
+(Convert(x, Int32) != 1)
+
+Convert((Convert(x, Int32) | 2), TestFlagEnum)
+Convert((Convert(x, Int32) | 2), TestFlagEnum)
+
+Convert((Convert(x, Int32) | Convert(x, Int32)), TestFlagEnum)
+Convert((Convert(x, Int32) | Convert(x, Int32)), TestFlagEnum)
+
+(Convert(x, Int32) == Convert(y, Int32))
+(Convert(x, Int32) == Convert(y, Int32))
+
+(Convert(x, Int32) != Convert(y, Int32))
+(Convert(x, Int32) != Convert(y, Int32))
+
+((Convert(x, Int32) == 1) OrElse (Convert(x, Int32) == 0))
+((Convert(x, Int32) == 1) OrElse (Convert(x, Int32) == 0))
+((Convert(x, Int32) == 1) OrElse (Convert(x, Int32) == 0))
+
+((Convert(x, Int32) - 1) <= 1)
+((Convert(x, Int32) - 1) <= 1)
+
+(Convert(x, Int32) <= 1)
+(Convert(x, Int32) <= 1)
+
+((Convert(x, Int32) != 1) OrElse (Convert(x, Int32) == 0))
+((Convert(x, Int32) != 1) OrElse (Convert(x, Int32) == 0))
+((Convert(x, Int32) != 1) OrElse (Convert(x, Int32) == 0))
+
+Convert(Not(Convert(x, Int32)), TestFlagEnum)
+Convert(Not(Convert(x, Int32)), TestFlagEnum)
+
+True.ToString()
+True.ToString()
+
+1.ToString()
+1.ToString()
+
+new Decimal(123, 0, 0, False, 2).ToString()
+1.23.ToString()
+new Decimal(123, 0, 0, False, 2).ToString()
+
+1.ToString()
+1.ToString()
+
+  Skipped TestEnumPropertyIsFooOrBaz [< 1 ms]
+  Skipped ConstantDecimalOneToString [< 1 ms]
+1.ToString()
+1.ToString()
+
+1.ToString()
+1.ToString()
+
+1.ToString()
+1.ToString()
+
+1.ToString()
+1.ToString()
+
+1.ToString()
+1.ToString()
+
+1.ToString()
+1.ToString()
+
+Method(True)
+Method(True)
+
+  Skipped ConstantInt64ToString [< 1 ms]
+  Skipped ConstantUInt64ToString [< 1 ms]
+Method(1)
+Method(1)
+
+Method(new Decimal(123, 0, 0, False, 2))
+Method(1.23)
+Method(new Decimal(123, 0, 0, False, 2))
+
+Method(1)
+Method(1)
+
+Method(1)
+Method(1)
+
+Method(1)
+Method(1)
+
+Method(1)
+Method(1)
+
+Method(1)
+Method(1)
+
+  Skipped MethodAcceptingDecimalOne [< 1 ms]
+  Skipped MethodAcceptingInt64 [< 1 ms]
+Method(1)
+Method(1)
+
+Method(1)
+Method(1)
+
+x.ToString()
+x.ToString()
+
+x.ToString()
+x.ToString()
+
+x.ToString()
+x.ToString()
+
+x.ToString()
+x.ToString()
+
+x.ToString()
+x.ToString()
+
+x.ToString()
+x.ToString()
+
+  Skipped MethodAcceptingUInt64 [< 1 ms]
+x.ToString()
+x.ToString()
+
+x.ToString()
+x.ToString()
+
+x.ToString()
+x.ToString()
+
+x.ToString()
+x.ToString()
+
+x.ToString()
+x.ToString()
+
+x.ToString()
+x.ToString()
+
+IIF(b.HasBar, b.Posts.Any(x => x.IsActive), (b.HasBaz AndAlso b.Posts.Any(x => x.IsActive)))
+((b.HasBar OrElse b.HasBaz) AndAlso b.Posts.Any(x => x.IsActive))
+IIF(b.HasBar, b.Posts.Any(x => x.IsActive), (b.HasBaz AndAlso b.Posts.Any(x => x.IsActive)))
+
+IIF(b.HasBar, (b.Posts.Any(x => x.IsActive) OrElse (b.HasBaz AndAlso b.Posts.Any(x => x.IsActive))), (b.HasBaz AndAlso b.Posts.Any(x => x.IsActive)))
+((b.HasBar AndAlso b.Posts.Any(x => x.IsActive)) OrElse (b.HasBaz AndAlso b.Posts.Any(x => x.IsActive)))
+IIF(b.HasBar, (b.Posts.Any(x => x.IsActive) OrElse (b.HasBaz AndAlso b.Posts.Any(x => x.IsActive))), (b.HasBaz AndAlso b.Posts.Any(x => x.IsActive)))
+
+(b.Posts.Any(x => x.IsActive) AndAlso (b.HasBar OrElse b.HasBaz))
+(b.Posts.Any(x => x.IsActive) AndAlso (b.HasBar OrElse b.HasBaz))
+
+  Skipped TestQueryable1 [< 1 ms]
+  Skipped TestQueryable2 [< 1 ms]
+  Skipped Test [< 1 ms]
+value.Field
+value.Field
+value.Field
+value.Field
+
+value.Method(i)
+value.Method(i)
+value.Method(i)
+value.Method(i)
+
+value.Field
+value.Field
+Convert(value, ITestInterface).Field
+
+entity.IsValidAt(dateTime)
+entity.IsValidAt(dateTime)
+
+entity.IsValidAt(dateTimeProvider.Now)
+entity.IsValidAt(dateTimeProvider.Now)
+
+entity.IsValidAt(DateTime.Now)
+entity.IsValidAt(DateTime.Now)
+
+entity.IsValidAt(DateTime.Now)
+entity.IsValidAt(DateTime.Now)
+
+Range(1, 10).Aggregate(0, (acc, x) => (acc + x))
+Range(1, 10).Aggregate(0, (acc, x) => (acc + x))
+
+Range(1, 10).Any(i => (i == 5))
+Range(1, 10).Any(i => (i == 5))
+
+Range(1, 10).OrderBy(x => x, Comparer`1.Default)
+Range(1, 10).OrderBy(x => x, Comparer`1.Default)
+
+Range(1, 10).OrderBy(x => x, null)
+Range(1, 10).OrderBy(x => x, null)
+
+Range(1, 10).Select(x => Range(0, x).Aggregate(0, (acc, i) => (acc + i)))
+Range(1, 10).Select(x => Range(0, x).Aggregate(0, (acc, i) => (acc + i)))
+
+  Skipped CanUseLambdaWithClosure [< 1 ms]
+Range(1, 10).ToDictionary(_ => _, _ => _)
+Range(1, 10).ToDictionary(_ => _, _ => _)
+
+new Dictionary`2() {Void Add(Int32, Int32)(1, 2), Void Add(Int32, Int32)(3, 4)}
+new Dictionary`2() {Void Add(Int32, Int32)(1, 2), Void Add(Int32, Int32)(3, 4)}
+
+new List`1() {Void Add(Int32)(1), Void Add(Int32)(2)}
+new List`1() {Void Add(Int32)(1), Void Add(Int32)(2)}
+
+new List`1() {Void Add(Int32)(1), Void Add(Int32)(2), Void Add(Int32)(3)}
+new List`1() {Void Add(Int32)(1), Void Add(Int32)(2), Void Add(Int32)(3)}
+
+new List`1() {Void Add(Int32)(1)}
+new List`1() {Void Add(Int32)(1)}
+
+new TestClass() {Void Add(System.DateTime, System.DateTime)(DateTime.Now, DateTime.Now)}
+new TestClass() {Void Add(System.DateTime, System.DateTime)(DateTime.Now, DateTime.Now)}
+
+ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests+<>c__DisplayClass21_0).v))
+ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests+<>c__DisplayClass21_0).v))
+
+ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests).f1))
+ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests).f1))
+
+ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests).M1()))
+ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests).M1()))
+
+ints.Select(_ => value(DelegateDecompiler.Tests.NestedExpressionsTests+<>c__DisplayClass20_0).p)
+ints.Select(_ => value(DelegateDecompiler.Tests.NestedExpressionsTests+<>c__DisplayClass20_0).p)
+
+ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests).P1))
+ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests).P1))
+
+ints.Select(_ => value(DelegateDecompiler.Tests.NestedExpressionsTests+<>c__DisplayClass19_0).v)
+ints.Select(_ => value(DelegateDecompiler.Tests.NestedExpressionsTests+<>c__DisplayClass19_0).v)
+
+ints.SingleOrDefault(i => (i == NestedExpressionsTests.f2))
+ints.SingleOrDefault(i => (i == NestedExpressionsTests.f2))
+
+ints.SingleOrDefault(i => (i == M2()))
+ints.SingleOrDefault(i => (i == M2()))
+
+ints.SingleOrDefault(i => (i == NestedExpressionsTests.P2))
+ints.SingleOrDefault(i => (i == NestedExpressionsTests.P2))
+
+ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests+<>c__DisplayClass29_0).v))
+ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests+<>c__DisplayClass29_0).v))
+
+ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests).f1))
+ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests).f1))
+
+ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests).M1()))
+ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests).M1()))
+
+ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests).P1))
+ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests).P1))
+
+ints.SingleOrDefault(i => (i == NestedExpressionsTests.f2))
+ints.SingleOrDefault(i => (i == NestedExpressionsTests.f2))
+
+ints.SingleOrDefault(i => (i == M2()))
+ints.SingleOrDefault(i => (i == M2()))
+
+ints.SingleOrDefault(i => (i == NestedExpressionsTests.P2))
+ints.SingleOrDefault(i => (i == NestedExpressionsTests.P2))
+
+ints.SingleOrDefault(i => (i == 0))
+ints.SingleOrDefault(i => (i == 0))
+
+ints.SingleOrDefault(i => (i == 0))
+ints.SingleOrDefault(i => (i == 0))
+
+value(DelegateDecompiler.Tests.NestedExpressionsTests+<>c__DisplayClass36_0).query
+value(DelegateDecompiler.Tests.NestedExpressionsTests+<>c__DisplayClass36_0).query
+
+value(DelegateDecompiler.Tests.NestedExpressionsTests).fQref1.Where(i => (i >= 0))
+value(DelegateDecompiler.Tests.NestedExpressionsTests).fQref1.Where(i => (i >= 0))
+
+Empty().AsQueryable().Where(i => (i >= 0))
+Empty().AsQueryable().Where(i => (i >= 0))
+
+Empty().AsQueryable().Where(x => (x >= value(DelegateDecompiler.Tests.NestedExpressionsTests+<>c__DisplayClass43_0).floor)).Where(i => (i >= 0))
+Empty().AsQueryable().Where(x => (x >= value(DelegateDecompiler.Tests.NestedExpressionsTests+<>c__DisplayClass43_0).floor)).Where(i => (i >= 0))
+
+Empty().AsQueryable().Where(x => (x >= floor)).Where(i => (i >= 0))
+Empty().AsQueryable().Where(x => (x >= floor)).Where(i => (i >= 0))
+
+Empty().AsQueryable().Where(i => (i >= 0))
+Empty().AsQueryable().Where(i => (i >= 0))
+
+NestedExpressionsTests.fQref2.Where(i => (i >= 0))
+NestedExpressionsTests.fQref2.Where(i => (i >= 0))
+
+Empty().AsQueryable().Where(i => (i >= 0))
+Empty().AsQueryable().Where(i => (i >= 0))
+
+Empty().AsQueryable().Where(x => (x >= value(DelegateDecompiler.Tests.NestedExpressionsTests+<>c__DisplayClass44_0).floor)).Where(i => (i >= 0))
+Empty().AsQueryable().Where(x => (x >= value(DelegateDecompiler.Tests.NestedExpressionsTests+<>c__DisplayClass44_0).floor)).Where(i => (i >= 0))
+
+Empty().AsQueryable().Where(x => (x >= floor)).Where(i => (i >= 0))
+Empty().AsQueryable().Where(x => (x >= floor)).Where(i => (i >= 0))
+
+Empty().AsQueryable().Where(i => (i >= 0))
+Empty().AsQueryable().Where(i => (i >= 0))
+
+  Skipped BooleanCompareToFalse [< 1 ms]
+(x ?? False)
+(x == Convert(True, Nullable`1))
+(x ?? False)
+
+x.Equals(null)
+x.Equals(null)
+
+(x ?? 0)
+(x ?? 0)
+x.GetValueOrDefault()
+
+(x ?? 100)
+(x ?? 100)
+x.GetValueOrDefault(100)
+
+null
+null
+
+Convert(x, Nullable`1)
+Convert(x, Nullable`1)
+
+(x & y)
+(x & y)
+
+(x & Convert(y, Nullable`1))
+(x & Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) & y)
+(Convert(x, Nullable`1) & y)
+
+(x & x)
+(x & x)
+
+(x ?? 0)
+(x ?? 0)
+
+(x / y)
+(x / y)
+
+(x / Convert(y, Nullable`1))
+(x / Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) / y)
+(Convert(x, Nullable`1) / y)
+
+(x / x)
+(x / x)
+
+(x == y)
+(x == y)
+
+(x == Convert(y, Nullable`1))
+(x == Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) == y)
+(Convert(x, Nullable`1) == y)
+
+(x == x)
+(x == x)
+
+(x > y)
+(x > y)
+
+(x > Convert(y, Nullable`1))
+(x > Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) > y)
+(Convert(x, Nullable`1) > y)
+
+(x >= y)
+(x >= y)
+
+(x >= Convert(y, Nullable`1))
+(x >= Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) >= y)
+(Convert(x, Nullable`1) >= y)
+
+(x >= x)
+(x >= x)
+
+(x > x)
+(x > x)
+
+(x << (y & Convert(31, Nullable`1)))
+(x << y)
+(x << (y & Convert(31, Nullable`1)))
+
+(x << Convert((y & 31), Nullable`1))
+(x << Convert((y & 31), Nullable`1))
+
+(Convert(x, Nullable`1) << (y & Convert(31, Nullable`1)))
+(Convert(x, Nullable`1) << y)
+(Convert(x, Nullable`1) << (y & Convert(31, Nullable`1)))
+
+(x << (x & Convert(31, Nullable`1)))
+(x << x)
+(x << (x & Convert(31, Nullable`1)))
+
+(x < y)
+(x < y)
+
+(x < Convert(y, Nullable`1))
+(x < Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) < y)
+(Convert(x, Nullable`1) < y)
+
+(x <= y)
+(x <= y)
+
+(x <= Convert(y, Nullable`1))
+(x <= Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) <= y)
+(Convert(x, Nullable`1) <= y)
+
+(x <= x)
+(x <= x)
+
+(x < x)
+(x < x)
+
+(x * y)
+(x * y)
+
+(x * Convert(y, Nullable`1))
+(x * Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) * y)
+(Convert(x, Nullable`1) * y)
+
+(x * x)
+(x * x)
+
+(x != y)
+(x != y)
+
+(x != Convert(y, Nullable`1))
+(x != Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) != y)
+(Convert(x, Nullable`1) != y)
+
+(x != x)
+(x != x)
+
+(x | y)
+(x | y)
+
+(x | Convert(y, Nullable`1))
+(x | Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) | y)
+(Convert(x, Nullable`1) | y)
+
+(x | x)
+(x | x)
+
+(x + y)
+(x + y)
+
+(x + Convert(y, Nullable`1))
+(x + Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) + y)
+(Convert(x, Nullable`1) + y)
+
+(x + x)
+(x + x)
+
+(x >> (y & Convert(31, Nullable`1)))
+(x >> y)
+(x >> (y & Convert(31, Nullable`1)))
+
+(x >> Convert((y & 31), Nullable`1))
+(x >> Convert(y, Nullable`1))
+(x >> Convert((y & 31), Nullable`1))
+
+(Convert(x, Nullable`1) >> (y & Convert(31, Nullable`1)))
+(Convert(x, Nullable`1) >> y)
+(Convert(x, Nullable`1) >> (y & Convert(31, Nullable`1)))
+
+(x >> (x & Convert(31, Nullable`1)))
+(x >> x)
+(x >> (x & Convert(31, Nullable`1)))
+
+((x + y) + z)
+((x + y) + z)
+
+(x ^ y)
+(x ^ y)
+
+(x ^ Convert(y, Nullable`1))
+(x ^ Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) ^ y)
+(Convert(x, Nullable`1) ^ y)
+
+(x ^ x)
+(x ^ x)
+
+(x != null)
+(x != null)
+
+(x + y)
+(x + y)
+
+(x * y)
+(x * y)
+
+(x ^ y)
+(x ^ y)
+
+(x == y)
+(x == y)
+
+(x > y)
+(x > y)
+
+  Skipped IntToBool [< 1 ms]
+Convert(x, Int32)
+Convert(x, Int32)
+
+-x
+-x
+
+DelegateDecompiler.Tests.Employee[].Where(employee => (((employee.FirstName + " ") + employee.LastName) == value(DelegateDecompiler.Tests.QueryableExtensionsTests+<>c__DisplayClass9_0).fullname))
+
+IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, e.LastName)))))))
+IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, e.LastName)))))))
+
+IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, e.LastName)))))))
+IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, IIF((e.FirstName != null), e.FirstName, e.LastName)))))))
+
+  Skipped Issue39 [< 1 ms]
+  Skipped Issue78 [< 1 ms]
+  Skipped StackOverflowTestOnThreadWithSmallStack [< 1 ms]
+IIF((value <= 0), -value, (value * 2))
+IIF((value <= 0), -value, (value * 2))
+
+(value + 1)
+(value + 1)
+
+IIF((text == null), text, (text + " modified"))
+IIF((text == null), text, (text + " modified"))
+
+((((((w + " ") + x) + " ") + y) + " ") + z)
+((((((w + " ") + x) + " ") + y) + " ") + z)
+
+((((((((u + " ") + w) + " ") + x) + " ") + y) + " ") + z)
+((((((((u + " ") + w) + " ") + x) + " ") + y) + " ") + z)
+
+((x.ToString() + y) + z.ToString())
+((Convert(x, Object) + y) + Convert(z, Object))
+((x.ToString() + y) + z.ToString())
+
+((x.ToString() + y) + z.ToString())
+((Convert(x, Object) + y) + Convert(z, Object))
+((x.ToString() + y) + z.ToString())
+
+Concat(x)
+Concat(x)
+
+Concat(new [] {x})
+Concat(new [] {x})
+
+(parent As Child)
+(parent As Child)
+
+Not((parent Is Child))
+Not((parent Is Child))
+
+  Skipped TryCatchFinally [12 ms]
+  Skipped TryCatchSimple [13 ms]
+  Skipped TryCatchWithCondition [14 ms]
+  Skipped TryCatchWithExceptionVariable [15 ms]
+  Skipped TryCatchWithSpecificException [16 ms]
+  Skipped TryFinallyOnly [16 ms]
+(parent Is Child)
+(parent Is Child)
+
+Convert(o, Point).X
+Convert(o, Point).X
+
+value.GetHashCode()
+value.GetHashCode()
+
+value.GetHashCode()
+value.GetHashCode()
+
+Convert(o, Point).X
+Convert(o, Point).X
+
+(Convert(o, Point).X + Convert(o, Point).Y)
+(Convert(o, Point).X + Convert(o, Point).Y)
+
+Convert(o, DayOfWeek)
+Convert(o, DayOfWeek)
+
+Convert(o, Nullable`1)
+Convert(o, Nullable`1)
+
+
+Passed!  - Failed:     0, Passed:   451, Skipped:    26, Total:   477, Duration: 1 s - DelegateDecompiler.Tests.dll (net8.0)
+  Determining projects to restore...
+  Restored /home/user/w59/DD/default2/src/DelegateDecompiler.Tests.VB/DelegateDecompiler.Tests.VB.vbproj (in 991 ms).
+  2 of 3 projects are up-to-date for restore.
+  DelegateDecompiler -> /home/user/w59/DD/default2/src/DelegateDecompiler/bin/Release/netstandard2.1/DelegateDecompiler.dll
+  DelegateDecompiler -> /home/user/w59/DD/default2/src/DelegateDecompiler/bin/Release/net40/DelegateDecompiler.dll
+  DelegateDecompiler.Tests -> /home/user/w59/DD/default2/src/DelegateDecompiler.Tests/bin/Release/net8.0/DelegateDecompiler.Tests.dll
+  DelegateDecompiler -> /home/user/w59/DD/default2/src/DelegateDecompiler/bin/Release/net45/DelegateDecompiler.dll
+  DelegateDecompiler.Tests -> /home/user/w59/DD/default2/src/DelegateDecompiler.Tests/bin/Release/net45/DelegateDecompiler.Tests.dll
+  DelegateDecompiler.Tests -> /home/user/w59/DD/default2/src/DelegateDecompiler.Tests/bin/Release/net40/DelegateDecompiler.Tests.dll
+  DelegateDecompiler.Tests.VB -> /home/user/w59/DD/default2/src/DelegateDecompiler.Tests.VB/bin/Release/net8.0/DelegateDecompiler.Tests.VB.dll
+  DelegateDecompiler.Tests.VB -> /home/user/w59/DD/default2/src/DelegateDecompiler.Tests.VB/bin/Release/net40/DelegateDecompiler.Tests.VB.dll
+  DelegateDecompiler.Tests.VB -> /home/user/w59/DD/default2/src/DelegateDecompiler.Tests.VB/bin/Release/net45/DelegateDecompiler.Tests.VB.dll
+Test run for /home/user/w59/DD/default2/src/DelegateDecompiler.Tests.VB/bin/Release/net40/DelegateDecompiler.Tests.VB.dll (.NETFramework,Version=v4.0)
+Test run for /home/user/w59/DD/default2/src/DelegateDecompiler.Tests.VB/bin/Release/net8.0/DelegateDecompiler.Tests.VB.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+Test run for /home/user/w59/DD/default2/src/DelegateDecompiler.Tests.VB/bin/Release/net45/DelegateDecompiler.Tests.VB.dll (.NETFramework,Version=v4.5)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+VSTest version 18.0.2 (x64)
+
+A total of 1 test files matched the specified pattern.
+Starting test execution, please wait...
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+System.IO.FileNotFoundException: Could not find 'mono' host. Make sure that 'mono' is installed on the machine and is available in PATH environment variable.
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Helpers.DotnetHostHelper.GetMonoPath() in /_/src/vstest/src/Microsoft.TestPlatform.CoreUtilities/Helpers/DotnetHostHelper.cs:line 100
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Hosting.DefaultTestHostManager.GetTestHostProcessStartInfo(IEnumerable`1 sources, IDictionary`2 environmentVariables, TestRunnerConnectionInfo connectionInfo) in /_/src/vstest/src/Microsoft.TestPlatform.TestHostProvider/Hosting/DefaultTestHostManager.cs:line 219
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Client.ProxyOperationManager.SetupChannel(IEnumerable`1 sources, String runSettings) in /_/src/vstest/src/Microsoft.TestPlatform.CrossPlatEngine/Client/ProxyOperationManager.cs:line 229
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Client.ProxyExecutionManager.InitializeTestRun(TestRunCriteria testRunCriteria, IInternalTestRunEventsHandler eventHandler) in /_/src/vstest/src/Microsoft.TestPlatform.CrossPlatEngine/Client/ProxyExecutionManager.cs:line 184
+System.IO.FileNotFoundException: Could not find 'mono' host. Make sure that 'mono' is installed on the machine and is available in PATH environment variable.
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Helpers.DotnetHostHelper.GetMonoPath() in /_/src/vstest/src/Microsoft.TestPlatform.CoreUtilities/Helpers/DotnetHostHelper.cs:line 100
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Hosting.DefaultTestHostManager.GetTestHostProcessStartInfo(IEnumerable`1 sources, IDictionary`2 environmentVariables, TestRunnerConnectionInfo connectionInfo) in /_/src/vstest/src/Microsoft.TestPlatform.TestHostProvider/Hosting/DefaultTestHostManager.cs:line 219
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Client.ProxyOperationManager.SetupChannel(IEnumerable`1 sources, String runSettings) in /_/src/vstest/src/Microsoft.TestPlatform.CrossPlatEngine/Client/ProxyOperationManager.cs:line 229
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Client.ProxyExecutionManager.InitializeTestRun(TestRunCriteria testRunCriteria, IInternalTestRunEventsHandler eventHandler) in /_/src/vstest/src/Microsoft.TestPlatform.CrossPlatEngine/Client/ProxyExecutionManager.cs:line 184
+
+Test Run Aborted.
+
+Test Run Aborted.
+Convert(x, Nullable`1)
+Convert(x, Nullable`1)
+
+(x / y)
+(x / y)
+
+(x / Convert(y, Nullable`1))
+(x / Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) / y)
+(Convert(x, Nullable`1) / y)
+
+(x == y)
+(x == y)
+
+(x == Convert(y, Nullable`1))
+(x == Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) == y)
+(Convert(x, Nullable`1) == y)
+
+(x > y)
+(x > y)
+
+(x > Convert(y, Nullable`1))
+(x > Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) > y)
+(Convert(x, Nullable`1) > y)
+
+(x >= y)
+(x >= y)
+
+(x >= Convert(y, Nullable`1))
+(x >= Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) >= y)
+(Convert(x, Nullable`1) >= y)
+
+(x < y)
+(x < y)
+
+(x < Convert(y, Nullable`1))
+(x < Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) < y)
+(Convert(x, Nullable`1) < y)
+
+(x <= y)
+(x <= y)
+
+(x <= Convert(y, Nullable`1))
+(x <= Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) <= y)
+(Convert(x, Nullable`1) <= y)
+
+(x - y)
+(x - y)
+
+(x - Convert(y, Nullable`1))
+(x - Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) - y)
+(Convert(x, Nullable`1) - y)
+
+(x * y)
+(x * y)
+
+(x * Convert(y, Nullable`1))
+(x * Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) * y)
+(Convert(x, Nullable`1) * y)
+
+(x != y)
+(x != y)
+
+(x != Convert(y, Nullable`1))
+(x != Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) != y)
+(Convert(x, Nullable`1) != y)
+
+(x + y)
+(x + y)
+
+(x + Convert(y, Nullable`1))
+(x + Convert(y, Nullable`1))
+
+(Convert(x, Nullable`1) + y)
+(Convert(x, Nullable`1) + y)
+
+((x + y) + z)
+((x + y) + z)
+
+IIF((x == y), x, y)
+IIF((x == y), x, y)
+
+IIF((x >= y), x, y)
+IIF((x >= y), x, y)
+
+IIF((x > y), x, y)
+IIF((x > y), x, y)
+
+IIF((x <= y), x, y)
+IIF((x <= y), x, y)
+
+IIF((x < y), x, y)
+IIF((x < y), x, y)
+
+IIF((x != y), x, y)
+IIF((x != y), x, y)
+
+(x == y)
+(x == y)
+
+(x >= y)
+(x >= y)
+
+(x > y)
+(x > y)
+
+(x <= y)
+(x <= y)
+
+(x < y)
+(x < y)
+
+new Decimal(121, 0, 0, False, 2)
+1.21
+new Decimal(121, 0, 0, False, 2)
+
+new Decimal(121, 0, 0, False, 2)
+1.21
+new Decimal(121, 0, 0, False, 2)
+
+(x / y)
+(x / y)
+
+(x * y)
+(x * y)
+
+(x * new Decimal(y))
+(x * Convert(y, Decimal))
+(x * new Decimal(y))
+
+(x != null)
+(x != null)
+
+
+Passed!  - Failed:     0, Passed:    50, Skipped:     0, Total:    50, Duration: 522 ms - DelegateDecompiler.Tests.VB.dll (net8.0)

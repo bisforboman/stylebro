@@ -1,0 +1,40 @@
+  Determining projects to restore...
+  Restored /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.EntityFrameworkCore5/DelegateDecompiler.EntityFrameworkCore5.csproj (in 4.97 sec).
+  Restored /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.EntityFrameworkCore10.Tests/DelegateDecompiler.EntityFrameworkCore10.Tests.csproj (in 7.04 sec).
+  Restored /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.EntityFrameworkCore8.Tests/DelegateDecompiler.EntityFrameworkCore8.Tests.csproj (in 7.09 sec).
+  Restored /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.EntityFrameworkCore9.Tests/DelegateDecompiler.EntityFrameworkCore9.Tests.csproj (in 7.09 sec).
+  Restored /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.EntityFramework/DelegateDecompiler.EntityFramework.csproj (in 2.49 sec).
+  Restored /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.EntityFramework.Tests/DelegateDecompiler.EntityFramework.Tests.csproj (in 2.53 sec).
+  Restored /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler/DelegateDecompiler.csproj (in 4.51 sec).
+  Restored /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.Tests.VB/DelegateDecompiler.Tests.VB.vbproj (in 537 ms).
+  Restored /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.Tests/DelegateDecompiler.Tests.csproj (in 2.99 sec).
+  DelegateDecompiler -> /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler/bin/Debug/netstandard2.0/DelegateDecompiler.dll
+  DelegateDecompiler -> /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler/bin/Debug/netstandard2.1/DelegateDecompiler.dll
+  DelegateDecompiler -> /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler/bin/Debug/net45/DelegateDecompiler.dll
+  DelegateDecompiler -> /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler/bin/Debug/net40/DelegateDecompiler.dll
+  DelegateDecompiler.EntityFramework -> /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.EntityFramework/bin/Debug/net45/DelegateDecompiler.EntityFramework.dll
+  DelegateDecompiler.EntityFrameworkCore5 -> /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.EntityFrameworkCore5/bin/Debug/netstandard2.1/DelegateDecompiler.EntityFrameworkCore5.dll
+  DelegateDecompiler.EntityFramework -> /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.EntityFramework/bin/Debug/netstandard2.1/DelegateDecompiler.EntityFramework.dll
+  DelegateDecompiler.Tests -> /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.Tests/bin/Debug/net8.0/DelegateDecompiler.Tests.dll
+  DelegateDecompiler.Tests -> /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.Tests/bin/Debug/net45/DelegateDecompiler.Tests.dll
+  DelegateDecompiler.Tests -> /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.Tests/bin/Debug/net40/DelegateDecompiler.Tests.dll
+  DelegateDecompiler.Tests.VB -> /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.Tests.VB/bin/Debug/net40/DelegateDecompiler.Tests.VB.dll
+  DelegateDecompiler.Tests.VB -> /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.Tests.VB/bin/Debug/net8.0/DelegateDecompiler.Tests.VB.dll
+  DelegateDecompiler.EntityFramework.Tests -> /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.EntityFramework.Tests/bin/Debug/net8.0/DelegateDecompiler.EntityFramework.Tests.dll
+  DelegateDecompiler.EntityFrameworkCore9.Tests -> /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.EntityFrameworkCore9.Tests/bin/Debug/net9.0/DelegateDecompiler.EntityFrameworkCore9.Tests.dll
+  DelegateDecompiler.EntityFrameworkCore10.Tests -> /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.EntityFrameworkCore10.Tests/bin/Debug/net10.0/DelegateDecompiler.EntityFrameworkCore10.Tests.dll
+  DelegateDecompiler.Tests.VB -> /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.Tests.VB/bin/Debug/net45/DelegateDecompiler.Tests.VB.dll
+  DelegateDecompiler.EntityFramework.Tests -> /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.EntityFramework.Tests/bin/Debug/net45/DelegateDecompiler.EntityFramework.Tests.dll
+  DelegateDecompiler.EntityFrameworkCore8.Tests -> /home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.EntityFrameworkCore8.Tests/bin/Debug/net8.0/DelegateDecompiler.EntityFrameworkCore8.Tests.dll
+  Successfully created package '/home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler/bin/Debug/DelegateDecompiler.0.36.0-ci.7.nupkg'.
+  Successfully created package '/home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler/bin/Debug/DelegateDecompiler.0.36.0-ci.7.snupkg'.
+  Successfully created package '/home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.EntityFrameworkCore5/bin/Debug/DelegateDecompiler.EntityFrameworkCore5.0.36.0-ci.7.nupkg'.
+  Successfully created package '/home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.EntityFrameworkCore5/bin/Debug/DelegateDecompiler.EntityFrameworkCore5.0.36.0-ci.7.snupkg'.
+  Successfully created package '/home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.EntityFramework/bin/Debug/DelegateDecompiler.EntityFramework.0.36.0-ci.7.nupkg'.
+  Successfully created package '/home/user/cand59/hazzik-DelegateDecompiler/src/DelegateDecompiler.EntityFramework/bin/Debug/DelegateDecompiler.EntityFramework.0.36.0-ci.7.snupkg'.
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:35.84

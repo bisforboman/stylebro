@@ -1074,3 +1074,45 @@ engines (`.trials/README.md`, "Engine soak").
   LightInject's tests need `dotnet tool install -g dotnet-ilverify`; NPoco's test config switched to SQLite in-memory;
   global.json lowered (LightInject); the net4x test frameworks need mono (CommandLineUtils, ExpressionTreeToString:
   net6.0 only).
+
+## Trial 59 (2026-10-28, not clean: owner "Not clean", tally 0; host soak: clean, the fourth clean soak with the host as the default)
+
+- Repos (three random plus one targeted): xoofx/SharpYaml, adamralph/bullseye, danielpalme/ReportGenerator (random, seed 59:
+  draws 28, 10, 83 of 95 entries; every entry 0-75 is used, 76 Vogen (702 files) and 77 PdfPig (1,238) are too large, so 28
+  walked to 78 and 10 to 79; `.trials/trial59/logs/picks.md`), hazzik/DelegateDecompiler (targeted at trial 58's
+  expression-tree skip; no pool entry fit, a scan of 10 LINQ/expression repositories found it; added to the pool). Tested
+  main 1ab4981 (after #311) plus this PR's commits: round 1 on 0.8.0-trial59.1 (`default`/`dotnet`), round 2 on .2
+  (`default2`/`dotnet2`), both before #312/#313. Logs: `.trials/trial59/<repo>/logs/`.
+- One session, two chains (base, host, `--engine dotnet-format`, `Compare-Format.ps1`). Wall clock: 07:00 start (the
+  session's permission classifier first refused to build the clones; the owner allowed it), round 1 09:24-12:08, round 2
+  13:00-14:37; the worker restarted twice (no runs lost but DD's, rerun).
+- SharpYaml: `check --build` said "Not clean" on both engines over the untouched Debug build's CS0281 (the tests sign only in
+  Release): MinVer versions from git tags, the HEAD copy had none, built as 0.0.0.0, and CS0281's text names the version.
+  The copy now gets the tags (packed refs); new fixture shape `git-tag-version` (fails without the fix, both engines).
+- SharpYaml: kept BRO1303 renames' "first:" lines were the text before format's other fixes (BRO1514's braces moved one 96
+  lines), on both engines, and the engines named different lines for three where their fix orders differ: the soak's one
+  real difference. Owner's decision: format re-finds the string in the formatted text
+  ([decision](../decisions/2026-10-28-a-kept-findings-first-location-is-refreshed-against-the.md)); round 2 identical.
+- DelegateDecompiler: its tests pair `Expression<Func<E, bool>> expected = x => E.Bar == x;` with a compiled twin written the
+  same way and compare the decompiled IL; BRO1103 swapped the twin (2 tests failed). Owner's decision: BRO1103 and BRO1106
+  skip a delegate lambda equivalent to an expression-tree lambda of the same member
+  ([decision](../decisions/2026-10-28-bro1103-and-bro1106-skip-expression-tree-twins.md)); round 2's tests match the
+  untouched code. init turned BRO1106 off there (mixed `string.Empty` and `""`), so only BRO1103 reached the trees.
+- DelegateDecompiler (setup): the reference in a new root Directory.Build.props, which `src/Directory.Build.props` (no import)
+  shadows; format said only "add the package". It now names the file the reference belongs in; `subfolder-props` extended.
+- ReportGenerator: migrate (StyleCop in Core only, the other projects left alone and named: trial 58's partial-StyleCop fix
+  held), 46 files, clean on both engines; its untouched TWAE build's 44 SA1204/SA1629 errors are gone. Bullseye: lock files
+  with RestoreLockedMode under CI (restored unlocked, as getting-started says), PublicApiAnalyzers, 22 files, clean.
+- Every TWAE build and test suite matched the untouched code after round 2's fixes (SharpYaml 886, Bullseye 213,
+  ReportGenerator 335 of 388 with the same 51 failing, DelegateDecompiler 451 + 50 VB).
+- Host soak: no fallback; trees, exit codes, verdicts, --json, builds and tests identical on all four in round 2 (round 1:
+  the "first:" lines above); SharpYaml differs only by the old engine's load-warning note (documented). The Visual Basic
+  test project in DelegateDecompiler references C#, not the reverse: no Not checked on the old engine. Format (s, host/
+  dotnet-format, r1; r2): ReportGenerator 66/131; 90/161, Bullseye 48/180; 53/136, DelegateDecompiler 82/230; 95/332, SharpYaml
+  160/370; 146/347. The trial chain's `check` after format, host/dotnet-format: ReportGenerator 60/44 (r1, host slower); 66/75,
+  Bullseye 30/50; 34/52, DelegateDecompiler 46/61; 67/95, SharpYaml 51/57; 58/72. The soak's own check (unformatted code) was
+  faster on the host everywhere but ReportGenerator r1 (117/113).
+- Environment: SDK 10.0.113 + 8.0.132; the trial feed in the user NuGet.Config; global.json lowered (ReportGenerator 10.0.403,
+  SharpYaml 10.0.103); `-p:NuGetAudit=false` (DelegateDecompiler's EF Core 10 tests); DelegateDecompiler's EF tests need SQL
+  Server and its net40/net45 tests mono (net8.0 + the VB project only); `pkill -f` with a pattern from its own command line
+  killed the shell again.

@@ -1,0 +1,33 @@
+Running tests from /home/user/w59/Bullseye/base/tests/Tests.Internal/bin/Release/net9.0/Tests.Internal.dll (net10.0|x64)
+Running tests from /home/user/w59/Bullseye/base/tests/Tests.Internal/bin/Release/net10.0/Tests.Internal.dll (net10.0|x64)
+Running tests from /home/user/w59/Bullseye/base/tests/Tests/bin/Release/net8.0/Tests.dll (net8.0|x64)
+Running tests from /home/user/w59/Bullseye/base/tests/Tests.Internal/bin/Release/net8.0/Tests.Internal.dll (net8.0|x64)
+[+0/x0/?0] Tests.Internal.dll (net10.0|x64)(1s)
+[+0/x0/?0] Tests.Internal.dll (net10.0|x64)(1s)
+[+0/x0/?0] Tests.dll (net8.0|x64)(1s)
+[+0/x0/?0] Tests.Internal.dll (net8.0|x64)(1s)
+
+/home/user/w59/Bullseye/base/tests/Tests.Internal/bin/Release/net10.0/Tests.Internal.dll (net10.0|x64) passed (2s 873ms)
+/home/user/w59/Bullseye/base/tests/Tests.Internal/bin/Release/net9.0/Tests.Internal.dll (net10.0|x64) passed (3s 245ms)
+/home/user/w59/Bullseye/base/tests/Tests.Internal/bin/Release/net8.0/Tests.Internal.dll (net8.0|x64) passed (3s 548ms)
+/home/user/w59/Bullseye/base/tests/Tests/bin/Release/net8.0/Tests.dll (net8.0|x64) passed (3s 798ms)
+Running tests from /home/user/w59/Bullseye/base/tests/Tests/bin/Release/net9.0/Tests.dll (net10.0|x64)
+[+0/x0/?0] Tests.dll (net10.0|x64)(0s)
+
+Running tests from /home/user/w59/Bullseye/base/tests/Tests/bin/Release/net10.0/Tests.dll (net10.0|x64)
+/home/user/w59/Bullseye/base/tests/Tests/bin/Release/net9.0/Tests.dll (net10.0|x64) passed (2s 419ms)
+/home/user/w59/Bullseye/base/tests/Tests/bin/Release/net10.0/Tests.dll (net10.0|x64) passed (2s 740ms)
+
+Test run summary: Passed!
+  /home/user/w59/Bullseye/base/tests/Tests/bin/Release/net9.0/Tests.dll (net10.0|x64) passed (2s 419ms)
+  /home/user/w59/Bullseye/base/tests/Tests.Internal/bin/Release/net9.0/Tests.Internal.dll (net10.0|x64) passed (3s 245ms)
+  /home/user/w59/Bullseye/base/tests/Tests/bin/Release/net8.0/Tests.dll (net8.0|x64) passed (3s 798ms)
+  /home/user/w59/Bullseye/base/tests/Tests.Internal/bin/Release/net10.0/Tests.Internal.dll (net10.0|x64) passed (2s 873ms)
+  /home/user/w59/Bullseye/base/tests/Tests/bin/Release/net10.0/Tests.dll (net10.0|x64) passed (2s 740ms)
+  /home/user/w59/Bullseye/base/tests/Tests.Internal/bin/Release/net8.0/Tests.Internal.dll (net8.0|x64) passed (3s 548ms)
+
+  total: 213
+  failed: 0
+  succeeded: 213
+  skipped: 0
+  duration: 8s 961ms

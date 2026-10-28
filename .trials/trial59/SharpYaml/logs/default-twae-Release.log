@@ -1,0 +1,23 @@
+  Determining projects to restore...
+  Restored /home/user/w59/SharpYaml/default/src/SharpYaml.AotSmoke/SharpYaml.AotSmoke.csproj (in 498 ms).
+  Restored /home/user/w59/SharpYaml/default/src/SharpYaml.Tests/SharpYaml.Tests.csproj (in 507 ms).
+  Restored /home/user/w59/SharpYaml/default/src/SharpYaml.Benchmarks/SharpYaml.Benchmarks.csproj (in 501 ms).
+  Restored /home/user/w59/SharpYaml/default/src/SharpYaml/SharpYaml.csproj (in 501 ms).
+  Restored /home/user/w59/SharpYaml/default/src/SharpYaml.FeatureSwitchSmoke/SharpYaml.FeatureSwitchSmoke.csproj (in 4 ms).
+  Restored /home/user/w59/SharpYaml/default/src/SharpYaml.AotSmokeLib/SharpYaml.AotSmokeLib.csproj (in 10 ms).
+  Restored /home/user/w59/SharpYaml/default/src/SharpYaml.SourceGenerator/SharpYaml.SourceGenerator.csproj (in 12 ms).
+  SharpYaml.SourceGenerator -> /home/user/w59/SharpYaml/default/src/SharpYaml.SourceGenerator/bin/Release/netstandard2.0/SharpYaml.SourceGenerator.dll
+  SharpYaml -> /home/user/w59/SharpYaml/default/src/SharpYaml/bin/Release/net8.0/SharpYaml.dll
+  SharpYaml -> /home/user/w59/SharpYaml/default/src/SharpYaml/bin/Release/netstandard2.0/SharpYaml.dll
+  SharpYaml -> /home/user/w59/SharpYaml/default/src/SharpYaml/bin/Release/net10.0/SharpYaml.dll
+  SharpYaml.FeatureSwitchSmoke -> /home/user/w59/SharpYaml/default/src/SharpYaml.FeatureSwitchSmoke/bin/Release/net10.0/SharpYaml.FeatureSwitchSmoke.dll
+  SharpYaml.AotSmokeLib -> /home/user/w59/SharpYaml/default/src/SharpYaml.AotSmokeLib/bin/Release/netstandard2.0/SharpYaml.AotSmokeLib.dll
+  SharpYaml.AotSmoke -> /home/user/w59/SharpYaml/default/src/SharpYaml.AotSmoke/bin/Release/net10.0/SharpYaml.AotSmoke.dll
+  SharpYaml.Benchmarks -> /home/user/w59/SharpYaml/default/src/SharpYaml.Benchmarks/bin/Release/net10.0/SharpYaml.Benchmarks.dll
+  SharpYaml.Tests -> /home/user/w59/SharpYaml/default/src/SharpYaml.Tests/bin/Release/net10.0/SharpYaml.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:23.84

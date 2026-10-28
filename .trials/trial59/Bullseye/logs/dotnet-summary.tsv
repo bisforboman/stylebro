@@ -1,0 +1,12 @@
+preview	0	109s	bro preview init --engine dotnet-format
+setup	0	12s	bash -c python3 /home/user/stylebro/.trials/trial59/addref.py Directory.Packages.props "<PackageVersion Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial59.1\" />" && python3 /home/user/stylebro/.trials/trial59/addref.py Directory.Build.props "<PackageReference Include=\"StyleBro.Analyzers\" PrivateAssets=\"all\" />" && dotnet restore Bullseye.slnx -p:RestoreLockedMode=false -p:NuGetAudit=false && git diff --stat && bro init --write
+format	0	180s	bro format --engine dotnet-format
+check	0	50s	bro check --engine dotnet-format
+check-json	0
+checkbuild	0	223s	bro check --build --engine dotnet-format
+checkbuild-json	0
+twae-Debug	0	37s	twae Debug
+test-Debug	0	9s	env CFG=Debug bash -c dotnet test --solution Bullseye.slnx -c $CFG
+twae-Release	0	41s	twae Release
+test-Release	0	15s	env CFG=Release bash -c dotnet test --solution Bullseye.slnx -c $CFG
+DONE

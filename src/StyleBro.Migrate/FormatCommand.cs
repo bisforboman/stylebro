@@ -610,6 +610,7 @@ internal static partial class FormatCommand
         }
 
         var prefix = Path.GetFullPath(from).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+        var strings = new Dictionary<string, List<(char Kind, string Text, int Line)>?>(StringComparer.OrdinalIgnoreCase);
         return File.ReadAllLines(file)
             .Select(KeptFinding.Parse)
             .OfType<KeptFinding>()
@@ -618,10 +619,52 @@ internal static partial class FormatCommand
                 : k)
             .GroupBy(k => (k.Path.ToUpperInvariant(), k.Line, k.Column, k.Id))
             .Select(g => g.OrderBy(k => k.Reason == KeptReason.UsedInProjectNotLoaded).First()) // a run that loads every use knows better
+            .Select(k => WhereNow(k, strings))
             .OrderBy(k => k.Path, StringComparer.OrdinalIgnoreCase)
             .ThenBy(k => k.Line)
             .ThenBy(k => k.Column)
             .ToList();
+    }
+
+    /// <summary>
+    /// A kept finding whose "first:" string (<see cref="KeptReason.NameInString"/>, 'path(line)' in a C# file) no longer is on
+    /// that line, at the first line of that file's text now with it: the fix records the line when it runs, before the
+    /// run's later fixes change the file (trial 59, SharpYaml: BRO1514's braces moved a string 96 lines down, and 'check'
+    /// still pointed above it; the engines' fix orders differ, so they named different lines). As the renamer picks it:
+    /// the first reflection-shaped string with the name, else the first string that is the name, else one with the name as a
+    /// word. <paramref name="cache"/>: each file's strings, read once.
+    /// </summary>
+    public static KeptFinding WhereNow(KeptFinding kept, Dictionary<string, List<(char Kind, string Text, int Line)>?> cache)
+    {
+        if (kept.Reason != KeptReason.NameInString || kept.Where is not { } where
+            || Regex.Match(where, @"^(?<path>.+\.cs)\((?<line>\d+)\)$", RegexOptions.IgnoreCase) is not { Success: true } at
+            || Regex.Match(kept.Message, "'(?<name>[^']+)'") is not { Success: true } quoted)
+        {
+            return kept;
+        }
+
+        var path = at.Groups["path"].Value;
+        if (!cache.TryGetValue(path, out var strings))
+        {
+            strings = cache[path] = File.Exists(path)
+                ? RepositoryNames.Collect(Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(File.ReadAllText(path), path: path).GetRoot())
+                    .Where(s => s.Kind is RepositoryNames.StringKind or RepositoryNames.ReflectionKind)
+                    .ToList()
+                : null;
+        }
+
+        var name = quoted.Groups["name"].Value;
+        var word = new Regex(@"(?<![\w@])" + Regex.Escape(name) + @"(?!\w)");
+        var line = int.Parse(at.Groups["line"].Value, System.Globalization.CultureInfo.InvariantCulture) - 1;
+        if (strings is null || strings.Any(s => s.Line == line && word.IsMatch(s.Text)))
+        {
+            return kept;
+        }
+
+        var now = strings.FirstOrDefault(s => s.Kind == RepositoryNames.ReflectionKind && s.Text == name) is { Text: not null } reflection ? reflection
+            : strings.FirstOrDefault(s => s.Text == name) is { Text: not null } exact ? exact
+            : strings.FirstOrDefault(s => word.IsMatch(s.Text));
+        return now.Text is null ? kept : new KeptFinding(kept.Path, kept.Line, kept.Column, kept.Id, kept.Reason, kept.Message, $"{path}({now.Line + 1})");
     }
 
     /// <summary>The lines that list the kept findings (none when there are none).</summary>
@@ -1908,21 +1951,27 @@ internal static partial class FormatCommand
     /// What to say when StyleBro's analyzers don't load in the projects a run formats (<see cref="LoadsStyleBro"/>, relative
     /// paths): null when they load everywhere; when they load nowhere the run stops (<paramref name="all"/>), else a warning.
     /// </summary>
-    public static string? NotLoadedMessage(IReadOnlyList<string> without, bool all)
+    public static string? NotLoadedMessage(IReadOnlyList<string> without, bool all, IReadOnlyList<(string Reference, string Nearest)>? shadowed = null)
     {
         if (without.Count == 0)
         {
             return null;
         }
 
+        // A reference in a Directory.Build.props the projects never read (Migration.ShadowedReferences): name where it goes.
+        var move = shadowed is { Count: > 0 }
+            ? string.Join(" ", shadowed.Select(s => $"{s.Reference} has the StyleBro.Analyzers reference, but MSBuild reads only the nearest Directory.Build.props and {s.Nearest} doesn't import it: put the reference in {s.Nearest} (or import the parent's there)."))
+                + " Then run again (https://bisforboman.github.io/stylebro/getting-started/)."
+            : null;
         if (all)
         {
             return $"{NotLoadedHeader} no project has StyleBro.Analyzers in its restore output (obj/project.assets.json), so 'dotnet format' would fix only whitespace and the built-in rules and report clean. "
-                + "Add the StyleBro.Analyzers package (https://bisforboman.github.io/stylebro/getting-started/), restore (without --no-restore, 'format' restores), then run again.";
+                + (move ?? "Add the StyleBro.Analyzers package (https://bisforboman.github.io/stylebro/getting-started/), restore (without --no-restore, 'format' restores), then run again.");
         }
 
         var names = string.Join(", ", without.Take(5)) + (without.Count > 5 ? $" and {without.Count - 5} more" : string.Empty);
-        return $"{PartlyLoadedHeader} {names} {(without.Count == 1 ? "has" : "have")} no StyleBro.Analyzers in {(without.Count == 1 ? "its" : "their")} restore output, so StyleBro's rules don't run there. Add the package there, or restore {(without.Count == 1 ? "it" : "them")}, then run again.";
+        return $"{PartlyLoadedHeader} {names} {(without.Count == 1 ? "has" : "have")} no StyleBro.Analyzers in {(without.Count == 1 ? "its" : "their")} restore output, so StyleBro's rules don't run there. "
+            + (move ?? $"Add the package there, or restore {(without.Count == 1 ? "it" : "them")}, then run again.");
     }
 
     /// <summary>
@@ -5720,7 +5769,10 @@ internal static partial class FormatCommand
             .ToList();
         var without = checkedProjects.Where(p => !LoadsStyleBro(p.FullPath, p.AssetsFile)).Select(p => p.Relative).Order(StringComparer.OrdinalIgnoreCase).ToList();
         var none = without.Count > 0 && without.Count == checkedProjects.Count;
-        if (NotLoadedMessage(without, none) is { } notLoaded)
+        var shadowed = without.Count > 0
+            ? Migration.ShadowedReferences(RepositoryRoot(root) ?? root, checkedProjects.Where(p => without.Contains(p.Relative)).Select(p => p.FullPath))
+            : [];
+        if (NotLoadedMessage(without, none, shadowed) is { } notLoaded)
         {
             if (none)
             {

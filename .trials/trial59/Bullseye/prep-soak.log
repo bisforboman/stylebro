@@ -1,0 +1,98 @@
+  Determining projects to restore...
+  Restored /home/user/w59/Bullseye/soak-src2/tests/Tests.Internal/Tests.Internal.csproj (in 313 ms).
+  Restored /home/user/w59/Bullseye/soak-src2/fixtures/Fixtures.Xunit/Fixtures.Xunit.csproj (in 310 ms).
+  Restored /home/user/w59/Bullseye/soak-src2/smoke-tests/SmokeTests.CommandLine/SmokeTests.CommandLine.csproj (in 311 ms).
+  Restored /home/user/w59/Bullseye/soak-src2/tests/Tests/Tests.csproj (in 312 ms).
+  Restored /home/user/w59/Bullseye/soak-src2/smoke-tests/SmokeTests.Parallel/SmokeTests.Parallel.csproj (in 4 ms).
+  Restored /home/user/w59/Bullseye/soak-src2/smoke-tests/SmokeTests/SmokeTests.csproj (in 4 ms).
+  Restored /home/user/w59/Bullseye/soak-src2/smoke-tests/SmokeTests.McMaster/SmokeTests.McMaster.csproj (in 7 ms).
+  Restored /home/user/w59/Bullseye/soak-src2/src/Bullseye/Bullseye.csproj (in 17 ms).
+ Directory.Build.props                              | 67 +++++++++++-----------
+ Directory.Packages.props                           | 39 +++++++------
+ fixtures/Fixtures.Xunit/packages.lock.json         | 18 ++++++
+ .../SmokeTests.CommandLine/packages.lock.json      |  6 ++
+ smoke-tests/SmokeTests.McMaster/packages.lock.json |  6 ++
+ smoke-tests/SmokeTests.Parallel/packages.lock.json |  6 ++
+ smoke-tests/SmokeTests/packages.lock.json          |  6 ++
+ src/Bullseye/packages.lock.json                    | 18 ++++++
+ tests/Tests.Internal/packages.lock.json            | 18 ++++++
+ tests/Tests/packages.lock.json                     | 18 ++++++
+ 10 files changed, 152 insertions(+), 50 deletions(-)
+Conventions in the code (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  kept     private fields: 6 of 6 named '_field' -> _camelCase
+  default  '{' of multi-line blocks: 303 of 303 on its own line -> all
+  default  else/catch/finally after '}': 23 of 23 on a new line -> true
+  default  one-line if/else/loop/using/lock bodies: 59 of 59 with braces -> true
+  default  one-line jumps ('if (x) return;'): 22 in braces -> false
+  default  operators where a line wraps: 29 of 30 at the start of the line -> beginning_of_line
+  default  '=>' where a line wraps: 69 of 69 at the end of the line -> end_of_line
+  default  '=' where a line wraps: 3 of 3 at the end of the line -> end_of_line
+  default  multi-line initializers: 12 of 12 with a trailing comma -> include
+  kept     empty strings: 75 of 75 "" -> literal
+  off      null checks: 1 'is null', 5 '== null' -> BRO1133 is off
+  default  one-line <summary> texts: 98 of 98 on three lines -> multi_line
+  default  <inheritdoc/> tags: 6 of 6 '<inheritdoc/>' -> compact
+  kept     default values: 3 of 3 'default' -> true
+  default  ')' of split lists: 55 of 55 after the last item -> last_item
+  default  split lists: 49 of 49 first item on the next line -> next_line
+  kept     ': base(...)'/': this(...)': 4 of 4 on the constructor's line -> same_line
+  default  'new T { ... }' with an initializer: 24 of 26 without '()' -> omit
+  kept     switch sections: 25 of 25 without a blank line -> omit
+  default  files' using directives: 31 of 31 outside the namespace -> outside_namespace
+  default  statements on their 'if'/loop/'case' line: 74 on a line of their own -> false
+  off      overrides/interface implementations: 4 of 4 without a doc comment -> BRO1601 is off
+  default  types' members: 13 of 16 in BRO1001's order -> warning
+  kept     overloads BRO1001 could split: 4 of 4 next to each other -> true
+  default  split lists' items: 47 of 50 one per line -> warning
+  default  private-by-default members: 58 of 66 with 'private' -> for_non_interface_members
+  default  partial type parts: 15 of 15 with an access modifier -> warning
+  default  internal-by-default types: 19 of 19 with 'internal' -> warning
+  off      property summaries: 25 starting with 'Gets'/'Sets', 16 in their own words -> BRO1604 is off
+  default  declarations with 2+ attributes: 5 of 5 one per list ('[A]' '[B]') -> warning
+  default  adjacent fields of one type: 3 of 3 declared one by one -> warning
+  default  private static fields: 8 of 8 without a prefix -> warning
+  default  built-in type names: 44 of 44 only keywords ('int') -> warning
+  default  empty blocks ('{ }'): 7 of 7 on two lines -> false
+  default  statement blocks ('if (x) { y(); }'): 78 of 78 on several lines -> warning
+  default  auto-property accessors ('{ get; set; }'): 55 of 55 on one line -> warning
+  set      C# files' line endings: 55 of 55 CRLF -> set in .editorconfig (crlf)
+  default  statements after a block's '}': 62 of 65 after a blank line -> warning
+  default  neighbouring members: 190 of 191 with a blank line between -> warning
+  default  doc comments below code: 101 of 101 after a blank line -> warning
+  default  '//' comments above code: 133 of 133 right above the code -> warning
+  default  '//' comments below code: 83 of 83 after a blank line -> warning
+  default  doc comment texts: 315 of 315 ending with a period -> warning
+  default  doc element order: 48 of 48 in BRO1619's order -> warning
+  off      keywords in doc comments: 25 of 25 '<c>null</c>' -> BRO1618 is off
+  default  doc comments above their element: 110 of 110 right above it -> warning
+  default  primary-constructor parameter names: 31 of 31 like 'logger' -> warning
+  default  tuple element names: 24 of 29 '(int Count, ...)' -> PascalCase
+  set      using directives: 19 of 19 files sorted, 6 of 6 with System first -> set in .editorconfig
+  default  private constants/static readonly fields: 12 of 12 PascalCase -> PascalCase
+  default  spacing, control-flow keywords: 103 of 103 'if (x)' -> 'if (x)'
+  default  spacing, control-flow parentheses: 103 of 103 'if (x)' -> 'if (x)'
+  default  spacing, parenthesized expressions: 21 of 21 '(a + b)' -> '(a + b)'
+  too few  spacing, cast parentheses: 1 of 1 '(int)x' -> default stays
+  too few  spacing, casts: 1 of 1 '(int)x' -> default stays
+  default  spacing, call arguments: 776 of 776 'F(x)' -> 'F(x)'
+  default  spacing, declared parameters: 121 of 121 'void F(int x)' -> 'void F(int x)'
+Summary:
+  Kept your style for 49 settings: wrote stylebro_private_field_naming, stylebro_empty_string_style,
+    csharp_prefer_simple_default_expression, stylebro_constructor_initializer_placement,
+    stylebro_blank_line_between_switch_sections, stylebro_keep_overloads_together; 43 were already StyleBro's default.
+  Turned 2 rules off because your code mixes both forms: BRO1133 (null checks), BRO1604 (property summaries).
+  Turned 2 rules off because your code doesn't do what they enforce: BRO1601 (overrides/interface implementations: 4 of
+    4 without a doc comment), BRO1618 (keywords in doc comments: 25 of 25 '<c>null</c>').
+  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
+  2 settings had fewer than 3 places to tell, StyleBro's defaults stay: csharp_space_between_parentheses (type_casts),
+    csharp_space_after_cast.
+
+4 projects target several frameworks (fixtures/Fixtures.Xunit/Fixtures.Xunit.csproj, src/Bullseye/Bullseye.csproj, tests/Tests.Internal/Tests.Internal.csproj, ...).
+Run 'bro format' instead of 'dotnet format' here: with IDE0055 on, 'dotnet format' crashes on multi-targeted
+projects (Roslyn can't merge the target frameworks' copies of a file). The command runs it once per target framework.
+Wrote the built-in rule severities to .editorconfig.
+Set the preset version in Directory.Build.props (<StyleBroPreset>1.0</StyleBroPreset>): rules of newer releases stay off until you raise it.
+Tip: --agents-md writes a StyleBro section into AGENTS.md for AI coding agents.
+Next: run 'bro format'. Plain 'dotnet format' also applies every other analyzer's and the compiler's fixes.

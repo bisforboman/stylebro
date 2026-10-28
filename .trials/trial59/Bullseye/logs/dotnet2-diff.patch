@@ -1,0 +1,872 @@
+diff --git a/.editorconfig b/.editorconfig
+index 40da07a..1b0414d 100644
+--- a/.editorconfig
++++ b/.editorconfig
+@@ -37,3 +37,55 @@ end_of_line                                                               = lf
+ [packages.lock.json]
+ end_of_line                                                               = unset
+ insert_final_newline                                                      = unset
++
++# BEGIN stylebro-migrate (stylebro-migrate init: built-in .NET rules for StyleBro's preset; edits inside are replaced)
++[*.cs]
++# Built-in .NET rules that cover StyleCop rules, at the preset's severities. Their options (brace placement, modifier
++# order, ...) come from StyleBro's preset. The severities have to be here: 'dotnet format' ignores rule severities in a
++# package's global config. Add <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> to report them on build too.
++
++# Braces (SA1503, SA1519, SA1520) are StyleBro's BRO1514-BRO1516: IDE0011's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0011.severity = none
++# Formatting: spacing, indentation, line breaks (SA1000-SA1028, SA1107, SA1134, SA1137, SA1500)
++dotnet_diagnostic.IDE0055.severity = warning
++# Access modifiers (SA1400, SA1205) are StyleBro's BRO1404/BRO1007: IDE0040's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0040.severity = none
++# Modifier order: access modifier first, then static (SA1206, SA1207)
++dotnet_diagnostic.IDE0036.severity = warning
++# 'int' instead of 'Int32' (SA1121)
++dotnet_diagnostic.IDE0049.severity = warning
++# Unnecessary parentheses (SA1119) are StyleBro's BRO1405: IDE0047's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0047.severity = none
++# Parentheses that show precedence (SA1407, SA1408) are StyleBro's BRO1406/BRO1407: IDE0048's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0048.severity = none
++# Using placement (SA1200) is StyleBro's BRO1008: IDE0065's fix can change what names bind to (CS0104, CS0118)
++dotnet_diagnostic.IDE0065.severity = none
++# Blank lines (SA1507, SA1508, SA1513) are StyleBro's BRO1517-BRO1519: the SDK's fixes break multi-targeted projects
++dotnet_diagnostic.IDE2000.severity = none
++dotnet_diagnostic.IDE2002.severity = none
++dotnet_diagnostic.IDE2003.severity = none
++# 'this.' qualification isn't required (SA1101 is off in the preset)
++dotnet_diagnostic.IDE0009.severity = none
++
++# Conventions in this repository's code (stylebro-migrate init counted them; delete a line to have it counted again)
++# init: private fields: named '_field' in 6 of 6 places in your code
++stylebro_private_field_naming = _camelCase
++# init: empty strings: "" in 75 of 75 places in your code
++stylebro_empty_string_style = literal
++# init: null checks: your code mixes both forms (1 'is null', 5 '== null'), so BRO1133 is off. To choose one: set stylebro_null_check_style and remove the next line.
++dotnet_diagnostic.BRO1133.severity = none
++# init: default values: 'default' in 3 of 3 places in your code
++csharp_prefer_simple_default_expression = true
++# init: ': base(...)'/': this(...)': on the constructor's line in 4 of 4 places in your code
++stylebro_constructor_initializer_placement = same_line
++# init: switch sections: without a blank line in 25 of 25 places in your code
++stylebro_blank_line_between_switch_sections = omit
++# init: overrides/interface implementations: 4 of 4 in your code are without a doc comment, so BRO1601 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1601.severity = none
++# init: overloads BRO1001 could split: next to each other in 4 of 4 places in your code
++stylebro_keep_overloads_together = true
++# init: property summaries: your code mixes both forms (25 starting with 'Gets'/'Sets', 16 in their own words), so BRO1604 is off. To choose one: set dotnet_diagnostic.BRO1604.severity and remove the next line.
++dotnet_diagnostic.BRO1604.severity = none
++# init: keywords in doc comments: 25 of 25 in your code are '<c>null</c>', so BRO1618 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1618.severity = none
++# END stylebro-migrate
+diff --git a/Directory.Build.props b/Directory.Build.props
+index 8034e86..a595d64 100644
+--- a/Directory.Build.props
++++ b/Directory.Build.props
+@@ -1,32 +1,36 @@
+-<Project>
+-
+-  <PropertyGroup>
+-    <AnalysisMode>All</AnalysisMode>
+-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+-    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+-    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+-    <GenerateDocumentationFile>true</GenerateDocumentationFile>    <!-- workaround for https://github.com/dotnet/roslyn/issues/41640 -->
+-    <ImplicitUsings>enable</ImplicitUsings>
+-    <Nullable>enable</Nullable>
+-    <RestoreLockedMode Condition="'$(CI)' != ''">true</RestoreLockedMode>
+-    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+-    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+-  </PropertyGroup>
+-
+-  <PropertyGroup>
+-    <NoWarn>$(NoWarn);CA1014</NoWarn>    <!-- Mark assemblies with CLSCompliantAttribute -->
+-  </PropertyGroup>
+-
+-  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+-  </PropertyGroup>
+-
+-  <ItemGroup>
+-    <Compile Include="$(MSBuildThisFileDirectory)/Global.cs" Link="Global.cs" />
+-  </ItemGroup>
+-
+-  <ItemGroup>
+-    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" PrivateAssets="All" />
+-  </ItemGroup>
+-
+-</Project>
++<Project>
++
++  <PropertyGroup>
++    <StyleBroPreset>1.0</StyleBroPreset>
++    <AnalysisMode>All</AnalysisMode>
++    <EmbedUntrackedSources>true</EmbedUntrackedSources>
++    <EnableNETAnalyzers>true</EnableNETAnalyzers>
++    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
++    <GenerateDocumentationFile>true</GenerateDocumentationFile>    <!-- workaround for https://github.com/dotnet/roslyn/issues/41640 -->
++    <ImplicitUsings>enable</ImplicitUsings>
++    <Nullable>enable</Nullable>
++    <RestoreLockedMode Condition="'$(CI)' != ''">true</RestoreLockedMode>
++    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
++    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
++  </PropertyGroup>
++
++  <PropertyGroup>
++    <NoWarn>$(NoWarn);CA1014</NoWarn>    <!-- Mark assemblies with CLSCompliantAttribute -->
++  </PropertyGroup>
++
++  <PropertyGroup Condition="'$(Configuration)'=='Release'">
++    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
++  </PropertyGroup>
++
++  <ItemGroup>
++    <Compile Include="$(MSBuildThisFileDirectory)/Global.cs" Link="Global.cs" />
++  </ItemGroup>
++
++  <ItemGroup>
++    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" PrivateAssets="All" />
++  </ItemGroup>
++
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" PrivateAssets="all" />
++  </ItemGroup>
++</Project>
+diff --git a/Directory.Packages.props b/Directory.Packages.props
+index ef41106..62f5ec1 100644
+--- a/Directory.Packages.props
++++ b/Directory.Packages.props
+@@ -1,18 +1,21 @@
+-<Project>
+-  <PropertyGroup>
+-    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+-  </PropertyGroup>
+-  <ItemGroup>
+-    <PackageVersion Include="DotNet.ReproducibleBuilds" Version="2.0.5" />
+-    <PackageVersion Include="GitHubActionsTestLogger" Version="3.0.5" />
+-    <PackageVersion Include="McMaster.Extensions.CommandLineUtils" Version="5.1.0" />
+-    <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="5.6.0" />
+-    <PackageVersion Include="Microsoft.Sbom.Targets" Version="4.1.13" />
+-    <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="18.7.23" />
+-    <PackageVersion Include="MinVer" Version="8.0.0" />
+-    <PackageVersion Include="PublicApiGenerator" Version="11.5.4" />
+-    <PackageVersion Include="System.CommandLine" Version="2.0.12" />
+-    <PackageVersion Include="xunit.v3.assert" Version="4.0.1" />
+-    <PackageVersion Include="xunit.v3.mtp-v2" Version="4.0.1" />
+-  </ItemGroup>
+-</Project>
++<Project>
++  <PropertyGroup>
++    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
++  </PropertyGroup>
++  <ItemGroup>
++    <PackageVersion Include="DotNet.ReproducibleBuilds" Version="2.0.5" />
++    <PackageVersion Include="GitHubActionsTestLogger" Version="3.0.5" />
++    <PackageVersion Include="McMaster.Extensions.CommandLineUtils" Version="5.1.0" />
++    <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="5.6.0" />
++    <PackageVersion Include="Microsoft.Sbom.Targets" Version="4.1.13" />
++    <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="18.7.23" />
++    <PackageVersion Include="MinVer" Version="8.0.0" />
++    <PackageVersion Include="PublicApiGenerator" Version="11.5.4" />
++    <PackageVersion Include="System.CommandLine" Version="2.0.12" />
++    <PackageVersion Include="xunit.v3.assert" Version="4.0.1" />
++    <PackageVersion Include="xunit.v3.mtp-v2" Version="4.0.1" />
++  </ItemGroup>
++  <ItemGroup>
++    <PackageVersion Include="StyleBro.Analyzers" Version="0.8.0-trial59.2" />
++  </ItemGroup>
++</Project>
+diff --git a/fixtures/Fixtures.Xunit/packages.lock.json b/fixtures/Fixtures.Xunit/packages.lock.json
+index c9c597c..76db007 100644
+--- a/fixtures/Fixtures.Xunit/packages.lock.json
++++ b/fixtures/Fixtures.Xunit/packages.lock.json
+@@ -8,6 +8,12 @@
+         "resolved": "18.7.23",
+         "contentHash": "dyj6z8m+LFjpeH69hdnciCcRCmD0YgMlvuQEywiEshjqj/blgQ+PuWX8Vd5gkWQFoBN4e+TFxx6DvGNSv/gIKg=="
+       },
++      "StyleBro.Analyzers": {
++        "type": "Direct",
++        "requested": "[0.8.0-trial59.2, )",
++        "resolved": "0.8.0-trial59.2",
++        "contentHash": "v7s2h9l9dFI46oOamG8wGDkLlmi7t95XkCDDA9jY0tbB8wAQq5N3QJBYUtLa6VWO1QHrwZ9o6kRLAA/Pl97vzw=="
++      },
+       "xunit.v3.assert": {
+         "type": "Direct",
+         "requested": "[4.0.1, )",
+@@ -22,6 +28,12 @@
+         "resolved": "18.7.23",
+         "contentHash": "dyj6z8m+LFjpeH69hdnciCcRCmD0YgMlvuQEywiEshjqj/blgQ+PuWX8Vd5gkWQFoBN4e+TFxx6DvGNSv/gIKg=="
+       },
++      "StyleBro.Analyzers": {
++        "type": "Direct",
++        "requested": "[0.8.0-trial59.2, )",
++        "resolved": "0.8.0-trial59.2",
++        "contentHash": "v7s2h9l9dFI46oOamG8wGDkLlmi7t95XkCDDA9jY0tbB8wAQq5N3QJBYUtLa6VWO1QHrwZ9o6kRLAA/Pl97vzw=="
++      },
+       "xunit.v3.assert": {
+         "type": "Direct",
+         "requested": "[4.0.1, )",
+@@ -36,6 +48,12 @@
+         "resolved": "18.7.23",
+         "contentHash": "dyj6z8m+LFjpeH69hdnciCcRCmD0YgMlvuQEywiEshjqj/blgQ+PuWX8Vd5gkWQFoBN4e+TFxx6DvGNSv/gIKg=="
+       },
++      "StyleBro.Analyzers": {
++        "type": "Direct",
++        "requested": "[0.8.0-trial59.2, )",
++        "resolved": "0.8.0-trial59.2",
++        "contentHash": "v7s2h9l9dFI46oOamG8wGDkLlmi7t95XkCDDA9jY0tbB8wAQq5N3QJBYUtLa6VWO1QHrwZ9o6kRLAA/Pl97vzw=="
++      },
+       "xunit.v3.assert": {
+         "type": "Direct",
+         "requested": "[4.0.1, )",
+diff --git a/smoke-tests/SmokeTests.CommandLine/packages.lock.json b/smoke-tests/SmokeTests.CommandLine/packages.lock.json
+index e23e060..08e3a72 100644
+--- a/smoke-tests/SmokeTests.CommandLine/packages.lock.json
++++ b/smoke-tests/SmokeTests.CommandLine/packages.lock.json
+@@ -8,6 +8,12 @@
+         "resolved": "18.7.23",
+         "contentHash": "dyj6z8m+LFjpeH69hdnciCcRCmD0YgMlvuQEywiEshjqj/blgQ+PuWX8Vd5gkWQFoBN4e+TFxx6DvGNSv/gIKg=="
+       },
++      "StyleBro.Analyzers": {
++        "type": "Direct",
++        "requested": "[0.8.0-trial59.2, )",
++        "resolved": "0.8.0-trial59.2",
++        "contentHash": "v7s2h9l9dFI46oOamG8wGDkLlmi7t95XkCDDA9jY0tbB8wAQq5N3QJBYUtLa6VWO1QHrwZ9o6kRLAA/Pl97vzw=="
++      },
+       "System.CommandLine": {
+         "type": "Direct",
+         "requested": "[2.0.12, )",
+diff --git a/smoke-tests/SmokeTests.McMaster/packages.lock.json b/smoke-tests/SmokeTests.McMaster/packages.lock.json
+index fbafe01..56d0fdd 100644
+--- a/smoke-tests/SmokeTests.McMaster/packages.lock.json
++++ b/smoke-tests/SmokeTests.McMaster/packages.lock.json
+@@ -14,6 +14,12 @@
+         "resolved": "18.7.23",
+         "contentHash": "dyj6z8m+LFjpeH69hdnciCcRCmD0YgMlvuQEywiEshjqj/blgQ+PuWX8Vd5gkWQFoBN4e+TFxx6DvGNSv/gIKg=="
+       },
++      "StyleBro.Analyzers": {
++        "type": "Direct",
++        "requested": "[0.8.0-trial59.2, )",
++        "resolved": "0.8.0-trial59.2",
++        "contentHash": "v7s2h9l9dFI46oOamG8wGDkLlmi7t95XkCDDA9jY0tbB8wAQq5N3QJBYUtLa6VWO1QHrwZ9o6kRLAA/Pl97vzw=="
++      },
+       "bullseye": {
+         "type": "Project"
+       }
+diff --git a/smoke-tests/SmokeTests.Parallel/packages.lock.json b/smoke-tests/SmokeTests.Parallel/packages.lock.json
+index 9927c2f..d05153d 100644
+--- a/smoke-tests/SmokeTests.Parallel/packages.lock.json
++++ b/smoke-tests/SmokeTests.Parallel/packages.lock.json
+@@ -8,6 +8,12 @@
+         "resolved": "18.7.23",
+         "contentHash": "dyj6z8m+LFjpeH69hdnciCcRCmD0YgMlvuQEywiEshjqj/blgQ+PuWX8Vd5gkWQFoBN4e+TFxx6DvGNSv/gIKg=="
+       },
++      "StyleBro.Analyzers": {
++        "type": "Direct",
++        "requested": "[0.8.0-trial59.2, )",
++        "resolved": "0.8.0-trial59.2",
++        "contentHash": "v7s2h9l9dFI46oOamG8wGDkLlmi7t95XkCDDA9jY0tbB8wAQq5N3QJBYUtLa6VWO1QHrwZ9o6kRLAA/Pl97vzw=="
++      },
+       "bullseye": {
+         "type": "Project"
+       }
+diff --git a/smoke-tests/SmokeTests/Program.cs b/smoke-tests/SmokeTests/Program.cs
+index e7d3cac..6494b49 100644
+--- a/smoke-tests/SmokeTests/Program.cs
++++ b/smoke-tests/SmokeTests/Program.cs
+@@ -20,11 +20,13 @@ var bars = new[] { 1, 2, };
+ Target(
+     "foo",
+     "foos",
+-    forEach: [10, 20, 30, (int?)null,], delay => Task.Delay(delay ?? 0));
++    forEach: [10, 20, 30, (int?)null,],
++    delay => Task.Delay(delay ?? 0));
+ 
+ Target(
+     "bar",
+-    "bars", () => Task.Delay(1));
++    "bars",
++    () => Task.Delay(1));
+ 
+ Target(
+     "echo",
+diff --git a/smoke-tests/SmokeTests/packages.lock.json b/smoke-tests/SmokeTests/packages.lock.json
+index 9927c2f..d05153d 100644
+--- a/smoke-tests/SmokeTests/packages.lock.json
++++ b/smoke-tests/SmokeTests/packages.lock.json
+@@ -8,6 +8,12 @@
+         "resolved": "18.7.23",
+         "contentHash": "dyj6z8m+LFjpeH69hdnciCcRCmD0YgMlvuQEywiEshjqj/blgQ+PuWX8Vd5gkWQFoBN4e+TFxx6DvGNSv/gIKg=="
+       },
++      "StyleBro.Analyzers": {
++        "type": "Direct",
++        "requested": "[0.8.0-trial59.2, )",
++        "resolved": "0.8.0-trial59.2",
++        "contentHash": "v7s2h9l9dFI46oOamG8wGDkLlmi7t95XkCDDA9jY0tbB8wAQq5N3QJBYUtLa6VWO1QHrwZ9o6kRLAA/Pl97vzw=="
++      },
+       "bullseye": {
+         "type": "Project"
+       }
+diff --git a/src/Bullseye/Internal/ActionTarget.cs b/src/Bullseye/Internal/ActionTarget.cs
+index 2cb15a3..003b902 100644
+--- a/src/Bullseye/Internal/ActionTarget.cs
++++ b/src/Bullseye/Internal/ActionTarget.cs
+@@ -5,8 +5,13 @@ namespace Bullseye.Internal;
+ internal sealed class ActionTarget(string name, string description, IReadOnlyCollection<string> dependencies, Func<Task> action)
+         : Target(name, description, dependencies)
+ {
+-    public override async Task RunAsync(bool dryRun, bool parallel, SemaphoreSlim parallelTargets, Output output,
+-        Func<Exception, bool> messageOnly, IReadOnlyCollection<Target> dependencyPath)
++    public override async Task RunAsync(
++        bool dryRun,
++        bool parallel,
++        SemaphoreSlim parallelTargets,
++        Output output,
++        Func<Exception, bool> messageOnly,
++        IReadOnlyCollection<Target> dependencyPath)
+     {
+         if (parallel)
+         {
+diff --git a/src/Bullseye/Internal/ArgsParser.cs b/src/Bullseye/Internal/ArgsParser.cs
+index c9bc2c3..401c2c6 100644
+--- a/src/Bullseye/Internal/ArgsParser.cs
++++ b/src/Bullseye/Internal/ArgsParser.cs
+@@ -4,7 +4,7 @@ internal static class ArgsParser
+ {
+     private static readonly IReadOnlyList<string> HelpOptions = ["--help", "-help", "/help", "-h", "/h", "-?", "/?",];
+ 
+-    public static (IReadOnlyList<string> Targets, Options Options, IReadOnlyList<string> UnknownOptions, bool showHelp)
++    public static (IReadOnlyList<string> Targets, Options Options, IReadOnlyList<string> UnknownOptions, bool ShowHelp)
+         Parse(IReadOnlyCollection<string> args)
+     {
+         var nonHelpArgs = args.Where(arg => !HelpOptions.Contains(arg, StringComparer.OrdinalIgnoreCase)).ToList();
+@@ -30,7 +30,7 @@ internal static class ArgsParser
+             nonHelpArgs.Where(IsTarget).ToList(),
+             options,
+             readResult.UnknownOptions,
+-            showHelp: nonHelpArgs.Count != args.Count);
++            ShowHelp: nonHelpArgs.Count != args.Count);
+     }
+ 
+     private static bool IsTarget(string arg) => !arg.StartsWith('-');
+diff --git a/src/Bullseye/Internal/NativeMethodsWrapper.cs b/src/Bullseye/Internal/NativeMethodsWrapper.cs
+index 0fdb88a..dcf21ef 100644
+--- a/src/Bullseye/Internal/NativeMethodsWrapper.cs
++++ b/src/Bullseye/Internal/NativeMethodsWrapper.cs
+@@ -4,7 +4,7 @@ namespace Bullseye.Internal;
+ 
+ internal static class NativeMethodsWrapper
+ {
+-    public static async Task<(IntPtr handle, bool succeeded)> TryGetStandardOutputHandleAsync(TextWriter diagnostics, Func<string> getMessagePrefix)
++    public static async Task<(IntPtr Handle, bool Succeeded)> TryGetStandardOutputHandleAsync(TextWriter diagnostics, Func<string> getMessagePrefix)
+     {
+         var (handle, error) = (NativeMethods.GetStdHandle(NativeMethods.StdHandle.StdOutputHandle), Marshal.GetLastWin32Error());
+ 
+@@ -18,7 +18,7 @@ internal static class NativeMethodsWrapper
+         return (handle, true);
+     }
+ 
+-    public static async Task<(NativeMethods.ConsoleOutputModes mode, bool succeeded)> TryGetConsoleScreenBufferOutputModeAsync(IntPtr standardOutputHandle, TextWriter diagnostics, Func<string> getMessagePrefix)
++    public static async Task<(NativeMethods.ConsoleOutputModes Mode, bool Succeeded)> TryGetConsoleScreenBufferOutputModeAsync(IntPtr standardOutputHandle, TextWriter diagnostics, Func<string> getMessagePrefix)
+     {
+         if (!NativeMethods.GetConsoleMode(standardOutputHandle, out var mode))
+         {
+diff --git a/src/Bullseye/Internal/Output.Results.cs b/src/Bullseye/Internal/Output.Results.cs
+index e2d009c..7c0e846 100644
+--- a/src/Bullseye/Internal/Output.Results.cs
++++ b/src/Bullseye/Internal/Output.Results.cs
+@@ -12,14 +12,17 @@ internal partial class Output
+     private int _resultOrdinal;
+     private TimeSpan _totalDuration;
+ 
+-    private TargetResult InternResult(Target target) => _results.GetOrAdd(target, _ => new TargetResult(Interlocked.Increment(ref _resultOrdinal)));
+-
+-    private (TargetResult, TargetInputResult) Intern(Target target, Guid inputId)
++    private enum TargetOutcome
+     {
+-        var targetResult = InternResult(target);
+-        var targetInputResult = targetResult.InputResults.GetOrAdd(inputId, _ => new TargetInputResult(Interlocked.Increment(ref _resultOrdinal)));
++        Succeeded,
++        Failed,
++        NoInputs,
++    }
+ 
+-        return (targetResult, targetInputResult);
++    private enum TargetInputOutcome
++    {
++        Succeeded,
++        Failed,
+     }
+ 
+     private static string GetResultLines(IEnumerable<KeyValuePair<Target, TargetResult>> results, TimeSpan totalDuration, Func<string> getPrefix, Palette p)
+@@ -112,6 +115,16 @@ internal partial class Output
+             text.PadRight(totalWidth + (text.Length - Palette.StripColors(text).Length), paddingChar);
+     }
+ 
++    private TargetResult InternResult(Target target) => _results.GetOrAdd(target, _ => new TargetResult(Interlocked.Increment(ref _resultOrdinal)));
++
++    private (TargetResult, TargetInputResult) Intern(Target target, Guid inputId)
++    {
++        var targetResult = InternResult(target);
++        var targetInputResult = targetResult.InputResults.GetOrAdd(inputId, _ => new TargetInputResult(Interlocked.Increment(ref _resultOrdinal)));
++
++        return (targetResult, targetInputResult);
++    }
++
+     private sealed class TargetResult(int ordinal)
+     {
+         public int Ordinal { get; } = ordinal;
+@@ -135,17 +148,4 @@ internal partial class Output
+     }
+ 
+     private sealed record SummaryRow(string TargetOrInput, string Outcome, string Duration, string Percentage);
+-
+-    private enum TargetOutcome
+-    {
+-        Succeeded,
+-        Failed,
+-        NoInputs,
+-    }
+-
+-    private enum TargetInputOutcome
+-    {
+-        Succeeded,
+-        Failed,
+-    }
+ }
+diff --git a/src/Bullseye/Internal/Output.cs b/src/Bullseye/Internal/Output.cs
+index 742b589..e6ff742 100644
+--- a/src/Bullseye/Internal/Output.cs
++++ b/src/Bullseye/Internal/Output.cs
+@@ -27,6 +27,7 @@ internal sealed partial class Output(
+     private readonly string _scriptExtension = osPlatform == OSPlatform.Windows ? "cmd" : "sh";
+ 
+     public bool Verbose { get; } = verbose;
++
+     public async Task HeaderAsync(Func<string> getVersion)
+     {
+         if (!Verbose)
+@@ -59,6 +60,21 @@ internal sealed partial class Output(
+     public Task StartingAsync(IEnumerable<Target> targets) =>
+         writer.WriteLineAsync(Format(getPrefix(), targets, $"{_palette.Text}{StartingMessage}{_palette.Default}", dryRun, parallel, skipDependencies, _palette));
+ 
++    public Task StartingAsync(Target target, IReadOnlyCollection<Target> dependencyPath)
++    {
++        _ = InternResult(target);
++
++        return writer.WriteLineAsync(Format(getPrefix(), target, $"{_palette.Text}{StartingMessage}{_palette.Default}", dependencyPath, _palette));
++    }
++
++    public Task StartingAsync<TInput>(Target target, TInput input, Guid inputId, IReadOnlyCollection<Target> dependencyPath)
++    {
++        var (_, targetInputResult) = Intern(target, inputId);
++        targetInputResult.Input = input;
++
++        return writer.WriteLineAsync(Format(getPrefix(), target, targetInputResult.Input, StartingMessage, dependencyPath, _palette));
++    }
++
+     public async Task FailedAsync(IEnumerable<Target> targets)
+     {
+         var message = GetResultLines(_results, _totalDuration, getPrefix, _palette)
+@@ -67,6 +83,33 @@ internal sealed partial class Output(
+         await writer.WriteLineAsync(message).Tax();
+     }
+ 
++    public Task FailedAsync(Target target, Exception ex, TimeSpan duration, IReadOnlyCollection<Target> dependencyPath)
++    {
++        var result = InternResult(target);
++        result.Outcome = TargetOutcome.Failed;
++        result.Duration = result.Duration.Add(duration);
++
++        _totalDuration = _totalDuration.Add(duration);
++
++        return writer.WriteLineAsync(Format(getPrefix(), target, $"{_palette.Failure}{FailedMessage}{_palette.Default} {_palette.Failure}{ex.Message}{_palette.Default}", result.Duration, dependencyPath, _palette));
++    }
++
++    public Task FailedAsync<TInput>(Target target, TInput input, Guid inputId, Exception ex, TimeSpan duration, IReadOnlyCollection<Target> dependencyPath)
++    {
++        var (targetResult, targetInputResult) = Intern(target, inputId);
++
++        targetInputResult.Input = input;
++        targetInputResult.Outcome = TargetInputOutcome.Failed;
++        targetInputResult.Duration = targetInputResult.Duration.Add(duration);
++
++        targetResult.Outcome = TargetOutcome.Failed;
++        targetResult.Duration = targetResult.Duration.Add(duration);
++
++        _totalDuration = _totalDuration.Add(duration);
++
++        return writer.WriteLineAsync(Format(getPrefix(), target, targetInputResult.Input, $"{_palette.Failure}{FailedMessage}{_palette.Default} {_palette.Failure}{ex.Message}{_palette.Default}", targetInputResult.Duration, dependencyPath, _palette));
++    }
++
+     public async Task SucceededAsync(IEnumerable<Target> targets)
+     {
+         var message = GetResultLines(_results, _totalDuration, getPrefix, _palette)
+@@ -75,6 +118,32 @@ internal sealed partial class Output(
+         await writer.WriteLineAsync(message).Tax();
+     }
+ 
++    public Task SucceededAsync(Target target, IReadOnlyCollection<Target> dependencyPath, TimeSpan duration)
++    {
++        var result = InternResult(target);
++        result.Outcome = TargetOutcome.Succeeded;
++        result.Duration = result.Duration.Add(duration);
++
++        _totalDuration = _totalDuration.Add(duration);
++
++        return writer.WriteLineAsync(Format(getPrefix(), target, $"{_palette.Success}{SucceededMessage}{_palette.Default}", result.Duration, dependencyPath, _palette));
++    }
++
++    public Task SucceededAsync<TInput>(Target target, TInput input, Guid inputId, IReadOnlyCollection<Target> dependencyPath, TimeSpan duration)
++    {
++        var (targetResult, targetInputResult) = Intern(target, inputId);
++
++        targetInputResult.Input = input;
++        targetInputResult.Outcome = TargetInputOutcome.Succeeded;
++        targetInputResult.Duration = targetInputResult.Duration.Add(duration);
++
++        targetResult.Duration = targetResult.Duration.Add(duration);
++
++        _totalDuration = _totalDuration.Add(duration);
++
++        return writer.WriteLineAsync(Format(getPrefix(), target, targetInputResult.Input, $"{_palette.Success}{SucceededMessage}{_palette.Default}", targetInputResult.Duration, dependencyPath, _palette));
++    }
++
+     public async Task AwaitingAsync(Target target, IReadOnlyCollection<Target> dependencyPath)
+     {
+         if (Verbose)
+@@ -123,37 +192,11 @@ internal sealed partial class Output(
+         }
+     }
+ 
+-    public Task StartingAsync(Target target, IReadOnlyCollection<Target> dependencyPath)
+-    {
+-        _ = InternResult(target);
+-
+-        return writer.WriteLineAsync(Format(getPrefix(), target, $"{_palette.Text}{StartingMessage}{_palette.Default}", dependencyPath, _palette));
+-    }
+-
+     public Task ErrorAsync(Target target, Exception ex) =>
+         writer.WriteLineAsync(Format(getPrefix(), target, $"{_palette.Failure}{ex}{_palette.Default}", _palette));
+ 
+-    public Task FailedAsync(Target target, Exception ex, TimeSpan duration, IReadOnlyCollection<Target> dependencyPath)
+-    {
+-        var result = InternResult(target);
+-        result.Outcome = TargetOutcome.Failed;
+-        result.Duration = result.Duration.Add(duration);
+-
+-        _totalDuration = _totalDuration.Add(duration);
+-
+-        return writer.WriteLineAsync(Format(getPrefix(), target, $"{_palette.Failure}{FailedMessage}{_palette.Default} {_palette.Failure}{ex.Message}{_palette.Default}", result.Duration, dependencyPath, _palette));
+-    }
+-
+-    public Task SucceededAsync(Target target, IReadOnlyCollection<Target> dependencyPath, TimeSpan duration)
+-    {
+-        var result = InternResult(target);
+-        result.Outcome = TargetOutcome.Succeeded;
+-        result.Duration = result.Duration.Add(duration);
+-
+-        _totalDuration = _totalDuration.Add(duration);
+-
+-        return writer.WriteLineAsync(Format(getPrefix(), target, $"{_palette.Success}{SucceededMessage}{_palette.Default}", result.Duration, dependencyPath, _palette));
+-    }
++    public Task ErrorAsync<TInput>(Target target, TInput input, Exception ex) =>
++        writer.WriteLineAsync(Format(getPrefix(), target, input, $"{_palette.Failure}{ex}{_palette.Default}", _palette));
+ 
+     public Task NoInputsAsync(Target target, IReadOnlyCollection<Target> dependencyPath)
+     {
+@@ -163,48 +206,6 @@ internal sealed partial class Output(
+         return writer.WriteLineAsync(Format(getPrefix(), target, $"{_palette.Warning}{NoInputsMessage}{_palette.Default}", result.Duration, dependencyPath, _palette));
+     }
+ 
+-    public Task StartingAsync<TInput>(Target target, TInput input, Guid inputId, IReadOnlyCollection<Target> dependencyPath)
+-    {
+-        var (_, targetInputResult) = Intern(target, inputId);
+-        targetInputResult.Input = input;
+-
+-        return writer.WriteLineAsync(Format(getPrefix(), target, targetInputResult.Input, StartingMessage, dependencyPath, _palette));
+-    }
+-
+-    public Task ErrorAsync<TInput>(Target target, TInput input, Exception ex) =>
+-        writer.WriteLineAsync(Format(getPrefix(), target, input, $"{_palette.Failure}{ex}{_palette.Default}", _palette));
+-
+-    public Task FailedAsync<TInput>(Target target, TInput input, Guid inputId, Exception ex, TimeSpan duration, IReadOnlyCollection<Target> dependencyPath)
+-    {
+-        var (targetResult, targetInputResult) = Intern(target, inputId);
+-
+-        targetInputResult.Input = input;
+-        targetInputResult.Outcome = TargetInputOutcome.Failed;
+-        targetInputResult.Duration = targetInputResult.Duration.Add(duration);
+-
+-        targetResult.Outcome = TargetOutcome.Failed;
+-        targetResult.Duration = targetResult.Duration.Add(duration);
+-
+-        _totalDuration = _totalDuration.Add(duration);
+-
+-        return writer.WriteLineAsync(Format(getPrefix(), target, targetInputResult.Input, $"{_palette.Failure}{FailedMessage}{_palette.Default} {_palette.Failure}{ex.Message}{_palette.Default}", targetInputResult.Duration, dependencyPath, _palette));
+-    }
+-
+-    public Task SucceededAsync<TInput>(Target target, TInput input, Guid inputId, IReadOnlyCollection<Target> dependencyPath, TimeSpan duration)
+-    {
+-        var (targetResult, targetInputResult) = Intern(target, inputId);
+-
+-        targetInputResult.Input = input;
+-        targetInputResult.Outcome = TargetInputOutcome.Succeeded;
+-        targetInputResult.Duration = targetInputResult.Duration.Add(duration);
+-
+-        targetResult.Duration = targetResult.Duration.Add(duration);
+-
+-        _totalDuration = _totalDuration.Add(duration);
+-
+-        return writer.WriteLineAsync(Format(getPrefix(), target, targetInputResult.Input, $"{_palette.Success}{SucceededMessage}{_palette.Default}", targetInputResult.Duration, dependencyPath, _palette));
+-    }
+-
+     // editorconfig-checker-disable
+     private static string GetUsageLines(Palette p, string scriptExtension) =>
+         $@"{p.Text}Usage:{p.Default}
+diff --git a/src/Bullseye/Internal/TargetCollection.cs b/src/Bullseye/Internal/TargetCollection.cs
+index 742635e..abcc1f3 100644
+--- a/src/Bullseye/Internal/TargetCollection.cs
++++ b/src/Bullseye/Internal/TargetCollection.cs
+@@ -7,8 +7,6 @@ internal sealed class TargetCollection() : KeyedCollection<string, Target>(Strin
+ {
+     private static readonly ImmutableQueue<Target> RootDependencyPath = [];
+ 
+-    protected override string GetKeyForItem(Target item) => item.Name;
+-
+     public async Task RunAsync(
+         IReadOnlyCollection<string> names,
+         bool dryRun,
+@@ -195,6 +193,8 @@ internal sealed class TargetCollection() : KeyedCollection<string, Target>(Strin
+         }
+     }
+ 
++    protected override string GetKeyForItem(Target item) => item.Name;
++
+     private void CheckForMissingDependencies()
+     {
+         var missingDependencies = new SortedDictionary<string, SortedSet<string>>();
+@@ -213,8 +213,8 @@ internal sealed class TargetCollection() : KeyedCollection<string, Target>(Strin
+         if (missingDependencies.Count != 0)
+         {
+             var message =
+-                $"Missing {(missingDependencies.Count > 1 ? "dependencies" : "dependency")}: " +
+-                string.Join("; ", missingDependencies.Select(dependency => $"{dependency.Key}, required by {dependency.Value.Spaced()}"));
++                $"Missing {(missingDependencies.Count > 1 ? "dependencies" : "dependency")}: "
++                + string.Join("; ", missingDependencies.Select(dependency => $"{dependency.Key}, required by {dependency.Value.Spaced()}"));
+ 
+             throw new InvalidUsageException(message);
+         }
+diff --git a/src/Bullseye/Options.Creation.cs b/src/Bullseye/Options.Creation.cs
+index 79a3f8d..2a20664 100644
+--- a/src/Bullseye/Options.Creation.cs
++++ b/src/Bullseye/Options.Creation.cs
+@@ -8,14 +8,14 @@ namespace Bullseye;
+ public partial class Options : IOptions
+ {
+     /// <summary>
+-    /// Constructs a new instance of <see cref="Options"/>.
++    /// Initializes a new instance of the <see cref="Options"/> class.
+     /// </summary>
+     public Options()
+     {
+     }
+ 
+     /// <summary>
+-    /// Constructs a new instance of <see cref="Options"/>.
++    /// Initializes a new instance of the <see cref="Options"/> class.
+     /// </summary>
+     /// <param name="values">A list of named options and their values.</param>
+     public Options(IEnumerable<(string Name, bool Value)> values)
+diff --git a/src/Bullseye/Palette.cs b/src/Bullseye/Palette.cs
+index 357c34b..419069e 100644
+--- a/src/Bullseye/Palette.cs
++++ b/src/Bullseye/Palette.cs
+@@ -10,7 +10,7 @@ public class Palette
+     private static readonly int[] Numbers = [0, 30, 31, 32, 33, 34, 35, 36, 37, 90, 91, 92, 93, 94, 95, 96, 97,];
+ 
+     /// <summary>
+-    /// Constructs an instance of <see cref="Palette"/>.
++    /// Initializes a new instance of the <see cref="Palette"/> class.
+     /// </summary>
+     /// <param name="noColor">Whether to use color or not.</param>
+     /// <param name="noExtendedChars">Whether to use extended characters or not.</param>
+diff --git a/src/Bullseye/packages.lock.json b/src/Bullseye/packages.lock.json
+index 585718a..de29e31 100644
+--- a/src/Bullseye/packages.lock.json
++++ b/src/Bullseye/packages.lock.json
+@@ -31,6 +31,12 @@
+         "requested": "[8.0.0, )",
+         "resolved": "8.0.0",
+         "contentHash": "AJy/KVjXgUbgjf6HiI8wAk4DSSq0SCmvXQF8aU6IB+pnIQq+YJvofvMczug2hqO8yEvnQY557ryew66KPpyCsA=="
++      },
++      "StyleBro.Analyzers": {
++        "type": "Direct",
++        "requested": "[0.8.0-trial59.2, )",
++        "resolved": "0.8.0-trial59.2",
++        "contentHash": "v7s2h9l9dFI46oOamG8wGDkLlmi7t95XkCDDA9jY0tbB8wAQq5N3QJBYUtLa6VWO1QHrwZ9o6kRLAA/Pl97vzw=="
+       }
+     },
+     "net8.0": {
+@@ -63,6 +69,12 @@
+         "requested": "[8.0.0, )",
+         "resolved": "8.0.0",
+         "contentHash": "AJy/KVjXgUbgjf6HiI8wAk4DSSq0SCmvXQF8aU6IB+pnIQq+YJvofvMczug2hqO8yEvnQY557ryew66KPpyCsA=="
++      },
++      "StyleBro.Analyzers": {
++        "type": "Direct",
++        "requested": "[0.8.0-trial59.2, )",
++        "resolved": "0.8.0-trial59.2",
++        "contentHash": "v7s2h9l9dFI46oOamG8wGDkLlmi7t95XkCDDA9jY0tbB8wAQq5N3QJBYUtLa6VWO1QHrwZ9o6kRLAA/Pl97vzw=="
+       }
+     },
+     "net9.0": {
+@@ -95,6 +107,12 @@
+         "requested": "[8.0.0, )",
+         "resolved": "8.0.0",
+         "contentHash": "AJy/KVjXgUbgjf6HiI8wAk4DSSq0SCmvXQF8aU6IB+pnIQq+YJvofvMczug2hqO8yEvnQY557ryew66KPpyCsA=="
++      },
++      "StyleBro.Analyzers": {
++        "type": "Direct",
++        "requested": "[0.8.0-trial59.2, )",
++        "resolved": "0.8.0-trial59.2",
++        "contentHash": "v7s2h9l9dFI46oOamG8wGDkLlmi7t95XkCDDA9jY0tbB8wAQq5N3QJBYUtLa6VWO1QHrwZ9o6kRLAA/Pl97vzw=="
+       }
+     }
+   }
+diff --git a/tests/Tests.Internal/OutputTests.cs b/tests/Tests.Internal/OutputTests.cs
+index acdc50f..af29161 100644
+--- a/tests/Tests.Internal/OutputTests.cs
++++ b/tests/Tests.Internal/OutputTests.cs
+@@ -199,6 +199,7 @@ public static class OutputTests
+             {
+                 await output.ErrorAsync(badTarget, badTargetEx);
+             }
++
+             await output.FailedAsync(badTarget, badTargetEx, badTargetDuration, verboseTargets);
+ 
+             await output.StartingAsync(goodInputsTarget, goodInput1, goodInputId1, verboseTargets);
+@@ -214,8 +215,10 @@ public static class OutputTests
+             {
+                 await output.ErrorAsync(badInputsTarget, badInput, badInputEx);
+             }
++
+             await output.FailedAsync(badInputsTarget, badInput, badInputId, badInputEx, badInputDuration, verboseTargets);
+         }
++
+         await output.SucceededAsync(targets);
+         await output.FailedAsync(targets);
+     }
+diff --git a/tests/Tests.Internal/packages.lock.json b/tests/Tests.Internal/packages.lock.json
+index 4cb58ff..4a7802d 100644
+--- a/tests/Tests.Internal/packages.lock.json
++++ b/tests/Tests.Internal/packages.lock.json
+@@ -14,6 +14,12 @@
+         "resolved": "18.7.23",
+         "contentHash": "dyj6z8m+LFjpeH69hdnciCcRCmD0YgMlvuQEywiEshjqj/blgQ+PuWX8Vd5gkWQFoBN4e+TFxx6DvGNSv/gIKg=="
+       },
++      "StyleBro.Analyzers": {
++        "type": "Direct",
++        "requested": "[0.8.0-trial59.2, )",
++        "resolved": "0.8.0-trial59.2",
++        "contentHash": "v7s2h9l9dFI46oOamG8wGDkLlmi7t95XkCDDA9jY0tbB8wAQq5N3QJBYUtLa6VWO1QHrwZ9o6kRLAA/Pl97vzw=="
++      },
+       "xunit.v3.mtp-v2": {
+         "type": "Direct",
+         "requested": "[4.0.1, )",
+@@ -157,6 +163,12 @@
+         "resolved": "18.7.23",
+         "contentHash": "dyj6z8m+LFjpeH69hdnciCcRCmD0YgMlvuQEywiEshjqj/blgQ+PuWX8Vd5gkWQFoBN4e+TFxx6DvGNSv/gIKg=="
+       },
++      "StyleBro.Analyzers": {
++        "type": "Direct",
++        "requested": "[0.8.0-trial59.2, )",
++        "resolved": "0.8.0-trial59.2",
++        "contentHash": "v7s2h9l9dFI46oOamG8wGDkLlmi7t95XkCDDA9jY0tbB8wAQq5N3QJBYUtLa6VWO1QHrwZ9o6kRLAA/Pl97vzw=="
++      },
+       "xunit.v3.mtp-v2": {
+         "type": "Direct",
+         "requested": "[4.0.1, )",
+@@ -300,6 +312,12 @@
+         "resolved": "18.7.23",
+         "contentHash": "dyj6z8m+LFjpeH69hdnciCcRCmD0YgMlvuQEywiEshjqj/blgQ+PuWX8Vd5gkWQFoBN4e+TFxx6DvGNSv/gIKg=="
+       },
++      "StyleBro.Analyzers": {
++        "type": "Direct",
++        "requested": "[0.8.0-trial59.2, )",
++        "resolved": "0.8.0-trial59.2",
++        "contentHash": "v7s2h9l9dFI46oOamG8wGDkLlmi7t95XkCDDA9jY0tbB8wAQq5N3QJBYUtLa6VWO1QHrwZ9o6kRLAA/Pl97vzw=="
++      },
+       "xunit.v3.mtp-v2": {
+         "type": "Direct",
+         "requested": "[4.0.1, )",
+diff --git a/tests/Tests/Dependencies.cs b/tests/Tests/Dependencies.cs
+index c618cc1..f3c21d2 100644
+--- a/tests/Tests/Dependencies.cs
++++ b/tests/Tests/Dependencies.cs
+@@ -142,12 +142,6 @@ public static partial class Dependencies
+         _ = Assert.Single(FirstAwaiting().Matches(output));
+     }
+ 
+-    [GeneratedRegex("first: Walking dependencies...")]
+-    private static partial Regex FirstWalkingDependencies();
+-
+-    [GeneratedRegex("first: Awaiting...")]
+-    private static partial Regex FirstAwaiting();
+-
+     [Fact]
+     public static async Task NotExistentDependencies()
+     {
+@@ -231,4 +225,10 @@ public static partial class Dependencies
+         Assert.Equal(1, buildStartTime);
+         Assert.Equal(5, test1StartTime + test2StartTime);
+     }
++
++    [GeneratedRegex("first: Walking dependencies...")]
++    private static partial Regex FirstWalkingDependencies();
++
++    [GeneratedRegex("first: Awaiting...")]
++    private static partial Regex FirstAwaiting();
+ }
+diff --git a/tests/Tests/packages.lock.json b/tests/Tests/packages.lock.json
+index ea35d11..e57622b 100644
+--- a/tests/Tests/packages.lock.json
++++ b/tests/Tests/packages.lock.json
+@@ -24,6 +24,12 @@
+           "System.CodeDom": "6.0.0"
+         }
+       },
++      "StyleBro.Analyzers": {
++        "type": "Direct",
++        "requested": "[0.8.0-trial59.2, )",
++        "resolved": "0.8.0-trial59.2",
++        "contentHash": "v7s2h9l9dFI46oOamG8wGDkLlmi7t95XkCDDA9jY0tbB8wAQq5N3QJBYUtLa6VWO1QHrwZ9o6kRLAA/Pl97vzw=="
++      },
+       "xunit.v3.mtp-v2": {
+         "type": "Direct",
+         "requested": "[4.0.1, )",
+@@ -187,6 +193,12 @@
+           "System.CodeDom": "6.0.0"
+         }
+       },
++      "StyleBro.Analyzers": {
++        "type": "Direct",
++        "requested": "[0.8.0-trial59.2, )",
++        "resolved": "0.8.0-trial59.2",
++        "contentHash": "v7s2h9l9dFI46oOamG8wGDkLlmi7t95XkCDDA9jY0tbB8wAQq5N3QJBYUtLa6VWO1QHrwZ9o6kRLAA/Pl97vzw=="
++      },
+       "xunit.v3.mtp-v2": {
+         "type": "Direct",
+         "requested": "[4.0.1, )",
+@@ -350,6 +362,12 @@
+           "System.CodeDom": "6.0.0"
+         }
+       },
++      "StyleBro.Analyzers": {
++        "type": "Direct",
++        "requested": "[0.8.0-trial59.2, )",
++        "resolved": "0.8.0-trial59.2",
++        "contentHash": "v7s2h9l9dFI46oOamG8wGDkLlmi7t95XkCDDA9jY0tbB8wAQq5N3QJBYUtLa6VWO1QHrwZ9o6kRLAA/Pl97vzw=="
++      },
+       "xunit.v3.mtp-v2": {
+         "type": "Direct",
+         "requested": "[4.0.1, )",

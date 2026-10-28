@@ -35,7 +35,7 @@ internal static class ConstantComparisons
         return (op.MethodKind == MethodKind.BuiltinOperator
                 || (op.MethodKind == MethodKind.UserDefinedOperator
                     && SymbolEqualityComparer.Default.Equals(op.ContainingAssembly, model.Compilation.ObjectType.ContainingAssembly)))
-            && !NullChecks.IsInExpressionTree(binary, model, cancellationToken);
+            && !NullChecks.IsInExpressionTreeOrTwin(binary, model, cancellationToken);
     }
 
     /// <summary>'1 == x' becomes 'x == 1', and '0 &lt; x' becomes 'x &gt; 0'. Layout and comments stay in place.</summary>
