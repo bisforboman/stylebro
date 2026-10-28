@@ -77,6 +77,28 @@ internal static class NullChecks
         return false;
     }
 
+    // In an expression tree, or in a delegate lambda that is the twin of one: the same member has a lambda written the same
+    // way (trivia aside) that is converted to an Expression. Owner's decision 2026-10-28, trial 59: DelegateDecompiler's tests
+    // write 'Expression<Func<E, bool>> expected = x => E.Bar == x;' and 'Func<E, bool> compiled = x => E.Bar == x;', decompile
+    // the delegate's IL and compare; BRO1103 swapped only the delegate's comparison and the pair no longer matched.
+    internal static bool IsInExpressionTreeOrTwin(SyntaxNode node, SemanticModel model, CancellationToken cancellationToken)
+    {
+        if (IsInExpressionTree(node, model, cancellationToken))
+        {
+            return true;
+        }
+
+        var lambdas = node.Ancestors().OfType<AnonymousFunctionExpressionSyntax>().ToList();
+        if (lambdas.Count == 0 || node.FirstAncestorOrSelf<MemberDeclarationSyntax>() is not { } member)
+        {
+            return false;
+        }
+
+        var others = member.DescendantNodes().OfType<AnonymousFunctionExpressionSyntax>().Where(l => !lambdas.Contains(l)).ToList();
+        return lambdas.Any(lambda => others.Any(other => SyntaxFactory.AreEquivalent(lambda, other)
+            && other.ExpressionBody is { } body && IsInExpressionTree(body, model, cancellationToken)));
+    }
+
     // 'x == null' -> 'x is null', 'x != null' -> 'x is not null', 'null == x' -> 'x is null'.
     private static (string, ImmutableArray<TextChange>)? ToPattern(BinaryExpressionSyntax binary, SemanticModel model, CancellationToken cancellationToken, LanguageVersion languageVersion)
     {

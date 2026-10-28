@@ -31,7 +31,7 @@ internal static class EmptyStrings
             && literal.Token.IsKind(SyntaxKind.StringLiteralToken)
             && literal.Token.ValueText.Length == 0
             && !IsInConstantContext(literal)
-            && !NullChecks.IsInExpressionTree(literal, model, cancellationToken);
+            && !NullChecks.IsInExpressionTreeOrTwin(literal, model, cancellationToken);
     }
 
     /// <summary>
@@ -45,7 +45,7 @@ internal static class EmptyStrings
             && !access.DescendantTrivia().Any(t => access.Span.Contains(t.Span) && !t.IsKind(SyntaxKind.WhitespaceTrivia) && !t.IsKind(SyntaxKind.EndOfLineTrivia))
             && !IsInNameof(access)
             && model.GetSymbolInfo(access, cancellationToken).Symbol is IFieldSymbol { ContainingType.SpecialType: SpecialType.System_String }
-            && !NullChecks.IsInExpressionTree(access, model, cancellationToken);
+            && !NullChecks.IsInExpressionTreeOrTwin(access, model, cancellationToken);
     }
 
     private static bool IsInNameof(SyntaxNode node)

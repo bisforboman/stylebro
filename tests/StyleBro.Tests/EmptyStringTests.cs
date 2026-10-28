@@ -201,4 +201,38 @@ public class EmptyStringTests
         }
         """,
         LiteralStyle);
+
+    [Fact]
+    public Task LiteralStyle_ExpressionTreeTwins_KeepTheirForm() => VerifyFixAsync(
+        """
+        using System;
+        using System.Linq.Expressions;
+
+        class C
+        {
+            // Trial 59 (DelegateDecompiler): the delegate is decompiled and compared with its twin tree (owner, 2026-10-28).
+            void M()
+            {
+                Expression<Func<string, bool>> expected = s => (s ?? string.Empty).Contains("Test");
+                Func<string, bool> compiled = s => (s ?? string.Empty).Contains("Test");
+                Func<string> other = () => {|BRO1106:string.Empty|};
+            }
+        }
+        """,
+        """
+        using System;
+        using System.Linq.Expressions;
+
+        class C
+        {
+            // Trial 59 (DelegateDecompiler): the delegate is decompiled and compared with its twin tree (owner, 2026-10-28).
+            void M()
+            {
+                Expression<Func<string, bool>> expected = s => (s ?? string.Empty).Contains("Test");
+                Func<string, bool> compiled = s => (s ?? string.Empty).Contains("Test");
+                Func<string> other = () => "";
+            }
+        }
+        """,
+        LiteralStyle);
 }
