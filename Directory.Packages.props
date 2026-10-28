@@ -13,7 +13,7 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0" />
     <!-- bro's format host compiles against these and runs on the SDK's own copies (src/StyleBro.FormatHost). -->
     <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.8.0" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
 
     <!-- StyleBro checks its own code with its latest published release (not the code being built). -->
     <PackageVersion Include="StyleBro.Analyzers" Version="$(StyleBroSelfVersion)" />
@@ -23,6 +23,6 @@
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.1" />
     <!-- Pins the test framework's transitive System.Security.Cryptography.Pkcs above 9.0.6 (NU1903, GHSA-846f-f764-76mx). Tests only: no shipped package contains it. -->
-    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
   </ItemGroup>
 </Project>
