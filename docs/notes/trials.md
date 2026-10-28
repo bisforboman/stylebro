@@ -1030,7 +1030,7 @@ engines (`.trials/README.md`, "Engine soak").
   (decision 2026-10-27: required on src/ PRs, nightly on main).
 - From now on: a trial finding that comes from the repository's shape adds a shape (`.trials/README.md`, step 4).
 
-## Trial 58 (2026-10-27, VERDICT; host soak: SOAK)
+## Trial 58 (2026-10-27, not clean: owner "Not clean", tally 0; host soak: clean, the third clean soak with the host as the default)
 
 - Repos (three random plus one targeted): seesharper/LightInject, natemcmaster/CommandLineUtils, schotime/NPoco (random,
   seed 58: draws 74, 25, 26 of 79 entries; 25 and 26 walked past WireMock.Net (trial 36), xunit (rejected, trial 38) and the
