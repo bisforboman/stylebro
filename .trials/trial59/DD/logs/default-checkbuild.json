@@ -13,7 +13,9 @@
   "filesPerRule": null,
   "keptFindings": [],
   "patch": null,
-  "clean": false,
-  "exitCode": 1,
-  "notChecked": []
+  "clean": true,
+  "exitCode": 0,
+  "notChecked": [
+    "IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)"
+  ]
 }

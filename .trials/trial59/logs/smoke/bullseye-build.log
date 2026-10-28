@@ -1,0 +1,31 @@
+  Determining projects to restore...
+  Restored /home/user/cand59/adamralph-bullseye/smoke-tests/SmokeTests.McMaster/SmokeTests.McMaster.csproj (in 1.5 sec).
+  Restored /home/user/cand59/adamralph-bullseye/smoke-tests/SmokeTests.Parallel/SmokeTests.Parallel.csproj (in 1.5 sec).
+  Restored /home/user/cand59/adamralph-bullseye/smoke-tests/SmokeTests.CommandLine/SmokeTests.CommandLine.csproj (in 216 ms).
+  Restored /home/user/cand59/adamralph-bullseye/fixtures/Fixtures.Xunit/Fixtures.Xunit.csproj (in 1.45 sec).
+  Restored /home/user/cand59/adamralph-bullseye/smoke-tests/SmokeTests/SmokeTests.csproj (in 4 ms).
+  Restored /home/user/cand59/adamralph-bullseye/tests/Tests.Internal/Tests.Internal.csproj (in 3.09 sec).
+  Restored /home/user/cand59/adamralph-bullseye/tests/Tests/Tests.csproj (in 3.09 sec).
+  Restored /home/user/cand59/adamralph-bullseye/src/Bullseye/Bullseye.csproj (in 2.44 sec).
+  Fixtures.Xunit -> /home/user/cand59/adamralph-bullseye/fixtures/Fixtures.Xunit/bin/Debug/net9.0/Fixtures.Xunit.dll
+  Fixtures.Xunit -> /home/user/cand59/adamralph-bullseye/fixtures/Fixtures.Xunit/bin/Debug/net10.0/Fixtures.Xunit.dll
+  Fixtures.Xunit -> /home/user/cand59/adamralph-bullseye/fixtures/Fixtures.Xunit/bin/Debug/net8.0/Fixtures.Xunit.dll
+  Bullseye -> /home/user/cand59/adamralph-bullseye/src/Bullseye/bin/Debug/net8.0/Bullseye.dll
+  Bullseye -> /home/user/cand59/adamralph-bullseye/src/Bullseye/bin/Debug/net10.0/Bullseye.dll
+  SmokeTests -> /home/user/cand59/adamralph-bullseye/smoke-tests/SmokeTests/bin/Debug/net10.0/SmokeTests.dll
+  SmokeTests.McMaster -> /home/user/cand59/adamralph-bullseye/smoke-tests/SmokeTests.McMaster/bin/Debug/net10.0/SmokeTests.McMaster.dll
+  SmokeTests.Parallel -> /home/user/cand59/adamralph-bullseye/smoke-tests/SmokeTests.Parallel/bin/Debug/net10.0/SmokeTests.Parallel.dll
+  Bullseye -> /home/user/cand59/adamralph-bullseye/src/Bullseye/bin/Debug/net9.0/Bullseye.dll
+  SmokeTests.CommandLine -> /home/user/cand59/adamralph-bullseye/smoke-tests/SmokeTests.CommandLine/bin/Debug/net10.0/SmokeTests.CommandLine.dll
+  Tests.Internal -> /home/user/cand59/adamralph-bullseye/tests/Tests.Internal/bin/Debug/net9.0/Tests.Internal.dll
+  Tests -> /home/user/cand59/adamralph-bullseye/tests/Tests/bin/Debug/net10.0/Tests.dll
+  Tests.Internal -> /home/user/cand59/adamralph-bullseye/tests/Tests.Internal/bin/Debug/net10.0/Tests.Internal.dll
+  Tests.Internal -> /home/user/cand59/adamralph-bullseye/tests/Tests.Internal/bin/Debug/net8.0/Tests.Internal.dll
+  Tests -> /home/user/cand59/adamralph-bullseye/tests/Tests/bin/Debug/net8.0/Tests.dll
+  Tests -> /home/user/cand59/adamralph-bullseye/tests/Tests/bin/Debug/net9.0/Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:53.68

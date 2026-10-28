@@ -1,0 +1,27 @@
+  Determining projects to restore...
+  Restored /home/user/cand59/xoofx-SharpYaml/src/SharpYaml.AotSmoke/SharpYaml.AotSmoke.csproj (in 2.39 sec).
+  Restored /home/user/cand59/xoofx-SharpYaml/src/SharpYaml/SharpYaml.csproj (in 2.34 sec).
+  Restored /home/user/cand59/xoofx-SharpYaml/src/SharpYaml.AotSmokeLib/SharpYaml.AotSmokeLib.csproj (in 2.34 sec).
+  Restored /home/user/cand59/xoofx-SharpYaml/src/SharpYaml.FeatureSwitchSmoke/SharpYaml.FeatureSwitchSmoke.csproj (in 6 ms).
+  Restored /home/user/cand59/xoofx-SharpYaml/src/SharpYaml.Benchmarks/SharpYaml.Benchmarks.csproj (in 4.89 sec).
+  Restored /home/user/cand59/xoofx-SharpYaml/src/SharpYaml.SourceGenerator/SharpYaml.SourceGenerator.csproj (in 3.39 sec).
+  Restored /home/user/cand59/xoofx-SharpYaml/src/SharpYaml.Tests/SharpYaml.Tests.csproj (in 3.91 sec).
+  SharpYaml.SourceGenerator -> /home/user/cand59/xoofx-SharpYaml/src/SharpYaml.SourceGenerator/bin/Debug/netstandard2.0/SharpYaml.SourceGenerator.dll
+  SharpYaml -> /home/user/cand59/xoofx-SharpYaml/src/SharpYaml/bin/Debug/net8.0/SharpYaml.dll
+  SharpYaml -> /home/user/cand59/xoofx-SharpYaml/src/SharpYaml/bin/Debug/net10.0/SharpYaml.dll
+  SharpYaml -> /home/user/cand59/xoofx-SharpYaml/src/SharpYaml/bin/Debug/netstandard2.0/SharpYaml.dll
+  SharpYaml.AotSmoke -> /home/user/cand59/xoofx-SharpYaml/src/SharpYaml.AotSmoke/bin/Debug/net10.0/SharpYaml.AotSmoke.dll
+  SharpYaml.FeatureSwitchSmoke -> /home/user/cand59/xoofx-SharpYaml/src/SharpYaml.FeatureSwitchSmoke/bin/Debug/net10.0/SharpYaml.FeatureSwitchSmoke.dll
+  SharpYaml.AotSmokeLib -> /home/user/cand59/xoofx-SharpYaml/src/SharpYaml.AotSmokeLib/bin/Debug/netstandard2.0/SharpYaml.AotSmokeLib.dll
+  SharpYaml.Benchmarks -> /home/user/cand59/xoofx-SharpYaml/src/SharpYaml.Benchmarks/bin/Debug/net10.0/SharpYaml.Benchmarks.dll
+/home/user/cand59/xoofx-SharpYaml/src/SharpYaml.Tests/InsertionQueueTests.cs(137,24): error CS0281: Friend access was granted by 'SharpYaml, Version=3.0.0.0, Culture=neutral, PublicKeyToken=null', but the public key of the output assembly ('') does not match that specified by the InternalsVisibleTo attribute in the granting assembly. [/home/user/cand59/xoofx-SharpYaml/src/SharpYaml.Tests/SharpYaml.Tests.csproj]
+/home/user/cand59/xoofx-SharpYaml/src/SharpYaml.Tests/InsertionQueueTests.cs(147,52): error CS0281: Friend access was granted by 'SharpYaml, Version=3.0.0.0, Culture=neutral, PublicKeyToken=null', but the public key of the output assembly ('') does not match that specified by the InternalsVisibleTo attribute in the granting assembly. [/home/user/cand59/xoofx-SharpYaml/src/SharpYaml.Tests/SharpYaml.Tests.csproj]
+
+Build FAILED.
+
+/home/user/cand59/xoofx-SharpYaml/src/SharpYaml.Tests/InsertionQueueTests.cs(137,24): error CS0281: Friend access was granted by 'SharpYaml, Version=3.0.0.0, Culture=neutral, PublicKeyToken=null', but the public key of the output assembly ('') does not match that specified by the InternalsVisibleTo attribute in the granting assembly. [/home/user/cand59/xoofx-SharpYaml/src/SharpYaml.Tests/SharpYaml.Tests.csproj]
+/home/user/cand59/xoofx-SharpYaml/src/SharpYaml.Tests/InsertionQueueTests.cs(147,52): error CS0281: Friend access was granted by 'SharpYaml, Version=3.0.0.0, Culture=neutral, PublicKeyToken=null', but the public key of the output assembly ('') does not match that specified by the InternalsVisibleTo attribute in the granting assembly. [/home/user/cand59/xoofx-SharpYaml/src/SharpYaml.Tests/SharpYaml.Tests.csproj]
+    0 Warning(s)
+    2 Error(s)
+
+Time Elapsed 00:00:19.41

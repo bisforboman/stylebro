@@ -1,3 +1,4 @@
+using StyleBro.Analyzers;
 using StyleBro.Migrate;
 
 namespace StyleBro.Tests;
@@ -37,6 +38,31 @@ public sealed partial class MigrationTests
         Write("Directory.Build.props", "<Project>\n  <!-- <PackageReference Include=\"StyleBro.Analyzers\" /> -->\n</Project>\n");
         Assert.Empty(Migration.ShadowedReferences(root, projects));
         Assert.Contains("Add the StyleBro.Analyzers package", FormatCommand.NotLoadedMessage(new[] { "src/Lib/Lib.csproj" }, all: true, [])!, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void AKeptFindingsFirstUse_IsWhereTheFormattedTextHasIt()
+    {
+        // SharpYaml: BRO1303 kept 'handle' for a string in TagDirective.cs and recorded its line when the fix ran; a later
+        // fix of the same run removed a blank line above it, and the old engine still said TagDirective.cs(52), the host 51.
+        Write("Tokens/TagDirective.cs", "class TagDirective\n{\n    void Check(string handle)\n    {\n        throw new System.ArgumentNullException(\"handle\", \"Tag handle must not be empty.\");\n    }\n}\n");
+        var file = Path.Combine(root, "Tokens/TagDirective.cs");
+        KeptFinding Kept(int line, KeptReason reason = KeptReason.NameInString) => new(Path.Combine(root, "Emitter.cs"), 106, 24, "BRO1303", reason, "Rename 'handle' to '_handle'", $"{file}({line})");
+        var cache = new Dictionary<string, List<(char Kind, string Text, int Line)>?>(StringComparer.OrdinalIgnoreCase);
+
+        Assert.Equal($"{file}(5)", FormatCommand.WhereNow(Kept(6), cache).Where);
+        Assert.Equal($"{file}(5)", FormatCommand.WhereNow(Kept(5), cache).Where);
+
+        // Another reason, or a file without such a string any more, stays as recorded.
+        Assert.Equal($"{file}(6)", FormatCommand.WhereNow(Kept(6, KeptReason.UsedThroughDynamic), cache).Where);
+        Write("Tokens/Other.cs", "class Other\n{\n}\n");
+        var other = new KeptFinding(Path.Combine(root, "Emitter.cs"), 106, 24, "BRO1303", KeptReason.NameInString, "Rename 'handle' to '_handle'", Path.Combine(root, "Tokens/Other.cs") + "(2)");
+        Assert.Equal(other.Where, FormatCommand.WhereNow(other, cache).Where);
+
+        // A reflection-shaped string with the name comes before an earlier plain one, as the renamer picks it.
+        Write("Reads.cs", "class Reads\n{\n    string a = \"handle\";\n    object b = typeof(Reads).GetField(\"handle\");\n}\n");
+        var reads = new KeptFinding(Path.Combine(root, "Emitter.cs"), 106, 24, "BRO1303", KeptReason.NameInString, "Rename 'handle' to '_handle'", Path.Combine(root, "Reads.cs") + "(1)");
+        Assert.Equal(Path.Combine(root, "Reads.cs") + "(4)", FormatCommand.WhereNow(reads, cache).Where);
     }
 
     [Fact]

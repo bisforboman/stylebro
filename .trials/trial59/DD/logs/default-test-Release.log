@@ -1,6 +1,6 @@
   Determining projects to restore...
-  Restored /home/user/w59/DD/default/src/DelegateDecompiler/DelegateDecompiler.csproj (in 476 ms).
-  Restored /home/user/w59/DD/default/src/DelegateDecompiler.Tests/DelegateDecompiler.Tests.csproj (in 476 ms).
+  Restored /home/user/w59/DD/default/src/DelegateDecompiler.Tests/DelegateDecompiler.Tests.csproj (in 523 ms).
+  Restored /home/user/w59/DD/default/src/DelegateDecompiler/DelegateDecompiler.csproj (in 523 ms).
   DelegateDecompiler -> /home/user/w59/DD/default/src/DelegateDecompiler/bin/Release/netstandard2.1/DelegateDecompiler.dll
   DelegateDecompiler.Tests -> /home/user/w59/DD/default/src/DelegateDecompiler.Tests/bin/Release/net8.0/DelegateDecompiler.Tests.dll
 Test run for /home/user/w59/DD/default/src/DelegateDecompiler.Tests/bin/Release/net8.0/DelegateDecompiler.Tests.dll (.NETCoreApp,Version=v8.0)
@@ -685,14 +685,14 @@ Round(x, 3, AwayFromZero)
 Convert((2 & Convert(x, Int32)), TestFlagEnum)
 Convert((2 & Convert(x, Int32)), TestFlagEnum)
 
-(1 == Convert(x, Int32))
+(Convert(x, Int32) == 1)
 (1 == Convert(x, Int32))
 (1 == Convert(x, Int32))
 
 Bar.HasFlag(Convert(x, Enum))
 Bar.HasFlag(Convert(x, Enum))
 
-(1 != Convert(x, Int32))
+(Convert(x, Int32) != 1)
 (1 != Convert(x, Int32))
 (1 != Convert(x, Int32))
 
@@ -704,6 +704,48 @@ Convert((Convert(x, Int32) & 2), TestFlagEnum)
 
 Convert((Convert(x, Int32) & Convert(x, Int32)), TestFlagEnum)
 Convert((Convert(x, Int32) & Convert(x, Int32)), TestFlagEnum)
+
+  Failed TestEnumConstantEqualsEnumParameter [37 ms]
+  Error Message:
+     Expected: any of < "(1 == Convert(x, Int32))", "(1 == Convert(x, Int32))" >
+  But was:  "(Convert(x, Int32) == 1)"
+
+  Stack Trace:
+     at DelegateDecompiler.Tests.DecompilerTestsBase.TestNoDebugView[T](T compiled, Expression`1[] expected) in /_/src/DelegateDecompiler.Tests/DecompilerTestsBase.cs:line 53
+   at DelegateDecompiler.Tests.DecompilerTestsBase.Test[T](T compiled, Expression`1[] expected) in /_/src/DelegateDecompiler.Tests/DecompilerTestsBase.cs:line 36
+   at DelegateDecompiler.Tests.EnumTests.TestEnumConstantEqualsEnumParameter() in /_/src/DelegateDecompiler.Tests/EnumTests.cs:line 40
+
+1)    at DelegateDecompiler.Tests.DecompilerTestsBase.TestNoDebugView[T](T compiled, Expression`1[] expected) in /_/src/DelegateDecompiler.Tests/DecompilerTestsBase.cs:line 53
+   at DelegateDecompiler.Tests.DecompilerTestsBase.Test[T](T compiled, Expression`1[] expected) in /_/src/DelegateDecompiler.Tests/DecompilerTestsBase.cs:line 36
+   at DelegateDecompiler.Tests.EnumTests.TestEnumConstantEqualsEnumParameter() in /_/src/DelegateDecompiler.Tests/EnumTests.cs:line 40
+
+
+  Standard Output Messages:
+ (Convert(x, Int32) == 1)
+ (1 == Convert(x, Int32))
+ (1 == Convert(x, Int32))
+
+
+  Failed TestEnumConstantNotEqualsEnumParameter [1 ms]
+  Error Message:
+     Expected: any of < "(1 != Convert(x, Int32))", "(1 != Convert(x, Int32))" >
+  But was:  "(Convert(x, Int32) != 1)"
+
+  Stack Trace:
+     at DelegateDecompiler.Tests.DecompilerTestsBase.TestNoDebugView[T](T compiled, Expression`1[] expected) in /_/src/DelegateDecompiler.Tests/DecompilerTestsBase.cs:line 53
+   at DelegateDecompiler.Tests.DecompilerTestsBase.Test[T](T compiled, Expression`1[] expected) in /_/src/DelegateDecompiler.Tests/DecompilerTestsBase.cs:line 36
+   at DelegateDecompiler.Tests.EnumTests.TestEnumConstantNotEqualsEnumParameter() in /_/src/DelegateDecompiler.Tests/EnumTests.cs:line 108
+
+1)    at DelegateDecompiler.Tests.DecompilerTestsBase.TestNoDebugView[T](T compiled, Expression`1[] expected) in /_/src/DelegateDecompiler.Tests/DecompilerTestsBase.cs:line 53
+   at DelegateDecompiler.Tests.DecompilerTestsBase.Test[T](T compiled, Expression`1[] expected) in /_/src/DelegateDecompiler.Tests/DecompilerTestsBase.cs:line 36
+   at DelegateDecompiler.Tests.EnumTests.TestEnumConstantNotEqualsEnumParameter() in /_/src/DelegateDecompiler.Tests/EnumTests.cs:line 108
+
+
+  Standard Output Messages:
+ (Convert(x, Int32) != 1)
+ (1 != Convert(x, Int32))
+ (1 != Convert(x, Int32))
+
 
 GenericMethod(x)
 GenericMethod(x)
@@ -960,8 +1002,8 @@ ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressions
 ints.Select(_ => value(DelegateDecompiler.Tests.NestedExpressionsTests+<>c__DisplayClass20_0).p)
 ints.Select(_ => value(DelegateDecompiler.Tests.NestedExpressionsTests+<>c__DisplayClass20_0).p)
 
-ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests).p1))
-ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests).p1))
+ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests).P1))
+ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests).P1))
 
 ints.Select(_ => value(DelegateDecompiler.Tests.NestedExpressionsTests+<>c__DisplayClass19_0).v)
 ints.Select(_ => value(DelegateDecompiler.Tests.NestedExpressionsTests+<>c__DisplayClass19_0).v)
@@ -972,8 +1014,8 @@ ints.SingleOrDefault(i => (i == NestedExpressionsTests.f2))
 ints.SingleOrDefault(i => (i == M2()))
 ints.SingleOrDefault(i => (i == M2()))
 
-ints.SingleOrDefault(i => (i == NestedExpressionsTests.p2))
-ints.SingleOrDefault(i => (i == NestedExpressionsTests.p2))
+ints.SingleOrDefault(i => (i == NestedExpressionsTests.P2))
+ints.SingleOrDefault(i => (i == NestedExpressionsTests.P2))
 
 ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests+<>c__DisplayClass29_0).v))
 ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests+<>c__DisplayClass29_0).v))
@@ -984,8 +1026,8 @@ ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressions
 ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests).M1()))
 ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests).M1()))
 
-ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests).p1))
-ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests).p1))
+ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests).P1))
+ints.SingleOrDefault(i => (i == value(DelegateDecompiler.Tests.NestedExpressionsTests).P1))
 
 ints.SingleOrDefault(i => (i == NestedExpressionsTests.f2))
 ints.SingleOrDefault(i => (i == NestedExpressionsTests.f2))
@@ -993,8 +1035,8 @@ ints.SingleOrDefault(i => (i == NestedExpressionsTests.f2))
 ints.SingleOrDefault(i => (i == M2()))
 ints.SingleOrDefault(i => (i == M2()))
 
-ints.SingleOrDefault(i => (i == NestedExpressionsTests.p2))
-ints.SingleOrDefault(i => (i == NestedExpressionsTests.p2))
+ints.SingleOrDefault(i => (i == NestedExpressionsTests.P2))
+ints.SingleOrDefault(i => (i == NestedExpressionsTests.P2))
 
 ints.SingleOrDefault(i => (i == 0))
 ints.SingleOrDefault(i => (i == 0))
@@ -1309,12 +1351,12 @@ Concat(new [] {x})
 Not((parent Is Child))
 Not((parent Is Child))
 
-  Skipped TryCatchFinally [8 ms]
-  Skipped TryCatchSimple [8 ms]
-  Skipped TryCatchWithCondition [8 ms]
-  Skipped TryCatchWithExceptionVariable [8 ms]
-  Skipped TryCatchWithSpecificException [8 ms]
-  Skipped TryFinallyOnly [8 ms]
+  Skipped TryCatchFinally [< 1 ms]
+  Skipped TryCatchSimple [< 1 ms]
+  Skipped TryCatchWithCondition [< 1 ms]
+  Skipped TryCatchWithExceptionVariable [< 1 ms]
+  Skipped TryCatchWithSpecificException [< 1 ms]
+  Skipped TryFinallyOnly [< 1 ms]
 (parent Is Child)
 (parent Is Child)
 
@@ -1340,22 +1382,22 @@ Convert(o, Nullable`1)
 Convert(o, Nullable`1)
 
 
-Passed!  - Failed:     0, Passed:   451, Skipped:    26, Total:   477, Duration: 834 ms - DelegateDecompiler.Tests.dll (net8.0)
+Failed!  - Failed:     2, Passed:   449, Skipped:    26, Total:   477, Duration: 896 ms - DelegateDecompiler.Tests.dll (net8.0)
   Determining projects to restore...
-  Restored /home/user/w59/DD/default/src/DelegateDecompiler.Tests.VB/DelegateDecompiler.Tests.VB.vbproj (in 500 ms).
+  Restored /home/user/w59/DD/default/src/DelegateDecompiler.Tests.VB/DelegateDecompiler.Tests.VB.vbproj (in 457 ms).
   2 of 3 projects are up-to-date for restore.
-  DelegateDecompiler -> /home/user/w59/DD/default/src/DelegateDecompiler/bin/Release/netstandard2.1/DelegateDecompiler.dll
   DelegateDecompiler -> /home/user/w59/DD/default/src/DelegateDecompiler/bin/Release/net40/DelegateDecompiler.dll
-  DelegateDecompiler -> /home/user/w59/DD/default/src/DelegateDecompiler/bin/Release/net45/DelegateDecompiler.dll
+  DelegateDecompiler -> /home/user/w59/DD/default/src/DelegateDecompiler/bin/Release/netstandard2.1/DelegateDecompiler.dll
   DelegateDecompiler.Tests -> /home/user/w59/DD/default/src/DelegateDecompiler.Tests/bin/Release/net8.0/DelegateDecompiler.Tests.dll
+  DelegateDecompiler -> /home/user/w59/DD/default/src/DelegateDecompiler/bin/Release/net45/DelegateDecompiler.dll
   DelegateDecompiler.Tests -> /home/user/w59/DD/default/src/DelegateDecompiler.Tests/bin/Release/net40/DelegateDecompiler.Tests.dll
-  DelegateDecompiler.Tests.VB -> /home/user/w59/DD/default/src/DelegateDecompiler.Tests.VB/bin/Release/net8.0/DelegateDecompiler.Tests.VB.dll
   DelegateDecompiler.Tests.VB -> /home/user/w59/DD/default/src/DelegateDecompiler.Tests.VB/bin/Release/net40/DelegateDecompiler.Tests.VB.dll
+  DelegateDecompiler.Tests.VB -> /home/user/w59/DD/default/src/DelegateDecompiler.Tests.VB/bin/Release/net8.0/DelegateDecompiler.Tests.VB.dll
   DelegateDecompiler.Tests -> /home/user/w59/DD/default/src/DelegateDecompiler.Tests/bin/Release/net45/DelegateDecompiler.Tests.dll
   DelegateDecompiler.Tests.VB -> /home/user/w59/DD/default/src/DelegateDecompiler.Tests.VB/bin/Release/net45/DelegateDecompiler.Tests.VB.dll
 Test run for /home/user/w59/DD/default/src/DelegateDecompiler.Tests.VB/bin/Release/net8.0/DelegateDecompiler.Tests.VB.dll (.NETCoreApp,Version=v8.0)
-Test run for /home/user/w59/DD/default/src/DelegateDecompiler.Tests.VB/bin/Release/net40/DelegateDecompiler.Tests.VB.dll (.NETFramework,Version=v4.0)
 Test run for /home/user/w59/DD/default/src/DelegateDecompiler.Tests.VB/bin/Release/net45/DelegateDecompiler.Tests.VB.dll (.NETFramework,Version=v4.5)
+Test run for /home/user/w59/DD/default/src/DelegateDecompiler.Tests.VB/bin/Release/net40/DelegateDecompiler.Tests.VB.dll (.NETFramework,Version=v4.0)
 VSTest version 18.0.2 (x64)
 
 VSTest version 18.0.2 (x64)
@@ -1368,11 +1410,6 @@ Starting test execution, please wait...
 Starting test execution, please wait...
 A total of 1 test files matched the specified pattern.
 A total of 1 test files matched the specified pattern.
-System.IO.FileNotFoundException: Could not find 'mono' host. Make sure that 'mono' is installed on the machine and is available in PATH environment variable.
-   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Helpers.DotnetHostHelper.GetMonoPath() in /_/src/vstest/src/Microsoft.TestPlatform.CoreUtilities/Helpers/DotnetHostHelper.cs:line 100
-   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Hosting.DefaultTestHostManager.GetTestHostProcessStartInfo(IEnumerable`1 sources, IDictionary`2 environmentVariables, TestRunnerConnectionInfo connectionInfo) in /_/src/vstest/src/Microsoft.TestPlatform.TestHostProvider/Hosting/DefaultTestHostManager.cs:line 219
-   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Client.ProxyOperationManager.SetupChannel(IEnumerable`1 sources, String runSettings) in /_/src/vstest/src/Microsoft.TestPlatform.CrossPlatEngine/Client/ProxyOperationManager.cs:line 229
-   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Client.ProxyExecutionManager.InitializeTestRun(TestRunCriteria testRunCriteria, IInternalTestRunEventsHandler eventHandler) in /_/src/vstest/src/Microsoft.TestPlatform.CrossPlatEngine/Client/ProxyExecutionManager.cs:line 184
 System.IO.FileNotFoundException: Could not find 'mono' host. Make sure that 'mono' is installed on the machine and is available in PATH environment variable.
    at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Helpers.DotnetHostHelper.GetMonoPath() in /_/src/vstest/src/Microsoft.TestPlatform.CoreUtilities/Helpers/DotnetHostHelper.cs:line 100
    at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Hosting.DefaultTestHostManager.GetTestHostProcessStartInfo(IEnumerable`1 sources, IDictionary`2 environmentVariables, TestRunnerConnectionInfo connectionInfo) in /_/src/vstest/src/Microsoft.TestPlatform.TestHostProvider/Hosting/DefaultTestHostManager.cs:line 219
@@ -1380,6 +1417,11 @@ System.IO.FileNotFoundException: Could not find 'mono' host. Make sure that 'mon
    at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Client.ProxyExecutionManager.InitializeTestRun(TestRunCriteria testRunCriteria, IInternalTestRunEventsHandler eventHandler) in /_/src/vstest/src/Microsoft.TestPlatform.CrossPlatEngine/Client/ProxyExecutionManager.cs:line 184
 
 Test Run Aborted.
+System.IO.FileNotFoundException: Could not find 'mono' host. Make sure that 'mono' is installed on the machine and is available in PATH environment variable.
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Helpers.DotnetHostHelper.GetMonoPath() in /_/src/vstest/src/Microsoft.TestPlatform.CoreUtilities/Helpers/DotnetHostHelper.cs:line 100
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Hosting.DefaultTestHostManager.GetTestHostProcessStartInfo(IEnumerable`1 sources, IDictionary`2 environmentVariables, TestRunnerConnectionInfo connectionInfo) in /_/src/vstest/src/Microsoft.TestPlatform.TestHostProvider/Hosting/DefaultTestHostManager.cs:line 219
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Client.ProxyOperationManager.SetupChannel(IEnumerable`1 sources, String runSettings) in /_/src/vstest/src/Microsoft.TestPlatform.CrossPlatEngine/Client/ProxyOperationManager.cs:line 229
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Client.ProxyExecutionManager.InitializeTestRun(TestRunCriteria testRunCriteria, IInternalTestRunEventsHandler eventHandler) in /_/src/vstest/src/Microsoft.TestPlatform.CrossPlatEngine/Client/ProxyExecutionManager.cs:line 184
 
 Test Run Aborted.
 Convert(x, Nullable`1)
@@ -1533,4 +1575,4 @@ new Decimal(121, 0, 0, False, 2)
 (x != null)
 
 
-Passed!  - Failed:     0, Passed:    50, Skipped:     0, Total:    50, Duration: 278 ms - DelegateDecompiler.Tests.VB.dll (net8.0)
+Passed!  - Failed:     0, Passed:    50, Skipped:     0, Total:    50, Duration: 95 ms - DelegateDecompiler.Tests.VB.dll (net8.0)

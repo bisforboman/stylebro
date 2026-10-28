@@ -1,8 +1,5 @@
-<Project>
-  <ItemGroup>
-    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial59.1" PrivateAssets="all" />
-  </ItemGroup>
-</Project>
+ src/Directory.Build.props | 3 +++
+ 1 file changed, 3 insertions(+)
 Conventions in the code (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
   off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
   mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
@@ -91,6 +88,7 @@ Summary:
 Run 'bro format' instead of 'dotnet format' here: with IDE0055 on, 'dotnet format' crashes on multi-targeted
 projects (Roslyn can't merge the target frameworks' copies of a file). The command runs it once per target framework.
 Wrote the built-in rule severities to .editorconfig.
+Set the preset version in src/Directory.Build.props (<StyleBroPreset>1.0</StyleBroPreset>): rules of newer releases stay off until you raise it.
 To report them on build too: <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> in src/Directory.Build.props.
 Tip: --agents-md writes a StyleBro section into AGENTS.md for AI coding agents.
 Next: run 'bro format'. Plain 'dotnet format' also applies every other analyzer's and the compiler's fixes.

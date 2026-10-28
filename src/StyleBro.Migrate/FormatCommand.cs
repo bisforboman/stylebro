@@ -610,6 +610,7 @@ internal static partial class FormatCommand
         }
 
         var prefix = Path.GetFullPath(from).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+        var strings = new Dictionary<string, List<(char Kind, string Text, int Line)>?>(StringComparer.OrdinalIgnoreCase);
         return File.ReadAllLines(file)
             .Select(KeptFinding.Parse)
             .OfType<KeptFinding>()
@@ -618,10 +619,52 @@ internal static partial class FormatCommand
                 : k)
             .GroupBy(k => (k.Path.ToUpperInvariant(), k.Line, k.Column, k.Id))
             .Select(g => g.OrderBy(k => k.Reason == KeptReason.UsedInProjectNotLoaded).First()) // a run that loads every use knows better
+            .Select(k => WhereNow(k, strings))
             .OrderBy(k => k.Path, StringComparer.OrdinalIgnoreCase)
             .ThenBy(k => k.Line)
             .ThenBy(k => k.Column)
             .ToList();
+    }
+
+    /// <summary>
+    /// A kept finding whose "first:" string (<see cref="KeptReason.NameInString"/>, 'path(line)' in a C# file) no longer is on
+    /// that line, at the first line of that file's text now with it: the fix records the line when it runs, before the
+    /// run's later fixes change the file (trial 59, SharpYaml: BRO1514's braces moved a string 96 lines down, and 'check'
+    /// still pointed above it; the engines' fix orders differ, so they named different lines). As the renamer picks it:
+    /// the first reflection-shaped string with the name, else the first string that is the name, else one with the name as a
+    /// word. <paramref name="cache"/>: each file's strings, read once.
+    /// </summary>
+    public static KeptFinding WhereNow(KeptFinding kept, Dictionary<string, List<(char Kind, string Text, int Line)>?> cache)
+    {
+        if (kept.Reason != KeptReason.NameInString || kept.Where is not { } where
+            || Regex.Match(where, @"^(?<path>.+\.cs)\((?<line>\d+)\)$", RegexOptions.IgnoreCase) is not { Success: true } at
+            || Regex.Match(kept.Message, "'(?<name>[^']+)'") is not { Success: true } quoted)
+        {
+            return kept;
+        }
+
+        var path = at.Groups["path"].Value;
+        if (!cache.TryGetValue(path, out var strings))
+        {
+            strings = cache[path] = File.Exists(path)
+                ? RepositoryNames.Collect(Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(File.ReadAllText(path), path: path).GetRoot())
+                    .Where(s => s.Kind is RepositoryNames.StringKind or RepositoryNames.ReflectionKind)
+                    .ToList()
+                : null;
+        }
+
+        var name = quoted.Groups["name"].Value;
+        var word = new Regex(@"(?<![\w@])" + Regex.Escape(name) + @"(?!\w)");
+        var line = int.Parse(at.Groups["line"].Value, System.Globalization.CultureInfo.InvariantCulture) - 1;
+        if (strings is null || strings.Any(s => s.Line == line && word.IsMatch(s.Text)))
+        {
+            return kept;
+        }
+
+        var now = strings.FirstOrDefault(s => s.Kind == RepositoryNames.ReflectionKind && s.Text == name) is { Text: not null } reflection ? reflection
+            : strings.FirstOrDefault(s => s.Text == name) is { Text: not null } exact ? exact
+            : strings.FirstOrDefault(s => word.IsMatch(s.Text));
+        return now.Text is null ? kept : new KeptFinding(kept.Path, kept.Line, kept.Column, kept.Id, kept.Reason, kept.Message, $"{path}({now.Line + 1})");
     }
 
     /// <summary>The lines that list the kept findings (none when there are none).</summary>
