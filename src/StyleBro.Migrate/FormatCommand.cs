@@ -1377,6 +1377,36 @@ internal static partial class FormatCommand
         return [.. result, "--include", .. include];
     }
 
+    /// <summary>
+    /// A plan entry's 'dotnet format' options: its own report folder, '--verify-no-changes' for a check. The check before a
+    /// fixing run (<see cref="CheckFirstOption"/>) writes no report: it would list the findings, where the merged report has
+    /// the fixing runs' changes (trial 58: with --json, 'format' left the check out, so the check after it ran every check).
+    /// </summary>
+    public static List<string> RunOptions(IReadOnlyList<string> passThrough, string? reportFolder, bool verify)
+    {
+        var options = passThrough.ToList();
+        var checkBefore = verify && !options.Contains("--verify-no-changes");
+        var at = options.IndexOf("--report");
+        if (reportFolder is not null && at >= 0 && at + 1 < options.Count)
+        {
+            if (checkBefore)
+            {
+                options.RemoveRange(at, 2);
+            }
+            else
+            {
+                options[at + 1] = reportFolder;
+            }
+        }
+
+        if (checkBefore)
+        {
+            options.Add("--verify-no-changes");
+        }
+
+        return options;
+    }
+
     /// <summary>The arguments with '--no-restore' (once).</summary>
     public static string[] NoRestore(string[] args) => args.Contains("--no-restore") ? args : args.Append("--no-restore").ToArray();
 
@@ -5865,7 +5895,7 @@ internal static partial class FormatCommand
             passThrough.RemoveAll(heldBack.Contains);
         }
 
-        if (whole && !(checkFirst && !passThrough.Contains("--report")))
+        if (whole && !checkFirst)
         {
             try
             {
@@ -6006,16 +6036,7 @@ internal static partial class FormatCommand
                     File.WriteAllText(filter, SolutionFilter(Path.GetFileName(solutionPath), FilterProjects(selected, projects.ToDictionary(p => p.Key, p => p.Value.FullPath), ReferencesOf)));
                 }
 
-                var options = passThrough.ToList();
-                if (report is not null)
-                {
-                    options[reportIndex + 1] = reportFolders[index];
-                }
-
-                if (verify && !options.Contains("--verify-no-changes"))
-                {
-                    options.Add("--verify-no-changes");
-                }
+                var options = RunOptions(passThrough, report is null ? null : reportFolders[index], verify);
 
                 if (requested is not null)
                 {
@@ -6091,7 +6112,7 @@ internal static partial class FormatCommand
             var verifying = passThrough.Contains("--verify-no-changes");
             IReadOnlyCollection<KeptFinding> known = verifying ? [] : Remembered(root);
             var done = 0;
-            var atOnce = verifying || (checkFirst && report is null)
+            var atOnce = verifying || checkFirst
                 ? toRun.AsParallel().AsOrdered().WithDegreeOfParallelism(Math.Max(1, Math.Min(toRun.Count, Environment.ProcessorCount)))
                     .Select(i =>
                     {

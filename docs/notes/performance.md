@@ -52,3 +52,10 @@ Build-time measurements, the benchmark and the performance fixes. More performan
   version is in its key, and the record says the note again before its verdict (`CleanVerdict`) and in `--json`'s
   `notChecked`. Any other gap still makes the check run. After: NPoco's check 85-89 s -> 0.6 s, ExpressionTreeToString's
   38-40 s -> under 1 s, the same verdict lines.
+- Not with `--json` (found while working on PR #312): it gives every run a `--report`, and the check before the runs (the
+  only place that records the clean check) ran only without one, so the record had no `#checked` and the check after a
+  `bro format --json` ran everything (NPoco: 85 s host, 128 s `--engine dotnet-format`; `Compare-Format.ps1` always passes
+  `--json`, so its recheck never used the record). Now the check runs with a report too, without a report of its own
+  (`RunOptions`: a check's report lists findings, the merged report is the fixing runs' changes). Same `--json` output and
+  files before and after (multi-targeted, single-target and `--engine dotnet-format` projects); the check after it 5-7 s ->
+  0.3 s. The check's findings now also reach `--json` runs' "its check found what no fix changes" verdict, as in plain runs.
