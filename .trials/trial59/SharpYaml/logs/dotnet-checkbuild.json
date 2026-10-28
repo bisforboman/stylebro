@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "command": "format",
+  "previewOf": null,
+  "path": "/home/user/w59/SharpYaml/dotnet",
+  "write": false,
+  "settings": [],
+  "conventions": [],
+  "sonar": null,
+  "agentsMd": null,
+  "runs": [
+    {
+      "run": 1,
+      "filesChanged": [],
+      "changesPerRule": {}
+    }
+  ],
+  "changesPerRule": {},
+  "filesPerRule": null,
+  "keptFindings": [
+    {
+      "path": "src/SharpYaml/Emitter.cs",
+      "line": 98,
+      "column": 24,
+      "rule": "BRO1303",
+      "reason": "NameInString",
+      "reasonText": "the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time",
+      "message": "Rename 'anchor' to '_anchor'"
+    },
+    {
+      "path": "src/SharpYaml/Emitter.cs",
+      "line": 106,
+      "column": 24,
+      "rule": "BRO1303",
+      "reason": "NameInString",
+      "reasonText": "the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time",
+      "message": "Rename 'handle' to '_handle'"
+    },
+    {
+      "path": "src/SharpYaml/Emitter.cs",
+      "line": 114,
+      "column": 23,
+      "rule": "BRO1303",
+      "reason": "NameInString",
+      "reasonText": "the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time",
+      "message": "Rename 'value' to '_value'"
+    },
+    {
+      "path": "src/SharpYaml/Emitter.cs",
+      "line": 120,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInString",
+      "reasonText": "the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time",
+      "message": "Rename 'style' to '_style'"
+    },
+    {
+      "path": "src/SharpYaml/Serialization/YamlPathTracker.cs",
+      "line": 29,
+      "column": 24,
+      "rule": "BRO1303",
+      "reason": "NameInString",
+      "reasonText": "the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time",
+      "message": "Rename 'Key' to '_key'"
+    },
+    {
+      "path": "src/SharpYaml/Serialization/YamlWriter.cs",
+      "line": 1639,
+      "column": 20,
+      "rule": "BRO1303",
+      "reason": "NameInString",
+      "reasonText": "the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time",
+      "message": "Rename 'Indent' to '_indent'"
+    }
+  ],
+  "patch": null,
+  "clean": false,
+  "exitCode": 2,
+  "notChecked": [
+    "IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)"
+  ]
+}

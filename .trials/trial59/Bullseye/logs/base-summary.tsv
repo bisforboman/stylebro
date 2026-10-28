@@ -1,0 +1,6 @@
+build	0	53s	dotnet build Bullseye.slnx -c Debug
+twae-Debug	0	48s	twae Debug
+test-Debug	0	11s	env CFG=Debug bash -c dotnet test --solution Bullseye.slnx -c $CFG
+twae-Release	0	35s	twae Release
+test-Release	0	15s	env CFG=Release bash -c dotnet test --solution Bullseye.slnx -c $CFG
+DONE

@@ -1,0 +1,79 @@
+Note: switching to 'cb9c18c8113a1dc9a3d4ef122a687e078adc6b26'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+Note: switching to 'cb9c18c8113a1dc9a3d4ef122a687e078adc6b26'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+== soak-src: dotnet-format check
+== soak-src: host check
+== soak-src: dotnet-format format
+== soak-src: host format
+== soak-src: dotnet-format recheck
+== soak-src: host recheck
+Times (soak-src):
+  dotnet-format check       256.0 s
+  host check                137.9 s
+  dotnet-format format      199.8 s
+  host format                99.8 s
+  dotnet-format recheck      45.3 s
+  host recheck               47.2 s
+DIFFERENT (soak-src):
+  check output differs (/home/user/w59/SharpYaml/parity/soak-src-dotnet-format-check.txt vs /home/user/w59/SharpYaml/parity/soak-src-host-check.txt):
+  => <root>/src/SharpYaml.FeatureSwitchSmoke/Program.cs(1,1): error IMPORTS: Fix imports ordering. [<root>/src/SharpYaml.FeatureSwitchSmoke/SharpYaml.FeatureSwitchSmoke.csproj]
+  <= 'dotnet format' had warnings loading the workspace in its netstandard2.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+  => <root>/src/SharpYaml.SourceGenerator/YamlSerializerContextGenerator.cs(121,47): warning BRO1514: Put the statement in braces [<root>/src/SharpYaml.SourceGenerator/SharpYaml.SourceGenerator.csproj]
+  <= <root>/src/SharpYaml.FeatureSwitchSmoke/Program.cs(1,1): error IMPORTS: Fix imports ordering. [<root>/src/SharpYaml.FeatureSwitchSmoke/SharpYaml.FeatureSwitchSmoke.csproj]
+  => <root>/src/SharpYaml.SourceGenerator/YamlSerializerContextGenerator.cs(122,44): warning BRO1514: Put the statement in braces [<root>/src/SharpYaml.SourceGenerator/SharpYaml.SourceGenerator.csproj]
+  <= <root>/src/SharpYaml.SourceGenerator/YamlSerializerContextGenerator.cs(121,47): warning BRO1514: Put the statement in braces [<root>/src/SharpYaml.SourceGenerator/SharpYaml.SourceGenerator.csproj]
+  => <root>/src/SharpYaml.SourceGenerator/YamlSerializerContextGenerator.cs(123,61): warning BRO1514: Put the statement in braces [<root>/src/SharpYaml.SourceGenerator/SharpYaml.SourceGenerator.csproj]
+  <= <root>/src/SharpYaml.SourceGenerator/YamlSerializerContextGenerator.cs(122,44): warning BRO1514: Put the statement in braces [<root>/src/SharpYaml.SourceGenerator/SharpYaml.SourceGenerator.csproj]
+  => <root>/src/SharpYaml.SourceGenerator/YamlSerializerContextGenerator.cs(124,70): warning BRO1514: Put the statement in braces [<root>/src/SharpYaml.SourceGenerator/SharpYaml.SourceGenerator.csproj]
+  <= <root>/src/SharpYaml.SourceGenerator/YamlSerializerContextGenerator.cs(123,61): warning BRO1514: Put the statement in braces [<root>/src/SharpYaml.SourceGenerator/SharpYaml.SourceGenerator.csproj]
+  => <root>/src/SharpYaml.SourceGenerator/YamlSerializerContextGenerator.cs(125,68): warning BRO1514: Put the statement in braces [<root>/src/SharpYaml.SourceGenerator/SharpYaml.SourceGenerator.csproj]
+  <= <root>/src/SharpYaml.SourceGenerator/YamlSerializerContextGenerator.cs(124,70): warning BRO1514: Put the statement in braces [<root>/src/SharpYaml.SourceGenerator/SharpYaml.SourceGenerator.csproj]
+  => <root>/src/SharpYaml.SourceGenerator/YamlSerializerContextGenerator.cs(126,67): warning BRO1514: Put the statement in braces [<root>/src/SharpYaml.SourceGenerator/SharpYaml.SourceGenerator.csproj]
+  <= <root>/src/SharpYaml.SourceGenerator/YamlSerializerContextGenerator.cs(125,68): warning BRO1514: Put the statement in braces [<root>/src/SharpYaml.SourceGenerator/SharpYaml.SourceGenerator.csproj]
+  => <root>/src/SharpYaml.SourceGenerator/YamlSerializerContextGenerator.cs(127,60): warning BRO1514: Put the statement in braces [<root>/src/SharpYaml.SourceGenerator/SharpYaml.SourceGenerator.csproj]
+  <= <root>/src/SharpYaml.SourceGenerator/YamlSerializerContextGenerator.cs(126,67): warning BRO1514: Put the statement in braces [<root>/src/SharpYaml.SourceGenerator/SharpYaml.SourceGenerator.csproj]
+  => <root>/src/SharpYaml.SourceGenerator/YamlSerializerContextGenerator.cs(128,73): warning BRO1514: Put the statement in braces [<root>/src/SharpYaml.SourceGenerator/SharpYaml.SourceGenerator.csproj]
+  <= <root>/src/SharpYaml.SourceGenerator/YamlSerializerContextGenerator.cs(127,60): warning BRO1514: Put the statement in braces [<root>/src/SharpYaml.SourceGenerator/SharpYaml.SourceGenerator.csproj]
+  => <root>/src/SharpYaml.SourceGenerator/YamlSerializerContextGenerator.cs(129,74): warning BRO1514: Put the statement in braces [<root>/src/SharpYaml.SourceGenerator/SharpYaml.SourceGenerator.csproj]
+  <= <root>/src/SharpYaml.SourceGenerator/YamlSerializerContextGenerator.cs(128,73): warning BRO1514: Put the statement in braces [<root>/src/SharpYaml.SourceGenerator/SharpYaml.SourceGenerator.csproj]
+  format output differs (/home/user/w59/SharpYaml/parity/soak-src-dotnet-format-format.txt vs /home/user/w59/SharpYaml/parity/soak-src-host-format.txt):
+  <= 'dotnet format' had warnings loading the workspace in its netstandard2.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+  recheck output differs (/home/user/w59/SharpYaml/parity/soak-src-dotnet-format-recheck.txt vs /home/user/w59/SharpYaml/parity/soak-src-host-recheck.txt):
+  => Checked net10.0
+  <= 'dotnet format' had warnings loading the workspace in its netstandard2.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+  => Checked net8.0
+  <= Checked net10.0
+  => Checked netstandard2.0
+  <= Checked net8.0
+  <= Checked netstandard2.0

@@ -1,0 +1,29 @@
+Running tests from /home/user/w59/Bullseye/base/tests/Tests.Internal/bin/Debug/net9.0/Tests.Internal.dll (net10.0|x64)
+Running tests from /home/user/w59/Bullseye/base/tests/Tests.Internal/bin/Debug/net8.0/Tests.Internal.dll (net8.0|x64)
+Running tests from /home/user/w59/Bullseye/base/tests/Tests/bin/Debug/net8.0/Tests.dll (net8.0|x64)
+Running tests from /home/user/w59/Bullseye/base/tests/Tests.Internal/bin/Debug/net10.0/Tests.Internal.dll (net10.0|x64)
+/home/user/w59/Bullseye/base/tests/Tests.Internal/bin/Debug/net8.0/Tests.Internal.dll (net8.0|x64) passed (1s 080ms)
+/home/user/w59/Bullseye/base/tests/Tests.Internal/bin/Debug/net10.0/Tests.Internal.dll (net10.0|x64) passed (1s 009ms)
+/home/user/w59/Bullseye/base/tests/Tests.Internal/bin/Debug/net9.0/Tests.Internal.dll (net10.0|x64) passed (1s 445ms)
+Running tests from /home/user/w59/Bullseye/base/tests/Tests/bin/Debug/net10.0/Tests.dll (net10.0|x64)
+Running tests from /home/user/w59/Bullseye/base/tests/Tests/bin/Debug/net9.0/Tests.dll (net10.0|x64)
+/home/user/w59/Bullseye/base/tests/Tests/bin/Debug/net8.0/Tests.dll (net8.0|x64) passed (2s 384ms)
+[+25/x0/?0] Tests.dll (net10.0|x64)(1s)
+[+28/x0/?0] Tests.dll (net10.0|x64)(1s)
+
+/home/user/w59/Bullseye/base/tests/Tests/bin/Debug/net9.0/Tests.dll (net10.0|x64) passed (1s 924ms)
+/home/user/w59/Bullseye/base/tests/Tests/bin/Debug/net10.0/Tests.dll (net10.0|x64) passed (2s 053ms)
+
+Test run summary: Passed!
+  /home/user/w59/Bullseye/base/tests/Tests/bin/Debug/net9.0/Tests.dll (net10.0|x64) passed (1s 924ms)
+  /home/user/w59/Bullseye/base/tests/Tests.Internal/bin/Debug/net10.0/Tests.Internal.dll (net10.0|x64) passed (1s 009ms)
+  /home/user/w59/Bullseye/base/tests/Tests.Internal/bin/Debug/net8.0/Tests.Internal.dll (net8.0|x64) passed (1s 080ms)
+  /home/user/w59/Bullseye/base/tests/Tests.Internal/bin/Debug/net9.0/Tests.Internal.dll (net10.0|x64) passed (1s 445ms)
+  /home/user/w59/Bullseye/base/tests/Tests/bin/Debug/net10.0/Tests.dll (net10.0|x64) passed (2s 053ms)
+  /home/user/w59/Bullseye/base/tests/Tests/bin/Debug/net8.0/Tests.dll (net8.0|x64) passed (2s 384ms)
+
+  total: 213
+  failed: 0
+  succeeded: 213
+  skipped: 0
+  duration: 3s 976ms

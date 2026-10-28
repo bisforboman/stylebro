@@ -1,0 +1,24 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Fixtures.Xunit -> /home/user/w59/Bullseye/dotnet/fixtures/Fixtures.Xunit/bin/Debug/net9.0/Fixtures.Xunit.dll
+  Fixtures.Xunit -> /home/user/w59/Bullseye/dotnet/fixtures/Fixtures.Xunit/bin/Debug/net8.0/Fixtures.Xunit.dll
+  Bullseye -> /home/user/w59/Bullseye/dotnet/src/Bullseye/bin/Debug/net8.0/Bullseye.dll
+  Bullseye -> /home/user/w59/Bullseye/dotnet/src/Bullseye/bin/Debug/net10.0/Bullseye.dll
+  SmokeTests.Parallel -> /home/user/w59/Bullseye/dotnet/smoke-tests/SmokeTests.Parallel/bin/Debug/net10.0/SmokeTests.Parallel.dll
+  Fixtures.Xunit -> /home/user/w59/Bullseye/dotnet/fixtures/Fixtures.Xunit/bin/Debug/net10.0/Fixtures.Xunit.dll
+  SmokeTests -> /home/user/w59/Bullseye/dotnet/smoke-tests/SmokeTests/bin/Debug/net10.0/SmokeTests.dll
+  SmokeTests.CommandLine -> /home/user/w59/Bullseye/dotnet/smoke-tests/SmokeTests.CommandLine/bin/Debug/net10.0/SmokeTests.CommandLine.dll
+  Bullseye -> /home/user/w59/Bullseye/dotnet/src/Bullseye/bin/Debug/net9.0/Bullseye.dll
+  SmokeTests.McMaster -> /home/user/w59/Bullseye/dotnet/smoke-tests/SmokeTests.McMaster/bin/Debug/net10.0/SmokeTests.McMaster.dll
+  Tests.Internal -> /home/user/w59/Bullseye/dotnet/tests/Tests.Internal/bin/Debug/net9.0/Tests.Internal.dll
+  Tests -> /home/user/w59/Bullseye/dotnet/tests/Tests/bin/Debug/net9.0/Tests.dll
+  Tests.Internal -> /home/user/w59/Bullseye/dotnet/tests/Tests.Internal/bin/Debug/net8.0/Tests.Internal.dll
+  Tests -> /home/user/w59/Bullseye/dotnet/tests/Tests/bin/Debug/net8.0/Tests.dll
+  Tests.Internal -> /home/user/w59/Bullseye/dotnet/tests/Tests.Internal/bin/Debug/net10.0/Tests.Internal.dll
+  Tests -> /home/user/w59/Bullseye/dotnet/tests/Tests/bin/Debug/net10.0/Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:36.70

@@ -977,7 +977,7 @@ internal static partial class Migration
     }
 
     /// <summary>Whether a Directory.Build.props imports the one above it (<see cref="PropsFiles"/>).</summary>
-    static bool ImportsParentProps(string props, string root)
+    private static bool ImportsParentProps(string props, string root)
     {
         // ponytail: text match for an <Import> naming Directory.Build.props (comments removed), not MSBuild's evaluation;
         // Imports also follows a property the file defines (Orleans' $(_ParentDirectoryBuildPropsPath)).
