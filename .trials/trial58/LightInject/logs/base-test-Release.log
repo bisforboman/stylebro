@@ -1,0 +1,19 @@
+  Determining projects to restore...
+  Restored /home/user/w58/LightInject/base/src/LightInject.Tests/LightInject.Tests.csproj (in 318 ms).
+  Restored /home/user/w58/LightInject/base/src/LightInject/LightInject.csproj (in 314 ms).
+  LightInject -> /home/user/w58/LightInject/base/src/LightInject/bin/Release/net8.0/LightInject.dll
+/home/user/w58/LightInject/base/src/LightInject.Tests/AsyncTests.cs(20,45): warning xUnit1031: Test methods should not use blocking task operations, as they can cause deadlocks. Use an async test method and await instead. (https://xunit.net/xunit.analyzers/rules/xUnit1031) [/home/user/w58/LightInject/base/src/LightInject.Tests/LightInject.Tests.csproj]
+/home/user/w58/LightInject/base/src/LightInject.Tests/AsyncTests.cs(53,51): warning xUnit1031: Test methods should not use blocking task operations, as they can cause deadlocks. Use an async test method and await instead. (https://xunit.net/xunit.analyzers/rules/xUnit1031) [/home/user/w58/LightInject/base/src/LightInject.Tests/LightInject.Tests.csproj]
+/home/user/w58/LightInject/base/src/LightInject.Tests/AsyncTests.cs(36,45): warning xUnit1031: Test methods should not use blocking task operations, as they can cause deadlocks. Use an async test method and await instead. (https://xunit.net/xunit.analyzers/rules/xUnit1031) [/home/user/w58/LightInject/base/src/LightInject.Tests/LightInject.Tests.csproj]
+/home/user/w58/LightInject/base/src/LightInject.Tests/DisposableTests.cs(244,22): warning xUnit1031: Test methods should not use blocking task operations, as they can cause deadlocks. Use an async test method and await instead. (https://xunit.net/xunit.analyzers/rules/xUnit1031) [/home/user/w58/LightInject/base/src/LightInject.Tests/LightInject.Tests.csproj]
+/home/user/w58/LightInject/base/src/LightInject.Tests/Issue614.cs(46,22): warning xUnit1031: Test methods should not use blocking task operations, as they can cause deadlocks. Use an async test method and await instead. (https://xunit.net/xunit.analyzers/rules/xUnit1031) [/home/user/w58/LightInject/base/src/LightInject.Tests/LightInject.Tests.csproj]
+/home/user/w58/LightInject/base/src/LightInject.Tests/PerLogicalCallContextTests.cs(47,18): warning xUnit1031: Test methods should not use blocking task operations, as they can cause deadlocks. Use an async test method and await instead. (https://xunit.net/xunit.analyzers/rules/xUnit1031) [/home/user/w58/LightInject/base/src/LightInject.Tests/LightInject.Tests.csproj]
+/home/user/w58/LightInject/base/src/LightInject.Tests/ServiceContainerTests.cs(605,13): warning xUnit2013: Do not use Assert.Equal() to check for collection size. Use Assert.Single instead. (https://xunit.net/xunit.analyzers/rules/xUnit2013) [/home/user/w58/LightInject/base/src/LightInject.Tests/LightInject.Tests.csproj]
+  LightInject.Tests -> /home/user/w58/LightInject/base/src/LightInject.Tests/bin/Release/net8.0/LightInject.Tests.dll
+Test run for /home/user/w58/LightInject/base/src/LightInject.Tests/bin/Release/net8.0/LightInject.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:  1568, Skipped:     0, Total:  1568, Duration: 6 m 25 s - LightInject.Tests.dll (net8.0)

@@ -1,0 +1,29 @@
+diff --git a/src/LightInject/LightInject.cs b/src/LightInject/LightInject.cs
+index 16b5057..2d5293a 100644
+--- a/src/LightInject/LightInject.cs
++++ b/src/LightInject/LightInject.cs
+@@ -37,9 +37,11 @@
+ 
+ [module: System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "Reviewed")]
+ [module: System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1101:PrefixLocalCallsWithThis", Justification = "No inheritance")]
++[module: System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0009", Justification = "No inheritance")]
+ [module: System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1402:FileMayOnlyContainASingleClass", Justification = "Single source file deployment.")]
+ [module: System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1633:FileMustHaveHeader", Justification = "Custom header.")]
+ [module: System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "All public members are documented.")]
++[module: System.Diagnostics.CodeAnalysis.SuppressMessage("StyleBro", "BRO1601", Justification = "All public members are documented.")]
+ [module: System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsMustBePrivate", Justification = "Performance")]
+ [module: System.Diagnostics.CodeAnalysis.SuppressMessage("MaintainabilityRules", "SA1403", Justification = "One source file")]
+ [module: System.Diagnostics.CodeAnalysis.SuppressMessage("DocumentationRules", "SA1649", Justification = "One source file")]
+diff --git a/src/LightInject/LightInject.csproj b/src/LightInject/LightInject.csproj
+index aaf5188..beb38d3 100644
+--- a/src/LightInject/LightInject.csproj
++++ b/src/LightInject/LightInject.csproj
+@@ -41,7 +41,7 @@
+     </When>
+   </Choose>
+   <ItemGroup>
+-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial58.1">
+       <PrivateAssets>all</PrivateAssets>
+       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+     </PackageReference>

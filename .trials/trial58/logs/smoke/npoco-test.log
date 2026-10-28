@@ -1,0 +1,135 @@
+Test run for /home/user/cand58/schotime-NPoco/test/NPoco.Tests/bin/Debug/net10.0/NPoco.Tests.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+TearDown failed for test fixture NPoco.Tests.Async.DeleteAsyncTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.Async.InsertAsyncTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.Async.QueryAsyncTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.Async.UpdateAsyncTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+Setup failed for test fixture NPoco.Tests.ConstructorTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.CRUDTests.DeleteTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.CRUDTests.InsertTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.CRUDTests.SaveTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.CRUDTests.UpdateTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.QueryTests.AdvancedFetchDecoratedTest
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.QueryTests.ConstructorTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.QueryTests.ConverterDecoratedTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.QueryTests.FetchAndQueryDecoratedTest
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.QueryTests.IncludeComplexMappingTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.QueryTests.NestedNestedFetchDecoratedTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.QueryTests.OneToManyDecoratedTest
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.QueryTests.PagingDecoratedTest
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.QueryTests.ParentChildIncludeTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.QueryTests.SingleAndFirstQueryDecoratedTest
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.TransactionDecoratedTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FieldTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentSqlTests.FluentSqlDecoratedMappingTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentSqlTests.FluentSqlExecutionTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentSqlTests.FluentSqlMappingTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentSqlTests.FluentSqlParameterTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentTests.DeleteTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentTests.QueryTests.AdvancedFetchFluentTest
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentTests.QueryTests.ConverterFluentTest
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentTests.QueryTests.ExpressionFluentTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentTests.QueryTests.FetchAndQueryFluentTest
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentTests.QueryTests.NullableTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentTests.QueryTests.PagingFluentTest
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentTests.QueryTests.QueryProviderTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentTests.QueryTests.SingleAndFirstQueryFluentTest
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.GetterOnlyTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.NewMapper.AbstractClassTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.NewMapper.IncludesWithLinqProvider
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.NewMapper.NewMapperDecoratedTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.NewMapper.NewMapperTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.NewMapper.ValueObjectTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.NewMapper.ValueTupleMapperTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.NewMapperPerfTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.PocoExpandoTests
+System.PlatformNotSupportedException : LocalDB is not supported on this platform.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+
+Passed!  - Failed:     0, Passed:   367, Skipped:     0, Total:   367, Duration: 7 s - NPoco.Tests.dll (net10.0)

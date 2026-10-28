@@ -1,0 +1,115 @@
+Note: switching to 'c05859bfa0460087fb28bcd4239d6d3d4fb11a09'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+Note: switching to 'c05859bfa0460087fb28bcd4239d6d3d4fb11a09'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+== soak-src: dotnet-format check
+== soak-src: host check
+== soak-src: dotnet-format format
+== soak-src: host format
+== soak-src: dotnet-format recheck
+== soak-src: host recheck
+Times (soak-src):
+  dotnet-format check       133.4 s
+  host check                116.8 s
+  dotnet-format format      101.7 s
+  host format                66.2 s
+  dotnet-format recheck      26.5 s
+  host recheck               36.3 s
+DIFFERENT (soak-src):
+  check output differs (/home/user/w58/ETTS/parity/soak-src-dotnet-format-check.txt vs /home/user/w58/ETTS/parity/soak-src-host-check.txt):
+  => Multi-targeted: one 'dotnet format' run per target framework (net452, net472, net48, net5.0, netcoreapp3.1, netstandard2.0). net6.0: no run of its own, the code compiles the same as for another framework of the same kind (the same '#if' symbols tested, files and settings).
+  <= Multi-targeted: one 'dotnet format' run per target framework (net452, net5.0, netcoreapp3.1, netstandard2.0).
+  => Formatting a copy: net452 (3 project(s), 70 files with findings)
+  <= Formatting a copy: net452 (2 project(s), 52 files with findings)
+  => Formatting a copy: net472 (1 project(s), 18 files with findings)
+  <= Formatting a copy: net5.0 (1 project(s), 22 files with findings)
+  => Formatting a copy: net48 (2 project(s), 2 files with findings)
+  <= Formatting a copy: netcoreapp3.1 (1 project(s), 30 files with findings)
+  => Formatting a copy: net5.0 (3 project(s), 41 files with findings)
+  <= Formatting a copy: netstandard2.0 (2 project(s), 52 files with findings)
+  => Formatting a copy: netcoreapp3.1 (2 project(s), 48 files with findings)
+  <= == net452 (2 project(s))
+  => Formatting a copy: netstandard2.0 (2 project(s), 52 files with findings)
+  <= == net5.0 (1 project(s))
+  => == net452 (3 project(s))
+  <= == netcoreapp3.1 (1 project(s))
+  => == net472 (1 project(s))
+  <= == netstandard2.0 (2 project(s))
+  => == net48 (2 project(s))
+  <= Not checked: Tests.DataGenerator/Tests.DataGenerator.csproj, Tests/Tests.csproj, _expressionTestObjectsTest/_expressionTestObjectsTest.csproj and 1 more: they reference a Visual Basic project, where 'dotnet format' (--engine dotnet-format) also runs Visual Basic fixes on C# code, so they are left out; the default engine checks them
+  check --json report differs (/home/user/w58/ETTS/parity/soak-src-dotnet-format-check.json vs /home/user/w58/ETTS/parity/soak-src-host-check.json)
+  format exit code: dotnet-format 3, host 0
+  format output differs (/home/user/w58/ETTS/parity/soak-src-dotnet-format-format.txt vs /home/user/w58/ETTS/parity/soak-src-host-format.txt):
+  => Multi-targeted: one 'dotnet format' run per target framework (net452, net472, net48, net5.0, netcoreapp3.1, netstandard2.0). net6.0: no run of its own, the code compiles the same as for another framework of the same kind (the same '#if' symbols tested, files and settings).
+  <= Multi-targeted: one 'dotnet format' run per target framework (net452, net5.0, netcoreapp3.1, netstandard2.0).
+  => == net452 (3 project(s))
+  <= == net452 (2 project(s))
+  => == net472 (1 project(s))
+  <= == net5.0 (1 project(s))
+  => == net48 (2 project(s))
+  <= == netcoreapp3.1 (1 project(s))
+  => == net5.0 (3 project(s))
+  <= == netstandard2.0 (2 project(s))
+  => == netcoreapp3.1 (2 project(s))
+  <= Run 1: 52 files changed:
+  => == netstandard2.0 (2 project(s))
+  <=   Library/BuiltinsWriterVisitor.cs
+  => Run 1: 73 files changed:
+  <=   Library/CodeWriterVisitors/CodeWriterVisitor.cs
+  =>   Library/BuiltinsWriterVisitor.cs
+  <=   Library/CodeWriterVisitors/CSharpBlockMetadata.cs
+  =>   Library/CodeWriterVisitors/CodeWriterVisitor.cs
+  <=   Library/CodeWriterVisitors/CSharpWriterVisitor.cs
+  format --json report differs (/home/user/w58/ETTS/parity/soak-src-dotnet-format-format.json vs /home/user/w58/ETTS/parity/soak-src-host-format.json)
+  the working trees differ after 'format' (git diff in /home/user/w58/ETTS/parity/soak-src-dotnet-format and /home/user/w58/ETTS/parity/soak-src-host)
+  recheck exit code: dotnet-format 3, host 0
+  recheck output differs (/home/user/w58/ETTS/parity/soak-src-dotnet-format-recheck.txt vs /home/user/w58/ETTS/parity/soak-src-host-recheck.txt):
+  => Multi-targeted: one 'dotnet format' run per target framework (net452, net472, net48, net5.0, netcoreapp3.1, netstandard2.0). net6.0: no run of its own, the code compiles the same as for another framework of the same kind (the same '#if' symbols tested, files and settings).
+  <= Multi-targeted: one 'dotnet format' run per target framework (net452, net5.0, netcoreapp3.1, netstandard2.0).
+  => Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+  <= Not checked: Tests.DataGenerator/Tests.DataGenerator.csproj, Tests/Tests.csproj, _expressionTestObjectsTest/_expressionTestObjectsTest.csproj and 1 more: they reference a Visual Basic project, where 'dotnet format' (--engine dotnet-format) also runs Visual Basic fixes on C# code, so they are left out; the default engine checks them
+  => Clean.
+  <= Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+  => --- unordered ---
+  <= Not verified: 1 part of the build wasn't checked (the 'Not checked:' line above); the rest is clean. The build may still report findings there: fix what's named, or build it (bro check --build).
+  => 'dotnet format' had warnings loading the workspace in its net48 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+  <= --- unordered ---
+  => Checked net472
+  <= Checked net5.0
+  => Checked net48
+  <= Checked netcoreapp3.1
+  => Checked net5.0
+  <= Checked netstandard2.0
+  => Checked netcoreapp3.1
+  => Checked netstandard2.0
+  recheck --json report differs (/home/user/w58/ETTS/parity/soak-src-dotnet-format-recheck.json vs /home/user/w58/ETTS/parity/soak-src-host-recheck.json)

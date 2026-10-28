@@ -1,0 +1,45 @@
+  Determining projects to restore...
+  Restored /home/user/w58/NPoco/base/src/NPoco/NPoco.csproj (in 536 ms).
+  Restored /home/user/w58/NPoco/base/src/NPoco.SqlServer.SystemData/NPoco.SqlServer.SystemData.csproj (in 536 ms).
+  Restored /home/user/w58/NPoco/base/src/NPoco.JsonNet/NPoco.JsonNet.csproj (in 537 ms).
+  Restored /home/user/w58/NPoco/base/src/NPoco.Abstractions/NPoco.Abstractions.csproj (in 16 ms).
+  Restored /home/user/w58/NPoco/base/src/NPoco.SqlServer/NPoco.SqlServer.csproj (in 614 ms).
+  Restored /home/user/w58/NPoco/base/src/NPoco.FluentSql/NPoco.FluentSql.csproj (in 18 ms).
+  Restored /home/user/w58/NPoco/base/test/NPoco.Tests/NPoco.Tests.csproj (in 49 ms).
+  NPoco.Abstractions -> /home/user/w58/NPoco/base/src/NPoco.Abstractions/bin/Release/netstandard2.1/NPoco.Abstractions.dll
+  NPoco.Abstractions -> /home/user/w58/NPoco/base/src/NPoco.Abstractions/bin/Release/net462/NPoco.Abstractions.dll
+  NPoco.Abstractions -> /home/user/w58/NPoco/base/src/NPoco.Abstractions/bin/Release/net10.0/NPoco.Abstractions.dll
+  NPoco.Abstractions -> /home/user/w58/NPoco/base/src/NPoco.Abstractions/bin/Release/net8.0/NPoco.Abstractions.dll
+  NPoco.Abstractions -> /home/user/w58/NPoco/base/src/NPoco.Abstractions/bin/Release/netstandard2.0/NPoco.Abstractions.dll
+  NPoco -> /home/user/w58/NPoco/base/src/NPoco/bin/Release/net8.0/NPoco.dll
+  NPoco -> /home/user/w58/NPoco/base/src/NPoco/bin/Release/net462/NPoco.dll
+  NPoco.JsonNet -> /home/user/w58/NPoco/base/src/NPoco.JsonNet/bin/Release/net462/NPoco.JsonNet.dll
+  NPoco.SqlServer -> /home/user/w58/NPoco/base/src/NPoco.SqlServer/bin/Release/net462/NPoco.SqlServer.dll
+  NPoco.SqlServer.SystemData -> /home/user/w58/NPoco/base/src/NPoco.SqlServer.SystemData/bin/Release/net462/NPoco.SqlServer.SystemData.dll
+  NPoco -> /home/user/w58/NPoco/base/src/NPoco/bin/Release/net10.0/NPoco.dll
+  NPoco.SqlServer.SystemData -> /home/user/w58/NPoco/base/src/NPoco.SqlServer.SystemData/bin/Release/net8.0/NPoco.SqlServer.SystemData.dll
+  NPoco.SqlServer -> /home/user/w58/NPoco/base/src/NPoco.SqlServer/bin/Release/net8.0/NPoco.SqlServer.dll
+  NPoco.JsonNet -> /home/user/w58/NPoco/base/src/NPoco.JsonNet/bin/Release/net8.0/NPoco.JsonNet.dll
+  NPoco.FluentSql -> /home/user/w58/NPoco/base/src/NPoco.FluentSql/bin/Release/net10.0/NPoco.FluentSql.dll
+  NPoco -> /home/user/w58/NPoco/base/src/NPoco/bin/Release/netstandard2.0/NPoco.dll
+  NPoco.SqlServer.SystemData -> /home/user/w58/NPoco/base/src/NPoco.SqlServer.SystemData/bin/Release/netstandard2.0/NPoco.SqlServer.SystemData.dll
+  NPoco.JsonNet -> /home/user/w58/NPoco/base/src/NPoco.JsonNet/bin/Release/net10.0/NPoco.JsonNet.dll
+  NPoco.JsonNet -> /home/user/w58/NPoco/base/src/NPoco.JsonNet/bin/Release/netstandard2.0/NPoco.JsonNet.dll
+  NPoco.SqlServer.SystemData -> /home/user/w58/NPoco/base/src/NPoco.SqlServer.SystemData/bin/Release/net10.0/NPoco.SqlServer.SystemData.dll
+  NPoco.SqlServer -> /home/user/w58/NPoco/base/src/NPoco.SqlServer/bin/Release/netstandard2.0/NPoco.SqlServer.dll
+  NPoco.FluentSql -> /home/user/w58/NPoco/base/src/NPoco.FluentSql/bin/Release/net462/NPoco.FluentSql.dll
+  NPoco.SqlServer -> /home/user/w58/NPoco/base/src/NPoco.SqlServer/bin/Release/net10.0/NPoco.SqlServer.dll
+  NPoco -> /home/user/w58/NPoco/base/src/NPoco/bin/Release/netstandard2.1/NPoco.dll
+  NPoco.SqlServer.SystemData -> /home/user/w58/NPoco/base/src/NPoco.SqlServer.SystemData/bin/Release/netstandard2.1/NPoco.SqlServer.SystemData.dll
+  NPoco.JsonNet -> /home/user/w58/NPoco/base/src/NPoco.JsonNet/bin/Release/netstandard2.1/NPoco.JsonNet.dll
+  NPoco.FluentSql -> /home/user/w58/NPoco/base/src/NPoco.FluentSql/bin/Release/netstandard2.1/NPoco.FluentSql.dll
+  NPoco.FluentSql -> /home/user/w58/NPoco/base/src/NPoco.FluentSql/bin/Release/netstandard2.0/NPoco.FluentSql.dll
+  NPoco.SqlServer -> /home/user/w58/NPoco/base/src/NPoco.SqlServer/bin/Release/netstandard2.1/NPoco.SqlServer.dll
+  NPoco.FluentSql -> /home/user/w58/NPoco/base/src/NPoco.FluentSql/bin/Release/net8.0/NPoco.FluentSql.dll
+  NPoco.Tests -> /home/user/w58/NPoco/base/test/NPoco.Tests/bin/Release/net10.0/NPoco.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:18.32

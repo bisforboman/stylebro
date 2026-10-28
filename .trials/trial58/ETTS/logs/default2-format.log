@@ -1,0 +1,37 @@
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+Visual Basic: TestObjects.VB.vbproj: Visual Basic projects are left alone, 'format' runs on the C# projects only.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net452, net472, net48, net5.0, netcoreapp3.1, netstandard2.0). net6.0: no run of its own, the code compiles the same as for another framework of the same kind (the same '#if' symbols tested, files and settings).
+Checked netstandard2.0 (run 1 of 6)
+Checked net48 (run 2 of 6)
+Checked netcoreapp3.1 (run 3 of 6)
+Checked net452 (run 4 of 6)
+Checked net472 (run 5 of 6)
+Checked net5.0 (run 6 of 6)
+== net452 (3 project(s), 69 files with findings)
+== net472 (1 project(s), 17 files with findings)
+== net48 (2 project(s), 2 files with findings)
+'dotnet format' had warnings loading the workspace in its net48 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+== net5.0 (3 project(s), 40 files with findings)
+== netcoreapp3.1 (2 project(s), 47 files with findings)
+== netstandard2.0 (2 project(s), 52 files with findings)
+Run 1: 72 files changed:
+  Library/BuiltinsWriterVisitor.cs
+  Library/CodeWriterVisitors/CodeWriterVisitor.cs
+  Library/CodeWriterVisitors/CSharpBlockMetadata.cs
+  Library/CodeWriterVisitors/CSharpWriterVisitor.cs
+  Library/CodeWriterVisitors/VBExpressionMetadata.cs
+  Library/CodeWriterVisitors/VBWriterVisitor.cs
+  Library/DebugViewWriterVisitor.cs
+  Library/DynamicLinqWriterVisitor.cs
+  Library/ExpressionExtension.cs
+  Library/FactoryMethodsWriterVisitor.cs
+  ... and 62 more
+Checked netstandard2.0 (run 1 of 6)
+Checked netcoreapp3.1 (run 2 of 6)
+Checked net48 (run 3 of 6)
+Checked net452 (run 4 of 6)
+Checked net472 (run 5 of 6)
+Checked net5.0 (run 6 of 6)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

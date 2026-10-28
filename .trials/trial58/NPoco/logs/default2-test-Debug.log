@@ -1,0 +1,174 @@
+  Determining projects to restore...
+  Restored /home/user/w58/NPoco/default2/src/NPoco.Abstractions/NPoco.Abstractions.csproj (in 955 ms).
+  Restored /home/user/w58/NPoco/default2/src/NPoco.SqlServer.SystemData/NPoco.SqlServer.SystemData.csproj (in 952 ms).
+  Restored /home/user/w58/NPoco/default2/src/NPoco.FluentSql/NPoco.FluentSql.csproj (in 917 ms).
+  Restored /home/user/w58/NPoco/default2/src/NPoco/NPoco.csproj (in 952 ms).
+  Restored /home/user/w58/NPoco/default2/src/NPoco.JsonNet/NPoco.JsonNet.csproj (in 75 ms).
+  Restored /home/user/w58/NPoco/default2/test/NPoco.Tests/NPoco.Tests.csproj (in 119 ms).
+  Restored /home/user/w58/NPoco/default2/src/NPoco.SqlServer/NPoco.SqlServer.csproj (in 287 ms).
+  NPoco.Abstractions -> /home/user/w58/NPoco/default2/src/NPoco.Abstractions/bin/Debug/net462/NPoco.Abstractions.dll
+  NPoco -> /home/user/w58/NPoco/default2/src/NPoco/bin/Debug/net462/NPoco.dll
+  NPoco.Abstractions -> /home/user/w58/NPoco/default2/src/NPoco.Abstractions/bin/Debug/netstandard2.1/NPoco.Abstractions.dll
+  NPoco.Abstractions -> /home/user/w58/NPoco/default2/src/NPoco.Abstractions/bin/Debug/net10.0/NPoco.Abstractions.dll
+  NPoco -> /home/user/w58/NPoco/default2/src/NPoco/bin/Debug/net10.0/NPoco.dll
+  NPoco.Abstractions -> /home/user/w58/NPoco/default2/src/NPoco.Abstractions/bin/Debug/net8.0/NPoco.Abstractions.dll
+  NPoco.FluentSql -> /home/user/w58/NPoco/default2/src/NPoco.FluentSql/bin/Debug/net10.0/NPoco.FluentSql.dll
+  NPoco.SqlServer.SystemData -> /home/user/w58/NPoco/default2/src/NPoco.SqlServer.SystemData/bin/Debug/net462/NPoco.SqlServer.SystemData.dll
+  NPoco.Abstractions -> /home/user/w58/NPoco/default2/src/NPoco.Abstractions/bin/Debug/netstandard2.0/NPoco.Abstractions.dll
+  NPoco.JsonNet -> /home/user/w58/NPoco/default2/src/NPoco.JsonNet/bin/Debug/net462/NPoco.JsonNet.dll
+  NPoco.SqlServer -> /home/user/w58/NPoco/default2/src/NPoco.SqlServer/bin/Debug/net462/NPoco.SqlServer.dll
+  NPoco.SqlServer.SystemData -> /home/user/w58/NPoco/default2/src/NPoco.SqlServer.SystemData/bin/Debug/net10.0/NPoco.SqlServer.SystemData.dll
+  NPoco.JsonNet -> /home/user/w58/NPoco/default2/src/NPoco.JsonNet/bin/Debug/net10.0/NPoco.JsonNet.dll
+  NPoco.SqlServer -> /home/user/w58/NPoco/default2/src/NPoco.SqlServer/bin/Debug/net10.0/NPoco.SqlServer.dll
+  NPoco.FluentSql -> /home/user/w58/NPoco/default2/src/NPoco.FluentSql/bin/Debug/net462/NPoco.FluentSql.dll
+  NPoco -> /home/user/w58/NPoco/default2/src/NPoco/bin/Debug/netstandard2.1/NPoco.dll
+  NPoco.SqlServer.SystemData -> /home/user/w58/NPoco/default2/src/NPoco.SqlServer.SystemData/bin/Debug/netstandard2.1/NPoco.SqlServer.SystemData.dll
+  NPoco.Tests -> /home/user/w58/NPoco/default2/test/NPoco.Tests/bin/Debug/net10.0/NPoco.Tests.dll
+  NPoco.FluentSql -> /home/user/w58/NPoco/default2/src/NPoco.FluentSql/bin/Debug/netstandard2.1/NPoco.FluentSql.dll
+  NPoco -> /home/user/w58/NPoco/default2/src/NPoco/bin/Debug/net8.0/NPoco.dll
+  NPoco.JsonNet -> /home/user/w58/NPoco/default2/src/NPoco.JsonNet/bin/Debug/netstandard2.1/NPoco.JsonNet.dll
+  NPoco.SqlServer -> /home/user/w58/NPoco/default2/src/NPoco.SqlServer/bin/Debug/netstandard2.1/NPoco.SqlServer.dll
+  NPoco.JsonNet -> /home/user/w58/NPoco/default2/src/NPoco.JsonNet/bin/Debug/net8.0/NPoco.JsonNet.dll
+  NPoco.SqlServer -> /home/user/w58/NPoco/default2/src/NPoco.SqlServer/bin/Debug/net8.0/NPoco.SqlServer.dll
+Test run for /home/user/w58/NPoco/default2/test/NPoco.Tests/bin/Debug/net10.0/NPoco.Tests.dll (.NETCoreApp,Version=v10.0)
+  NPoco.SqlServer.SystemData -> /home/user/w58/NPoco/default2/src/NPoco.SqlServer.SystemData/bin/Debug/net8.0/NPoco.SqlServer.SystemData.dll
+VSTest version 18.0.2 (x64)
+
+  NPoco.FluentSql -> /home/user/w58/NPoco/default2/src/NPoco.FluentSql/bin/Debug/net8.0/NPoco.FluentSql.dll
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+TearDown failed for test fixture NPoco.Tests.Async.DeleteAsyncTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.Async.InsertAsyncTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.Async.QueryAsyncTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.Async.UpdateAsyncTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+Setup failed for test fixture NPoco.Tests.ConstructorTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.CRUDTests.DeleteTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.CRUDTests.InsertTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.CRUDTests.SaveTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.CRUDTests.UpdateTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.QueryTests.AdvancedFetchDecoratedTest
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.QueryTests.ConstructorTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.QueryTests.ConverterDecoratedTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.QueryTests.FetchAndQueryDecoratedTest
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.QueryTests.IncludeComplexMappingTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.QueryTests.NestedNestedFetchDecoratedTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.QueryTests.OneToManyDecoratedTest
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.QueryTests.PagingDecoratedTest
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.QueryTests.ParentChildIncludeTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.QueryTests.SingleAndFirstQueryDecoratedTest
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.DecoratedTests.TransactionDecoratedTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FieldTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentSqlTests.FluentSqlDecoratedMappingTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentSqlTests.FluentSqlExecutionTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentSqlTests.FluentSqlMappingTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentSqlTests.FluentSqlParameterTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentTests.DeleteTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentTests.QueryTests.AdvancedFetchFluentTest
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentTests.QueryTests.ConverterFluentTest
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentTests.QueryTests.ExpressionFluentTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentTests.QueryTests.FetchAndQueryFluentTest
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentTests.QueryTests.NullableTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentTests.QueryTests.PagingFluentTest
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentTests.QueryTests.QueryProviderTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.FluentTests.QueryTests.SingleAndFirstQueryFluentTest
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.GetterOnlyTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.NewMapper.AbstractClassTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.NewMapper.IncludesWithLinqProvider
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.NewMapper.NewMapperDecoratedTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.NewMapper.NewMapperTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.NewMapper.ValueObjectTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.NewMapper.ValueTupleMapperTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.NewMapperPerfTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown failed for test fixture NPoco.Tests.PocoExpandoTests
+System.NullReferenceException : Object reference not set to an instance of an object.
+TearDown : System.NullReferenceException : Object reference not set to an instance of an object.
+
+Passed!  - Failed:     0, Passed:   367, Skipped:     0, Total:   367, Duration: 11 s - NPoco.Tests.dll (net10.0)
+  NPoco -> /home/user/w58/NPoco/default2/src/NPoco/bin/Debug/netstandard2.0/NPoco.dll
+  NPoco.SqlServer.SystemData -> /home/user/w58/NPoco/default2/src/NPoco.SqlServer.SystemData/bin/Debug/netstandard2.0/NPoco.SqlServer.SystemData.dll
+  NPoco.SqlServer -> /home/user/w58/NPoco/default2/src/NPoco.SqlServer/bin/Debug/netstandard2.0/NPoco.SqlServer.dll
+  NPoco.JsonNet -> /home/user/w58/NPoco/default2/src/NPoco.JsonNet/bin/Debug/netstandard2.0/NPoco.JsonNet.dll
+  NPoco.FluentSql -> /home/user/w58/NPoco/default2/src/NPoco.FluentSql/bin/Debug/netstandard2.0/NPoco.FluentSql.dll

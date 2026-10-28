@@ -1,0 +1,23 @@
+Checking StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (163 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Leaving alone: src/LightInject.Benchmarks/, src/LightInject.Tests/: StyleCop didn't run there, so the migration set nothing up there (the stylebro-migrate block in .editorconfig names them).
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net462, net8.0, netstandard2.0).
+Checked netstandard2.0 (run 1 of 3)
+Checked net462 (run 2 of 3)
+Checked net8.0 (run 3 of 3)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Building LightInject.sln in Debug, Debug|x64, Debug|x86, Release, Release|x64, Release|x86 with warnings as errors, and a copy of HEAD to compare...
+Debug: 1 finding of format's rules (7 errors the untouched code has too, not counted):
+  src/LightInject.Tests/ServiceContainerTests.cs(605,13): xUnit2013: Do not use Assert.Equal() to check for collection size. Use Assert.Single instead. (https://xunit.net/xunit.analyzers/rules/xUnit2013)
+Debug|x64: 1 finding of format's rules (7 errors the untouched code has too, not counted):
+  src/LightInject.Tests/ServiceContainerTests.cs(605,13): xUnit2013: Do not use Assert.Equal() to check for collection size. Use Assert.Single instead. (https://xunit.net/xunit.analyzers/rules/xUnit2013)
+Debug|x86: 1 finding of format's rules (7 errors the untouched code has too, not counted):
+  src/LightInject.Tests/ServiceContainerTests.cs(605,13): xUnit2013: Do not use Assert.Equal() to check for collection size. Use Assert.Single instead. (https://xunit.net/xunit.analyzers/rules/xUnit2013)
+Release: 1 finding of format's rules (7 errors the untouched code has too, not counted):
+  src/LightInject.Tests/ServiceContainerTests.cs(605,13): xUnit2013: Do not use Assert.Equal() to check for collection size. Use Assert.Single instead. (https://xunit.net/xunit.analyzers/rules/xUnit2013)
+Release|x64: 1 finding of format's rules (7 errors the untouched code has too, not counted):
+  src/LightInject.Tests/ServiceContainerTests.cs(605,13): xUnit2013: Do not use Assert.Equal() to check for collection size. Use Assert.Single instead. (https://xunit.net/xunit.analyzers/rules/xUnit2013)
+Release|x86: 1 finding of format's rules (7 errors the untouched code has too, not counted):
+  src/LightInject.Tests/ServiceContainerTests.cs(605,13): xUnit2013: Do not use Assert.Equal() to check for collection size. Use Assert.Single instead. (https://xunit.net/xunit.analyzers/rules/xUnit2013)
+Formatting is clean. But:
+Not clean: the builds report 6 findings of format's rules (above): fix them by hand, or suppress or baseline them.

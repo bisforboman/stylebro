@@ -1,0 +1,35 @@
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (162 ids); --all applies every analyzer's and compiler fix.
+Generators: building McMaster.Extensions.CommandLineUtils.Generators first (in the default configuration, the one 'dotnet format' loads): the code uses it as a source generator, and without its output the generated code would be missing from the checks.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net472, net8.0, netstandard2.0).
+Checked netstandard2.0 (run 1 of 4)
+Checked net10.0 (run 2 of 4)
+Checked net472 (run 3 of 4)
+Checked net8.0 (run 4 of 4)
+== net10.0 (2 project(s), 35 files with findings)
+'dotnet format' had warnings loading the workspace in its net10.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+== net472 (4 project(s), 109 files with findings)
+== net8.0 (4 project(s), 109 files with findings)
+== netstandard2.0 (1 project(s), 6 files with findings)
+Run 1: 115 files changed:
+  src/CommandLineUtils.Generators/ArgumentData.cs
+  src/CommandLineUtils.Generators/CommandData.cs
+  src/CommandLineUtils.Generators/CommandMetadataGenerator.cs
+  src/CommandLineUtils.Generators/OptionData.cs
+  src/CommandLineUtils.Generators/SpecialPropertiesData.cs
+  src/CommandLineUtils.Generators/VersionOptionData.cs
+  src/CommandLineUtils/Abstractions/CommandLineContext.cs
+  src/CommandLineUtils/Attributes/ArgumentAttribute.cs
+  src/CommandLineUtils/Attributes/CommandAttribute.cs
+  src/CommandLineUtils/Attributes/FilePathExistsAttributeBase.cs
+  ... and 105 more
+Checked netstandard2.0 (run 1 of 4)
+Checked net8.0 (run 2 of 4)
+Checked net10.0 (run 3 of 4)
+Checked net472 (run 4 of 4)
+Run 2: 0 files changed, clean.
+Clean: 2 findings kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them (https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose).
+  src/CommandLineUtils/Attributes/ArgumentAttribute.cs(29,40): BRO1603 End the documentation text with a period. Kept: the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test (first: test/CommandLineUtils.Tests/OptionAttributeTests.cs(364)).
+  src/CommandLineUtils/Attributes/ArgumentAttribute.cs(38,40): BRO1603 End the documentation text with a period. Kept: the documentation text is a string or is in a snapshot file in the solution (code that reads XML docs at run time, such as an OpenAPI generator, and a test comparing the text): changing it would fail that test (first: test/CommandLineUtils.Tests/OptionAttributeTests.cs(364)).
+Baseline: stylebro.baseline: added 2 kept findings, so the build and 'format --verify-no-changes' skip them (new violations still fail; delete an entry to see it again) (https://bisforboman.github.io/stylebro/baseline/).
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

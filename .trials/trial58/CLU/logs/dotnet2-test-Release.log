@@ -1,0 +1,73 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  McMaster.Extensions.CommandLineUtils.Generators -> /home/user/w58/CLU/dotnet2/.build/bin/McMaster.Extensions.CommandLineUtils.Generators/Release/netstandard2.0/McMaster.Extensions.CommandLineUtils.Generators.dll
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.201/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand58/natemcmaster-CommandLineUtils'. [/home/user/w58/CLU/dotnet2/src/CommandLineUtils/McMaster.Extensions.CommandLineUtils.csproj::TargetFramework=net8.0]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.201/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w58/CLU/dotnet2/src/CommandLineUtils/McMaster.Extensions.CommandLineUtils.csproj::TargetFramework=net8.0]
+  McMaster.Extensions.CommandLineUtils -> /home/user/w58/CLU/dotnet2/.build/bin/McMaster.Extensions.CommandLineUtils/Release/net8.0/McMaster.Extensions.CommandLineUtils.dll
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.201/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand58/natemcmaster-CommandLineUtils'. [/home/user/w58/CLU/dotnet2/src/CommandLineUtils/McMaster.Extensions.CommandLineUtils.csproj::TargetFramework=net472]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.201/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w58/CLU/dotnet2/src/CommandLineUtils/McMaster.Extensions.CommandLineUtils.csproj::TargetFramework=net472]
+  McMaster.Extensions.CommandLineUtils -> /home/user/w58/CLU/dotnet2/.build/bin/McMaster.Extensions.CommandLineUtils/Release/net472/McMaster.Extensions.CommandLineUtils.dll
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.201/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand58/natemcmaster-CommandLineUtils'. [/home/user/w58/CLU/dotnet2/src/Hosting.CommandLine/McMaster.Extensions.Hosting.CommandLine.csproj::TargetFramework=net8.0]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.201/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w58/CLU/dotnet2/src/Hosting.CommandLine/McMaster.Extensions.Hosting.CommandLine.csproj::TargetFramework=net8.0]
+  McMaster.Extensions.CommandLineUtils.Tests -> /home/user/w58/CLU/dotnet2/.build/bin/McMaster.Extensions.CommandLineUtils.Tests/Release/net472/McMaster.Extensions.CommandLineUtils.Tests.dll
+  McMaster.Extensions.CommandLineUtils.Tests -> /home/user/w58/CLU/dotnet2/.build/bin/McMaster.Extensions.CommandLineUtils.Tests/Release/net8.0/McMaster.Extensions.CommandLineUtils.Tests.dll
+  McMaster.Extensions.Hosting.CommandLine -> /home/user/w58/CLU/dotnet2/.build/bin/McMaster.Extensions.Hosting.CommandLine/Release/net8.0/McMaster.Extensions.Hosting.CommandLine.dll
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.201/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand58/natemcmaster-CommandLineUtils'. [/home/user/w58/CLU/dotnet2/src/Hosting.CommandLine/McMaster.Extensions.Hosting.CommandLine.csproj::TargetFramework=net472]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.201/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w58/CLU/dotnet2/src/Hosting.CommandLine/McMaster.Extensions.Hosting.CommandLine.csproj::TargetFramework=net472]
+  McMaster.Extensions.CommandLineUtils.Tests -> /home/user/w58/CLU/dotnet2/.build/bin/McMaster.Extensions.CommandLineUtils.Tests/Release/net10.0/McMaster.Extensions.CommandLineUtils.Tests.dll
+  McMaster.Extensions.Hosting.CommandLine -> /home/user/w58/CLU/dotnet2/.build/bin/McMaster.Extensions.Hosting.CommandLine/Release/net472/McMaster.Extensions.Hosting.CommandLine.dll
+Test run for /home/user/w58/CLU/dotnet2/.build/bin/McMaster.Extensions.CommandLineUtils.Tests/Release/net10.0/McMaster.Extensions.CommandLineUtils.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /home/user/w58/CLU/dotnet2/.build/bin/McMaster.Extensions.CommandLineUtils.Tests/Release/net472/McMaster.Extensions.CommandLineUtils.Tests.dll (.NETFramework,Version=v4.7.2)
+VSTest version 18.0.2 (x64)
+
+Test run for /home/user/w58/CLU/dotnet2/.build/bin/McMaster.Extensions.CommandLineUtils.Tests/Release/net8.0/McMaster.Extensions.CommandLineUtils.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+System.IO.FileNotFoundException: Could not find 'mono' host. Make sure that 'mono' is installed on the machine and is available in PATH environment variable.
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Helpers.DotnetHostHelper.GetMonoPath() in /_/src/vstest/src/Microsoft.TestPlatform.CoreUtilities/Helpers/DotnetHostHelper.cs:line 100
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Hosting.DefaultTestHostManager.GetTestHostProcessStartInfo(IEnumerable`1 sources, IDictionary`2 environmentVariables, TestRunnerConnectionInfo connectionInfo) in /_/src/vstest/src/Microsoft.TestPlatform.TestHostProvider/Hosting/DefaultTestHostManager.cs:line 219
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Client.ProxyOperationManager.SetupChannel(IEnumerable`1 sources, String runSettings) in /_/src/vstest/src/Microsoft.TestPlatform.CrossPlatEngine/Client/ProxyOperationManager.cs:line 229
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Client.ProxyExecutionManager.InitializeTestRun(TestRunCriteria testRunCriteria, IInternalTestRunEventsHandler eventHandler) in /_/src/vstest/src/Microsoft.TestPlatform.CrossPlatEngine/Client/ProxyExecutionManager.cs:line 184
+
+Test Run Aborted.
+  McMaster.Extensions.Hosting.CommandLine.Tests -> /home/user/w58/CLU/dotnet2/.build/bin/McMaster.Extensions.Hosting.CommandLine.Tests/Release/net472/McMaster.Extensions.Hosting.CommandLine.Tests.dll
+
+Passed!  - Failed:     0, Passed:  1125, Skipped:     0, Total:  1125, Duration: 3 s - McMaster.Extensions.CommandLineUtils.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:  1125, Skipped:     0, Total:  1125, Duration: 3 s - McMaster.Extensions.CommandLineUtils.Tests.dll (net8.0)
+  McMaster.Extensions.Hosting.CommandLine.Tests -> /home/user/w58/CLU/dotnet2/.build/bin/McMaster.Extensions.Hosting.CommandLine.Tests/Release/net10.0/McMaster.Extensions.Hosting.CommandLine.Tests.dll
+  McMaster.Extensions.Hosting.CommandLine.Tests -> /home/user/w58/CLU/dotnet2/.build/bin/McMaster.Extensions.Hosting.CommandLine.Tests/Release/net8.0/McMaster.Extensions.Hosting.CommandLine.Tests.dll
+Test run for /home/user/w58/CLU/dotnet2/.build/bin/McMaster.Extensions.Hosting.CommandLine.Tests/Release/net472/McMaster.Extensions.Hosting.CommandLine.Tests.dll (.NETFramework,Version=v4.7.2)
+Test run for /home/user/w58/CLU/dotnet2/.build/bin/McMaster.Extensions.Hosting.CommandLine.Tests/Release/net8.0/McMaster.Extensions.Hosting.CommandLine.Tests.dll (.NETCoreApp,Version=v8.0)
+Test run for /home/user/w58/CLU/dotnet2/.build/bin/McMaster.Extensions.Hosting.CommandLine.Tests/Release/net10.0/McMaster.Extensions.Hosting.CommandLine.Tests.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+System.IO.FileNotFoundException: Could not find 'mono' host. Make sure that 'mono' is installed on the machine and is available in PATH environment variable.
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Helpers.DotnetHostHelper.GetMonoPath() in /_/src/vstest/src/Microsoft.TestPlatform.CoreUtilities/Helpers/DotnetHostHelper.cs:line 100
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Hosting.DefaultTestHostManager.GetTestHostProcessStartInfo(IEnumerable`1 sources, IDictionary`2 environmentVariables, TestRunnerConnectionInfo connectionInfo) in /_/src/vstest/src/Microsoft.TestPlatform.TestHostProvider/Hosting/DefaultTestHostManager.cs:line 219
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Client.ProxyOperationManager.SetupChannel(IEnumerable`1 sources, String runSettings) in /_/src/vstest/src/Microsoft.TestPlatform.CrossPlatEngine/Client/ProxyOperationManager.cs:line 229
+   at Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Client.ProxyExecutionManager.InitializeTestRun(TestRunCriteria testRunCriteria, IInternalTestRunEventsHandler eventHandler) in /_/src/vstest/src/Microsoft.TestPlatform.CrossPlatEngine/Client/ProxyExecutionManager.cs:line 184
+
+Test Run Aborted.
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    18, Skipped:     0, Total:    18, Duration: 830 ms - McMaster.Extensions.Hosting.CommandLine.Tests.dll (net8.0)
+
+Passed!  - Failed:     0, Passed:    18, Skipped:     0, Total:    18, Duration: 600 ms - McMaster.Extensions.Hosting.CommandLine.Tests.dll (net10.0)

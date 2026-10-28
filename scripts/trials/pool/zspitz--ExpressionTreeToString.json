@@ -1,0 +1,24 @@
+{
+  "repo": "zspitz/ExpressionTreeToString",
+  "branch": "master",
+  "commit": "ca6e099c1f92a1dbe152d95484da75f6eafd157b",
+  "csFiles": 92,
+  "tags": [
+    "library",
+    "multi-target",
+    "visual-basic",
+    "expression-trees",
+    "twae-fails-untouched"
+  ],
+  "setups": "ExpressionTreeToString.sln at the root, no Directory.Build.props, an .editorconfig; Library netstandard2.0/net452/net5.0, TestObjects (C#) and TestObjects.VB (a .vbproj, 13 .vb files) netstandard2.0/netcoreapp3.1/net452; Tests (xunit 2.4) net452/net472/netcoreapp3.1/net5.0/net6.0 referencing both; _tests and Tests.DataGenerator net48 consoles referencing the VB project too; configurations Debug, Release, ReleaseCI.",
+  "build": "ok",
+  "workaround": "DOTNET_ROLL_FORWARD=Major for the netcoreapp3.1/net5.0/net6.0 tests",
+  "tests": "dotnet test Tests/Tests.csproj -f net6.0: 3,080 of 3,089 pass, 9 fail untouched (the net4x frameworks need mono)",
+  "usedIn": "trial 58",
+  "verified": {
+    "by": "trial 58 session",
+    "date": "2026-10-27",
+    "sdks": "10.0.113, 8.0.132"
+  },
+  "notes": "C# tests referencing a Visual Basic project (#310's fixer-language fix and the old engine's VB fallback); test objects are expression trees compiled from C# and compared as rendered text, so any fix inside an Expression<> lambda fails a test (trial 58: BRO1103, BRO1106); TWAE fails untouched (CS1685, CS8618, xUnit1026)."
+}

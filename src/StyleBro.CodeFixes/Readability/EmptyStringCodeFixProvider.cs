@@ -59,16 +59,21 @@ public sealed class EmptyStringCodeFixProvider : CodeFixProvider
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
         var literalStyle = EmptyStrings.PrefersLiteral(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
-        var model = literalStyle ? await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false) : null;
+        var model = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+        if (model is null)
+        {
+            return document;
+        }
+
         var changes = new List<TextChange>();
         foreach (var span in diagnostics.Select(d => d.Location.SourceSpan).Distinct())
         {
             var node = root.FindNode(span, getInnermostNodeForTie: true);
-            if (!literalStyle && node is LiteralExpressionSyntax literal && EmptyStrings.ShouldReplace(literal))
+            if (!literalStyle && node is LiteralExpressionSyntax literal && EmptyStrings.ShouldReplace(literal, model, cancellationToken))
             {
                 changes.Add(new TextChange(literal.Span, "string.Empty"));
             }
-            else if (model is not null
+            else if (literalStyle
                 && node is MemberAccessExpressionSyntax access
                 && EmptyStrings.ShouldReplaceWithLiteral(access, model, cancellationToken))
             {

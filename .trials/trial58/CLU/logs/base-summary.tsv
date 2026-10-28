@@ -1,0 +1,6 @@
+build	0	34s	dotnet build CommandLineUtils.sln -c Debug
+twae-Debug	0	18s	twae Debug
+test-Debug	1	18s	env CFG=Debug bash -c dotnet test CommandLineUtils.sln -c $CFG
+twae-Release	0	14s	twae Release
+test-Release	1	19s	env CFG=Release bash -c dotnet test CommandLineUtils.sln -c $CFG
+DONE

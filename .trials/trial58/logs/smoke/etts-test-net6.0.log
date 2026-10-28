@@ -1,0 +1,332 @@
+Test run for /home/user/cand58/zspitz-ExpressionTreeToString/Tests/bin/Debug/net6.0/Tests.dll (.NETCoreApp,Version=v6.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:01.36]     ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(category: "Conditionals", name: "NpChainWithMethodsParameters", expr: Param_0 => IIF((((Param_0 != null) AndAlso (Param_0.LastName != null)) AndAlso (Param_0.LastName.ToString(en-US) != null)), Param_0.LastName.ToString(en-US).ToString(en-US), null)) [FAIL]
+  Failed ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(category: "Conditionals", name: "NpChainWithMethodsParameters", expr: Param_0 => IIF((((Param_0 != null) AndAlso (Param_0.LastName != null)) AndAlso (Param_0.LastName.ToString(en-US) != null)), Param_0.LastName.ToString(en-US).ToString(en-US), null)) [2 ms]
+  Error Message:
+   System.Linq.Dynamic.Core.Exceptions.ParseException : Expression expected
+  Stack Trace:
+     at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParsePrimaryStart()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParsePrimary()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseUnary()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseMultiplicative()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseAdditive()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseShiftOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseComparisonOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseLogicalAndOrOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseIn()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseAndOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseOrOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseLambdaOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseNullCoalescingOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseConditionalOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.Parse(Type resultType, Boolean createParameterCtor)
+   at ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(String category, String name, Expression expr) in /home/user/cand58/zspitz-ExpressionTreeToString/Tests/DynamicLinqTests.cs:line 44
+   at InvokeStub_DynamicLinqTests.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:01.36]     ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(category: "Conditionals", name: "NpChainWithMethodsParameters1", expr: Param_0 => IIF((((Param_0 != null) AndAlso (Param_0.LastName != null)) AndAlso (Param_0.LastName.ToString(en-US) != null)), Param_0.LastName.ToString(en-US).ToString(he-IL), null)) [FAIL]
+  Failed ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(category: "Conditionals", name: "NpChainWithMethodsParameters1", expr: Param_0 => IIF((((Param_0 != null) AndAlso (Param_0.LastName != null)) AndAlso (Param_0.LastName.ToString(en-US) != null)), Param_0.LastName.ToString(en-US).ToString(he-IL), null)) [1 ms]
+  Error Message:
+   System.Linq.Dynamic.Core.Exceptions.ParseException : Expression expected
+  Stack Trace:
+     at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParsePrimaryStart()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParsePrimary()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseUnary()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseMultiplicative()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseAdditive()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseShiftOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseComparisonOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseLogicalAndOrOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseIn()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseAndOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseOrOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseLambdaOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseNullCoalescingOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseConditionalOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.Parse(Type resultType, Boolean createParameterCtor)
+   at ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(String category, String name, Expression expr) in /home/user/cand58/zspitz-ExpressionTreeToString/Tests/DynamicLinqTests.cs:line 44
+   at InvokeStub_DynamicLinqTests.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:01.37]     ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(category: "Constants", name: "LambdaRandom", expr: () => value(System.Random)) [FAIL]
+  Failed ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(category: "Constants", name: "LambdaRandom", expr: () => value(System.Random)) [< 1 ms]
+  Error Message:
+   System.Linq.Dynamic.Core.Exceptions.ParseException : Expression expected
+  Stack Trace:
+     at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParsePrimaryStart()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParsePrimary()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseUnary()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseMultiplicative()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseAdditive()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseShiftOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseComparisonOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseLogicalAndOrOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseIn()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseAndOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseOrOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseLambdaOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseNullCoalescingOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseConditionalOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.Parse(Type resultType, Boolean createParameterCtor)
+   at ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(String category, String name, Expression expr) in /home/user/cand58/zspitz-ExpressionTreeToString/Tests/DynamicLinqTests.cs:line 44
+   at InvokeStub_DynamicLinqTests.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:01.37]     ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(category: "Member access (+ closed variables)", name: "ClosureValue", expr: p => value(ExpressionTreeToString.Tests.DynamicLinqTestObjects+<>c__DisplayClass84_0).x) [FAIL]
+  Failed ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(category: "Member access (+ closed variables)", name: "ClosureValue", expr: p => value(ExpressionTreeToString.Tests.DynamicLinqTestObjects+<>c__DisplayClass84_0).x) [< 1 ms]
+  Error Message:
+   System.Linq.Dynamic.Core.Exceptions.ParseException : Expression expected
+  Stack Trace:
+     at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParsePrimaryStart()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParsePrimary()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseUnary()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseMultiplicative()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseAdditive()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseShiftOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseComparisonOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseLogicalAndOrOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseIn()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseAndOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseOrOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseLambdaOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseNullCoalescingOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseConditionalOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.Parse(Type resultType, Boolean createParameterCtor)
+   at ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(String category, String name, Expression expr) in /home/user/cand58/zspitz-ExpressionTreeToString/Tests/DynamicLinqTests.cs:line 44
+   at InvokeStub_DynamicLinqTests.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:01.37]     ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(category: "Method call", name: "Contains1", expr: Param_0 => value(System.String[]).Contains("")) [FAIL]
+  Failed ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(category: "Method call", name: "Contains1", expr: Param_0 => value(System.String[]).Contains("")) [< 1 ms]
+  Error Message:
+   System.Linq.Dynamic.Core.Exceptions.ParseException : Expression expected
+  Stack Trace:
+     at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParsePrimaryStart()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParsePrimary()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseUnary()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseMultiplicative()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseAdditive()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseShiftOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseComparisonOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseLogicalAndOrOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseIn()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseAndOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseOrOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseLambdaOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseNullCoalescingOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseConditionalOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.Parse(Type resultType, Boolean createParameterCtor)
+   at ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(String category, String name, Expression expr) in /home/user/cand58/zspitz-ExpressionTreeToString/Tests/DynamicLinqTests.cs:line 44
+   at InvokeStub_DynamicLinqTests.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:01.75]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: FactoryMethods, objectName: "CSCompiler.InterpolatedString", category: "Literal", o: () => Format("{0:yyyy-MM-dd}", Convert(new DateTime(2001, 3, 25), Object))) [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: FactoryMethods, objectName: "CSCompiler.InterpolatedString", category: "Literal", o: () => Format("{0:yyyy-MM-dd}", Convert(new DateTime(2001, 3, 25), Object))) [4 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: // using static System.Linq.Expressions.Expression
+
+Lambda(
+    Call(
+        typeof(string).GetMethod("Format", new[] { typeof(string), typeof(object) }),
+        Constant("{0:yyyy-MM-dd}"),
+        Convert(
+            New(
+                typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int) }),
+                Constant(2001),
+                Constant(3),
+                Constant(25)
+            ),
+            typeof(object)
+        )
+    )
+)
+Actual:   // using static System.Linq.Expressions.Expression
+
+Lambda(
+    Call(
+        typeof(string).GetMethod("Format", 0, new[] { typeof(string), typeof(object) }),
+        Constant("{0:yyyy-MM-dd}"),
+        Convert(
+            New(
+                typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int) }),
+                Constant(2001),
+                Constant(3),
+                Constant(25)
+            ),
+            typeof(object)
+        )
+    )
+)
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/cand58/zspitz-ExpressionTreeToString/Tests/TestObjectsRunner.cs:line 141
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:02.34]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: FactoryMethods, objectName: "VBCompiler.InterpolatedString", category: "Literal", o: () => Format("{0:yyyy-MM-dd}", Convert(03/25/2001 00:00:00, Object))) [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: FactoryMethods, objectName: "VBCompiler.InterpolatedString", category: "Literal", o: () => Format("{0:yyyy-MM-dd}", Convert(03/25/2001 00:00:00, Object))) [2 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: // using static System.Linq.Expressions.Expression
+
+Lambda(
+    Call(
+        typeof(string).GetMethod("Format", new[] { typeof(string), typeof(object) }),
+        Constant("{0:yyyy-MM-dd}"),
+        Convert(
+            Constant(#DateTime),
+            typeof(object)
+        )
+    )
+)
+Actual:   // using static System.Linq.Expressions.Expression
+
+Lambda(
+    Call(
+        typeof(string).GetMethod("Format", 0, new[] { typeof(string), typeof(object) }),
+        Constant("{0:yyyy-MM-dd}"),
+        Convert(
+            Constant(#DateTime),
+            typeof(object)
+        )
+    )
+)
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/cand58/zspitz-ExpressionTreeToString/Tests/TestObjectsRunner.cs:line 141
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:02.56]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: ObjectNotation, objectName: "CSCompiler.InterpolatedString", category: "Literal", o: () => Format("{0:yyyy-MM-dd}", Convert(new DateTime(2001, 3, 25), Object))) [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: ObjectNotation, objectName: "CSCompiler.InterpolatedString", category: "Literal", o: () => Format("{0:yyyy-MM-dd}", Convert(new DateTime(2001, 3, 25), Object))) [1 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: new Expression<Func<string>> {
+    NodeType = ExpressionType.Lambda,
+    Type = typeof(Func<string>),
+    Body = new MethodCallExpression {
+        Type = typeof(string),
+        Arguments = new ReadOnlyCollection<Expression> {
+            new ConstantExpression {
+                Type = typeof(string),
+                Value = "{0:yyyy-MM-dd}"
+            },
+            new UnaryExpression {
+                NodeType = ExpressionType.Convert,
+                Type = typeof(object),
+                Operand = new NewExpression {
+                    Type = typeof(DateTime),
+                    Arguments = new ReadOnlyCollection<Expression> {
+                        new ConstantExpression {
+                            Type = typeof(int),
+                            Value = 2001
+                        },
+                        new ConstantExpression {
+                            Type = typeof(int),
+                            Value = 3
+                        },
+                        new ConstantExpression {
+                            Type = typeof(int),
+                            Value = 25
+                        }
+                    },
+                    Constructor = typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int) })
+                }
+            }
+        },
+        Method = typeof(string).GetMethod("Format", new[] { typeof(string), typeof(object) })
+    },
+    ReturnType = typeof(string)
+}
+Actual:   new Expression<Func<string>> {
+    NodeType = ExpressionType.Lambda,
+    Type = typeof(Func<string>),
+    Body = new MethodCallExpression {
+        Type = typeof(string),
+        Arguments = new ReadOnlyCollection<Expression> {
+            new ConstantExpression {
+                Type = typeof(string),
+                Value = "{0:yyyy-MM-dd}"
+            },
+            new UnaryExpression {
+                NodeType = ExpressionType.Convert,
+                Type = typeof(object),
+                Operand = new NewExpression {
+                    Type = typeof(DateTime),
+                    Arguments = new ReadOnlyCollection<Expression> {
+                        new ConstantExpression {
+                            Type = typeof(int),
+                            Value = 2001
+                        },
+                        new ConstantExpression {
+                            Type = typeof(int),
+                            Value = 3
+                        },
+                        new ConstantExpression {
+                            Type = typeof(int),
+                            Value = 25
+                        }
+                    },
+                    Constructor = typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int) })
+                }
+            }
+        },
+        Method = typeof(string).GetMethod("Format", 0, new[] { typeof(string), typeof(object) })
+    },
+    ReturnType = typeof(string)
+}
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/cand58/zspitz-ExpressionTreeToString/Tests/TestObjectsRunner.cs:line 141
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:02.97]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: ObjectNotation, objectName: "VBCompiler.InterpolatedString", category: "Literal", o: () => Format("{0:yyyy-MM-dd}", Convert(03/25/2001 00:00:00, Object))) [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: ObjectNotation, objectName: "VBCompiler.InterpolatedString", category: "Literal", o: () => Format("{0:yyyy-MM-dd}", Convert(03/25/2001 00:00:00, Object))) [< 1 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: new Expression<Func<string>> {
+    NodeType = ExpressionType.Lambda,
+    Type = typeof(Func<string>),
+    Body = new MethodCallExpression {
+        Type = typeof(string),
+        Arguments = new ReadOnlyCollection<Expression> {
+            new ConstantExpression {
+                Type = typeof(string),
+                Value = "{0:yyyy-MM-dd}"
+            },
+            new UnaryExpression {
+                NodeType = ExpressionType.Convert,
+                Type = typeof(object),
+                Operand = new ConstantExpression {
+                    Type = typeof(DateTime),
+                    Value = #DateTime
+                }
+            }
+        },
+        Method = typeof(string).GetMethod("Format", new[] { typeof(string), typeof(object) })
+    },
+    ReturnType = typeof(string)
+}
+Actual:   new Expression<Func<string>> {
+    NodeType = ExpressionType.Lambda,
+    Type = typeof(Func<string>),
+    Body = new MethodCallExpression {
+        Type = typeof(string),
+        Arguments = new ReadOnlyCollection<Expression> {
+            new ConstantExpression {
+                Type = typeof(string),
+                Value = "{0:yyyy-MM-dd}"
+            },
+            new UnaryExpression {
+                NodeType = ExpressionType.Convert,
+                Type = typeof(object),
+                Operand = new ConstantExpression {
+                    Type = typeof(DateTime),
+                    Value = #DateTime
+                }
+            }
+        },
+        Method = typeof(string).GetMethod("Format", 0, new[] { typeof(string), typeof(object) })
+    },
+    ReturnType = typeof(string)
+}
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/cand58/zspitz-ExpressionTreeToString/Tests/TestObjectsRunner.cs:line 141
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+
+Failed!  - Failed:     9, Passed:  3080, Skipped:     0, Total:  3089, Duration: 2 s - Tests.dll (net6.0)

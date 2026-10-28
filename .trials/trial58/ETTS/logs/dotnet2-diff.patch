@@ -1,0 +1,2885 @@
+diff --git a/.editorconfig b/.editorconfig
+index 6ee456b..48b8403 100644
+--- a/.editorconfig
++++ b/.editorconfig
+@@ -173,3 +173,74 @@ csharp_style_conditional_delegate_call = true:suggestion
+ visual_basic_preferred_modifier_order = partial,default,private,protected,public,friend,notoverridable,overridable,mustoverride,overloads,overrides,mustinherit,notinheritable,static,shared,shadows,readonly,writeonly,dim,const,withevents,widening,narrowing,custom,async,iterator:silent
+ visual_basic_style_unused_value_assignment_preference = unused_local_variable:suggestion
+ visual_basic_style_unused_value_expression_statement_preference = unused_local_variable:silent
++
++# BEGIN stylebro-migrate (stylebro-migrate init: built-in .NET rules for StyleBro's preset; edits inside are replaced)
++[*.cs]
++# Built-in .NET rules that cover StyleCop rules, at the preset's severities. Their options (brace placement, modifier
++# order, ...) come from StyleBro's preset. The severities have to be here: 'dotnet format' ignores rule severities in a
++# package's global config. Add <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> to report them on build too.
++
++# Braces (SA1503, SA1519, SA1520) are StyleBro's BRO1514-BRO1516: IDE0011's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0011.severity = none
++# Access modifiers (SA1400, SA1205) are StyleBro's BRO1404/BRO1007: IDE0040's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0040.severity = none
++# Modifier order: access modifier first, then static (SA1206, SA1207)
++dotnet_diagnostic.IDE0036.severity = warning
++# 'int' instead of 'Int32' (SA1121)
++dotnet_diagnostic.IDE0049.severity = warning
++# Unnecessary parentheses (SA1119) are StyleBro's BRO1405: IDE0047's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0047.severity = none
++# Parentheses that show precedence (SA1407, SA1408) are StyleBro's BRO1406/BRO1407: IDE0048's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0048.severity = none
++# Using placement (SA1200) is StyleBro's BRO1008: IDE0065's fix can change what names bind to (CS0104, CS0118)
++dotnet_diagnostic.IDE0065.severity = none
++# Blank lines (SA1507, SA1508, SA1513) are StyleBro's BRO1517-BRO1519: the SDK's fixes break multi-targeted projects
++dotnet_diagnostic.IDE2000.severity = none
++dotnet_diagnostic.IDE2002.severity = none
++dotnet_diagnostic.IDE2003.severity = none
++# 'this.' qualification isn't required (SA1101 is off in the preset)
++dotnet_diagnostic.IDE0009.severity = none
++
++# Conventions in this repository's code (stylebro-migrate init counted them; delete a line to have it counted again)
++# init: multi-line initializers: without a trailing comma in 76 of 89 places in your code
++stylebro_trailing_comma = omit
++# init: empty strings: "" in 98 of 100 places in your code
++stylebro_empty_string_style = literal
++# init: null checks: your code mixes both forms (41 'is null', 60 '== null'), so BRO1133 is off. To choose one: set stylebro_null_check_style and remove the next line.
++dotnet_diagnostic.BRO1133.severity = none
++# init: one-line <summary> texts: on one line in 18 of 18 places in your code
++stylebro_summary_layout = single_line_when_fits
++# init: ')' of split lists: on its own line in 159 of 159 places in your code
++stylebro_closing_parenthesis_placement = own_line
++# init: ': base(...)'/': this(...)': your code mixes both forms (5 on its own line, 6 on the constructor's line), so BRO1105 is off. To choose one: set stylebro_constructor_initializer_placement and remove the next line.
++dotnet_diagnostic.BRO1105.severity = none
++# init: 'where' constraints: on the declaration's line in 6 of 6 places in your code
++stylebro_constraint_placement = same_line
++# init: switch sections: without a blank line in 131 of 174 places in your code
++stylebro_blank_line_between_switch_sections = omit
++# init: types' members: your code mixes both forms (14 in BRO1001's order, 20 in another order), so BRO1001 is off. To choose one: set dotnet_diagnostic.BRO1001.severity and remove the next line.
++dotnet_diagnostic.BRO1001.severity = none
++# init: partial type parts: 30 of 36 in your code are without one ('partial class X'), so BRO1007 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1007.severity = none
++# init: adjacent locals of one type: 23 of 23 in your code are declared together ('int a, b;'), so BRO1142 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1142.severity = none
++# init: empty blocks ('{ }'): on one line in 18 of 18 blocks in your code
++stylebro_allow_empty_single_line_blocks = true
++# init: statement blocks ('if (x) { y(); }'): your code mixes both forms (161 on several lines, 89 on one line), so BRO1508 is off. To choose one: set dotnet_diagnostic.BRO1508.severity and remove the next line.
++dotnet_diagnostic.BRO1508.severity = none
++# init: statements after a block's '}': your code mixes both forms (94 after a blank line, 126 right below the '}'), so BRO1519 is off. To choose one: set dotnet_diagnostic.BRO1519.severity and remove the next line.
++dotnet_diagnostic.BRO1519.severity = none
++# init: doc comment texts: your code mixes both forms (1 ending with a period, 4 without a period), so BRO1603 is off. To choose one: set dotnet_diagnostic.BRO1603.severity and remove the next line.
++dotnet_diagnostic.BRO1603.severity = none
++# init: non-private fields: your code mixes both forms (3 PascalCase or as your naming rule says, 4 named otherwise), so BRO1306 is off. To choose one: set dotnet_diagnostic.BRO1306.severity and remove the next line.
++dotnet_diagnostic.BRO1306.severity = none
++# init: tuple element names: '(int count, ...)' in 96 of 96 elements in your code
++stylebro_tuple_element_name_casing = camelCase
++# init: private constants/static readonly fields: camelCase in 52 of 54 fields in your code
++stylebro_private_static_field_naming = camelCase
++# init: empty blocks: IDE0055 keeps '{ }' after a statement ('else { }', 'lock (x) { }') on one line only with this
++csharp_preserve_single_line_statements = true
++# Line endings: your .editorconfig says end_of_line = crlf, but git checks out 92 C# files with each machine's ending (a .gitattributes 'text' attribute without 'eol', or core.autocrlf), so Linux and macOS checkouts don't match it. Until that's settled, formatting and IDE0055 leave each file's endings as checked out. To settle it: '*.cs text eol=crlf' in .gitattributes (then 'git add --renormalize .'), or remove end_of_line from .editorconfig; then run bro again.
++end_of_line = unset
++dotnet_diagnostic.IDE0055.severity = suggestion
++# END stylebro-migrate
+diff --git a/Library/BuiltinsWriterVisitor.cs b/Library/BuiltinsWriterVisitor.cs
+index 0f672b8..2642537 100644
+--- a/Library/BuiltinsWriterVisitor.cs
++++ b/Library/BuiltinsWriterVisitor.cs
+@@ -4,12 +4,12 @@ using System.Collections.Generic;
+ using System.Dynamic;
+ using System.Linq.Expressions;
+ using ZSpitz.Util;
+-using static System.Linq.Expressions.ExpressionType;
+ using static ExpressionTreeToString.Globals;
++using static System.Linq.Expressions.ExpressionType;
+ 
+ namespace ExpressionTreeToString {
+     public abstract class BuiltinsWriterVisitor : WriterVisitorBase {
+-        protected BuiltinsWriterVisitor(object o, OneOf<string, Language?> languageArg, IEnumerable<string>? insertionPointKeys, bool hasPathSpans) 
++        protected BuiltinsWriterVisitor(object o, OneOf<string, Language?> languageArg, IEnumerable<string>? insertionPointKeys, bool hasPathSpans)
+             : base(o, languageArg, insertionPointKeys, hasPathSpans) { }
+ 
+         protected override void WriteNodeImpl(object? o, bool parameterDeclaration = false, object? metadata = null) {
+@@ -41,7 +41,6 @@ namespace ExpressionTreeToString {
+                 case LabelTarget labelTarget:
+                     WriteLabelTarget(labelTarget);
+                     break;
+-
+                 default:
+                     WriteNotImplemented(
+                         o is null ?
+@@ -54,113 +53,86 @@ namespace ExpressionTreeToString {
+ 
+         private void writeExpression(Expression expr) {
+             switch (expr.NodeType) {
+-
+                 case var nodeType when nodeType.In(BinaryExpressionTypes):
+                     WriteBinary((BinaryExpression)expr);
+                     break;
+-
+                 case var nodeType when nodeType.In(UnaryExpressionTypes):
+                     WriteUnary((UnaryExpression)expr);
+                     break;
+-
+                 case Lambda:
+                     WriteLambda((LambdaExpression)expr);
+                     break;
+-
+                 case Parameter:
+                     WriteParameter((ParameterExpression)expr);
+                     break;
+-
+                 case Constant:
+                     WriteConstant((ConstantExpression)expr);
+                     break;
+-
+                 case MemberAccess:
+                     WriteMemberAccess((MemberExpression)expr);
+                     break;
+-
+                 case New:
+                     WriteNew((NewExpression)expr);
+                     break;
+-
+                 case Call:
+                     WriteCall((MethodCallExpression)expr);
+                     break;
+-
+                 case MemberInit:
+                     WriteMemberInit((MemberInitExpression)expr);
+                     break;
+-
+                 case ListInit:
+                     WriteListInit((ListInitExpression)expr);
+                     break;
+-
+                 case NewArrayInit:
+                 case NewArrayBounds:
+                     WriteNewArray((NewArrayExpression)expr);
+                     break;
+-
+                 case Conditional:
+                     WriteConditional((ConditionalExpression)expr, null);
+                     break;
+-
+                 case Default:
+                     WriteDefault((DefaultExpression)expr);
+                     break;
+-
+                 case TypeIs:
+                 case TypeEqual:
+                     WriteTypeBinary((TypeBinaryExpression)expr);
+                     break;
+-
+                 case Invoke:
+                     WriteInvocation((InvocationExpression)expr);
+                     break;
+-
+                 case ExpressionType.Index:
+                     WriteIndex((IndexExpression)expr);
+                     break;
+-
+                 case Block:
+                     WriteBlock((BlockExpression)expr, null);
+                     break;
+-
+                 case Switch:
+                     WriteSwitch((SwitchExpression)expr);
+                     break;
+-
+                 case Try:
+                     WriteTry((TryExpression)expr);
+                     break;
+-
+                 case Label:
+                     WriteLabel((LabelExpression)expr);
+                     break;
+-
+                 case Goto:
+                     WriteGoto((GotoExpression)expr);
+                     break;
+-
+                 case Loop:
+                     WriteLoop((LoopExpression)expr);
+                     break;
+-
+                 case RuntimeVariables:
+                     WriteRuntimeVariables((RuntimeVariablesExpression)expr);
+                     break;
+-
+                 case DebugInfo:
+                     WriteDebugInfo((DebugInfoExpression)expr);
+                     break;
+-
+                 case Dynamic:
+                     WriteDynamic((DynamicExpression)expr);
+                     break;
+-
+                 case Extension:
+                     WriteExtension(expr);
+                     break;
+-
+                 default:
+                     WriteNotImplemented($"NodeType: {expr.NodeType}, Expression object type: {expr.GetType().Name}");
+                     break;
+@@ -207,7 +179,6 @@ namespace ExpressionTreeToString {
+                 case UnaryOperationBinder unaryOperationBinder:
+                     WriteUnaryOperationBinder(unaryOperationBinder, expr.Arguments);
+                     break;
+-
+                 default:
+                     WriteNotImplemented($"Dynamic expression with binder type {expr.Binder} not implemented");
+                     break;
+@@ -218,51 +189,88 @@ namespace ExpressionTreeToString {
+ 
+         // .NET 3.5 expression types
+         protected abstract void WriteBinary(BinaryExpression expr);
++
+         protected abstract void WriteUnary(UnaryExpression expr);
++
+         protected abstract void WriteLambda(LambdaExpression expr);
++
+         protected abstract void WriteParameter(ParameterExpression expr);
++
+         protected abstract void WriteConstant(ConstantExpression expr);
++
+         protected abstract void WriteMemberAccess(MemberExpression expr);
++
+         protected abstract void WriteNew(NewExpression expr);
++
+         protected abstract void WriteCall(MethodCallExpression expr);
++
+         protected abstract void WriteMemberInit(MemberInitExpression expr);
++
+         protected abstract void WriteListInit(ListInitExpression expr);
++
+         protected abstract void WriteNewArray(NewArrayExpression expr);
++
+         protected abstract void WriteConditional(ConditionalExpression expr, object? metadata);
++
+         protected abstract void WriteDefault(DefaultExpression expr);
++
+         protected abstract void WriteTypeBinary(TypeBinaryExpression expr);
++
+         protected abstract void WriteInvocation(InvocationExpression expr);
++
+         protected abstract void WriteIndex(IndexExpression expr);
+ 
+         // .NET 4 expression types
+         protected abstract void WriteBlock(BlockExpression expr, object? metadata);
++
+         protected abstract void WriteSwitch(SwitchExpression expr);
++
+         protected abstract void WriteTry(TryExpression expr);
++
+         protected abstract void WriteLabel(LabelExpression expr);
++
+         protected abstract void WriteGoto(GotoExpression expr);
++
+         protected abstract void WriteLoop(LoopExpression expr);
++
+         protected abstract void WriteRuntimeVariables(RuntimeVariablesExpression expr);
++
+         protected abstract void WriteDebugInfo(DebugInfoExpression expr);
+ 
+         // other types
+         protected abstract void WriteElementInit(ElementInit elementInit);
++
+         protected abstract void WriteBinding(MemberBinding binding);
++
+         protected abstract void WriteSwitchCase(SwitchCase switchCase);
++
+         protected abstract void WriteCatchBlock(CatchBlock catchBlock);
++
+         protected abstract void WriteLabelTarget(LabelTarget labelTarget);
+ 
+         // binders
+         protected virtual void WriteBinaryOperationBinder(BinaryOperationBinder binaryOperationBinder, IList<Expression> args) => throw new NotImplementedException();
++
+         protected virtual void WriteConvertBinder(ConvertBinder convertBinder, IList<Expression> args) => throw new NotImplementedException();
++
+         protected virtual void WriteCreateInstanceBinder(CreateInstanceBinder createInstanceBinder, IList<Expression> args) => throw new NotImplementedException();
++
+         protected virtual void WriteDeleteIndexBinder(DeleteIndexBinder deleteIndexBinder, IList<Expression> args) => throw new NotImplementedException();
++
+         protected virtual void WriteDeleteMemberBinder(DeleteMemberBinder deleteMemberBinder, IList<Expression> args) => throw new NotImplementedException();
++
+         protected virtual void WriteGetIndexBinder(GetIndexBinder getIndexBinder, IList<Expression> args) => throw new NotImplementedException();
++
+         protected virtual void WriteGetMemberBinder(GetMemberBinder getMemberBinder, IList<Expression> args) => throw new NotImplementedException();
++
+         protected virtual void WriteInvokeBinder(InvokeBinder invokeBinder, IList<Expression> args) => throw new NotImplementedException();
++
+         protected virtual void WriteInvokeMemberBinder(InvokeMemberBinder invokeMemberBinder, IList<Expression> args) => throw new NotImplementedException();
++
+         protected virtual void WriteSetIndexBinder(SetIndexBinder setIndexBinder, IList<Expression> args) => throw new NotImplementedException();
++
+         protected virtual void WriteSetMemberBinder(SetMemberBinder setMemberBinder, IList<Expression> args) => throw new NotImplementedException();
++
+         protected virtual void WriteUnaryOperationBinder(UnaryOperationBinder unaryOperationBinder, IList<Expression> args) => throw new NotImplementedException();
+ 
+         // parameter declarations
+diff --git a/Library/CodeWriterVisitors/CSharpBlockMetadata.cs b/Library/CodeWriterVisitors/CSharpBlockMetadata.cs
+index b5f7910..eb2985b 100644
+--- a/Library/CodeWriterVisitors/CSharpBlockMetadata.cs
++++ b/Library/CodeWriterVisitors/CSharpBlockMetadata.cs
+@@ -4,10 +4,12 @@ namespace ExpressionTreeToString {
+     internal class CSharpBlockMetadata {
+         internal CSharpMultilineBlockTypes BlockType { get; private set; } = Inline;
+         internal bool ParentIsBlock { get; private set; } = false;
+-        internal static CSharpBlockMetadata CreateMetadata(CSharpMultilineBlockTypes blockType = Inline, bool parentIsBlock=false) => new CSharpBlockMetadata {
++
++        internal static CSharpBlockMetadata CreateMetadata(CSharpMultilineBlockTypes blockType = Inline, bool parentIsBlock = false) => new CSharpBlockMetadata {
+             BlockType = blockType,
+-            ParentIsBlock=parentIsBlock
++            ParentIsBlock = parentIsBlock
+         };
++
+         internal void Deconstruct(out CSharpMultilineBlockTypes blockType, out bool parentIsBlock) {
+             blockType = BlockType;
+             parentIsBlock = ParentIsBlock;
+diff --git a/Library/CodeWriterVisitors/CSharpWriterVisitor.cs b/Library/CodeWriterVisitors/CSharpWriterVisitor.cs
+index 15733e1..8a1d928 100644
+--- a/Library/CodeWriterVisitors/CSharpWriterVisitor.cs
++++ b/Library/CodeWriterVisitors/CSharpWriterVisitor.cs
+@@ -1,16 +1,16 @@
+-﻿using ZSpitz.Util;
++﻿using ExpressionTreeToString.Util;
++using OneOf;
+ using System;
+ using System.Collections.Generic;
+ using System.Linq;
+ using System.Linq.Expressions;
++using ZSpitz.Util;
++using static ExpressionTreeToString.CSharpBlockMetadata;
++using static ExpressionTreeToString.CSharpMultilineBlockTypes;
++using static ExpressionTreeToString.Util.Functions;
+ using static System.Linq.Enumerable;
+ using static System.Linq.Expressions.ExpressionType;
+ using static System.Linq.Expressions.GotoExpressionKind;
+-using static ExpressionTreeToString.CSharpMultilineBlockTypes;
+-using static ExpressionTreeToString.CSharpBlockMetadata;
+-using ExpressionTreeToString.Util;
+-using OneOf;
+-using static ExpressionTreeToString.Util.Functions;
+ 
+ namespace ExpressionTreeToString {
+     public class CSharpWriterVisitor : CodeWriterVisitor {
+@@ -228,6 +228,7 @@ namespace ExpressionTreeToString {
+                         Write(",");
+                         WriteEOL();
+                     }
++
+                     // if the expression being assigned from is a property access with the same name as the target property, 
+                     // write only the target expression.
+                     // Otherwise, write `property = expression`
+@@ -254,8 +255,7 @@ namespace ExpressionTreeToString {
+ 
+             Write("{");
+ 
+-            (var items, var itemsPath) = binding switch
+-            {
++            (var items, var itemsPath) = binding switch {
+                 MemberListBinding listBinding => (listBinding.Initializers, "Initializers"),
+                 MemberMemberBinding memberBinding => (memberBinding.Bindings, "Bindings"),
+                 _ => (Empty<object>(), "")
+@@ -334,7 +334,6 @@ namespace ExpressionTreeToString {
+                     return canInline(lmbd.Body);
+                 case UnaryExpression uexpr when uexpr.NodeType == Quote:
+                     return canInline(uexpr.Operand);
+-
+                 case ConditionalExpression cexpr when cexpr.Type == typeof(void):
+                 case BlockExpression bexpr when
+                     bexpr.Expressions.Count > 1 ||
+@@ -464,7 +463,6 @@ namespace ExpressionTreeToString {
+                 WriteEOL(true);
+                 if (blockType == Inline || parentIsBlock) { Write(")"); }
+             }
+-            return;
+         }
+ 
+         private void writeStatementEnd(Expression expr) {
+@@ -609,8 +607,7 @@ namespace ExpressionTreeToString {
+         }
+ 
+         protected override void WriteGoto(GotoExpression expr) {
+-            var gotoKeyword = expr.Kind switch
+-            {
++            var gotoKeyword = expr.Kind switch {
+                 Break => "break",
+                 Continue => "continue",
+                 GotoExpressionKind.Goto => "goto",
+@@ -749,7 +746,7 @@ namespace ExpressionTreeToString {
+             [TypeEqual] = 8, // like Equal
+             [TypeIs] = 7,
+             [UnaryPlus] = 1,
+-            [Unbox] = 1, // // conversion is rendered only if the types aren't assignable
++            [Unbox] = 1 // // conversion is rendered only if the types aren't assignable
+         };
+ 
+         private static int getPrecedence(Expression node, Type? parentType = null) {
+@@ -762,8 +759,7 @@ namespace ExpressionTreeToString {
+             }
+ 
+             var renderConversion = parentType is null || !type.HasImplicitConversionTo(parentType);
+-            return nodeType switch
+-            {
++            return nodeType switch {
+                 Conditional when type != typeof(void) => 15,
+                 Switch when type != typeof(void) => 3,
+                 var x when x.In(Unbox, ExpressionType.Convert, ConvertChecked) && !renderConversion => -1,
+diff --git a/Library/CodeWriterVisitors/CodeWriterVisitor.cs b/Library/CodeWriterVisitors/CodeWriterVisitor.cs
+index 2f5ecc8..81eff44 100644
+--- a/Library/CodeWriterVisitors/CodeWriterVisitor.cs
++++ b/Library/CodeWriterVisitors/CodeWriterVisitor.cs
+@@ -1,16 +1,16 @@
+-﻿using System;
+-using System.Linq.Expressions;
+-using static System.Linq.Expressions.ExpressionType;
+-using ZSpitz.Util;
++﻿using ExpressionTreeToString.Util;
+ using OneOf;
+-using static ZSpitz.Util.Functions;
++using System;
+ using System.Collections.Generic;
++using System.Dynamic;
+ using System.Linq;
++using System.Linq.Expressions;
+ using System.Runtime.CompilerServices;
+-using System.Dynamic;
+-using static ZSpitz.Util.Methods;
+-using ExpressionTreeToString.Util;
++using ZSpitz.Util;
+ using static ExpressionTreeToString.Util.Functions;
++using static System.Linq.Expressions.ExpressionType;
++using static ZSpitz.Util.Functions;
++using static ZSpitz.Util.Methods;
+ 
+ namespace ExpressionTreeToString {
+     public abstract class CodeWriterVisitor : BuiltinsWriterVisitor {
+@@ -81,8 +81,8 @@ namespace ExpressionTreeToString {
+                 }
+             }
+ 
+-            var isIndexer = 
+-                (expr.Object?.Type.IsArray ?? false) && expr.Method.Name == "Get" || 
++            var isIndexer =
++                (expr.Object?.Type.IsArray ?? false) && expr.Method.Name == "Get" ||
+                 expr.Method.IsIndexerMethod();
+             if (isIndexer) {
+                 // no such thing as a static indexer; expr.Object will not be null
+@@ -149,6 +149,7 @@ namespace ExpressionTreeToString {
+             WriteNodes(argBasePath, keys);
+             Write(IndexerIndicators.suffix);
+         }
++
+         private void writeIndexerAccess(string instancePath, Expression instance, string argBasePath, IEnumerable<Expression> keys) =>
+             WriteIndexerAccess(instancePath, instance, argBasePath, keys.ToArray());
+ 
+@@ -185,9 +186,10 @@ namespace ExpressionTreeToString {
+             Write(")");
+         }
+ 
+-        protected override void WriteDeleteIndexBinder(DeleteIndexBinder binder, IList<Expression> args) => 
++        protected override void WriteDeleteIndexBinder(DeleteIndexBinder binder, IList<Expression> args) =>
+             WriteNotImplemented("No C#/VB syntax for deleting an index.");
+-        protected override void WriteDeleteMemberBinder(DeleteMemberBinder binder, IList<Expression> args) => 
++
++        protected override void WriteDeleteMemberBinder(DeleteMemberBinder binder, IList<Expression> args) =>
+             WriteNotImplemented("No C#/VB syntax for deleting a mamber.");
+ 
+         protected override void WriteBinaryOperationBinder(BinaryOperationBinder binder, IList<Expression> args) {
+diff --git a/Library/CodeWriterVisitors/VBExpressionMetadata.cs b/Library/CodeWriterVisitors/VBExpressionMetadata.cs
+index cdc9ec3..997de6e 100644
+--- a/Library/CodeWriterVisitors/VBExpressionMetadata.cs
++++ b/Library/CodeWriterVisitors/VBExpressionMetadata.cs
+@@ -10,11 +10,13 @@ namespace ExpressionTreeToString {
+         internal bool IsInMutiline { get; private set; } = false;
+         internal ExpressionType? ExpressionType { get; private set; } = null;
+         internal bool ReturnBkock { get; private set; } = false;
++
+         internal static VBExpressionMetadata CreateMetadata(bool isInMultiline = false, ExpressionType? expressionType = null, bool returnBlock = false) => new VBExpressionMetadata {
+             IsInMutiline = isInMultiline,
+             ExpressionType = expressionType,
+             ReturnBkock = returnBlock
+         };
++
+         internal void Deconstruct(out bool isInMultiline, out ExpressionType? expressionType, out bool returnBlock) {
+             isInMultiline = IsInMutiline;
+             expressionType = ExpressionType;
+diff --git a/Library/CodeWriterVisitors/VBWriterVisitor.cs b/Library/CodeWriterVisitors/VBWriterVisitor.cs
+index 2c8d647..ebe1a7e 100644
+--- a/Library/CodeWriterVisitors/VBWriterVisitor.cs
++++ b/Library/CodeWriterVisitors/VBWriterVisitor.cs
+@@ -1,18 +1,18 @@
+-﻿using ZSpitz.Util;
++﻿using ExpressionTreeToString.Util;
++using OneOf;
+ using System;
+ using System.Collections.Generic;
+ using System.Linq;
+ using System.Linq.Expressions;
+ using System.Reflection;
+-using static ZSpitz.Util.Functions;
++using ZSpitz.Util;
++using static ExpressionTreeToString.Globals;
++using static ExpressionTreeToString.Util.Functions;
++using static ExpressionTreeToString.VBExpressionMetadata;
+ using static System.Linq.Enumerable;
+ using static System.Linq.Expressions.ExpressionType;
+ using static System.Linq.Expressions.GotoExpressionKind;
+-using static ExpressionTreeToString.VBExpressionMetadata;
+-using ExpressionTreeToString.Util;
+-using OneOf;
+-using static ExpressionTreeToString.Globals;
+-using static ExpressionTreeToString.Util.Functions;
++using static ZSpitz.Util.Functions;
+ 
+ namespace ExpressionTreeToString {
+     public class VBWriterVisitor : CodeWriterVisitor {
+@@ -180,7 +180,6 @@ namespace ExpressionTreeToString {
+                     WriteNode(operandPath, operand);
+                     Write($", {type.FriendlyName(language)})");
+                     break;
+-
+                 case PreIncrementAssign:
+                     Write("(");
+                     WriteNode($"{operandPath}_0", operand);
+@@ -209,7 +208,6 @@ namespace ExpressionTreeToString {
+                     WriteNode(operandPath, operand);
+                     Write(" + 1)");
+                     return;
+-
+                 case IsTrue:
+                     WriteNode(operandPath, operand);
+                     break;
+@@ -217,7 +215,6 @@ namespace ExpressionTreeToString {
+                     Write("Not ");
+                     WriteNode(operandPath, operand);
+                     break;
+-
+                 case Increment:
+                     WriteNode(operandPath, operand);
+                     Write(" += 1");
+@@ -226,7 +223,6 @@ namespace ExpressionTreeToString {
+                     WriteNode(operandPath, operand);
+                     Write(" -= 1");
+                     break;
+-
+                 case Throw:
+                     Write("Throw");
+                     if (operand != null) {
+@@ -234,23 +230,19 @@ namespace ExpressionTreeToString {
+                         WriteNode(operandPath, operand);
+                     }
+                     break;
+-
+                 case Quote:
+                     WriteNode(operandPath, operand);
+                     break;
+-
+                 case UnaryPlus:
+                     Write("+");
+                     WriteNode(operandPath, operand);
+                     break;
+-
+                 default:
+                     WriteNotImplemented($"NodeType: {nodeType}, Expression object type: {expressionTypename}");
+                     break;
+             }
+         }
+ 
+-
+         protected override void WriteLambda(LambdaExpression expr) {
+             var lambdaKeyword = expr.ReturnType == typeof(void) ? "Sub" : "Function";
+             Write($"{lambdaKeyword}(");
+@@ -307,6 +299,7 @@ namespace ExpressionTreeToString {
+                         Write(",");
+                         WriteEOL();
+                     }
++
+                     // write as `.property = member` only if the source name is different from the target name
+                     // otheriwse just write `member`
+                     if (!(arg is MemberExpression mexpr && mexpr.Member.Name.Replace("$VB$Local_", "") == name)) {
+@@ -321,7 +314,7 @@ namespace ExpressionTreeToString {
+             WriteNew(expr.Type, "Arguments", expr.Arguments);
+         }
+ 
+-        static readonly MethodInfo power = typeof(Math).GetMethod("Pow")!;
++        private static readonly MethodInfo power = typeof(Math).GetMethod("Pow")!;
+ 
+         protected override void WriteCall(MethodCallExpression expr) {
+             if (expr.Method.IsVBLike()) {
+@@ -492,7 +485,7 @@ namespace ExpressionTreeToString {
+                 Write("Then");
+             }
+ 
+-            var canInline = (new[] { expr.IfTrue, expr.IfFalse }).All(x => this.canInline(x)) && !parentIsConditional;
++            var canInline = new[] { expr.IfTrue, expr.IfFalse }.All(x => this.canInline(x)) && !parentIsConditional;
+             if (canInline) {
+                 Write(" ");
+                 WriteNode("IfTrue", expr.IfTrue);
+@@ -582,7 +575,6 @@ namespace ExpressionTreeToString {
+                     return canInline(lmbd.Body);
+                 case UnaryExpression uexpr when uexpr.NodeType == Quote:
+                     return canInline(uexpr.Operand);
+-
+                 case ConditionalExpression cexpr when cexpr.Type == typeof(void):
+                 case BlockExpression bexpr when
+                     bexpr.Expressions.Count > 1 ||
+@@ -674,8 +666,7 @@ namespace ExpressionTreeToString {
+         }
+ 
+         protected override void WriteGoto(GotoExpression expr) {
+-            var gotoKeyword = expr.Kind switch
+-            {
++            var gotoKeyword = expr.Kind switch {
+                 Break => "Exit",
+                 Continue => "Continue",
+                 GotoExpressionKind.Goto => "Goto",
+@@ -813,7 +804,7 @@ namespace ExpressionTreeToString {
+             [TypeEqual] = 9, // like Equal
+             [TypeIs] = 9,
+             [UnaryPlus] = 2,
+-            [Unbox] = -1,
++            [Unbox] = -1
+         };
+ 
+         private static int getPrecedence(Expression node) => node switch {
+@@ -838,8 +829,7 @@ namespace ExpressionTreeToString {
+                 if (childPrecedence > parentPrecedence) {
+                     writeParens = true;
+                 } else if (childPrecedence == parentPrecedence) {
+-                    writeParens = childNode switch
+-                    {
++                    writeParens = childNode switch {
+                         BinaryExpression _ => path == "Right",
+                         DynamicExpression dexpr =>
+                             (dexpr.VirtualNodeType() == Conditional || dexpr.VirtualNodeType().In(BinaryExpressionTypes)) &&
+diff --git a/Library/DebugViewWriterVisitor.cs b/Library/DebugViewWriterVisitor.cs
+index bc837b8..dc5a3d6 100644
+--- a/Library/DebugViewWriterVisitor.cs
++++ b/Library/DebugViewWriterVisitor.cs
+@@ -5,8 +5,8 @@ using System.Linq;
+ using System.Linq.Expressions;
+ using System.Reflection;
+ using ZSpitz.Util;
+-using static System.Linq.Expressions.ExpressionType;
+ using static ExpressionTreeToString.Util.Functions;
++using static System.Linq.Expressions.ExpressionType;
+ 
+ #pragma warning disable IDE1006 // we want to imitate the original source as much as possible
+ namespace ExpressionTreeToString {
+@@ -30,9 +30,11 @@ namespace ExpressionTreeToString {
+         private int _column;
+ 
+         private const int Tab = 4;
++
+         private int Depth => CurrentIndentationLevel * Tab;
+ 
+         private void Out(string s, Flow after = Flow.None) => Out(Flow.None, s, after);
++
+         private void Out(Flow before, string s, Flow after = Flow.None) {
+             Flow CheckBreak(Flow flow) {
+                 if ((flow & Flow.Break) != 0) {
+@@ -76,7 +78,9 @@ namespace ExpressionTreeToString {
+         private Dictionary<LabelTarget, int>? _labelIds;
+ 
+         private int GetLambdaId(LambdaExpression lmbd, out bool isNew) => GetId(lmbd, ref _lambdaIds, out isNew, 1);
++
+         private int GetParamId(ParameterExpression prm) => GetId(prm, ref _paramIds, out var _, 1);
++
+         private int GetLabelTargetId(LabelTarget target) => GetId(target, ref _labelIds, out var _, 1);
+ 
+         private static string GetDisplayName(string name) =>
+@@ -84,14 +88,16 @@ namespace ExpressionTreeToString {
+                 $"'{name}'" :
+                 name;
+ 
+-        bool isRootLambda = true;
++        private bool isRootLambda = true;
++
+         protected override void WriteNodeImpl(object? o, bool parameterDeclaration = false, object? metadata = null) {
+             if (!(o is LambdaExpression)) { isRootLambda = false; }
+             base.WriteNodeImpl(o, parameterDeclaration, metadata);
+         }
+ 
+-        private void VisitExpressions<T>(string path, char open, IReadOnlyList<T> expressions) where T : notnull => 
++        private void VisitExpressions<T>(string path, char open, IReadOnlyList<T> expressions) where T : notnull =>
+             VisitExpressions(path, open, ',', expressions);
++
+         private void VisitExpressions<T>(string path, char open, char separator, IReadOnlyList<T> expressions, bool parameterDeclaration = false) where T : notnull {
+             // we can't replace this with WriteNodes, because this affects Flow, which doesn't exist in VisitorWriterBase -- 
+             // but perhaps after https://github.com/zspitz/ExpressionTreeToString/issues/52
+@@ -110,8 +116,7 @@ namespace ExpressionTreeToString {
+                 Dedent();
+             }
+ 
+-            var close = open switch
+-            {
++            var close = open switch {
+                 '(' => ')',
+                 '{' => '}',
+                 '[' => ']',
+@@ -124,7 +129,7 @@ namespace ExpressionTreeToString {
+             Out(close.ToString(), Flow.Break);
+         }
+ 
+-        private string GetLabelTargetName(LabelTarget target) => 
++        private string GetLabelTargetName(LabelTarget target) =>
+             target.Name.IsNullOrEmpty() ?
+                 $"#Label{GetLabelTargetId(target)}" :
+                 GetDisplayName(target.Name);
+@@ -182,7 +187,6 @@ namespace ExpressionTreeToString {
+                 case Power: op = "**"; break;
+                 case PowerAssign: op = "**="; break;
+                 case Coalesce: op = "??"; break;
+-
+                 default:
+                     throw new InvalidOperationException();
+             }
+@@ -211,8 +215,7 @@ namespace ExpressionTreeToString {
+             if (node.NodeType == Throw && node.Operand is { }) {
+                 Out(".Throw", Flow.Space);
+             } else {
+-                var toWrite = node.NodeType switch
+-                {
++                var toWrite = node.NodeType switch {
+                     ExpressionType.Convert => "(" + node.Type.ToString() + ")",
+                     ConvertChecked => "#(" + node.Type.ToString() + ")",
+                     Not => node.Type == typeof(bool) ? "!" : "~",
+@@ -243,15 +246,12 @@ namespace ExpressionTreeToString {
+                     Out(Flow.Space, ".As", Flow.Space | Flow.Break);
+                     Out(node.Type.ToString());
+                     break;
+-
+                 case ArrayLength:
+                     Out(".Length");
+                     break;
+-
+                 case PostDecrementAssign:
+                     Out("--");
+                     break;
+-
+                 case PostIncrementAssign:
+                     Out("++");
+                     break;
+@@ -319,8 +319,7 @@ namespace ExpressionTreeToString {
+             var value = expr.Value;
+ 
+             Out(
+-                value switch
+-                {
++                value switch {
+                     null => "null",
+                     string _ when expr.Type == typeof(string) => $"\"{value}\"",
+                     char _ when expr.Type == typeof(char) => $"'{value}'",
+@@ -333,14 +332,22 @@ namespace ExpressionTreeToString {
+         }
+ 
+         private static int GetOperatorPrecedence(Expression node) =>
+-            node.NodeType switch
+-            {
++            node.NodeType switch {
+                 var x when x.In(
+-                    Assign, ExclusiveOrAssign,
+-                    AddAssign, AddAssignChecked, SubtractAssign, SubtractAssignChecked,
+-                    DivideAssign, ModuloAssign, MultiplyAssign, MultiplyAssignChecked,
+-                    LeftShiftAssign, RightShiftAssign,
+-                    AndAssign, OrAssign,
++                    Assign,
++                    ExclusiveOrAssign,
++                    AddAssign,
++                    AddAssignChecked,
++                    SubtractAssign,
++                    SubtractAssignChecked,
++                    DivideAssign,
++                    ModuloAssign,
++                    MultiplyAssign,
++                    MultiplyAssignChecked,
++                    LeftShiftAssign,
++                    RightShiftAssign,
++                    AndAssign,
++                    OrAssign,
+                     PowerAssign,
+                     Coalesce
+                 ) => 1,
+@@ -355,8 +362,13 @@ namespace ExpressionTreeToString {
+                 var x when x.In(Equal, NotEqual) => 7,
+ 
+                 var x when x.In(
+-                    GreaterThan, LessThan, GreaterThanOrEqual, LessThanOrEqual,
+-                    TypeAs, TypeIs, TypeEqual
++                    GreaterThan,
++                    LessThan,
++                    GreaterThanOrEqual,
++                    LessThanOrEqual,
++                    TypeAs,
++                    TypeIs,
++                    TypeEqual
+                 ) => 8,
+ 
+                 var x when x.In(LeftShift, RightShift) => 9,
+@@ -364,11 +376,20 @@ namespace ExpressionTreeToString {
+                 var x when x.In(Divide, Modulo, Multiply, MultiplyChecked) => 11,
+ 
+                 var x when x.In(
+-                    Negate, NegateChecked, UnaryPlus, Not,
+-                    ExpressionType.Convert, ConvertChecked, Unbox,
+-                    PreIncrementAssign, PreDecrementAssign,
+-                    OnesComplement, Increment, Decrement,
+-                    IsTrue, IsFalse,
++                    Negate,
++                    NegateChecked,
++                    UnaryPlus,
++                    Not,
++                    ExpressionType.Convert,
++                    ConvertChecked,
++                    Unbox,
++                    PreIncrementAssign,
++                    PreDecrementAssign,
++                    OnesComplement,
++                    Increment,
++                    Decrement,
++                    IsTrue,
++                    IsFalse,
+                     Throw
+                 ) => 12,
+ 
+@@ -411,7 +432,6 @@ namespace ExpressionTreeToString {
+                 // 3) Parent op is -, / or %, and the child is the left operand.
+                 // In this case, if left and right operand are the same, we don't
+                 // remove parenthesis, e.g. (x + y) - (x + y)
+-                //
+                 return parent.NodeType switch {
+                     // Since these ops are the only ones on their precedence,
+                     // the child op must be the same.
+@@ -420,7 +440,7 @@ namespace ExpressionTreeToString {
+ 
+                     Add or AddChecked or Multiply or MultiplyChecked => false,
+                     Subtract or SubtractChecked or Divide or Modulo => child == (parent as BinaryExpression)!.Right,
+-                    _ => true,
++                    _ => true
+                 };
+             }
+ 
+@@ -520,12 +540,12 @@ namespace ExpressionTreeToString {
+             Dedent();
+             Out(Flow.NewLine, "}");
+ 
+-            static bool IsSimpleExpression(Expression node) => 
+-                node is BinaryExpression binary && 
++            static bool IsSimpleExpression(Expression node) =>
++                node is BinaryExpression binary &&
+                 !(binary.Left is BinaryExpression || binary.Right is BinaryExpression);
+         }
+ 
+-        protected override void WriteDefault(DefaultExpression node) => 
++        protected override void WriteDefault(DefaultExpression node) =>
+             Out(
+                 $".Default({node.Type})"
+             );
+@@ -551,7 +571,7 @@ namespace ExpressionTreeToString {
+ 
+         protected override void WriteIndex(IndexExpression node) {
+             if (node.Indexer is { }) {
+-                OutMember("Object",node, node.Object, node.Indexer);
++                OutMember("Object", node, node.Object, node.Indexer);
+             } else {
+                 ParenthesizedVisit("Object", node, node.Object!);
+             }
+@@ -648,7 +668,7 @@ namespace ExpressionTreeToString {
+             VisitExpressions("Variables", '(', expr.Variables);
+         }
+ 
+-        protected override void WriteDebugInfo(DebugInfoExpression node) => 
++        protected override void WriteDebugInfo(DebugInfoExpression node) =>
+             Out(
+                 $".DebugInfo({node.Document.FileName}: {node.StartLine}, {node.StartColumn} - {node.EndLine}, {node.EndColumn})"
+             );
+@@ -699,7 +719,7 @@ namespace ExpressionTreeToString {
+             });
+             Indent(); Indent();
+             WriteNode("Body", node.Body);
+-            Dedent(); 
++            Dedent();
+             Dedent();
+             NewLine();
+         }
+@@ -720,7 +740,7 @@ namespace ExpressionTreeToString {
+             Dedent();
+         }
+ 
+-        protected override void WriteLabelTarget(LabelTarget labelTarget) => 
++        protected override void WriteLabelTarget(LabelTarget labelTarget) =>
+             Out(
+                 $".LabelTarget {GetLabelTargetName(labelTarget)}:"
+             );
+@@ -733,8 +753,7 @@ namespace ExpressionTreeToString {
+ 
+             Out(".Dynamic", Flow.Space);
+             Out(
+-                node.Binder switch
+-                {
++                node.Binder switch {
+                     ConvertBinder convert => $"Convert {convert.Type}",
+                     GetMemberBinder getMember => $"GetMember {getMember.Name}",
+                     SetMemberBinder setMember => $"SetMember {setMember.Name}",
+diff --git a/Library/DynamicLinqWriterVisitor.cs b/Library/DynamicLinqWriterVisitor.cs
+index 4380503..f099c64 100644
+--- a/Library/DynamicLinqWriterVisitor.cs
++++ b/Library/DynamicLinqWriterVisitor.cs
+@@ -6,10 +6,10 @@ using System.Linq;
+ using System.Linq.Expressions;
+ using System.Reflection;
+ using ZSpitz.Util;
++using static ExpressionTreeToString.Util.Functions;
++using static System.Linq.Enumerable;
+ using static System.Linq.Expressions.ExpressionType;
+ using static ZSpitz.Util.Functions;
+-using static System.Linq.Enumerable;
+-using static ExpressionTreeToString.Util.Functions;
+ 
+ namespace ExpressionTreeToString {
+     public class DynamicLinqWriterVisitor : BuiltinsWriterVisitor {
+@@ -44,7 +44,7 @@ namespace ExpressionTreeToString {
+                 isAccessibleType(t.UnderlyingSystemType) :
+                 t.In(predefinedTypes) || t.In(CustomAccessibleTypes);
+ 
+-        ParameterExpression? currentScoped;
++        private ParameterExpression? currentScoped;
+ 
+         public DynamicLinqWriterVisitor(object o, OneOf<string, Language?> languageArg, bool hasPathSpans) :
+             base(
+@@ -71,7 +71,7 @@ namespace ExpressionTreeToString {
+             [GreaterThan] = ">",
+             [LessThan] = "<",
+             [LessThanOrEqual] = "<=",
+-            [Coalesce] = "??",
++            [Coalesce] = "??"
+         };
+ 
+         // can be verified against https://dynamic-linq.net/expression-language#operators using:
+@@ -341,6 +341,7 @@ namespace ExpressionTreeToString {
+         }
+ 
+         private bool insideLambda = false;
++
+         protected override void WriteLambda(LambdaExpression expr) {
+             var exitLambda = false;
+             if (!insideLambda) {
+@@ -375,6 +376,7 @@ namespace ExpressionTreeToString {
+         }
+ 
+         private Dictionary<object, int>? parameterIds;
++
+         private int getParaneterId(object o, out bool isNew) => GetId(o, ref parameterIds, out isNew);
+ 
+         protected override void WriteConstant(ConstantExpression expr) {
+@@ -480,6 +482,7 @@ namespace ExpressionTreeToString {
+                 WriteNotImplemented("Multidimensional array access not supported.");
+                 return;
+             }
++
+             // No such thing as a static indexer
+             parens(0, instancePath, instance);
+             Write("[");
+@@ -495,22 +498,20 @@ namespace ExpressionTreeToString {
+                     return;
+                 }
+                 Write(typeName(declaringType) + ".");
+-            } else {
+-                if (instance.Type.IsClosureClass()) {
+-                    WriteNotImplemented("No representation for closed-over variables.");
+-                    return;
+-                } else if (
+-                    mi is MethodInfo mthd &&
+-                    !isAccessibleType(declaringType) &&
+-                    !isAccessibleType(mthd.ReturnType) &&
+-                    insideLambda
++            } else if (instance.Type.IsClosureClass()) {
++                WriteNotImplemented("No representation for closed-over variables.");
++                return;
++            } else if (
++                mi is MethodInfo mthd &&
++                !isAccessibleType(declaringType) &&
++                !isAccessibleType(mthd.ReturnType) &&
++                insideLambda
+                 ) {
+-                    WriteNotImplemented($"Within a quoted lambda, {(mthd.IsStatic ? "extension" : "instance")} methods must either be on an accessible type, or return an instance of an accessible type.");
+-                    return;
+-                } else if (instance.SansConvert() != currentScoped) {
+-                    parens(0, instancePath, instance);
+-                    Write(".");
+-                }
++                WriteNotImplemented($"Within a quoted lambda, {(mthd.IsStatic ? "extension" : "instance")} methods must either be on an accessible type, or return an instance of an accessible type.");
++                return;
++            } else if (instance.SansConvert() != currentScoped) {
++                parens(0, instancePath, instance);
++                Write(".");
+             }
+             Write(mi.Name);
+         }
+@@ -535,7 +536,6 @@ namespace ExpressionTreeToString {
+             // TODO what about Max/Min/Sum without predicate?
+ 
+             return new[] {
+-                #region Enumerable
+                 GetMethod(() => e.All(x => true)),
+                 GetMethod(() => e.Any()),
+                 GetMethod(() => e.Any(x => true)),
+@@ -576,9 +576,7 @@ namespace ExpressionTreeToString {
+                 GetMethod(() => ordered.ThenBy(x => x)),
+                 GetMethod(() => ordered.ThenByDescending(x => x)),
+                 GetMethod(() => e.Where(x => true)),
+-                #endregion
+ 
+-                #region Queryable
+                 GetMethod(() => q.All(x => true)),
+                 GetMethod(() => q.Any()),
+                 GetMethod(() => q.Any(x => true)),
+@@ -619,7 +617,6 @@ namespace ExpressionTreeToString {
+                 GetMethod(() => orderedQ.ThenBy(x => x)),
+                 GetMethod(() => orderedQ.ThenByDescending(x => x)),
+                 GetMethod(() => q.Where(x => true))
+-                #endregion
+             }.Select(x => x.GetGenericMethodDefinition()).ToArray();
+         });
+ 
+@@ -710,7 +707,7 @@ namespace ExpressionTreeToString {
+             if (expr.Type == typeof(void)) {
+                 WriteNotImplemented("Cannot represent void-returning conditionals.");
+                 return;
+-            };
++            }
+ 
+             // TODO handle !(x.A == null) as well
+             // TODO handle also !(x == null || x.A == null)
+@@ -768,11 +765,12 @@ namespace ExpressionTreeToString {
+ 
+         protected override void WriteInvocation(InvocationExpression expr) {
+             WriteNotImplemented("Pending https://github.com/zzzprojects/System.Linq.Dynamic.Core/issues/441");
+-            //Write("(");
+-            //WriteNode("Expression", expr.Expression);
+-            //Write(")(");
+-            //WriteNodes("Arguments", expr.Arguments);
+-            //Write(")");
++
++            // Write("(");
++            // WriteNode("Expression", expr.Expression);
++            // Write(")(");
++            // WriteNodes("Arguments", expr.Arguments);
++            // Write(")");
+         }
+ 
+         protected override void WriteIndex(IndexExpression expr) =>
+@@ -828,7 +826,7 @@ namespace ExpressionTreeToString {
+             { typeof(long), "long" },
+             { typeof(ulong), "ulong" },
+             { typeof(bool), "bool" },
+-            { typeof(float), "float" },
++            { typeof(float), "float" }
+         };
+ 
+         private static string typeName(Type t) =>
+diff --git a/Library/ExpressionExtension.cs b/Library/ExpressionExtension.cs
+index e604c8a..41fe49b 100644
+--- a/Library/ExpressionExtension.cs
++++ b/Library/ExpressionExtension.cs
+@@ -1,6 +1,6 @@
+-﻿using System.Collections.Generic;
++﻿using OneOf;
++using System.Collections.Generic;
+ using System.Linq.Expressions;
+-using OneOf;
+ using ZSpitz.Util;
+ using static ExpressionTreeToString.Renderers;
+ 
+@@ -9,13 +9,13 @@ namespace ExpressionTreeToString {
+         public static string ToString(this Expression expr, OneOf<string, BuiltinRenderer> rendererArg, OneOf<string, Language?> language = default) =>
+             Invoke(rendererArg, expr, language);
+ 
+-        public static string ToString(this Expression expr, OneOf<string, BuiltinRenderer> rendererArg, out Dictionary<string, (int start, int length)> pathSpans, OneOf<string, Language?> language = default) => 
++        public static string ToString(this Expression expr, OneOf<string, BuiltinRenderer> rendererArg, out Dictionary<string, (int start, int length)> pathSpans, OneOf<string, Language?> language = default) =>
+             Invoke(rendererArg, expr, language, out pathSpans);
+ 
+         public static string ToString(this ElementInit init, OneOf<string, BuiltinRenderer> rendererArg, OneOf<string, Language?> language = default) =>
+             Invoke(rendererArg, init, language);
+ 
+-        public static string ToString(this ElementInit init, OneOf<string, BuiltinRenderer> rendererArg, out Dictionary<string, (int start, int length)> pathSpans, OneOf<string, Language?> language = default) => 
++        public static string ToString(this ElementInit init, OneOf<string, BuiltinRenderer> rendererArg, out Dictionary<string, (int start, int length)> pathSpans, OneOf<string, Language?> language = default) =>
+             Invoke(rendererArg, init, language, out pathSpans);
+ 
+         public static string ToString(this MemberBinding mbind, OneOf<string, BuiltinRenderer> rendererArg, OneOf<string, Language?> language = default) =>
+diff --git a/Library/FactoryMethodsWriterVisitor.cs b/Library/FactoryMethodsWriterVisitor.cs
+index f9c9d20..7afe30d 100644
+--- a/Library/FactoryMethodsWriterVisitor.cs
++++ b/Library/FactoryMethodsWriterVisitor.cs
+@@ -1,20 +1,20 @@
+-﻿using ZSpitz.Util;
++﻿using ExpressionTreeToString.Util;
++using OneOf;
+ using System;
++using System.Collections;
+ using System.Collections.Generic;
+ using System.Dynamic;
+ using System.Linq;
+ using System.Linq.Expressions;
+-using static ExpressionTreeToString.Globals;
+-using static ZSpitz.Util.Functions;
+-using static System.Linq.Expressions.Expression;
+-using System.Collections;
+ using System.Reflection;
+ using System.Runtime.CompilerServices;
++using ZSpitz.Util;
++using static ExpressionTreeToString.Globals;
++using static ExpressionTreeToString.Util.Functions;
+ using static System.Linq.Enumerable;
+-using OneOf;
++using static System.Linq.Expressions.Expression;
++using static ZSpitz.Util.Functions;
+ using static ZSpitz.Util.Language;
+-using static ExpressionTreeToString.Util.Functions;
+-using ExpressionTreeToString.Util;
+ 
+ namespace ExpressionTreeToString {
+     public class FactoryMethodsWriterVisitor : BuiltinsWriterVisitor {
+@@ -24,8 +24,7 @@ namespace ExpressionTreeToString {
+ 
+         private void writeUsings() {
+             SetInsertionPoint("usings");
+-            var @using = language switch
+-            {
++            var @using = language switch {
+                 CSharp => "// using static System.Linq.Expressions.Expression",
+                 VisualBasic => "' Imports System.Linq.Expressions.Expression",
+                 _ => throw new NotImplementedException()
+@@ -37,16 +36,16 @@ namespace ExpressionTreeToString {
+ 
+         public FactoryMethodsWriterVisitor(object o, OneOf<string, Language?> languageArg, bool hasPathSpans = false) :
+             base(
+-                o, 
+-                languageArg.ResolveLanguage() ?? throw new ArgumentException("Invalid language"), 
+-                insertionPointKeys, 
++                o,
++                languageArg.ResolveLanguage() ?? throw new ArgumentException("Invalid language"),
++                insertionPointKeys,
+                 hasPathSpans
+             ) => writeUsings();
+ 
+         /// <param name="args">The arguments to write. If a tuple of string and node type, will write as single node. If a tuple of string and property type, will write as multiple nodes.</param>
+         private void writeMethodCall(string name, IEnumerable args) {
+             var isVBKeyword = language == VisualBasic && VBKeywords.Contains(name);
+-            if (isVBKeyword) {Write("[");}
++            if (isVBKeyword) { Write("["); }
+             Write(name);
+             if (isVBKeyword) { Write("["); }
+             Write("(");
+@@ -57,8 +56,8 @@ namespace ExpressionTreeToString {
+             args.Cast<object>().ForEach((x, index) => {
+                 var isTuple = TryTupleValues(x, out var values) && values.Length == 2;
+                 (var path, var arg) = isTuple ? ((string)values![0]!, values[1]) : ("", x);
+-                var parameterDeclaration = 
+-                    (name == "Lambda" && path.StartsWith("Parameters")) || 
++                var parameterDeclaration =
++                    (name == "Lambda" && path.StartsWith("Parameters")) ||
+                     (name == "Block" && path.StartsWith("Variables"));
+ 
+                 var writeNewline = false;
+@@ -66,19 +65,15 @@ namespace ExpressionTreeToString {
+                 if (wrapPreviousInNewline) {
+                     writeNewline = true;
+                     wrapPreviousInNewline = false;
+-                } else if (arg is { }) {
+-                    if (
+-                        (
+-                            argType!.InheritsFromOrImplementsAny(NodeTypes) ||
+-                            arg is MemberInfo ||
+-                            arg is CallSiteBinder
+-                        ) && !(
+-                            arg is ParameterExpression
+-                        )
+-                    ) {
+-                        writeNewline = true;
+-                        wrapPreviousInNewline = true;
+-                    }
++                } else if (arg is { } && (
++                        argType!.InheritsFromOrImplementsAny(NodeTypes) ||
++                        arg is MemberInfo ||
++                        arg is CallSiteBinder
++                    ) && !(
++                        arg is ParameterExpression
++                    )) {
++                    writeNewline = true;
++                    wrapPreviousInNewline = true;
+                 }
+ 
+                 if (index > 0) {
+@@ -135,18 +130,19 @@ namespace ExpressionTreeToString {
+             if (expr.Body is not MethodCallExpression callExpr) { throw new ArgumentException("Not a MethodCallExpression"); }
+ 
+             var args = NewArrayInit(
+-                typeof(object), 
+-                callExpr.Arguments.Select(x => 
+-                    !x.Type.IsValueType ? 
+-                        x : 
+-                        Convert(x, typeof(object)))
++                typeof(object),
++                callExpr.Arguments.Select(x =>
++                    !x.Type.IsValueType ?
++                        x :
++                        Convert(x, typeof(object))
++                )
+                 ).ExtractValue() as object[];
+             var names = callExpr.Arguments.Select(x => {
+                 if (x is MethodCallExpression callExpr1) {
+                     if (callExpr1.Method.Name == "ToArray") {
+                         x = callExpr1.Arguments[0];
+                     } else if (
+-                        callExpr1.Method.IsIndexerMethod() && 
++                        callExpr1.Method.IsIndexerMethod() &&
+                         callExpr1.Arguments.Count == 1 && // TODO theoretically we could pass multiple values to the indexer
+                         callExpr1.Arguments[0] is ConstantExpression cexpr &&
+                         callExpr1.Object is MemberExpression mexpr
+@@ -167,6 +163,7 @@ namespace ExpressionTreeToString {
+         }
+ 
+         private static readonly MethodInfo powerMethod = typeof(Math).GetMethod("Pow")!;
++
+         protected override void WriteBinary(BinaryExpression expr) {
+             var methodName = FactoryMethodNames[expr.NodeType];
+             var args = new List<object?> {
+@@ -219,7 +216,7 @@ namespace ExpressionTreeToString {
+             };
+ 
+             if (
+-                (expr.NodeType.In(ExpressionType.Convert, ExpressionType.ConvertChecked, ExpressionType.TypeAs, ExpressionType.Unbox)) ||
++                expr.NodeType.In(ExpressionType.Convert, ExpressionType.ConvertChecked, ExpressionType.TypeAs, ExpressionType.Unbox) ||
+                 (expr.NodeType == ExpressionType.Throw && expr.Type != typeof(void))
+             ) {
+                 args.Add(expr.Type);
+@@ -248,7 +245,7 @@ namespace ExpressionTreeToString {
+             var args = new List<object>();
+             if (!expr.Type.IsAction() && !expr.Type.IsFunc()) {
+                 args.Add(expr.Type);
+-            };
++            }
+             args.Add(("Body", expr.Body));
+             if (!expr.Name.IsNullOrWhitespace()) {
+                 args.Add(expr.Name);
+@@ -260,7 +257,7 @@ namespace ExpressionTreeToString {
+             writeMethodCall("Lambda", args);
+         }
+ 
+-        protected override void WriteParameter(ParameterExpression expr) => 
++        protected override void WriteParameter(ParameterExpression expr) =>
+             Write(GetVariableName(expr, ref ids));
+ 
+         protected override void WriteConstant(ConstantExpression expr) {
+@@ -290,15 +287,15 @@ namespace ExpressionTreeToString {
+             writeMethodCall(() => MakeMemberAccess(expr.Expression, expr.Member));
+         }
+ 
+-        protected override void WriteNew(NewExpression expr) => 
++        protected override void WriteNew(NewExpression expr) =>
+             writeMethodCall(() => New(expr.Constructor!, expr.Arguments.ToArray()));
+ 
+         protected override void WriteCall(MethodCallExpression expr) {
+             if ((expr.Object?.Type.IsArray ?? false) && expr.Method.Name == "Get") {
+                 writeMethodCall(() => ArrayIndex(expr.Object, expr.Arguments.ToArray()));
+                 return;
+-            } 
+-            
++            }
++
+             if (expr.Method.IsIndexerMethod(out var pi)) {
+                 writeMethodCall(() => Property(expr.Object, pi, expr.Arguments.ToArray()));
+                 return;
+@@ -384,12 +381,10 @@ namespace ExpressionTreeToString {
+                 } else {
+                     writeMethodCall(() => Block(expr.Type, expr.Expressions.ToArray()));
+                 }
++            } else if (expr.Variables.Any()) {
++                writeMethodCall(() => Block(expr.Variables, expr.Expressions.ToArray()));
+             } else {
+-                if (expr.Variables.Any()) {
+-                    writeMethodCall(() => Block(expr.Variables, expr.Expressions.ToArray()));
+-                } else {
+-                    writeMethodCall(() => Block(expr.Expressions.ToArray()));
+-                }
++                writeMethodCall(() => Block(expr.Expressions.ToArray()));
+             }
+         }
+ 
+@@ -428,8 +423,7 @@ namespace ExpressionTreeToString {
+         }
+ 
+         protected override void WriteGoto(GotoExpression expr) {
+-            var methodName = expr.Kind switch
+-            {
++            var methodName = expr.Kind switch {
+                 GotoExpressionKind.Break => "Break",
+                 GotoExpressionKind.Continue => "Continue",
+                 GotoExpressionKind.Return => "Return",
+@@ -453,6 +447,7 @@ namespace ExpressionTreeToString {
+ 
+         protected override void WriteRuntimeVariables(RuntimeVariablesExpression expr) =>
+             writeMethodCall(() => RuntimeVariables(expr.Variables.ToArray()));
++
+         protected override void WriteDebugInfo(DebugInfoExpression expr) {
+             if (expr.IsClear) {
+                 writeMethodCall(() => ClearDebugInfo(expr.Document));
+@@ -490,12 +485,10 @@ namespace ExpressionTreeToString {
+                 } else {
+                     writeMethodCall(() => Catch(catchBlock.Variable, catchBlock.Body));
+                 }
++            } else if (catchBlock.Filter != null) {
++                writeMethodCall(() => Catch(catchBlock.Test, catchBlock.Body, catchBlock.Filter));
+             } else {
+-                if (catchBlock.Filter != null) {
+-                    writeMethodCall(() => Catch(catchBlock.Test, catchBlock.Body, catchBlock.Filter));
+-                } else {
+-                    writeMethodCall(() => Catch(catchBlock.Test, catchBlock.Body));
+-                }
++                writeMethodCall(() => Catch(catchBlock.Test, catchBlock.Body));
+             }
+         }
+ 
+@@ -506,18 +499,15 @@ namespace ExpressionTreeToString {
+                 } else {
+                     writeMethodCall(() => Label(labelTarget.Name));
+                 }
++            } else if (labelTarget.Name == null) {
++                writeMethodCall(() => Label(labelTarget.Type));
+             } else {
+-                if (labelTarget.Name == null) {
+-                    writeMethodCall(() => Label(labelTarget.Type));
+-                } else {
+-                    writeMethodCall(() => Label(labelTarget.Type, labelTarget.Name));
+-                }
++                writeMethodCall(() => Label(labelTarget.Type, labelTarget.Name));
+             }
+         }
+ 
+         protected override void WriteDynamic(DynamicExpression expr) {
+-            Expression<Action> callExpr = expr.Arguments.Count switch
+-            {
++            Expression<Action> callExpr = expr.Arguments.Count switch {
+                 1 => () => Dynamic(expr.Binder, expr.Type, expr.Arguments[0]),
+                 2 => () => Dynamic(expr.Binder, expr.Type, expr.Arguments[0], expr.Arguments[1]),
+                 3 => () => Dynamic(expr.Binder, expr.Type, expr.Arguments[0], expr.Arguments[1], expr.Arguments[2]),
+@@ -541,12 +531,10 @@ namespace ExpressionTreeToString {
+                     new (string, object)[] { ("Type", type) } :
+                     new (string, object)[] { ("Type", type), ("Name", prm.Name) };
+                 writeMethodCall("Parameter", args);
++            } else if (prm.Name.IsNullOrWhitespace()) {
++                writeMethodCall(() => Parameter(prm.Type));
+             } else {
+-                if (prm.Name.IsNullOrWhitespace()) {
+-                    writeMethodCall(() => Parameter(prm.Type));
+-                } else {
+-                    writeMethodCall(() => Parameter(prm.Type, prm.Name));
+-                }
++                writeMethodCall(() => Parameter(prm.Type, prm.Name));
+             }
+             if (language == CSharp) { Write(";"); }
+             WriteEOL();
+diff --git a/Library/Globals.cs b/Library/Globals.cs
+index c9a7f32..9483262 100644
+--- a/Library/Globals.cs
++++ b/Library/Globals.cs
+@@ -1,8 +1,8 @@
+-﻿using ZSpitz.Util;
+-using System;
++﻿using System;
+ using System.Collections.Generic;
+ using System.Linq;
+ using System.Linq.Expressions;
++using ZSpitz.Util;
+ using static System.Linq.Expressions.ExpressionType;
+ 
+ namespace ExpressionTreeToString {
+@@ -125,7 +125,7 @@ namespace ExpressionTreeToString {
+             { TypeEqual, "TypeEqual" },
+             { TypeIs, "TypeIs" },
+             { UnaryPlus, "UnaryPlus" },
+-            { Unbox, "Unbox" },
++            { Unbox, "Unbox" }
+         };
+ 
+         public static readonly List<(Type type, string[] propertyNames)> PreferredPropertyOrders = new() {
+diff --git a/Library/ObjectNotationWriterVisitor.cs b/Library/ObjectNotationWriterVisitor.cs
+index fbdd99f..33d3a61 100644
+--- a/Library/ObjectNotationWriterVisitor.cs
++++ b/Library/ObjectNotationWriterVisitor.cs
+@@ -1,14 +1,14 @@
+-﻿using ZSpitz.Util;
++﻿using OneOf;
+ using System;
++using System.Collections;
+ using System.Collections.Generic;
+ using System.Linq;
+ using System.Linq.Expressions;
+-using static ZSpitz.Util.Functions;
++using ZSpitz.Util;
+ using static ExpressionTreeToString.Globals;
+-using System.Collections;
+-using OneOf;
+-using static ZSpitz.Util.Language;
+ using static ExpressionTreeToString.Util.Functions;
++using static ZSpitz.Util.Functions;
++using static ZSpitz.Util.Language;
+ 
+ namespace ExpressionTreeToString {
+     public class ObjectNotationWriterVisitor : WriterVisitorBase {
+@@ -30,8 +30,7 @@ namespace ExpressionTreeToString {
+                 if (!parameterDeclaration) { return; }
+ 
+                 SetInsertionPoint("declarations");
+-                Write(language switch
+-                {
++                Write(language switch {
+                     CSharp => "var",
+                     VisualBasic => "Dim",
+                     _ => throw new NotImplementedException("Invalid language.")
+@@ -41,7 +40,7 @@ namespace ExpressionTreeToString {
+ 
+             var type = writeNew(o);
+             var preferredOrder = PreferredPropertyOrders.FirstOrDefault(x => x.type.IsAssignableFrom(o.GetType())).propertyNames;
+-            var properties = type.GetProperties().Where(x => 
++            var properties = type.GetProperties().Where(x =>
+                 x.Name.NotIn("CanReduce", "TailCall", "CanReduce", "IsLifted", "IsLiftedToNull", "ArgumentCount") &&
+                 !(x.Name == "NodeType" && type.In(hideNodeType))
+             ).ToList();
+@@ -84,7 +83,7 @@ namespace ExpressionTreeToString {
+                 )
+                 .WithIndex();
+ 
+-            foreach (var (x,value,index) in propertyValues) {
++            foreach (var (x, value, index) in propertyValues) {
+                 if (index > 0) {
+                     Write(",");
+                     WriteEOL();
+diff --git a/Library/Renderers.cs b/Library/Renderers.cs
+index 5966b1e..fc2fdeb 100644
+--- a/Library/Renderers.cs
++++ b/Library/Renderers.cs
+@@ -25,7 +25,7 @@ namespace ExpressionTreeToString {
+ 
+         public static void Register(string key, Renderer writer) => writers.Add(key, writer);
+ 
+-        public static string Invoke(OneOf<string, BuiltinRenderer> rendererArg, object o, OneOf<string, Language?> language) => 
++        public static string Invoke(OneOf<string, BuiltinRenderer> rendererArg, object o, OneOf<string, Language?> language) =>
+             writers[rendererArg.ResolveRendererKey()].Invoke(o, language, false).result;
+ 
+         public static string Invoke(OneOf<string, BuiltinRenderer> rendererArg, object o, OneOf<string, Language?> language, out Dictionary<string, (int start, int length)> pathSpans) {
+diff --git a/Library/TextualTreeWriterVisitor.cs b/Library/TextualTreeWriterVisitor.cs
+index 1993b0f..240cd5b 100644
+--- a/Library/TextualTreeWriterVisitor.cs
++++ b/Library/TextualTreeWriterVisitor.cs
+@@ -1,19 +1,19 @@
+-﻿using ZSpitz.Util;
++﻿using ExpressionTreeToString.Util;
++using OneOf;
+ using System;
++using System.Collections;
+ using System.Linq;
+ using System.Linq.Expressions;
+ using System.Runtime.CompilerServices;
+-using static ZSpitz.Util.Functions;
++using ZSpitz.Util;
+ using static ExpressionTreeToString.Globals;
+-using System.Collections;
+-using ExpressionTreeToString.Util;
+-using OneOf;
++using static ZSpitz.Util.Functions;
+ 
+ namespace ExpressionTreeToString {
+     public class TextualTreeWriterVisitor : WriterVisitorBase {
+         public static Func<Expression, bool>? ReducePredicate;
+ 
+-        public TextualTreeWriterVisitor(object o, OneOf<string, Language?> languageArg, bool hasPathSpans = false) 
++        public TextualTreeWriterVisitor(object o, OneOf<string, Language?> languageArg, bool hasPathSpans = false)
+             : base(o, languageArg, null, hasPathSpans) { }
+ 
+         private readonly ValueExtractor valueExtractor = new();
+@@ -32,7 +32,6 @@ namespace ExpressionTreeToString {
+                     if (name is { } && name.ContainsWhitespace()) { name = $"\"{name}\""; }
+                     value = valueExtractor.GetValue(expr).value;
+                     break;
+-
+                 case MemberBinding mbind:
+                     nodeType = mbind.BindingType.ToString();
+                     name = mbind.Member.Name;
+@@ -59,13 +58,13 @@ namespace ExpressionTreeToString {
+                     prp.PropertyType.InheritsFromOrImplementsAny(PropertyTypes) ||
+                     prp.PropertyType.InheritsFromOrImplementsAny(NodeTypes)
+                 )
+-                .OrderBy(x => 
+-                    preferredOrder is null ? 
+-                        -1 : 
++                .OrderBy(x =>
++                    preferredOrder is null ?
++                        -1 :
+                         Array.IndexOf(preferredOrder, x.Name)
+                 )
+                 .ThenBy(x => x.Name)
+-                .SelectMany(prp => 
++                .SelectMany(prp =>
+                     prp.PropertyType.InheritsFromOrImplements<IEnumerable>() ?
+                         (prp.GetValue(o) as IEnumerable)!.Cast<object>().Select((x, index) => (name: $"{prp.Name}[{index}]", value: x)) :
+                         (new[] { (prp.Name, prp.GetValue(o)) }!)
+@@ -73,9 +72,9 @@ namespace ExpressionTreeToString {
+                 .Where(x => x.value != null)
+                 .ToList();
+ 
+-            static bool defaultReduceFilter(Expression expr2) => expr2.NodeType == ExpressionType.Extension;
++            static bool DefaultReduceFilter(Expression expr2) => expr2.NodeType == ExpressionType.Extension;
+ 
+-            if (o is Expression expr1 && expr1.CanReduce && (ReducePredicate ?? defaultReduceFilter)(expr1)) {
++            if (o is Expression expr1 && expr1.CanReduce && (ReducePredicate ?? DefaultReduceFilter)(expr1)) {
+                 var reduced = expr1;
+                 while (reduced.CanReduce) {
+                     reduced = reduced.Reduce();
+diff --git a/Library/ToStringWriterVisitor.cs b/Library/ToStringWriterVisitor.cs
+index 694a973..63fb8e3 100644
+--- a/Library/ToStringWriterVisitor.cs
++++ b/Library/ToStringWriterVisitor.cs
+@@ -1,15 +1,15 @@
+-﻿using System;
++﻿using OneOf;
++using System;
+ using System.Collections.Generic;
+ using System.Dynamic;
+ using System.Globalization;
+ using System.Linq.Expressions;
++using System.Runtime.CompilerServices;
+ using ZSpitz.Util;
+-using static System.Linq.Expressions.ExpressionType;
++using static ExpressionTreeToString.Util.Functions;
+ using static System.Linq.Enumerable;
+-using System.Runtime.CompilerServices;
++using static System.Linq.Expressions.ExpressionType;
+ using static System.Linq.Expressions.GotoExpressionKind;
+-using OneOf;
+-using static ExpressionTreeToString.Util.Functions;
+ 
+ #pragma warning disable IDE1006 // we want to imitate the original source as much as possible
+ namespace ExpressionTreeToString {
+@@ -24,6 +24,7 @@ namespace ExpressionTreeToString {
+         private Dictionary<OneOf<LabelTarget, ParameterExpression>, int>? _ids;
+ 
+         private int GetLabelId(LabelTarget label) => GetId(label, ref _ids, out var _);
++
+         private int GetParamId(ParameterExpression p) => GetId(p, ref _ids, out var _);
+ 
+         private static bool IsBool(Expression node) => node.Type.In(typeof(bool), typeof(bool?));
+@@ -46,8 +47,7 @@ namespace ExpressionTreeToString {
+             }
+ 
+             // when we start using C# 9, we can replace the .In calls with the OR pattern
+-            var op = expr.NodeType switch
+-            {
++            var op = expr.NodeType switch {
+                 AndAlso => "AndAlso",
+                 OrElse => "OrElse",
+                 Assign => "=",
+@@ -205,8 +205,7 @@ namespace ExpressionTreeToString {
+ 
+             Write('{');
+ 
+-            (var items, var itemsPath) = binding switch
+-            {
++            (var items, var itemsPath) = binding switch {
+                 MemberListBinding listBinding => (listBinding.Initializers, "Initializers"),
+                 MemberMemberBinding memberBinding => (memberBinding.Bindings, "Bindings"),
+                 _ => (Empty<object>(), "")
+@@ -286,8 +285,7 @@ namespace ExpressionTreeToString {
+             Write('(');
+             WriteNode("Expression", expr.Expression);
+             Write(
+-                expr.NodeType switch
+-                {
++                expr.NodeType switch {
+                     TypeIs => " Is ",
+                     TypeEqual => " TypeEqual ",
+                     _ => throw new NotImplementedException()
+@@ -299,8 +297,7 @@ namespace ExpressionTreeToString {
+ 
+         protected override void WriteUnary(UnaryExpression expr) {
+             Write(
+-                expr.NodeType switch
+-                {
++                expr.NodeType switch {
+                     var x when x.In(Negate, NegateChecked) => "-",
+                     Not => "Not(",
+                     IsFalse => "IsFalse(",
+@@ -378,13 +375,12 @@ namespace ExpressionTreeToString {
+         }
+ 
+         protected override void WriteGoto(GotoExpression expr) {
+-            var op = expr.Kind switch
+-            {
++            var op = expr.Kind switch {
+                 GotoExpressionKind.Goto => "goto",
+                 Break => "break",
+                 Continue => "continue",
+                 Return => "return",
+-                _ => throw new InvalidOperationException(),
++                _ => throw new InvalidOperationException()
+             };
+             Write(op);
+             if (!FrameworkCompatible) { Write(' '); }
+@@ -428,7 +424,7 @@ namespace ExpressionTreeToString {
+             if (expr.Object is null) {
+                 // per https://stackoverflow.com/questions/401232/static-indexers#comment46687777_401381
+                 // the CLR doesn't support static indexers; so this code should never be reached
+-                //Write(expr.Indexer.DeclaringType.Name);
++                // Write(expr.Indexer.DeclaringType.Name);
+                 throw new NotImplementedException("Static indexeres are not allowed.");
+             }
+ 
+@@ -459,14 +455,13 @@ namespace ExpressionTreeToString {
+         }
+ 
+         protected override void WriteDynamic(DynamicExpression expr) {
+-            if (!FrameworkCompatible) { 
++            if (!FrameworkCompatible) {
+                 WriteExtension(expr);
+                 return;
+             }
+ 
+             Write(
+-                expr.Binder switch
+-                {
++                expr.Binder switch {
+                     ConvertBinder convert => $"Convert {convert.Type}",
+                     GetMemberBinder getMember => $"GetMember {getMember.Name}",
+                     SetMemberBinder setMember => $"SetMember {setMember.Name}",
+diff --git a/Library/Util/Extensions/CallSiteBinder.cs b/Library/Util/Extensions/CallSiteBinder.cs
+index 0a606ea..af57c53 100644
+--- a/Library/Util/Extensions/CallSiteBinder.cs
++++ b/Library/Util/Extensions/CallSiteBinder.cs
+@@ -37,7 +37,7 @@ namespace ExpressionTreeToString.Util {
+                 SetMemberBinder _ => SetMember,
+                 UnaryOperationBinder _ => UnaryOperation,
+                 DynamicMetaObjectBinder _ => Dynamic,
+-                _ => Unknown,
++                _ => Unknown
+             };
+     }
+ }
+diff --git a/Library/Util/Extensions/DynamicExpression.cs b/Library/Util/Extensions/DynamicExpression.cs
+index 5de77ac..b2d444c 100644
+--- a/Library/Util/Extensions/DynamicExpression.cs
++++ b/Library/Util/Extensions/DynamicExpression.cs
+@@ -5,15 +5,14 @@ using static System.Linq.Expressions.ExpressionType;
+ 
+ namespace ExpressionTreeToString.Util {
+     internal static class DynamicExpressionExtensions {
+-        internal static void Deconstruct(this DynamicExpression expr, out ExpressionType nodeType, out Type type, out BinderTypes binderType) => 
++        internal static void Deconstruct(this DynamicExpression expr, out ExpressionType nodeType, out Type type, out BinderTypes binderType) =>
+             (nodeType, type, binderType) = (
+                 expr.VirtualNodeType(),
+                 expr.Type,
+                 expr.Binder.BinderType()
+             );
+ 
+-        internal static ExpressionType VirtualNodeType(this DynamicExpression expr) => expr.Binder switch
+-        {
++        internal static ExpressionType VirtualNodeType(this DynamicExpression expr) => expr.Binder switch {
+             BinaryOperationBinder binder => binder.Operation,
+             ConvertBinder _ => ExpressionType.Convert,
+             CreateInstanceBinder _ => New,
+diff --git a/Library/Util/Extensions/Expression.cs b/Library/Util/Extensions/Expression.cs
+index e770728..682db29 100644
+--- a/Library/Util/Extensions/Expression.cs
++++ b/Library/Util/Extensions/Expression.cs
+@@ -33,11 +33,11 @@ namespace ExpressionTreeToString.Util {
+         }
+ 
+         internal static IEnumerable<Expression> AndClauses(this Expression expr) => logicalCombinedClauses("", expr, And, AndAlso).Select(x => x.clause);
++
+         internal static IEnumerable<(string path, Expression clause)> OrClauses(this Expression expr) => logicalCombinedClauses("", expr, Or, OrElse);
+ 
+         internal static IEnumerable<OneOf<MemberExpression, MethodCallExpression>> ChainClauses(this Expression? expr) {
+             var (ret, subexpr) = expr switch {
+-
+                 // instance member
+                 MemberExpression mexpr when mexpr.Expression is not null =>
+                     (mexpr, mexpr.Expression),
+@@ -61,6 +61,6 @@ namespace ExpressionTreeToString.Util {
+                 yield return item;
+             }
+             yield return ret.Value;
+-        } 
++        }
+     }
+ }
+diff --git a/Library/Util/Extensions/MethodInfos.cs b/Library/Util/Extensions/MethodInfos.cs
+index 14880c5..7dc854e 100644
+--- a/Library/Util/Extensions/MethodInfos.cs
++++ b/Library/Util/Extensions/MethodInfos.cs
+@@ -16,7 +16,7 @@ namespace ExpressionTreeToString.Util {
+                         y => y.ParameterType.In(typeof(string), typeof(string[]))
+                     ),
+                     "Format" => x.GetParameters().First().ParameterType == typeof(string),
+-                    _ => false,
++                    _ => false
+                 })
+                 .ToLookup(x => x.Name);
+ 
+@@ -25,11 +25,12 @@ namespace ExpressionTreeToString.Util {
+         }
+ 
+         internal static bool IsStringConcat(this MethodInfo mthd) => mthd.In(StringConcats);
++
+         internal static bool IsStringFormat(this MethodInfo mthd) => mthd.In(StringFormats);
+ 
+         // Microsoft.VisualBasic.CompilerServices is not available to .NET Standard, so we have to check by name
+-        internal static bool IsVBLike(this MethodInfo mthd) => 
+-            mthd.DeclaringType?.FullName == "Microsoft.VisualBasic.CompilerServices.LikeOperator" && 
++        internal static bool IsVBLike(this MethodInfo mthd) =>
++            mthd.DeclaringType?.FullName == "Microsoft.VisualBasic.CompilerServices.LikeOperator" &&
+             mthd.Name.StartsWith("Like");
+     }
+ }
+diff --git a/Library/Util/Functions.cs b/Library/Util/Functions.cs
+index 32e9a39..5a146af 100644
+--- a/Library/Util/Functions.cs
++++ b/Library/Util/Functions.cs
+@@ -3,14 +3,15 @@ using System.Collections.Generic;
+ using System.Diagnostics.CodeAnalysis;
+ using System.Linq.Expressions;
+ using ZSpitz.Util;
+-using static System.Linq.Expressions.ExpressionType;
+ using static ExpressionTreeToString.Globals;
++using static System.Linq.Expressions.ExpressionType;
+ 
+ namespace ExpressionTreeToString.Util {
+     public static class Functions {
+         // TODO indicate that ids is not going to be null after returning
+         public static int GetId<T>(T e, [NotNull] ref Dictionary<T, int>? ids, int offset = 0) where T : notnull =>
+             GetId(e, ref ids, out var _, offset);
++
+         public static int GetId<T>(T e, [NotNull] ref Dictionary<T, int>? ids, out bool isNew, int offset = 0) where T : notnull {
+             isNew = false;
+             if (ids is null) {
+@@ -50,7 +51,7 @@ namespace ExpressionTreeToString.Util {
+             results = default;
+             if (expr.NodeType.NotIn(RelationalOperators) || expr is not BinaryExpression bexpr) { return false; }
+ 
+-            static (Expression?, string?) enumOperand(Expression operand, Expression other, string pathSegment) {
++            static (Expression?, string?) EnumOperand(Expression operand, Expression other, string pathSegment) {
+                 if (operand is not UnaryExpression uexpr) { return default; }
+                 if (uexpr.NodeType.NotIn(ExpressionType.Convert, ConvertChecked)) { return default; }
+                 var operandType = uexpr.Operand.Type;
+@@ -60,21 +61,21 @@ namespace ExpressionTreeToString.Util {
+                         default;
+             }
+ 
+-            static Expression? getEnumValue(Expression other, Type enumType) => 
++            static Expression? GetEnumValue(Expression other, Type enumType) =>
+                 other is ConstantExpression cexpr && Enum.IsDefined(enumType, cexpr.Value!) ?
+                     Expression.Constant(Enum.Parse(enumType, cexpr.Value!.ToString()!)) :
+                     null;
+ 
+-            var (leftOperand, leftPath) = enumOperand(bexpr.Left, bexpr.Right, "Left");
+-            var (rightOperand, rightPath) = enumOperand(bexpr.Right, bexpr.Left, "Right");
++            var (leftOperand, leftPath) = EnumOperand(bexpr.Left, bexpr.Right, "Left");
++            var (rightOperand, rightPath) = EnumOperand(bexpr.Right, bexpr.Left, "Right");
+ 
+             if (leftOperand is null && rightOperand is null) {
+                 return false;
+             } else if (leftOperand is { } && rightOperand is null) {
+-                rightOperand = getEnumValue(bexpr.Right, leftOperand.Type);
++                rightOperand = GetEnumValue(bexpr.Right, leftOperand.Type);
+                 rightPath = "Right";
+             } else if (leftOperand is null && rightOperand is { }) {
+-                leftOperand = getEnumValue(bexpr.Left, rightOperand.Type);
++                leftOperand = GetEnumValue(bexpr.Left, rightOperand.Type);
+                 leftPath = "Left";
+             }
+ 
+@@ -94,7 +95,7 @@ namespace ExpressionTreeToString.Util {
+             results = default;
+             if (expr.NodeType.NotIn(RelationalOperators) || expr is not BinaryExpression bexpr) { return false; }
+ 
+-            static (Expression?, Expression?) charOperand(Expression operand, Expression other) =>
++            static (Expression?, Expression?) CharOperand(Expression operand, Expression other) =>
+                 operand is UnaryExpression uexpr &&
+                 uexpr.NodeType.In(ExpressionType.Convert, ConvertChecked) &&
+                 uexpr.Operand.Type == typeof(char) &&
+@@ -103,12 +104,12 @@ namespace ExpressionTreeToString.Util {
+                     (uexpr.Operand, Expression.Constant((char)i, typeof(char))) :
+                     default;
+ 
+-            var (leftOperand, rightOperand) = charOperand(bexpr.Left, bexpr.Right);
++            var (leftOperand, rightOperand) = CharOperand(bexpr.Left, bexpr.Right);
+             if (leftOperand is { }) {
+                 results = (leftOperand, "Left.Operand", rightOperand!, "Right");
+                 return true;
+             }
+-            (rightOperand, leftOperand) = charOperand(bexpr.Right, bexpr.Left);
++            (rightOperand, leftOperand) = CharOperand(bexpr.Right, bexpr.Left);
+             if (rightOperand is { }) {
+                 results = (leftOperand!, "Left", rightOperand!, "Right.Operand");
+                 return true;
+diff --git a/Library/ValueExtractor.cs b/Library/ValueExtractor.cs
+index 522b650..9becab6 100644
+--- a/Library/ValueExtractor.cs
++++ b/Library/ValueExtractor.cs
+@@ -33,7 +33,6 @@ namespace ExpressionTreeToString {
+                         evaluables[x] = false;
+                     }
+                     break;
+-
+                 case DefaultExpression _:
+                 case ConstantExpression _:
+                 case MethodCallExpression mcexpr when mcexpr.Arguments.None() && mcexpr.Object is null:
+diff --git a/Library/WriterVisitorBase.cs b/Library/WriterVisitorBase.cs
+index 935b5a6..d501574 100644
+--- a/Library/WriterVisitorBase.cs
++++ b/Library/WriterVisitorBase.cs
+@@ -1,11 +1,11 @@
+-﻿using ZSpitz.Util;
++﻿using ExpressionTreeToString.Util;
++using OneOf;
+ using System;
+ using System.Collections.Generic;
+ using System.Linq;
+ using System.Text;
+-using OneOf;
++using ZSpitz.Util;
+ using static ZSpitz.Util.Functions;
+-using ExpressionTreeToString.Util;
+ 
+ namespace ExpressionTreeToString {
+     internal class InsertionPoint {
+@@ -13,6 +13,7 @@ namespace ExpressionTreeToString {
+         internal readonly Dictionary<string, (int start, int length)>? pathSpans;
+         internal int indentationLevel = 0;
+         internal string key;
++
+         internal InsertionPoint(string key, bool hasPathSpans) {
+             if (hasPathSpans) { pathSpans = new(); }
+             this.key = key;
+@@ -34,7 +35,7 @@ namespace ExpressionTreeToString {
+                 .Joined(Environment.NewLine, x => x.sb.ToString())
+                 .Trim('\0');
+ 
+-            Dictionary<string, (int start, int length)>? pathSpans=null;
++            Dictionary<string, (int start, int length)>? pathSpans = null;
+             if (insertionPoints.Any(x => x.pathSpans is { })) {
+                 pathSpans = new Dictionary<string, (int start, int length)>();
+                 var offset = 0;
+@@ -57,6 +58,7 @@ namespace ExpressionTreeToString {
+         }
+ 
+         protected void Indent() => ip.indentationLevel += 1;
++
+         protected void Dedent() => ip.indentationLevel = Math.Max(ip.indentationLevel - 1, 0); // ensures the indentation level is never < 0
+ 
+         protected void WriteEOL(bool dedent = false) {
+@@ -66,12 +68,12 @@ namespace ExpressionTreeToString {
+         }
+ 
+         protected void Write(string? s) => s.AppendTo(ip.sb);
++
+         protected void Write(char c) => c.AppendTo(ip.sb);
+ 
+         /// <summary>Write a string-rendering of an expression or other type used in expression trees</summary>
+         /// <param name="o">Object to be rendered</param>
+         /// <param name="parameterDeclaration">For ParameterExpression, this is a parameter declaration</param>
+-        /// <param name="blockType">For BlockExpression, sets the preferred block type</param>
+         /// 
+         protected void WriteNode(string pathSegment, object? o, bool parameterDeclaration = false, object? metadata = null) {
+             if (!pathSegment.IsNullOrWhitespace()) { pathSegments.Add(pathSegment); }
+@@ -90,7 +92,9 @@ namespace ExpressionTreeToString {
+                 }
+             }
+         }
++
+         protected void WriteNode((string pathSegment, object o) x) => WriteNode(x.pathSegment, x.o);
++
+         protected void WriteNode(string pathSegment, object o, object blockMetadata) => WriteNode(pathSegment, o, false, blockMetadata);
+ 
+         protected abstract void WriteNodeImpl(object? o, bool parameterDeclaration = false, object? metadata = null);
+@@ -105,6 +109,7 @@ namespace ExpressionTreeToString {
+                 WriteNode(pathSegment, arg!, parameterDeclaration);
+             }
+         }
++
+         protected void WriteNodes<T>(IEnumerable<(string pathSegment, T o)> pathsItems, string delimiter = ", ") =>
+             WriteNodes(pathsItems, false, delimiter);
+ 
+@@ -121,11 +126,13 @@ namespace ExpressionTreeToString {
+             .Joined(Environment.NewLine, x => x.sb.ToString());
+ 
+         protected void SetInsertionPoint(string key) => ip = insertionPoints.Get(key);
++
+         protected void AddInsertionPoint(string key) {
+             var ip = new InsertionPoint(key, hasPathSpans);
+             insertionPoints.Add(key, ip);
+             this.ip = ip;
+         }
++
+         protected string CurrentInsertionPoint => ip.key;
+ 
+         protected void WriteNotImplemented(string message) {
+diff --git a/TestObjects/CSCompiler/CSCompiler.cs b/TestObjects/CSCompiler/CSCompiler.cs
+index ae43582..291062d 100644
+--- a/TestObjects/CSCompiler/CSCompiler.cs
++++ b/TestObjects/CSCompiler/CSCompiler.cs
+@@ -1,8 +1,8 @@
+ ﻿using System;
+ using System.Collections.Generic;
+ using System.Linq.Expressions;
+-using static ExpressionTreeTestObjects.Functions;
+ using static ExpressionTreeTestObjects.Categories;
++using static ExpressionTreeTestObjects.Functions;
+ 
+ namespace ExpressionTreeTestObjects {
+     [ObjectContainer]
+@@ -24,7 +24,7 @@ namespace ExpressionTreeTestObjects {
+ 
+         [TestObject(Invocation)]
+         internal static readonly Expression InvocationNoArguments = IIFE(() => {
+-            Func<int> del = () => new DateTime(2001,1,1).Day;
++            Func<int> del = () => new DateTime(2001, 1, 1).Day;
+             return Expr(() => del());
+         });
+ 
+@@ -71,7 +71,7 @@ namespace ExpressionTreeTestObjects {
+ 
+         [TestObject(Indexer)]
+         internal static readonly Expression TypeIndexer = IIFE(() => {
+-            var lst = new List<string>() { "1", "2", "3", "4" };
++            var lst = new List<string> { "1", "2", "3", "4" };
+             return Expr(() => lst[3]);
+         });
+ 
+diff --git a/TestObjects/CSCompiler/Lambda.cs b/TestObjects/CSCompiler/Lambda.cs
+index c1d0577..27be016 100644
+--- a/TestObjects/CSCompiler/Lambda.cs
++++ b/TestObjects/CSCompiler/Lambda.cs
+@@ -7,10 +7,10 @@ namespace ExpressionTreeTestObjects {
+     partial class CSCompiler {
+         [TestObject(Lambdas)]
+         internal static readonly Expression NoParametersVoidReturn = Expr(() => Console.WriteLine());
+-        
++
+         [TestObject(Lambdas)]
+         internal static readonly Expression OneParameterVoidReturn = Expr((string s) => Console.WriteLine(s));
+-        
++
+         [TestObject(Lambdas)]
+         internal static readonly Expression TwoParametersVoidReturn = Expr((string s1, string s2) => Console.WriteLine(s1 + s2));
+ 
+diff --git a/TestObjects/CSCompiler/Literals.cs b/TestObjects/CSCompiler/Literals.cs
+index a687b74..662fc9e 100644
+--- a/TestObjects/CSCompiler/Literals.cs
++++ b/TestObjects/CSCompiler/Literals.cs
+@@ -1,8 +1,8 @@
+ ﻿using System;
+ using System.Collections.Generic;
+ using System.Linq.Expressions;
+-using static ExpressionTreeTestObjects.Functions;
+ using static ExpressionTreeTestObjects.Categories;
++using static ExpressionTreeTestObjects.Functions;
+ 
+ namespace ExpressionTreeTestObjects {
+     partial class CSCompiler {
+@@ -30,4 +30,4 @@ namespace ExpressionTreeTestObjects {
+         [TestObject(Literal)]
+         internal static readonly Expression Type = Expr(() => typeof(string));
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/TestObjects/CSCompiler/Method.cs b/TestObjects/CSCompiler/Method.cs
+index 508af8c..4968969 100644
+--- a/TestObjects/CSCompiler/Method.cs
++++ b/TestObjects/CSCompiler/Method.cs
+@@ -1,24 +1,30 @@
+ ﻿using System;
+ using System.Collections.Generic;
++using System.Linq;
+ using System.Linq.Expressions;
+-using static ExpressionTreeTestObjects.Functions;
+ using static ExpressionTreeTestObjects.Categories;
+-using System.Linq;
++using static ExpressionTreeTestObjects.Functions;
+ 
+ namespace ExpressionTreeTestObjects {
+     public static class Dummy {
+         public static void DummyMethod() { }
++
+         public static List<T> ExtensionMethod1Argument<T>(this List<T> lst, int n) => lst;
++
+         public static List<T> ExtensionMethod2Arguments<T>(this List<T> lst, int n1, int n2) => lst;
++
+         public static IEnumerable<T> ExtensionMethod1ArgumentEnumerable<T>(this IEnumerable<T> lst, int n) => lst;
++
+         public static IEnumerable<T> ExtensionMethod2ArgumentsEnumerable<T>(this IEnumerable<T> lst, int n1, int n2) => lst;
++
+         public static void DummyMethodWithGenerics<T>() { }
++
+         public static void DummyMethodWithRef(ref int i) { }
++
+         public static void DummyMethodWithOut(out int i) => i = 5;
+     }
+ 
+     partial class CSCompiler {
+-
+         [TestObject(Method)]
+         internal static readonly Expression InstanceMethod0Arguments = IIFE(() => {
+             var s = "";
+@@ -56,7 +62,7 @@ namespace ExpressionTreeTestObjects {
+         });
+ 
+         [TestObject(Method)]
+-        internal static readonly Expression StaticMethod2Arguments = Expr(() => string.Join(",", new[] { "a", "b" }));
++        internal static readonly Expression StaticMethod2Arguments = Expr(() => string.Join(",", "a", "b"));
+ 
+         [TestObject(Method)]
+         internal static readonly Expression ExtensionMethod2Arguments = IIFE(() => {
+diff --git a/TestObjects/CSCompiler/NewArray.cs b/TestObjects/CSCompiler/NewArray.cs
+index 8b827e1..a7001e0 100644
+--- a/TestObjects/CSCompiler/NewArray.cs
++++ b/TestObjects/CSCompiler/NewArray.cs
+@@ -1,12 +1,11 @@
+ ﻿using System;
+ using System.Collections.Generic;
+ using System.Linq.Expressions;
+-using static ExpressionTreeTestObjects.Functions;
+ using static ExpressionTreeTestObjects.Categories;
++using static ExpressionTreeTestObjects.Functions;
+ 
+ namespace ExpressionTreeTestObjects {
+     partial class CSCompiler {
+-
+         [TestObject(NewArray)]
+         internal static readonly Expression SingleDimensionInit = Expr(() => new string[] { "" });
+ 
+@@ -40,4 +39,4 @@ namespace ExpressionTreeTestObjects {
+         [TestObject(NewArray)]
+         internal static readonly Expression MultidimensionalArrayOfArray = Expr(() => new string[3, 2][]);
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/TestObjects/CSCompiler/NewObject.cs b/TestObjects/CSCompiler/NewObject.cs
+index a8dc239..97e054b 100644
+--- a/TestObjects/CSCompiler/NewObject.cs
++++ b/TestObjects/CSCompiler/NewObject.cs
+@@ -1,14 +1,16 @@
+ ﻿using System;
+ using System.Collections.Generic;
+ using System.Linq.Expressions;
+-using static ExpressionTreeTestObjects.Functions;
+ using static ExpressionTreeTestObjects.Categories;
++using static ExpressionTreeTestObjects.Functions;
+ 
+ namespace ExpressionTreeTestObjects {
+     public class Foo {
+         public string? Bar { get; set; }
+         public string? Baz { get; set; }
++
+         public Foo() { }
++
+         public Foo(string baz) { }
+     }
+ 
+@@ -19,7 +21,7 @@ namespace ExpressionTreeTestObjects {
+     // class used for MemberMemberBinding and ListBinding
+     public class Node {
+         internal NodeData Data { get; set; } = new NodeData();
+-        internal IList<Node?> Children { get; set; } = new List<Node?>() { null };
++        internal IList<Node?> Children { get; set; } = new List<Node?> { null };
+     }
+ 
+     public class NodeData {
+@@ -27,7 +29,6 @@ namespace ExpressionTreeTestObjects {
+     }
+ 
+     partial class CSCompiler {
+-
+         [TestObject(NewObject)]
+         internal static readonly Expression NamedType = Expr(() => new Random());
+ 
+@@ -68,4 +69,4 @@ namespace ExpressionTreeTestObjects {
+         [TestObject(NewObject)]
+         internal static readonly Expression ListBinding = Expr(() => new Node { Children = { new Node(), new Node() } });
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/TestObjects/CSCompiler/RefOut.cs b/TestObjects/CSCompiler/RefOut.cs
+index 2402330..13e3479 100644
+--- a/TestObjects/CSCompiler/RefOut.cs
++++ b/TestObjects/CSCompiler/RefOut.cs
+@@ -1,13 +1,13 @@
+-﻿//using System.Linq.Expressions;
+-//using static ExpressionTreeTestObjects.Functions;
+-//using static ExpressionTreeTestObjects.Categories;
++﻿// using System.Linq.Expressions;
++// using static ExpressionTreeTestObjects.Functions;
++// using static ExpressionTreeTestObjects.Categories;
+ 
+ namespace ExpressionTreeTestObjects {
+-    //public class Dummy2 {
++    // public class Dummy2 {
+     //    public int Data = 5;
+-    //}
++    // }
+ 
+-    //partial class CSCompiler {
++    // partial class CSCompiler {
+     //    [TestObject(RefOut)]
+     //    internal static readonly Expression PassRef = Expr((int i) => Dummy.DummyMethodWithRef(ref i));
+ 
+@@ -31,5 +31,5 @@ namespace ExpressionTreeTestObjects {
+     //        int i = 0;
+     //        return Expr(() => Dummy.DummyMethodWithOut(out i));
+     //    });
+-    //}
++    // }
+ }
+diff --git a/TestObjects/CSCompiler/Unary.cs b/TestObjects/CSCompiler/Unary.cs
+index 51888a8..d6e9ce2 100644
+--- a/TestObjects/CSCompiler/Unary.cs
++++ b/TestObjects/CSCompiler/Unary.cs
+@@ -29,6 +29,7 @@ namespace ExpressionTreeTestObjects {
+             return Expr(() => o as string);
+         })
+             ;
++
+         [TestObject(Unary)]
+         internal static readonly Expression ArrayLength = IIFE(() => {
+             var arr = new string[] { };
+diff --git a/TestObjects/ExtensionExpression.cs b/TestObjects/ExtensionExpression.cs
+index 006e1c0..7147a8c 100644
+--- a/TestObjects/ExtensionExpression.cs
++++ b/TestObjects/ExtensionExpression.cs
+@@ -6,6 +6,7 @@ namespace TestObjects {
+         public override ExpressionType NodeType => ExpressionType.Extension;
+         public override Type Type => typeof(int);
+         public override bool CanReduce => true;
++
+         public override Expression Reduce() => Add(Constant(42), Constant(27));
+     }
+ 
+diff --git a/TestObjects/Extensions.cs b/TestObjects/Extensions.cs
+index da3411c..c670422 100644
+--- a/TestObjects/Extensions.cs
++++ b/TestObjects/Extensions.cs
+@@ -10,8 +10,8 @@ namespace ExpressionTreeTestObjects {
+ 
+         internal static PropertyInfo[] GetIndexers(this Type type, bool inherit) {
+             var memberName = type.GetAttributes<DefaultMemberAttribute>(inherit).FirstOrDefault()?.MemberName;
+-            return memberName == null ? 
+-                new PropertyInfo[] { } : 
++            return memberName == null ?
++                new PropertyInfo[] { } :
+                 type.GetProperties().Where(x => x.Name == memberName).ToArray();
+         }
+ 
+@@ -24,10 +24,10 @@ namespace ExpressionTreeTestObjects {
+         internal static bool HasAttribute<TAttribute>(this MemberInfo mi, bool inherit = false) where TAttribute : Attribute =>
+             mi.GetCustomAttributes(typeof(TAttribute), inherit).Any();
+ 
+-        internal static IEnumerable<TResult> SelectT<T1, T2, TResult>(this IEnumerable<ValueTuple<T1, T2>> src, Func<T1, T2, TResult> selector) =>
++        internal static IEnumerable<TResult> SelectT<T1, T2, TResult>(this IEnumerable<(T1, T2)> src, Func<T1, T2, TResult> selector) =>
+             src.Select(x => selector(x.Item1, x.Item2));
+ 
+-        internal static IEnumerable<(T1, T2)> WhereT<T1, T2>(this IEnumerable<(T1, T2)> src, Func<T1, T2, bool> predicate) => 
++        internal static IEnumerable<(T1, T2)> WhereT<T1, T2>(this IEnumerable<(T1, T2)> src, Func<T1, T2, bool> predicate) =>
+             src.Where(x => predicate(x.Item1, x.Item2));
+     }
+ }
+diff --git a/TestObjects/FactoryMethods/ArrayIndexer.cs b/TestObjects/FactoryMethods/ArrayIndexer.cs
+index 01780d1..5466449 100644
+--- a/TestObjects/FactoryMethods/ArrayIndexer.cs
++++ b/TestObjects/FactoryMethods/ArrayIndexer.cs
+@@ -1,7 +1,7 @@
+ ﻿using System.Linq.Expressions;
+ using static ExpressionTreeTestObjects.Categories;
+-using static System.Linq.Expressions.Expression;
+ using static ExpressionTreeTestObjects.Globals;
++using static System.Linq.Expressions.Expression;
+ 
+ namespace ExpressionTreeTestObjects {
+     partial class FactoryMethods {
+@@ -22,4 +22,4 @@ namespace ExpressionTreeTestObjects {
+         [TestObject(Indexer)]
+         internal static readonly Expression PropertyIndexer = Property(lstString, listIndexer, Constant(0));
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/TestObjects/FactoryMethods/Constants.cs b/TestObjects/FactoryMethods/Constants.cs
+index cf496ab..697db05 100644
+--- a/TestObjects/FactoryMethods/Constants.cs
++++ b/TestObjects/FactoryMethods/Constants.cs
+@@ -1,9 +1,9 @@
+ ﻿using System;
++using System.Collections;
+ using System.Collections.Generic;
+ using System.Linq.Expressions;
+ using static ExpressionTreeTestObjects.Categories;
+ using static System.Linq.Expressions.Expression;
+-using System.Collections;
+ 
+ namespace ExpressionTreeTestObjects {
+     partial class FactoryMethods {
+@@ -25,4 +25,4 @@ namespace ExpressionTreeTestObjects {
+         [TestObject(Constants)]
+         internal static readonly Expression DifferentTypeForNodeAndValue = Constant(new List<string>(), typeof(IEnumerable));
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/TestObjects/FactoryMethods/FactoryMethods.cs b/TestObjects/FactoryMethods/FactoryMethods.cs
+index 36d48b1..8999c7e 100644
+--- a/TestObjects/FactoryMethods/FactoryMethods.cs
++++ b/TestObjects/FactoryMethods/FactoryMethods.cs
+@@ -1,11 +1,11 @@
+-﻿using System.Linq.Expressions;
+-using static ExpressionTreeTestObjects.Categories;
+-using static System.Linq.Expressions.Expression;
+-using static ExpressionTreeTestObjects.Globals;
+-using System.Linq;
++﻿using System;
+ using System.Collections;
++using System.Linq;
++using System.Linq.Expressions;
+ using TestObjects;
+-using System;
++using static ExpressionTreeTestObjects.Categories;
++using static ExpressionTreeTestObjects.Globals;
++using static System.Linq.Expressions.Expression;
+ 
+ namespace ExpressionTreeTestObjects {
+     [ObjectContainer]
+@@ -56,7 +56,7 @@ namespace ExpressionTreeTestObjects {
+ 
+         [TestObject(RuntimeVars)]
+         internal static readonly Expression RuntimeVariablesWithinBlock = Block(
+-            new[] { s2 }, //forces an explicit block
++            new[] { s2 }, // forces an explicit block
+             Constant(true),
+             RuntimeVariables(x, s1)
+         );
+@@ -93,7 +93,7 @@ namespace ExpressionTreeTestObjects {
+         [TestObject(EnumComparison)]
+         internal static readonly Expression MakeEqualsEnum = Equal(
+             ConvertChecked(
+-                Constant(DayOfWeek.Tuesday), 
++                Constant(DayOfWeek.Tuesday),
+                 typeof(int)
+             ),
+             ConvertChecked(
+diff --git a/TestObjects/FactoryMethods/MakeBinary.cs b/TestObjects/FactoryMethods/MakeBinary.cs
+index 97cd347..3708b3d 100644
+--- a/TestObjects/FactoryMethods/MakeBinary.cs
++++ b/TestObjects/FactoryMethods/MakeBinary.cs
+@@ -1,7 +1,7 @@
+ ﻿using System.Linq.Expressions;
+ using static ExpressionTreeTestObjects.Categories;
+-using static System.Linq.Expressions.Expression;
+ using static ExpressionTreeTestObjects.Globals;
++using static System.Linq.Expressions.Expression;
+ 
+ namespace ExpressionTreeTestObjects {
+     internal static partial class FactoryMethods {
+diff --git a/TestObjects/FactoryMethods/MakeBlock.cs b/TestObjects/FactoryMethods/MakeBlock.cs
+index ede7ed5..7763cb2 100644
+--- a/TestObjects/FactoryMethods/MakeBlock.cs
++++ b/TestObjects/FactoryMethods/MakeBlock.cs
+@@ -1,10 +1,10 @@
+ ﻿using System;
+ using System.Collections.Generic;
+ using System.Linq.Expressions;
+-using static ExpressionTreeTestObjects.Functions;
+ using static ExpressionTreeTestObjects.Categories;
+-using static System.Linq.Expressions.Expression;
++using static ExpressionTreeTestObjects.Functions;
+ using static ExpressionTreeTestObjects.Globals;
++using static System.Linq.Expressions.Expression;
+ 
+ namespace ExpressionTreeTestObjects {
+     partial class FactoryMethods {
+@@ -73,4 +73,4 @@ namespace ExpressionTreeTestObjects {
+             NestedInlineBlockWithVariable
+         );
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/TestObjects/FactoryMethods/MakeConditional.cs b/TestObjects/FactoryMethods/MakeConditional.cs
+index da72018..68dc81a 100644
+--- a/TestObjects/FactoryMethods/MakeConditional.cs
++++ b/TestObjects/FactoryMethods/MakeConditional.cs
+@@ -1,16 +1,14 @@
+ ﻿using System.Linq.Expressions;
+-using static ExpressionTreeTestObjects.Functions;
+ using static ExpressionTreeTestObjects.Categories;
+-using static System.Linq.Expressions.Expression;
++using static ExpressionTreeTestObjects.Functions;
+ using static ExpressionTreeTestObjects.Globals;
++using static System.Linq.Expressions.Expression;
+ 
+ namespace ExpressionTreeTestObjects {
+-
+     // note that the NodeType of the expression constructed Conditional factory method can be either typeof(void) or some other type
+     // the NodeTypeof IfThen and IfThenElse is always typeof(void)
+ 
+     partial class FactoryMethods {
+-
+         [TestObject(Conditionals)]
+         internal static readonly Expression VoidConditionalWithElse = Condition(
+             Constant(true),
+@@ -59,7 +57,6 @@ namespace ExpressionTreeTestObjects {
+             falseLength
+         );
+ 
+-
+         [TestObject(Conditionals)]
+         internal static readonly Expression MultilineTestPart1 = IfThen(
+             Block(Constant(true), Constant(true)),
+@@ -108,4 +105,4 @@ namespace ExpressionTreeTestObjects {
+             );
+         });
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/TestObjects/FactoryMethods/MakeDynamic.cs b/TestObjects/FactoryMethods/MakeDynamic.cs
+index b79dba8..20519da 100644
+--- a/TestObjects/FactoryMethods/MakeDynamic.cs
++++ b/TestObjects/FactoryMethods/MakeDynamic.cs
+@@ -1,11 +1,11 @@
+-﻿using System;
++﻿using Microsoft.CSharp.RuntimeBinder;
++using System;
+ using System.Linq.Expressions;
+-using static ExpressionTreeTestObjects.Functions;
+ using static ExpressionTreeTestObjects.Categories;
+-using static System.Linq.Expressions.Expression;
+-using Microsoft.CSharp.RuntimeBinder;
+-using static Microsoft.CSharp.RuntimeBinder.Binder;
++using static ExpressionTreeTestObjects.Functions;
+ using static ExpressionTreeTestObjects.Globals;
++using static Microsoft.CSharp.RuntimeBinder.Binder;
++using static System.Linq.Expressions.Expression;
+ 
+ namespace ExpressionTreeTestObjects {
+     partial class FactoryMethods {
+@@ -16,6 +16,7 @@ namespace ExpressionTreeTestObjects {
+             CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null),
+             CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null)
+         };
++
+         private static readonly ParameterExpression obj = Parameter(typeof(object), "obj");
+         private static readonly ConstantExpression key = Constant("key");
+         private static readonly ConstantExpression key1 = Constant(1);
+@@ -82,11 +83,11 @@ namespace ExpressionTreeTestObjects {
+         // TODO InvokeConstructor binder
+         // we can't use Microsoft.CSharp.RuntimeBinder.Binder.InvokeConstructor, because the resulting binder
+         // inherits directly from DynamicMetaObjectBinder, not from System.Dynamic.InvokeConstructorBinder
+-        //[TestObject(Dynamics)]
+-        //internal static readonly Expression DynamicCreateInstance = IIFE(() => {
++        // [TestObject(Dynamics)]
++        // internal static readonly Expression DynamicCreateInstance = IIFE(() => {
+         //    var binder = InvokeConstructor(flags, context, new CSharpArgumentInfo[] { });
+         //    return Dynamic(binder, typeof(object), obj, arg1, arg2);
+-        //});
++        // });
+ 
+         // TODO IsEvent binder
+ 
+@@ -114,4 +115,4 @@ namespace ExpressionTreeTestObjects {
+             return Dynamic(binder, typeof(bool), b1);
+         });
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/TestObjects/FactoryMethods/MakeLabel.cs b/TestObjects/FactoryMethods/MakeLabel.cs
+index c3d859a..fd63ea5 100644
+--- a/TestObjects/FactoryMethods/MakeLabel.cs
++++ b/TestObjects/FactoryMethods/MakeLabel.cs
+@@ -1,11 +1,10 @@
+ ﻿using System.Linq.Expressions;
+ using static ExpressionTreeTestObjects.Categories;
+-using static System.Linq.Expressions.Expression;
+ using static ExpressionTreeTestObjects.Globals;
++using static System.Linq.Expressions.Expression;
+ 
+ namespace ExpressionTreeTestObjects {
+     partial class FactoryMethods {
+-
+         [TestObject(Labels)]
+         // we're using variables here to force explicit blocks, which have indentation
+         // in order to verify that the label is written without indentation
+@@ -45,7 +44,6 @@ namespace ExpressionTreeTestObjects {
+             )
+         );
+ 
+-
+         [TestObject(Labels)]
+         internal static readonly LabelTarget ConstructLabelTarget = Label("target");
+ 
+diff --git a/TestObjects/FactoryMethods/MakeLambda.cs b/TestObjects/FactoryMethods/MakeLambda.cs
+index 986a796..be24241 100644
+--- a/TestObjects/FactoryMethods/MakeLambda.cs
++++ b/TestObjects/FactoryMethods/MakeLambda.cs
+@@ -1,8 +1,8 @@
+ ﻿using System.Linq.Expressions;
+ using static ExpressionTreeTestObjects.Categories;
+-using static System.Linq.Expressions.Expression;
+-using static ExpressionTreeTestObjects.Globals;
+ using static ExpressionTreeTestObjects.Functions;
++using static ExpressionTreeTestObjects.Globals;
++using static System.Linq.Expressions.Expression;
+ 
+ namespace ExpressionTreeTestObjects {
+     internal static partial class FactoryMethods {
+diff --git a/TestObjects/FactoryMethods/MakeMemberBind.cs b/TestObjects/FactoryMethods/MakeMemberBind.cs
+index 221eb08..e6de4ef 100644
+--- a/TestObjects/FactoryMethods/MakeMemberBind.cs
++++ b/TestObjects/FactoryMethods/MakeMemberBind.cs
+@@ -1,12 +1,12 @@
+ ﻿using System;
+ using System.Collections.Generic;
++using System.Linq;
+ using System.Linq.Expressions;
++using System.Reflection;
+ using static ExpressionTreeTestObjects.Categories;
++using static ExpressionTreeTestObjects.Functions;
+ using static System.Linq.Expressions.Expression;
+ using static System.Reflection.BindingFlags;
+-using System.Linq;
+-using static ExpressionTreeTestObjects.Functions;
+-using System.Reflection;
+ 
+ namespace ExpressionTreeTestObjects {
+     internal class DummyMember {
+@@ -14,7 +14,6 @@ namespace ExpressionTreeTestObjects {
+     }
+ 
+     partial class FactoryMethods {
+-
+         [TestObject(MemberBindings)]
+         internal static readonly MemberBinding MakeMemberBind = Bind(
+             typeof(DummyMember).GetMember("Foo", Instance | NonPublic).Single(),
+@@ -43,8 +42,8 @@ namespace ExpressionTreeTestObjects {
+             )
+         );
+ 
+-        static readonly MethodInfo addMethod = GetMethod(() => ((IList<Node>?)null)!.Add(new Node()));
+-        static readonly ConstructorInfo nodeConstructor = typeof(Node).GetConstructor(new Type[] { })!;
++        private static readonly MethodInfo addMethod = GetMethod(() => ((IList<Node>?)null)!.Add(new Node()));
++        private static readonly ConstructorInfo nodeConstructor = typeof(Node).GetConstructor(new Type[] { })!;
+ 
+         [TestObject(MemberBindings)]
+         internal static readonly MemberBinding MakeListBinding = ListBind(
+@@ -53,4 +52,4 @@ namespace ExpressionTreeTestObjects {
+             ElementInit(addMethod, New(nodeConstructor))
+         );
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/TestObjects/FactoryMethods/MakeMethodCall.cs b/TestObjects/FactoryMethods/MakeMethodCall.cs
+index a1383dc..b57060d 100644
+--- a/TestObjects/FactoryMethods/MakeMethodCall.cs
++++ b/TestObjects/FactoryMethods/MakeMethodCall.cs
+@@ -1,10 +1,10 @@
+ ﻿using System.Collections.Generic;
++using System.Linq;
+ using System.Linq.Expressions;
+-using static ExpressionTreeTestObjects.Functions;
+ using static ExpressionTreeTestObjects.Categories;
+-using static System.Linq.Expressions.Expression;
++using static ExpressionTreeTestObjects.Functions;
+ using static ExpressionTreeTestObjects.Globals;
+-using System.Linq;
++using static System.Linq.Expressions.Expression;
+ 
+ namespace ExpressionTreeTestObjects {
+     partial class FactoryMethods {
+@@ -25,8 +25,8 @@ namespace ExpressionTreeTestObjects {
+ 
+         [TestObject(Method)]
+         internal static readonly Expression ExtensionMethod1Argument = Call(
+-            GetMethod(() => (null as List<string>)!.ExtensionMethod1Argument(0)), 
+-            lstString, 
++            GetMethod(() => (null as List<string>)!.ExtensionMethod1Argument(0)),
++            lstString,
+             Constant(1)
+         );
+ 
+@@ -40,7 +40,7 @@ namespace ExpressionTreeTestObjects {
+ 
+         [TestObject(Method)]
+         internal static readonly Expression StaticMethod2Arguments = Call(
+-            GetMethod(() => string.Join(",", new[] { "a", "b" })),
++            GetMethod(() => string.Join(",", "a", "b")),
+             Constant(","),
+             NewArrayInit(typeof(string), Constant("a"), Constant("b"))
+         );
+@@ -49,7 +49,7 @@ namespace ExpressionTreeTestObjects {
+         internal static readonly Expression ExtensionMethod2Arguments = IIFE(() => {
+             var x = Parameter(typeof(string), "x");
+             return Call(
+-                GetMethod(() => (null as List<string>)!.ExtensionMethod2Arguments(0,0)),
++                GetMethod(() => (null as List<string>)!.ExtensionMethod2Arguments(0, 0)),
+                 lstString,
+                 Constant(5),
+                 Constant(17)
+diff --git a/TestObjects/FactoryMethods/MakeNew.cs b/TestObjects/FactoryMethods/MakeNew.cs
+index 01abd51..5d079e6 100644
+--- a/TestObjects/FactoryMethods/MakeNew.cs
++++ b/TestObjects/FactoryMethods/MakeNew.cs
+@@ -1,19 +1,19 @@
+ ﻿using System;
+ using System.Collections.Generic;
+ using System.Linq.Expressions;
+-using static ExpressionTreeTestObjects.Functions;
++using System.Reflection;
+ using static ExpressionTreeTestObjects.Categories;
++using static ExpressionTreeTestObjects.Functions;
+ using static System.Linq.Expressions.Expression;
+-using System.Reflection;
+ 
+ namespace ExpressionTreeTestObjects {
+     partial class FactoryMethods {
+-        static readonly Type fooType = typeof(Foo);
+-        static readonly PropertyInfo barProp = typeof(Foo).GetProperty("Bar")!;
+-        static readonly PropertyInfo bazProp = typeof(Foo).GetProperty("Baz")!;
+-        static readonly ConstructorInfo fooCtor1 = typeof(Foo).GetConstructor(new[] { typeof(string) })!;
+-        static readonly MethodInfo add1 = typeof(List<string>).GetMethod("Add")!;
+-        static readonly MethodInfo add2 = GetMethod(() => ((Wrapper?)null)!.Add("", ""));
++        private static readonly Type fooType = typeof(Foo);
++        private static readonly PropertyInfo barProp = typeof(Foo).GetProperty("Bar")!;
++        private static readonly PropertyInfo bazProp = typeof(Foo).GetProperty("Baz")!;
++        private static readonly ConstructorInfo fooCtor1 = typeof(Foo).GetConstructor(new[] { typeof(string) })!;
++        private static readonly MethodInfo add1 = typeof(List<string>).GetMethod("Add")!;
++        private static readonly MethodInfo add2 = GetMethod(() => ((Wrapper?)null)!.Add("", ""));
+ 
+         [TestObject(NewObject)]
+         internal static readonly Expression NamedType = New(typeof(Random));
+@@ -62,4 +62,4 @@ namespace ExpressionTreeTestObjects {
+             ElementInit(add1, Constant("ef"))
+         );
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/TestObjects/FactoryMethods/MakeNewArray.cs b/TestObjects/FactoryMethods/MakeNewArray.cs
+index daf3911..3415e17 100644
+--- a/TestObjects/FactoryMethods/MakeNewArray.cs
++++ b/TestObjects/FactoryMethods/MakeNewArray.cs
+@@ -4,7 +4,6 @@ using static System.Linq.Expressions.Expression;
+ 
+ namespace ExpressionTreeTestObjects {
+     partial class FactoryMethods {
+-
+         [TestObject(NewArray)]
+         internal static readonly Expression SingleDimensionInit = NewArrayInit(typeof(string), Constant(""));
+ 
+@@ -18,13 +17,15 @@ namespace ExpressionTreeTestObjects {
+         internal static readonly Expression MultidimensionWithBounds = NewArrayBounds(typeof(string), Constant(2), Constant(3));
+ 
+         [TestObject(NewArray)]
+-        internal static readonly Expression JaggedWithElementsImplicitType = NewArrayInit(typeof(string[]),
++        internal static readonly Expression JaggedWithElementsImplicitType = NewArrayInit(
++            typeof(string[]),
+             NewArrayInit(typeof(string), Constant("ab"), Constant("cd")),
+             NewArrayInit(typeof(string), Constant("ef"), Constant("gh"))
+         );
+ 
+         [TestObject(NewArray)]
+-        internal static readonly Expression JaggedWithElementsExplicitType = NewArrayInit(typeof(object[]),
++        internal static readonly Expression JaggedWithElementsExplicitType = NewArrayInit(
++            typeof(object[]),
+             NewArrayInit(typeof(string), Constant("ab"), Constant("cd")),
+             NewArrayInit(typeof(string), Constant("ef"), Constant("gh"))
+         );
+@@ -38,4 +39,4 @@ namespace ExpressionTreeTestObjects {
+         [TestObject(NewArray)]
+         internal static readonly Expression MultidimensionalArrayOfArray = NewArrayBounds(typeof(string[]), Constant(3), Constant(2));
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/TestObjects/FactoryMethods/MakeSwitch.cs b/TestObjects/FactoryMethods/MakeSwitch.cs
+index 0576799..8fa6c3b 100644
+--- a/TestObjects/FactoryMethods/MakeSwitch.cs
++++ b/TestObjects/FactoryMethods/MakeSwitch.cs
+@@ -1,7 +1,7 @@
+ ﻿using System.Linq.Expressions;
+ using static ExpressionTreeTestObjects.Categories;
+-using static System.Linq.Expressions.Expression;
+ using static ExpressionTreeTestObjects.Globals;
++using static System.Linq.Expressions.Expression;
+ 
+ namespace ExpressionTreeTestObjects {
+     partial class FactoryMethods {
+@@ -25,60 +25,76 @@ namespace ExpressionTreeTestObjects {
+         internal static readonly SwitchCase MultiValueSwitchCase1 = SwitchCase(writeLineTrue, Constant(5), Constant(6));
+ 
+         [TestObject(SwitchCases)]
+-        internal static readonly Expression SwitchOnExpressionWithDefaultSingleStatement = Switch(i, Empty(),
++        internal static readonly Expression SwitchOnExpressionWithDefaultSingleStatement = Switch(
++            i,
++            Empty(),
+             SwitchCase(
+                 writeLineTrue,
+                 Constant(4)
+-            ), SwitchCase(
++            ),
++            SwitchCase(
+                 writeLineFalse,
+                 Constant(5)
+             )
+         );
+ 
+         [TestObject(SwitchCases)]
+-        internal static readonly Expression SwitchOnExpressionWithDefaultMultiStatement = Switch(i,
++        internal static readonly Expression SwitchOnExpressionWithDefaultMultiStatement = Switch(
++            i,
+             Block(
+                 typeof(void),
+                 Constant(true),
+                 Constant(true)
+-            ), SwitchCase(
++            ),
++            SwitchCase(
+                 writeLineTrue,
+                 Constant(4)
+-            ), SwitchCase(
++            ),
++            SwitchCase(
+                 writeLineFalse,
+                 Constant(5)
+             )
+         );
+ 
+         [TestObject(SwitchCases)]
+-        internal static readonly Expression SwitchOnMultipleStatementsWithDefault = Switch(Block(i, j), Block(
+-                typeof(void),
+-                Constant(true),
+-                Constant(true)
+-            ), SwitchCase(
++        internal static readonly Expression SwitchOnMultipleStatementsWithDefault = Switch(
++            Block(i, j),
++            Block(
++                    typeof(void),
++                    Constant(true),
++                    Constant(true)
++                ),
++            SwitchCase(
+                 writeLineTrue,
+                 Constant(4)
+-            ), SwitchCase(
++            ),
++            SwitchCase(
+                 writeLineFalse,
+                 Constant(5)
+             )
+         );
+ 
+         [TestObject(SwitchCases)]
+-        internal static readonly Expression SwitchOnExpressionWithoutDefault = Switch(i, SwitchCase(
+-                writeLineTrue,
+-                Constant(4)
+-            ), SwitchCase(
++        internal static readonly Expression SwitchOnExpressionWithoutDefault = Switch(
++            i,
++            SwitchCase(
++                    writeLineTrue,
++                    Constant(4)
++                ),
++            SwitchCase(
+                 writeLineFalse,
+                 Constant(5)
+             )
+         );
+ 
+         [TestObject(SwitchCases)]
+-        internal static readonly Expression SwitchOnMultipleStatementsWithoutDefault = Switch(Block(i, j), SwitchCase(
+-                writeLineTrue,
+-                Constant(4)
+-            ), SwitchCase(
++        internal static readonly Expression SwitchOnMultipleStatementsWithoutDefault = Switch(
++            Block(i, j),
++            SwitchCase(
++                    writeLineTrue,
++                    Constant(4)
++                ),
++            SwitchCase(
+                 writeLineFalse,
+                 Constant(5)
+             )
+@@ -131,6 +147,5 @@ namespace ExpressionTreeTestObjects {
+                 Constant(4)
+             )
+         );
+-
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/TestObjects/FactoryMethods/MakeTry.cs b/TestObjects/FactoryMethods/MakeTry.cs
+index c3578d4..df73b12 100644
+--- a/TestObjects/FactoryMethods/MakeTry.cs
++++ b/TestObjects/FactoryMethods/MakeTry.cs
+@@ -1,13 +1,13 @@
+ ﻿using System;
+ using System.Linq.Expressions;
+ using static ExpressionTreeTestObjects.Categories;
+-using static System.Linq.Expressions.Expression;
+ using static ExpressionTreeTestObjects.Globals;
++using static System.Linq.Expressions.Expression;
+ 
+ namespace ExpressionTreeTestObjects {
+     partial class FactoryMethods {
+-        static readonly Type exceptionType = typeof(InvalidCastException);
+-        static readonly ParameterExpression ex = Parameter(typeof(Exception), "ex");
++        private static readonly Type exceptionType = typeof(InvalidCastException);
++        private static readonly ParameterExpression ex = Parameter(typeof(Exception), "ex");
+ 
+         [TestObject(Try)]
+         internal static readonly Expression ConstructTryFault = TryFault(writeLineTrue, writeLineTrue);
+diff --git a/TestObjects/FactoryMethods/MakeUnary.cs b/TestObjects/FactoryMethods/MakeUnary.cs
+index 7eb1f25..4b3cb49 100644
+--- a/TestObjects/FactoryMethods/MakeUnary.cs
++++ b/TestObjects/FactoryMethods/MakeUnary.cs
+@@ -1,8 +1,8 @@
+ ﻿using System;
+ using System.Linq.Expressions;
+ using static ExpressionTreeTestObjects.Categories;
+-using static System.Linq.Expressions.Expression;
+ using static ExpressionTreeTestObjects.Globals;
++using static System.Linq.Expressions.Expression;
+ 
+ namespace ExpressionTreeTestObjects {
+     internal static partial class FactoryMethods {
+@@ -62,5 +62,5 @@ namespace ExpressionTreeTestObjects {
+ 
+         [TestObject(Unary)]
+         internal static readonly Expression ConstructUnbox = Unbox(obj, typeof(int));
+-      }
++    }
+ }
+diff --git a/TestObjects/FactoryMethods/RefOut.cs b/TestObjects/FactoryMethods/RefOut.cs
+index 5575f9c..e116a46 100644
+--- a/TestObjects/FactoryMethods/RefOut.cs
++++ b/TestObjects/FactoryMethods/RefOut.cs
+@@ -1,13 +1,13 @@
+-﻿//using System.Linq.Expressions;
+-//using static ExpressionTreeTestObjects.Categories;
+-//using static System.Linq.Expressions.Expression;
+-//using static ExpressionTreeTestObjects.Functions;
++﻿// using System.Linq.Expressions;
++// using static ExpressionTreeTestObjects.Categories;
++// using static System.Linq.Expressions.Expression;
++// using static ExpressionTreeTestObjects.Functions;
+ 
+ namespace ExpressionTreeTestObjects {
+-    //internal delegate int DelegateWithOut(out int i);
+-    //internal delegate int DelegateWithRef(ref int i);
++    // internal delegate int DelegateWithOut(out int i);
++    // internal delegate int DelegateWithRef(ref int i);
+ 
+-    //partial class FactoryMethods {
++    // partial class FactoryMethods {
+     //    [TestObject(RefOut)]
+     //    internal static readonly Expression OutParameter = IIFE(() => {
+     //        var prm = Parameter(typeof(int).MakeByRefType());
+@@ -61,5 +61,5 @@ namespace ExpressionTreeTestObjects {
+     //                "Data"
+     //            )
+     //        );
+-    //}
++    // }
+ }
+diff --git a/TestObjects/Functions.cs b/TestObjects/Functions.cs
+index b452110..94cf32a 100644
+--- a/TestObjects/Functions.cs
++++ b/TestObjects/Functions.cs
+@@ -7,6 +7,7 @@ namespace ExpressionTreeTestObjects {
+     public static class Functions {
+         internal static MethodInfo GetMethod(Expression<Action> expr, params Type[] typeargs) {
+             var ret = ((MethodCallExpression)expr.Body).Method;
++
+             // TODO handle partially open generic methods
+             if (typeargs.Any() && ret.IsGenericMethod) {
+                 ret = ret.GetGenericMethodDefinition().MakeGenericMethod(typeargs);
+@@ -18,12 +19,17 @@ namespace ExpressionTreeTestObjects {
+             ((MemberExpression)expr.Body).Member;
+ 
+         public static LambdaExpression Expr<T>(Expression<Func<T>> expr) => expr;
++
+         public static LambdaExpression Expr<T, T1>(Expression<Func<T, T1>> expr) => expr;
++
+         public static LambdaExpression Expr<T, T1, T2>(Expression<Func<T, T1, T2>> expr) => expr;
++
+         public static LambdaExpression Expr(Expression<Action> expr) => expr;
++
+         public static LambdaExpression Expr<T>(Expression<Action<T>> expr) => expr;
++
+         public static LambdaExpression Expr<T, T1>(Expression<Action<T, T1>> expr) => expr;
+-        public static T IIFE<T>(Func<T> fn) => fn();
+ 
++        public static T IIFE<T>(Func<T> fn) => fn();
+     }
+ }
+diff --git a/TestObjects/Globals.cs b/TestObjects/Globals.cs
+index 16ab8e6..6349936 100644
+--- a/TestObjects/Globals.cs
++++ b/TestObjects/Globals.cs
+@@ -1,10 +1,10 @@
+ ﻿using System;
+ using System.Collections.Generic;
++using System.Linq;
+ using System.Linq.Expressions;
+ using System.Reflection;
+-using static System.Linq.Expressions.Expression;
+-using System.Linq;
+ using static ExpressionTreeTestObjects.Functions;
++using static System.Linq.Expressions.Expression;
+ 
+ namespace ExpressionTreeTestObjects {
+     internal static class Globals {
+diff --git a/TestObjects/Objects.cs b/TestObjects/Objects.cs
+index 63c4e59..c03678a 100644
+--- a/TestObjects/Objects.cs
++++ b/TestObjects/Objects.cs
+@@ -2,8 +2,8 @@
+ using System.Collections.Generic;
+ using System.Linq;
+ using System.Reflection;
+-using static System.Reflection.BindingFlags;
+ using static System.Linq.Enumerable;
++using static System.Reflection.BindingFlags;
+ 
+ namespace ExpressionTreeTestObjects {
+     public static class Objects {
+@@ -16,7 +16,8 @@ namespace ExpressionTreeTestObjects {
+                         ret = x.GetTypes();
+                     } catch { }
+                     return ret;
+-                }).Where(x => x.HasAttribute<ObjectContainerAttribute>());
++                })
++                .Where(x => x.HasAttribute<ObjectContainerAttribute>());
+ 
+             foreach (var t in safeTypes) {
+                 LoadType(t);
+@@ -27,6 +28,7 @@ namespace ExpressionTreeTestObjects {
+         private static readonly Dictionary<string, object> byName = new();
+ 
+         public static (string category, string source, string name, object o)[] Get() => objects.ToArray();
++
+         public static object ByName(string s) => byName[s];
+ 
+         public static void LoadType(Type t) {

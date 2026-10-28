@@ -1,0 +1,4 @@
+ M src/LightInject/LightInject.cs
+ M src/LightInject/LightInject.csproj
+?? .editorconfig
+?? Directory.Build.props

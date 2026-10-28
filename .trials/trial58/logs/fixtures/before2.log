@@ -1,0 +1,91 @@
+You can invoke the tool using the following command: bro
+Tool 'stylebro.tool' (version '0.8.0-trial58.1') was successfully installed.
+== duplicate-predefined-type : a type the compiler needs defined in two references (CS1685 with warnings as errors, untouched too)
+  preview                      exit 0 (16 s)
+  init                         exit 0 (3 s)
+  host-format                  exit 0 (14 s)
+  host-check                   exit 0 (9 s)
+  host-check-build             exit 3 (24 s)
+  dotnet-format-format         exit 0 (21 s)
+  dotnet-format-check          exit 0 (9 s)
+  dotnet-format-check-build    exit 3 (23 s)
+  FAIL duplicate-predefined-type (125 s)
+    - host-check-build exited 3, expected 0 (log: /home/user/fx58/before2/duplicate-predefined-type/logs/host-check-build.txt)
+    - dotnet-format-check-build exited 3, expected 0 (log: /home/user/fx58/before2/duplicate-predefined-type/logs/dotnet-format-check-build.txt)
+    --- build.txt (last 12 lines)
+        Restored /home/user/fx58/before2/duplicate-predefined-type/host/src/Poly/Poly.csproj (in 535 ms).
+        Restored /home/user/fx58/before2/duplicate-predefined-type/host/src/App/App.csproj (in 528 ms).
+        Poly -> /home/user/fx58/before2/duplicate-predefined-type/host/src/Poly/bin/Debug/net10.0/Poly.dll
+      CSC : error CS1685: The predefined type 'RuntimeHelpers' is defined in multiple assemblies in the global alias; using definition from 'Poly, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' [/home/user/fx58/before2/duplicate-predefined-type/host/src/App/App.csproj]
+      
+      Build FAILED.
+      
+      CSC : error CS1685: The predefined type 'RuntimeHelpers' is defined in multiple assemblies in the global alias; using definition from 'Poly, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' [/home/user/fx58/before2/duplicate-predefined-type/host/src/App/App.csproj]
+          0 Warning(s)
+          1 Error(s)
+      
+      Time Elapsed 00:00:04.18
+    --- dotnet-format-check-build.txt (last 12 lines)
+      Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+      Building Fixture.slnx in Debug, Release with warnings as errors, and a copy of HEAD to compare...
+      Debug: no findings, no new errors (1 error the untouched code has too, not counted).
+        CSC: CS1685: The predefined type 'RuntimeHelpers' is defined in multiple assemblies in the global alias; using definition from 'Poly, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
+      Release: no findings, no new errors (1 error the untouched code has too, not counted).
+        CSC: CS1685: The predefined type 'RuntimeHelpers' is defined in multiple assemblies in the global alias; using definition from 'Poly, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
+      Formatting is clean. But:
+      Not verified: the Debug, Release builds failed, as the untouched code's do (above), so they compiled nothing past their errors: fix them (a missing workload, a failed restore), then run again.
+    --- dotnet-format-check.txt (last 12 lines)
+      Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+      Clean.
+    --- dotnet-format-format.txt (last 12 lines)
+      Fixing StyleBro's rules and the built-in rules init and migrate turn on (141 ids); --all applies every analyzer's and compiler fix.
+      Run 1: 1 file changed:
+        src/App/Messy.cs
+      Run 2: 0 files changed, clean.
+    --- host-check-build.txt (last 12 lines)
+      Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+      Building Fixture.slnx in Debug, Release with warnings as errors, and a copy of HEAD to compare...
+      Debug: no findings, no new errors (1 error the untouched code has too, not counted).
+        CSC: CS1685: The predefined type 'RuntimeHelpers' is defined in multiple assemblies in the global alias; using definition from 'Poly, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
+      Release: no findings, no new errors (1 error the untouched code has too, not counted).
+        CSC: CS1685: The predefined type 'RuntimeHelpers' is defined in multiple assemblies in the global alias; using definition from 'Poly, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
+      Formatting is clean. But:
+      Not verified: the Debug, Release builds failed, as the untouched code's do (above), so they compiled nothing past their errors: fix them (a missing workload, a failed restore), then run again.
+    --- host-check.txt (last 12 lines)
+      Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+      Clean.
+    --- host-format.txt (last 12 lines)
+      Fixing StyleBro's rules and the built-in rules init and migrate turn on (141 ids); --all applies every analyzer's and compiler fix.
+      Run 1: 1 file changed:
+        src/App/Messy.cs
+      Run 2: 0 files changed, clean.
+    --- init.txt (last 12 lines)
+        Kept your style for 1 setting: end_of_line.
+        8 settings had fewer than 3 places to tell, StyleBro's defaults stay: csharp_new_line_before_open_brace,
+          stylebro_empty_string_style, dotnet_diagnostic.BRO1001.severity, dotnet_diagnostic.IDE0049.severity,
+          dotnet_diagnostic.BRO1505.severity, dotnet_diagnostic.BRO1306.severity,
+          csharp_space_between_method_call_parameter_list_parentheses,
+          csharp_space_between_method_declaration_parameter_list_parentheses.
+      
+      Wrote the built-in rule severities to .editorconfig.
+      Set the preset version in Directory.Build.props (<StyleBroPreset>1.0</StyleBroPreset>): rules of newer releases stay off until you raise it.
+      To report them on build too: <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> in Directory.Build.props.
+      Tip: --agents-md writes a StyleBro section into AGENTS.md for AI coding agents.
+      Next: run 'bro format'. Plain 'dotnet format' also applies every other analyzer's and the compiler's fixes.
+    --- preview.txt (last 12 lines)
+        IDE0036  Modifier order                               1 file
+      Sample (BRO1001, BRO1106, src/App/Messy.cs; BRO1509, IDE0036 changed this file too):
+        -    public string Name = "";
+        +    public static int Twice(int x)
+        +    {
+        +        return x * 2;
+        +    }
+      Sample (BRO1509, src/App/Messy.cs; BRO1001, BRO1106, IDE0036 changed this file too):
+        -    static public int Twice(int x) { return x * 2; }
+        +    public string Name = string.Empty;
+      Full diff: .git/stylebro-preview.patch (75 lines)
+      Done in 15s.
+| Shape | Result | Time |
+| --- | --- | --- |
+| duplicate-predefined-type | FAIL: host-check-build exited 3, expected 0 (log: /home/user/fx58/before2/duplicate-predefined-type/logs/host-check-build.txt)<br>dotnet-format-check-build exited 3, expected 0 (log: /home/user/fx58/before2/duplicate-predefined-type/logs/dotnet-format-check-build.txt) | 125 s |
+Work folder: /home/user/fx58/before2

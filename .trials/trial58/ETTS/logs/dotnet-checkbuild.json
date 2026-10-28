@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "command": "format",
+  "previewOf": null,
+  "path": "/home/user/w58/ETTS/dotnet",
+  "write": false,
+  "settings": [],
+  "conventions": [],
+  "sonar": null,
+  "agentsMd": null,
+  "runs": [],
+  "changesPerRule": {},
+  "filesPerRule": null,
+  "keptFindings": [],
+  "patch": null,
+  "clean": false,
+  "exitCode": 2,
+  "notChecked": [
+    "Tests.DataGenerator/Tests.DataGenerator.csproj, Tests/Tests.csproj, _expressionTestObjectsTest/_expressionTestObjectsTest.csproj and 1 more: they reference a Visual Basic project, where 'dotnet format' (--engine dotnet-format) also runs Visual Basic fixes on C# code, so they are left out; the default engine checks them",
+    "IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)"
+  ]
+}

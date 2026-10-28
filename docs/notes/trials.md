@@ -1029,3 +1029,48 @@ engines (`.trials/README.md`, "Engine soak").
 - Cost: about 2.5-5 minutes per shape (two `check --build`s are half of it), about 80 minutes serial; CI runs six shards
   (decision 2026-10-27: required on src/ PRs, nightly on main).
 - From now on: a trial finding that comes from the repository's shape adds a shape (`.trials/README.md`, step 4).
+
+## Trial 58 (2026-10-27, not clean: owner "Not clean", tally 0; host soak: clean, the third clean soak with the host as the default)
+
+- Repos (three random plus one targeted): seesharper/LightInject, natemcmaster/CommandLineUtils, schotime/NPoco (random,
+  seed 58: draws 74, 25, 26 of 79 entries; 25 and 26 walked past WireMock.Net (trial 36), xunit (rejected, trial 38) and the
+  used entries 27-72 to 70 and 73; only entries 76-78 were left, so 16 candidates were appended (80-95);
+  `.trials/trial58/logs/picks.md`), zspitz/ExpressionTreeToString (targeted at #310's Visual Basic fixes: C# tests
+  referencing a `.vbproj`; no pool entry fit, a scan of 20 repositories for `.vbproj` found it; added to the pool). Tested
+  main 556db04 (after #310). Logs: `.trials/trial58/<repo>/logs/` (round 1 `default`/`dotnet` on 0.8.0-trial58.1, round 2
+  `default2`/`dotnet2` on .2).
+- One session, two chains (base, default = host, `--engine dotnet-format` on fresh clones, then `Compare-Format.ps1`). Wall
+  clock: 19:00 start, round 1 19:09-21:06, fixes during it, round 2 21:07-22:57 (the container restarted once, out of memory
+  while the test suite ran next to a chain: NPoco's round 2 soak was rerun alone).
+- LightInject: StyleCop ran in the library only, so migrate named the tests and benchmarks as without StyleCop and format left
+  them alone; an xUnit2013 there (one of the xunit.analyzers ids format applies), in the untouched code too, made
+  `check --build` say "Not clean: fix them by hand" on both engines. In the folders format leaves alone, format's ids are
+  now compared with the untouched build like any other error, and the HEAD copy's hook keeps them as errors there.
+  New fixture shape `stylecop-partial`. The library is StyleCop-clean: nothing to format.
+- ExpressionTreeToString: BRO1103 (`'c' == s[0]`, `Tuesday <= dow`) and BRO1106 (`string.Empty` -> `""`, literal style)
+  rewrote lambdas converted to `Expression<T>`, which the tests render to text: 14 tests failed. Owner's decision: both rules
+  skip expression trees ([decision](../decisions/2026-10-27-bro1103-and-bro1106-skip-expression-trees.md)); round 2's tests
+  match the untouched code.
+- ExpressionTreeToString: its net452/net472 tests see `RuntimeHelpers` in two references (CS1685); with warnings as errors
+  that error has no place in the code, so `check --build` said "Not verified: ... compiled nothing past their errors"
+  although the analyzers ran (the old engine's build of the same projects reported 329 findings). CS1685 joins CS8002 as an
+  error that doesn't stop the analyzers; new fixture shape `duplicate-predefined-type`. Round 2: Not verified, naming
+  Tests.DataGenerator, which really didn't compile (it needs Tests, whose untouched TWAE errors stop it).
+- Targeted lens held: the host formatted the C# projects next to the Visual Basic one, left the `.vb` files alone, and the VB
+  project built; the old engine left the four C# projects reaching it Not checked (exit 3; check --build 2 on what it left),
+  the documented difference (#310), the only one in the soak.
+- CommandLineUtils: 115 files, one run, 2 kept BRO1603 (a test compares the doc text) baselined, clean on both engines.
+  Format ran net10.0 on its own (4 runs) where check merged it with net8.0 (3): the code tests only NET6_0_OR_GREATER, so
+  both are right; the extra run is only time. NPoco: 325 files, clean on both engines.
+- Every TWAE build and test suite matched the untouched code after the fixes (LightInject 1,568, CommandLineUtils 1,143,
+  NPoco 367, ExpressionTreeToString 3,080 of 3,089 with the same 9 failing).
+- Host soak: no fallback to dotnet format; trees, exit codes, verdicts, --json, builds and tests identical on LightInject,
+  CommandLineUtils and NPoco in both rounds, Compare-Format Same six times; ExpressionTreeToString differs only by the
+  documented Visual Basic gap. Format (s, host/dotnet-format, r1; r2): LightInject 39/62; 31/42, CommandLineUtils 99/215;
+  130/288, NPoco 173/331; 201/401, ExpressionTreeToString 61/120; 72/84. The trial chain's `check` after format was slower
+  on the host for NPoco (116/82; 105/76) and ExpressionTreeToString (30/23; 35/20); the soak's own check (on unformatted
+  code) was faster (NPoco 148/349).
+- Environment: SDK 10.0.113 + 8.0.132; the trial feed in the user NuGet.Config (no repository here clears its sources);
+  LightInject's tests need `dotnet tool install -g dotnet-ilverify`; NPoco's test config switched to SQLite in-memory;
+  global.json lowered (LightInject); the net4x test frameworks need mono (CommandLineUtils, ExpressionTreeToString:
+  net6.0 only).

@@ -84,6 +84,7 @@ under "Compared with StyleCop". Two things differ for every rule:
 | [BRO1101](rules/BRO1101.md) (SA1106) | `while (x) ;` and labeled `end: ;` | StyleCop's fix hides a likely bug in the first and breaks the build in the second. |
 | [BRO1102](rules/BRO1102.md) (SA1133) | Attribute lists with a comment between the attributes | StyleCop's fix drops the comment. |
 | [BRO1103](rules/BRO1103.md) (SA1131) | Comparisons using a type's own `==`/`<` | A user-defined operator may not be symmetric. |
+| [BRO1103](rules/BRO1103.md), [BRO1106](rules/BRO1106.md) (SA1131, SA1122) | Code in an expression tree (an `Expression<...>` lambda, a query over `IQueryable`) | The fix would change the tree the program sees at run time (operands swapped, `<=` turned into `>=`, a constant turned into a field access): ExpressionTreeToString's tests render such trees (trial 58; [decision](https://github.com/bisforboman/stylebro/blob/main/docs/decisions/2026-10-27-bro1103-and-bro1106-skip-expression-trees.md)). |
 | [BRO1131](rules/BRO1131.md) (SA1100) | `base.M()` for a virtual M in a type that isn't sealed | `this.M()` would call a derived type's override instead: a behavior change. |
 | [BRO1104](rules/BRO1104.md) (SA1129) | `new T()` for type parameters; `new S();` statements | `default(T)` differs for reference types; StyleCop's fix for the statement doesn't compile. |
 | [BRO1110](rules/BRO1110.md) (SA1111) | A comment at the end of the last item's line when code follows the `)` (`2 // two` then `); var x = 1;`) | The code would end up behind the comment. |
@@ -193,7 +194,7 @@ under "Compared with StyleCop". Two things differ for every rule:
 
 Reports and fixes match StyleCop (checked with `scripts/stylecop-survey/Compare-WithStyleCop.ps1`):
 [BRO1003](rules/BRO1003.md), [BRO1004](rules/BRO1004.md), [BRO1005](rules/BRO1005.md), [BRO1006](rules/BRO1006.md), [BRO1007](rules/BRO1007.md), [BRO1404](rules/BRO1404.md), [BRO1406](rules/BRO1406.md), [BRO1116](rules/BRO1116.md), [BRO1117](rules/BRO1117.md),
-[BRO1511](rules/BRO1511.md), [BRO1512](rules/BRO1512.md), [BRO1105](rules/BRO1105.md), [BRO1106](rules/BRO1106.md), [BRO1109](rules/BRO1109.md), [BRO1111](rules/BRO1111.md),
+[BRO1511](rules/BRO1511.md), [BRO1512](rules/BRO1512.md), [BRO1105](rules/BRO1105.md), [BRO1109](rules/BRO1109.md), [BRO1111](rules/BRO1111.md),
 [BRO1304](rules/BRO1304.md), [BRO1305](rules/BRO1305.md), [BRO1501](rules/BRO1501.md),
 [BRO1502](rules/BRO1502.md), [BRO1503](rules/BRO1503.md), [BRO1506](rules/BRO1506.md),
 [BRO1507](rules/BRO1507.md), [BRO1602](rules/BRO1602.md), [BRO1605](rules/BRO1605.md), [BRO1608](rules/BRO1608.md),

@@ -146,4 +146,59 @@ public class EmptyStringTests
         }
         """,
         LiteralStyle);
+
+    [Fact]
+    public Task ExpressionTrees_KeepTheirForm() => VerifyFixAsync(
+        """
+        using System;
+        using System.Linq;
+        using System.Linq.Expressions;
+
+        class C
+        {
+            // Trial 58 (ExpressionTreeToString): a constant and a field access are different trees (owner, 2026-10-27).
+            Expression<Func<string>> e = () => "";
+            Func<string> f = () => {|BRO1106:""|};
+
+            IQueryable<string> Q(IQueryable<string> q) => q.Where(s => s != "");
+        }
+        """,
+        """
+        using System;
+        using System.Linq;
+        using System.Linq.Expressions;
+
+        class C
+        {
+            // Trial 58 (ExpressionTreeToString): a constant and a field access are different trees (owner, 2026-10-27).
+            Expression<Func<string>> e = () => "";
+            Func<string> f = () => string.Empty;
+
+            IQueryable<string> Q(IQueryable<string> q) => q.Where(s => s != "");
+        }
+        """);
+
+    [Fact]
+    public Task LiteralStyle_ExpressionTrees_KeepTheirForm() => VerifyFixAsync(
+        """
+        using System;
+        using System.Linq.Expressions;
+
+        class C
+        {
+            Expression<Func<string>> e = () => string.Empty;
+            Func<string> f = () => {|BRO1106:string.Empty|};
+        }
+        """,
+        """
+        using System;
+        using System.Linq.Expressions;
+
+        class C
+        {
+            Expression<Func<string>> e = () => string.Empty;
+            Func<string> f = () => "";
+        }
+        """,
+        LiteralStyle);
 }

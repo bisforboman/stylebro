@@ -1,0 +1,76 @@
+  Determining projects to restore...
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net5.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/w58/ETTS/base/_expressionTestObjectsTest/_expressionTestObjectsTest.csproj]
+  Restored /home/user/w58/ETTS/base/_expressionTestObjectsTest/_expressionTestObjectsTest.csproj (in 475 ms).
+  Restored /home/user/w58/ETTS/base/TestObjects/TestObjects.csproj (in 475 ms).
+  Restored /home/user/w58/ETTS/base/TestObjects.VB/TestObjects.VB.vbproj (in 475 ms).
+  Restored /home/user/w58/ETTS/base/Library/Library.csproj (in 475 ms).
+  Restored /home/user/w58/ETTS/base/_tests/_tests.csproj (in 20 ms).
+  Restored /home/user/w58/ETTS/base/Tests.DataGenerator/Tests.DataGenerator.csproj (in 30 ms).
+  Restored /home/user/w58/ETTS/base/Tests/Tests.csproj (in 223 ms).
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net5.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/w58/ETTS/base/_expressionTestObjectsTest/_expressionTestObjectsTest.csproj]
+  Library -> /home/user/w58/ETTS/base/Library/bin/Debug/netstandard2.0/ExpressionTreeToString.dll
+  Library -> /home/user/w58/ETTS/base/Library/bin/Debug/net5.0/ExpressionTreeToString.dll
+  Library -> /home/user/w58/ETTS/base/Library/bin/Debug/net452/ExpressionTreeToString.dll
+  TestObjects -> /home/user/w58/ETTS/base/TestObjects/bin/Debug/netcoreapp3.1/ExpressionTreeTestObjects.CSharp.dll
+  TestObjects -> /home/user/w58/ETTS/base/TestObjects/bin/Debug/net452/ExpressionTreeTestObjects.CSharp.dll
+  TestObjects -> /home/user/w58/ETTS/base/TestObjects/bin/Debug/netstandard2.0/ExpressionTreeTestObjects.CSharp.dll
+  TestObjects.VB -> /home/user/w58/ETTS/base/TestObjects.VB/bin/Debug/netcoreapp3.1/ExpressionTreeTestObjects.VB.dll
+  TestObjects.VB -> /home/user/w58/ETTS/base/TestObjects.VB/bin/Debug/netstandard2.0/ExpressionTreeTestObjects.VB.dll
+  Successfully created package '/home/user/w58/ETTS/base/Library/bin/Debug/ExpressionTreeToString.1.0.1.nupkg'.
+/home/user/w58/ETTS/base/Tests/models/Person.cs(7,16): warning CS8618: Non-nullable property 'Property' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net6.0]
+/home/user/w58/ETTS/base/Tests/models/Person.cs(8,16): warning CS8618: Non-nullable property 'Property' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net6.0]
+/home/user/w58/ETTS/base/Tests/TestObjectsRunner.cs(119,87): warning xUnit1026: Theory method 'TestMethod' on test class 'TestObjectsRunner' does not use parameter 'category'. (https://xunit.github.io/xunit.analyzers/rules/xUnit1026) [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net6.0]
+  Successfully created package '/home/user/w58/ETTS/base/Library/bin/Debug/ExpressionTreeToString.1.0.1.snupkg'.
+/home/user/w58/ETTS/base/Tests/models/Person.cs(7,16): warning CS8618: Non-nullable property 'Property' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=netcoreapp3.1]
+/home/user/w58/ETTS/base/Tests/models/Person.cs(8,16): warning CS8618: Non-nullable property 'Property' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=netcoreapp3.1]
+/home/user/w58/ETTS/base/Tests/TestObjectsRunner.cs(119,87): warning xUnit1026: Theory method 'TestMethod' on test class 'TestObjectsRunner' does not use parameter 'category'. (https://xunit.github.io/xunit.analyzers/rules/xUnit1026) [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=netcoreapp3.1]
+/home/user/w58/ETTS/base/Tests/models/Person.cs(7,16): warning CS8618: Non-nullable property 'Property' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net5.0]
+/home/user/w58/ETTS/base/Tests/models/Person.cs(8,16): warning CS8618: Non-nullable property 'Property' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net5.0]
+/home/user/w58/ETTS/base/Tests/TestObjectsRunner.cs(119,87): warning xUnit1026: Theory method 'TestMethod' on test class 'TestObjectsRunner' does not use parameter 'category'. (https://xunit.github.io/xunit.analyzers/rules/xUnit1026) [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net5.0]
+  Tests -> /home/user/w58/ETTS/base/Tests/bin/Debug/net5.0/Tests.dll
+  Tests -> /home/user/w58/ETTS/base/Tests/bin/Debug/net6.0/Tests.dll
+  _expressionTestObjectsTest -> /home/user/w58/ETTS/base/_expressionTestObjectsTest/bin/Debug/net5.0/_expressionTestObjectsTest.dll
+  TestObjects.VB -> /home/user/w58/ETTS/base/TestObjects.VB/bin/Debug/net452/ExpressionTreeTestObjects.VB.dll
+  Tests -> /home/user/w58/ETTS/base/Tests/bin/Debug/netcoreapp3.1/Tests.dll
+/home/user/w58/ETTS/base/Tests/models/Person.cs(7,16): warning CS8618: Non-nullable property 'Property' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net452]
+/home/user/w58/ETTS/base/Tests/models/Person.cs(8,16): warning CS8618: Non-nullable property 'Property' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net452]
+CSC : warning CS1685: The predefined type 'RuntimeHelpers' is defined in multiple assemblies in the global alias; using definition from 'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089' [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net452]
+/home/user/w58/ETTS/base/Tests/TestObjectsRunner.cs(119,87): warning xUnit1026: Theory method 'TestMethod' on test class 'TestObjectsRunner' does not use parameter 'category'. (https://xunit.github.io/xunit.analyzers/rules/xUnit1026) [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net452]
+  Tests -> /home/user/w58/ETTS/base/Tests/bin/Debug/net452/Tests.dll
+/home/user/w58/ETTS/base/Tests/models/Person.cs(7,16): warning CS8618: Non-nullable property 'Property' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net472]
+/home/user/w58/ETTS/base/Tests/models/Person.cs(8,16): warning CS8618: Non-nullable property 'Property' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net472]
+CSC : warning CS1685: The predefined type 'RuntimeHelpers' is defined in multiple assemblies in the global alias; using definition from 'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089' [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net472]
+/home/user/w58/ETTS/base/Tests/TestObjectsRunner.cs(119,87): warning xUnit1026: Theory method 'TestMethod' on test class 'TestObjectsRunner' does not use parameter 'category'. (https://xunit.github.io/xunit.analyzers/rules/xUnit1026) [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net472]
+  Tests -> /home/user/w58/ETTS/base/Tests/bin/Debug/net472/Tests.dll
+  _tests -> /home/user/w58/ETTS/base/_tests/bin/Debug/net48/_tests.exe
+/home/user/w58/ETTS/base/Tests.DataGenerator/Program.cs(27,30): warning CS0219: The variable 'dlinq' is assigned but its value is never used [/home/user/w58/ETTS/base/Tests.DataGenerator/Tests.DataGenerator.csproj]
+  Successfully created package '/home/user/w58/ETTS/base/TestObjects.VB/bin/Debug/ExpressionTreeTestObjects.1.0.23.nupkg'.
+  Successfully created package '/home/user/w58/ETTS/base/TestObjects.VB/bin/Debug/ExpressionTreeTestObjects.1.0.23.snupkg'.
+  Tests.DataGenerator -> /home/user/w58/ETTS/base/Tests.DataGenerator/bin/Debug/net48/Tests.DataGenerator.exe
+
+Build succeeded.
+
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net5.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/w58/ETTS/base/_expressionTestObjectsTest/_expressionTestObjectsTest.csproj]
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net5.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/w58/ETTS/base/_expressionTestObjectsTest/_expressionTestObjectsTest.csproj]
+/home/user/w58/ETTS/base/Tests/models/Person.cs(7,16): warning CS8618: Non-nullable property 'Property' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net6.0]
+/home/user/w58/ETTS/base/Tests/models/Person.cs(8,16): warning CS8618: Non-nullable property 'Property' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net6.0]
+/home/user/w58/ETTS/base/Tests/TestObjectsRunner.cs(119,87): warning xUnit1026: Theory method 'TestMethod' on test class 'TestObjectsRunner' does not use parameter 'category'. (https://xunit.github.io/xunit.analyzers/rules/xUnit1026) [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net6.0]
+/home/user/w58/ETTS/base/Tests/models/Person.cs(7,16): warning CS8618: Non-nullable property 'Property' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=netcoreapp3.1]
+/home/user/w58/ETTS/base/Tests/models/Person.cs(8,16): warning CS8618: Non-nullable property 'Property' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=netcoreapp3.1]
+/home/user/w58/ETTS/base/Tests/TestObjectsRunner.cs(119,87): warning xUnit1026: Theory method 'TestMethod' on test class 'TestObjectsRunner' does not use parameter 'category'. (https://xunit.github.io/xunit.analyzers/rules/xUnit1026) [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=netcoreapp3.1]
+/home/user/w58/ETTS/base/Tests/models/Person.cs(7,16): warning CS8618: Non-nullable property 'Property' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net5.0]
+/home/user/w58/ETTS/base/Tests/models/Person.cs(8,16): warning CS8618: Non-nullable property 'Property' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net5.0]
+/home/user/w58/ETTS/base/Tests/TestObjectsRunner.cs(119,87): warning xUnit1026: Theory method 'TestMethod' on test class 'TestObjectsRunner' does not use parameter 'category'. (https://xunit.github.io/xunit.analyzers/rules/xUnit1026) [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net5.0]
+/home/user/w58/ETTS/base/Tests/models/Person.cs(7,16): warning CS8618: Non-nullable property 'Property' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net452]
+/home/user/w58/ETTS/base/Tests/models/Person.cs(8,16): warning CS8618: Non-nullable property 'Property' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net452]
+CSC : warning CS1685: The predefined type 'RuntimeHelpers' is defined in multiple assemblies in the global alias; using definition from 'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089' [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net452]
+/home/user/w58/ETTS/base/Tests/TestObjectsRunner.cs(119,87): warning xUnit1026: Theory method 'TestMethod' on test class 'TestObjectsRunner' does not use parameter 'category'. (https://xunit.github.io/xunit.analyzers/rules/xUnit1026) [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net452]
+/home/user/w58/ETTS/base/Tests/models/Person.cs(7,16): warning CS8618: Non-nullable property 'Property' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net472]
+/home/user/w58/ETTS/base/Tests/models/Person.cs(8,16): warning CS8618: Non-nullable property 'Property' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net472]
+CSC : warning CS1685: The predefined type 'RuntimeHelpers' is defined in multiple assemblies in the global alias; using definition from 'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089' [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net472]
+/home/user/w58/ETTS/base/Tests/TestObjectsRunner.cs(119,87): warning xUnit1026: Theory method 'TestMethod' on test class 'TestObjectsRunner' does not use parameter 'category'. (https://xunit.github.io/xunit.analyzers/rules/xUnit1026) [/home/user/w58/ETTS/base/Tests/Tests.csproj::TargetFramework=net472]
+/home/user/w58/ETTS/base/Tests.DataGenerator/Program.cs(27,30): warning CS0219: The variable 'dlinq' is assigned but its value is never used [/home/user/w58/ETTS/base/Tests.DataGenerator/Tests.DataGenerator.csproj]
+    20 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:09.53

@@ -1,0 +1,6 @@
+build	0	10s	dotnet build ExpressionTreeToString.sln -c Debug
+twae-Debug	1	8s	twae Debug
+test-Debug	1	14s	env CFG=Debug bash -c dotnet test Tests/Tests.csproj -c $CFG -f net6.0
+twae-Release	1	7s	twae Release
+test-Release	1	11s	env CFG=Release bash -c dotnet test Tests/Tests.csproj -c $CFG -f net6.0
+DONE

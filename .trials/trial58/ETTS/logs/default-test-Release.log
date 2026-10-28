@@ -1,0 +1,749 @@
+  Determining projects to restore...
+  Restored /home/user/w58/ETTS/default/TestObjects.VB/TestObjects.VB.vbproj (in 656 ms).
+  Restored /home/user/w58/ETTS/default/TestObjects/TestObjects.csproj (in 657 ms).
+  Restored /home/user/w58/ETTS/default/Library/Library.csproj (in 656 ms).
+  Restored /home/user/w58/ETTS/default/Tests/Tests.csproj (in 1.03 sec).
+  Library -> /home/user/w58/ETTS/default/Library/bin/Release/net5.0/ExpressionTreeToString.dll
+  TestObjects -> /home/user/w58/ETTS/default/TestObjects/bin/Release/netcoreapp3.1/ExpressionTreeTestObjects.CSharp.dll
+  TestObjects.VB -> /home/user/w58/ETTS/default/TestObjects.VB/bin/Release/netcoreapp3.1/ExpressionTreeTestObjects.VB.dll
+/home/user/w58/ETTS/default/Tests/models/Person.cs(7,16): warning CS8618: Non-nullable property 'Property' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/home/user/w58/ETTS/default/Tests/Tests.csproj::TargetFramework=net6.0]
+/home/user/w58/ETTS/default/Tests/models/Person.cs(9,16): warning CS8618: Non-nullable property 'Property' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/home/user/w58/ETTS/default/Tests/Tests.csproj::TargetFramework=net6.0]
+/home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs(117,87): warning xUnit1026: Theory method 'TestMethod' on test class 'TestObjectsRunner' does not use parameter 'category'. (https://xunit.github.io/xunit.analyzers/rules/xUnit1026) [/home/user/w58/ETTS/default/Tests/Tests.csproj::TargetFramework=net6.0]
+  Tests -> /home/user/w58/ETTS/default/Tests/bin/Release/net6.0/Tests.dll
+Test run for /home/user/w58/ETTS/default/Tests/bin/Release/net6.0/Tests.dll (.NETCoreApp,Version=v6.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:01.49]     ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(category: "Conditionals", name: "NpChainWithMethodsParameters", expr: Param_0 => IIF((((Param_0 != null) AndAlso (Param_0.LastName != null)) AndAlso (Param_0.LastName.ToString(en-US) != null)), Param_0.LastName.ToString(en-US).ToString(en-US), null)) [FAIL]
+[xUnit.net 00:00:01.49]     ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(category: "Conditionals", name: "NpChainWithMethodsParameters1", expr: Param_0 => IIF((((Param_0 != null) AndAlso (Param_0.LastName != null)) AndAlso (Param_0.LastName.ToString(en-US) != null)), Param_0.LastName.ToString(en-US).ToString(he-IL), null)) [FAIL]
+  Failed ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(category: "Conditionals", name: "NpChainWithMethodsParameters", expr: Param_0 => IIF((((Param_0 != null) AndAlso (Param_0.LastName != null)) AndAlso (Param_0.LastName.ToString(en-US) != null)), Param_0.LastName.ToString(en-US).ToString(en-US), null)) [3 ms]
+  Error Message:
+   System.Linq.Dynamic.Core.Exceptions.ParseException : Expression expected
+  Stack Trace:
+     at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParsePrimaryStart()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParsePrimary()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseUnary()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseMultiplicative()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseAdditive()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseShiftOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseComparisonOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseLogicalAndOrOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseIn()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseAndOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseOrOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseLambdaOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseNullCoalescingOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseConditionalOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.Parse(Type resultType, Boolean createParameterCtor)
+   at ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(String category, String name, Expression expr) in /home/user/w58/ETTS/default/Tests/DynamicLinqTests.cs:line 44
+   at InvokeStub_DynamicLinqTests.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(category: "Conditionals", name: "NpChainWithMethodsParameters1", expr: Param_0 => IIF((((Param_0 != null) AndAlso (Param_0.LastName != null)) AndAlso (Param_0.LastName.ToString(en-US) != null)), Param_0.LastName.ToString(en-US).ToString(he-IL), null)) [< 1 ms]
+  Error Message:
+   System.Linq.Dynamic.Core.Exceptions.ParseException : Expression expected
+  Stack Trace:
+     at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParsePrimaryStart()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParsePrimary()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseUnary()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseMultiplicative()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseAdditive()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseShiftOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseComparisonOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseLogicalAndOrOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseIn()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseAndOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseOrOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseLambdaOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseNullCoalescingOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseConditionalOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.Parse(Type resultType, Boolean createParameterCtor)
+   at ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(String category, String name, Expression expr) in /home/user/w58/ETTS/default/Tests/DynamicLinqTests.cs:line 44
+   at InvokeStub_DynamicLinqTests.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:01.50]     ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(category: "Constants", name: "LambdaRandom", expr: () => value(System.Random)) [FAIL]
+  Failed ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(category: "Constants", name: "LambdaRandom", expr: () => value(System.Random)) [< 1 ms]
+  Error Message:
+   System.Linq.Dynamic.Core.Exceptions.ParseException : Expression expected
+  Stack Trace:
+     at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParsePrimaryStart()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParsePrimary()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseUnary()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseMultiplicative()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseAdditive()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseShiftOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseComparisonOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseLogicalAndOrOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseIn()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseAndOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseOrOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseLambdaOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseNullCoalescingOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseConditionalOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.Parse(Type resultType, Boolean createParameterCtor)
+   at ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(String category, String name, Expression expr) in /home/user/w58/ETTS/default/Tests/DynamicLinqTests.cs:line 44
+   at InvokeStub_DynamicLinqTests.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:01.51]     ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(category: "Member access (+ closed variables)", name: "ClosureValue", expr: p => value(ExpressionTreeToString.Tests.DynamicLinqTestObjects+<>c__DisplayClass84_0).x) [FAIL]
+  Failed ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(category: "Member access (+ closed variables)", name: "ClosureValue", expr: p => value(ExpressionTreeToString.Tests.DynamicLinqTestObjects+<>c__DisplayClass84_0).x) [< 1 ms]
+  Error Message:
+   System.Linq.Dynamic.Core.Exceptions.ParseException : Expression expected
+  Stack Trace:
+     at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParsePrimaryStart()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParsePrimary()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseUnary()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseMultiplicative()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseAdditive()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseShiftOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseComparisonOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseLogicalAndOrOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseIn()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseAndOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseOrOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseLambdaOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseNullCoalescingOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseConditionalOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.Parse(Type resultType, Boolean createParameterCtor)
+   at ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(String category, String name, Expression expr) in /home/user/w58/ETTS/default/Tests/DynamicLinqTests.cs:line 44
+   at InvokeStub_DynamicLinqTests.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:01.51]     ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(category: "Method call", name: "Contains1", expr: Param_0 => value(System.String[]).Contains("")) [FAIL]
+  Failed ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(category: "Method call", name: "Contains1", expr: Param_0 => value(System.String[]).Contains("")) [< 1 ms]
+  Error Message:
+   System.Linq.Dynamic.Core.Exceptions.ParseException : Expression expected
+  Stack Trace:
+     at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParsePrimaryStart()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParsePrimary()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseUnary()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseMultiplicative()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseAdditive()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseShiftOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseComparisonOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseLogicalAndOrOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseIn()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseAndOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseOrOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseLambdaOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseNullCoalescingOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.ParseConditionalOperator()
+   at System.Linq.Dynamic.Core.Parser.ExpressionParser.Parse(Type resultType, Boolean createParameterCtor)
+   at ExpressionTreeToString.Tests.DynamicLinqTests.TestMethod(String category, String name, Expression expr) in /home/user/w58/ETTS/default/Tests/DynamicLinqTests.cs:line 44
+   at InvokeStub_DynamicLinqTests.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:01.55]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: CSharp, objectName: "CSCompiler.CharEquality1", category: "Comparison against char", o: () => (Convert("abcd".get_Chars(0), Int32) == 99)) [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: CSharp, objectName: "CSCompiler.CharEquality1", category: "Comparison against char", o: () => (Convert("abcd".get_Chars(0), Int32) == 99)) [1 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: () => 'c' == "abcd"[0]
+Actual:   () => "abcd"[0] == 'c'
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs:line 138
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:01.59]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: CSharp, objectName: "CSCompiler.RightEnumNonConstant", category: "Enum comparison", o: () => (Convert(value(ExpressionTreeTestObjects.CSCompiler+<>c__DisplayClass98_33).dow, Int32) >= 2)) [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: CSharp, objectName: "CSCompiler.RightEnumNonConstant", category: "Enum comparison", o: () => (Convert(value(ExpressionTreeTestObjects.CSCompiler+<>c__DisplayClass98_33).dow, Int32) >= 2)) [< 1 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: () => DayOfWeek.Tuesday <= dow
+Actual:   () => dow >= DayOfWeek.Tuesday
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs:line 138
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:01.60]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: CSharp, objectName: "CSCompiler.StaticMember", category: "Member access (+ closed variables)", o: () => "") [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: CSharp, objectName: "CSCompiler.StaticMember", category: "Member access (+ closed variables)", o: () => "") [< 1 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: () => string.Empty
+Actual:   () => ""
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs:line 138
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:01.80]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: VisualBasic, objectName: "CSCompiler.CharEquality1", category: "Comparison against char", o: () => (Convert("abcd".get_Chars(0), Int32) == 99)) [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: VisualBasic, objectName: "CSCompiler.CharEquality1", category: "Comparison against char", o: () => (Convert("abcd".get_Chars(0), Int32) == 99)) [< 1 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: Function() "c"C = "abcd"(0)
+Actual:   Function() "abcd"(0) = "c"C
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs:line 138
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:01.83]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: VisualBasic, objectName: "CSCompiler.RightEnumNonConstant", category: "Enum comparison", o: () => (Convert(value(ExpressionTreeTestObjects.CSCompiler+<>c__DisplayClass98_33).dow, Int32) >= 2)) [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: VisualBasic, objectName: "CSCompiler.RightEnumNonConstant", category: "Enum comparison", o: () => (Convert(value(ExpressionTreeTestObjects.CSCompiler+<>c__DisplayClass98_33).dow, Int32) >= 2)) [< 1 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: Function() DayOfWeek.Tuesday <= dow
+Actual:   Function() dow >= DayOfWeek.Tuesday
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs:line 138
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:01.83]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: VisualBasic, objectName: "CSCompiler.StaticMember", category: "Member access (+ closed variables)", o: () => "") [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: VisualBasic, objectName: "CSCompiler.StaticMember", category: "Member access (+ closed variables)", o: () => "") [< 1 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: Function() String.Empty
+Actual:   Function() ""
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs:line 138
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:02.03]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: FactoryMethods, objectName: "CSCompiler.CharEquality1", category: "Comparison against char", o: () => (Convert("abcd".get_Chars(0), Int32) == 99)) [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: FactoryMethods, objectName: "CSCompiler.CharEquality1", category: "Comparison against char", o: () => (Convert("abcd".get_Chars(0), Int32) == 99)) [2 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: // using static System.Linq.Expressions.Expression
+
+Lambda(
+    Equal(
+        Constant(99),
+        Convert(
+            Property(
+                Constant("abcd"),
+                typeof(string).GetProperty("Chars"),
+                Constant(0)
+            ),
+            typeof(int)
+        )
+    )
+)
+Actual:   // using static System.Linq.Expressions.Expression
+
+Lambda(
+    Equal(
+        Convert(
+            Property(
+                Constant("abcd"),
+                typeof(string).GetProperty("Chars"),
+                Constant(0)
+            ),
+            typeof(int)
+        ),
+        Constant(99)
+    )
+)
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs:line 138
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:02.13]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: FactoryMethods, objectName: "CSCompiler.InterpolatedString", category: "Literal", o: () => Format("{0:yyyy-MM-dd}", Convert(new DateTime(2001, 3, 25), Object))) [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: FactoryMethods, objectName: "CSCompiler.InterpolatedString", category: "Literal", o: () => Format("{0:yyyy-MM-dd}", Convert(new DateTime(2001, 3, 25), Object))) [3 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: // using static System.Linq.Expressions.Expression
+
+Lambda(
+    Call(
+        typeof(string).GetMethod("Format", new[] { typeof(string), typeof(object) }),
+        Constant("{0:yyyy-MM-dd}"),
+        Convert(
+            New(
+                typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int) }),
+                Constant(2001),
+                Constant(3),
+                Constant(25)
+            ),
+            typeof(object)
+        )
+    )
+)
+Actual:   // using static System.Linq.Expressions.Expression
+
+Lambda(
+    Call(
+        typeof(string).GetMethod("Format", 0, new[] { typeof(string), typeof(object) }),
+        Constant("{0:yyyy-MM-dd}"),
+        Convert(
+            New(
+                typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int) }),
+                Constant(2001),
+                Constant(3),
+                Constant(25)
+            ),
+            typeof(object)
+        )
+    )
+)
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs:line 138
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:02.23]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: FactoryMethods, objectName: "CSCompiler.RightEnumNonConstant", category: "Enum comparison", o: () => (Convert(value(ExpressionTreeTestObjects.CSCompiler+<>c__DisplayClass98_33).dow, Int32) >= 2)) [FAIL]
+[xUnit.net 00:00:02.24]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: FactoryMethods, objectName: "CSCompiler.StaticMember", category: "Member access (+ closed variables)", o: () => "") [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: FactoryMethods, objectName: "CSCompiler.RightEnumNonConstant", category: "Enum comparison", o: () => (Convert(value(ExpressionTreeTestObjects.CSCompiler+<>c__DisplayClass98_33).dow, Int32) >= 2)) [1 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: // using static System.Linq.Expressions.Expression
+
+var dow = Parameter(
+    typeof(DayOfWeek),
+    "dow"
+);
+
+Lambda(
+    LessThanOrEqual(
+        Constant(2),
+        Convert(
+            dow,
+            typeof(int)
+        )
+    )
+)
+Actual:   // using static System.Linq.Expressions.Expression
+
+var dow = Parameter(
+    typeof(DayOfWeek),
+    "dow"
+);
+
+Lambda(
+    GreaterThanOrEqual(
+        Convert(
+            dow,
+            typeof(int)
+        ),
+        Constant(2)
+    )
+)
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs:line 138
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: FactoryMethods, objectName: "CSCompiler.StaticMember", category: "Member access (+ closed variables)", o: () => "") [< 1 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: // using static System.Linq.Expressions.Expression
+
+Lambda(
+    MakeMemberAccess(null,
+        typeof(string).GetField("Empty")
+    )
+)
+Actual:   // using static System.Linq.Expressions.Expression
+
+Lambda(
+    Constant("")
+)
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs:line 138
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:02.93]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: FactoryMethods, objectName: "VBCompiler.InterpolatedString", category: "Literal", o: () => Format("{0:yyyy-MM-dd}", Convert(03/25/2001 00:00:00, Object))) [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: FactoryMethods, objectName: "VBCompiler.InterpolatedString", category: "Literal", o: () => Format("{0:yyyy-MM-dd}", Convert(03/25/2001 00:00:00, Object))) [2 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: // using static System.Linq.Expressions.Expression
+
+Lambda(
+    Call(
+        typeof(string).GetMethod("Format", new[] { typeof(string), typeof(object) }),
+        Constant("{0:yyyy-MM-dd}"),
+        Convert(
+            Constant(#DateTime),
+            typeof(object)
+        )
+    )
+)
+Actual:   // using static System.Linq.Expressions.Expression
+
+Lambda(
+    Call(
+        typeof(string).GetMethod("Format", 0, new[] { typeof(string), typeof(object) }),
+        Constant("{0:yyyy-MM-dd}"),
+        Convert(
+            Constant(#DateTime),
+            typeof(object)
+        )
+    )
+)
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs:line 138
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:03.22]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: ObjectNotation, objectName: "CSCompiler.CharEquality1", category: "Comparison against char", o: () => (Convert("abcd".get_Chars(0), Int32) == 99)) [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: ObjectNotation, objectName: "CSCompiler.CharEquality1", category: "Comparison against char", o: () => (Convert("abcd".get_Chars(0), Int32) == 99)) [< 1 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: new Expression<Func<bool>> {
+    NodeType = ExpressionType.Lambda,
+    Type = typeof(Func<bool>),
+    Body = new BinaryExpression {
+        NodeType = ExpressionType.Equal,
+        Type = typeof(bool),
+        Left = new ConstantExpression {
+            Type = typeof(int),
+            Value = 99
+        },
+        Right = new UnaryExpression {
+            NodeType = ExpressionType.Convert,
+            Type = typeof(int),
+            Operand = new MethodCallExpression {
+                Type = typeof(char),
+                Object = new ConstantExpression {
+                    Type = typeof(string),
+                    Value = "abcd"
+                },
+                Arguments = new ReadOnlyCollection<Expression> {
+                    new ConstantExpression {
+                        Type = typeof(int),
+                        Value = 0
+                    }
+                },
+                Method = typeof(string).GetMethod("get_Chars")
+            }
+        }
+    },
+    ReturnType = typeof(bool)
+}
+Actual:   new Expression<Func<bool>> {
+    NodeType = ExpressionType.Lambda,
+    Type = typeof(Func<bool>),
+    Body = new BinaryExpression {
+        NodeType = ExpressionType.Equal,
+        Type = typeof(bool),
+        Left = new UnaryExpression {
+            NodeType = ExpressionType.Convert,
+            Type = typeof(int),
+            Operand = new MethodCallExpression {
+                Type = typeof(char),
+                Object = new ConstantExpression {
+                    Type = typeof(string),
+                    Value = "abcd"
+                },
+                Arguments = new ReadOnlyCollection<Expression> {
+                    new ConstantExpression {
+                        Type = typeof(int),
+                        Value = 0
+                    }
+                },
+                Method = typeof(string).GetMethod("get_Chars")
+            }
+        },
+        Right = new ConstantExpression {
+            Type = typeof(int),
+            Value = 99
+        }
+    },
+    ReturnType = typeof(bool)
+}
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs:line 138
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:03.25]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: ObjectNotation, objectName: "CSCompiler.InterpolatedString", category: "Literal", o: () => Format("{0:yyyy-MM-dd}", Convert(new DateTime(2001, 3, 25), Object))) [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: ObjectNotation, objectName: "CSCompiler.InterpolatedString", category: "Literal", o: () => Format("{0:yyyy-MM-dd}", Convert(new DateTime(2001, 3, 25), Object))) [< 1 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: new Expression<Func<string>> {
+    NodeType = ExpressionType.Lambda,
+    Type = typeof(Func<string>),
+    Body = new MethodCallExpression {
+        Type = typeof(string),
+        Arguments = new ReadOnlyCollection<Expression> {
+            new ConstantExpression {
+                Type = typeof(string),
+                Value = "{0:yyyy-MM-dd}"
+            },
+            new UnaryExpression {
+                NodeType = ExpressionType.Convert,
+                Type = typeof(object),
+                Operand = new NewExpression {
+                    Type = typeof(DateTime),
+                    Arguments = new ReadOnlyCollection<Expression> {
+                        new ConstantExpression {
+                            Type = typeof(int),
+                            Value = 2001
+                        },
+                        new ConstantExpression {
+                            Type = typeof(int),
+                            Value = 3
+                        },
+                        new ConstantExpression {
+                            Type = typeof(int),
+                            Value = 25
+                        }
+                    },
+                    Constructor = typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int) })
+                }
+            }
+        },
+        Method = typeof(string).GetMethod("Format", new[] { typeof(string), typeof(object) })
+    },
+    ReturnType = typeof(string)
+}
+Actual:   new Expression<Func<string>> {
+    NodeType = ExpressionType.Lambda,
+    Type = typeof(Func<string>),
+    Body = new MethodCallExpression {
+        Type = typeof(string),
+        Arguments = new ReadOnlyCollection<Expression> {
+            new ConstantExpression {
+                Type = typeof(string),
+                Value = "{0:yyyy-MM-dd}"
+            },
+            new UnaryExpression {
+                NodeType = ExpressionType.Convert,
+                Type = typeof(object),
+                Operand = new NewExpression {
+                    Type = typeof(DateTime),
+                    Arguments = new ReadOnlyCollection<Expression> {
+                        new ConstantExpression {
+                            Type = typeof(int),
+                            Value = 2001
+                        },
+                        new ConstantExpression {
+                            Type = typeof(int),
+                            Value = 3
+                        },
+                        new ConstantExpression {
+                            Type = typeof(int),
+                            Value = 25
+                        }
+                    },
+                    Constructor = typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int) })
+                }
+            }
+        },
+        Method = typeof(string).GetMethod("Format", 0, new[] { typeof(string), typeof(object) })
+    },
+    ReturnType = typeof(string)
+}
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs:line 138
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:03.29]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: ObjectNotation, objectName: "CSCompiler.RightEnumNonConstant", category: "Enum comparison", o: () => (Convert(value(ExpressionTreeTestObjects.CSCompiler+<>c__DisplayClass98_33).dow, Int32) >= 2)) [FAIL]
+[xUnit.net 00:00:03.30]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: ObjectNotation, objectName: "CSCompiler.StaticMember", category: "Member access (+ closed variables)", o: () => "") [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: ObjectNotation, objectName: "CSCompiler.RightEnumNonConstant", category: "Enum comparison", o: () => (Convert(value(ExpressionTreeTestObjects.CSCompiler+<>c__DisplayClass98_33).dow, Int32) >= 2)) [< 1 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: new Expression<Func<bool>> {
+    NodeType = ExpressionType.Lambda,
+    Type = typeof(Func<bool>),
+    Body = new BinaryExpression {
+        NodeType = ExpressionType.LessThanOrEqual,
+        Type = typeof(bool),
+        Left = new ConstantExpression {
+            Type = typeof(int),
+            Value = 2
+        },
+        Right = new UnaryExpression {
+            NodeType = ExpressionType.Convert,
+            Type = typeof(int),
+            Operand = new MemberExpression {
+                Type = typeof(DayOfWeek),
+                Expression = new ConstantExpression {
+                    Type = typeof(<closure>),
+                    Value = #<closure>
+                },
+                Member = typeof(<closure>).GetField("dow")
+            }
+        }
+    },
+    ReturnType = typeof(bool)
+}
+Actual:   new Expression<Func<bool>> {
+    NodeType = ExpressionType.Lambda,
+    Type = typeof(Func<bool>),
+    Body = new BinaryExpression {
+        NodeType = ExpressionType.GreaterThanOrEqual,
+        Type = typeof(bool),
+        Left = new UnaryExpression {
+            NodeType = ExpressionType.Convert,
+            Type = typeof(int),
+            Operand = new MemberExpression {
+                Type = typeof(DayOfWeek),
+                Expression = new ConstantExpression {
+                    Type = typeof(<closure>),
+                    Value = #<closure>
+                },
+                Member = typeof(<closure>).GetField("dow")
+            }
+        },
+        Right = new ConstantExpression {
+            Type = typeof(int),
+            Value = 2
+        }
+    },
+    ReturnType = typeof(bool)
+}
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs:line 138
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: ObjectNotation, objectName: "CSCompiler.StaticMember", category: "Member access (+ closed variables)", o: () => "") [3 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: new Expression<Func<string>> {
+    NodeType = ExpressionType.Lambda,
+    Type = typeof(Func<string>),
+    Body = new MemberExpression {
+        Type = typeof(string),
+        Member = typeof(string).GetField("Empty")
+    },
+    ReturnType = typeof(string)
+}
+Actual:   new Expression<Func<string>> {
+    NodeType = ExpressionType.Lambda,
+    Type = typeof(Func<string>),
+    Body = new ConstantExpression {
+        Type = typeof(string)
+    },
+    ReturnType = typeof(string)
+}
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs:line 138
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:03.58]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: ObjectNotation, objectName: "VBCompiler.InterpolatedString", category: "Literal", o: () => Format("{0:yyyy-MM-dd}", Convert(03/25/2001 00:00:00, Object))) [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: ObjectNotation, objectName: "VBCompiler.InterpolatedString", category: "Literal", o: () => Format("{0:yyyy-MM-dd}", Convert(03/25/2001 00:00:00, Object))) [< 1 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: new Expression<Func<string>> {
+    NodeType = ExpressionType.Lambda,
+    Type = typeof(Func<string>),
+    Body = new MethodCallExpression {
+        Type = typeof(string),
+        Arguments = new ReadOnlyCollection<Expression> {
+            new ConstantExpression {
+                Type = typeof(string),
+                Value = "{0:yyyy-MM-dd}"
+            },
+            new UnaryExpression {
+                NodeType = ExpressionType.Convert,
+                Type = typeof(object),
+                Operand = new ConstantExpression {
+                    Type = typeof(DateTime),
+                    Value = #DateTime
+                }
+            }
+        },
+        Method = typeof(string).GetMethod("Format", new[] { typeof(string), typeof(object) })
+    },
+    ReturnType = typeof(string)
+}
+Actual:   new Expression<Func<string>> {
+    NodeType = ExpressionType.Lambda,
+    Type = typeof(Func<string>),
+    Body = new MethodCallExpression {
+        Type = typeof(string),
+        Arguments = new ReadOnlyCollection<Expression> {
+            new ConstantExpression {
+                Type = typeof(string),
+                Value = "{0:yyyy-MM-dd}"
+            },
+            new UnaryExpression {
+                NodeType = ExpressionType.Convert,
+                Type = typeof(object),
+                Operand = new ConstantExpression {
+                    Type = typeof(DateTime),
+                    Value = #DateTime
+                }
+            }
+        },
+        Method = typeof(string).GetMethod("Format", 0, new[] { typeof(string), typeof(object) })
+    },
+    ReturnType = typeof(string)
+}
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs:line 138
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:03.64]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: TextualTree, objectName: "CSCompiler.CharEquality1", category: "Comparison against char", o: () => (Convert("abcd".get_Chars(0), Int32) == 99)) [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: TextualTree, objectName: "CSCompiler.CharEquality1", category: "Comparison against char", o: () => (Convert("abcd".get_Chars(0), Int32) == 99)) [< 1 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: Lambda (Func<bool>)
+    · Body - Equal (bool) = false
+        · Left - Constant (int) = 99
+        · Right - Convert (int) = 97
+            · Operand - Call (char) get_Chars = 'a'
+                · Object - Constant (string) = "abcd"
+                · Arguments[0] - Constant (int) = 0
+Actual:   Lambda (Func<bool>)
+    · Body - Equal (bool) = false
+        · Left - Convert (int) = 97
+            · Operand - Call (char) get_Chars = 'a'
+                · Object - Constant (string) = "abcd"
+                · Arguments[0] - Constant (int) = 0
+        · Right - Constant (int) = 99
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs:line 138
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:03.78]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: TextualTree, objectName: "CSCompiler.RightEnumNonConstant", category: "Enum comparison", o: () => (Convert(value(ExpressionTreeTestObjects.CSCompiler+<>c__DisplayClass98_33).dow, Int32) >= 2)) [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: TextualTree, objectName: "CSCompiler.RightEnumNonConstant", category: "Enum comparison", o: () => (Convert(value(ExpressionTreeTestObjects.CSCompiler+<>c__DisplayClass98_33).dow, Int32) >= 2)) [2 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: Lambda (Func<bool>)
+    · Body - LessThanOrEqual (bool) = true
+        · Left - Constant (int) = 2
+        · Right - Convert (int) = 3
+            · Operand - MemberAccess (DayOfWeek) dow = DayOfWeek.Wednesday
+                · Expression - Constant (<closure>) = #<closure>
+Actual:   Lambda (Func<bool>)
+    · Body - GreaterThanOrEqual (bool) = true
+        · Left - Convert (int) = 3
+            · Operand - MemberAccess (DayOfWeek) dow = DayOfWeek.Wednesday
+                · Expression - Constant (<closure>) = #<closure>
+        · Right - Constant (int) = 2
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs:line 138
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:03.79]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: TextualTree, objectName: "CSCompiler.StaticMember", category: "Member access (+ closed variables)", o: () => "") [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: TextualTree, objectName: "CSCompiler.StaticMember", category: "Member access (+ closed variables)", o: () => "") [< 1 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: Lambda (Func<string>)
+    · Body - MemberAccess (string) string.Empty = ""
+Actual:   Lambda (Func<string>)
+    · Body - Constant (string) = ""
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs:line 138
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:04.49]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: DynamicLinq, objectName: "DynamicLinqTestObjects.CharEquality1", category: "Comparison against char", o: p => (Convert(p.LastName.get_Chars(0), Int32) == 99)) [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: DynamicLinq, objectName: "DynamicLinqTestObjects.CharEquality1", category: "Comparison against char", o: p => (Convert(p.LastName.get_Chars(0), Int32) == 99)) [< 1 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: "\'c\' == LastName[0]"
+Actual:   "LastName[0] == \'c\'"
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs:line 138
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:04.49]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: DynamicLinq, objectName: "DynamicLinqTestObjects.InRightEnumNonConstant", category: "Enum comparison", o: p => ((Convert(p.DOB.Value.DayOfWeek, Int32) == 2) OrElse (Convert(p.RegisteredOn.Value.DayOfWeek, Int32) == 2))) [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: DynamicLinq, objectName: "DynamicLinqTestObjects.InRightEnumNonConstant", category: "Enum comparison", o: p => ((Convert(p.DOB.Value.DayOfWeek, Int32) == 2) OrElse (Convert(p.RegisteredOn.Value.DayOfWeek, Int32) == 2))) [< 1 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: "DayOfWeek.Tuesday in (DOB.Value.DayOfWeek, RegisteredOn.Value.DayOfWeek)"
+Actual:   "DOB.Value.DayOfWeek == DayOfWeek.Tuesday || RegisteredOn.Value.DayOfWeek == DayOfWeek.Tuesday"
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs:line 138
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:04.50]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: DynamicLinq, objectName: "DynamicLinqTestObjects.RightEnumNonConstant", category: "Enum comparison", o: p => (Convert(p.DOB.Value.DayOfWeek, Int32) <= 2)) [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: DynamicLinq, objectName: "DynamicLinqTestObjects.RightEnumNonConstant", category: "Enum comparison", o: p => (Convert(p.DOB.Value.DayOfWeek, Int32) <= 2)) [< 1 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: "DayOfWeek.Tuesday >= DOB.Value.DayOfWeek"
+Actual:   "DOB.Value.DayOfWeek <= DayOfWeek.Tuesday"
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs:line 138
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:04.50]     ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: DynamicLinq, objectName: "DynamicLinqTestObjects.StaticMember", category: "Member access (+ closed variables)", o: p => "") [FAIL]
+  Failed ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(rendererKey: DynamicLinq, objectName: "DynamicLinqTestObjects.StaticMember", category: "Member access (+ closed variables)", o: p => "") [< 1 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: "String.Empty"
+Actual:   "\"\""
+  Stack Trace:
+     at ExpressionTreeToString.Tests.TestObjectsRunner.TestMethod(BuiltinRenderer rendererKey, String objectName, String category, Object o) in /home/user/w58/ETTS/default/Tests/TestObjectsRunner.cs:line 138
+   at InvokeStub_TestObjectsRunner.TestMethod(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+
+Failed!  - Failed:    28, Passed:  3061, Skipped:     0, Total:  3089, Duration: 3 s - Tests.dll (net6.0)

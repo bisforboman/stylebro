@@ -1,0 +1,39 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  NPoco.Abstractions -> /home/user/w58/NPoco/default/src/NPoco.Abstractions/bin/Debug/net462/NPoco.Abstractions.dll
+  NPoco.Abstractions -> /home/user/w58/NPoco/default/src/NPoco.Abstractions/bin/Debug/netstandard2.1/NPoco.Abstractions.dll
+  NPoco.Abstractions -> /home/user/w58/NPoco/default/src/NPoco.Abstractions/bin/Debug/net8.0/NPoco.Abstractions.dll
+  NPoco.Abstractions -> /home/user/w58/NPoco/default/src/NPoco.Abstractions/bin/Debug/net10.0/NPoco.Abstractions.dll
+  NPoco -> /home/user/w58/NPoco/default/src/NPoco/bin/Debug/netstandard2.1/NPoco.dll
+  NPoco -> /home/user/w58/NPoco/default/src/NPoco/bin/Debug/net10.0/NPoco.dll
+  NPoco -> /home/user/w58/NPoco/default/src/NPoco/bin/Debug/net462/NPoco.dll
+  NPoco.Abstractions -> /home/user/w58/NPoco/default/src/NPoco.Abstractions/bin/Debug/netstandard2.0/NPoco.Abstractions.dll
+  NPoco.FluentSql -> /home/user/w58/NPoco/default/src/NPoco.FluentSql/bin/Debug/netstandard2.1/NPoco.FluentSql.dll
+  NPoco.SqlServer.SystemData -> /home/user/w58/NPoco/default/src/NPoco.SqlServer.SystemData/bin/Debug/net462/NPoco.SqlServer.SystemData.dll
+  NPoco.SqlServer -> /home/user/w58/NPoco/default/src/NPoco.SqlServer/bin/Debug/net462/NPoco.SqlServer.dll
+  NPoco.SqlServer -> /home/user/w58/NPoco/default/src/NPoco.SqlServer/bin/Debug/netstandard2.1/NPoco.SqlServer.dll
+  NPoco.JsonNet -> /home/user/w58/NPoco/default/src/NPoco.JsonNet/bin/Debug/net462/NPoco.JsonNet.dll
+  NPoco.JsonNet -> /home/user/w58/NPoco/default/src/NPoco.JsonNet/bin/Debug/net10.0/NPoco.JsonNet.dll
+  NPoco.JsonNet -> /home/user/w58/NPoco/default/src/NPoco.JsonNet/bin/Debug/netstandard2.1/NPoco.JsonNet.dll
+  NPoco.FluentSql -> /home/user/w58/NPoco/default/src/NPoco.FluentSql/bin/Debug/net10.0/NPoco.FluentSql.dll
+  NPoco.SqlServer.SystemData -> /home/user/w58/NPoco/default/src/NPoco.SqlServer.SystemData/bin/Debug/netstandard2.1/NPoco.SqlServer.SystemData.dll
+  NPoco.SqlServer -> /home/user/w58/NPoco/default/src/NPoco.SqlServer/bin/Debug/net10.0/NPoco.SqlServer.dll
+  NPoco.SqlServer.SystemData -> /home/user/w58/NPoco/default/src/NPoco.SqlServer.SystemData/bin/Debug/net10.0/NPoco.SqlServer.SystemData.dll
+  NPoco.FluentSql -> /home/user/w58/NPoco/default/src/NPoco.FluentSql/bin/Debug/net462/NPoco.FluentSql.dll
+  NPoco -> /home/user/w58/NPoco/default/src/NPoco/bin/Debug/netstandard2.0/NPoco.dll
+  NPoco.SqlServer -> /home/user/w58/NPoco/default/src/NPoco.SqlServer/bin/Debug/netstandard2.0/NPoco.SqlServer.dll
+  NPoco.JsonNet -> /home/user/w58/NPoco/default/src/NPoco.JsonNet/bin/Debug/netstandard2.0/NPoco.JsonNet.dll
+  NPoco.SqlServer.SystemData -> /home/user/w58/NPoco/default/src/NPoco.SqlServer.SystemData/bin/Debug/netstandard2.0/NPoco.SqlServer.SystemData.dll
+  NPoco.FluentSql -> /home/user/w58/NPoco/default/src/NPoco.FluentSql/bin/Debug/netstandard2.0/NPoco.FluentSql.dll
+  NPoco -> /home/user/w58/NPoco/default/src/NPoco/bin/Debug/net8.0/NPoco.dll
+  NPoco.SqlServer -> /home/user/w58/NPoco/default/src/NPoco.SqlServer/bin/Debug/net8.0/NPoco.SqlServer.dll
+  NPoco.FluentSql -> /home/user/w58/NPoco/default/src/NPoco.FluentSql/bin/Debug/net8.0/NPoco.FluentSql.dll
+  NPoco.JsonNet -> /home/user/w58/NPoco/default/src/NPoco.JsonNet/bin/Debug/net8.0/NPoco.JsonNet.dll
+  NPoco.SqlServer.SystemData -> /home/user/w58/NPoco/default/src/NPoco.SqlServer.SystemData/bin/Debug/net8.0/NPoco.SqlServer.SystemData.dll
+  NPoco.Tests -> /home/user/w58/NPoco/default/test/NPoco.Tests/bin/Debug/net10.0/NPoco.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:24.59
