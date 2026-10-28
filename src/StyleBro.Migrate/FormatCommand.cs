@@ -1878,21 +1878,27 @@ internal static partial class FormatCommand
     /// What to say when StyleBro's analyzers don't load in the projects a run formats (<see cref="LoadsStyleBro"/>, relative
     /// paths): null when they load everywhere; when they load nowhere the run stops (<paramref name="all"/>), else a warning.
     /// </summary>
-    public static string? NotLoadedMessage(IReadOnlyList<string> without, bool all)
+    public static string? NotLoadedMessage(IReadOnlyList<string> without, bool all, IReadOnlyList<(string Reference, string Nearest)>? shadowed = null)
     {
         if (without.Count == 0)
         {
             return null;
         }
 
+        // A reference in a Directory.Build.props the projects never read (Migration.ShadowedReferences): name where it goes.
+        var move = shadowed is { Count: > 0 }
+            ? string.Join(" ", shadowed.Select(s => $"{s.Reference} has the StyleBro.Analyzers reference, but MSBuild reads only the nearest Directory.Build.props and {s.Nearest} doesn't import it: put the reference in {s.Nearest} (or import the parent's there)."))
+                + " Then run again (https://bisforboman.github.io/stylebro/getting-started/)."
+            : null;
         if (all)
         {
             return $"{NotLoadedHeader} no project has StyleBro.Analyzers in its restore output (obj/project.assets.json), so 'dotnet format' would fix only whitespace and the built-in rules and report clean. "
-                + "Add the StyleBro.Analyzers package (https://bisforboman.github.io/stylebro/getting-started/), restore (without --no-restore, 'format' restores), then run again.";
+                + (move ?? "Add the StyleBro.Analyzers package (https://bisforboman.github.io/stylebro/getting-started/), restore (without --no-restore, 'format' restores), then run again.");
         }
 
         var names = string.Join(", ", without.Take(5)) + (without.Count > 5 ? $" and {without.Count - 5} more" : string.Empty);
-        return $"{PartlyLoadedHeader} {names} {(without.Count == 1 ? "has" : "have")} no StyleBro.Analyzers in {(without.Count == 1 ? "its" : "their")} restore output, so StyleBro's rules don't run there. Add the package there, or restore {(without.Count == 1 ? "it" : "them")}, then run again.";
+        return $"{PartlyLoadedHeader} {names} {(without.Count == 1 ? "has" : "have")} no StyleBro.Analyzers in {(without.Count == 1 ? "its" : "their")} restore output, so StyleBro's rules don't run there. "
+            + (move ?? $"Add the package there, or restore {(without.Count == 1 ? "it" : "them")}, then run again.");
     }
 
     /// <summary>
@@ -5688,7 +5694,10 @@ internal static partial class FormatCommand
             .ToList();
         var without = checkedProjects.Where(p => !LoadsStyleBro(p.FullPath, p.AssetsFile)).Select(p => p.Relative).Order(StringComparer.OrdinalIgnoreCase).ToList();
         var none = without.Count > 0 && without.Count == checkedProjects.Count;
-        if (NotLoadedMessage(without, none) is { } notLoaded)
+        var shadowed = without.Count > 0
+            ? Migration.ShadowedReferences(RepositoryRoot(root) ?? root, checkedProjects.Where(p => without.Contains(p.Relative)).Select(p => p.FullPath))
+            : [];
+        if (NotLoadedMessage(without, none, shadowed) is { } notLoaded)
         {
             if (none)
             {

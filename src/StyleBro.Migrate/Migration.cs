@@ -955,12 +955,7 @@ internal static partial class Migration
                 var candidate = Path.Combine(directory, "Directory.Build.props");
                 if (File.Exists(candidate))
                 {
-                    // ponytail: text match for an <Import> naming Directory.Build.props (comments removed), not MSBuild's evaluation;
-                    // Imports also follows a property the file defines (Orleans' $(_ParentDirectoryBuildPropsPath)).
-                    var text = StyleCopSetup.WithoutComments(File.ReadAllText(candidate));
-                    var importsParent = Regex.IsMatch(text, @"<Import\b[^>]*Directory\.Build\.props", RegexOptions.IgnoreCase)
-                        || StyleCopSetup.Imports(candidate, root).Any(i => Path.GetFileName(i).Equals("Directory.Build.props", StringComparison.OrdinalIgnoreCase));
-                    return importsParent ? Nearest(Path.GetDirectoryName(directory)) : candidate;
+                    return ImportsParentProps(candidate, root) ? Nearest(Path.GetDirectoryName(directory)) : candidate;
                 }
             }
 
@@ -979,6 +974,55 @@ internal static partial class Migration
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Order(StringComparer.OrdinalIgnoreCase)
             .ToList();
+    }
+
+    /// <summary>Whether a Directory.Build.props imports the one above it (<see cref="PropsFiles"/>).</summary>
+    static bool ImportsParentProps(string props, string root)
+    {
+        // ponytail: text match for an <Import> naming Directory.Build.props (comments removed), not MSBuild's evaluation;
+        // Imports also follows a property the file defines (Orleans' $(_ParentDirectoryBuildPropsPath)).
+        var text = StyleCopSetup.WithoutComments(File.ReadAllText(props));
+        return Regex.IsMatch(text, @"<Import\b[^>]*Directory\.Build\.props", RegexOptions.IgnoreCase)
+            || StyleCopSetup.Imports(props, root).Any(i => Path.GetFileName(i).Equals("Directory.Build.props", StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// The Directory.Build.props files with a StyleBro.Analyzers reference that projects (full paths) under the root never
+    /// read, each with the nearer one that shadows it (it doesn't import its parent's; MSBuild reads only the nearest), as
+    /// root-relative '/'-separated paths. Trial 59 (DelegateDecompiler): the reference went into a new root
+    /// Directory.Build.props, the projects read src/'s, and format only said to add the package.
+    /// </summary>
+    public static List<(string Reference, string Nearest)> ShadowedReferences(string root, IEnumerable<string> projects)
+    {
+        root = Path.GetFullPath(root).TrimEnd('\\', '/');
+        string Relative(string path) => Path.GetRelativePath(root, path).Replace('\\', '/');
+        static bool References(string props) => Regex.IsMatch(
+            StyleCopSetup.WithoutComments(File.ReadAllText(props)), @"<(Global)?PackageReference\b[^>]*\bInclude\s*=\s*""StyleBro\.Analyzers""", RegexOptions.IgnoreCase);
+        var shadowed = new List<(string, string)>();
+        foreach (var project in projects)
+        {
+            // The props above the project, nearest first, up to the root; the project reads them while each imports its parent's.
+            var above = new List<string>();
+            for (var folder = Path.GetDirectoryName(Path.GetFullPath(project)); folder is not null && folder.Length >= root.Length; folder = Path.GetDirectoryName(folder))
+            {
+                var candidate = Path.Combine(folder, "Directory.Build.props");
+                if (File.Exists(candidate))
+                {
+                    above.Add(candidate);
+                }
+            }
+
+            var read = above.TakeWhile((p, i) => i == 0 || ImportsParentProps(above[i - 1], root)).Count();
+            for (var i = read; i < above.Count; i++)
+            {
+                if (References(above[i]))
+                {
+                    shadowed.Add((Relative(above[i]), Relative(above[read - 1])));
+                }
+            }
+        }
+
+        return shadowed.Distinct().OrderBy(s => s.Item1, StringComparer.OrdinalIgnoreCase).ThenBy(s => s.Item2, StringComparer.OrdinalIgnoreCase).ToList();
     }
 
     /// <summary>

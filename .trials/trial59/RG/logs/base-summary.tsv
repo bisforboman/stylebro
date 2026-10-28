@@ -1,0 +1,6 @@
+build	0	23s	dotnet build src/ReportGenerator.slnx -c Debug
+twae-Debug	1	13s	twae Debug
+test-Debug	2	20s	env CFG=Debug bash -c cd src && dotnet test --solution ReportGenerator.slnx -c $CFG
+twae-Release	1	7s	twae Release
+test-Release	2	19s	env CFG=Release bash -c cd src && dotnet test --solution ReportGenerator.slnx -c $CFG
+DONE
