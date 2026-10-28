@@ -1075,7 +1075,7 @@ engines (`.trials/README.md`, "Engine soak").
   global.json lowered (LightInject); the net4x test frameworks need mono (CommandLineUtils, ExpressionTreeToString:
   net6.0 only).
 
-## Trial 59 (2026-10-28, verdict pending)
+## Trial 59 (2026-10-28, not clean: owner "Not clean", tally 0; host soak: clean, the fourth clean soak with the host as the default)
 
 - Repos (three random plus one targeted): xoofx/SharpYaml, adamralph/bullseye, danielpalme/ReportGenerator (random, seed 59:
   draws 28, 10, 83 of 95 entries; every entry 0-75 is used, 76 Vogen (702 files) and 77 PdfPig (1,238) are too large, so 28
