@@ -1,0 +1,27 @@
+  Determining projects to restore...
+  Restored /home/user/w59/SharpYaml/base/src/SharpYaml.FeatureSwitchSmoke/SharpYaml.FeatureSwitchSmoke.csproj (in 512 ms).
+  Restored /home/user/w59/SharpYaml/base/src/SharpYaml.AotSmokeLib/SharpYaml.AotSmokeLib.csproj (in 737 ms).
+  Restored /home/user/w59/SharpYaml/base/src/SharpYaml.Benchmarks/SharpYaml.Benchmarks.csproj (in 787 ms).
+  Restored /home/user/w59/SharpYaml/base/src/SharpYaml/SharpYaml.csproj (in 737 ms).
+  Restored /home/user/w59/SharpYaml/base/src/SharpYaml.AotSmoke/SharpYaml.AotSmoke.csproj (in 23 ms).
+  Restored /home/user/w59/SharpYaml/base/src/SharpYaml.SourceGenerator/SharpYaml.SourceGenerator.csproj (in 64 ms).
+  Restored /home/user/w59/SharpYaml/base/src/SharpYaml.Tests/SharpYaml.Tests.csproj (in 146 ms).
+  SharpYaml.SourceGenerator -> /home/user/w59/SharpYaml/base/src/SharpYaml.SourceGenerator/bin/Debug/netstandard2.0/SharpYaml.SourceGenerator.dll
+  SharpYaml -> /home/user/w59/SharpYaml/base/src/SharpYaml/bin/Debug/netstandard2.0/SharpYaml.dll
+  SharpYaml.AotSmokeLib -> /home/user/w59/SharpYaml/base/src/SharpYaml.AotSmokeLib/bin/Debug/netstandard2.0/SharpYaml.AotSmokeLib.dll
+  SharpYaml -> /home/user/w59/SharpYaml/base/src/SharpYaml/bin/Debug/net8.0/SharpYaml.dll
+  SharpYaml -> /home/user/w59/SharpYaml/base/src/SharpYaml/bin/Debug/net10.0/SharpYaml.dll
+  SharpYaml.FeatureSwitchSmoke -> /home/user/w59/SharpYaml/base/src/SharpYaml.FeatureSwitchSmoke/bin/Debug/net10.0/SharpYaml.FeatureSwitchSmoke.dll
+  SharpYaml.AotSmoke -> /home/user/w59/SharpYaml/base/src/SharpYaml.AotSmoke/bin/Debug/net10.0/SharpYaml.AotSmoke.dll
+/home/user/w59/SharpYaml/base/src/SharpYaml.Tests/InsertionQueueTests.cs(137,24): error CS0281: Friend access was granted by 'SharpYaml, Version=3.0.0.0, Culture=neutral, PublicKeyToken=null', but the public key of the output assembly ('') does not match that specified by the InternalsVisibleTo attribute in the granting assembly. [/home/user/w59/SharpYaml/base/src/SharpYaml.Tests/SharpYaml.Tests.csproj]
+/home/user/w59/SharpYaml/base/src/SharpYaml.Tests/InsertionQueueTests.cs(147,52): error CS0281: Friend access was granted by 'SharpYaml, Version=3.0.0.0, Culture=neutral, PublicKeyToken=null', but the public key of the output assembly ('') does not match that specified by the InternalsVisibleTo attribute in the granting assembly. [/home/user/w59/SharpYaml/base/src/SharpYaml.Tests/SharpYaml.Tests.csproj]
+  SharpYaml.Benchmarks -> /home/user/w59/SharpYaml/base/src/SharpYaml.Benchmarks/bin/Debug/net10.0/SharpYaml.Benchmarks.dll
+
+Build FAILED.
+
+/home/user/w59/SharpYaml/base/src/SharpYaml.Tests/InsertionQueueTests.cs(137,24): error CS0281: Friend access was granted by 'SharpYaml, Version=3.0.0.0, Culture=neutral, PublicKeyToken=null', but the public key of the output assembly ('') does not match that specified by the InternalsVisibleTo attribute in the granting assembly. [/home/user/w59/SharpYaml/base/src/SharpYaml.Tests/SharpYaml.Tests.csproj]
+/home/user/w59/SharpYaml/base/src/SharpYaml.Tests/InsertionQueueTests.cs(147,52): error CS0281: Friend access was granted by 'SharpYaml, Version=3.0.0.0, Culture=neutral, PublicKeyToken=null', but the public key of the output assembly ('') does not match that specified by the InternalsVisibleTo attribute in the granting assembly. [/home/user/w59/SharpYaml/base/src/SharpYaml.Tests/SharpYaml.Tests.csproj]
+    0 Warning(s)
+    2 Error(s)
+
+Time Elapsed 00:00:18.14

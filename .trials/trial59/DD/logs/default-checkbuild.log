@@ -1,0 +1,6 @@
+Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Visual Basic: DelegateDecompiler.Tests.VB.vbproj: Visual Basic projects are left alone, 'format' runs on the C# projects only.
+StyleBro's analyzers aren't loaded: no project has StyleBro.Analyzers in its restore output (obj/project.assets.json), so 'dotnet format' would fix only whitespace and the built-in rules and report clean. Add the StyleBro.Analyzers package (https://bisforboman.github.io/stylebro/getting-started/), restore (without --no-restore, 'format' restores), then run again.
+Building DelegateDecompiler.sln in Debug, Release with warnings as errors, and a copy of HEAD to compare...
+Debug: no findings, no new errors.
+Release: no findings, no new errors.

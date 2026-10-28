@@ -1,0 +1,88 @@
+diff --git a/.editorconfig b/.editorconfig
+index aa2d422..7585412 100644
+--- a/.editorconfig
++++ b/.editorconfig
+@@ -84,3 +84,83 @@ csharp_indent_case_contents_when_block = false
+ 
+ # ReSharper properties
+ resharper_place_accessorholder_attribute_on_same_line = false
++
++# BEGIN stylebro-migrate (stylebro-migrate init: built-in .NET rules for StyleBro's preset; edits inside are replaced)
++[*.cs]
++# Built-in .NET rules that cover StyleCop rules, at the preset's severities. Their options (brace placement, modifier
++# order, ...) come from StyleBro's preset. The severities have to be here: 'dotnet format' ignores rule severities in a
++# package's global config. Add <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> to report them on build too.
++
++# Braces (SA1503, SA1519, SA1520) are StyleBro's BRO1514-BRO1516: IDE0011's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0011.severity = none
++# Formatting: spacing, indentation, line breaks (SA1000-SA1028, SA1107, SA1134, SA1137, SA1500)
++dotnet_diagnostic.IDE0055.severity = warning
++# Access modifiers (SA1400, SA1205) are StyleBro's BRO1404/BRO1007: IDE0040's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0040.severity = none
++# Modifier order: access modifier first, then static (SA1206, SA1207)
++dotnet_diagnostic.IDE0036.severity = warning
++# 'int' instead of 'Int32' (SA1121)
++dotnet_diagnostic.IDE0049.severity = warning
++# Unnecessary parentheses (SA1119) are StyleBro's BRO1405: IDE0047's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0047.severity = none
++# Parentheses that show precedence (SA1407, SA1408) are StyleBro's BRO1406/BRO1407: IDE0048's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0048.severity = none
++# Using placement (SA1200) is StyleBro's BRO1008: IDE0065's fix can change what names bind to (CS0104, CS0118)
++dotnet_diagnostic.IDE0065.severity = none
++# Blank lines (SA1507, SA1508, SA1513) are StyleBro's BRO1517-BRO1519: the SDK's fixes break multi-targeted projects
++dotnet_diagnostic.IDE2000.severity = none
++dotnet_diagnostic.IDE2002.severity = none
++dotnet_diagnostic.IDE2003.severity = none
++# 'this.' qualification isn't required (SA1101 is off in the preset)
++dotnet_diagnostic.IDE0009.severity = none
++
++# Conventions in this repository's code (stylebro-migrate init counted them; delete a line to have it counted again)
++# init: one-line if/else/loop/using/lock bodies: your code mixes both forms (98 with braces, 90 without braces), so both are allowed. To choose with braces: change the next line to csharp_prefer_braces = true.
++csharp_prefer_braces = when_multiline
++# init: one-line jumps ('if (x) return;'): allowed, because your code has some (13 of 77 places on the 'if' line without braces; any 3 keep them allowed: without it BRO1514 would add braces to each)
++stylebro_allow_single_line_jump_statements = true
++# init: operators where a line wraps: your .editorconfig says dotnet_style_operator_placement_when_wrapping = beginning_of_line, but your code mixes both forms (67 at the start of the line, 81 at the end of the line); nothing enforced it, so BRO1520 is off. To enforce it: change the code, then remove the next line.
++dotnet_diagnostic.BRO1520.severity = none
++# init: multi-line initializers: without a trailing comma in 49 of 55 places in your code
++stylebro_trailing_comma = omit
++# init: empty strings: your code mixes both forms (5 string.Empty, 14 ""), so BRO1106 is off. To choose one: set stylebro_empty_string_style and remove the next line.
++dotnet_diagnostic.BRO1106.severity = none
++# init: null checks: '== null' in 135 of 135 places in your code
++stylebro_null_check_style = equality_operator
++# init: split lists: your code mixes both forms (19 first item on the next line, 24 first item after '('), so BRO1107 is off. To choose one: set stylebro_split_list_first_item and remove the next line.
++dotnet_diagnostic.BRO1107.severity = none
++# init: ': base(...)'/': this(...)': your code mixes both forms (2 on its own line, 1 on the constructor's line), so BRO1105 is off. To choose one: set stylebro_constructor_initializer_placement and remove the next line.
++dotnet_diagnostic.BRO1105.severity = none
++# init: 'where' constraints: on the declaration's line in 9 of 12 places in your code
++stylebro_constraint_placement = same_line
++# init: switch sections: your code mixes both forms (22 after a blank line, 29 without a blank line), so BRO1526 is off. To choose one: set stylebro_blank_line_between_switch_sections and remove the next line.
++dotnet_diagnostic.BRO1526.severity = none
++# init: mixed arithmetic ('a + b * c'): without parentheses in 4 of 4 places in your code
++dotnet_style_parentheses_in_arithmetic_binary_operators = never_if_unnecessary
++# init: statements on their 'if'/loop/'case' line: allowed, because your code has some (14 of 178 places on their owner's line; any 3 keep them allowed: csharp_preserve_single_line_statements = false would move each to a line of its own)
++csharp_preserve_single_line_statements = true
++# init: types' members: your code mixes both forms (83 in BRO1001's order, 46 in another order), so BRO1001 is off. To choose one: set dotnet_diagnostic.BRO1001.severity and remove the next line.
++dotnet_diagnostic.BRO1001.severity = none
++# init: lambda-first calls: rest on the lambda's last line in 4 of 4 calls in your code
++stylebro_allow_leading_multiline_lambda = true
++# init: split lists' items: your code mixes both forms (27 one per line, 25 grouped on lines), so BRO1108 is off. To choose one: set dotnet_diagnostic.BRO1108.severity and remove the next line.
++dotnet_diagnostic.BRO1108.severity = none
++# init: private-by-default members: your code mixes both forms (90 with 'private', 115 without 'private'), so BRO1404 is off. To choose one: set dotnet_style_require_accessibility_modifiers and remove the next line.
++dotnet_diagnostic.BRO1404.severity = none
++# init: declarations with 2+ attributes: 29 of 31 in your code are combined ('[A, B]'), so BRO1102 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1102.severity = none
++# init: empty blocks ('{ }'): your code mixes both forms (2 on two lines, 1 on one line), so both are allowed. To choose on two lines: change the next line to stylebro_allow_empty_single_line_blocks = false.
++stylebro_allow_empty_single_line_blocks = true
++# init: block-bodied properties/methods: your code mixes both forms (20 on several lines, 25 on one line), so BRO1509 is off. To choose one: set dotnet_diagnostic.BRO1509.severity and remove the next line.
++dotnet_diagnostic.BRO1509.severity = none
++# init: statements after a block's '}': your code mixes both forms (94 after a blank line, 35 right below the '}'), so BRO1519 is off. To choose one: set dotnet_diagnostic.BRO1519.severity and remove the next line.
++dotnet_diagnostic.BRO1519.severity = none
++# init: nested ifs BRO1149 would merge: kept, because your code has some (4 nested ifs; any 3 keep them: BRO1149 would merge each), so BRO1149 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1149.severity = none
++# init: doc comment texts: your code mixes both forms (4 ending with a period, 4 without a period), so BRO1603 is off. To choose one: set dotnet_diagnostic.BRO1603.severity and remove the next line.
++dotnet_diagnostic.BRO1603.severity = none
++# init: using directives: 148 of 151 files sorted, 113 of 113 with System first
++dotnet_sort_system_directives_first = true
++# init: private constants/static readonly fields: your code mixes their casing (7 PascalCase, 12 camelCase), so BRO1306 is off (it checks constants, static readonly and non-private fields). To choose one: set stylebro_private_static_field_naming (PascalCase, camelCase, _camelCase or s_camelCase) and remove the next line.
++dotnet_diagnostic.BRO1306.severity = none
++# END stylebro-migrate

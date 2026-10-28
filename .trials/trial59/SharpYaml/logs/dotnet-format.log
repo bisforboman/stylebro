@@ -1,0 +1,9 @@
+Using src/SharpYaml.slnx: no solution or project at the root, and it's the only solution one folder down.
+Fixing StyleBro's rules and the built-in rules init and migrate turn on (141 ids); --all applies every analyzer's and compiler fix.
+Generators: building SharpYaml.SourceGenerator first (in the default configuration, the one 'dotnet format' loads): the code uses it as a source generator, and without its output the generated code would be missing from the checks.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net8.0, netstandard2.0).
+Checked net8.0 (run 1 of 3)
+Checked netstandard2.0 (run 2 of 3)
+Checked net10.0 (run 3 of 3)
+== net10.0 (5 project(s), 127 files with findings)

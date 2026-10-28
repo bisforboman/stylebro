@@ -1,0 +1,94 @@
+ src/Directory.Packages.props | 3 +++
+ 1 file changed, 3 insertions(+)
+No C# code outside src/, whose .editorconfig says root = true: no root .editorconfig is written.
+1 project targets several frameworks (src/SharpYaml/SharpYaml.csproj).
+Run 'bro format' instead of 'dotnet format' here: with IDE0055 on, 'dotnet format' crashes on multi-targeted
+projects (Roslyn can't merge the target frameworks' copies of a file). The command runs it once per target framework.
+
+src/.editorconfig says root = true, so the root's settings don't reach src/: it gets a block of its own, from its own code.
+Conventions in the code under src/ (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  note     csharp_prefer_braces = true:silent in .editorconfig isn't enforced (its severity is silent or none), so your code decides
+  set      private fields: 193 places -> the naming rule dotnet_naming_rule.instance_fields_should_be_camel_case decides: 113 follow it
+  set      '{' of multi-line blocks: 5758 of 5758 on its own line -> set in .editorconfig (all)
+  set      else/catch/finally after '}': 303 of 303 on a new line -> set in .editorconfig (true)
+  default  one-line if/else/loop/using/lock bodies: 1298 of 1507 with braces -> true
+  kept     one-line jumps ('if (x) return;'): 53 of 813 on the 'if' line without braces -> true (3 are enough)
+  off      operators where a line wraps: 81 at the start of the line, 209 at the end of the line -> BRO1520 is off
+  kept     '=>' where a line wraps: 108 of 108 at the start of the line -> beginning_of_line
+  default  '=' where a line wraps: 70 of 70 at the end of the line -> end_of_line
+  off      multi-line initializers: 245 with a trailing comma, 128 without a trailing comma -> BRO1401 is off
+  default  empty strings: 158 of 181 string.Empty -> string_empty
+  default  null checks: 402 of 523 'is null' -> pattern_matching
+  off      one-line <summary> texts: 819 on three lines, 312 on one line -> BRO1616 is off
+  kept     <inheritdoc/> tags: 11 of 11 '<inheritdoc />' -> spaced
+  kept     default values: 54 of 54 'default' -> true
+  default  ')' of split lists: 303 of 310 after the last item -> last_item
+  default  split lists: 213 of 271 first item on the next line -> next_line
+  default  ': base(...)'/': this(...)': 113 of 125 on its own line -> own_line
+  off      'where' constraints: 6 on their own line, 11 on the declaration's line -> BRO1111 is off
+  default  'new T { ... }' with an initializer: 492 of 539 without '()' -> omit
+  off      switch sections: 125 after a blank line, 61 without a blank line -> BRO1526 is off
+  default  files' using directives: 181 of 181 outside the namespace -> outside_namespace
+  off      mixed arithmetic ('a + b * c'): 3 with parentheses, 2 without parentheses -> BRO1406 is off
+  set      statements on their 'if'/loop/'case' line: 78 of 776 on their owner's line -> set in .editorconfig (true)
+  off      overrides/interface implementations: 155 with a doc comment, 131 without a doc comment -> BRO1601 is off
+  off      types' members: 170 in BRO1001's order, 75 in another order -> BRO1001 is off
+  mixed    overloads BRO1001 could split: 3 apart, 3 next to each other -> default stays (false)
+  default  split lists' items: 266 of 283 one per line -> warning
+  off      unsigned literal suffixes: 12 upper case ('0U', '1UL'), 5 lower case ('0u', '1ul') -> BRO1135 is off
+  default  private-by-default members: 894 of 911 with 'private' -> for_non_interface_members
+  default  partial type parts: 25 of 25 with an access modifier -> warning
+  default  internal-by-default types: 206 of 206 with 'internal' -> warning
+  set      'case X:' blocks: 4 of 4 at the label's level -> set in .editorconfig (true)
+  default  property summaries: 263 of 266 starting with 'Gets'/'Sets' -> warning
+  default  adjacent locals of one type: 30 of 30 declared one by one -> warning
+  default  declarations with 2+ attributes: 103 of 103 one per list ('[A]' '[B]') -> warning
+  default  adjacent fields of one type: 71 of 71 declared one by one -> warning
+  set      private static fields: 18 of 24 without a prefix -> a naming rule requires 's_', which BRO1307 keeps
+  set      built-in type names: 187 of 187 only keywords ('int') -> set in .editorconfig (true:suggestion)
+  default  empty blocks ('{ }'): 104 of 125 on two lines -> false
+  off      block-bodied properties/methods: 45 on several lines, 66 on one line -> BRO1509 is off
+  default  statement blocks ('if (x) { y(); }'): 1393 of 1393 on several lines -> warning
+  off      accessor bodies: 24 of 26 one-line and multi-line mixed -> BRO1510 is off
+  default  auto-property accessors ('{ get; set; }'): 763 of 763 on one line -> warning
+  kept     C# files' line endings: 245 of 245 LF -> lf
+  default  statements after a block's '}': 1779 of 1938 after a blank line -> warning
+  off      nested ifs BRO1149 would merge: 8 nested -> BRO1149 is off
+  default  neighbouring members: 2518 of 2535 with a blank line between -> warning
+  default  doc comments below code: 947 of 963 after a blank line -> warning
+  default  '//' comments above code: 248 of 248 right above the code -> warning
+  default  '//' comments below code: 287 of 309 after a blank line -> warning
+  default  doc comment texts: 1996 of 2045 ending with a period -> warning
+  default  doc element order (exception, remarks, example): 102 of 109 in BRO1619's order -> warning
+  default  keywords in doc comments: 196 of 224 '<see langword="null"/>' -> warning
+  off      non-private fields: 45 PascalCase or as your naming rule says, 30 named otherwise -> BRO1306 is off
+  default  doc comments above their element: 1065 of 1065 right above it -> warning
+  default  primary-constructor parameter names: 10 of 10 like 'logger' -> warning
+  default  tuple element names: 30 of 30 '(int Count, ...)' -> PascalCase
+  set      using directives: 139 of 139 files sorted, 96 of 97 with System first -> set in .editorconfig
+  set      private constants/static readonly fields: 38 fields -> a dotnet_naming_rule decides
+  set      spacing (csharp_space_*): your settings set IDE0055 (warning)
+Summary:
+  Kept your style for 36 settings: wrote stylebro_allow_single_line_jump_statements,
+    stylebro_arrow_placement_when_wrapping, stylebro_inheritdoc_style, csharp_prefer_simple_default_expression,
+    end_of_line; 31 were already StyleBro's default.
+  Turned 11 rules off because your code mixes both forms: BRO1520 (operators where a line wraps),
+    BRO1401 (multi-line initializers), BRO1616 (one-line <summary> texts), BRO1111 ('where' constraints),
+    BRO1526 (switch sections), BRO1406 (mixed arithmetic ('a + b * c')), BRO1601 (overrides/interface implementations),
+    BRO1001 (types' members), BRO1135 (unsigned literal suffixes), BRO1509 (block-bodied properties/methods),
+    BRO1306 (non-private fields).
+  Turned 2 rules off because your code doesn't do what they enforce: BRO1510 (accessor bodies: 24 of 26 one-line and
+    multi-line mixed), BRO1149 (nested ifs BRO1149 would merge: 8 nested).
+  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
+  note     Charset: your .editorconfig says charset = utf-8-bom, but 9 of 245 C# files start with a BOM: nothing enforced it, so charset = utf-8 is written for C# files and 'format' removes the BOM from the 9 files that have one. To have charset = utf-8-bom everywhere: put that line below the stylebro-migrate block, in a [*.cs] section (a later line wins; the block's own lines come back on the next init) and run 'bro format' (it rewrites the files).
+  note     Final line breaks: your .editorconfig says insert_final_newline = true, but 174 of 245 C# files end with a line break: nothing enforced it, so insert_final_newline = unset is written for C# files and 'format' leaves each file's last line break (or its absence) as it is. To have insert_final_newline = true everywhere: put that line below the stylebro-migrate block, in a [*.cs] section (a later line wins; the block's own lines come back on the next init) and run 'bro format' (it rewrites the files).
+
+src/.editorconfig sets IDE0055 (warning): kept, the block doesn't set it. 'bro format' still formats whitespace (its whitespace pass runs unless IDE0055 is off).
+src/.editorconfig's own [src/{Analyzers,CodeStyle,Features,Workspaces,EditorFeatures,VisualStudio}/**/*.{cs,vb}] section sets keys the block sets too: repeated at the block's end, so it still wins there.
+Wrote the built-in rule severities to src/.editorconfig.
+Set the preset version in src/Directory.Build.props (<StyleBroPreset>1.0</StyleBroPreset>): rules of newer releases stay off until you raise it.
+To report them on build too: <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> in src/Directory.Build.props.
+Tip: --agents-md adds a StyleBro section to your AGENTS.md for AI coding agents.
+Next: run 'bro format'. Plain 'dotnet format' also applies every other analyzer's and the compiler's fixes.

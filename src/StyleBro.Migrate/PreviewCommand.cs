@@ -1216,6 +1216,15 @@ internal static class PreviewCommand
         }
 
         GitChecked(folder, "update-ref", "HEAD", head.Trim());
+
+        // The tags too, as packed refs (the tag objects come through the alternates). Trial 59, SharpYaml: MinVer versions the
+        // assembly from them; the copy built as 0.0.0.0, the CS0281 its untouched Debug build has names that version, and
+        // check --build counted the same two errors as new ("Not clean").
+        if (Git(source, "for-each-ref", "--format=%(objectname) %(refname)", "refs/tags") is (0, var tags) && tags.Trim().Length > 0)
+        {
+            File.WriteAllText(Path.Combine(folder, ".git", "packed-refs"), "# pack-refs with: sorted \n" + tags.Replace("\r\n", "\n").Trim() + "\n");
+        }
+
         if (Git(source, "remote") is (0, var remotes))
         {
             foreach (var remote in remotes.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))

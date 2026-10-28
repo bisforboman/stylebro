@@ -3,3 +3,10 @@ setup	0	8s	bash -c bro migrate . --write && sed -i "s#<PackageReference Include=
 format	0	131s	bro format --engine dotnet-format
 check	0	44s	bro check --engine dotnet-format
 check-json	0
+checkbuild	0	99s	bro check --build --engine dotnet-format
+checkbuild-json	0
+twae-Debug	0	9s	twae Debug
+test-Debug	2	11s	env CFG=Debug bash -c cd src && dotnet test --solution ReportGenerator.slnx -c $CFG
+twae-Release	0	9s	twae Release
+test-Release	2	9s	env CFG=Release bash -c cd src && dotnet test --solution ReportGenerator.slnx -c $CFG
+DONE

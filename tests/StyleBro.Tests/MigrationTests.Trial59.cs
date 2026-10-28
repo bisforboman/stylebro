@@ -38,4 +38,26 @@ public sealed partial class MigrationTests
         Assert.Empty(Migration.ShadowedReferences(root, projects));
         Assert.Contains("Add the StyleBro.Analyzers package", FormatCommand.NotLoadedMessage(new[] { "src/Lib/Lib.csproj" }, all: true, [])!, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void TheHeadCopy_HasTheRepositorysTags()
+    {
+        // SharpYaml: MinVer versions the assembly from the tags. check --build's copy of HEAD had none, built as 0.0.0.0, and
+        // the CS0281 its untouched Debug build has (it names that version) counted as new: "Not clean".
+        var repository = Path.Combine(root, "repo");
+        Write("repo/A.cs", "class A { }\n");
+        Assert.Equal(0, PreviewCommand.Git(repository, "init", "-q").Code);
+        Assert.Equal(0, PreviewCommand.Git(repository, "add", "-A").Code);
+        Assert.Equal(0, PreviewCommand.Git(repository, "-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-qm", "one").Code);
+        Assert.Equal(0, PreviewCommand.Git(repository, "tag", "v1.0.0").Code);
+        Assert.Equal(0, PreviewCommand.Git(repository, "-c", "user.name=t", "-c", "user.email=t@example.com", "tag", "-a", "v3.16.0", "-m", "annotated").Code);
+        var copy = Path.Combine(root, "copy");
+        Write("copy/A.cs", "class A { }\n");
+
+        FormatCommand.WithHistory(copy, repository);
+
+        Assert.Equal("v1.0.0\nv3.16.0", PreviewCommand.Git(copy, "tag").Output.Replace("\r\n", "\n").Trim());
+        Assert.Equal("tag", PreviewCommand.Git(copy, "cat-file", "-t", "v3.16.0").Output.Trim());
+        Assert.Equal(PreviewCommand.Git(repository, "rev-parse", "HEAD").Output, PreviewCommand.Git(copy, "rev-parse", "HEAD").Output);
+    }
 }

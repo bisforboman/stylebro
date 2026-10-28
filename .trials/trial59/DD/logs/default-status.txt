@@ -1,0 +1,2 @@
+ M .editorconfig
+?? Directory.Build.props
