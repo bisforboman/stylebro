@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using StyleBro.Analyzers;
 using StyleBro.Migrate;
 
@@ -210,6 +211,37 @@ public sealed partial class MigrationTests
             return 0;
         }));
         Assert.True(ran);
+    }
+
+    [Fact]
+    public void Format_WithJson_ChecksFirst_TheCheckWritingNoReport_AndVerifyAnswersFromTheRecord()
+    {
+        // Trial 58, NPoco: 'format --json' gave every run a report, which left the check before the runs out, so the record had
+        // no check and 'bro check' after it ran every check (85 s). The check now runs with no report of its own: it lists
+        // findings, and the merged report is the fixing runs' changes.
+        List<string> options = ["style", "/r/.stylebro-format-0.slnf", "--severity", "warn", "--report", "/tmp/r"];
+        Assert.Equal(["style", "/r/.stylebro-format-0.slnf", "--severity", "warn", "--verify-no-changes"], FormatCommand.RunOptions(options, "/tmp/r0", verify: true));
+        Assert.Equal(["style", "/r/.stylebro-format-0.slnf", "--severity", "warn", "--report", "/tmp/r0"], FormatCommand.RunOptions(options, "/tmp/r0", verify: false));
+
+        // 'check --json': its checks' reports are the report.
+        Assert.Equal([.. options.Take(4), "--verify-no-changes", "--report", "/tmp/r0"], FormatCommand.RunOptions([.. options.Take(4), "--verify-no-changes", "--report", "/tmp/r"], "/tmp/r0", verify: true));
+        Assert.Equal([.. options.Take(4), "--verify-no-changes"], FormatCommand.RunOptions(options.Take(4).ToList(), null, verify: true));
+
+        // The run that checked every plan entry clean records it with --json too.
+        Write("src/A/A.csproj", "<Project />");
+        Write("src/A/X.cs", "class X { }");
+        JsonReport.Begin("format");
+        var code = FormatCommand.Run([root], _ => { }, (args, _) =>
+        {
+            Assert.Contains("--report", args);
+            FormatCommand.MarkCheckedClean(root);
+            return 0;
+        });
+        Assert.True(JsonNode.Parse(JsonReport.End(code))!["clean"]!.GetValue<bool>());
+
+        var lines = new List<string>();
+        Assert.Equal(0, FormatCommand.Run([root, "--verify-no-changes"], lines.Add, (_, _) => throw new InvalidOperationException("verify ran 'dotnet format'")));
+        Assert.StartsWith(FormatCommand.FromRecordHeader, lines[0], StringComparison.Ordinal);
     }
 
     [Fact]
