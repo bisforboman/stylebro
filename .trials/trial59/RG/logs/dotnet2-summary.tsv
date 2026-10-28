@@ -1,0 +1,12 @@
+preview	0	144s	bro preview migrate --engine dotnet-format
+setup	0	11s	bash -c bro migrate . --write && sed -i "s#<PackageReference Include=\"StyleCop.Analyzers\" Version=\"1.1.118\">#<PackageReference Include=\"StyleBro.Analyzers\" Version=\"0.8.0-trial59.2\">#" src/ReportGenerator.Core/ReportGenerator.Core.csproj && git diff --stat
+format	0	161s	bro format --engine dotnet-format
+check	0	75s	bro check --engine dotnet-format
+check-json	0
+checkbuild	0	148s	bro check --build --engine dotnet-format
+checkbuild-json	0
+twae-Debug	0	11s	twae Debug
+test-Debug	2	12s	env CFG=Debug bash -c cd src && dotnet test --solution ReportGenerator.slnx -c $CFG
+twae-Release	0	11s	twae Release
+test-Release	2	17s	env CFG=Release bash -c cd src && dotnet test --solution ReportGenerator.slnx -c $CFG
+DONE

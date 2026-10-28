@@ -3,3 +3,10 @@ setup	0	11s	bash -c python3 /home/user/stylebro/.trials/trial59/addref.py src/Di
 format	0	146s	bro format
 check	0	58s	bro check
 check-json	0
+checkbuild	0	484s	bro check --build
+checkbuild-json	0
+twae-Debug	1	20s	twae Debug
+test-Debug	1	13s	env CFG=Debug bash -c cd src && dotnet test SharpYaml.slnx -c $CFG
+twae-Release	0	31s	twae Release
+test-Release	0	26s	env CFG=Release bash -c cd src && dotnet test SharpYaml.slnx -c $CFG
+DONE

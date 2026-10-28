@@ -1,0 +1,15 @@
+Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Visual Basic: DelegateDecompiler.Tests.VB.vbproj: Visual Basic projects are left alone, 'format' runs on the C# projects only.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net45, net8.0, net9.0, netstandard2.0, netstandard2.1). net40: no run of its own, the code compiles the same as for another framework of the same kind (the same '#if' symbols tested, files and settings).
+Shared files: these projects compile the same files with other '#if' symbols or settings, so each group gets a run of its own (loaded together, 'dotnet format' crashes: https://github.com/dotnet/roslyn/issues/86001): DelegateDecompiler.EntityFramework.Tests | DelegateDecompiler.EntityFrameworkCore8.Tests.
+Checked netstandard2.1 (run 1 of 7)
+Checked net9.0 (run 2 of 7)
+Checked net10.0 (run 3 of 7)
+Checked net8.0, part 1 of 2 (run 4 of 7)
+Checked netstandard2.0 (run 5 of 7)
+Checked net45 (run 6 of 7)
+Checked net8.0, part 2 of 2 (run 7 of 7)
+'dotnet format' had warnings loading the workspace in its net45 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Clean.

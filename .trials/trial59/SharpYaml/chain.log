@@ -8,3 +8,9 @@ soak start 10:29
 soak done rc=1 10:43
 CHAIN-DONE
 default2 start 13:00
+default2 done 13:24
+dotnet2 start 13:24
+dotnet2 done 13:51
+soak start 13:51
+soak done rc=1 14:05
+CHAIN-DONE

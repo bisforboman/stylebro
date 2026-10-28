@@ -1,0 +1,32 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  DelegateDecompiler -> /home/user/w59/DD/dotnet2/src/DelegateDecompiler/bin/Debug/netstandard2.0/DelegateDecompiler.dll
+  DelegateDecompiler -> /home/user/w59/DD/dotnet2/src/DelegateDecompiler/bin/Debug/net40/DelegateDecompiler.dll
+  DelegateDecompiler -> /home/user/w59/DD/dotnet2/src/DelegateDecompiler/bin/Debug/net45/DelegateDecompiler.dll
+  DelegateDecompiler -> /home/user/w59/DD/dotnet2/src/DelegateDecompiler/bin/Debug/netstandard2.1/DelegateDecompiler.dll
+  DelegateDecompiler.EntityFrameworkCore5 -> /home/user/w59/DD/dotnet2/src/DelegateDecompiler.EntityFrameworkCore5/bin/Debug/netstandard2.1/DelegateDecompiler.EntityFrameworkCore5.dll
+  DelegateDecompiler.Tests -> /home/user/w59/DD/dotnet2/src/DelegateDecompiler.Tests/bin/Debug/net45/DelegateDecompiler.Tests.dll
+  Successfully created package '/home/user/w59/DD/dotnet2/src/DelegateDecompiler.EntityFrameworkCore5/bin/Debug/DelegateDecompiler.EntityFrameworkCore5.0.36.0--no-branch-.1.nupkg'.
+  Successfully created package '/home/user/w59/DD/dotnet2/src/DelegateDecompiler.EntityFrameworkCore5/bin/Debug/DelegateDecompiler.EntityFrameworkCore5.0.36.0--no-branch-.1.snupkg'.
+  DelegateDecompiler.Tests -> /home/user/w59/DD/dotnet2/src/DelegateDecompiler.Tests/bin/Debug/net40/DelegateDecompiler.Tests.dll
+  DelegateDecompiler.EntityFramework -> /home/user/w59/DD/dotnet2/src/DelegateDecompiler.EntityFramework/bin/Debug/net45/DelegateDecompiler.EntityFramework.dll
+  DelegateDecompiler.Tests.VB -> /home/user/w59/DD/dotnet2/src/DelegateDecompiler.Tests.VB/bin/Debug/net40/DelegateDecompiler.Tests.VB.dll
+  DelegateDecompiler.EntityFramework -> /home/user/w59/DD/dotnet2/src/DelegateDecompiler.EntityFramework/bin/Debug/netstandard2.1/DelegateDecompiler.EntityFramework.dll
+  DelegateDecompiler.Tests.VB -> /home/user/w59/DD/dotnet2/src/DelegateDecompiler.Tests.VB/bin/Debug/net45/DelegateDecompiler.Tests.VB.dll
+  DelegateDecompiler.Tests -> /home/user/w59/DD/dotnet2/src/DelegateDecompiler.Tests/bin/Debug/net8.0/DelegateDecompiler.Tests.dll
+  Successfully created package '/home/user/w59/DD/dotnet2/src/DelegateDecompiler/bin/Debug/DelegateDecompiler.0.36.0--no-branch-.1.nupkg'.
+  Successfully created package '/home/user/w59/DD/dotnet2/src/DelegateDecompiler/bin/Debug/DelegateDecompiler.0.36.0--no-branch-.1.snupkg'.
+  DelegateDecompiler.EntityFrameworkCore9.Tests -> /home/user/w59/DD/dotnet2/src/DelegateDecompiler.EntityFrameworkCore9.Tests/bin/Debug/net9.0/DelegateDecompiler.EntityFrameworkCore9.Tests.dll
+  DelegateDecompiler.EntityFrameworkCore10.Tests -> /home/user/w59/DD/dotnet2/src/DelegateDecompiler.EntityFrameworkCore10.Tests/bin/Debug/net10.0/DelegateDecompiler.EntityFrameworkCore10.Tests.dll
+  DelegateDecompiler.EntityFrameworkCore8.Tests -> /home/user/w59/DD/dotnet2/src/DelegateDecompiler.EntityFrameworkCore8.Tests/bin/Debug/net8.0/DelegateDecompiler.EntityFrameworkCore8.Tests.dll
+  DelegateDecompiler.Tests.VB -> /home/user/w59/DD/dotnet2/src/DelegateDecompiler.Tests.VB/bin/Debug/net8.0/DelegateDecompiler.Tests.VB.dll
+  DelegateDecompiler.EntityFramework.Tests -> /home/user/w59/DD/dotnet2/src/DelegateDecompiler.EntityFramework.Tests/bin/Debug/net8.0/DelegateDecompiler.EntityFramework.Tests.dll
+  DelegateDecompiler.EntityFramework.Tests -> /home/user/w59/DD/dotnet2/src/DelegateDecompiler.EntityFramework.Tests/bin/Debug/net45/DelegateDecompiler.EntityFramework.Tests.dll
+  Successfully created package '/home/user/w59/DD/dotnet2/src/DelegateDecompiler.EntityFramework/bin/Debug/DelegateDecompiler.EntityFramework.0.36.0--no-branch-.1.nupkg'.
+  Successfully created package '/home/user/w59/DD/dotnet2/src/DelegateDecompiler.EntityFramework/bin/Debug/DelegateDecompiler.EntityFramework.0.36.0--no-branch-.1.snupkg'.
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:33.24

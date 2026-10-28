@@ -1,12 +1,12 @@
   Determining projects to restore...
-  Restored /home/user/w59/Bullseye/soak-src/smoke-tests/SmokeTests.McMaster/SmokeTests.McMaster.csproj (in 357 ms).
-  Restored /home/user/w59/Bullseye/soak-src/src/Bullseye/Bullseye.csproj (in 355 ms).
-  Restored /home/user/w59/Bullseye/soak-src/smoke-tests/SmokeTests/SmokeTests.csproj (in 351 ms).
-  Restored /home/user/w59/Bullseye/soak-src/tests/Tests/Tests.csproj (in 363 ms).
-  Restored /home/user/w59/Bullseye/soak-src/smoke-tests/SmokeTests.Parallel/SmokeTests.Parallel.csproj (in 4 ms).
-  Restored /home/user/w59/Bullseye/soak-src/fixtures/Fixtures.Xunit/Fixtures.Xunit.csproj (in 5 ms).
-  Restored /home/user/w59/Bullseye/soak-src/smoke-tests/SmokeTests.CommandLine/SmokeTests.CommandLine.csproj (in 8 ms).
-  Restored /home/user/w59/Bullseye/soak-src/tests/Tests.Internal/Tests.Internal.csproj (in 19 ms).
+  Restored /home/user/w59/Bullseye/soak-src2/tests/Tests.Internal/Tests.Internal.csproj (in 313 ms).
+  Restored /home/user/w59/Bullseye/soak-src2/fixtures/Fixtures.Xunit/Fixtures.Xunit.csproj (in 310 ms).
+  Restored /home/user/w59/Bullseye/soak-src2/smoke-tests/SmokeTests.CommandLine/SmokeTests.CommandLine.csproj (in 311 ms).
+  Restored /home/user/w59/Bullseye/soak-src2/tests/Tests/Tests.csproj (in 312 ms).
+  Restored /home/user/w59/Bullseye/soak-src2/smoke-tests/SmokeTests.Parallel/SmokeTests.Parallel.csproj (in 4 ms).
+  Restored /home/user/w59/Bullseye/soak-src2/smoke-tests/SmokeTests/SmokeTests.csproj (in 4 ms).
+  Restored /home/user/w59/Bullseye/soak-src2/smoke-tests/SmokeTests.McMaster/SmokeTests.McMaster.csproj (in 7 ms).
+  Restored /home/user/w59/Bullseye/soak-src2/src/Bullseye/Bullseye.csproj (in 17 ms).
  Directory.Build.props                              | 67 +++++++++++-----------
  Directory.Packages.props                           | 39 +++++++------
  fixtures/Fixtures.Xunit/packages.lock.json         | 18 ++++++

@@ -1,0 +1,24 @@
+{
+  "repo": "hazzik/DelegateDecompiler",
+  "branch": "main",
+  "commit": "bc42e9706ddc4ec19166e8512256a32047c635e9",
+  "csFiles": 173,
+  "tags": [
+    "library",
+    "multi-target",
+    "visual-basic",
+    "expression-trees",
+    "twae"
+  ],
+  "setups": "DelegateDecompiler.sln at the root, src/Directory.Build.props (TreatWarningsAsErrors, NuGetAudit low/all, signing) and none at the root; library net40/net45/netstandard2.0/2.1, EF6 and EF Core 5 adapters, NUnit tests net40/net45/net8.0 plus a Visual Basic test project (net8.0) and EF Core 8/9/10 test projects; .editorconfig.",
+  "build": "ok",
+  "workaround": "-p:NuGetAudit=false (NU1902/NU1903 as errors in the EF Core 10 tests); DOTNET_ROLL_FORWARD=Major for net9.0",
+  "tests": "dotnet test src/DelegateDecompiler.Tests -f net8.0 (451 pass, 26 skipped) and src/DelegateDecompiler.Tests.VB (50); the EF and EF Core tests need SQL Server (70 of 89 fail offline), net40/net45 need mono",
+  "usedIn": "trial 59",
+  "verified": {
+    "by": "trial 59 session",
+    "date": "2026-10-28",
+    "sdks": "10.0.113, 8.0.132"
+  },
+  "notes": "Tests write an expected Expression<> next to a compiled Func<> written the same way, decompile the delegate and compare: any fix that touches only one of the pair fails a test (trial 59: BRO1103 on 'E.Bar == x'). init turns BRO1106 off here (string.Empty and \"\" mixed)."
+}
