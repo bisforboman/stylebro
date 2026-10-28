@@ -976,16 +976,6 @@ internal static partial class Migration
             .ToList();
     }
 
-    /// <summary>Whether a Directory.Build.props imports the one above it (<see cref="PropsFiles"/>).</summary>
-    private static bool ImportsParentProps(string props, string root)
-    {
-        // ponytail: text match for an <Import> naming Directory.Build.props (comments removed), not MSBuild's evaluation;
-        // Imports also follows a property the file defines (Orleans' $(_ParentDirectoryBuildPropsPath)).
-        var text = StyleCopSetup.WithoutComments(File.ReadAllText(props));
-        return Regex.IsMatch(text, @"<Import\b[^>]*Directory\.Build\.props", RegexOptions.IgnoreCase)
-            || StyleCopSetup.Imports(props, root).Any(i => Path.GetFileName(i).Equals("Directory.Build.props", StringComparison.OrdinalIgnoreCase));
-    }
-
     /// <summary>
     /// The Directory.Build.props files with a StyleBro.Analyzers reference that projects (full paths) under the root never
     /// read, each with the nearer one that shadows it (it doesn't import its parent's; MSBuild reads only the nearest), as
@@ -1768,6 +1758,16 @@ internal static partial class Migration
         }
 
         return null;
+    }
+
+    /// <summary>Whether a Directory.Build.props imports the one above it (<see cref="PropsFiles"/>).</summary>
+    private static bool ImportsParentProps(string props, string root)
+    {
+        // ponytail: text match for an <Import> naming Directory.Build.props (comments removed), not MSBuild's evaluation;
+        // Imports also follows a property the file defines (Orleans' $(_ParentDirectoryBuildPropsPath)).
+        var text = StyleCopSetup.WithoutComments(File.ReadAllText(props));
+        return Regex.IsMatch(text, @"<Import\b[^>]*Directory\.Build\.props", RegexOptions.IgnoreCase)
+            || StyleCopSetup.Imports(props, root).Any(i => Path.GetFileName(i).Equals("Directory.Build.props", StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>
