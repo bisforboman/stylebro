@@ -1,0 +1,28 @@
+== Packing 0.0.0-fixture.20261028122055 into /home/user/fx59/run1/feed
+You can invoke the tool using the following command: bro
+Tool 'stylebro.tool' (version '0.0.0-fixture.20261028122055') was successfully installed.
+== git-tag-version : MinVer versions from a git tag, an untouched Debug error naming that version (CS0012)
+  preview                      exit 0 (18 s)
+  init                         exit 0 (2 s)
+  host-format                  exit 0 (12 s)
+  host-check                   exit 0 (9 s)
+  host-check-build             exit 0 (29 s)
+  dotnet-format-format         exit 0 (19 s)
+  dotnet-format-check          exit 0 (9 s)
+  dotnet-format-check-build    exit 0 (27 s)
+  PASS git-tag-version (133 s)
+== subfolder-props : src/ and tests/ Directory.Build.props, none at the root
+  preview                      exit 0 (14 s)
+  init                         exit 0 (2 s)
+  host-format                  exit 0 (12 s)
+  host-check                   exit 0 (10 s)
+  host-check-build             exit 0 (48 s)
+  dotnet-format-format         exit 0 (20 s)
+  dotnet-format-check          exit 0 (10 s)
+  dotnet-format-check-build    exit 0 (48 s)
+  PASS subfolder-props (188 s)
+| Shape | Result | Time |
+| --- | --- | --- |
+| git-tag-version | pass | 133 s |
+| subfolder-props | pass | 188 s |
+Work folder: /home/user/fx59/run1
