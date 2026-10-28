@@ -12,3 +12,4 @@ Checked net8.0, part 2 of 2 (run 6 of 7)
 Checked net45 (run 7 of 7)
 'dotnet format' had warnings loading the workspace in its net45 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
 Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Building DelegateDecompiler.sln in Debug, Release with warnings as errors, and a copy of HEAD to compare...
