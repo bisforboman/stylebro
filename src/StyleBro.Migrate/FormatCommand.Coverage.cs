@@ -58,6 +58,9 @@ internal static partial class FormatCommand
     /// <summary>The gaps that make the verdict "Not verified": all but the notes (<see cref="HeldBackGap"/>, <see cref="XunitGap"/>).</summary>
     public static List<string> Unverified(IEnumerable<string> gaps) => gaps.Where(g => !g.EndsWith(NoteEnd, StringComparison.Ordinal)).ToList();
 
+    /// <summary>Whether a gap line is the held-back SDK rules' note (<see cref="HeldBackGap"/>).</summary>
+    public static bool IsHeldBackGap(string line) => IsGapLine(line) && line.EndsWith(HeldBackReason, StringComparison.Ordinal);
+
     /// <summary>Whether a run's line names a gap (<see cref="Gap"/>).</summary>
     public static bool IsGapLine(string line) => line.StartsWith(NotCheckedPrefix, StringComparison.Ordinal);
 

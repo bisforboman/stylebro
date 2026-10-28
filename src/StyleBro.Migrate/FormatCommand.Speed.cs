@@ -308,11 +308,14 @@ internal static partial class FormatCommand
         }
     }
 
-    /// <summary>The lines --verify-no-changes prints after a clean check that reported <paramref name="reported"/> (kept findings), as <see cref="Verify"/> prints them.</summary>
-    public static List<string> CleanVerdict(string root, IReadOnlyCollection<KeptFinding> reported) =>
+    /// <summary>
+    /// The lines --verify-no-changes prints after a clean check that reported <paramref name="reported"/> (kept findings) and the
+    /// gap lines that are only <paramref name="notes"/> (<see cref="HeldBackGap"/>), as <see cref="Verify"/> prints them.
+    /// </summary>
+    public static List<string> CleanVerdict(string root, IReadOnlyCollection<KeptFinding> reported, IReadOnlyCollection<string>? notes = null) =>
         reported.Count == 0
-            ? ["Clean."]
-            : [.. KeptSummary(reported, root, clean: true), .. new[] { BaselineOffLine(root, reported.Count) }.OfType<string>()];
+            ? [.. notes ?? [], "Clean."]
+            : [.. KeptSummary(reported, root, clean: true), .. new[] { BaselineOffLine(root, reported.Count) }.OfType<string>(), .. notes ?? []];
 
     /// <summary>
     /// --verify-no-changes from the record of the last clean 'format' on this state (owner's decision 2026-10-17): when that
@@ -345,6 +348,12 @@ internal static partial class FormatCommand
         {
             JsonReport.AddRun(1, [], null);
             JsonReport.AddKept(record.Kept);
+        }
+
+        // The held-back SDK rules' note (CleanVerdict), with --json's 'notChecked' as verify sets it.
+        if (Gaps(record.Verdict) is { Count: > 0 } notes)
+        {
+            ReportGaps(notes);
         }
 
         record.Verdict.ForEach(log);
