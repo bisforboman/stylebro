@@ -213,6 +213,36 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
+    public void Verify_AnswersFromTheRecord_WithTheHeldBackNote_ButNotWithAGapThatCounts()
+    {
+        // Trial 58, SDK 10.0.1xx: IDE0049's held-back note in every run of NPoco's format made the check after it run again (85 s).
+        Write("src/A/A.csproj", "<Project />");
+        Write("src/A/X.cs", "class X { }");
+        var note = FormatCommand.HeldBackGap(["IDE0049"]);
+        Assert.Equal(0, FormatCommand.Run([root], _ => { }, (_, output) =>
+        {
+            FormatCommand.MarkCheckedClean(root);
+            output?.Invoke(note);
+            return 0;
+        }));
+
+        var lines = new List<string>();
+        Assert.Equal(0, FormatCommand.Run([root, "--verify-no-changes"], lines.Add, (_, _) => throw new InvalidOperationException("verify ran 'dotnet format'")));
+        Assert.StartsWith(FormatCommand.FromRecordHeader, lines[0], StringComparison.Ordinal);
+        Assert.Equal([note, "Clean."], lines.Skip(1));
+
+        // A gap that counts: verify's checks run.
+        var gap = FormatCommand.Gap("src/A/A.csproj", "it didn't load");
+        FormatCommand.Run([root], _ => { }, (_, output) =>
+        {
+            FormatCommand.MarkCheckedClean(root);
+            output?.Invoke(gap);
+            return 0;
+        });
+        Assert.False(FormatCommand.LoadRecord(root, [root])!.Checked);
+    }
+
+    [Fact]
     public void Verify_RunsTheChecks_WhenTheCleanRunDidntCheckEveryRun()
     {
         // A first run of one plain 'dotnet format' (no check) that changed nothing, or a check that loaded only some projects

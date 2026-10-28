@@ -4881,8 +4881,10 @@ internal static partial class FormatCommand
             runPhase.Dispose();
 
             // The run checked every plan entry, clean apart from kept findings, and loaded every project: verify's checks find the
-            // same on this state (VerifyFromRecord).
-            var checkedClean = TakeCheckedClean(root) && !incomplete && gaps.Count == 0;
+            // same on this state (VerifyFromRecord). The held-back SDK rules' note too: the SDK's version is in the record's key, and
+            // verify says the note again (trial 58: SDK 10.0.1xx's IDE0049 note made NPoco's check run every run again, 85 s).
+            var checkedClean = TakeCheckedClean(root) && !incomplete && gaps.All(IsHeldBackGap);
+            var heldBackNotes = checkedClean ? gaps.ToList() : [];
             var checkFindings = TakeCheckFindings(root);
 
             // The configurations an in-solution generator keeps from the runs: 'bro check' builds them, format doesn't (a gap).
@@ -4992,7 +4994,7 @@ internal static partial class FormatCommand
                 {
                     // The run's check reported the kept findings (and nothing else), so verify's does, and ends with these lines.
                     // Not after a run that changed files (endings only): its check was of the files before.
-                    SaveKept(root, args, keptFindings, checkedClean && changed.Count == 0 ? CleanVerdict(root, keptFindings) : null, UncheckedByFormat.TryRemove(Key(root), out var builds) ? builds : null, GeneratorLines.TryRemove(Key(root), out var generatorLine) ? generatorLine : null);
+                    SaveKept(root, args, keptFindings, checkedClean && changed.Count == 0 ? CleanVerdict(root, keptFindings, heldBackNotes) : null, UncheckedByFormat.TryRemove(Key(root), out var builds) ? builds : null, GeneratorLines.TryRemove(Key(root), out var generatorLine) ? generatorLine : null);
                 }
 
                 JsonReport.AddKept(keptFindings);
