@@ -424,7 +424,7 @@ internal static class PreviewCommand
             }
 
             keptLines.ForEach(Console.WriteLine);
-            GitChecked(copy, ["diff", "--cached", "--ignore-submodules", "--output=" + patch, baseline, "--", ".", .. leftOut.Select(d => $":(exclude){d}/")]);
+            GitChecked(copy, PatchArguments(patch, baseline, leftOut));
             JsonReport.Set("patch", patch);
             var lines = File.Exists(patch) ? File.ReadLines(patch).Count() : 0;
             Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Full diff: {(Path.GetRelativePath(Environment.CurrentDirectory, patch) is var shown && !shown.StartsWith("..", StringComparison.Ordinal) ? shown : patch)} ({lines:N0} lines)"));
@@ -1250,6 +1250,14 @@ internal static class PreviewCommand
 
             // ponytail: a path with whitespace, quotes or glob characters is left out (gitattributes would need it quoted or escaped).
             .Where(path => path.Length > 0 && !path.Any(c => char.IsWhiteSpace(c) || c is '"' or '*' or '?' or '[' or '\\' or '!' or '#'));
+
+    /// <summary>
+    /// The 'git diff' that writes the preview's patch: the staged changes against <paramref name="baseline"/>, without the
+    /// folders left out. '--binary' carries files git takes for binary: a UTF-16 Directory.Build.props got "Binary files
+    /// differ", and the patch didn't apply (trial 62, mono.linq.expressions).
+    /// </summary>
+    public static string[] PatchArguments(string patch, string baseline, IEnumerable<string> leftOut) =>
+        ["diff", "--cached", "--binary", "--ignore-submodules", "--output=" + patch, baseline, "--", ".", .. leftOut.Select(d => $":(exclude){d}/")];
 
     /// <summary>
     /// Rewrites a file (null text: it doesn't exist yet) keeping its UTF-8 byte order mark (File.ReadAllText drops it and

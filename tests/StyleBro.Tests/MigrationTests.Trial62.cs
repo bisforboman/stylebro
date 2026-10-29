@@ -185,4 +185,14 @@ public sealed partial class MigrationTests
 
         Assert.Equal(line is null ? [] : [line], lines);
     }
+
+    // The UTF-16 Directory.Build.props init edits is binary to git: without '--binary' the preview's patch said "Binary files
+    // differ" for it and didn't apply (the fixture utf16-props).
+    [Fact]
+    public void PreviewPatch_CarriesBinaryFiles()
+    {
+        Assert.Equal(
+            ["diff", "--cached", "--binary", "--ignore-submodules", "--output=p.patch", "base", "--", ".", ":(exclude)vendor/"],
+            PreviewCommand.PatchArguments("p.patch", "base", ["vendor"]));
+    }
 }
