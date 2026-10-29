@@ -7,3 +7,21 @@ Checked net40 (run 2 of 3)
 Checked netcoreapp2.1 (run 3 of 3)
 == net40 (3 project(s), 11 files with findings)
 == netcoreapp2.1 (1 project(s), 5 files with findings)
+== netstandard2.0 (1 project(s), 11 files with findings)
+Run 1: 11 files changed:
+  dbg/Program.cs
+  Mono.Linq.Expressions/CombineExtensions.cs
+  Mono.Linq.Expressions/CSharpWriter.cs
+  Mono.Linq.Expressions/FluentExtensions.cs
+  Mono.Linq.Expressions/IExpressionWriter.cs
+  Mono.Linq.Expressions/IFormatter.cs
+  Test/Mono.Linq.Expressions/CSharpWriterTest.cs
+  Test/Mono.Linq.Expressions/DoWhileExpressionTest.cs
+  Test/Mono.Linq.Expressions/ForEachExpressionTest.cs
+  Test/Mono.Linq.Expressions/ForExpressionTest.cs
+  ... and 1 more
+Checked netstandard2.0 (run 1 of 3)
+Checked net40 (run 2 of 3)
+Checked netcoreapp2.1 (run 3 of 3)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

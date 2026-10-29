@@ -125,3 +125,5 @@ Assert.That(messageCounts.All(c => c.Value == 1), Is.True)
    at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
 
+
+Failed!  - Failed:     3, Passed:   622, Skipped:     5, Total:   630, Duration: 8 m 23 s - Rebus.Tests.dll (net10.0)
