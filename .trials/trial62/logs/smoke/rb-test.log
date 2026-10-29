@@ -8,3 +8,73 @@ A total of 1 test files matched the specified pattern.
   Skipped CompareInvocationSpeeds(ThreadPool) [< 1 ms]
   Skipped CompareInvocationSpeeds(ThreadPoolUnsafe) [< 1 ms]
   Skipped ReproduceIt [< 1 ms]
+  Failed ItWorks(1000,5) [1 s]
+  Error Message:
+     Not all message counts were exactly 0:
+
+    THIS IS MESSAGE 851: 2
+    THIS IS MESSAGE 281: 2
+    THIS IS MESSAGE 168: 2
+    THIS IS MESSAGE 585: 2
+    THIS IS MESSAGE 327: 2
+    THIS IS MESSAGE 380: 3
+    THIS IS MESSAGE 596: 3
+    THIS IS MESSAGE 163: 2
+    THIS IS MESSAGE 463: 3
+    THIS IS MESSAGE 178: 2
+    THIS IS MESSAGE 78: 2
+    THIS IS MESSAGE 990: 2
+    THIS IS MESSAGE 371: 2
+    THIS IS MESSAGE 267: 2
+    THIS IS MESSAGE 167: 2
+    THIS IS MESSAGE 897: 2
+    THIS IS MESSAGE 808: 2
+    THIS IS MESSAGE 708: 3
+    THIS IS MESSAGE 701: 3
+    THIS IS MESSAGE 377: 2
+    THIS IS MESSAGE 144: 2
+    THIS IS MESSAGE 118: 3
+    THIS IS MESSAGE 311: 3
+    THIS IS MESSAGE 948: 2
+    THIS IS MESSAGE 602: 2
+    THIS IS MESSAGE 41: 2
+    THIS IS MESSAGE 69: 3
+    THIS IS MESSAGE 913: 3
+    THIS IS MESSAGE 658: 2
+
+Assert.That(messageCounts.All(c => c.Value == 1), Is.True)
+  Expected: True
+  But was:  False
+
+  Stack Trace:
+     at Rebus.Tests.Integration.TestFileSystemBasedTransportAndCompetingConsumers.ItWorks(Int32 messageCount, Int32 consumers) in /home/user/cand62/rebus-org-Rebus/Rebus.Tests/Integration/TestFileSystemBasedTransportAndCompetingConsumers.cs:line 68
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.BlockUntilCompleted()
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.<>c__DisplayClass1_0.<Execute>b__0()
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)
+
+1)    at Rebus.Tests.Integration.TestFileSystemBasedTransportAndCompetingConsumers.ItWorks(Int32 messageCount, Int32 consumers) in /home/user/cand62/rebus-org-Rebus/Rebus.Tests/Integration/TestFileSystemBasedTransportAndCompetingConsumers.cs:line 68
+
+
+  Skipped CheckTiming [< 1 ms]
+  Skipped TakeTime(100000,10,Action) [< 1 ms]
+  Skipped TakeTime(100000,10,Default) [< 1 ms]
+  Skipped TakeTime(100000,10,DefaultNew) [< 1 ms]
+  Skipped DoesNotImmediatelyDeadlettersWhenDeliveryCountHeaderDoesNotExceedMaxRetries [< 1 ms]
+  Failed CanDoItSyncWithoutBlocking [17 ms]
+  Error Message:
+   System.PlatformNotSupportedException : COM Interop is not supported on this platform.
+  Stack Trace:
+     at System.Threading.Thread.SetApartmentStateUnchecked(ApartmentState state, Boolean throwOnError)
+   at System.Threading.Thread.SetApartmentState(ApartmentState state)
+   at Rebus.Tests.Synchronous.TestSyncBus.CanDoItSyncWithoutBlocking() in /home/user/cand62/rebus-org-Rebus/Rebus.Tests/Synchronous/TestSyncBus.cs:line 45
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+1)    at System.Threading.Thread.SetApartmentStateUnchecked(ApartmentState state, Boolean throwOnError)
+   at System.Threading.Thread.SetApartmentState(ApartmentState state)
+   at Rebus.Tests.Synchronous.TestSyncBus.CanDoItSyncWithoutBlocking() in /home/user/cand62/rebus-org-Rebus/Rebus.Tests/Synchronous/TestSyncBus.cs:line 45
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+
+Failed!  - Failed:     2, Passed:   623, Skipped:     5, Total:   630, Duration: 10 m 47 s - Rebus.Tests.dll (net10.0)
