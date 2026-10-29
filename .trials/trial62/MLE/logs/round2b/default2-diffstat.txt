@@ -1,0 +1,14 @@
+ Directory.Build.props                               | Bin 3080 -> 3428 bytes
+ Mono.Linq.Expressions/CSharpWriter.cs               |   3 ++-
+ Mono.Linq.Expressions/CombineExtensions.cs          |   1 -
+ Mono.Linq.Expressions/FluentExtensions.cs           |   3 +--
+ Mono.Linq.Expressions/ForEachExpression.cs          |   8 --------
+ Mono.Linq.Expressions/IExpressionWriter.cs          |   5 +++++
+ Mono.Linq.Expressions/IFormatter.cs                 |   9 +++++++++
+ Test/Mono.Linq.Expressions/CSharpWriterTest.cs      |  13 +++++++------
+ Test/Mono.Linq.Expressions/DoWhileExpressionTest.cs |   6 ++----
+ Test/Mono.Linq.Expressions/ForEachExpressionTest.cs |   3 +--
+ Test/Mono.Linq.Expressions/ForExpressionTest.cs     |   2 +-
+ Test/Mono.Linq.Expressions/WhileExpressionTest.cs   |   6 ++----
+ dbg/Program.cs                                      |   1 -
+ 13 files changed, 30 insertions(+), 30 deletions(-)

@@ -1,0 +1,219 @@
+You can invoke the tool using the following command: bro
+Tool 'stylebro.tool' (version '0.8.0-trial62.1') was successfully installed.
+== tab-indentation : tab-indented code without an .editorconfig
+  preview                      exit 0 (17 s)
+  init                         exit 0 (2 s)
+  host-format                  exit 0 (14 s)
+  host-check                   exit 0 (1 s)
+  host-check-build             exit 0 (37 s)
+  dotnet-format-format         exit 0 (20 s)
+  dotnet-format-check          exit 0 (1 s)
+  dotnet-format-check-build    exit 0 (37 s)
+  FAIL tab-indentation (140 s)
+    - init's output doesn't match /indented with tabs/ (log: /home/user/fx62/w0/tab-indentation/logs/init.txt)
+    - Alpha.cs has lines indented with spaces
+    - Beta.cs has lines indented with spaces
+    - Calc.cs has lines indented with spaces
+    - CalcTests.cs has lines indented with spaces
+    --- build.txt (last 12 lines)
+        Determining projects to restore...
+        Restored /home/user/fx62/w0/tab-indentation/host/tests/Lib.Tests/Lib.Tests.csproj (in 421 ms).
+        Restored /home/user/fx62/w0/tab-indentation/host/src/Lib/Lib.csproj (in 413 ms).
+        Lib -> /home/user/fx62/w0/tab-indentation/host/src/Lib/bin/Debug/net10.0/Lib.dll
+        Lib.Tests -> /home/user/fx62/w0/tab-indentation/host/tests/Lib.Tests/bin/Debug/net10.0/Lib.Tests.dll
+      
+      Build succeeded.
+          0 Warning(s)
+          0 Error(s)
+      
+      Time Elapsed 00:00:03.40
+    --- dotnet-format-check-build.txt (last 12 lines)
+      Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+      Building Fixture.sln in Debug, Debug|x64, Debug|x86, Release, Release|x64, Release|x86 with warnings as errors, and a copy of HEAD to compare...
+      Debug: no findings, no new errors.
+      Debug|x64: no findings, no new errors.
+      Debug|x86: no findings, no new errors.
+      Release: no findings, no new errors.
+      Release|x64: no findings, no new errors.
+      Release|x86: no findings, no new errors.
+      Clean.
+    --- dotnet-format-check.txt (last 12 lines)
+      Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+      Clean.
+    --- dotnet-format-format.txt (last 12 lines)
+      Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+      Run 1: 4 files changed:
+        src/Lib/Alpha.cs
+        src/Lib/Beta.cs
+        src/Lib/Calc.cs
+        tests/Lib.Tests/CalcTests.cs
+      Checked 2 projects (run 1 of 1)
+      Run 2: 0 files changed, clean.
+    --- host-check-build.txt (last 12 lines)
+      Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+      Building Fixture.sln in Debug, Debug|x64, Debug|x86, Release, Release|x64, Release|x86 with warnings as errors, and a copy of HEAD to compare...
+      Debug: no findings, no new errors.
+      Debug|x64: no findings, no new errors.
+      Debug|x86: no findings, no new errors.
+      Release: no findings, no new errors.
+      Release|x64: no findings, no new errors.
+      Release|x86: no findings, no new errors.
+      Clean.
+    --- host-check.txt (last 12 lines)
+      Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+      Clean.
+    --- host-format.txt (last 12 lines)
+      Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+      Run 1: 4 files changed:
+        src/Lib/Alpha.cs
+        src/Lib/Beta.cs
+        src/Lib/Calc.cs
+        tests/Lib.Tests/CalcTests.cs
+      Checked 2 projects (run 1 of 1)
+      Run 2: 0 files changed, clean.
+    --- init.txt (last 12 lines)
+        Kept your style for 6 settings: wrote end_of_line; 5 were already StyleBro's default.
+        Turned 1 rule off because your code mixes both forms: BRO1509 (block-bodied properties/methods).
+        To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
+        6 settings had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_closing_parenthesis_placement,
+          stylebro_split_list_first_item, csharp_using_directive_placement, dotnet_diagnostic.BRO1001.severity,
+          dotnet_diagnostic.BRO1108.severity, csharp_space_between_method_declaration_parameter_list_parentheses.
+      
+      Wrote the built-in rule severities to .editorconfig.
+      Set the preset version in Directory.Build.props (<StyleBroPreset>1.0</StyleBroPreset>): rules of newer releases stay off until you raise it.
+      To report them on build too: <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> in Directory.Build.props.
+      Tip: --agents-md writes a StyleBro section into AGENTS.md for AI coding agents.
+      Next: run 'bro format'. Plain 'dotnet format' also applies every other analyzer's and the compiler's fixes.
+    --- preview.txt (last 12 lines)
+        -		int b)
+        -	{
+        -		return a + b;
+        -	}
+        +    public static int Sum(
+        +        int a,
+        +        int b)
+        +    {
+        +        return a + b;
+        +    }
+      Full diff: .git/stylebro-preview.patch (129 lines)
+      Done in 16s.
+    --- test.txt (last 12 lines)
+      Test run for /home/user/fx62/w0/tab-indentation/host/tests/Lib.Tests/bin/Debug/net10.0/Lib.Tests.dll (.NETCoreApp,Version=v10.0)
+      A total of 1 test files matched the specified pattern.
+      
+      Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 24 ms - Lib.Tests.dll (net10.0)
+    --- untouched-build.txt (last 12 lines)
+      
+      Build succeeded.
+          0 Warning(s)
+          0 Error(s)
+      
+      Time Elapsed 00:00:02.90
+== utf16-props : a UTF-16 Directory.Build.props with CRLF
+  preview                      exit 0 (15 s)
+  init                         exit 0 (2 s)
+  host-format                  exit 0 (14 s)
+  host-check                   exit 0 (0 s)
+  host-check-build             exit 0 (36 s)
+  dotnet-format-format         exit 0 (18 s)
+  dotnet-format-check          exit 0 (0 s)
+  dotnet-format-check-build    exit 0 (37 s)
+  FAIL utf16-props (132 s)
+    - the preview's patch doesn't apply to the checkout (/home/user/fx62/w0/utf16-props/repo/.git/stylebro-preview.patch)
+    - Directory.Build.props isn't UTF-16 with a BOM any more
+    - Directory.Build.props has LF line endings now
+    --- build.txt (last 12 lines)
+        Determining projects to restore...
+        Restored /home/user/fx62/w0/utf16-props/host/src/Lib/Lib.csproj (in 392 ms).
+        Restored /home/user/fx62/w0/utf16-props/host/tests/Lib.Tests/Lib.Tests.csproj (in 393 ms).
+        Lib -> /home/user/fx62/w0/utf16-props/host/src/Lib/bin/Debug/net10.0/Lib.dll
+        Lib.Tests -> /home/user/fx62/w0/utf16-props/host/tests/Lib.Tests/bin/Debug/net10.0/Lib.Tests.dll
+      
+      Build succeeded.
+          0 Warning(s)
+          0 Error(s)
+      
+      Time Elapsed 00:00:02.08
+    --- dotnet-format-check-build.txt (last 12 lines)
+      Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+      Building Fixture.sln in Debug, Debug|x64, Debug|x86, Release, Release|x64, Release|x86 with warnings as errors, and a copy of HEAD to compare...
+      Debug: no findings, no new errors.
+      Debug|x64: no findings, no new errors.
+      Debug|x86: no findings, no new errors.
+      Release: no findings, no new errors.
+      Release|x64: no findings, no new errors.
+      Release|x86: no findings, no new errors.
+      Clean.
+    --- dotnet-format-check.txt (last 12 lines)
+      Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+      Clean.
+    --- dotnet-format-format.txt (last 12 lines)
+      Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+      Run 1: 2 files changed:
+        src/Lib/Calc.cs
+        tests/Lib.Tests/CalcTests.cs
+      Checked 2 projects (run 1 of 1)
+      Run 2: 0 files changed, clean.
+    --- host-check-build.txt (last 12 lines)
+      Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+      Building Fixture.sln in Debug, Debug|x64, Debug|x86, Release, Release|x64, Release|x86 with warnings as errors, and a copy of HEAD to compare...
+      Debug: no findings, no new errors.
+      Debug|x64: no findings, no new errors.
+      Debug|x86: no findings, no new errors.
+      Release: no findings, no new errors.
+      Release|x64: no findings, no new errors.
+      Release|x86: no findings, no new errors.
+      Clean.
+    --- host-check.txt (last 12 lines)
+      Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+      Clean.
+    --- host-format.txt (last 12 lines)
+      Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+      Run 1: 2 files changed:
+        src/Lib/Calc.cs
+        tests/Lib.Tests/CalcTests.cs
+      Checked 2 projects (run 1 of 1)
+      Run 2: 0 files changed, clean.
+    --- init.txt (last 12 lines)
+        11 settings had fewer than 3 places to tell, StyleBro's defaults stay: csharp_new_line_before_open_brace,
+          stylebro_empty_string_style, csharp_using_directive_placement, dotnet_diagnostic.BRO1001.severity,
+          dotnet_diagnostic.IDE0049.severity, end_of_line, dotnet_diagnostic.BRO1505.severity,
+          dotnet_diagnostic.BRO1503.severity, dotnet_diagnostic.BRO1306.severity,
+          csharp_space_between_method_call_parameter_list_parentheses,
+          csharp_space_between_method_declaration_parameter_list_parentheses.
+      
+      Wrote the built-in rule severities to .editorconfig.
+      Set the preset version in Directory.Build.props (<StyleBroPreset>1.0</StyleBroPreset>): rules of newer releases stay off until you raise it.
+      To report them on build too: <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> in Directory.Build.props.
+      Tip: --agents-md writes a StyleBro section into AGENTS.md for AI coding agents.
+      Next: run 'bro format'. Plain 'dotnet format' also applies every other analyzer's and the compiler's fixes.
+    --- preview.txt (last 12 lines)
+        +    public void Twice()
+        +    {
+        +        Assert.Equal(4, Lib.Calc.Twice(2));
+        +    }
+      Sample (BRO1001, BRO1106, src/Lib/Calc.cs; BRO1509, IDE0036 changed this file too):
+        -    public string Name = "";
+        +    public static int Twice(int x)
+        +    {
+        +        return x * 2;
+        +    }
+      Full diff: .git/stylebro-preview.patch (75 lines)
+      Done in 14s.
+    --- test.txt (last 12 lines)
+      Test run for /home/user/fx62/w0/utf16-props/host/tests/Lib.Tests/bin/Debug/net10.0/Lib.Tests.dll (.NETCoreApp,Version=v10.0)
+      A total of 1 test files matched the specified pattern.
+      
+      Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 7 ms - Lib.Tests.dll (net10.0)
+    --- untouched-build.txt (last 12 lines)
+      
+      Build succeeded.
+          0 Warning(s)
+          0 Error(s)
+      
+      Time Elapsed 00:00:02.38
+| Shape | Result | Time |
+| --- | --- | --- |
+| tab-indentation | FAIL: init's output doesn't match /indented with tabs/ (log: /home/user/fx62/w0/tab-indentation/logs/init.txt)<br>Alpha.cs has lines indented with spaces<br>Beta.cs has lines indented with spaces<br>Calc.cs has lines indented with spaces<br>CalcTests.cs has lines indented with spaces | 140 s |
+| utf16-props | FAIL: the preview's patch doesn't apply to the checkout (/home/user/fx62/w0/utf16-props/repo/.git/stylebro-preview.patch)<br>Directory.Build.props isn't UTF-16 with a BOM any more<br>Directory.Build.props has LF line endings now | 132 s |
+Work folder: /home/user/fx62/w0

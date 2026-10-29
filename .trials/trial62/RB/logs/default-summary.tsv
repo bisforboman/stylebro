@@ -9,3 +9,5 @@ checkbuild-json	3
 twae-Debug	1	26s	twae Debug
 test-Debug	1	581s	env CFG=Debug bash -c dotnet test Rebus.Tests -c $CFG
 twae-Release	1	13s	twae Release
+test-Release	1	530s	env CFG=Release bash -c dotnet test Rebus.Tests -c $CFG
+DONE
