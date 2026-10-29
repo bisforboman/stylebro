@@ -1,0 +1,17 @@
+== fs-build: dotnet build /home/user/cand61/fluentscheduler-FluentScheduler/FluentScheduler.sln -p:NuGetAudit=false (13:31:50)
+   exit 0 (13:32:17) 0 error lines
+== fs-test: bash -c cd /home/user/cand61/fluentscheduler-FluentScheduler && timeout 900 dotnet test FluentScheduler.sln --no-build (13:32:17)
+   exit 0 (13:32:28) 0 error lines
+== rs-build: dotnet build /home/user/cand61/jbogard-Respawn/Respawn.sln -p:NuGetAudit=false (13:32:28)
+   exit 0 (13:32:44) 0 error lines
+== rs-test: bash -c cd /home/user/cand61/jbogard-Respawn && timeout 600 dotnet test Respawn.UnitTests --no-build (13:32:44)
+   exit 0 (13:32:46) 0 error lines
+== em-build: dotnet build /home/user/cand61/mganss-ExcelMapper/ExcelMapper.sln -p:NuGetAudit=false (13:32:46)
+   exit 0 (13:33:06) 0 error lines
+== em-test: bash -c cd /home/user/cand61/mganss-ExcelMapper && timeout 900 dotnet test ExcelMapper.sln --no-build (13:33:06)
+   exit 1 (13:33:13) 0 error lines
+== ce-build: dotnet build /home/user/cand61/jbevain-cecil/Mono.Cecil.sln -p:NuGetAudit=false (13:33:13)
+   exit 0 (13:33:28) 0 error lines
+== ce-test: bash -c cd /home/user/cand61/jbevain-cecil && timeout 1200 dotnet test Mono.Cecil.sln --no-build -f net8.0 (13:33:28)
+   exit 1 (13:34:10) 19 error lines
+SMOKE-DONE
