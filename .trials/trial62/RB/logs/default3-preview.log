@@ -97,4 +97,27 @@ Summary:
   note     Line endings: 1 file with the other ending holds a string literal spanning lines, so it keeps its ending (another would change the literal's value): Rebus/Bus/RebusBus.cs
 Settings: 93 lines in .editorconfig; 9 lines in Directory.Build.props (StyleBro.Analyzers)
   StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial62.5 to Directory.Build.props for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).
-Format run 1... 
+Format run 1... 1m 28s
+Format run 2... 5s
+Format: 293 files, 1,458 reported changes, clean after 1 run
+  IDE0055  Whitespace and formatting                  144 files
+  BRO1505  Elements should be separated by a bla...    60 files
+  BRO1506  Single-line comments should not be fo...    39 files
+  BRO1110  Closing parenthesis or bracket should...    36 files
+  BRO1002  Single-line comments should begin wit...    35 files
+  BRO1518  Closing braces should not be preceded...    34 files
+  BRO1519  Closing brace should be followed by b...    29 files
+  ENDOFLINE                                             15 files
+  BRO1517  Code should not contain multiple blan...    13 files
+  BRO1138  A string literal should be a plain st...    12 files
+  ... and 25 more rules
+Sample (IDE0055, Rebus.Tests.Contracts/Activation/ActivationContextExtensions.cs):
+  -        return context.CreateBus(registry => {}, configureBus, out container);
+  +        return context.CreateBus(registry => { }, configureBus, out container);
+Sample (BRO1505, Rebus.Tests.Contracts/DataBus/IDataBusStorageFactory.cs):
+  (adds a blank line)
+Sample (BRO1506, Rebus.Tests/Integration/TestFileSystemDataBusCleanup.cs; BRO1505 changed this file too):
+  (removes a blank line)
+Full diff: .git/stylebro-preview.patch (8,090 lines)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 1m 42s.

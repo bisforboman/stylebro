@@ -1,0 +1,13 @@
+ M Directory.Build.props
+ M Mono.Linq.Expressions/CSharpWriter.cs
+ M Mono.Linq.Expressions/CombineExtensions.cs
+ M Mono.Linq.Expressions/FluentExtensions.cs
+ M Mono.Linq.Expressions/IExpressionWriter.cs
+ M Mono.Linq.Expressions/IFormatter.cs
+ M Test/Mono.Linq.Expressions/CSharpWriterTest.cs
+ M Test/Mono.Linq.Expressions/DoWhileExpressionTest.cs
+ M Test/Mono.Linq.Expressions/ForEachExpressionTest.cs
+ M Test/Mono.Linq.Expressions/ForExpressionTest.cs
+ M Test/Mono.Linq.Expressions/WhileExpressionTest.cs
+ M dbg/Program.cs
+?? .editorconfig

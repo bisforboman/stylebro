@@ -1,0 +1,248 @@
+diff --git a/Directory.Build.props b/Directory.Build.props
+index 152625f..977b576 100644
+Binary files a/Directory.Build.props and b/Directory.Build.props differ
+diff --git a/Mono.Linq.Expressions/CSharpWriter.cs b/Mono.Linq.Expressions/CSharpWriter.cs
+index 6660d20..016f9f1 100644
+--- a/Mono.Linq.Expressions/CSharpWriter.cs
++++ b/Mono.Linq.Expressions/CSharpWriter.cs
+@@ -164,7 +164,6 @@ namespace Mono.Linq.Expressions {
+ 			}
+ 		}
+ 
+-
+ 		void VisitSingleExpressionBody (LambdaExpression node)
+ 		{
+ 			VisitBlock (() => {
+@@ -1185,6 +1184,7 @@ namespace Mono.Linq.Expressions {
+ 				WriteSpace ();
+ 				WriteIdentifier (NameFor (node.Variable), node.Variable);
+ 			}
++
+ 			WriteToken (")");
+ 
+ 			if (node.Filter != null) {
+@@ -1195,6 +1195,7 @@ namespace Mono.Linq.Expressions {
+ 				Visit (node.Filter);
+ 				WriteToken (")");
+ 			}
++
+ 			WriteLine ();
+ 
+ 			VisitAsBlock (node.Body);
+diff --git a/Mono.Linq.Expressions/CombineExtensions.cs b/Mono.Linq.Expressions/CombineExtensions.cs
+index ca79bf3..a3a68d4 100644
+--- a/Mono.Linq.Expressions/CombineExtensions.cs
++++ b/Mono.Linq.Expressions/CombineExtensions.cs
+@@ -91,6 +91,5 @@ namespace Mono.Linq.Expressions {
+ 				return parameterMapping.TryGetValue(expression, out replacement) ? replacement : expression;
+ 			}
+ 		}
+-
+ 	}
+ }
+diff --git a/Mono.Linq.Expressions/FluentExtensions.cs b/Mono.Linq.Expressions/FluentExtensions.cs
+index 349f60c..e5da8f6 100644
+--- a/Mono.Linq.Expressions/FluentExtensions.cs
++++ b/Mono.Linq.Expressions/FluentExtensions.cs
+@@ -31,9 +31,9 @@
+ 
+ using System;
+ using System.Collections.Generic;
+-using System.Runtime.CompilerServices;
+ using System.Linq.Expressions;
+ using System.Reflection;
++using System.Runtime.CompilerServices;
+ 
+ namespace Mono.Linq.Expressions {
+ 
+@@ -1218,6 +1218,5 @@ namespace Mono.Linq.Expressions {
+ 		public static UnaryExpression PostDecrementAssign (this Expression expression, MethodInfo method) {
+ 			return Expression.PostDecrementAssign (expression, method);
+ 		}
+-
+ 	}
+ }
+diff --git a/Mono.Linq.Expressions/IExpressionWriter.cs b/Mono.Linq.Expressions/IExpressionWriter.cs
+index 906c173..52a7d59 100644
+--- a/Mono.Linq.Expressions/IExpressionWriter.cs
++++ b/Mono.Linq.Expressions/IExpressionWriter.cs
+@@ -32,10 +32,15 @@ namespace Mono.Linq.Expressions {
+ 
+ 	public interface IExpressionWriter {
+ 		void Write (Expression expression);
++
+ 		void Write (ElementInit initializer);
++
+ 		void Write (MemberBinding binding);
++
+ 		void Write (CatchBlock block);
++
+ 		void Write (SwitchCase @case);
++
+ 		void Write (LabelTarget target);
+ 	}
+ }
+diff --git a/Mono.Linq.Expressions/IFormatter.cs b/Mono.Linq.Expressions/IFormatter.cs
+index ae1a694..2b6910d 100644
+--- a/Mono.Linq.Expressions/IFormatter.cs
++++ b/Mono.Linq.Expressions/IFormatter.cs
+@@ -30,14 +30,23 @@ namespace Mono.Linq.Expressions {
+ 
+ 	public interface IFormatter {
+ 		void Write (string str);
++
+ 		void WriteLine ();
++
+ 		void WriteSpace ();
++
+ 		void WriteToken (string token);
++
+ 		void WriteKeyword (string keyword);
++
+ 		void WriteLiteral (string literal);
++
+ 		void WriteReference (string value, object reference);
++
+ 		void WriteIdentifier (string value, object identifier);
++
+ 		void Indent ();
++
+ 		void Dedent ();
+ 	}
+ }
+diff --git a/Test/Mono.Linq.Expressions/CSharpWriterTest.cs b/Test/Mono.Linq.Expressions/CSharpWriterTest.cs
+index 3f73f6c..76a4cd3 100644
+--- a/Test/Mono.Linq.Expressions/CSharpWriterTest.cs
++++ b/Test/Mono.Linq.Expressions/CSharpWriterTest.cs
+@@ -199,7 +199,6 @@ bool (int a, int b)
+ ", lambda);
+ 		}
+ 
+-
+ 		[Test, MethodImpl (MethodImplOptions.NoInlining)]
+ 		public void BinaryOperators ()
+ 		{
+@@ -392,7 +391,6 @@ bool (bool a)
+ ", lambda);
+ 		}
+ 
+-
+ 		[Test, MethodImpl (MethodImplOptions.NoInlining)]
+ 		public void Power ()
+ 		{
+@@ -675,10 +673,12 @@ Dictionary<string, int> ListInitDict()
+ 			var expression =  Expression.MemberInit (
+ 				Expression.New (typeof (Foo)),
+ 				Expression.Bind (typeof (Foo).GetProperty ("Bar"), Expression.Constant (42)),
+-				Expression.ListBind (typeof (Foo).GetProperty ("Baz"),
++				Expression.ListBind (
++					typeof (Foo).GetProperty ("Baz"),
+ 					Expression.ElementInit (list_int_add, Expression.Constant (4)),
+ 					Expression.ElementInit (list_int_add, Expression.Constant (12))),
+-				Expression.MemberBind (typeof (Foo).GetProperty ("Gaz"),
++				Expression.MemberBind (
++					typeof (Foo).GetProperty ("Gaz"),
+ 					Expression.Bind (typeof (Gazonk).GetProperty ("Identifier"), Expression.Constant (42)),
+ 					Expression.Bind (typeof (Gazonk).GetProperty ("Name"), Expression.Constant ("Gazonka"))));
+ 
+@@ -755,13 +755,14 @@ bool TypeIs(object o)
+ 
+ 			var body = Expression.Block (
+ 				CallWrite (0),
+-				Expression.MakeTry (null,
++				Expression.MakeTry (
++					null,
+ 					CallWrite (1),
+ 					CallWrite (4),
+ 					null,
+ 					new [] {
+ 						Expression.Catch (typeof (OutOfMemoryException), CallWrite (2), Expression.GreaterThan (i, Expression.Constant (10))),
+-						Expression.Catch (nre, CallWrite (3))
++						Expression.Catch (nre, CallWrite (3)),
+ 					}));
+ 
+ 			AssertLambda<Action<int>> (@"
+diff --git a/Test/Mono.Linq.Expressions/DoWhileExpressionTest.cs b/Test/Mono.Linq.Expressions/DoWhileExpressionTest.cs
+index e34de84..21b354c 100644
+--- a/Test/Mono.Linq.Expressions/DoWhileExpressionTest.cs
++++ b/Test/Mono.Linq.Expressions/DoWhileExpressionTest.cs
+@@ -64,8 +64,7 @@ namespace Mono.Linq.Expressions {
+ 					Expression.LessThan (i, l),
+ 					Expression.Block (
+ 						Expression.Call (c, typeof (Counter).GetMethod ("Hit", Type.EmptyTypes)),
+-						Expression.PreIncrementAssign (i))
+-					),
++						Expression.PreIncrementAssign (i))),
+ 				c, i, l).Compile ();
+ 
+ 			hitcounter (counter, 0, 10);
+@@ -87,8 +86,7 @@ namespace Mono.Linq.Expressions {
+ 					Expression.LessThan (i, l),
+ 					Expression.Block (
+ 						Expression.Call (c, typeof (Counter).GetMethod ("Hit", Type.EmptyTypes)),
+-						Expression.PreIncrementAssign (i))
+-					),
++						Expression.PreIncrementAssign (i))),
+ 				c, i, l).Compile ();
+ 
+ 			hitcounter (counter, 100, 10);
+diff --git a/Test/Mono.Linq.Expressions/ForEachExpressionTest.cs b/Test/Mono.Linq.Expressions/ForEachExpressionTest.cs
+index 2a8c7ab..b288c84 100644
+--- a/Test/Mono.Linq.Expressions/ForEachExpressionTest.cs
++++ b/Test/Mono.Linq.Expressions/ForEachExpressionTest.cs
+@@ -233,8 +233,7 @@ namespace Mono.Linq.Expressions {
+ 						Expression.Call(ec, typeof(EnumerableCounter).GetMethod("Hit", Type.EmptyTypes)),
+ 						Expression.IfThen(
+ 						Expression.GreaterThanOrEqual(item, Expression.Constant(10)),
+-							Expression.Goto(foreach_break)
+-							));
++							Expression.Goto(foreach_break)));
+ 
+ 			var foreach_expr = CustomExpression.ForEach(
+ 					item,
+diff --git a/Test/Mono.Linq.Expressions/ForExpressionTest.cs b/Test/Mono.Linq.Expressions/ForExpressionTest.cs
+index ee4eb75..efd5a9a 100644
+--- a/Test/Mono.Linq.Expressions/ForExpressionTest.cs
++++ b/Test/Mono.Linq.Expressions/ForExpressionTest.cs
+@@ -184,7 +184,7 @@ namespace Mono.Linq.Expressions {
+ 				Expression.Constant(null),
+ 				for_break,
+ 				for_continue);
+-			var visitedForExpression = (ForExpression)(new ReplaceNullByDefaultVisitor ().Visit (forExpression));
++			var visitedForExpression = (ForExpression)new ReplaceNullByDefaultVisitor ().Visit (forExpression);
+ 
+ 			Assert.AreNotEqual (forExpression, visitedForExpression);
+ 
+diff --git a/Test/Mono.Linq.Expressions/WhileExpressionTest.cs b/Test/Mono.Linq.Expressions/WhileExpressionTest.cs
+index 3e1e2d9..9087149 100644
+--- a/Test/Mono.Linq.Expressions/WhileExpressionTest.cs
++++ b/Test/Mono.Linq.Expressions/WhileExpressionTest.cs
+@@ -64,8 +64,7 @@ namespace Mono.Linq.Expressions {
+ 					Expression.LessThan (i, l),
+ 					Expression.Block (
+ 						Expression.Call (c, typeof (Counter).GetMethod ("Hit", Type.EmptyTypes)),
+-						Expression.PreIncrementAssign (i))
+-					),
++						Expression.PreIncrementAssign (i))),
+ 				c, i, l).Compile ();
+ 
+ 			hitcounter (counter, 0, 10);
+@@ -87,8 +86,7 @@ namespace Mono.Linq.Expressions {
+ 					Expression.LessThan (i, l),
+ 					Expression.Block (
+ 						Expression.Call (c, typeof (Counter).GetMethod ("Hit", Type.EmptyTypes)),
+-						Expression.PreIncrementAssign (i))
+-					),
++						Expression.PreIncrementAssign (i))),
+ 				c, i, l).Compile ();
+ 
+ 			hitcounter (counter, 100, 10);
+diff --git a/dbg/Program.cs b/dbg/Program.cs
+index 613f5b3..5e2dfa0 100644
+--- a/dbg/Program.cs
++++ b/dbg/Program.cs
+@@ -50,4 +50,3 @@ class Program {
+ 		Console.WriteLine (typeof (Expression).GetProperty ("DebugView", BindingFlags.NonPublic | BindingFlags.NonPublic | BindingFlags.Instance).GetValue (lambda, new object [0]));
+ 	}
+ }
+-
