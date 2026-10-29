@@ -1,0 +1,30 @@
+Fixing StyleBro's rules and the built-in rules init and migrate turn on (141 ids); --all applies every analyzer's and compiler fix.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net40, net8.0, netstandard2.0).
+Configurations: runs for Release (Mono.Cecil.Rocks.Tests, Mono.Cecil.Tests) too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.
+Checked netstandard2.0 (run 1 of 4)
+Checked net40 (run 2 of 4)
+Checked net8.0, Release (run 3 of 4)
+Checked net8.0 (run 4 of 4)
+== net40 (8 project(s), 131 files with findings)
+== net8.0 (4 project(s), 33 files with findings)
+== netstandard2.0 (4 project(s), 131 files with findings)
+== net8.0, Release (2 project(s), 31 files with findings)
+Run 1: 131 files changed:
+  Mono.Cecil.Cil/CodeReader.cs
+  Mono.Cecil.Cil/CodeWriter.cs
+  Mono.Cecil.Cil/Document.cs
+  Mono.Cecil.Cil/Instruction.cs
+  Mono.Cecil.Cil/MethodBody.cs
+  Mono.Cecil.Cil/PortablePdb.cs
+  Mono.Cecil.Cil/Symbols.cs
+  Mono.Cecil.Metadata/Buffers.cs
+  Mono.Cecil.Metadata/GuidHeap.cs
+  Mono.Cecil.Metadata/Heap.cs
+  ... and 121 more
+Checked netstandard2.0 (run 1 of 4)
+Checked net40 (run 2 of 4)
+Checked net8.0 (run 3 of 4)
+Checked net8.0, Release (run 4 of 4)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

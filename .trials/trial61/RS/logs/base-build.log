@@ -1,0 +1,14 @@
+  Determining projects to restore...
+  Restored /home/user/w61/RS/base/Respawn.UnitTests/Respawn.UnitTests.csproj (in 493 ms).
+  Restored /home/user/w61/RS/base/Respawn/Respawn.csproj (in 466 ms).
+  Restored /home/user/w61/RS/base/Respawn.DatabaseTests/Respawn.DatabaseTests.csproj (in 753 ms).
+  Respawn -> /home/user/w61/RS/base/Respawn/bin/Debug/netstandard2.1/Respawn.dll
+  Respawn.UnitTests -> /home/user/w61/RS/base/Respawn.UnitTests/bin/Debug/net8.0/Respawn.UnitTests.dll
+  Respawn.DatabaseTests -> /home/user/w61/RS/base/Respawn.DatabaseTests/bin/Debug/net10.0/Respawn.DatabaseTests.dll
+  Respawn.DatabaseTests -> /home/user/w61/RS/base/Respawn.DatabaseTests/bin/Debug/net8.0/Respawn.DatabaseTests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:11.27

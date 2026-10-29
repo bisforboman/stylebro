@@ -1,0 +1,6 @@
+build	0	8s	dotnet build ExcelMapper.sln -c Debug
+twae-Debug	0	7s	twae Debug
+test-Debug	1	13s	env CFG=Debug bash -c dotnet test ExcelMapper.sln -c $CFG
+twae-Release	0	7s	twae Release
+test-Release	1	11s	env CFG=Release bash -c dotnet test ExcelMapper.sln -c $CFG
+DONE

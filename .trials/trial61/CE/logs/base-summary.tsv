@@ -1,0 +1,6 @@
+build	0	18s	dotnet build Mono.Cecil.sln -c Debug
+twae-Debug	0	17s	twae Debug
+test-Debug	1	70s	env CFG=Debug bash -c dotnet test Mono.Cecil.sln -c $CFG -f net8.0
+twae-Release	0	10s	twae Release
+test-Release	1	44s	env CFG=Release bash -c dotnet test Mono.Cecil.sln -c $CFG -f net8.0
+DONE

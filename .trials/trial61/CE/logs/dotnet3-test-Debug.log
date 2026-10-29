@@ -1,0 +1,434 @@
+  Determining projects to restore...
+  Restored /home/user/w61/CE/dotnet3/symbols/mdb/Mono.Cecil.Mdb.csproj (in 642 ms).
+  Restored /home/user/w61/CE/dotnet3/rocks/Mono.Cecil.Rocks.csproj (in 639 ms).
+  Restored /home/user/w61/CE/dotnet3/Mono.Cecil.csproj (in 637 ms).
+  Restored /home/user/w61/CE/dotnet3/symbols/mdb/Test/Mono.Cecil.Mdb.Tests.csproj (in 748 ms).
+  Restored /home/user/w61/CE/dotnet3/symbols/pdb/Test/Mono.Cecil.Pdb.Tests.csproj (in 43 ms).
+  Restored /home/user/w61/CE/dotnet3/symbols/pdb/Mono.Cecil.Pdb.csproj (in 15 ms).
+  Restored /home/user/w61/CE/dotnet3/rocks/Test/Mono.Cecil.Rocks.Tests.csproj (in 65 ms).
+  Restored /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests.csproj (in 97 ms).
+  Mono.Cecil -> /home/user/w61/CE/dotnet3/bin/Debug/netstandard2.0/Mono.Cecil.dll
+  Mono.Cecil.Pdb -> /home/user/w61/CE/dotnet3/symbols/pdb/bin/Debug/netstandard2.0/Mono.Cecil.Pdb.dll
+  Mono.Cecil.Mdb -> /home/user/w61/CE/dotnet3/symbols/mdb/bin/Debug/netstandard2.0/Mono.Cecil.Mdb.dll
+  Mono.Cecil.Rocks -> /home/user/w61/CE/dotnet3/rocks/bin/Debug/netstandard2.0/Mono.Cecil.Rocks.dll
+  Mono.Cecil.Tests -> /home/user/w61/CE/dotnet3/Test/bin/Debug/net8.0/Mono.Cecil.Tests.dll
+Test run for /home/user/w61/CE/dotnet3/Test/bin/Debug/net8.0/Mono.Cecil.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+  Failed EmptyBlob [11 ms]
+  Error Message:
+   System.ComponentModel.Win32Exception : An error occurred trying to start process 'ilasm' with working directory '/home/user/w61/CE/dotnet3/Test/bin/Debug/net8.0'. No such file or directory
+  Stack Trace:
+     at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32& stdinFd, Int32& stdoutFd, Int32& stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at Mono.Cecil.Tests.ShellService.RunProcess(String target, String[] arguments) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 307
+   at Mono.Cecil.Tests.ShellService.ILAsm(String source, String output) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 326
+   at Mono.Cecil.Tests.IlasmCompilationService.CompileFile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 137
+   at Mono.Cecil.Tests.CompilationService.Compile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 83
+   at Mono.Cecil.Tests.CompilationService.CompileResource(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 99
+   at Mono.Cecil.Tests.ILTestCase.get_ModuleLocation() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 277
+   at Mono.Cecil.Tests.TestRunner.GetModule() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 298
+   at Mono.Cecil.Tests.TestRunner.RunTest() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 376
+   at Mono.Cecil.Tests.BaseTestFixture.Run(TestCase testCase) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 143
+   at Mono.Cecil.Tests.BaseTestFixture.TestIL(String file, Action`1 test, Boolean verify, Boolean readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, Boolean applyWindowsRuntimeProjections, String sourceFilePath) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 137
+   at Mono.Cecil.Tests.CustomAttributesTests.EmptyBlob() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CustomAttributesTests.cs:line 431
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Skipped InterfaceImplementation [34 ms]
+  Failed OtherMethod [1 ms]
+  Error Message:
+   System.ComponentModel.Win32Exception : An error occurred trying to start process 'ilasm' with working directory '/home/user/w61/CE/dotnet3/Test/bin/Debug/net8.0'. No such file or directory
+  Stack Trace:
+     at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32& stdinFd, Int32& stdoutFd, Int32& stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at Mono.Cecil.Tests.ShellService.RunProcess(String target, String[] arguments) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 307
+   at Mono.Cecil.Tests.ShellService.ILAsm(String source, String output) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 326
+   at Mono.Cecil.Tests.IlasmCompilationService.CompileFile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 137
+   at Mono.Cecil.Tests.CompilationService.Compile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 83
+   at Mono.Cecil.Tests.CompilationService.CompileResource(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 99
+   at Mono.Cecil.Tests.ILTestCase.get_ModuleLocation() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 277
+   at Mono.Cecil.Tests.TestRunner.GetModule() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 298
+   at Mono.Cecil.Tests.TestRunner.RunTest() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 376
+   at Mono.Cecil.Tests.BaseTestFixture.Run(TestCase testCase) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 143
+   at Mono.Cecil.Tests.BaseTestFixture.TestIL(String file, Action`1 test, Boolean verify, Boolean readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, Boolean applyWindowsRuntimeProjections, String sourceFilePath) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 137
+   at Mono.Cecil.Tests.EventTests.OtherMethod() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/EventTests.cs:line 42
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Failed ArrayFields [1 ms]
+  Error Message:
+   System.ComponentModel.Win32Exception : An error occurred trying to start process 'ilasm' with working directory '/home/user/w61/CE/dotnet3/Test/bin/Debug/net8.0'. No such file or directory
+  Stack Trace:
+     at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32& stdinFd, Int32& stdoutFd, Int32& stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at Mono.Cecil.Tests.ShellService.RunProcess(String target, String[] arguments) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 307
+   at Mono.Cecil.Tests.ShellService.ILAsm(String source, String output) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 326
+   at Mono.Cecil.Tests.IlasmCompilationService.CompileFile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 137
+   at Mono.Cecil.Tests.CompilationService.Compile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 83
+   at Mono.Cecil.Tests.CompilationService.CompileResource(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 99
+   at Mono.Cecil.Tests.ILTestCase.get_ModuleLocation() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 277
+   at Mono.Cecil.Tests.TestRunner.GetModule() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 298
+   at Mono.Cecil.Tests.TestRunner.RunTest() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 376
+   at Mono.Cecil.Tests.BaseTestFixture.Run(TestCase testCase) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 143
+   at Mono.Cecil.Tests.BaseTestFixture.TestIL(String file, Action`1 test, Boolean verify, Boolean readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, Boolean applyWindowsRuntimeProjections, String sourceFilePath) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 137
+   at Mono.Cecil.Tests.FieldTests.ArrayFields() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/FieldTests.cs:line 204
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Failed ConstantCoalescing [< 1 ms]
+  Error Message:
+   System.ComponentModel.Win32Exception : An error occurred trying to start process 'ilasm' with working directory '/home/user/w61/CE/dotnet3/Test/bin/Debug/net8.0'. No such file or directory
+  Stack Trace:
+     at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32& stdinFd, Int32& stdoutFd, Int32& stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at Mono.Cecil.Tests.ShellService.RunProcess(String target, String[] arguments) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 307
+   at Mono.Cecil.Tests.ShellService.ILAsm(String source, String output) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 326
+   at Mono.Cecil.Tests.IlasmCompilationService.CompileFile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 137
+   at Mono.Cecil.Tests.CompilationService.Compile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 83
+   at Mono.Cecil.Tests.CompilationService.CompileResource(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 99
+   at Mono.Cecil.Tests.ILTestCase.get_ModuleLocation() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 277
+   at Mono.Cecil.Tests.TestRunner.GetModule() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 298
+   at Mono.Cecil.Tests.TestRunner.RunTest() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 376
+   at Mono.Cecil.Tests.BaseTestFixture.Run(TestCase testCase) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 143
+   at Mono.Cecil.Tests.BaseTestFixture.TestIL(String file, Action`1 test, Boolean verify, Boolean readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, Boolean applyWindowsRuntimeProjections, String sourceFilePath) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 137
+   at Mono.Cecil.Tests.FieldTests.ConstantCoalescing() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/FieldTests.cs:line 317
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Failed FieldRVAAlignment [1 ms]
+  Error Message:
+   System.ComponentModel.Win32Exception : An error occurred trying to start process 'ilasm' with working directory '/home/user/w61/CE/dotnet3/Test/bin/Debug/net8.0'. No such file or directory
+  Stack Trace:
+     at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32& stdinFd, Int32& stdoutFd, Int32& stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at Mono.Cecil.Tests.ShellService.RunProcess(String target, String[] arguments) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 307
+   at Mono.Cecil.Tests.ShellService.ILAsm(String source, String output) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 326
+   at Mono.Cecil.Tests.IlasmCompilationService.CompileFile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 137
+   at Mono.Cecil.Tests.CompilationService.Compile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 83
+   at Mono.Cecil.Tests.CompilationService.CompileResource(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 99
+   at Mono.Cecil.Tests.ILTestCase.get_ModuleLocation() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 277
+   at Mono.Cecil.Tests.TestRunner.GetModule() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 298
+   at Mono.Cecil.Tests.TestRunner.RunTest() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 376
+   at Mono.Cecil.Tests.BaseTestFixture.Run(TestCase testCase) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 143
+   at Mono.Cecil.Tests.BaseTestFixture.TestIL(String file, Action`1 test, Boolean verify, Boolean readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, Boolean applyWindowsRuntimeProjections, String sourceFilePath) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 137
+   at Mono.Cecil.Tests.FieldTests.FieldRVAAlignment() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/FieldTests.cs:line 153
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Failed NullPrimitiveConstant [1 ms]
+  Error Message:
+   System.ComponentModel.Win32Exception : An error occurred trying to start process 'ilasm' with working directory '/home/user/w61/CE/dotnet3/Test/bin/Debug/net8.0'. No such file or directory
+  Stack Trace:
+     at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32& stdinFd, Int32& stdoutFd, Int32& stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at Mono.Cecil.Tests.ShellService.RunProcess(String target, String[] arguments) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 307
+   at Mono.Cecil.Tests.ShellService.ILAsm(String source, String output) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 326
+   at Mono.Cecil.Tests.IlasmCompilationService.CompileFile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 137
+   at Mono.Cecil.Tests.CompilationService.Compile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 83
+   at Mono.Cecil.Tests.CompilationService.CompileResource(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 99
+   at Mono.Cecil.Tests.ILTestCase.get_ModuleLocation() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 277
+   at Mono.Cecil.Tests.TestRunner.GetModule() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 298
+   at Mono.Cecil.Tests.TestRunner.RunTest() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 376
+   at Mono.Cecil.Tests.BaseTestFixture.Run(TestCase testCase) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 143
+   at Mono.Cecil.Tests.BaseTestFixture.TestIL(String file, Action`1 test, Boolean verify, Boolean readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, Boolean applyWindowsRuntimeProjections, String sourceFilePath) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 137
+   at Mono.Cecil.Tests.FieldTests.NullPrimitiveConstant() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/FieldTests.cs:line 292
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+14
+
+  Skipped BranchOutsideMethod [1 ms]
+  Failed FilterMaxStack [1 ms]
+  Error Message:
+   System.ComponentModel.Win32Exception : An error occurred trying to start process 'ilasm' with working directory '/home/user/w61/CE/dotnet3/Test/bin/Debug/net8.0'. No such file or directory
+  Stack Trace:
+     at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32& stdinFd, Int32& stdoutFd, Int32& stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at Mono.Cecil.Tests.ShellService.RunProcess(String target, String[] arguments) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 307
+   at Mono.Cecil.Tests.ShellService.ILAsm(String source, String output) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 326
+   at Mono.Cecil.Tests.IlasmCompilationService.CompileFile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 137
+   at Mono.Cecil.Tests.CompilationService.Compile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 83
+   at Mono.Cecil.Tests.CompilationService.CompileResource(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 99
+   at Mono.Cecil.Tests.ILTestCase.get_ModuleLocation() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 277
+   at Mono.Cecil.Tests.TestRunner.GetModule() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 298
+   at Mono.Cecil.Tests.TestRunner.RunTest() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 376
+   at Mono.Cecil.Tests.BaseTestFixture.Run(TestCase testCase) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 143
+   at Mono.Cecil.Tests.BaseTestFixture.TestIL(String file, Action`1 test, Boolean verify, Boolean readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, Boolean applyWindowsRuntimeProjections, String sourceFilePath) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 137
+   at Mono.Cecil.Tests.MethodBodyTests.FilterMaxStack() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/MethodBodyTests.cs:line 275
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Failed MethodSpec [1 ms]
+  Error Message:
+   System.ComponentModel.Win32Exception : An error occurred trying to start process 'ilasm' with working directory '/home/user/w61/CE/dotnet3/Test/bin/Debug/net8.0'. No such file or directory
+  Stack Trace:
+     at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32& stdinFd, Int32& stdoutFd, Int32& stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at Mono.Cecil.Tests.ShellService.RunProcess(String target, String[] arguments) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 307
+   at Mono.Cecil.Tests.ShellService.ILAsm(String source, String output) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 326
+   at Mono.Cecil.Tests.IlasmCompilationService.CompileFile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 137
+   at Mono.Cecil.Tests.CompilationService.Compile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 83
+   at Mono.Cecil.Tests.CompilationService.CompileResource(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 99
+   at Mono.Cecil.Tests.ILTestCase.get_ModuleLocation() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 277
+   at Mono.Cecil.Tests.TestRunner.GetModule() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 298
+   at Mono.Cecil.Tests.TestRunner.RunTest() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 376
+   at Mono.Cecil.Tests.BaseTestFixture.Run(TestCase testCase) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 143
+   at Mono.Cecil.Tests.BaseTestFixture.TestIL(String file, Action`1 test, Boolean verify, Boolean readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, Boolean applyWindowsRuntimeProjections, String sourceFilePath) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 137
+   at Mono.Cecil.Tests.MethodBodyTests.MethodSpec() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/MethodBodyTests.cs:line 128
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Failed MultiplyMethod [< 1 ms]
+  Error Message:
+   System.ComponentModel.Win32Exception : An error occurred trying to start process 'ilasm' with working directory '/home/user/w61/CE/dotnet3/Test/bin/Debug/net8.0'. No such file or directory
+  Stack Trace:
+     at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32& stdinFd, Int32& stdoutFd, Int32& stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at Mono.Cecil.Tests.ShellService.RunProcess(String target, String[] arguments) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 307
+   at Mono.Cecil.Tests.ShellService.ILAsm(String source, String output) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 326
+   at Mono.Cecil.Tests.IlasmCompilationService.CompileFile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 137
+   at Mono.Cecil.Tests.CompilationService.Compile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 83
+   at Mono.Cecil.Tests.CompilationService.CompileResource(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 99
+   at Mono.Cecil.Tests.ILTestCase.get_ModuleLocation() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 277
+   at Mono.Cecil.Tests.TestRunner.GetModule() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 298
+   at Mono.Cecil.Tests.TestRunner.RunTest() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 376
+   at Mono.Cecil.Tests.BaseTestFixture.Run(TestCase testCase) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 143
+   at Mono.Cecil.Tests.BaseTestFixture.TestIL(String file, Action`1 test, Boolean verify, Boolean readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, Boolean applyWindowsRuntimeProjections, String sourceFilePath) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 137
+   at Mono.Cecil.Tests.MethodBodyTests.MultiplyMethod() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/MethodBodyTests.cs:line 17
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Failed PrintStringEmpty [< 1 ms]
+  Error Message:
+   System.ComponentModel.Win32Exception : An error occurred trying to start process 'ilasm' with working directory '/home/user/w61/CE/dotnet3/Test/bin/Debug/net8.0'. No such file or directory
+  Stack Trace:
+     at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32& stdinFd, Int32& stdoutFd, Int32& stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at Mono.Cecil.Tests.ShellService.RunProcess(String target, String[] arguments) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 307
+   at Mono.Cecil.Tests.ShellService.ILAsm(String source, String output) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 326
+   at Mono.Cecil.Tests.IlasmCompilationService.CompileFile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 137
+   at Mono.Cecil.Tests.CompilationService.Compile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 83
+   at Mono.Cecil.Tests.CompilationService.CompileResource(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 99
+   at Mono.Cecil.Tests.ILTestCase.get_ModuleLocation() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 277
+   at Mono.Cecil.Tests.TestRunner.GetModule() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 298
+   at Mono.Cecil.Tests.TestRunner.RunTest() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 376
+   at Mono.Cecil.Tests.BaseTestFixture.Run(TestCase testCase) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 143
+   at Mono.Cecil.Tests.BaseTestFixture.TestIL(String file, Action`1 test, Boolean verify, Boolean readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, Boolean applyWindowsRuntimeProjections, String sourceFilePath) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 137
+   at Mono.Cecil.Tests.MethodBodyTests.PrintStringEmpty() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/MethodBodyTests.cs:line 41
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Failed ThisParameter [1 ms]
+  Error Message:
+   System.ComponentModel.Win32Exception : An error occurred trying to start process 'ilasm' with working directory '/home/user/w61/CE/dotnet3/Test/bin/Debug/net8.0'. No such file or directory
+  Stack Trace:
+     at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32& stdinFd, Int32& stdoutFd, Int32& stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at Mono.Cecil.Tests.ShellService.RunProcess(String target, String[] arguments) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 307
+   at Mono.Cecil.Tests.ShellService.ILAsm(String source, String output) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 326
+   at Mono.Cecil.Tests.IlasmCompilationService.CompileFile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 137
+   at Mono.Cecil.Tests.CompilationService.Compile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 83
+   at Mono.Cecil.Tests.CompilationService.CompileResource(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 99
+   at Mono.Cecil.Tests.ILTestCase.get_ModuleLocation() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 277
+   at Mono.Cecil.Tests.TestRunner.GetModule() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 298
+   at Mono.Cecil.Tests.TestRunner.RunTest() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 376
+   at Mono.Cecil.Tests.BaseTestFixture.Run(TestCase testCase) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 143
+   at Mono.Cecil.Tests.BaseTestFixture.TestIL(String file, Action`1 test, Boolean verify, Boolean readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, Boolean applyWindowsRuntimeProjections, String sourceFilePath) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 137
+   at Mono.Cecil.Tests.MethodBodyTests.ThisParameter() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/MethodBodyTests.cs:line 206
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Failed FunctionPointerArgumentOverload [3 ms]
+  Error Message:
+   System.ComponentModel.Win32Exception : An error occurred trying to start process 'ilasm' with working directory '/home/user/w61/CE/dotnet3/Test/bin/Debug/net8.0'. No such file or directory
+  Stack Trace:
+     at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32& stdinFd, Int32& stdoutFd, Int32& stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at Mono.Cecil.Tests.ShellService.RunProcess(String target, String[] arguments) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 307
+   at Mono.Cecil.Tests.ShellService.ILAsm(String source, String output) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 326
+   at Mono.Cecil.Tests.IlasmCompilationService.CompileFile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 137
+   at Mono.Cecil.Tests.CompilationService.Compile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 83
+   at Mono.Cecil.Tests.CompilationService.CompileResource(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 99
+   at Mono.Cecil.Tests.ILTestCase.get_ModuleLocation() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 277
+   at Mono.Cecil.Tests.TestRunner.GetModule() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 298
+   at Mono.Cecil.Tests.TestRunner.RunTest() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 376
+   at Mono.Cecil.Tests.BaseTestFixture.Run(TestCase testCase) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 143
+   at Mono.Cecil.Tests.BaseTestFixture.TestIL(String file, Action`1 test, Boolean verify, Boolean readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, Boolean applyWindowsRuntimeProjections, String sourceFilePath) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 137
+   at Mono.Cecil.Tests.MethodTests.FunctionPointerArgumentOverload() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/MethodTests.cs:line 243
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Failed InstanceAndStaticMethodComparison [1 ms]
+  Error Message:
+   System.ComponentModel.Win32Exception : An error occurred trying to start process 'ilasm' with working directory '/home/user/w61/CE/dotnet3/Test/bin/Debug/net8.0'. No such file or directory
+  Stack Trace:
+     at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32& stdinFd, Int32& stdoutFd, Int32& stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at Mono.Cecil.Tests.ShellService.RunProcess(String target, String[] arguments) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 307
+   at Mono.Cecil.Tests.ShellService.ILAsm(String source, String output) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 326
+   at Mono.Cecil.Tests.IlasmCompilationService.CompileFile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 137
+   at Mono.Cecil.Tests.CompilationService.Compile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 83
+   at Mono.Cecil.Tests.CompilationService.CompileResource(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 99
+   at Mono.Cecil.Tests.ILTestCase.get_ModuleLocation() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 277
+   at Mono.Cecil.Tests.TestRunner.GetModule() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 298
+   at Mono.Cecil.Tests.TestRunner.RunTest() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 376
+   at Mono.Cecil.Tests.BaseTestFixture.Run(TestCase testCase) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 143
+   at Mono.Cecil.Tests.BaseTestFixture.TestIL(String file, Action`1 test, Boolean verify, Boolean readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, Boolean applyWindowsRuntimeProjections, String sourceFilePath) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 137
+   at Mono.Cecil.Tests.MethodTests.InstanceAndStaticMethodComparison() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/MethodTests.cs:line 229
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Failed PrivateScope [1 ms]
+  Error Message:
+   System.ComponentModel.Win32Exception : An error occurred trying to start process 'ilasm' with working directory '/home/user/w61/CE/dotnet3/Test/bin/Debug/net8.0'. No such file or directory
+  Stack Trace:
+     at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32& stdinFd, Int32& stdoutFd, Int32& stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at Mono.Cecil.Tests.ShellService.RunProcess(String target, String[] arguments) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 307
+   at Mono.Cecil.Tests.ShellService.ILAsm(String source, String output) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 326
+   at Mono.Cecil.Tests.IlasmCompilationService.CompileFile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 137
+   at Mono.Cecil.Tests.CompilationService.Compile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 83
+   at Mono.Cecil.Tests.CompilationService.CompileResource(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 99
+   at Mono.Cecil.Tests.ILTestCase.get_ModuleLocation() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 277
+   at Mono.Cecil.Tests.TestRunner.GetModule() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 298
+   at Mono.Cecil.Tests.TestRunner.RunTest() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 376
+   at Mono.Cecil.Tests.BaseTestFixture.Run(TestCase testCase) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 143
+   at Mono.Cecil.Tests.BaseTestFixture.TestIL(String file, Action`1 test, Boolean verify, Boolean readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, Boolean applyWindowsRuntimeProjections, String sourceFilePath) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 137
+   at Mono.Cecil.Tests.MethodTests.PrivateScope() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/MethodTests.cs:line 285
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Failed PrivateScopeGeneric [< 1 ms]
+  Error Message:
+   System.ComponentModel.Win32Exception : An error occurred trying to start process 'ilasm' with working directory '/home/user/w61/CE/dotnet3/Test/bin/Debug/net8.0'. No such file or directory
+  Stack Trace:
+     at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32& stdinFd, Int32& stdoutFd, Int32& stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at Mono.Cecil.Tests.ShellService.RunProcess(String target, String[] arguments) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 307
+   at Mono.Cecil.Tests.ShellService.ILAsm(String source, String output) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 326
+   at Mono.Cecil.Tests.IlasmCompilationService.CompileFile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 137
+   at Mono.Cecil.Tests.CompilationService.Compile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 83
+   at Mono.Cecil.Tests.CompilationService.CompileResource(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 99
+   at Mono.Cecil.Tests.ILTestCase.get_ModuleLocation() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 277
+   at Mono.Cecil.Tests.TestRunner.GetModule() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 298
+   at Mono.Cecil.Tests.TestRunner.RunTest() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 376
+   at Mono.Cecil.Tests.BaseTestFixture.Run(TestCase testCase) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 143
+   at Mono.Cecil.Tests.BaseTestFixture.TestIL(String file, Action`1 test, Boolean verify, Boolean readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, Boolean applyWindowsRuntimeProjections, String sourceFilePath) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 137
+   at Mono.Cecil.Tests.MethodTests.PrivateScopeGeneric() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/MethodTests.cs:line 329
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Skipped ExportedTypeFromNetModule [1 ms]
+  Skipped MultiModules [1 ms]
+  Skipped Win32FileVersion [< 1 ms]
+  Failed GenericParameterConstant [1 ms]
+  Error Message:
+   System.ComponentModel.Win32Exception : An error occurred trying to start process 'ilasm' with working directory '/home/user/w61/CE/dotnet3/Test/bin/Debug/net8.0'. No such file or directory
+  Stack Trace:
+     at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32& stdinFd, Int32& stdoutFd, Int32& stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at Mono.Cecil.Tests.ShellService.RunProcess(String target, String[] arguments) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 307
+   at Mono.Cecil.Tests.ShellService.ILAsm(String source, String output) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 326
+   at Mono.Cecil.Tests.IlasmCompilationService.CompileFile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 137
+   at Mono.Cecil.Tests.CompilationService.Compile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 83
+   at Mono.Cecil.Tests.CompilationService.CompileResource(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 99
+   at Mono.Cecil.Tests.ILTestCase.get_ModuleLocation() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 277
+   at Mono.Cecil.Tests.TestRunner.GetModule() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 298
+   at Mono.Cecil.Tests.TestRunner.RunTest() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 376
+   at Mono.Cecil.Tests.BaseTestFixture.Run(TestCase testCase) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 143
+   at Mono.Cecil.Tests.BaseTestFixture.TestIL(String file, Action`1 test, Boolean verify, Boolean readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, Boolean applyWindowsRuntimeProjections, String sourceFilePath) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 137
+   at Mono.Cecil.Tests.ParameterTests.GenericParameterConstant() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/ParameterTests.cs:line 238
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Failed OtherMethod [1 ms]
+  Error Message:
+   System.ComponentModel.Win32Exception : An error occurred trying to start process 'ilasm' with working directory '/home/user/w61/CE/dotnet3/Test/bin/Debug/net8.0'. No such file or directory
+  Stack Trace:
+     at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32& stdinFd, Int32& stdoutFd, Int32& stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at Mono.Cecil.Tests.ShellService.RunProcess(String target, String[] arguments) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 307
+   at Mono.Cecil.Tests.ShellService.ILAsm(String source, String output) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 326
+   at Mono.Cecil.Tests.IlasmCompilationService.CompileFile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 137
+   at Mono.Cecil.Tests.CompilationService.Compile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 83
+   at Mono.Cecil.Tests.CompilationService.CompileResource(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 99
+   at Mono.Cecil.Tests.ILTestCase.get_ModuleLocation() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 277
+   at Mono.Cecil.Tests.TestRunner.GetModule() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 298
+   at Mono.Cecil.Tests.TestRunner.RunTest() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 376
+   at Mono.Cecil.Tests.BaseTestFixture.Run(TestCase testCase) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 143
+   at Mono.Cecil.Tests.BaseTestFixture.TestIL(String file, Action`1 test, Boolean verify, Boolean readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, Boolean applyWindowsRuntimeProjections, String sourceFilePath) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 137
+   at Mono.Cecil.Tests.PropertyTests.OtherMethod() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/PropertyTests.cs:line 61
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Failed ExplicitThis [2 ms]
+  Error Message:
+   System.ComponentModel.Win32Exception : An error occurred trying to start process 'ilasm' with working directory '/home/user/w61/CE/dotnet3/Test/bin/Debug/net8.0'. No such file or directory
+  Stack Trace:
+     at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32& stdinFd, Int32& stdoutFd, Int32& stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at Mono.Cecil.Tests.ShellService.RunProcess(String target, String[] arguments) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 307
+   at Mono.Cecil.Tests.ShellService.ILAsm(String source, String output) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 326
+   at Mono.Cecil.Tests.IlasmCompilationService.CompileFile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 137
+   at Mono.Cecil.Tests.CompilationService.Compile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 83
+   at Mono.Cecil.Tests.CompilationService.CompileResource(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 99
+   at Mono.Cecil.Tests.ILTestCase.get_ModuleLocation() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 277
+   at Mono.Cecil.Tests.TestRunner.GetModule() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 298
+   at Mono.Cecil.Tests.TestRunner.RunTest() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 376
+   at Mono.Cecil.Tests.BaseTestFixture.Run(TestCase testCase) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 143
+   at Mono.Cecil.Tests.BaseTestFixture.TestIL(String file, Action`1 test, Boolean verify, Boolean readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, Boolean applyWindowsRuntimeProjections, String sourceFilePath) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 137
+   at Mono.Cecil.Tests.TypeTests.ExplicitThis() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/TypeTests.cs:line 244
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Failed SimpleInterfaces [1 ms]
+  Error Message:
+   System.ComponentModel.Win32Exception : An error occurred trying to start process 'ilasm' with working directory '/home/user/w61/CE/dotnet3/Test/bin/Debug/net8.0'. No such file or directory
+  Stack Trace:
+     at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32& stdinFd, Int32& stdoutFd, Int32& stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at Mono.Cecil.Tests.ShellService.RunProcess(String target, String[] arguments) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 307
+   at Mono.Cecil.Tests.ShellService.ILAsm(String source, String output) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 326
+   at Mono.Cecil.Tests.IlasmCompilationService.CompileFile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 137
+   at Mono.Cecil.Tests.CompilationService.Compile(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 83
+   at Mono.Cecil.Tests.CompilationService.CompileResource(String name) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/CompilationService.cs:line 99
+   at Mono.Cecil.Tests.ILTestCase.get_ModuleLocation() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 277
+   at Mono.Cecil.Tests.TestRunner.GetModule() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 298
+   at Mono.Cecil.Tests.TestRunner.RunTest() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 376
+   at Mono.Cecil.Tests.BaseTestFixture.Run(TestCase testCase) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 143
+   at Mono.Cecil.Tests.BaseTestFixture.TestIL(String file, Action`1 test, Boolean verify, Boolean readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, Boolean applyWindowsRuntimeProjections, String sourceFilePath) in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/BaseTestFixture.cs:line 137
+   at Mono.Cecil.Tests.TypeTests.SimpleInterfaces() in /home/user/w61/CE/dotnet3/Test/Mono.Cecil.Tests/TypeTests.cs:line 36
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+
+Failed!  - Failed:    19, Passed:   335, Skipped:     5, Total:   359, Duration: 35 s - Mono.Cecil.Tests.dll (net8.0)
+  Mono.Cecil.Rocks.Tests -> /home/user/w61/CE/dotnet3/rocks/Test/bin/Debug/net8.0/Mono.Cecil.Rocks.Tests.dll
+Test run for /home/user/w61/CE/dotnet3/rocks/Test/bin/Debug/net8.0/Mono.Cecil.Rocks.Tests.dll (.NETCoreApp,Version=v8.0)
+  Mono.Cecil.Pdb.Tests -> /home/user/w61/CE/dotnet3/symbols/pdb/Test/bin/Debug/net8.0/Mono.Cecil.Pdb.Tests.dll
+VSTest version 18.0.2 (x64)
+
+Test run for /home/user/w61/CE/dotnet3/symbols/pdb/Test/bin/Debug/net8.0/Mono.Cecil.Pdb.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+  Skipped CreateMethodFromScratch [47 ms]
+  Skipped TypeNameExceedingMaxPdbPath [1 ms]
+
+Passed!  - Failed:     0, Passed:    15, Skipped:     2, Total:    17, Duration: 691 ms - Mono.Cecil.Pdb.Tests.dll (net8.0)
+  Mono.Cecil.Mdb.Tests -> /home/user/w61/CE/dotnet3/symbols/mdb/Test/bin/Debug/net8.0/Mono.Cecil.Mdb.Tests.dll
+Test run for /home/user/w61/CE/dotnet3/symbols/mdb/Test/bin/Debug/net8.0/Mono.Cecil.Mdb.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    43, Skipped:     0, Total:    43, Duration: 1 s - Mono.Cecil.Rocks.Tests.dll (net8.0)
+
+Passed!  - Failed:     0, Passed:     4, Skipped:     0, Total:     4, Duration: 4 s - Mono.Cecil.Mdb.Tests.dll (net8.0)

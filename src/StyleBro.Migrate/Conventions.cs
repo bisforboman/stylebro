@@ -238,6 +238,7 @@ internal static class Conventions
         new(AfterBlockKey, "statements after a block's '}'", "warning", ("warning", "after a blank line"), ("none", "right below the '}'"), Off(DiagnosticIds.BlankLineAfterCloseBrace)) { Unit = "statement" },
         new(NestedIfKey, "nested ifs BRO1149 would merge", "warning", ("warning", "merged ('if (a && b)')"), ("none", "nested"), Off(DiagnosticIds.NestedIf)) { Unit = "nested if", KeepAny = true, Keeps = $"{DiagnosticIds.NestedIf} would merge each" },
         new(SeparationKey, "neighbouring members", "warning", ("warning", "with a blank line between"), ("none", "without one"), Off(DiagnosticIds.ElementsSeparatedByBlankLine)) { Unit = "member pair" },
+        new(BraceBlankLineKey, "types' and namespaces' '{'", "warning", ("warning", "right above the code"), ("none", "with a blank line below"), Off(DiagnosticIds.BlankLineAfterOpenBrace)) { Unit = "brace" },
         new(DocBlankLineKey, "doc comments below code", "warning", ("warning", "after a blank line"), ("none", "right below the code"), Off(DiagnosticIds.BlankLineBeforeDocumentation)) { Unit = "doc comment" },
         new(CommentBlankLineKey, "'//' comments above code", "warning", ("warning", "right above the code"), ("none", "with a blank line below"), Off(DiagnosticIds.BlankLineAfterComment)) { Unit = "comment" },
         new(CommentAboveKey, "'//' comments below code", "warning", ("warning", "after a blank line"), ("none", "right below the code"), Off(DiagnosticIds.BlankLineBeforeComment)) { Unit = "comment" },
@@ -408,6 +409,12 @@ internal static class Conventions
     /// documented), with one or without (owner's policy, trial 14: Kavita's compact code got blank lines in 392 files).
     /// </summary>
     private const string SeparationKey = "dotnet_diagnostic." + DiagnosticIds.ElementsSeparatedByBlankLine + ".severity";
+
+    /// <summary>
+    /// BRO1503's severity, judged on the '{' of namespaces and types: right above the first line inside, or with a blank line
+    /// below (owner's decision 2026-10-29, trial 61: cecil has one below 543 of 720, and BRO1503 removed them in ~200 files).
+    /// </summary>
+    private const string BraceBlankLineKey = "dotnet_diagnostic." + DiagnosticIds.BlankLineAfterOpenBrace + ".severity";
 
     /// <summary>BRO1513's severity: doc comments right below code, or after a blank line (Kavita: 312 files changed).</summary>
     private const string DocBlankLineKey = "dotnet_diagnostic." + DiagnosticIds.BlankLineBeforeDocumentation + ".severity";
@@ -1598,6 +1605,7 @@ internal static class Conventions
             Overloads();
             MemberOrder();
             Separation();
+            BraceBlankLines();
             CommentBlankLines();
             CommentsBelowCode();
             Documentation();
@@ -2259,6 +2267,30 @@ internal static class Conventions
                 {
                     Add(DocElementBlankLineKey, false);
                 }
+            }
+        }
+
+        // Unit = the '{' of namespaces and types with code or a comment below it on a later line (not '{ // note' or an empty
+        // body): with a blank line below (what BRO1503 removes), or right above that line. Blocks inside members don't count:
+        // cecil's 543 of 720 below a type's '{' came with 5 of 5,334 in method bodies.
+        void BraceBlankLines()
+        {
+            foreach (var node in root.DescendantNodes(n => n is CompilationUnitSyntax or BaseNamespaceDeclarationSyntax or BaseTypeDeclarationSyntax))
+            {
+                var (open, close) = node switch
+                {
+                    NamespaceDeclarationSyntax ns => (ns.OpenBraceToken, ns.CloseBraceToken),
+                    BaseTypeDeclarationSyntax type => (type.OpenBraceToken, type.CloseBraceToken),
+                    _ => (default, default),
+                };
+                if (!open.IsKind(SyntaxKind.OpenBraceToken) || open.IsMissing || open.GetNextToken() == close
+                    || open.TrailingTrivia.Any(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia) || t.IsKind(SyntaxKind.MultiLineCommentTrivia))
+                    || Line(open.GetNextToken().SpanStart) == Line(open.SpanStart))
+                {
+                    continue;
+                }
+
+                Add(BraceBlankLineKey, StyleBro.Analyzers.Layout.BlankLines.GetBlankLinesBelow(open, text).Count > 0);
             }
         }
 

@@ -1,0 +1,12 @@
+Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net462, net8.0, netstandard2.0).
+Checked net462 (run 1 of 3)
+Checked netstandard2.0 (run 2 of 3)
+Checked net8.0 (run 3 of 3)
+'dotnet format' had warnings loading the workspace in its net462 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Building ExcelMapper.sln in Debug, Release with warnings as errors, and a copy of HEAD to compare...
+Debug: no findings, no new errors.
+Release: no findings, no new errors.
+Clean.

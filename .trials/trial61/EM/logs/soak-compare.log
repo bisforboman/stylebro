@@ -1,0 +1,54 @@
+Note: switching to '65ec929e2102b47d2b3768a56a1b985cefe8489c'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+Note: switching to '65ec929e2102b47d2b3768a56a1b985cefe8489c'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+== soak-src: dotnet-format check
+== soak-src: host check
+== soak-src: dotnet-format format
+== soak-src: host format
+== soak-src: dotnet-format recheck
+== soak-src: host recheck
+Times (soak-src):
+  dotnet-format check       117.2 s
+  host check                 57.9 s
+  dotnet-format format       97.5 s
+  host format                38.3 s
+  dotnet-format recheck       0.5 s
+  host recheck                0.5 s
+DIFFERENT (soak-src):
+  check output differs (/home/user/w61/EM/parity/soak-src-dotnet-format-check.txt vs /home/user/w61/EM/parity/soak-src-host-check.txt):
+  => 'dotnet format' had warnings loading the workspace in its net462 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+  <= 'dotnet format' had warnings loading the workspace in its net8.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+  format output differs (/home/user/w61/EM/parity/soak-src-dotnet-format-format.txt vs /home/user/w61/EM/parity/soak-src-host-format.txt):
+  => 'dotnet format' had warnings loading the workspace in its net462 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+  <= 'dotnet format' had warnings loading the workspace in its net8.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.

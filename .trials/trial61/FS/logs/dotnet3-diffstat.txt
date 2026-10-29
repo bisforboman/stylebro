@@ -1,0 +1,23 @@
+ .editorconfig                                      |  60 +-
+ Directory.Build.props                              |   8 +
+ FluentScheduler.TestApplication/Program.cs         |   6 +-
+ .../Cron/CronTimeCalculatorTests.cs                |  31 +-
+ .../Fluent/2.Once/OnceDurationSetTests.cs          |   1 -
+ .../Fluent/2.Once/OnceSetTests.cs                  |   4 +-
+ .../Fluent/3.Duration/EverydayUnitTests.cs         | 792 ++++++++++-----------
+ .../Scheduler/ScheduleGroupTests.cs                |   2 +-
+ .../Scheduler/ScheduleTests.cs                     |  14 +-
+ FluentScheduler/Common/ThrowHelper.cs              |  14 +-
+ FluentScheduler/Cron/CronTimeCalculator.cs         |   8 +-
+ FluentScheduler/Fluent/3.Duration/DayUnit.cs       | 120 ++--
+ FluentScheduler/Fluent/3.Duration/EverydayUnit.cs  | 198 +++---
+ FluentScheduler/Fluent/3.Duration/MonthUnit.cs     |  56 +-
+ .../Fluent/3.Duration/PeriodDurationSet.cs         |   8 +-
+ FluentScheduler/Fluent/3.Duration/PeriodOnceSet.cs |   2 -
+ .../Fluent/4.Restriction/RestrictionUnit.cs        |   2 +
+ FluentScheduler/Fluent/FluentTimeCalculator.cs     |   8 +-
+ FluentScheduler/Scheduler/ITimeCalculator.cs       |   6 +-
+ FluentScheduler/Scheduler/InternalSchedule.cs      |  16 +-
+ FluentScheduler/Scheduler/Schedule.cs              |  42 +-
+ FluentScheduler/Scheduler/ScheduleGroup.cs         |   1 -
+ 22 files changed, 730 insertions(+), 669 deletions(-)

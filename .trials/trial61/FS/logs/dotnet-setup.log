@@ -1,0 +1,87 @@
+ Directory.Build.props | 5 +++++
+ 1 file changed, 5 insertions(+)
+Conventions in the code (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  kept     private fields: 27 of 27 named '_field' -> _camelCase
+  default  '{' of multi-line blocks: 342 of 342 on its own line -> all
+  default  else/catch/finally after '}': 17 of 17 on a new line -> true
+  kept     one-line if/else/loop/using/lock bodies: 63 of 80 without braces -> when_multiline
+  kept     one-line jumps ('if (x) return;'): 5 of 8 on the 'if' line without braces -> true (3 are enough)
+  off      operators where a line wraps: 3 at the start of the line, 5 at the end of the line -> BRO1520 is off
+  default  '=>' where a line wraps: 38 of 39 at the end of the line -> end_of_line
+  too few  '=' where a line wraps: 2 places -> default stays (end_of_line)
+  default  multi-line initializers: 14 of 17 with a trailing comma -> include
+  too few  empty strings: 2 places -> default stays (string_empty)
+  kept     null checks: 32 of 34 '== null' -> equality_operator
+  default  one-line <summary> texts: 91 of 91 on three lines -> multi_line
+  too few  default values: 1 place -> default stays (false)
+  off      ')' of split lists: 15 after the last item, 39 on its own line -> BRO1110 is off
+  default  split lists: 33 of 34 first item on the next line -> next_line
+  kept     ': base(...)'/': this(...)': 3 of 3 on the constructor's line -> same_line
+  too few  'where' constraints: 2 places -> default stays (own_line)
+  default  'new T { ... }' with an initializer: 13 of 13 without '()' -> omit
+  too few  switch sections: 2 places -> default stays (include)
+  kept     files' using directives: 30 of 33 inside the namespace -> inside_namespace
+  too few  mixed arithmetic ('a + b * c'): 2 places -> default stays (always_for_clarity)
+  kept     statements on their 'if'/loop/'case' line: 5 of 70 on their owner's line -> true (3 are enough)
+  off      overrides/interface implementations: 10 of 10 without a doc comment -> BRO1601 is off
+  default  types' members: 14 of 17 in BRO1001's order -> warning
+  too few  lambda-first calls: 2 calls -> default stays (false)
+  default  split lists' items: 32 of 35 one per line -> warning
+  off      private-by-default members: 45 with 'private', 29 without 'private' -> BRO1404 is off
+  default  partial type parts: 5 of 5 with an access modifier -> warning
+  default  internal-by-default types: 11 of 11 with 'internal' -> warning
+  off      property summaries: 9 of 9 in their own words -> BRO1604 is off
+  too few  declarations with 2+ attributes: 1 place -> default stays (warning)
+  default  adjacent fields of one type: 12 of 12 declared one by one -> warning
+  default  private static fields: 3 of 3 without a prefix -> warning
+  default  usings inside a namespace: 87 of 88 fully qualified -> warning
+  set      built-in type names: 22 of 22 only keywords ('int') -> set in .editorconfig (error)
+  kept     empty blocks ('{ }'): 5 of 5 on one line -> true
+  too few  block-bodied properties/methods: 1 member -> default stays (warning)
+  default  statement blocks ('if (x) { y(); }'): 25 of 25 on several lines -> warning
+  default  auto-property accessors ('{ get; set; }'): 17 of 17 on one line -> warning
+  set      C# files' line endings: 35 of 39 CRLF -> set in .editorconfig (crlf)
+  default  statements after a block's '}': 14 of 16 after a blank line -> warning
+  default  neighbouring members: 291 of 294 with a blank line between -> warning
+  default  doc comments below code: 98 of 98 after a blank line -> warning
+  default  '//' comments above code: 463 of 463 right above the code -> warning
+  default  '//' comments below code: 368 of 368 after a blank line -> warning
+  off      doc comment texts: 122 ending with a period, 61 without a period -> BRO1603 is off
+  default  doc element order: 28 of 28 in BRO1619's order -> warning
+  too few  non-private fields: 2 fields -> default stays (warning)
+  default  doc comments above their element: 99 of 99 right above it -> warning
+  default  using directives: 23 of 24 files sorted, 0 of 2 with System first -> sorted, System first
+  default  private constants/static readonly fields: 3 of 3 PascalCase -> PascalCase
+  set      spacing (csharp_space_*): your settings set IDE0055 (error)
+Summary:
+  Kept your style for 33 settings: wrote stylebro_private_field_naming, csharp_prefer_braces,
+    stylebro_allow_single_line_jump_statements, stylebro_null_check_style, stylebro_constructor_initializer_placement,
+    csharp_using_directive_placement, csharp_preserve_single_line_statements,
+    stylebro_allow_empty_single_line_blocks; 25 were already StyleBro's default.
+  Turned 4 rules off because your code mixes both forms: BRO1520 (operators where a line wraps),
+    BRO1110 (')' of split lists), BRO1404 (private-by-default members), BRO1603 (doc comment texts).
+  Turned 2 rules off because your code doesn't do what they enforce: BRO1601 (overrides/interface implementations: 10 of
+    10 without a doc comment), BRO1604 (property summaries: 9 of 9 in their own words).
+  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
+  10 settings had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_equals_placement_when_wrapping,
+    stylebro_empty_string_style, csharp_prefer_simple_default_expression, stylebro_constraint_placement,
+    stylebro_blank_line_between_switch_sections, dotnet_style_parentheses_in_arithmetic_binary_operators,
+    stylebro_allow_leading_multiline_lambda, dotnet_diagnostic.BRO1102.severity, dotnet_diagnostic.BRO1509.severity,
+    dotnet_diagnostic.BRO1306.severity.
+  note     Line endings: your .editorconfig says end_of_line = crlf, and 4 of 39 C# files are LF as committed (git doesn't convert them): 'format' converts them to CRLF (a whole-file change each). To keep that out of the formatting changes, convert them in a commit of their own first, or add '*.cs text eol=crlf' to .gitattributes and run 'git add --renormalize .'.
+
+.editorconfig requires 'this.' (dotnet_style_qualification_for_*, IDE0009): kept, the block doesn't turn IDE0009 off.
+.editorconfig sets IDE0055 (error): kept, the block doesn't set it. 'bro format' still formats whitespace (its whitespace pass runs unless IDE0055 is off).
+.editorconfig sets IDE0040 (error): the block turns it off. Access modifiers (SA1400, SA1205) are StyleBro's BRO1404/BRO1007: IDE0040's fix breaks multi-targeted projects; they enforce its setting instead.
+.editorconfig sets IDE0047 (error): the block turns it off. Unnecessary parentheses (SA1119) are StyleBro's BRO1405: IDE0047's fix breaks multi-targeted projects; they enforce its setting instead.
+.editorconfig sets IDE0048 (error): the block turns it off. Parentheses that show precedence (SA1407, SA1408) are StyleBro's BRO1406/BRO1407: IDE0048's fix breaks multi-targeted projects; they enforce its setting instead.
+1 project targets several frameworks (FluentScheduler/FluentScheduler.csproj).
+Run 'bro format' instead of 'dotnet format' here: with IDE0055 on, 'dotnet format' crashes on multi-targeted
+projects (Roslyn can't merge the target frameworks' copies of a file). The command runs it once per target framework.
+Wrote the built-in rule severities to .editorconfig.
+Set the preset version in Directory.Build.props (<StyleBroPreset>1.0</StyleBroPreset>): rules of newer releases stay off until you raise it.
+To report them on build too: <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> in Directory.Build.props.
+Tip: --agents-md writes a StyleBro section into AGENTS.md for AI coding agents.
+Next: run 'bro format'. Plain 'dotnet format' also applies every other analyzer's and the compiler's fixes.

@@ -1,0 +1,24 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Mono.Cecil -> /home/user/w61/CE/dotnet/bin/Debug/net40/Mono.Cecil.dll
+  Mono.Cecil -> /home/user/w61/CE/dotnet/bin/Debug/netstandard2.0/Mono.Cecil.dll
+  Mono.Cecil.Rocks -> /home/user/w61/CE/dotnet/rocks/bin/Debug/netstandard2.0/Mono.Cecil.Rocks.dll
+  Mono.Cecil.Pdb -> /home/user/w61/CE/dotnet/symbols/pdb/bin/Debug/netstandard2.0/Mono.Cecil.Pdb.dll
+  Mono.Cecil.Mdb -> /home/user/w61/CE/dotnet/symbols/mdb/bin/Debug/netstandard2.0/Mono.Cecil.Mdb.dll
+  Mono.Cecil.Mdb -> /home/user/w61/CE/dotnet/symbols/mdb/bin/Debug/net40/Mono.Cecil.Mdb.dll
+  Mono.Cecil.Pdb -> /home/user/w61/CE/dotnet/symbols/pdb/bin/Debug/net40/Mono.Cecil.Pdb.dll
+  Mono.Cecil.Rocks -> /home/user/w61/CE/dotnet/rocks/bin/Debug/net40/Mono.Cecil.Rocks.dll
+  Mono.Cecil.Tests -> /home/user/w61/CE/dotnet/Test/bin/Debug/net8.0/Mono.Cecil.Tests.dll
+  Mono.Cecil.Mdb.Tests -> /home/user/w61/CE/dotnet/symbols/mdb/Test/bin/Debug/net8.0/Mono.Cecil.Mdb.Tests.dll
+  Mono.Cecil.Tests -> /home/user/w61/CE/dotnet/Test/bin/Debug/net40/Mono.Cecil.Tests.dll
+  Mono.Cecil.Pdb.Tests -> /home/user/w61/CE/dotnet/symbols/pdb/Test/bin/Debug/net40/Mono.Cecil.Pdb.Tests.dll
+  Mono.Cecil.Pdb.Tests -> /home/user/w61/CE/dotnet/symbols/pdb/Test/bin/Debug/net8.0/Mono.Cecil.Pdb.Tests.dll
+  Mono.Cecil.Mdb.Tests -> /home/user/w61/CE/dotnet/symbols/mdb/Test/bin/Debug/net40/Mono.Cecil.Mdb.Tests.dll
+  Mono.Cecil.Rocks.Tests -> /home/user/w61/CE/dotnet/rocks/Test/bin/Debug/net40/Mono.Cecil.Rocks.Tests.dll
+  Mono.Cecil.Rocks.Tests -> /home/user/w61/CE/dotnet/rocks/Test/bin/Debug/net8.0/Mono.Cecil.Rocks.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:11.35

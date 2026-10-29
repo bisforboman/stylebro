@@ -1,0 +1,27 @@
+base start 13:36
+base done 13:36
+CHAIN-DONE
+default start 14:44
+default done 14:51
+dotnet start 14:51
+dotnet done 14:58
+CHAIN-DONE
+soak start 14:58
+soak done rc=1 15:03
+soak-compare done 15:03
+default2 start 16:04
+default2 done 16:12
+dotnet2 start 16:12
+dotnet2 done 16:20
+CHAIN-DONE
+soak start 16:20
+soak done rc=1 16:25
+soak2-compare done 16:25
+default3 start 16:55
+default3 done 17:01
+dotnet3 start 17:01
+dotnet3 done 17:08
+CHAIN-DONE
+soak start 17:08
+soak done rc=0 17:13
+soak3-compare done 17:13

@@ -1,0 +1,31 @@
+  Determining projects to restore...
+  Restored /home/user/cand61/jbevain-cecil/rocks/Mono.Cecil.Rocks.csproj (in 5.6 sec).
+  Restored /home/user/cand61/jbevain-cecil/symbols/mdb/Mono.Cecil.Mdb.csproj (in 5.6 sec).
+  Restored /home/user/cand61/jbevain-cecil/symbols/pdb/Mono.Cecil.Pdb.csproj (in 5.6 sec).
+  Restored /home/user/cand61/jbevain-cecil/Test/Mono.Cecil.Tests.csproj (in 309 ms).
+  Restored /home/user/cand61/jbevain-cecil/rocks/Test/Mono.Cecil.Rocks.Tests.csproj (in 313 ms).
+  Restored /home/user/cand61/jbevain-cecil/symbols/mdb/Test/Mono.Cecil.Mdb.Tests.csproj (in 318 ms).
+  Restored /home/user/cand61/jbevain-cecil/symbols/pdb/Test/Mono.Cecil.Pdb.Tests.csproj (in 6 sec).
+  Restored /home/user/cand61/jbevain-cecil/Mono.Cecil.csproj (in 8 ms).
+  Mono.Cecil -> /home/user/cand61/jbevain-cecil/bin/Debug/net40/Mono.Cecil.dll
+  Mono.Cecil -> /home/user/cand61/jbevain-cecil/bin/Debug/netstandard2.0/Mono.Cecil.dll
+  Mono.Cecil.Rocks -> /home/user/cand61/jbevain-cecil/rocks/bin/Debug/netstandard2.0/Mono.Cecil.Rocks.dll
+  Mono.Cecil.Mdb -> /home/user/cand61/jbevain-cecil/symbols/mdb/bin/Debug/netstandard2.0/Mono.Cecil.Mdb.dll
+  Mono.Cecil.Rocks -> /home/user/cand61/jbevain-cecil/rocks/bin/Debug/net40/Mono.Cecil.Rocks.dll
+  Mono.Cecil.Pdb -> /home/user/cand61/jbevain-cecil/symbols/pdb/bin/Debug/net40/Mono.Cecil.Pdb.dll
+  Mono.Cecil.Mdb -> /home/user/cand61/jbevain-cecil/symbols/mdb/bin/Debug/net40/Mono.Cecil.Mdb.dll
+  Mono.Cecil.Pdb -> /home/user/cand61/jbevain-cecil/symbols/pdb/bin/Debug/netstandard2.0/Mono.Cecil.Pdb.dll
+  Mono.Cecil.Tests -> /home/user/cand61/jbevain-cecil/Test/bin/Debug/net40/Mono.Cecil.Tests.dll
+  Mono.Cecil.Mdb.Tests -> /home/user/cand61/jbevain-cecil/symbols/mdb/Test/bin/Debug/net40/Mono.Cecil.Mdb.Tests.dll
+  Mono.Cecil.Pdb.Tests -> /home/user/cand61/jbevain-cecil/symbols/pdb/Test/bin/Debug/net40/Mono.Cecil.Pdb.Tests.dll
+  Mono.Cecil.Tests -> /home/user/cand61/jbevain-cecil/Test/bin/Debug/net8.0/Mono.Cecil.Tests.dll
+  Mono.Cecil.Pdb.Tests -> /home/user/cand61/jbevain-cecil/symbols/pdb/Test/bin/Debug/net8.0/Mono.Cecil.Pdb.Tests.dll
+  Mono.Cecil.Rocks.Tests -> /home/user/cand61/jbevain-cecil/rocks/Test/bin/Debug/net8.0/Mono.Cecil.Rocks.Tests.dll
+  Mono.Cecil.Rocks.Tests -> /home/user/cand61/jbevain-cecil/rocks/Test/bin/Debug/net40/Mono.Cecil.Rocks.Tests.dll
+  Mono.Cecil.Mdb.Tests -> /home/user/cand61/jbevain-cecil/symbols/mdb/Test/bin/Debug/net8.0/Mono.Cecil.Mdb.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:14.50

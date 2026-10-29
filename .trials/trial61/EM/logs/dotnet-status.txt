@@ -1,0 +1,15 @@
+ A Directory.Build.props
+ M ExcelMapper.Tests/ExceptionsTests/ExcelMapperConvertExceptionTests.cs
+ M ExcelMapper.Tests/Tests.cs
+ M ExcelMapper/ActionInvoker.cs
+ M ExcelMapper/Attributes/ColumnAttribute.cs
+ M ExcelMapper/Attributes/DataFormatAttribute.cs
+ M ExcelMapper/ColumnInfo.cs
+ M ExcelMapper/ColumnInfoDirections.cs
+ M ExcelMapper/EventArgs.cs
+ M ExcelMapper/ExcelMapper.cs
+ M ExcelMapper/Exceptions/ExcelMapperConvertException.cs
+ M ExcelMapper/Extensions.cs
+ M ExcelMapper/ParsingErrorEventArgs.cs
+ M ExcelMapper/TypeMapper.cs
+?? .editorconfig

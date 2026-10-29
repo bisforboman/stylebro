@@ -1,0 +1,23 @@
+{
+  "repo": "jbevain/cecil",
+  "branch": "master",
+  "commit": "882ca5eedda1e62eb41bd5869aeb15d8f1538e51",
+  "csFiles": 243,
+  "tags": [
+    "library",
+    "multi-target",
+    "file-headers",
+    "tabs"
+  ],
+  "setups": "Mono.Cecil.sln at the root; netstandard2.0;net40 library, net8.0;net40 NUnit tests; Directory.Build.props with EnableDefaultItems false (explicit Compile items), PublicSign off Windows, SourceLink; .editorconfig with tabs, Mono spacing ('F ()', 'a [i]'), csharp_new_line_before_open_brace = methods, snake_case naming; every file starts with a Mono header whose first and last lines are an empty '//'; a blank line below 543 of 720 namespace and type '{'; vendored symbols/pdb/Microsoft.Cci.Pdb.",
+  "build": "ok",
+  "workaround": null,
+  "tests": "dotnet test Mono.Cecil.sln -f net8.0 (net40 needs mono): 335 + 15 + 43 + 4 pass; 19 Mono.Cecil.Tests fail untouched (they run ilasm, which Linux doesn't have).",
+  "usedIn": "trial 61",
+  "verified": {
+    "by": "trial 61 session",
+    "date": "2026-10-29",
+    "sdks": "10.0.113, 8.0.132"
+  },
+  "notes": "Targeted at trial 60's BRO1120 fix: the empty '//' header lines stayed. BRO1503 removed the blank lines below its type braces until init learned that convention (trial 61)."
+}

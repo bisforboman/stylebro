@@ -1,0 +1,17 @@
+  Determining projects to restore...
+  Restored /home/user/cand61/mganss-ExcelMapper/ExcelMapper.Tests/ExcelMapper.Tests.csproj (in 12.25 sec).
+  Restored /home/user/cand61/mganss-ExcelMapper/ExcelMapper/ExcelMapper.csproj (in 13.06 sec).
+/root/.nuget/packages/npoi/2.8.1/build/NPOI.targets(8,5): warning : NPOI: You must accept the OSMF EULA license to use NPOI. Add <AcceptNPOIOSMFLicense>true</AcceptNPOIOSMFLicense> to your project file. [/home/user/cand61/mganss-ExcelMapper/ExcelMapper/ExcelMapper.csproj::TargetFramework=net462]
+/root/.nuget/packages/npoi/2.8.1/build/NPOI.targets(8,5): warning : NPOI: You must accept the OSMF EULA license to use NPOI. Add <AcceptNPOIOSMFLicense>true</AcceptNPOIOSMFLicense> to your project file. [/home/user/cand61/mganss-ExcelMapper/ExcelMapper/ExcelMapper.csproj::TargetFramework=netstandard2.0]
+  ExcelMapper -> /home/user/cand61/mganss-ExcelMapper/ExcelMapper/bin/Debug/netstandard2.0/ExcelMapper.dll
+  ExcelMapper -> /home/user/cand61/mganss-ExcelMapper/ExcelMapper/bin/Debug/net462/ExcelMapper.dll
+  ExcelMapper.Tests -> /home/user/cand61/mganss-ExcelMapper/ExcelMapper.Tests/bin/Debug/net8.0/ExcelMapper.Tests.dll
+
+Build succeeded.
+
+/root/.nuget/packages/npoi/2.8.1/build/NPOI.targets(8,5): warning : NPOI: You must accept the OSMF EULA license to use NPOI. Add <AcceptNPOIOSMFLicense>true</AcceptNPOIOSMFLicense> to your project file. [/home/user/cand61/mganss-ExcelMapper/ExcelMapper/ExcelMapper.csproj::TargetFramework=net462]
+/root/.nuget/packages/npoi/2.8.1/build/NPOI.targets(8,5): warning : NPOI: You must accept the OSMF EULA license to use NPOI. Add <AcceptNPOIOSMFLicense>true</AcceptNPOIOSMFLicense> to your project file. [/home/user/cand61/mganss-ExcelMapper/ExcelMapper/ExcelMapper.csproj::TargetFramework=netstandard2.0]
+    2 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:19.74

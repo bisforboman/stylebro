@@ -1,0 +1,712 @@
+diff --git a/Directory.Build.props b/Directory.Build.props
+index 2f9a220..4b02975 100644
+--- a/Directory.Build.props
++++ b/Directory.Build.props
+@@ -1,5 +1,6 @@
+ <Project>
+   <PropertyGroup>
++    <StyleBroPreset>1.0</StyleBroPreset>
+     <LangVersion>12.0</LangVersion>
+     <NoWarn>$(NoWarn);CS1701;CS1702;CS1591</NoWarn>
+     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+@@ -7,4 +8,7 @@
+     <IsMac>$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::get_OSX())))</IsMac>
+     <IsWindows>$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::get_Windows())))</IsWindows>
+   </PropertyGroup>
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial61.1" PrivateAssets="all" />
++  </ItemGroup>
+ </Project>
+diff --git a/Respawn.DatabaseTests/DB2Tests.cs b/Respawn.DatabaseTests/DB2Tests.cs
+index 6a12871..fa04b47 100644
+--- a/Respawn.DatabaseTests/DB2Tests.cs
++++ b/Respawn.DatabaseTests/DB2Tests.cs
+@@ -1,9 +1,9 @@
+-﻿using Shouldly;
+-using System;
++﻿using System;
+ using System.Threading.Tasks;
+ using IBM.Data.Db2;
+ using NPoco;
+ using Respawn.Graph;
++using Shouldly;
+ using Xunit;
+ using Xunit.Abstractions;
+ 
+@@ -64,7 +64,7 @@ public async Task ShouldIgnoreTables()
+                 command.ExecuteNonQuery();
+                 command.Parameters.Clear();
+             }
+-            var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions()
++            var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
+             {
+                 DbAdapter = DbAdapter.DB2,
+                 SchemasToInclude = new[] { "DB2INST1" },
+@@ -126,7 +126,6 @@ FOREIGN KEY (FooValue) REFERENCES Foo(Value)
+                 throw;
+             }
+ 
+-
+             command.CommandText = "SELECT COUNT(1) FROM Foo";
+             command.ExecuteScalar().ShouldBe(0);
+             command.CommandText = "SELECT COUNT(1) FROM Bar";
+@@ -154,9 +153,9 @@ public async Task ShouldHandleCircularRelationships()
+                                             ParentId INT NULL
+                                         );";
+             command.ExecuteNonQuery();
+-            command.CommandText = @"ALTER TABLE Parent ADD CONSTRAINT FK_Child FOREIGN KEY (ChildId) REFERENCES Child (Id)";
++            command.CommandText = "ALTER TABLE Parent ADD CONSTRAINT FK_Child FOREIGN KEY (ChildId) REFERENCES Child (Id)";
+             command.ExecuteNonQuery();
+-            command.CommandText = @"ALTER TABLE Child ADD CONSTRAINT FK_Parent FOREIGN KEY (ParentId) REFERENCES Parent (Id)";
++            command.CommandText = "ALTER TABLE Child ADD CONSTRAINT FK_Parent FOREIGN KEY (ParentId) REFERENCES Parent (Id)";
+             command.ExecuteNonQuery();
+ 
+             for (int i = 0; i < 100; i++)
+@@ -171,9 +170,9 @@ public async Task ShouldHandleCircularRelationships()
+                 command.ExecuteNonQuery();
+                 command.Parameters.Clear();
+             }
+-            command.CommandText = @"UPDATE Parent SET ChildId = 0";
++            command.CommandText = "UPDATE Parent SET ChildId = 0";
+             command.ExecuteNonQuery();
+-            command.CommandText = @"UPDATE Child SET ParentId = 1";
++            command.CommandText = "UPDATE Child SET ParentId = 1";
+             command.ExecuteNonQuery();
+ 
+             command.CommandText = "SELECT COUNT(1) FROM Parent";
+@@ -499,4 +498,4 @@ private async Task CreateSchema(string schemaName)
+     }
+ }
+ 
+-//#endif
++// #endif
+diff --git a/Respawn.DatabaseTests/EmptyDbTests.cs b/Respawn.DatabaseTests/EmptyDbTests.cs
+index 7b1ddab..33d0ed4 100644
+--- a/Respawn.DatabaseTests/EmptyDbTests.cs
++++ b/Respawn.DatabaseTests/EmptyDbTests.cs
+@@ -16,7 +16,6 @@ public class EmptyDbTests : IAsyncLifetime
+         private Database _database;
+         private MsSqlContainer _msSqlContainer;
+ 
+-
+         public EmptyDbTests(ITestOutputHelper output)
+         {
+         }
+@@ -33,8 +32,8 @@ await using (var connection = new SqlConnection(connString))
+                 await connection.OpenAsync();
+                 using (var database = new Database(connection))
+                 {
+-                    await database.ExecuteAsync(@"IF EXISTS (SELECT name FROM master.dbo.sysdatabases WHERE name = N'EmptyDbTests') alter database EmptyDbTests set single_user with rollback immediate");
+-                    await database.ExecuteAsync(@"DROP DATABASE IF EXISTS EmptyDbTests");
++                    await database.ExecuteAsync("IF EXISTS (SELECT name FROM master.dbo.sysdatabases WHERE name = N'EmptyDbTests') alter database EmptyDbTests set single_user with rollback immediate");
++                    await database.ExecuteAsync("DROP DATABASE IF EXISTS EmptyDbTests");
+                     await database.ExecuteAsync("create database [EmptyDbTests]");
+                 }
+             }
+diff --git a/Respawn.DatabaseTests/InformixFixture.cs b/Respawn.DatabaseTests/InformixFixture.cs
+index 5184089..1f27c9e 100644
+--- a/Respawn.DatabaseTests/InformixFixture.cs
++++ b/Respawn.DatabaseTests/InformixFixture.cs
+@@ -27,7 +27,7 @@ protected override InformixBuilder CreateBuilder()
+ public sealed class InformixBuilder : ContainerBuilder<InformixBuilder, InformixContainer, ContainerConfiguration>
+ {
+     public InformixBuilder()
+-        : this("")
++        : this(string.Empty)
+     {
+         throw new NotSupportedException();
+     }
+@@ -76,10 +76,10 @@ protected override InformixBuilder Init()
+             .WithPrivileged(true)
+ 
+             // = user: root
+-            //.WithUser("root")
++            // .WithUser("root")
+ 
+             // = tty: true
+-            //.WithTty(true)
++            // .WithTty(true)
+ 
+             // optional: equivalent to "restart: always" but Testcontainers
+             // does not automatically restart containers (it recreates instead)
+@@ -91,8 +91,7 @@ protected override InformixBuilder Init()
+                 .UntilInternalTcpPortIsAvailable(9088)
+                 .UntilInternalTcpPortIsAvailable(9089)
+                 // This is the last success message
+-                .UntilMessageIsLogged("starting mqtt listener on port 27883")
+-            );
++                .UntilMessageIsLogged("starting mqtt listener on port 27883"));
+     }
+ 
+     public override InformixContainer Build()
+diff --git a/Respawn.DatabaseTests/InformixTests.cs b/Respawn.DatabaseTests/InformixTests.cs
+index 1bf0ee6..db78f71 100644
+--- a/Respawn.DatabaseTests/InformixTests.cs
++++ b/Respawn.DatabaseTests/InformixTests.cs
+@@ -1,9 +1,9 @@
+-﻿using Shouldly;
+-using System;
++﻿using System;
+ using System.Threading.Tasks;
+ using IBM.Data.Db2;
+ using NPoco;
+ using Respawn.Graph;
++using Shouldly;
+ using Xunit;
+ using Xunit.Abstractions;
+ 
+@@ -68,7 +68,7 @@ public async Task ShouldIgnoreTables()
+                 command.ExecuteNonQuery();
+                 command.Parameters.Clear();
+             }
+-            var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions()
++            var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
+             {
+                 SchemasToInclude = new[] { "informix" },
+                 TablesToIgnore = new Table[] { "foo" }
+@@ -143,9 +143,9 @@ public async Task ShouldHandleCircularRelationships()
+                                             ParentId INT NULL
+                                         );";
+             command.ExecuteNonQuery();
+-            command.CommandText = @"ALTER TABLE Parent ADD CONSTRAINT (FOREIGN KEY (ChildId) REFERENCES Child (Id) CONSTRAINT FK_Child)";
++            command.CommandText = "ALTER TABLE Parent ADD CONSTRAINT (FOREIGN KEY (ChildId) REFERENCES Child (Id) CONSTRAINT FK_Child)";
+             command.ExecuteNonQuery();
+-            command.CommandText = @"ALTER TABLE Child ADD CONSTRAINT (FOREIGN KEY (ParentId) REFERENCES Parent (Id) CONSTRAINT FK_Parent)";
++            command.CommandText = "ALTER TABLE Child ADD CONSTRAINT (FOREIGN KEY (ParentId) REFERENCES Parent (Id) CONSTRAINT FK_Parent)";
+             command.ExecuteNonQuery();
+ 
+             for (int i = 0; i < 100; i++)
+@@ -160,9 +160,9 @@ public async Task ShouldHandleCircularRelationships()
+                 command.ExecuteNonQuery();
+                 command.Parameters.Clear();
+             }
+-            command.CommandText = @"UPDATE Parent SET ChildId = 0";
++            command.CommandText = "UPDATE Parent SET ChildId = 0";
+             command.ExecuteNonQuery();
+-            command.CommandText = @"UPDATE Child SET ParentId = 1";
++            command.CommandText = "UPDATE Child SET ParentId = 1";
+             command.ExecuteNonQuery();
+ 
+             command.CommandText = "SELECT COUNT(1) FROM Parent";
+@@ -421,4 +421,4 @@ private async Task ManageUser(string userName)
+     }
+ }
+ 
+-//#endif
++// #endif
+diff --git a/Respawn.DatabaseTests/MySqlTests.cs b/Respawn.DatabaseTests/MySqlTests.cs
+index f2b331d..8063a17 100644
+--- a/Respawn.DatabaseTests/MySqlTests.cs
++++ b/Respawn.DatabaseTests/MySqlTests.cs
+@@ -14,6 +14,7 @@ public class Foo
+         {
+             public int Value { get; set; }
+         }
++
+         public class Bar
+         {
+             public int Value { get; set; }
+@@ -134,7 +135,6 @@ public async Task ShouldHandleSelfRelationships()
+             db.ExecuteScalar<int>("SELECT COUNT(1) FROM foo").ShouldBe(0);
+         }
+ 
+-
+         [Fact]
+         public async Task ShouldHandleCircularRelationships()
+         {
+@@ -186,7 +186,6 @@ public async Task ShouldHandleComplexCycles()
+             db.Execute("alter table e add constraint FK_e_a foreign key (a_id) references a (id)");
+             db.Execute("alter table f add constraint FK_f_b foreign key (b_id) references b (id)");
+ 
+-
+             db.Execute("insert into d (id) values (1)");
+             db.Execute("insert into c (id, d_id) values (1, 1)");
+             db.Execute("insert into a (id) values (1)");
+@@ -351,6 +350,5 @@ public async Task ShouldResetSequencesAndIdentities()
+             await checkpoint.ResetAsync(db.Connection);
+             db.ExecuteScalar<int>($"SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '{nameof(ShouldResetSequencesAndIdentities)}' AND TABLE_NAME = 'a';").ShouldBe(1);
+         }
+-
+     }
+ }
+diff --git a/Respawn.DatabaseTests/OracleTests.cs b/Respawn.DatabaseTests/OracleTests.cs
+index 92d14c8..b9692f4 100644
+--- a/Respawn.DatabaseTests/OracleTests.cs
++++ b/Respawn.DatabaseTests/OracleTests.cs
+@@ -56,7 +56,7 @@ public async Task ShouldDeleteMultipleTables()
+ 
+             var respawner = await Respawner.CreateAsync(db.Connection, new RespawnerOptions
+             {
+-                SchemasToInclude = new[] { fixture.User },
++                SchemasToInclude = new[] { fixture.User }
+             });
+             await respawner.ResetAsync(db.Connection);
+ 
+@@ -83,7 +83,7 @@ public async Task ShouldHandleRelationships()
+ 
+             var respawner = await Respawner.CreateAsync(db.Connection, new RespawnerOptions
+             {
+-                SchemasToInclude = new[] { fixture.User },
++                SchemasToInclude = new[] { fixture.User }
+             });
+             try
+             {
+@@ -166,7 +166,7 @@ public async Task ShouldHandleRelationshipsWithNamedPrimaryKeyConstraint()
+ 
+             var respawner = await Respawner.CreateAsync(db.Connection, new RespawnerOptions
+             {
+-                SchemasToInclude = new[] { userA },
++                SchemasToInclude = new[] { userA }
+             });
+             try
+             {
+@@ -203,7 +203,6 @@ public async Task ShouldHandleComplexCycles()
+             db.Execute("alter table \"e\" add constraint \"FK_e_a\" foreign key (\"a_id\") references \"a\" (\"id\")");
+             db.Execute("alter table \"f\" add constraint \"FK_f_b\" foreign key (\"b_id\") references \"b\" (\"id\")");
+ 
+-
+             db.Execute("insert into \"d\" (\"id\") values (1)");
+             db.Execute("insert into \"c\" (\"id\", \"d_id\") values (1, 1)");
+             db.Execute("insert into \"a\" (\"id\") values (1)");
+@@ -222,7 +221,7 @@ public async Task ShouldHandleComplexCycles()
+ 
+             var respawner = await Respawner.CreateAsync(db.Connection, new RespawnerOptions
+             {
+-                SchemasToInclude = new[] { fixture.User },
++                SchemasToInclude = new[] { fixture.User }
+             });
+             try
+             {
+@@ -266,7 +265,7 @@ public async Task ShouldHandleCircularRelationships()
+ 
+             var respawner = await Respawner.CreateAsync(db.Connection, new RespawnerOptions
+             {
+-                SchemasToInclude = new[] { fixture.User },
++                SchemasToInclude = new[] { fixture.User }
+             });
+             try
+             {
+diff --git a/Respawn.DatabaseTests/PostgresTests.cs b/Respawn.DatabaseTests/PostgresTests.cs
+index e98ebf8..e1e38a4 100644
+--- a/Respawn.DatabaseTests/PostgresTests.cs
++++ b/Respawn.DatabaseTests/PostgresTests.cs
+@@ -248,7 +248,6 @@ public async Task ShouldHandleComplexCycles()
+             await db.ExecuteAsync("alter table e add constraint FK_e_a foreign key (a_id) references a (id)");
+             await db.ExecuteAsync("alter table f add constraint FK_f_b foreign key (b_id) references b (id)");
+ 
+-
+             await db.ExecuteAsync("insert into d (id) values (1)");
+             await db.ExecuteAsync("insert into c (id, d_id) values (1, 1)");
+             await db.ExecuteAsync("insert into a (id) values (1)");
+@@ -284,7 +283,6 @@ public async Task ShouldHandleComplexCycles()
+             db.ExecuteScalar<int>("SELECT COUNT(1) FROM f").ShouldBe(0);
+         }
+ 
+-
+         [Fact]
+         public async Task ShouldExcludeSchemas()
+         {
+diff --git a/Respawn.DatabaseTests/SkipOnCIAttribute.cs b/Respawn.DatabaseTests/SkipOnCIAttribute.cs
+index 7bb97c7..233a3bc 100644
+--- a/Respawn.DatabaseTests/SkipOnCIAttribute.cs
++++ b/Respawn.DatabaseTests/SkipOnCIAttribute.cs
+@@ -1,12 +1,12 @@
+-﻿namespace Respawn.DatabaseTests
+-{
+-    using System;
+-    using System.Collections.Generic;
+-    using System.Linq;
+-    using Xunit;
+-    using Xunit.Abstractions;
+-    using Xunit.Sdk;
++﻿using System;
++using System.Collections.Generic;
++using System.Linq;
++using Xunit;
++using Xunit.Abstractions;
++using Xunit.Sdk;
+ 
++namespace Respawn.DatabaseTests
++{
+     public class SkipOnCITestDiscoverer : IXunitTestCaseDiscoverer
+     {
+         private readonly IMessageSink _diagnosticMessageSink;
+diff --git a/Respawn.DatabaseTests/SnowflakeTests.cs b/Respawn.DatabaseTests/SnowflakeTests.cs
+index 4e2cfb0..3c9df2b 100644
+--- a/Respawn.DatabaseTests/SnowflakeTests.cs
++++ b/Respawn.DatabaseTests/SnowflakeTests.cs
+@@ -1,7 +1,7 @@
+-﻿using Respawn.Graph;
++﻿using System.Threading.Tasks;
++using Respawn.Graph;
+ using Shouldly;
+ using Snowflake.Data.Client;
+-using System.Threading.Tasks;
+ using Xunit;
+ using Xunit.Abstractions;
+ 
+diff --git a/Respawn.DatabaseTests/SqlServerTests.cs b/Respawn.DatabaseTests/SqlServerTests.cs
+index a25a560..f7f5b01 100644
+--- a/Respawn.DatabaseTests/SqlServerTests.cs
++++ b/Respawn.DatabaseTests/SqlServerTests.cs
+@@ -15,10 +15,12 @@ public class Foo
+         {
+             public int Value { get; set; }
+         }
++
+         public class Bar
+         {
+             public int Value { get; set; }
+         }
++
+         public class Baz
+         {
+             public int Value { get; set; }
+@@ -78,7 +80,7 @@ public async Task ShouldDeleteDataUsingCustomDeleteStatements()
+             db.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(100);
+             db.ExecuteScalar<int>("SELECT COUNT(1) FROM Bar").ShouldBe(100);
+ 
+-            var checkpoint = await Respawner.CreateAsync(db.Connection, new RespawnerOptions()
++            var checkpoint = await Respawner.CreateAsync(db.Connection, new RespawnerOptions
+             {
+                 FormatDeleteStatement = table =>
+                 {
+@@ -185,7 +187,6 @@ public async Task ShouldHandleComplexCycles()
+             await db.ExecuteAsync("alter table e add constraint FK_e_a foreign key (a_id) references a (id)");
+             await db.ExecuteAsync("alter table f add constraint FK_f_b foreign key (b_id) references b (id)");
+ 
+-
+             await db.ExecuteAsync("insert into d (id) values (1)");
+             await db.ExecuteAsync("insert into c (id, d_id) values (1, 1)");
+             await db.ExecuteAsync("insert into a (id) values (1)");
+diff --git a/Respawn.UnitTests/GraphTests.cs b/Respawn.UnitTests/GraphTests.cs
+index 6ec6f01..7fdeb82 100644
+--- a/Respawn.UnitTests/GraphTests.cs
++++ b/Respawn.UnitTests/GraphTests.cs
+@@ -13,8 +13,8 @@ public class GraphTests
+         public void ShouldConstructDeleteListWithOneTable()
+         {
+             var a = new Table("dbo", "A");
+-            var builder = new GraphBuilder
+-                (new HashSet<Table>(new[] {a}), 
++            var builder = new GraphBuilder(
++                    new HashSet<Table>(new[] {a}), 
+                 new HashSet<Relationship>(Enumerable.Empty<Relationship>()));
+             
+             builder.ToDelete.ToList().ShouldBe(new [] {a});
+@@ -188,7 +188,7 @@ public void ShouldFindCyclicRelationships()
+             var builder = new GraphBuilder(new HashSet<Table>(new[] { a, b, c, d, e, f }), new HashSet<Relationship>(new[] { aToB, bToC, cToD, bToA, bToD, eToA, fToB }));
+ 
+             builder.ToDelete.ShouldBe(new[] { f, e, a, b, c, d });
+-            builder.CyclicalTableRelationships.ShouldBe(new[] { bToA, });
++            builder.CyclicalTableRelationships.ShouldBe(new[] { bToA });
+         }
+ 
+         [Fact]
+diff --git a/Respawn/DB2DbAdapter.cs b/Respawn/DB2DbAdapter.cs
+index 96e357d..a40fddf 100644
+--- a/Respawn/DB2DbAdapter.cs
++++ b/Respawn/DB2DbAdapter.cs
+@@ -1,9 +1,9 @@
+-﻿using Respawn.Graph;
+-using System.Collections.Generic;
++﻿using System.Collections.Generic;
+ using System.Data.Common;
+ using System.Linq;
+ using System.Text;
+ using System.Threading.Tasks;
++using Respawn.Graph;
+ 
+ namespace Respawn
+ {
+@@ -96,12 +96,11 @@ FROM SYSCAT.TABLES
+             return sb.ToString();
+         }
+ 
+-
+         public string BuildRelationshipCommandText(RespawnerOptions options)
+         {
+             var sb = new StringBuilder();
+ 
+-            sb.Append(@"SELECT TABSCHEMA, TABNAME, REFTABSCHEMA, REFTABNAME, CONSTNAME FROM SYSCAT.REFERENCES WHERE 1=1");
++            sb.Append("SELECT TABSCHEMA, TABNAME, REFTABSCHEMA, REFTABNAME, CONSTNAME FROM SYSCAT.REFERENCES WHERE 1=1");
+ 
+             if (options.TablesToIgnore.Any())
+             {
+@@ -172,7 +171,6 @@ public string BuildRelationshipCommandText(RespawnerOptions options)
+                 sb.Append(" AND TABSCHEMA IN (" + args + ")");
+             }
+ 
+-
+             return sb.ToString();
+         }
+ 
+diff --git a/Respawn/Graph/GraphBuilder.cs b/Respawn/Graph/GraphBuilder.cs
+index 9795895..64f4128 100644
+--- a/Respawn/Graph/GraphBuilder.cs
++++ b/Respawn/Graph/GraphBuilder.cs
+@@ -33,7 +33,7 @@ private static void FillRelationships(HashSet<Table> tables, HashSet<Relationshi
+             }
+         }
+ 
+-        private static (HashSet<Relationship> cyclicRelationships, Stack<Table> toDelete) 
++        private static (HashSet<Relationship> CyclicRelationships, Stack<Table> ToDelete) 
+             FindAndRemoveCycles(HashSet<Table> allTables)
+         {
+             var notVisited = new HashSet<Table>(allTables);
+@@ -50,19 +50,23 @@ private static (HashSet<Relationship> cyclicRelationships, Stack<Table> toDelete
+             return (cyclicRelationships, toDelete);
+         }
+ 
+-        private static bool HasCycles(Table table,
++        private static bool HasCycles(
++            Table table,
+             HashSet<Table> notVisited,
+             HashSet<Table> visiting,
+             HashSet<Table> visited,
+             Stack<Table> toDelete,
+-            HashSet<Relationship> cyclicalRelationships
+-            )
++            HashSet<Relationship> cyclicalRelationships)
+         {
+             if (visited.Contains(table))
++            {
+                 return false;
++            }
+ 
+             if (visiting.Contains(table))
++            {
+                 return true;
++            }
+ 
+             notVisited.Remove(table);
+             visiting.Add(table);
+diff --git a/Respawn/Graph/Table.cs b/Respawn/Graph/Table.cs
+index f2bc27f..bbfd621 100644
+--- a/Respawn/Graph/Table.cs
++++ b/Respawn/Graph/Table.cs
+@@ -7,7 +7,6 @@ public class Table : IEquatable<Table>
+     {
+         public Table(string name) : this(null, name)
+         {
+-            
+         }
+ 
+         public Table(string? schema, string name)
+@@ -22,9 +21,9 @@ public Table(string? schema, string name)
+         public HashSet<Relationship> Relationships { get; } = new();
+ 
+         public string GetFullName(char quoteIdentifier) =>
+-            Schema == null
+-                ? $"{quoteIdentifier}{Name}{quoteIdentifier}"
+-                : $"{quoteIdentifier}{Schema}{quoteIdentifier}.{quoteIdentifier}{Name}{quoteIdentifier}";
++            Schema == null ?
++                $"{quoteIdentifier}{Name}{quoteIdentifier}" :
++                $"{quoteIdentifier}{Schema}{quoteIdentifier}.{quoteIdentifier}{Name}{quoteIdentifier}";
+ 
+         public static implicit operator Table(string name) => new(name);
+ 
+diff --git a/Respawn/IDbAdapter.cs b/Respawn/IDbAdapter.cs
+index 79ecae9..b354e00 100644
+--- a/Respawn/IDbAdapter.cs
++++ b/Respawn/IDbAdapter.cs
+@@ -8,16 +8,24 @@ namespace Respawn
+     public interface IDbAdapter
+     {
+         string BuildTableCommandText(RespawnerOptions options);
++
+         string BuildTemporalTableCommandText(RespawnerOptions options);
++
+         string BuildRelationshipCommandText(RespawnerOptions options);
++
+         string BuildDeleteCommandText(GraphBuilder builder, RespawnerOptions options);
++
+         string BuildReseedSql(IEnumerable<Table> tablesToDelete);
++
+         string BuildTurnOffSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOffSystemVersioning);
++
+         string BuildTurnOnSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOnSystemVersioning);
++
+         Task<bool> CheckSupportsTemporalTables(DbConnection connection)
+         {
+             return Task.FromResult(false);
+         }
++
+         bool RequiresStatementsToBeExecutedIndividually();
+     }
+ }
+\ No newline at end of file
+diff --git a/Respawn/IsExternalInit.cs b/Respawn/IsExternalInit.cs
+index d40b50a..fbca6f9 100644
+--- a/Respawn/IsExternalInit.cs
++++ b/Respawn/IsExternalInit.cs
+@@ -1,9 +1,10 @@
+-﻿namespace System.Runtime.CompilerServices
+-{
+-    using Diagnostics;
+-    using Diagnostics.CodeAnalysis;
++﻿using System.Diagnostics;
++using System.Diagnostics.CodeAnalysis;
+ 
+-    [ExcludeFromCodeCoverage, DebuggerNonUserCode]
++namespace System.Runtime.CompilerServices
++{
++    [ExcludeFromCodeCoverage]
++    [DebuggerNonUserCode]
+     internal static class IsExternalInit
+     {
+     }
+diff --git a/Respawn/MySqlAdapter.cs b/Respawn/MySqlAdapter.cs
+index 58b0e34..bc49407 100644
+--- a/Respawn/MySqlAdapter.cs
++++ b/Respawn/MySqlAdapter.cs
+@@ -174,7 +174,9 @@ public string BuildRelationshipCommandText(RespawnerOptions options)
+             }
+ 
+             if (whereText.Any())
++            {
+                 commandText += $" WHERE {string.Join(" AND ", whereText.ToArray())}";
++            }
+             return commandText;
+         }
+ 
+diff --git a/Respawn/OracleDbAdapter.cs b/Respawn/OracleDbAdapter.cs
+index 142c673..7d9c2b2 100644
+--- a/Respawn/OracleDbAdapter.cs
++++ b/Respawn/OracleDbAdapter.cs
+@@ -192,6 +192,7 @@ private static IEnumerable<string> BuildCommands(GraphBuilder graph, RespawnerOp
+                 yield return $"EXECUTE IMMEDIATE 'ALTER TABLE {rel.ParentTable.GetFullName(QuoteCharacter)} ENABLE CONSTRAINT {QuoteCharacter}{rel.Name}{QuoteCharacter}';";
+             }
+         }
++
+         public string BuildReseedSql(IEnumerable<Table> tablesToDelete) => throw new System.NotImplementedException();
+ 
+         public string BuildTemporalTableCommandText(RespawnerOptions options) => throw new System.NotImplementedException();
+diff --git a/Respawn/Respawner.cs b/Respawn/Respawner.cs
+index 5832d43..7803023 100644
+--- a/Respawn/Respawner.cs
++++ b/Respawn/Respawner.cs
+@@ -1,9 +1,9 @@
+-using Respawn.Graph;
+ using System;
+ using System.Collections.Generic;
+ using System.Data.Common;
+ using System.Linq;
+ using System.Threading.Tasks;
++using Respawn.Graph;
+ 
+ namespace Respawn
+ {
+@@ -11,6 +11,7 @@ public class Respawner
+     {
+         private readonly IDbAdapter _dbAdapter;
+         private IList<TemporalTable> _temporalTables = new List<TemporalTable>();
++
+         public RespawnerOptions Options { get; }
+         public string? DeleteSql { get; private set; }
+         public string? ReseedSql { get; private set; }
+@@ -33,7 +34,7 @@ private Respawner(RespawnerOptions options, IDbAdapter dbAdapter)
+                     WithReseed = options.WithReseed,
+                     CommandTimeout = options.CommandTimeout,
+                     FormatDeleteStatement = options.FormatDeleteStatement,
+-                    DbAdapter = dbAdapter,
++                    DbAdapter = dbAdapter
+                 };
+             }
+             _dbAdapter = dbAdapter;
+@@ -79,7 +80,9 @@ public virtual async Task ResetAsync(DbConnection connection)
+             try
+             {
+                 if (Options.DbAdapter == null)
++                {
+                     throw new InvalidOperationException("Database adapter is not set in options.");
++                }
+                 
+                 if (Options.DbAdapter.RequiresStatementsToBeExecutedIndividually())
+                 {
+diff --git a/Respawn/RespawnerOptions.cs b/Respawn/RespawnerOptions.cs
+index 490b00f..8ef76c4 100644
+--- a/Respawn/RespawnerOptions.cs
++++ b/Respawn/RespawnerOptions.cs
+@@ -1,5 +1,5 @@
+-﻿using Respawn.Graph;
+-using System;
++﻿using System;
++using Respawn.Graph;
+ 
+ namespace Respawn;
+ 
+diff --git a/Respawn/SnowflakeDbAdapter.cs b/Respawn/SnowflakeDbAdapter.cs
+index cd6fa0d..7b1b8fe 100644
+--- a/Respawn/SnowflakeDbAdapter.cs
++++ b/Respawn/SnowflakeDbAdapter.cs
+@@ -1,9 +1,9 @@
+-﻿using Respawn.Graph;
+-using System.Collections.Generic;
++﻿using System.Collections.Generic;
+ using System.Data.Common;
+ using System.Linq;
+ using System.Text;
+ using System.Threading.Tasks;
++using Respawn.Graph;
+ 
+ namespace Respawn
+ {
+@@ -99,7 +99,7 @@ from INFORMATION_SCHEMA.TABLES
+ 
+         public string BuildRelationshipCommandText(RespawnerOptions options)
+         {
+-            string commandText = @"select '' as name, '' as name, '' as name, '' as name, '' as name";
++            string commandText = "select '' as name, '' as name, '' as name, '' as name, '' as name";
+             return commandText;
+         }
+ 
+@@ -110,7 +110,7 @@ public string BuildDeleteCommandText(GraphBuilder graph, RespawnerOptions option
+             foreach (var table in graph.ToDelete)
+             {
+                 string tableName = table.GetFullName(QuoteCharacter);
+-                tableName = tableName.Replace("\"", "");
++                tableName = tableName.Replace("\"", string.Empty);
+ 
+                 builder.AppendLine($"DELETE FROM {tableName};");
+             }
+diff --git a/Respawn/SqlServerDbAdapter.cs b/Respawn/SqlServerDbAdapter.cs
+index c39f354..bfe510d 100644
+--- a/Respawn/SqlServerDbAdapter.cs
++++ b/Respawn/SqlServerDbAdapter.cs
+@@ -309,7 +309,7 @@ public async Task<bool> CheckSupportsTemporalTables(DbConnection connection)
+             _compatibilityLevel ??= await GetCompatibilityLevel(connection).ConfigureAwait(false);
+             _engineEdition ??= await GetEngineEdition(connection).ConfigureAwait(false);
+ 
+-            //Code taken from https://github.com/dotnet/efcore/blob/main/src/EFCore.SqlServer/Scaffolding/Internal/SqlServerDatabaseModelFactory.cs
++            // Code taken from https://github.com/dotnet/efcore/blob/main/src/EFCore.SqlServer/Scaffolding/Internal/SqlServerDatabaseModelFactory.cs
+             return _compatibilityLevel >= 130 && _engineEdition != 6;
+         }
+ 
+diff --git a/Respawn/SqliteDbAdapter.cs b/Respawn/SqliteDbAdapter.cs
+index 8afcfba..063ccbe 100644
+--- a/Respawn/SqliteDbAdapter.cs
++++ b/Respawn/SqliteDbAdapter.cs
+@@ -51,6 +51,7 @@ public string BuildRelationshipCommandText(RespawnerOptions options)
+ WHERE 
+     m.type = 'table'";
+         }
++
+         public string BuildDeleteCommandText(GraphBuilder graph, RespawnerOptions options)
+         {
+             var builder = new StringBuilder();
+@@ -64,11 +65,14 @@ public string BuildDeleteCommandText(GraphBuilder graph, RespawnerOptions option
+ 
+             builder.AppendLine("PRAGMA foreign_keys = ON;"); return builder.ToString();
+         }
++
+         public string BuildReseedSql(IEnumerable<Table> tablesToDelete)
+         {
+             var tables = tablesToDelete as Table[] ?? tablesToDelete.ToArray();
+             if (!tables.Any())
++            {
+                 return string.Empty;
++            }
+ 
+             var builder = new StringBuilder();
+ 

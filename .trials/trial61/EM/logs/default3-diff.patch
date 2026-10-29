@@ -1,0 +1,2826 @@
+diff --git a/Directory.Build.props b/Directory.Build.props
+new file mode 100644
+index 0000000..a44aacf
+--- /dev/null
++++ b/Directory.Build.props
+@@ -0,0 +1,8 @@
++<Project>
++  <PropertyGroup>
++    <StyleBroPreset>1.0</StyleBroPreset>
++  </PropertyGroup>
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial61.3" PrivateAssets="all" />
++  </ItemGroup>
++</Project>
+diff --git a/ExcelMapper.Tests/ExceptionsTests/ExcelMapperConvertExceptionTests.cs b/ExcelMapper.Tests/ExceptionsTests/ExcelMapperConvertExceptionTests.cs
+index 6ba659c..42433eb 100644
+--- a/ExcelMapper.Tests/ExceptionsTests/ExcelMapperConvertExceptionTests.cs
++++ b/ExcelMapper.Tests/ExceptionsTests/ExcelMapperConvertExceptionTests.cs
+@@ -1,57 +1,57 @@
+-﻿using System;
+-using Ganss.Excel.Exceptions;
+-using NUnit.Framework;
+-
+-namespace ExcelMapper.Tests.ExceptionsTests;
+-
+-public class ExcelMapperConvertExceptionTests
+-{
+-    [Test]
+-    public void EmptyConstructorTest()
+-    {
+-        var ex = new ExcelMapperConvertException();
+-        Assert.That(ex, Is.Not.Null);
+-    }
+-
+-    [Test]
+-    public void MessageConstructorTest()
+-    {
+-        const string message = "Exception message.";
+-
+-        var ex = new ExcelMapperConvertException(message);
+-
+-        Assert.That(ex.Message, Is.EqualTo(message));
+-    }
+-
+-    [Test]
+-    public void MessageAndInnerExceptionConstructorTest()
+-    {
+-        const string message = "Exception message.";
+-        var baseEx = new StackOverflowException();
+-
+-        var ex = new ExcelMapperConvertException(message, baseEx);
+-
+-        Assert.That(ex.Message, Is.EqualTo(message));
+-        Assert.That(ex.InnerException?.GetType(), Is.EqualTo(baseEx.GetType()));
+-    }
+-
+-    [Test]
+-    public void ParamsConstructorTest()
+-    {
+-        const string value = "test";
+-        var targetType = typeof(int);
+-        const int line = 1;
+-        const int column = 2;
+-
+-        var ex = new ExcelMapperConvertException(value, targetType, line, column);
+-
+-        Assert.That(ex.CellValue, Is.EqualTo(value));
+-        Assert.That(ex.TargetType, Is.EqualTo(targetType));
+-        Assert.That(ex.Line, Is.EqualTo(line));
+-        Assert.That(ex.Column, Is.EqualTo(column));
+-        Assert.That(ex.Message.Contains($"\"{value}\""));
+-        Assert.That(ex.Message.Contains(targetType.ToString()));
+-        Assert.That(ex.Message.Contains($"[L:{line}]"));
+-        Assert.That(ex.Message.Contains($"[C:{column}]"));
+-    }
+-}
++﻿using System;
++using Ganss.Excel.Exceptions;
++using NUnit.Framework;
++
++namespace ExcelMapper.Tests.ExceptionsTests;
++
++public class ExcelMapperConvertExceptionTests
++{
++    [Test]
++    public void EmptyConstructorTest()
++    {
++        var ex = new ExcelMapperConvertException();
++        Assert.That(ex, Is.Not.Null);
++    }
++
++    [Test]
++    public void MessageConstructorTest()
++    {
++        const string message = "Exception message.";
++
++        var ex = new ExcelMapperConvertException(message);
++
++        Assert.That(ex.Message, Is.EqualTo(message));
++    }
++
++    [Test]
++    public void MessageAndInnerExceptionConstructorTest()
++    {
++        const string message = "Exception message.";
++        var baseEx = new StackOverflowException();
++
++        var ex = new ExcelMapperConvertException(message, baseEx);
++
++        Assert.That(ex.Message, Is.EqualTo(message));
++        Assert.That(ex.InnerException?.GetType(), Is.EqualTo(baseEx.GetType()));
++    }
++
++    [Test]
++    public void ParamsConstructorTest()
++    {
++        const string value = "test";
++        var targetType = typeof(int);
++        const int line = 1;
++        const int column = 2;
++
++        var ex = new ExcelMapperConvertException(value, targetType, line, column);
++
++        Assert.That(ex.CellValue, Is.EqualTo(value));
++        Assert.That(ex.TargetType, Is.EqualTo(targetType));
++        Assert.That(ex.Line, Is.EqualTo(line));
++        Assert.That(ex.Column, Is.EqualTo(column));
++        Assert.That(ex.Message.Contains($"\"{value}\""));
++        Assert.That(ex.Message.Contains(targetType.ToString()));
++        Assert.That(ex.Message.Contains($"[L:{line}]"));
++        Assert.That(ex.Message.Contains($"[C:{column}]"));
++    }
++}
+diff --git a/ExcelMapper.Tests/Tests.cs b/ExcelMapper.Tests/Tests.cs
+index f011f14..b37c94b 100644
+--- a/ExcelMapper.Tests/Tests.cs
++++ b/ExcelMapper.Tests/Tests.cs
+@@ -101,6 +101,7 @@ public class Tests
+         public override int GetHashCode() =>
+             $"{Name}{Number}{Price}{Value}".GetHashCode();
+     }
++
+     private class ProductFluentResult : ProductFluent
+     { }
+ 
+@@ -186,6 +187,7 @@ public class Tests
+             return HashCode.Combine(Name, Number, Price, Offer, OfferEnd, Value);
+         }
+     }
++
+     private class ProductDynamicValueConvertSave : ProductDynamic
+     {
+         public override bool Equals(object obj)
+@@ -212,6 +214,7 @@ public class Tests
+             return hashCode;
+         }
+     }
++
+     private class ProductDynamicValueConvert
+     {
+         public string Name { get; set; }
+@@ -261,10 +264,10 @@ public class Tests
+     [Test]
+     public async Task FetchSaveValueConverterOverloadsTest()
+     {
+-        var file = @"../../../xlsx/Products.xlsx";
++        var file = "../../../xlsx/Products.xlsx";
+         var excel = new ExcelMapper();
+ 
+-        object valueParser(ValueConverterArgs args)
++        object ValueParser(ValueConverterArgs args)
+         {
+             return args.ColumnName switch
+             {
+@@ -276,7 +279,7 @@ public class Tests
+             };
+         }
+ 
+-        object valueConverter(ValueConverterArgs args)
++        object ValueConverter(ValueConverterArgs args)
+         {
+             return args.ColumnName switch
+             {
+@@ -288,19 +291,19 @@ public class Tests
+             };
+         }
+ 
+-        var products = await excel.FetchAsync(file, "Tabelle1", valueParser);
++        var products = await excel.FetchAsync(file, "Tabelle1", ValueParser);
+         CheckDynamicObjectsValueConvert(products);
+ 
+-        products = await excel.FetchAsync(file, 0, valueParser);
++        products = await excel.FetchAsync(file, 0, ValueParser);
+         CheckDynamicObjectsValueConvert(products);
+ 
+         var stream = new FileStream(file, FileMode.Open, FileAccess.Read);
+-        products = await excel.FetchAsync(stream, "Tabelle1", valueParser);
++        products = await excel.FetchAsync(stream, "Tabelle1", ValueParser);
+         stream.Close();
+         CheckDynamicObjectsValueConvert(products);
+ 
+         stream = new FileStream(file, FileMode.Open, FileAccess.Read);
+-        products = await excel.FetchAsync(stream, 0, valueParser);
++        products = await excel.FetchAsync(stream, 0, ValueParser);
+         stream.Close();
+         CheckDynamicObjectsValueConvert(products);
+ 
+@@ -314,25 +317,27 @@ public class Tests
+ 
+         var filesave = "productssave_valueconverter.xlsx";
+ 
+-        await new ExcelMapper().SaveAsync(filesave, products, "Products", valueConverter: valueConverter);
++        await new ExcelMapper().SaveAsync(filesave, products, "Products", valueConverter: ValueConverter);
+         var productsFetched = new ExcelMapper(filesave).Fetch<ProductDynamicValueConvertSave>().ToList();
+         AssertEquivalent(expectedResult, productsFetched);
+ 
+-        await new ExcelMapper().SaveAsync(filesave, products, valueConverter: valueConverter);
++        await new ExcelMapper().SaveAsync(filesave, products, valueConverter: ValueConverter);
+         productsFetched = [.. new ExcelMapper(filesave).Fetch<ProductDynamicValueConvertSave>()];
+         AssertEquivalent(expectedResult, productsFetched);
+ 
+         using (var fs = File.OpenWrite(filesave))
+         {
+-            await new ExcelMapper().SaveAsync(fs, products, "Products", valueConverter: valueConverter);
++            await new ExcelMapper().SaveAsync(fs, products, "Products", valueConverter: ValueConverter);
+         }
++
+         productsFetched = [.. new ExcelMapper(filesave).Fetch<ProductDynamicValueConvertSave>()];
+         AssertEquivalent(expectedResult, productsFetched);
+ 
+         using (var fs = File.OpenWrite(filesave))
+         {
+-            await new ExcelMapper().SaveAsync(fs, products, valueConverter: valueConverter);
++            await new ExcelMapper().SaveAsync(fs, products, valueConverter: ValueConverter);
+         }
++
+         productsFetched = [.. new ExcelMapper(filesave).Fetch<ProductDynamicValueConvertSave>()];
+         AssertEquivalent(expectedResult, productsFetched);
+     }
+@@ -345,28 +350,28 @@ public class Tests
+     [Test]
+     public void BeforeAfterMappingTest()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/Products.xlsx")
++        var products = new ExcelMapper("../../../xlsx/Products.xlsx")
+             // preparation before the mapping start
+             .AddBeforeMapping<BeforeAfterMapping>((obj, idx) =>
+-                obj.Id = idx + 1000
+-            )
++                obj.Id = idx + 1000)
+             // Apply late mapping after every Excel to Object row mapping
+             .AddAfterMapping<BeforeAfterMapping>((obj, idx) =>
+             {
+                 obj.Hash = $"{obj.Name}:{obj.Number}:{obj.Id}";
+             })
+-            .Fetch<BeforeAfterMapping>().ToList();
++            .Fetch<BeforeAfterMapping>()
++            .ToList();
+ 
+         AssertEquivalent(
+         [
+             new() { Name = "Nudossi", Number = 60, Price = 1.99m, Value = "C2*D2"
+-                , Id = 1000, Hash = $"Nudossi:60:1000"
++                , Id = 1000, Hash = "Nudossi:60:1000"
+             },
+             new() { Name = "Halloren", Number = 33, Price = 2.99m, Value = "C3*D3"
+-                , Id = 1001, Hash = $"Halloren:33:1001"
++                , Id = 1001, Hash = "Halloren:33:1001"
+             },
+             new() { Name = "Filinchen", Number = 100, Price = 0.99m, Value = "C5*D5"
+-                , Id = 1002, Hash = $"Filinchen:100:1002"
++                , Id = 1002, Hash = "Filinchen:100:1002"
+             },
+         ], products);
+     }
+@@ -374,15 +379,15 @@ public class Tests
+     [Test]
+     public void MultiDirectionalTest()
+     {
+-        /// Reading using <see cref="MappingDirections.ExcelToObject"/> direction mapping
+-        var products = new ExcelMapper(@"../../../xlsx/Products.xlsx").Fetch<ProductMultiColums>().ToList();
++        // Reading using <see cref="MappingDirections.ExcelToObject"/> direction mapping
++        var products = new ExcelMapper("../../../xlsx/Products.xlsx").Fetch<ProductMultiColums>().ToList();
+ 
+         var file = "productssave_multicolums.xlsx";
+ 
+-        /// Saving using <see cref="MappingDirections.ObjectToExcel"/> direction mapping
++        // Saving using <see cref="MappingDirections.ObjectToExcel"/> direction mapping
+         new ExcelMapper().Save(file, products, "Products");
+ 
+-        /// reload excel with <see cref="ProductMultiColumsReload"/> mapping instead of <see cref="ProductMultiColums"/>
++        // reload excel with <see cref="ProductMultiColumsReload"/> mapping instead of <see cref="ProductMultiColums"/>
+         var reloaded = new ExcelMapper(file).Fetch<ProductMultiColumsReload>().ToList();
+ 
+         AssertEquivalent(
+@@ -396,7 +401,7 @@ public class Tests
+     [Test]
+     public void FetchDynamicTest()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/Products.xlsx").Fetch().ToList();
++        var products = new ExcelMapper("../../../xlsx/Products.xlsx").Fetch().ToList();
+ 
+         var result = new List<ProductDynamic>();
+         foreach (var p in products)
+@@ -431,7 +436,7 @@ public class Tests
+     [Test]
+     public void FetchDynamicIndexTest()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/Products.xlsx") { HeaderRow = false, MinRowNumber = 1 }.Fetch().ToList();
++        var products = new ExcelMapper("../../../xlsx/Products.xlsx") { HeaderRow = false, MinRowNumber = 1 }.Fetch().ToList();
+ 
+         var result = new List<ProductDynamic>();
+         foreach (var p in products)
+@@ -459,7 +464,7 @@ public class Tests
+     [Test]
+     public void FetchDynamicSaveTest()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/Products.xlsx");
++        var excel = new ExcelMapper("../../../xlsx/Products.xlsx");
+         var dynProducts = excel.Fetch().ToList();
+         var products = dynProducts.Select(p => new ProductDynamic()
+         {
+@@ -482,7 +487,7 @@ public class Tests
+         dynProducts[1].Price += 1.0;
+         dynProducts[2].OfferEnd = new DateTime(2000, 1, 2);
+ 
+-        var file = @"productssavedynamic.xlsx";
++        var file = "productssavedynamic.xlsx";
+ 
+         excel.Save(file);
+ 
+@@ -498,7 +503,7 @@ public class Tests
+     [Test]
+     public void FetchDynamicIndexSaveTest()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/Products.xlsx") { HeaderRow = false, MinRowNumber = 1 };
++        var excel = new ExcelMapper("../../../xlsx/Products.xlsx") { HeaderRow = false, MinRowNumber = 1 };
+         var dynProducts = excel.Fetch().ToList();
+         var products = dynProducts.Select(p => new ProductDynamic()
+         {
+@@ -525,7 +530,7 @@ public class Tests
+         foreach (var d in dynProducts)
+             d.__indexes__ = null;
+ 
+-        var file = @"productssavedynamicindex.xlsx";
++        var file = "productssavedynamicindex.xlsx";
+ 
+         excel.Save(file);
+ 
+@@ -541,7 +546,7 @@ public class Tests
+     [Test]
+     public void FetchDynamicSaveObjectsTest()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/Products.xlsx");
++        var excel = new ExcelMapper("../../../xlsx/Products.xlsx");
+         var dynProducts = excel.Fetch().ToList();
+         var products = dynProducts.Select(p => new ProductDynamic()
+         {
+@@ -564,7 +569,7 @@ public class Tests
+         dynProducts[1].Price += 1.0;
+         dynProducts[2].OfferEnd = new DateTime(2000, 1, 2);
+ 
+-        var file = @"productssavedynamic.xlsx";
++        var file = "productssavedynamic.xlsx";
+ 
+         new ExcelMapper().Save(file, dynProducts);
+ 
+@@ -580,7 +585,7 @@ public class Tests
+     [Test]
+     public void FetchDynamicOverloadsTest()
+     {
+-        var file = @"../../../xlsx/Products.xlsx";
++        var file = "../../../xlsx/Products.xlsx";
+         var excel = new ExcelMapper();
+ 
+         var products = excel.Fetch(file, "Tabelle1");
+@@ -611,7 +616,7 @@ public class Tests
+     [Test]
+     public void FetchAsyncDynamicOverloadsTest()
+     {
+-        var file = @"../../../xlsx/Products.xlsx";
++        var file = "../../../xlsx/Products.xlsx";
+         var excel = new ExcelMapper();
+ 
+         var products = excel.FetchAsync(file, "Tabelle1").Result;
+@@ -654,7 +659,7 @@ public class Tests
+     [Test]
+     public void FromExcelOnlyTest()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/Products.xlsx").Fetch<ProductDirection>().ToList();
++        var products = new ExcelMapper("../../../xlsx/Products.xlsx").Fetch<ProductDirection>().ToList();
+         AssertEquivalent(
+         [
+             new() { Name = "Nudossi", NumberInStock = 60, Price = 0, Value = null },
+@@ -682,7 +687,7 @@ public class Tests
+ 
+         new ExcelMapper().Save(file, src, "Products");
+ 
+-        /// Read result with <see cref="Product"/> mapping instead of <see cref="ProductDirection"/>
++        // Read result with <see cref="Product"/> mapping instead of <see cref="ProductDirection"/>
+         var productsFetched = new ExcelMapper(file).Fetch<Product>().ToList();
+ 
+         AssertEquivalent(
+@@ -735,7 +740,7 @@ public class Tests
+     [Test]
+     public void FetchTest()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/Products.xlsx").Fetch<Product>().ToList();
++        var products = new ExcelMapper("../../../xlsx/Products.xlsx").Fetch<Product>().ToList();
+         AssertEquivalent(
+         [
+             new() { Name = "Nudossi", NumberInStock = 60, Price = 1.99m, Value = "C2*D2" },
+@@ -747,7 +752,7 @@ public class Tests
+     [Test]
+     public void FetchWithTypeTest()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/Products.xlsx").Fetch(typeof(Product));
++        var products = new ExcelMapper("../../../xlsx/Products.xlsx").Fetch(typeof(Product));
+         AssertEquivalent(
+         [
+             new() { Name = "Nudossi", NumberInStock = 60, Price = 1.99m, Value = "C2*D2" },
+@@ -759,7 +764,7 @@ public class Tests
+     [Test]
+     public void FetchWithStreamAndIndexTest()
+     {
+-        var stream = new FileStream(@"../../../xlsx/Products.xlsx", FileMode.Open, FileAccess.Read);
++        var stream = new FileStream("../../../xlsx/Products.xlsx", FileMode.Open, FileAccess.Read);
+         var products = new ExcelMapper().Fetch<Product>(stream, 0);
+ 
+         AssertEquivalent(
+@@ -774,7 +779,7 @@ public class Tests
+     [Test]
+     public void FetchWithTypeUsingStreamAndIndexTest()
+     {
+-        var stream = new FileStream(@"../../../xlsx/Products.xlsx", FileMode.Open, FileAccess.Read);
++        var stream = new FileStream("../../../xlsx/Products.xlsx", FileMode.Open, FileAccess.Read);
+         var products = new ExcelMapper().Fetch(stream, typeof(Product), 0);
+ 
+         AssertEquivalent(
+@@ -789,7 +794,7 @@ public class Tests
+     [Test]
+     public void FetchWithStreamAndSheetNameTest()
+     {
+-        var stream = new FileStream(@"../../../xlsx/Products.xlsx", FileMode.Open, FileAccess.Read);
++        var stream = new FileStream("../../../xlsx/Products.xlsx", FileMode.Open, FileAccess.Read);
+         var products = new ExcelMapper().Fetch<Product>(stream, "Tabelle1");
+ 
+         AssertEquivalent(
+@@ -804,7 +809,7 @@ public class Tests
+     [Test]
+     public void FetchWithTypeUsingStreamAndSheetNameTest()
+     {
+-        var stream = new FileStream(@"../../../xlsx/Products.xlsx", FileMode.Open, FileAccess.Read);
++        var stream = new FileStream("../../../xlsx/Products.xlsx", FileMode.Open, FileAccess.Read);
+         var products = new ExcelMapper().Fetch(stream, typeof(Product), "Tabelle1");
+ 
+         AssertEquivalent(
+@@ -819,7 +824,7 @@ public class Tests
+     [Test]
+     public void FetchWithFileAndSheetNameTest()
+     {
+-        var products = new ExcelMapper().Fetch<Product>(@"../../../xlsx/Products.xlsx", "Tabelle1");
++        var products = new ExcelMapper().Fetch<Product>("../../../xlsx/Products.xlsx", "Tabelle1");
+ 
+         AssertEquivalent(
+         [
+@@ -832,7 +837,7 @@ public class Tests
+     [Test]
+     public void FetchWithFileAndIndexTest()
+     {
+-        var products = new ExcelMapper().Fetch<Product>(@"../../../xlsx/Products.xlsx", 0);
++        var products = new ExcelMapper().Fetch<Product>("../../../xlsx/Products.xlsx", 0);
+ 
+         AssertEquivalent(
+         [
+@@ -845,7 +850,7 @@ public class Tests
+     [Test]
+     public void FetchWithTypeThrowsExceptionWithPrimitivesTest()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/Products.xlsx");
++        var excel = new ExcelMapper("../../../xlsx/Products.xlsx");
+         Assert.Throws<ArgumentException>(() => excel.Fetch(typeof(string)));
+         Assert.Throws<ArgumentException>(() => excel.Fetch(typeof(object)));
+         Assert.Throws<ArgumentException>(() => excel.Fetch(typeof(int)));
+@@ -855,14 +860,14 @@ public class Tests
+     [Test]
+     public void FetchValueTest()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/Products.xlsx").Fetch<ProductValue>().ToList();
++        var products = new ExcelMapper("../../../xlsx/Products.xlsx").Fetch<ProductValue>().ToList();
+         AssertEquivalent([119.4m, 98.67m, 99m], [.. products.Select(p => p.Value)]);
+     }
+ 
+     [Test]
+     public void FetchValueWithTypeTest()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/Products.xlsx").Fetch(typeof(ProductValue))
++        var products = new ExcelMapper("../../../xlsx/Products.xlsx").Fetch(typeof(ProductValue))
+                                                                  .OfType<ProductValue>()
+                                                                  .ToList();
+         AssertEquivalent([119.4m, 98.67m, 99m], [.. products.Select(p => p.Value)]);
+@@ -876,7 +881,7 @@ public class Tests
+     [Test]
+     public void FetchEmptyTest()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/ProductsExceptionEmpty.xlsx").Fetch<ProductException>().ToList();
++        var products = new ExcelMapper("../../../xlsx/ProductsExceptionEmpty.xlsx").Fetch<ProductException>().ToList();
+         AssertEquivalent(
+         [
+             new() { Name = "Nudossi", NumberInStock = 60, Price = 0m },
+@@ -886,7 +891,7 @@ public class Tests
+     [Test]
+     public void FetchExceptionWhenEmptyTest()
+     {
+-        var ex = Assert.Throws<ExcelMapperConvertException>(() => new ExcelMapper(@"../../../xlsx/ProductsExceptionEmpty.xlsx") { SkipBlankCells = false }.Fetch<ProductException>().ToList());
++        var ex = Assert.Throws<ExcelMapperConvertException>(() => new ExcelMapper("../../../xlsx/ProductsExceptionEmpty.xlsx") { SkipBlankCells = false }.Fetch<ProductException>().ToList());
+         Assert.That(ex.Message.Contains("<EMPTY>"));
+         Assert.That(ex.Message.Contains("[L:1]:[C:2]"));
+     }
+@@ -894,7 +899,7 @@ public class Tests
+     [Test]
+     public void FetchWithTypeExceptionWhenEmptyTest()
+     {
+-        var ex = Assert.Throws<ExcelMapperConvertException>(() => new ExcelMapper(@"../../../xlsx/ProductsExceptionEmpty.xlsx") { SkipBlankCells = false }.Fetch(typeof(ProductException))
++        var ex = Assert.Throws<ExcelMapperConvertException>(() => new ExcelMapper("../../../xlsx/ProductsExceptionEmpty.xlsx") { SkipBlankCells = false }.Fetch(typeof(ProductException))
+                                                                                                                           .OfType<ProductException>()
+                                                                                                                           .ToList());
+         Assert.That(ex.Message.Contains("<EMPTY>"));
+@@ -904,8 +909,9 @@ public class Tests
+     [Test]
+     public void FetchExceptionWhenFieldTooBigTest()
+     {
+-        var ex = Assert.Throws<ExcelMapperConvertException>(() => new ExcelMapper(@"../../../xlsx/ProductsExceptionTooBig.xlsx").Fetch<ProductException>().ToList());
+-        //2147483649 is Int.MaxValue + 1
++        var ex = Assert.Throws<ExcelMapperConvertException>(() => new ExcelMapper("../../../xlsx/ProductsExceptionTooBig.xlsx").Fetch<ProductException>().ToList());
++
++        // 2147483649 is Int.MaxValue + 1
+         Assert.That(ex.Message.Contains("2147483649"));
+         Assert.That(ex.Message.Contains("[L:1]:[C:1]"));
+     }
+@@ -913,7 +919,7 @@ public class Tests
+     [Test]
+     public void FetchExceptionWhenFieldInvalidTest()
+     {
+-        var ex = Assert.Throws<ExcelMapperConvertException>(() => new ExcelMapper(@"../../../xlsx/ProductsExceptionInvalid.xlsx").Fetch<ProductException>().ToList());
++        var ex = Assert.Throws<ExcelMapperConvertException>(() => new ExcelMapper("../../../xlsx/ProductsExceptionInvalid.xlsx").Fetch<ProductException>().ToList());
+         Assert.That(ex.Message.Contains("FALSEd"));
+         Assert.That(ex.Message.Contains("[L:1]:[C:3]"));
+     }
+@@ -922,7 +928,7 @@ public class Tests
+     public void FetchEventErrorWhenFieldInvalidTest()
+     {
+         int numberOfErrors = 0;
+-        var excelMapper = new ExcelMapper(@"../../../xlsx/ProductsEventsExceptionInvalid.xlsx");
++        var excelMapper = new ExcelMapper("../../../xlsx/ProductsEventsExceptionInvalid.xlsx");
+         excelMapper.ErrorParsingCell += (sender, e) =>
+         {
+             Assert.That(e, Is.InstanceOf<ParsingErrorEventArgs>());
+@@ -943,7 +949,7 @@ public class Tests
+     [Test]
+     public void FetchEventExceptionExplicitlyDisabledWhenFieldInvalidTest()
+     {
+-        var excelMapper = new ExcelMapper(@"../../../xlsx/ProductsEventsExceptionInvalid.xlsx");
++        var excelMapper = new ExcelMapper("../../../xlsx/ProductsEventsExceptionInvalid.xlsx");
+         excelMapper.ErrorParsingCell += (sender, e) =>
+         {
+             e.Cancel = false;
+@@ -957,14 +963,14 @@ public class Tests
+     [Test]
+     public void FetchExceptionWhenSheetDoesNotExists()
+     {
+-        var ex = Assert.Throws<ArgumentOutOfRangeException>(() => new ExcelMapper(@"../../../xlsx/ProductsExceptionInvalid.xlsx").Fetch<ProductException>("this sheet does not exist").ToList());
++        var ex = Assert.Throws<ArgumentOutOfRangeException>(() => new ExcelMapper("../../../xlsx/ProductsExceptionInvalid.xlsx").Fetch<ProductException>("this sheet does not exist").ToList());
+         Assert.That(ex.Message.Contains("Sheet not found"));
+     }
+ 
+     [Test]
+     public void FetchWithTypeThrowsExceptionWhenSheetDoesNotExists()
+     {
+-        var ex = Assert.Throws<ArgumentOutOfRangeException>(() => new ExcelMapper(@"../../../xlsx/ProductsExceptionInvalid.xlsx").Fetch(typeof(ProductException), "This is not a exist")
++        var ex = Assert.Throws<ArgumentOutOfRangeException>(() => new ExcelMapper("../../../xlsx/ProductsExceptionInvalid.xlsx").Fetch(typeof(ProductException), "This is not a exist")
+                                                                                                                             .OfType<ProductException>()
+                                                                                                                             .ToList());
+         Assert.That(ex.Message.Contains("Sheet not found"));
+@@ -973,7 +979,7 @@ public class Tests
+     [Test]
+     public void FetchSheetNamesTest()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/Products.xlsx");
++        var excel = new ExcelMapper("../../../xlsx/Products.xlsx");
+         var sheetNames = excel.FetchSheetNames().ToList();
+ 
+         AssertEquivalent(
+@@ -987,7 +993,7 @@ public class Tests
+     [Test]
+     public void FetchSheetNamesHiddenTest()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/ProductsHidden.xlsx");
++        var excel = new ExcelMapper("../../../xlsx/ProductsHidden.xlsx");
+         var sheetNames = excel.FetchSheetNames(ignoreHidden: true).ToList();
+ 
+         AssertEquivalent(
+@@ -1028,7 +1034,7 @@ public class Tests
+     [Test]
+     public void FetchNoHeaderTest()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/ProductsNoHeader.xlsx") { HeaderRow = false }.Fetch<ProductNoHeader>("Products").ToList();
++        var products = new ExcelMapper("../../../xlsx/ProductsNoHeader.xlsx") { HeaderRow = false }.Fetch<ProductNoHeader>("Products").ToList();
+         AssertEquivalent(
+         [
+             new() { Name = "Nudossi", NumberInStock = 60, Price = 1.99m },
+@@ -1040,7 +1046,7 @@ public class Tests
+     [Test]
+     public void FetchWithTypeNoHeaderTest()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/ProductsNoHeader.xlsx") { HeaderRow = false }.Fetch(typeof(ProductNoHeader), "Products")
++        var products = new ExcelMapper("../../../xlsx/ProductsNoHeader.xlsx") { HeaderRow = false }.Fetch(typeof(ProductNoHeader), "Products")
+                                                                                                .OfType<ProductNoHeader>()
+                                                                                                .ToList();
+         AssertEquivalent(
+@@ -1072,7 +1078,7 @@ public class Tests
+     [Test]
+     public void FetchNoHeaderManualTest()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/ProductsNoHeader.xlsx") { HeaderRow = false };
++        var excel = new ExcelMapper("../../../xlsx/ProductsNoHeader.xlsx") { HeaderRow = false };
+ 
+         excel.AddMapping<ProductNoHeaderManual>(1, p => p.NameX);
+         excel.AddMapping<ProductNoHeaderManual>(ExcelMapper.LetterToIndex("C"), p => p.NumberInStockX);
+@@ -1138,12 +1144,12 @@ public class Tests
+     [Test]
+     public void SaveFetchedTest()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/Products.xlsx");
++        var excel = new ExcelMapper("../../../xlsx/Products.xlsx");
+         var products = excel.Fetch<Product>().ToList();
+ 
+         products[2].Price += 1.0m;
+ 
+-        var file = @"productssavefetched.xlsx";
++        var file = "productssavefetched.xlsx";
+ 
+         excel.Save(file, products);
+ 
+@@ -1173,7 +1179,7 @@ public class Tests
+     [Test]
+     public void SaveTrackedObjectsTest()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/Products.xlsx") { TrackObjects = true };
++        var excel = new ExcelMapper("../../../xlsx/Products.xlsx") { TrackObjects = true };
+ 
+         excel.AddMapping(typeof(ProductMapped), "Name", "NameX");
+         excel.AddMapping<ProductMapped>("Number", p => p.NumberX);
+@@ -1183,7 +1189,7 @@ public class Tests
+ 
+         products[1].PriceX += 1.0m;
+ 
+-        var file = @"productssavetracked.xlsx";
++        var file = "productssavetracked.xlsx";
+ 
+         excel.Save(file);
+ 
+@@ -1215,7 +1221,7 @@ public class Tests
+     [Test]
+     public void GetterSetterTest()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/ProductsConvert.xlsx") { TrackObjects = true };
++        var excel = new ExcelMapper("../../../xlsx/ProductsConvert.xlsx") { TrackObjects = true };
+ 
+         excel.AddMapping<GetterSetterProduct>("Name", p => p.Name);
+         excel.AddMapping<GetterSetterProduct>("Name", p => p.RedName)
+@@ -1263,7 +1269,7 @@ public class Tests
+         Assert.That(products[0].RedName, Is.Null);
+         Assert.That(products[1].RedName, Is.EqualTo("Halloren"));
+ 
+-        var file = @"productsconverttracked.xlsx";
++        var file = "productsconverttracked.xlsx";
+ 
+         excel.Save(file);
+ 
+@@ -1297,7 +1303,7 @@ public class Tests
+     [Test]
+     public void IgnoreTest()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/Products.xlsx");
++        var excel = new ExcelMapper("../../../xlsx/Products.xlsx");
+         excel.Ignore<IgnoreProduct>(p => p.Price);
+         excel.Ignore(typeof(IgnoreProduct), "Value");
+         var products = excel.Fetch<IgnoreProduct>().ToList();
+@@ -1346,7 +1352,7 @@ public class Tests
+     [Test]
+     public void NullableTest()
+     {
+-        var workbook = WorkbookFactory.Create(@"../../../xlsx/Products.xlsx");
++        var workbook = WorkbookFactory.Create("../../../xlsx/Products.xlsx");
+         var excel = new ExcelMapper(workbook);
+         var products = excel.Fetch<NullableProduct>().ToList();
+ 
+@@ -1375,7 +1381,7 @@ public class Tests
+     [Test]
+     public void NullableDynamicTest()
+     {
+-        var workbook = WorkbookFactory.Create(@"../../../xlsx/Products.xlsx");
++        var workbook = WorkbookFactory.Create("../../../xlsx/Products.xlsx");
+         var excel = new ExcelMapper(workbook) { SkipBlankCells = false };
+         var products = excel.Fetch().ToList();
+         var nudossi = products[0];
+@@ -1384,27 +1390,28 @@ public class Tests
+         Assert.That(nudossi.Price, Is.EqualTo(1.99m));
+         Assert.That(nudossi.Offer, Is.False);
+         Assert.That(nudossi.OfferEnd, Is.Not.Null);
+-        nudossi.OfferEnd = null; //set to null to test it
++        nudossi.OfferEnd = null; // set to null to test it
+ 
+         var halloren = products[1];
+         Assert.That(halloren.Offer, Is.True);
+         Assert.That(halloren.OfferEnd, Is.EqualTo(new DateTime(2015, 12, 31)));
+         Assert.That(halloren.Number, Is.Not.Null);
+-        halloren.Number = null; //set to null to test it
++        halloren.Number = null; // set to null to test it
+         Assert.That(halloren.Offer, Is.Not.Null);
+-        halloren.Offer = null; //set to null to test it
++        halloren.Offer = null; // set to null to test it
+ 
+         var file = "productsnullabledynamic.xlsx";
+ 
+         new ExcelMapper().Save(file, products, "Products");
+ 
+-        var productsFetched = new ExcelMapper(file) { SkipBlankCells = false }.Fetch(0, (args) =>
++        var productsFetched = new ExcelMapper(file) { SkipBlankCells = false }.Fetch(0, args =>
+         {
+-            //convert an empty string to null
++            // convert an empty string to null
+             if (args.CellValue is string && args.CellValue.ToString().Length == 0 && new string[] { "OfferEnd", "Number", "Offer" }.Contains(args.ColumnName))
+             {
+                 return null;
+             }
++
+             return args.CellValue;
+         }).ToList();
+ 
+@@ -1471,7 +1478,7 @@ public class Tests
+     [Test]
+     public void ColumnTest()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/DataItems.xlsx") { HeaderRow = false };
++        var excel = new ExcelMapper("../../../xlsx/DataItems.xlsx") { HeaderRow = false };
+         var items = excel.Fetch<DataItem>().ToList();
+ 
+         var trackedFile = "dataitemstracked.xlsx";
+@@ -1488,7 +1495,7 @@ public class Tests
+     [Test]
+     public void ColumnTestUsingFetchWithType()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/DataItems.xlsx") { HeaderRow = false };
++        var excel = new ExcelMapper("../../../xlsx/DataItems.xlsx") { HeaderRow = false };
+         var items = excel.Fetch(typeof(DataItem)).OfType<DataItem>().ToList();
+ 
+         var trackedFile = "dataitemstracked1.xlsx";
+@@ -1505,7 +1512,7 @@ public class Tests
+     [Test]
+     public void FetchMinMaxTest()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/ProductsMinMaxRow.xlsx")
++        var products = new ExcelMapper("../../../xlsx/ProductsMinMaxRow.xlsx")
+         {
+             HeaderRowNumber = 2,
+             MinRowNumber = 6,
+@@ -1549,7 +1556,7 @@ public class Tests
+     [Test]
+     public void FormulaResultAttributeTest()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/ProductsAsString.xlsx").Fetch<ProductValueString>().ToList();
++        var products = new ExcelMapper("../../../xlsx/ProductsAsString.xlsx").Fetch<ProductValueString>().ToList();
+         AssertEquivalent(["119.4", "98.67", "99"], [.. products.Select(p => p.ValueAsString)]);
+     }
+ 
+@@ -1574,7 +1581,7 @@ public class Tests
+     [Test]
+     public void FormulaResultMappedTest()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/ProductsAsString.xlsx");
++        var excel = new ExcelMapper("../../../xlsx/ProductsAsString.xlsx");
+ 
+         excel.AddMapping<ProductFormulaMapped>("Value", p => p.Result);
+         excel.AddMapping<ProductFormulaMapped>("ValueDefaultAsFormula", p => p.Formula);
+@@ -1620,7 +1627,7 @@ public class Tests
+         Assert.That(ex.Line, Is.EqualTo(12));
+         Assert.That(ex.Column, Is.EqualTo(34));
+ 
+-        Assert.Throws<ArgumentNullException>(() => ex.GetObjectData(null, new System.Runtime.Serialization.StreamingContext()));
++        Assert.Throws<ArgumentNullException>(() => ex.GetObjectData(null, default(System.Runtime.Serialization.StreamingContext)));
+     }
+ 
+     private class ProductIndex
+@@ -1647,7 +1654,7 @@ public class Tests
+     [Test]
+     public void FetchIndexTest()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/Products.xlsx").Fetch<ProductIndex>().ToList();
++        var products = new ExcelMapper("../../../xlsx/Products.xlsx").Fetch<ProductIndex>().ToList();
+         AssertEquivalent(
+         [
+             new() { Price = "Nudossi", Name = "60", Number = "1.99" },
+@@ -1682,7 +1689,7 @@ public class Tests
+     public void FetchDoubleMap()
+     {
+         // https://github.com/mganss/ExcelMapper/issues/50
+-        var products = new ExcelMapper(@"../../../xlsx/Products.xlsx").Fetch<ProductDoubleMap>().ToList();
++        var products = new ExcelMapper("../../../xlsx/Products.xlsx").Fetch<ProductDoubleMap>().ToList();
+         AssertEquivalent(
+         [
+             new() { Price = "Nudossi", OtherNumber = "60" },
+@@ -1704,12 +1711,12 @@ public class Tests
+     [Test]
+     public async Task FetchAsyncTest()
+     {
+-        var path = @"../../../xlsx/Products.xlsx";
++        var path = "../../../xlsx/Products.xlsx";
+ 
+         var products = (await new ExcelMapper().FetchAsync<Product>(path)).ToList();
+         AssertProducts(products);
+ 
+-        products = [.. (await new ExcelMapper().FetchAsync<Product>(path, "Tabelle1"))];
++        products = [.. await new ExcelMapper().FetchAsync<Product>(path, "Tabelle1")];
+         AssertProducts(products);
+ 
+         products = [.. (await new ExcelMapper().FetchAsync(path, typeof(Product), "Tabelle1")).OfType<Product>()];
+@@ -1718,10 +1725,10 @@ public class Tests
+         products = [.. (await new ExcelMapper().FetchAsync(path, typeof(Product))).OfType<Product>()];
+         AssertProducts(products);
+ 
+-        products = [.. (await new ExcelMapper().FetchAsync<Product>(File.OpenRead(path)))];
++        products = [.. await new ExcelMapper().FetchAsync<Product>(File.OpenRead(path))];
+         AssertProducts(products);
+ 
+-        products = [.. (await new ExcelMapper().FetchAsync<Product>(File.OpenRead(path), "Tabelle1"))];
++        products = [.. await new ExcelMapper().FetchAsync<Product>(File.OpenRead(path), "Tabelle1")];
+         AssertProducts(products);
+ 
+         products = [.. (await new ExcelMapper().FetchAsync(File.OpenRead(path), typeof(Product), "Tabelle1")).OfType<Product>()];
+@@ -1763,7 +1770,7 @@ public class Tests
+         productsFetched = [.. new ExcelMapper(file).Fetch<Product>()];
+         AssertEquivalent(products, productsFetched);
+ 
+-        var path = @"../../../xlsx/Products.xlsx";
++        var path = "../../../xlsx/Products.xlsx";
+ 
+         var mapper = new ExcelMapper() { TrackObjects = true };
+         var tracked = (await mapper.FetchAsync<Product>(path)).ToList();
+@@ -1772,13 +1779,13 @@ public class Tests
+         AssertEquivalent(tracked, productsFetched);
+ 
+         mapper = new ExcelMapper() { TrackObjects = true };
+-        tracked = [.. (await mapper.FetchAsync<Product>(path))];
++        tracked = [.. await mapper.FetchAsync<Product>(path)];
+         await mapper.SaveAsync(file);
+         productsFetched = [.. new ExcelMapper(file).Fetch<Product>()];
+         AssertEquivalent(tracked, productsFetched);
+ 
+         mapper = new ExcelMapper() { TrackObjects = true };
+-        tracked = [.. (await mapper.FetchAsync<Product>(path))];
++        tracked = [.. await mapper.FetchAsync<Product>(path)];
+         fs = File.OpenWrite(file);
+         await mapper.SaveAsync(fs, "Tabelle1");
+         fs.Close();
+@@ -1786,7 +1793,7 @@ public class Tests
+         AssertEquivalent(tracked, productsFetched);
+ 
+         mapper = new ExcelMapper() { TrackObjects = true };
+-        tracked = [.. (await mapper.FetchAsync<Product>(path))];
++        tracked = [.. await mapper.FetchAsync<Product>(path)];
+         fs = File.OpenWrite(file);
+         await mapper.SaveAsync(fs);
+         fs.Close();
+@@ -1817,12 +1824,13 @@ public class Tests
+     public void DateTest()
+     {
+         // see https://github.com/mganss/ExcelMapper/issues/51
+-        var mapper = new ExcelMapper(@"../../../xlsx/DateTest.xlsx") { HeaderRow = true };
++        var mapper = new ExcelMapper("../../../xlsx/DateTest.xlsx") { HeaderRow = true };
+ 
+         var courses = mapper.Fetch<Course>().ToList();
+ 
+         Assert.That(courses.First().CourseStartDate, Is.EqualTo("00:00.0"));
+     }
++
+     private class ProductJson
+     {
+         [Json]
+@@ -1838,7 +1846,7 @@ public class Tests
+     [Test]
+     public void JsonTest()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/ProductsJson.xlsx").Fetch<ProductJson>().ToList();
++        var products = new ExcelMapper("../../../xlsx/ProductsJson.xlsx").Fetch<ProductJson>().ToList();
+ 
+         AssertEquivalent(
+         [
+@@ -1859,7 +1867,7 @@ public class Tests
+     [Test]
+     public void JsonMappedTest()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/ProductsJson.xlsx");
++        var excel = new ExcelMapper("../../../xlsx/ProductsJson.xlsx");
+ 
+         excel.AddMapping<ProductJsonMapped>("Product", p => p.Product).AsJson();
+ 
+@@ -1882,7 +1890,7 @@ public class Tests
+     [Test]
+     public void JsonListTest()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/ProductsJsonList.xlsx").Fetch<ProductJsonList>().ToList();
++        var products = new ExcelMapper("../../../xlsx/ProductsJsonList.xlsx").Fetch<ProductJsonList>().ToList();
+ 
+         AssertEquivalent(
+         [
+@@ -1922,7 +1930,7 @@ public class Tests
+ 
+         for (var i = 0; i < N; i++)
+         {
+-            using var f2 = File.OpenRead(@"../../../xlsx/SampleExcel.xlsx");
++            using var f2 = File.OpenRead("../../../xlsx/SampleExcel.xlsx");
+             var s2 = FetchWaterCaptationComplementsAsync(f2).Result;
+         }
+     }
+@@ -1937,7 +1945,7 @@ public class Tests
+     [Test]
+     public void NormalizeTest()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/Products.xlsx");
++        var excel = new ExcelMapper("../../../xlsx/Products.xlsx");
+ 
+         excel.NormalizeUsing(n => n + "X");
+ 
+@@ -1954,7 +1962,7 @@ public class Tests
+     [Test]
+     public void NormalizeTypeTest()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/Products.xlsx");
++        var excel = new ExcelMapper("../../../xlsx/Products.xlsx");
+ 
+         excel.AddMapping<ProductMapped>("NameY", p => p.NameX);
+         excel.AddMapping<ProductMapped>("NumberY", p => p.NumberX);
+@@ -1975,7 +1983,7 @@ public class Tests
+     [Test]
+     public void NormalizeType2Test()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/Products.xlsx");
++        var excel = new ExcelMapper("../../../xlsx/Products.xlsx");
+ 
+         excel.AddMapping<ProductMapped>("NameY", p => p.NameX);
+         excel.AddMapping<ProductMapped>("NumberY", p => p.NumberX);
+@@ -2015,7 +2023,7 @@ public class Tests
+     public void ColumnSkipTest()
+     {
+         // see https://github.com/mganss/ExcelMapper/issues/90
+-        var products = new ExcelMapper(@"../../../xlsx/ProductsExceptionEmpty.xlsx") { SkipBlankCells = false }.Fetch().ToList();
++        var products = new ExcelMapper("../../../xlsx/ProductsExceptionEmpty.xlsx") { SkipBlankCells = false }.Fetch().ToList();
+         Assert.That(products.Count, Is.EqualTo(1));
+         var p = products[0];
+         Assert.That(p.Price, Is.Empty);
+@@ -2033,7 +2041,7 @@ public class Tests
+     public void NullTest()
+     {
+         // see https://github.com/mganss/ExcelMapper/issues/96
+-        var products = new ExcelMapper(@"../../../xlsx/null_test.xlsx").Fetch<NullProduct>().ToList();
++        var products = new ExcelMapper("../../../xlsx/null_test.xlsx").Fetch<NullProduct>().ToList();
+         Assert.That(products.Count, Is.EqualTo(20));
+     }
+ 
+@@ -2051,7 +2059,7 @@ public class Tests
+     [Test]
+     public void RecordFetchTest()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/Products.xlsx").Fetch<ProductRecord>().ToList();
++        var products = new ExcelMapper("../../../xlsx/Products.xlsx").Fetch<ProductRecord>().ToList();
+         AssertEquivalent(
+         [
+             new("Nudossi", 60, 1.99m, "C2*D2"),
+@@ -2063,10 +2071,10 @@ public class Tests
+     [Test]
+     public void SaveFetchedRecordTest()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/Products.xlsx");
++        var excel = new ExcelMapper("../../../xlsx/Products.xlsx");
+         var products = excel.Fetch<ProductRecord>().ToList();
+ 
+-        var file = @"productssavefetchedrecord.xlsx";
++        var file = "productssavefetchedrecord.xlsx";
+ 
+         excel.Save(file, products);
+ 
+@@ -2091,7 +2099,7 @@ public class Tests
+     [Test]
+     public void FetchRecordNoHeaderManualTest()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/ProductsNoHeader.xlsx") { HeaderRow = false };
++        var excel = new ExcelMapper("../../../xlsx/ProductsNoHeader.xlsx") { HeaderRow = false };
+ 
+         excel.AddMapping<ProductRecordNoHeaderManual>(1, p => p.NameX);
+         excel.AddMapping<ProductRecordNoHeaderManual>(ExcelMapper.LetterToIndex("C"), p => p.NumberInStockX);
+@@ -2112,7 +2120,7 @@ public class Tests
+     [Test]
+     public void PosRecordFetchTest()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/Products.xlsx").Fetch<ProductPosRecord>().ToList();
++        var products = new ExcelMapper("../../../xlsx/Products.xlsx").Fetch<ProductPosRecord>().ToList();
+         AssertEquivalent(
+         [
+             new(60, "Nudossi", 1.99m, "C2*D2"),
+@@ -2141,7 +2149,7 @@ public class Tests
+             new() { Name = "Filinchen", NumberInStock = 100, Price = 0.99m },
+         };
+ 
+-        var excelMapper = new ExcelMapper(@"../../../xlsx/ProductsMissingHeaders.xlsx")
++        var excelMapper = new ExcelMapper("../../../xlsx/ProductsMissingHeaders.xlsx")
+         {
+             HeaderRowNumber = 2,
+             MinRowNumber = 3,
+@@ -2165,7 +2173,7 @@ public class Tests
+     [Test]
+     public void LongRowsTest()
+     {
+-        var rows = new ExcelMapper(@"../../../xlsx/JaggedRows.xlsx") { HeaderRow = false, SkipBlankCells = false }.Fetch().ToList();
++        var rows = new ExcelMapper("../../../xlsx/JaggedRows.xlsx") { HeaderRow = false, SkipBlankCells = false }.Fetch().ToList();
+ 
+         Assert.That(rows.Count, Is.EqualTo(2));
+         Assert.That(((IDictionary<string, object>)rows[0]).Count, Is.EqualTo(13));
+@@ -2231,7 +2239,7 @@ public class Tests
+     [Test]
+     public void NestedTest()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/Products.xlsx");
++        var excel = new ExcelMapper("../../../xlsx/Products.xlsx");
+         var products = excel.Fetch<NestedProduct>().ToList();
+ 
+         Assert.That(products.Count, Is.EqualTo(3));
+@@ -2244,7 +2252,7 @@ public class Tests
+     [Test]
+     public void IgnoreNestedTest()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/Products.xlsx") { IgnoreNestedTypes = true };
++        var excel = new ExcelMapper("../../../xlsx/Products.xlsx") { IgnoreNestedTypes = true };
+         var products = excel.Fetch<NestedProduct>().ToList();
+ 
+         Assert.That(products.Count, Is.EqualTo(3));
+@@ -2312,12 +2320,13 @@ public class Tests
+     }
+ 
+     private record OfferDetailsRecord(bool Offer, DateTime OfferEnd);
++
+     private record NestedRecord(string Name, int Number, decimal Price, decimal Value, OfferDetailsRecord OfferDetails);
+ 
+     [Test]
+     public void NestedRecordTest()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/Products.xlsx").Fetch<NestedRecord>().ToList();
++        var products = new ExcelMapper("../../../xlsx/Products.xlsx").Fetch<NestedRecord>().ToList();
+ 
+         AssertEquivalent(
+         [
+@@ -2357,7 +2366,7 @@ public class Tests
+             new("Filinchen", 100, 0.99m, 99.00m, new OfferDetailsRecord(false, new DateTime(1970, 01, 01))),
+         };
+ 
+-        var excelMapper = new ExcelMapper(@"../../../xlsx/ProductsMissingHeaders.xlsx")
++        var excelMapper = new ExcelMapper("../../../xlsx/ProductsMissingHeaders.xlsx")
+         {
+             CreateMissingHeaders = true,
+             HeaderRowNumber = 2,
+@@ -2417,7 +2426,7 @@ public class Tests
+     [Test]
+     public void NestedProductMappedTest()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/Products.xlsx");
++        var excel = new ExcelMapper("../../../xlsx/Products.xlsx");
+ 
+         excel.AddMapping<NestedProductMapped>("Name", p => p.N);
+         excel.AddMapping<NestedProductMapped>("Number", p => p.Num);
+@@ -2440,7 +2449,7 @@ public class Tests
+     [Test]
+     public void NestedProductIndexMappedTest()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/Products.xlsx")
++        var excel = new ExcelMapper("../../../xlsx/Products.xlsx")
+         {
+             HeaderRow = false,
+             MinRowNumber = 1
+@@ -2641,7 +2650,7 @@ public class Tests
+     {
+         var mapper = new ExcelMapper();
+ 
+-        mapper.Attach(@"../../../xlsx/Products.xlsx");
++        mapper.Attach("../../../xlsx/Products.xlsx");
+ 
+         var products = mapper.Fetch<Product>();
+ 
+@@ -2656,7 +2665,7 @@ public class Tests
+     [Test]
+     public void AttachWithStreamUsingFetchTest()
+     {
+-        var stream = new FileStream(@"../../../xlsx/Products.xlsx", FileMode.Open, FileAccess.Read);
++        var stream = new FileStream("../../../xlsx/Products.xlsx", FileMode.Open, FileAccess.Read);
+         var mapper = new ExcelMapper();
+ 
+         mapper.Attach(stream);
+@@ -2675,7 +2684,7 @@ public class Tests
+     [Test]
+     public void AttachWithWorkbookUsingFetchTest()
+     {
+-        var workbook = WorkbookFactory.Create(@"../../../xlsx/Products.xlsx");
++        var workbook = WorkbookFactory.Create("../../../xlsx/Products.xlsx");
+         var mapper = new ExcelMapper();
+ 
+         mapper.Attach(workbook);
+@@ -2757,7 +2766,7 @@ public class Tests
+ 
+         var file = "bytesdata.xlsx";
+ 
+-        excel.Save(file, datas, "data", true, (args) =>
++        excel.Save(file, datas, "data", true, args =>
+         {
+             if (args.CellValue != null)
+             {
+@@ -2767,13 +2776,13 @@ public class Tests
+                         return Encoding.UTF8.GetString(args.CellValue as byte[]);
+                     case "RowVersion":
+                         return BitConverter.ToInt32(args.CellValue as byte[]);
+-
+                 }
+             }
++
+             return args.CellValue;
+         });
+ 
+-        var productsFetched = new ExcelMapper(file).Fetch<BytesData>(0, (args) =>
++        var productsFetched = new ExcelMapper(file).Fetch<BytesData>(0, args =>
+         {
+             if (args.CellValue != null && !string.IsNullOrEmpty(args.CellValue.ToString()))
+             {
+@@ -2783,9 +2792,9 @@ public class Tests
+                         return Encoding.UTF8.GetBytes(args.CellValue.ToString());
+                     case "RowVersion":
+                         return BitConverter.GetBytes(Convert.ToInt32(args.CellValue.ToString()));
+-
+                 }
+             }
++
+             return args.CellValue;
+         }).ToList();
+ 
+@@ -2995,7 +3004,7 @@ public class Tests
+     [Test]
+     public void IgnoreInnerTest()
+     {
+-        var mapper = new ExcelMapper(@"../../../xlsx/IgnoreInner.xlsx");
++        var mapper = new ExcelMapper("../../../xlsx/IgnoreInner.xlsx");
+         mapper.Ignore<RowDef>(i => i.CustomOutput);
+         var rows = mapper.Fetch<RowDef>().ToList();
+ 
+@@ -3012,8 +3021,9 @@ public class Tests
+     [Test]
+     public void InvalidDateTest()
+     {
+-        var mapper = new ExcelMapper(@"../../../xlsx/InvalidDate.xlsx");
+-        Assert.Throws<ExcelMapperConvertException>(() => mapper.Fetch<InvalidDate>().ToList(),
++        var mapper = new ExcelMapper("../../../xlsx/InvalidDate.xlsx");
++        Assert.Throws<ExcelMapperConvertException>(
++            () => mapper.Fetch<InvalidDate>().ToList(),
+             "Unable to convert \"55555555\" from [L:1]:[C:0] to System.DateTime.");
+     }
+ 
+@@ -3026,8 +3036,9 @@ public class Tests
+     [Test]
+     public void InvalidJsonTest()
+     {
+-        var mapper = new ExcelMapper(@"../../../xlsx/InvalidJson.xlsx");
+-        Assert.Throws<ExcelMapperConvertException>(() => mapper.Fetch<InvalidJson>().ToList(),
++        var mapper = new ExcelMapper("../../../xlsx/InvalidJson.xlsx");
++        Assert.Throws<ExcelMapperConvertException>(
++            () => mapper.Fetch<InvalidJson>().ToList(),
+             @"Unable to convert ""{ ""key"": }"" from [L:1]:[C:0] to System.String.");
+     }
+ 
+@@ -3052,14 +3063,15 @@ public class Tests
+                     try
+                     {
+                         if (Interlocked.Decrement(ref waiting) == 0) allGo.Set();
+-                        var products = new ExcelMapper(@"../../../xlsx/Products.xlsx").Fetch<Product>().ToList();
++                        var products = new ExcelMapper("../../../xlsx/Products.xlsx").Fetch<Product>().ToList();
+                     }
+                     catch (Exception ex)
+                     {
+                         Interlocked.CompareExchange(ref firstException, ex, null);
+                         Interlocked.Increment(ref failures);
+                     }
+-                })).ToList();
++                }))
++                .ToList();
+ 
+             foreach (var thread in threads)
+                 thread.Start();
+@@ -3076,7 +3088,7 @@ public class Tests
+     [Test]
+     public void DateTimeOffsetTest()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/Products.xlsx").Fetch<DateTimeOffsetProduct>().ToList();
++        var products = new ExcelMapper("../../../xlsx/Products.xlsx").Fetch<DateTimeOffsetProduct>().ToList();
+ 
+         static void AssertProducts(IEnumerable<DateTimeOffsetProduct> products)
+         {
+@@ -3104,7 +3116,7 @@ public class Tests
+     [Test]
+     public void ErrorTest()
+     {
+-        var customers = new ExcelMapper(@"../../../xlsx/Error.xlsx").Fetch<Customer>().ToList();
++        var customers = new ExcelMapper("../../../xlsx/Error.xlsx").Fetch<Customer>().ToList();
+ 
+         AssertEquivalent(
+         [
+@@ -3119,7 +3131,7 @@ public class Tests
+     [Test]
+     public void DateOnlyTest()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/Products.xlsx").Fetch<DateOnlyProduct>().ToList();
++        var products = new ExcelMapper("../../../xlsx/Products.xlsx").Fetch<DateOnlyProduct>().ToList();
+ 
+         static void AssertProducts(IEnumerable<DateOnlyProduct> products)
+         {
+@@ -3156,7 +3168,7 @@ public class Tests
+     [Test]
+     public void SetMappingTest()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/Products.xlsx").Fetch<ProductSet>().ToList();
++        var products = new ExcelMapper("../../../xlsx/Products.xlsx").Fetch<ProductSet>().ToList();
+         var excel = new ExcelMapper { TypeMapperFactory = new TypeMapperFactory() };
+ 
+         excel.SetMapping<ProductSet>("Name2", p => p.Name);
+@@ -3171,7 +3183,7 @@ public class Tests
+     [Test]
+     public void SetMapping2Test()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/Products.xlsx").Fetch<ProductSet>().ToList();
++        var products = new ExcelMapper("../../../xlsx/Products.xlsx").Fetch<ProductSet>().ToList();
+         var excel = new ExcelMapper { TypeMapperFactory = new TypeMapperFactory() };
+ 
+         excel.SetMapping(typeof(ProductSet), "Name2", "Name");
+@@ -3219,8 +3231,9 @@ public class Tests
+     [Test]
+     public void FormatTest()
+     {
+-        var rows = new ExcelMapper(@"../../../xlsx/Format.xlsx").Fetch<IdNumber>().ToList();
+-        AssertEquivalent(rows,
++        var rows = new ExcelMapper("../../../xlsx/Format.xlsx").Fetch<IdNumber>().ToList();
++        AssertEquivalent(
++            rows,
+         [
+             new IdNumber { IdNo = "8005065137086" },
+             new IdNumber { IdNo = "8402155792088" }
+@@ -3236,7 +3249,7 @@ public class Tests
+     [Test]
+     public void ObjectTest()
+     {
+-        var products = new ExcelMapper(@"../../../xlsx/Products.xlsx").Fetch<ObjectProduct>().ToList();
++        var products = new ExcelMapper("../../../xlsx/Products.xlsx").Fetch<ObjectProduct>().ToList();
+         Assert.That(products.Count, Is.EqualTo(3));
+         Assert.That(products[0].Name, Is.EqualTo("Nudossi"));
+         Assert.That(products[0].Number, Is.EqualTo(60));
+@@ -3247,12 +3260,13 @@ public class Tests
+     [Test]
+     public void DateFormatTest()
+     {
+-        var excel = new ExcelMapper(@"../../../xlsx/dateformat.xlsx");
++        var excel = new ExcelMapper("../../../xlsx/dateformat.xlsx");
+         var products = excel.Fetch<DateProduct>().ToList();
+         Assert.That(products.Count, Is.EqualTo(1));
+         Assert.That(products[0].Date, Is.EqualTo(new DateTime(2024, 2, 1)));
+         var fn = "dateformat2.xlsx";
+-        excel.Save(fn,
++        excel.Save(
++            fn,
+         [
+             new DateProduct(new DateTime(2021, 1, 1)),
+             new DateProduct(new DateTime(2022, 2, 1)),
+@@ -3270,6 +3284,7 @@ public class Tests
+     }
+ 
+     private record NullableValueType(bool? BoolValue, int? IntValue);
++
+     private record ConvertedNullableValueType(string BoolValue, string IntValue);
+ 
+     private static object NullableValueTypeToStringCellValueConverter(ValueConverterArgs args) =>
+@@ -3289,7 +3304,7 @@ public class Tests
+         {
+             SkipBlankRows = false
+         };
+-        var ms = new MemoryStream(); ;
++        var ms = new MemoryStream();
+         Assert.DoesNotThrow(() => writeMapper.Save(ms, inputItems, valueConverter: NullableValueTypeToStringCellValueConverter));
+ 
+         ms.Seek(0, SeekOrigin.Begin);
+diff --git a/ExcelMapper/ActionInvoker.cs b/ExcelMapper/ActionInvoker.cs
+index 0f838e1..1ca5ece 100644
+--- a/ExcelMapper/ActionInvoker.cs
++++ b/ExcelMapper/ActionInvoker.cs
+@@ -3,20 +3,20 @@
+ namespace Ganss.Excel;
+ 
+ /// <summary>
+-/// Abstract class action invoker
++/// Abstract class action invoker.
+ /// </summary>
+ internal class ActionInvoker
+ {
+     /// <summary>
+-    /// Invoke from an unspecified <paramref name="obj"/> type
++    /// Invoke from an unspecified <paramref name="obj"/> type.
+     /// </summary>
+-    /// <param name="obj">mapping instance class</param>
+-    /// <param name="index">index in the collection</param>
++    /// <param name="obj">mapping instance class.</param>
++    /// <param name="index">index in the collection.</param>
+     internal virtual void Invoke(object obj, int index) =>
+         throw new NotImplementedException();
+ 
+     /// <summary>
+-    /// <see cref="ActionInvokerImpl{T}"/> factory
++    /// <see cref="ActionInvokerImpl{T}"/> factory.
+     /// </summary>
+     /// <typeparam name="T"></typeparam>
+     /// <param name="mappingAction"></param>
+@@ -33,11 +33,11 @@ internal class ActionInvoker
+ }
+ 
+ /// <summary>
+-/// Generic form <see cref="ActionInvoker"/>
++/// Generic form <see cref="ActionInvoker"/>.
+ /// </summary>
+ /// <typeparam name="T"></typeparam>
+ /// <remarks>
+-/// Ctor
++/// Ctor.
+ /// </remarks>
+ /// <param name="mappingAction"></param>
+ internal class ActionInvokerImpl<T>(Action<T, int> mappingAction) : ActionInvoker
+@@ -46,16 +46,16 @@ internal class ActionInvokerImpl<T>(Action<T, int> mappingAction) : ActionInvoke
+     /// <summary>
+     /// ref to the mapping action.
+     /// </summary>
+-    internal Action<T, int> mappingAction = mappingAction;
++    internal Action<T, int> MappingAction = mappingAction;
+ 
+     /// <summary>
+-    /// Invoke Generic Action
++    /// Invoke Generic Action.
+     /// </summary>
+     /// <param name="obj"></param>
+     /// <param name="index"></param>
+     internal override void Invoke(object obj, int index)
+     {
+-        if (mappingAction is null || obj is null) return;
+-        mappingAction((obj as T), index);
++        if (MappingAction == null || obj == null) return;
++        MappingAction(obj as T, index);
+     }
+ }
+\ No newline at end of file
+diff --git a/ExcelMapper/Attributes/ColumnAttribute.cs b/ExcelMapper/Attributes/ColumnAttribute.cs
+index dd21a9d..1050ae6 100644
+--- a/ExcelMapper/Attributes/ColumnAttribute.cs
++++ b/ExcelMapper/Attributes/ColumnAttribute.cs
+@@ -17,7 +17,7 @@ public sealed class ColumnAttribute : Attribute
+     /// Initializes a new instance of the <see cref="ColumnAttribute"/> class.
+     /// </summary>
+     /// <param name="name">The name of the column.</param>
+-    /// <param name="directions">mapping direction</param>
++    /// <param name="directions">mapping direction.</param>
+     public ColumnAttribute(string name, MappingDirections directions = MappingDirections.Both)
+     {
+         this.name = name;
+@@ -28,7 +28,7 @@ public sealed class ColumnAttribute : Attribute
+     /// Initializes a new instance of the <see cref="ColumnAttribute"/> class.
+     /// </summary>
+     /// <param name="index">The index of the column.</param>
+-    /// <param name="directions">mapping direction</param>
++    /// <param name="directions">mapping direction.</param>
+     public ColumnAttribute(int index, MappingDirections directions = MappingDirections.Both)
+     {
+         this.index = index;
+@@ -40,7 +40,7 @@ public sealed class ColumnAttribute : Attribute
+     /// </summary>
+     /// <param name="index">The index of the column.</param>
+     /// <param name="name">The name of the column.</param>
+-    /// <param name="directions">mapping direction</param>
++    /// <param name="directions">mapping direction.</param>
+     public ColumnAttribute(int index, string name, MappingDirections directions = MappingDirections.Both)
+     {
+         this.index = index;
+@@ -51,7 +51,7 @@ public sealed class ColumnAttribute : Attribute
+     /// <summary>
+     /// Initializes a new instance of the <see cref="ColumnAttribute"/> class.
+     /// </summary>
+-    /// <param name="directions">mapping direction</param>
++    /// <param name="directions">mapping direction.</param>
+     public ColumnAttribute(MappingDirections directions = MappingDirections.Both)
+     {
+         this.directions = directions;
+diff --git a/ExcelMapper/Attributes/DataFormatAttribute.cs b/ExcelMapper/Attributes/DataFormatAttribute.cs
+index 9a208ea..8b1045d 100644
+--- a/ExcelMapper/Attributes/DataFormatAttribute.cs
++++ b/ExcelMapper/Attributes/DataFormatAttribute.cs
+@@ -9,7 +9,7 @@ namespace Ganss.Excel;
+ /// </summary>
+ /// <seealso cref="System.Attribute" />
+ [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
+-public sealed class DataFormatAttribute: Attribute
++public sealed class DataFormatAttribute : Attribute
+ {
+     /// <summary>
+     /// Gets or sets the builtin format, see https://poi.apache.org/apidocs/org/apache/poi/ss/usermodel/BuiltinFormats.html for possible values.
+diff --git a/ExcelMapper/ColumnInfo.cs b/ExcelMapper/ColumnInfo.cs
+index bb9c85d..97d9113 100644
+--- a/ExcelMapper/ColumnInfo.cs
++++ b/ExcelMapper/ColumnInfo.cs
+@@ -14,7 +14,7 @@ namespace Ganss.Excel;
+ public class ColumnInfo
+ {
+     /// <summary>
+-    /// Gets or sets the mapping directions.
++    /// Gets the mapping directions.
+     /// </summary>
+     public MappingDirections Directions { get; internal set; } = MappingDirections.Both;
+ 
+@@ -72,7 +72,11 @@ public class ColumnInfo
+     /// </value>
+     public PropertyInfo Property
+     {
+-        get { return property; }
++        get
++        {
++            return property;
++        }
++
+         set
+         {
+             property = value;
+@@ -102,7 +106,7 @@ public class ColumnInfo
+     }
+ 
+     /// <summary>
+-    /// Gets a value indicating whether the property is nullable.
++    /// Gets or sets a value indicating whether the property is nullable.
+     /// </summary>
+     /// <value>
+     /// <c>true</c> if the property is nullable; otherwise, <c>false</c>.
+@@ -110,7 +114,7 @@ public class ColumnInfo
+     public bool IsNullable { get; protected set; }
+ 
+     /// <summary>
+-    /// Gets the type of the property.
++    /// Gets or sets the type of the property.
+     /// </summary>
+     /// <value>
+     /// The type of the property.
+@@ -118,7 +122,7 @@ public class ColumnInfo
+     public Type PropertyType { get; protected set; }
+ 
+     /// <summary>
+-    /// Gets or sets the cell setter.
++    /// Gets the cell setter.
+     /// </summary>
+     /// <value>
+     /// The cell setter.
+@@ -234,6 +238,7 @@ public class ColumnInfo
+         else if (PropertyType == typeof(bool))
+         {
+             if (IsNullable)
++            {
+                 return (c, o) =>
+                 {
+                     if (o == null)
+@@ -241,12 +246,16 @@ public class ColumnInfo
+                     else
+                         c.SetCellValue((bool)o);
+                 };
++            }
+             else
++            {
+                 return (c, o) => c.SetCellValue((bool)o);
++            }
+         }
+         else if (NumericTypes.Contains(PropertyType))
+         {
+             if (IsNullable)
++            {
+                 return (c, o) =>
+                 {
+                     if (o == null)
+@@ -254,8 +263,11 @@ public class ColumnInfo
+                     else
+                         c.SetCellValue(Convert.ToDouble(o));
+                 };
++            }
+             else
++            {
+                 return (c, o) => c.SetCellValue(Convert.ToDouble(o));
++            }
+         }
+         else if (PropertyType == typeof(byte[]))
+         {
+@@ -346,7 +358,9 @@ public class ColumnInfo
+         return Property.GetValue(o, null);
+     }
+ 
+-    /// <summary>Specifies a method to use when setting the cell value from an object.</summary>
++    /// <summary>
++    /// Specifies a method to use when setting the cell value from an object.
++    /// </summary>
+     /// <param name="setCell">The method to use when setting the cell value from an object.</param>
+     /// <returns>The <see cref="ColumnInfo"/> object.</returns>
+     public ColumnInfo SetCellUsing(Action<ICell, object> setCell)
+@@ -355,7 +369,9 @@ public class ColumnInfo
+         return this;
+     }
+ 
+-    /// <summary>Specifies a method to use when setting the cell value from an object.</summary>
++    /// <summary>
++    /// Specifies a method to use when setting the cell value from an object.
++    /// </summary>
+     /// <param name="setCell">The method to use when setting the cell value from an object.</param>
+     /// <returns>The <see cref="ColumnInfo"/> object.</returns>
+     public ColumnInfo SetCellUsing<T>(Action<ICell, T> setCell)
+@@ -364,7 +380,9 @@ public class ColumnInfo
+         return this;
+     }
+ 
+-    /// <summary>Specifies a method to use when setting the property value from the cell value.</summary>
++    /// <summary>
++    /// Specifies a method to use when setting the property value from the cell value.
++    /// </summary>
+     /// <param name="setProp">The method to use when setting the property value from the cell value.</param>
+     /// <returns>The <see cref="ColumnInfo"/> object.</returns>
+     public ColumnInfo SetPropertyUsing(Func<object, object> setProp)
+@@ -373,7 +391,9 @@ public class ColumnInfo
+         return this;
+     }
+ 
+-    /// <summary>Specifies a method to use when setting the property value from the cell value.</summary>
++    /// <summary>
++    /// Specifies a method to use when setting the property value from the cell value.
++    /// </summary>
+     /// <param name="setProp">The method to use when setting the property value from the cell value.</param>
+     /// <returns>The <see cref="ColumnInfo"/> object.</returns>
+     public ColumnInfo SetPropertyUsing(Func<object, ICell, object> setProp)
+@@ -382,7 +402,9 @@ public class ColumnInfo
+         return this;
+     }
+ 
+-    /// <summary>Specifies a method to use when setting the property value from the cell value.</summary>
++    /// <summary>
++    /// Specifies a method to use when setting the property value from the cell value.
++    /// </summary>
+     /// <param name="setProp">The method to use when setting the property value from the cell value.</param>
+     /// <returns>The <see cref="ColumnInfo"/> object.</returns>
+     public ColumnInfo SetPropertyUsing(Func<object, object, ICell, object> setProp)
+@@ -391,7 +413,9 @@ public class ColumnInfo
+         return this;
+     }
+ 
+-    /// <summary>Specifies a method to use when setting the property value from the cell value.</summary>
++    /// <summary>
++    /// Specifies a method to use when setting the property value from the cell value.
++    /// </summary>
+     /// <param name="setProp">The method to use when setting the property value from the cell value.</param>
+     /// <returns>The <see cref="ColumnInfo"/> object.</returns>
+     public ColumnInfo SetPropertyUsing<T>(Func<T, object, object> setProp)
+@@ -400,7 +424,9 @@ public class ColumnInfo
+         return this;
+     }
+ 
+-    /// <summary>Specifies a method to use when setting the property value from the cell value.</summary>
++    /// <summary>
++    /// Specifies a method to use when setting the property value from the cell value.
++    /// </summary>
+     /// <param name="setProp">The method to use when setting the property value from the cell value.</param>
+     /// <returns>The <see cref="ColumnInfo"/> object.</returns>
+     public ColumnInfo SetPropertyUsing<T>(Func<T, object, ICell, object> setProp)
+@@ -409,7 +435,9 @@ public class ColumnInfo
+         return this;
+     }
+ 
+-    /// <summary>Selects formula results to be mapped instead of the formula itself.</summary>
++    /// <summary>
++    /// Selects formula results to be mapped instead of the formula itself.
++    /// </summary>
+     /// <returns>The <see cref="ColumnInfo"/> object.</returns>
+     public ColumnInfo AsFormulaResult()
+     {
+@@ -417,7 +445,9 @@ public class ColumnInfo
+         return this;
+     }
+ 
+-    /// <summary>Selects the property to be saved as a formula.</summary>
++    /// <summary>
++    /// Selects the property to be saved as a formula.
++    /// </summary>
+     /// <returns>The <see cref="ColumnInfo"/> object.</returns>
+     public ColumnInfo AsFormula()
+     {
+@@ -425,7 +455,9 @@ public class ColumnInfo
+         return this;
+     }
+ 
+-    /// <summary>Selects the property to be serialized as JSON.</summary>
++    /// <summary>
++    /// Selects the property to be serialized as JSON.
++    /// </summary>
+     /// <returns>The <see cref="ColumnInfo"/> object.</returns>
+     public ColumnInfo AsJson()
+     {
+@@ -437,7 +469,7 @@ public class ColumnInfo
+     /// Initializes a new instance of the <see cref="ColumnInfo"/> class.
+     /// </summary>
+     /// <param name="propertyInfo">The property information.</param>
+-    /// <param name="direction">Data direction</param>
++    /// <param name="direction">Data direction.</param>
+     public ColumnInfo(PropertyInfo propertyInfo, MappingDirections direction = MappingDirections.Both)
+     {
+         Property = propertyInfo;
+@@ -450,7 +482,9 @@ public class ColumnInfo
+     /// </summary>
+     protected ColumnInfo() { }
+ 
+-    /// <summary>Selects the property to be unidirectional from Excel to Object.</summary>
++    /// <summary>
++    /// Selects the property to be unidirectional from Excel to Object.
++    /// </summary>
+     /// <returns>The <see cref="ColumnInfo"/> object.</returns>
+     public ColumnInfo FromExcelOnly()
+     {
+@@ -458,7 +492,9 @@ public class ColumnInfo
+         return this;
+     }
+ 
+-    /// <summary>Selects the property to be unidirectional from Excel to Object.</summary>
++    /// <summary>
++    /// Selects the property to be unidirectional from Excel to Object.
++    /// </summary>
+     /// <returns>The <see cref="ColumnInfo"/> object.</returns>
+     public ColumnInfo ToExcelOnly()
+     {
+diff --git a/ExcelMapper/ColumnInfoDirections.cs b/ExcelMapper/ColumnInfoDirections.cs
+index 3cae9cc..dcf23b5 100644
+--- a/ExcelMapper/ColumnInfoDirections.cs
++++ b/ExcelMapper/ColumnInfoDirections.cs
+@@ -2,23 +2,24 @@
+ 
+ namespace Ganss.Excel;
+ 
+-
+ /// <summary>
+-/// Data direction
++/// Data direction.
+ /// </summary>
+ [Flags]
+ public enum MappingDirections
+ {
+     /// <summary>
+-    /// From Excel to Object
++    /// From Excel to Object.
+     /// </summary>
+     ExcelToObject = 1 << 0,
++
+     /// <summary>
+-    /// From Object to Excel
++    /// From Object to Excel.
+     /// </summary>
+     ObjectToExcel = 1 << 1,
++
+     /// <summary>
+-    /// Both directions
++    /// Both directions.
+     /// </summary>
+     Both = ExcelToObject | ObjectToExcel,
+ }
+diff --git a/ExcelMapper/EventArgs.cs b/ExcelMapper/EventArgs.cs
+index 9da59a2..a009b7e 100644
+--- a/ExcelMapper/EventArgs.cs
++++ b/ExcelMapper/EventArgs.cs
+@@ -13,7 +13,7 @@ namespace Ganss.Excel;
+ public class SavingEventArgs(ISheet sheet) : EventArgs
+ {
+     /// <summary>
+-    /// Gets or sets the sheet.
++    /// Gets the sheet.
+     /// </summary>
+     /// <value>
+     /// The sheet.
+diff --git a/ExcelMapper/ExcelMapper.cs b/ExcelMapper/ExcelMapper.cs
+index 9958ca4..6e2e6f7 100644
+--- a/ExcelMapper/ExcelMapper.cs
++++ b/ExcelMapper/ExcelMapper.cs
+@@ -143,7 +143,8 @@ public class ExcelMapper
+ 
+     private Func<string, string> NormalizeName { get; set; }
+ 
+-    readonly Dictionary<Type, Func<object>> ObjectFactories = [];
++    readonly Dictionary<Type, Func<object>> objectFactories = [];
++
+     Dictionary<string, Dictionary<int, object>> Objects { get; set; } = [];
+ 
+     IWorkbook Workbook { get; set; }
+@@ -216,7 +217,7 @@ public class ExcelMapper
+     /// <param name="factory">The factory function.</param>
+     public void CreateInstance<T>(Func<T> factory)
+     {
+-        ObjectFactories[typeof (T)] = () => factory();
++        objectFactories[typeof(T)] = () => factory();
+     }
+ 
+     void CreateWorkbook(bool xlsx)
+@@ -230,7 +231,7 @@ public class ExcelMapper
+     /// <typeparam name="T">The type of objects the Excel file is mapped to.</typeparam>
+     /// <param name="file">The path to the Excel file.</param>
+     /// <param name="sheetName">Name of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public IEnumerable<T> Fetch<T>(string file, string sheetName, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -240,10 +241,10 @@ public class ExcelMapper
+     /// <summary>
+     /// Fetches objects from the specified sheet name.
+     /// </summary>
+-    /// <param name="type">The type of objects the Excel file is mapped to.</param>
+     /// <param name="file">The path to the Excel file.</param>
++    /// <param name="type">The type of objects the Excel file is mapped to.</param>
+     /// <param name="sheetName">Name of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public IEnumerable Fetch(string file, Type type, string sheetName, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -256,7 +257,7 @@ public class ExcelMapper
+     /// </summary>
+     /// <param name="file">The path to the Excel file.</param>
+     /// <param name="sheetName">Name of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public IEnumerable<dynamic> Fetch(string file, string sheetName, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -270,7 +271,7 @@ public class ExcelMapper
+     /// <typeparam name="T">The type of objects the Excel file is mapped to.</typeparam>
+     /// <param name="file">The path to the Excel file.</param>
+     /// <param name="sheetIndex">Index of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public IEnumerable<T> Fetch<T>(string file, int sheetIndex, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -280,10 +281,10 @@ public class ExcelMapper
+     /// <summary>
+     /// Fetches objects from the specified sheet index.
+     /// </summary>
+-    /// <param name="type">The type of objects the Excel file is mapped to.</param>
+     /// <param name="file">The path to the Excel file.</param>
++    /// <param name="type">The type of objects the Excel file is mapped to.</param>
+     /// <param name="sheetIndex">Index of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public IEnumerable Fetch(string file, Type type, int sheetIndex, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -296,7 +297,7 @@ public class ExcelMapper
+     /// </summary>
+     /// <param name="file">The path to the Excel file.</param>
+     /// <param name="sheetIndex">Index of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public IEnumerable<dynamic> Fetch(string file, int sheetIndex, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -310,7 +311,7 @@ public class ExcelMapper
+     /// <typeparam name="T">The type of objects the Excel file is mapped to.</typeparam>
+     /// <param name="stream">The stream the Excel file is read from.</param>
+     /// <param name="sheetName">Name of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public IEnumerable<T> Fetch<T>(Stream stream, string sheetName, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -320,10 +321,10 @@ public class ExcelMapper
+     /// <summary>
+     /// Fetches objects from the specified sheet name.
+     /// </summary>
+-    /// <param name="type">The type of objects the Excel file is mapped to.</param>
+     /// <param name="stream">The stream the Excel file is read from.</param>
++    /// <param name="type">The type of objects the Excel file is mapped to.</param>
+     /// <param name="sheetName">Name of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public IEnumerable Fetch(Stream stream, Type type, string sheetName, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -336,7 +337,7 @@ public class ExcelMapper
+     /// </summary>
+     /// <param name="stream">The stream the Excel file is read from.</param>
+     /// <param name="sheetName">Name of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public IEnumerable<dynamic> Fetch(Stream stream, string sheetName, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -350,7 +351,7 @@ public class ExcelMapper
+     /// <typeparam name="T">The type of objects the Excel file is mapped to.</typeparam>
+     /// <param name="stream">The stream the Excel file is read from.</param>
+     /// <param name="sheetIndex">Index of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public IEnumerable<T> Fetch<T>(Stream stream, int sheetIndex, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -360,10 +361,10 @@ public class ExcelMapper
+     /// <summary>
+     /// Fetches objects from the specified sheet index.
+     /// </summary>
+-    /// <param name="type">The type of objects the Excel file is mapped to.</param>
+     /// <param name="stream">The stream the Excel file is read from.</param>
++    /// <param name="type">The type of objects the Excel file is mapped to.</param>
+     /// <param name="sheetIndex">Index of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public IEnumerable Fetch(Stream stream, Type type, int sheetIndex, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -376,7 +377,7 @@ public class ExcelMapper
+     /// </summary>
+     /// <param name="stream">The stream the Excel file is read from.</param>
+     /// <param name="sheetIndex">Index of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public IEnumerable<dynamic> Fetch(Stream stream, int sheetIndex, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -389,9 +390,9 @@ public class ExcelMapper
+     /// </summary>
+     /// <typeparam name="T">The type of objects the Excel file is mapped to.</typeparam>
+     /// <param name="sheetName">Name of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+-    /// <exception cref="System.ArgumentOutOfRangeException">Thrown when a sheet is not found</exception>
++    /// <exception cref="System.ArgumentOutOfRangeException">Thrown when a sheet is not found.</exception>
+     public IEnumerable<T> Fetch<T>(string sheetName, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+         return Fetch(typeof(T), sheetName, valueConverter).OfType<T>();
+@@ -402,9 +403,9 @@ public class ExcelMapper
+     /// </summary>
+     /// <param name="type">The type of objects the Excel file is mapped to.</param>
+     /// <param name="sheetName">Name of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+-    /// <exception cref="System.ArgumentOutOfRangeException">Thrown when a sheet is not found</exception>
++    /// <exception cref="System.ArgumentOutOfRangeException">Thrown when a sheet is not found.</exception>
+     public IEnumerable Fetch(Type type, string sheetName, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+         PrimitiveCheck(type);
+@@ -417,9 +418,9 @@ public class ExcelMapper
+     /// Fetches objects from the specified sheet name.
+     /// </summary>
+     /// <param name="sheetName">Name of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+-    /// <exception cref="System.ArgumentOutOfRangeException">Thrown when a sheet is not found</exception>
++    /// <exception cref="System.ArgumentOutOfRangeException">Thrown when a sheet is not found.</exception>
+     public IEnumerable<dynamic> Fetch(string sheetName, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+         var sheet = Workbook.GetSheet(sheetName) ?? throw new ArgumentOutOfRangeException(nameof(sheetName), sheetName, "Sheet not found");
+@@ -431,7 +432,7 @@ public class ExcelMapper
+     /// </summary>
+     /// <typeparam name="T">The type of objects the Excel file is mapped to.</typeparam>
+     /// <param name="sheetIndex">Index of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public IEnumerable<T> Fetch<T>(int sheetIndex = 0, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -442,9 +443,9 @@ public class ExcelMapper
+     /// <summary>
+     /// Fetches objects from the specified sheet index.
+     /// </summary>
+-    /// <param name="type">The type of objects the Excel file is mapped to</param>
++    /// <param name="type">The type of objects the Excel file is mapped to.</param>
+     /// <param name="sheetIndex">Index of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public IEnumerable Fetch(Type type, int sheetIndex = 0, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -458,7 +459,7 @@ public class ExcelMapper
+     /// Fetches objects from the specified sheet index.
+     /// </summary>
+     /// <param name="sheetIndex">Index of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public IEnumerable<dynamic> Fetch(int sheetIndex = 0, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -476,8 +477,10 @@ public class ExcelMapper
+         var firstRowNumber = HeaderRowNumber;
+ 
+         if (!HeaderRow)
++        {
+             firstRowNumber = sheet.Rows().Where(r => r.RowNum >= MinRowNumber && r.RowNum <= MaxRowNumber)
+                 .OrderByDescending(r => r.LastCellNum).FirstOrDefault()?.RowNum ?? 0;
++        }
+ 
+         var firstRow = sheet.GetRow(firstRowNumber);
+ 
+@@ -547,12 +550,14 @@ public class ExcelMapper
+                     try
+                     {
+                         if (valueConverter != null)
++                        {
+                             cellValue = valueConverter(new ValueConverterArgs()
+                             {
+                                 ColumnName = string.IsNullOrWhiteSpace(ci.Name) ? columnIndex.ToString() : ci.Name,
+                                 Cell = cell,
+                                 CellValue = cellValue
+                             });
++                        }
+ 
+                         initValues.Add((ci, cellValue, cell, columnIndex));
+                     }
+@@ -581,68 +586,67 @@ public class ExcelMapper
+         object o;
+ 
+         if (type == null)
++        {
+             o = typeMapper.CreateExpando();
+-        else
++        }
++        else if (typeMapper.Constructor != null)
+         {
+-            if (typeMapper.Constructor != null)
+-            {
+-                var parms = typeMapper.Constructor.GetParameters();
+-                var vals = parms.Select(p => GetDefault(p.ParameterType)).ToArray();
++            var parms = typeMapper.Constructor.GetParameters();
++            var vals = parms.Select(p => GetDefault(p.ParameterType)).ToArray();
+ 
+-                foreach (var initVal in initValues.ToList())
++            foreach (var initVal in initValues.ToList())
++            {
++                if (typeMapper.ConstructorParams.TryGetValue(initVal.Col.Property.Name, out var parm))
+                 {
+-                    if (typeMapper.ConstructorParams.TryGetValue(initVal.Col.Property.Name, out var parm))
++                    try
+                     {
+-                        try
+-                        {
+-                            object v;
++                        object v;
+ 
+-                            if (initVal.Cell != null)
+-                                v = initVal.Col.GetPropertyValue(null, initVal.CellValue, initVal.Cell);
+-                            else
+-                                v = initVal.CellValue;
++                        if (initVal.Cell != null)
++                            v = initVal.Col.GetPropertyValue(null, initVal.CellValue, initVal.Cell);
++                        else
++                            v = initVal.CellValue;
+ 
+-                            vals[parm.Position] = v;
++                        vals[parm.Position] = v;
+ 
+-                            initValues.Remove(initVal);
+-                        }
+-                        catch (Exception ex)
+-                        {
+-                            TriggerOrThrowParsingError(new ExcelMapperConvertException(initVal.CellValue, initVal.Col.PropertyType, i, initVal.ColumnIndex, ex));
+-                        }
++                        initValues.Remove(initVal);
++                    }
++                    catch (Exception ex)
++                    {
++                        TriggerOrThrowParsingError(new ExcelMapperConvertException(initVal.CellValue, initVal.Col.PropertyType, i, initVal.ColumnIndex, ex));
+                     }
+                 }
++            }
+ 
+-                try
+-                {
+-                    o = typeMapper.Constructor.Invoke(vals);
+-                }
+-                catch (Exception ex)
+-                {
+-                    throw new ExcelMapperConvertException($"Failed to initialize type {type.FullName}.", ex);
+-                }
++            try
++            {
++                o = typeMapper.Constructor.Invoke(vals);
++            }
++            catch (Exception ex)
++            {
++                throw new ExcelMapperConvertException($"Failed to initialize type {type.FullName}.", ex);
++            }
++        }
++        else
++        {
++            if (objectFactories.TryGetValue(type, out var factory))
++            {
++                o = factory();
+             }
+             else
+             {
+-                if (ObjectFactories.TryGetValue(type, out var factory))
++                try
+                 {
+-                    o = factory();
++                    o = Activator.CreateInstance(type);
+                 }
+-                else
++                catch (Exception)
+                 {
+-                    try
+-                    {
+-                        o = Activator.CreateInstance(type);
+-                    }
+-                    catch (Exception)
+-                    {
+-                        o = null;
+-                    }
++                    o = null;
+                 }
+-
+-                if (o == null)
+-                    return null;
+             }
++
++            if (o == null)
++                return null;
+         }
+ 
+         if (initValues.Any())
+@@ -664,6 +668,7 @@ public class ExcelMapper
+                 }
+             }
+         }
++
+         if (TrackObjects) Objects[sheet.SheetName][i] = o;
+ 
+         typeMapper?.AfterMappingActionInvoker?.Invoke(o, objInstanceIdx);
+@@ -688,7 +693,7 @@ public class ExcelMapper
+     /// <typeparam name="T">The type of objects the Excel file is mapped to.</typeparam>
+     /// <param name="file">The path to the Excel file.</param>
+     /// <param name="sheetName">Name of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public async Task<IEnumerable<T>> FetchAsync<T>(string file, string sheetName, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -700,7 +705,7 @@ public class ExcelMapper
+     /// </summary>
+     /// <param name="file">The path to the Excel file.</param>
+     /// <param name="sheetName">Name of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public async Task<IEnumerable<dynamic>> FetchAsync(string file, string sheetName, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -712,10 +717,10 @@ public class ExcelMapper
+     /// <summary>
+     /// Fetches objects from the specified sheet name using async I/O.
+     /// </summary>
+-    /// <param name="type">The type of objects the Excel file is mapped to.</param>
+     /// <param name="file">The path to the Excel file.</param>
++    /// <param name="type">The type of objects the Excel file is mapped to.</param>
+     /// <param name="sheetName">Name of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public async Task<IEnumerable> FetchAsync(string file, Type type, string sheetName, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -730,7 +735,7 @@ public class ExcelMapper
+     /// <typeparam name="T">The type of objects the Excel file is mapped to.</typeparam>
+     /// <param name="file">The path to the Excel file.</param>
+     /// <param name="sheetIndex">Index of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public async Task<IEnumerable<T>> FetchAsync<T>(string file, int sheetIndex = 0, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -744,7 +749,7 @@ public class ExcelMapper
+     /// </summary>
+     /// <param name="file">The path to the Excel file.</param>
+     /// <param name="sheetIndex">Index of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public async Task<IEnumerable<dynamic>> FetchAsync(string file, int sheetIndex = 0, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -756,10 +761,10 @@ public class ExcelMapper
+     /// <summary>
+     /// Fetches objects from the specified sheet index using async I/O.
+     /// </summary>
+-    /// <param name="type">The type of objects the Excel file is mapped to.</param>
+     /// <param name="file">The path to the Excel file.</param>
++    /// <param name="type">The type of objects the Excel file is mapped to.</param>
+     /// <param name="sheetIndex">Index of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public async Task<IEnumerable> FetchAsync(string file, Type type, int sheetIndex = 0, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -774,7 +779,7 @@ public class ExcelMapper
+     /// <typeparam name="T">The type of objects the Excel file is mapped to.</typeparam>
+     /// <param name="stream">The stream the Excel file is read from.</param>
+     /// <param name="sheetName">Name of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public async Task<IEnumerable<T>> FetchAsync<T>(Stream stream, string sheetName, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -786,7 +791,7 @@ public class ExcelMapper
+     /// </summary>
+     /// <param name="stream">The stream the Excel file is read from.</param>
+     /// <param name="sheetName">Name of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public async Task<IEnumerable<dynamic>> FetchAsync(Stream stream, string sheetName, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -798,10 +803,10 @@ public class ExcelMapper
+     /// <summary>
+     /// Fetches objects from the specified sheet name using async I/O.
+     /// </summary>
+-    /// <param name="type">The type of objects the Excel file is mapped to.</param>
+     /// <param name="stream">The stream the Excel file is read from.</param>
++    /// <param name="type">The type of objects the Excel file is mapped to.</param>
+     /// <param name="sheetName">Name of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public async Task<IEnumerable> FetchAsync(Stream stream, Type type, string sheetName, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -816,7 +821,7 @@ public class ExcelMapper
+     /// <typeparam name="T">The type of objects the Excel file is mapped to.</typeparam>
+     /// <param name="stream">The stream the Excel file is read from.</param>
+     /// <param name="sheetIndex">Index of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public async Task<IEnumerable<T>> FetchAsync<T>(Stream stream, int sheetIndex = 0, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -828,7 +833,7 @@ public class ExcelMapper
+     /// </summary>
+     /// <param name="stream">The stream the Excel file is read from.</param>
+     /// <param name="sheetIndex">Index of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public async Task<IEnumerable<dynamic>> FetchAsync(Stream stream, int sheetIndex = 0, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -840,10 +845,10 @@ public class ExcelMapper
+     /// <summary>
+     /// Fetches objects from the specified sheet index using async I/O.
+     /// </summary>
+-    /// <param name="type">The type of objects the Excel file is mapped to.</param>
+     /// <param name="stream">The stream the Excel file is read from.</param>
++    /// <param name="type">The type of objects the Excel file is mapped to.</param>
+     /// <param name="sheetIndex">Index of the sheet.</param>
+-    /// <param name="valueConverter">Allow value conversion</param>
++    /// <param name="valueConverter">Allow value conversion.</param>
+     /// <returns>The objects read from the Excel file.</returns>
+     public async Task<IEnumerable> FetchAsync(Stream stream, Type type, int sheetIndex = 0, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+@@ -863,7 +868,8 @@ public class ExcelMapper
+     /// </summary>
+     /// <param name="ignoreHidden">Indicates if hidden sheets should be ignored.</param>
+     /// <returns>The sheet names.</returns>
+-    public IEnumerable<string> FetchSheetNames(bool ignoreHidden) => Workbook == null ? []
++    public IEnumerable<string> FetchSheetNames(bool ignoreHidden) => Workbook == null
++        ? []
+         : Enumerable.Range(0, Workbook.NumberOfSheets).Where(i => !ignoreHidden || !Workbook.IsSheetHidden(i)).Select(i => Workbook.GetSheetName(i));
+ 
+     static async Task<Stream> ReadAsync(string file)
+@@ -905,7 +911,9 @@ public class ExcelMapper
+         // map column by name only if it hasn't been mapped to another property by index
+         if (colByName != null
+             && !typeMapper.ColumnsByIndex.SelectMany(ci => ci.Value).Any(c => c.Property.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
++        {
+             return colByName;
++        }
+ 
+         return [];
+     }
+@@ -925,7 +933,7 @@ public class ExcelMapper
+     /// <param name="objects">The objects to save.</param>
+     /// <param name="sheetName">Name of the sheet.</param>
+     /// <param name="xlsx">if set to <c>true</c> saves in .xlsx format; otherwise, saves in .xls format.</param>
+-    /// <param name="valueConverter">converter receiving property name and value</param>
++    /// <param name="valueConverter">converter receiving property name and value.</param>
+     public void Save<T>(string file, IEnumerable<T> objects, string sheetName, bool xlsx = true, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+         using var fs = File.Open(file, FileMode.Create, FileAccess.Write);
+@@ -940,7 +948,7 @@ public class ExcelMapper
+     /// <param name="objects">The objects to save.</param>
+     /// <param name="sheetIndex">Index of the sheet.</param>
+     /// <param name="xlsx">if set to <c>true</c> saves in .xlsx format; otherwise, saves in .xls format.</param>
+-    /// <param name="valueConverter">converter receiving property name and value</param>
++    /// <param name="valueConverter">converter receiving property name and value.</param>
+     public void Save<T>(string file, IEnumerable<T> objects, int sheetIndex = 0, bool xlsx = true, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+         using var fs = File.Open(file, FileMode.Create, FileAccess.Write);
+@@ -955,7 +963,7 @@ public class ExcelMapper
+     /// <param name="objects">The objects to save.</param>
+     /// <param name="sheetName">Name of the sheet.</param>
+     /// <param name="xlsx">if set to <c>true</c> saves in .xlsx format; otherwise, saves in .xls format.</param>
+-    /// <param name="valueConverter">converter receiving property name and value</param>
++    /// <param name="valueConverter">converter receiving property name and value.</param>
+     public void Save<T>(Stream stream, IEnumerable<T> objects, string sheetName, bool xlsx = true, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+         CreateWorkbook(xlsx);
+@@ -972,7 +980,7 @@ public class ExcelMapper
+     /// <param name="objects">The objects to save.</param>
+     /// <param name="sheetIndex">Index of the sheet.</param>
+     /// <param name="xlsx">if set to <c>true</c> saves in .xlsx format; otherwise, saves in .xls format.</param>
+-    /// <param name="valueConverter">converter receiving property name and value</param>
++    /// <param name="valueConverter">converter receiving property name and value.</param>
+     public void Save<T>(Stream stream, IEnumerable<T> objects, int sheetIndex = 0, bool xlsx = true, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+         CreateWorkbook(xlsx);
+@@ -990,7 +998,7 @@ public class ExcelMapper
+     /// <param name="file">The path to the Excel file.</param>
+     /// <param name="sheetName">Name of the sheet.</param>
+     /// <param name="xlsx">if set to <c>true</c> saves in .xlsx format; otherwise, saves in .xls format.</param>
+-    /// <param name="valueConverter">converter receiving property name and value</param>
++    /// <param name="valueConverter">converter receiving property name and value.</param>
+     public void Save(string file, string sheetName, bool xlsx = true, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+         using var fs = File.Open(file, FileMode.Create, FileAccess.Write);
+@@ -1003,7 +1011,7 @@ public class ExcelMapper
+     /// <param name="file">The path to the Excel file.</param>
+     /// <param name="sheetIndex">Index of the sheet.</param>
+     /// <param name="xlsx">if set to <c>true</c> saves in .xlsx format; otherwise, saves in .xls format.</param>
+-    /// <param name="valueConverter">converter receiving property name and value</param>
++    /// <param name="valueConverter">converter receiving property name and value.</param>
+     public void Save(string file, int sheetIndex = 0, bool xlsx = true, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+         using var fs = File.Open(file, FileMode.Create, FileAccess.Write);
+@@ -1016,7 +1024,7 @@ public class ExcelMapper
+     /// <param name="stream">The stream to save the objects to.</param>
+     /// <param name="sheetName">Name of the sheet.</param>
+     /// <param name="xlsx">if set to <c>true</c> saves in .xlsx format; otherwise, saves in .xls format.</param>
+-    /// <param name="valueConverter">converter receiving property name and value</param>
++    /// <param name="valueConverter">converter receiving property name and value.</param>
+     public void Save(Stream stream, string sheetName, bool xlsx = true, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+         CreateWorkbook(xlsx);
+@@ -1031,7 +1039,7 @@ public class ExcelMapper
+     /// <param name="stream">The stream to save the objects to.</param>
+     /// <param name="sheetIndex">Index of the sheet.</param>
+     /// <param name="xlsx">if set to <c>true</c> saves in .xlsx format; otherwise, saves in .xls format.</param>
+-    /// <param name="valueConverter">converter receiving property name and value</param>
++    /// <param name="valueConverter">converter receiving property name and value.</param>
+     public void Save(Stream stream, int sheetIndex = 0, bool xlsx = true, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+         CreateWorkbook(xlsx);
+@@ -1147,7 +1155,8 @@ public class ExcelMapper
+         return cell;
+     }
+ 
+-    private void SetCells(TypeMapper typeMapper,
++    private void SetCells(
++        TypeMapper typeMapper,
+         Dictionary<int, List<ColumnInfo>> columnsByIndex,
+         object o, IRow row,
+         Dictionary<int, ICellStyle> cellStyles,
+@@ -1196,6 +1205,7 @@ public class ExcelMapper
+                 style.DataFormat = dataFormat;
+                 cellStyles[cell.ColumnIndex] = style;
+             }
++
+             cell.CellStyle = style;
+         }
+ 
+@@ -1227,6 +1237,7 @@ public class ExcelMapper
+                 CellValue = val
+             });
+         }
++
+         // When the value is a dynamic type or has a specified value conversion function, the type may be inconsistent, and the type needs to be changed
+         var newType = val?.GetType() ?? ci.PropertyType;
+         if (newType != ci.PropertyType)
+@@ -1234,6 +1245,7 @@ public class ExcelMapper
+             oldType = ci.PropertyType.IsValueType && ci.IsNullable ? typeof(Nullable<>).MakeGenericType(ci.PropertyType) : ci.PropertyType;
+             ci.ChangeSetterType(newType);
+         }
++
+         SetCellStyle(cell, ci, cellStyles);
+         ci.SetCell(cell, val);
+         if (oldType != null)
+@@ -1248,7 +1260,7 @@ public class ExcelMapper
+     /// <param name="objects">The objects to save.</param>
+     /// <param name="sheetName">Name of the sheet.</param>
+     /// <param name="xlsx">if set to <c>true</c> saves in .xlsx format; otherwise, saves in .xls format.</param>
+-    /// <param name="valueConverter">converter receiving property name and value</param>
++    /// <param name="valueConverter">converter receiving property name and value.</param>
+     public async Task SaveAsync<T>(string file, IEnumerable<T> objects, string sheetName, bool xlsx = true, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+         using var ms = new MemoryStream();
+@@ -1264,7 +1276,7 @@ public class ExcelMapper
+     /// <param name="objects">The objects to save.</param>
+     /// <param name="sheetIndex">Index of the sheet.</param>
+     /// <param name="xlsx">if set to <c>true</c> saves in .xlsx format; otherwise, saves in .xls format.</param>
+-    /// <param name="valueConverter">converter receiving property name and value</param>
++    /// <param name="valueConverter">converter receiving property name and value.</param>
+     public async Task SaveAsync<T>(string file, IEnumerable<T> objects, int sheetIndex = 0, bool xlsx = true, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+         using var ms = new MemoryStream();
+@@ -1280,7 +1292,7 @@ public class ExcelMapper
+     /// <param name="objects">The objects to save.</param>
+     /// <param name="sheetName">Name of the sheet.</param>
+     /// <param name="xlsx">if set to <c>true</c> saves in .xlsx format; otherwise, saves in .xls format.</param>
+-    /// <param name="valueConverter">converter receiving property name and value</param>
++    /// <param name="valueConverter">converter receiving property name and value.</param>
+     public async Task SaveAsync<T>(Stream stream, IEnumerable<T> objects, string sheetName, bool xlsx = true, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+         using var ms = new MemoryStream();
+@@ -1296,7 +1308,7 @@ public class ExcelMapper
+     /// <param name="objects">The objects to save.</param>
+     /// <param name="sheetIndex">Index of the sheet.</param>
+     /// <param name="xlsx">if set to <c>true</c> saves in .xlsx format; otherwise, saves in .xls format.</param>
+-    /// <param name="valueConverter">converter receiving property name and value</param>
++    /// <param name="valueConverter">converter receiving property name and value.</param>
+     public async Task SaveAsync<T>(Stream stream, IEnumerable<T> objects, int sheetIndex = 0, bool xlsx = true, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+         using var ms = new MemoryStream();
+@@ -1310,7 +1322,7 @@ public class ExcelMapper
+     /// <param name="file">The path to the Excel file.</param>
+     /// <param name="sheetName">Name of the sheet.</param>
+     /// <param name="xlsx">if set to <c>true</c> saves in .xlsx format; otherwise, saves in .xls format.</param>
+-    /// <param name="valueConverter">converter receiving property name and value</param>
++    /// <param name="valueConverter">converter receiving property name and value.</param>
+     public async Task SaveAsync(string file, string sheetName, bool xlsx = true, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+         using var ms = new MemoryStream();
+@@ -1324,7 +1336,7 @@ public class ExcelMapper
+     /// <param name="file">The path to the Excel file.</param>
+     /// <param name="sheetIndex">Index of the sheet.</param>
+     /// <param name="xlsx">if set to <c>true</c> saves in .xlsx format; otherwise, saves in .xls format.</param>
+-    /// <param name="valueConverter">converter receiving property name and value</param>
++    /// <param name="valueConverter">converter receiving property name and value.</param>
+     public async Task SaveAsync(string file, int sheetIndex = 0, bool xlsx = true, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+         using var ms = new MemoryStream();
+@@ -1338,7 +1350,7 @@ public class ExcelMapper
+     /// <param name="stream">The stream to save the objects to.</param>
+     /// <param name="sheetName">Name of the sheet.</param>
+     /// <param name="xlsx">if set to <c>true</c> saves in .xlsx format; otherwise, saves in .xls format.</param>
+-    /// <param name="valueConverter">converter receiving property name and value</param>
++    /// <param name="valueConverter">converter receiving property name and value.</param>
+     public async Task SaveAsync(Stream stream, string sheetName, bool xlsx = true, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+         using var ms = new MemoryStream();
+@@ -1352,7 +1364,7 @@ public class ExcelMapper
+     /// <param name="stream">The stream to save the objects to.</param>
+     /// <param name="sheetIndex">Index of the sheet.</param>
+     /// <param name="xlsx">if set to <c>true</c> saves in .xlsx format; otherwise, saves in .xls format.</param>
+-    /// <param name="valueConverter">converter receiving property name and value</param>
++    /// <param name="valueConverter">converter receiving property name and value.</param>
+     public async Task SaveAsync(Stream stream, int sheetIndex = 0, bool xlsx = true, Func<ValueConverterArgs, object> valueConverter = null)
+     {
+         using var ms = new MemoryStream();
+@@ -1386,16 +1398,13 @@ public class ExcelMapper
+                 var columnIndex = 0;
+                 PopulateHeaderRow(typeMapper, columnsByIndex, headerRow, ref columnIndex, callChain);
+             }
++            else if (CreateMissingHeaders)
++            {
++                UpdateHeaderRow(typeMapper, columnsByIndex, headerRow, callChain);
++            }
+             else
+             {
+-                if (CreateMissingHeaders)
+-                {
+-                    UpdateHeaderRow(typeMapper, columnsByIndex, headerRow, callChain);
+-                }
+-                else
+-                {
+-                    ReadHeaderRow(typeMapper, columnsByIndex, headerRow, callChain);
+-                }
++                ReadHeaderRow(typeMapper, columnsByIndex, headerRow, callChain);
+             }
+         }
+         else
+@@ -1583,7 +1592,8 @@ public class ExcelMapper
+                     if (targetColumn.BuiltinFormat != 0 || targetColumn.CustomFormat != null)
+                     {
+                         var formatIndex = targetColumn.BuiltinFormat != 0 ? targetColumn.BuiltinFormat : cell.CellStyle.DataFormat;
+-                        var formatString = targetColumn.BuiltinFormat != 0 ? BuiltinFormats.GetBuiltinFormat(targetColumn.BuiltinFormat)
++                        var formatString = targetColumn.BuiltinFormat != 0
++                            ? BuiltinFormats.GetBuiltinFormat(targetColumn.BuiltinFormat)
+                             : targetColumn.CustomFormat ?? cell.CellStyle.GetDataFormatString();
+                         var formattedValue = DataFormatter.FormatRawCellContents(cell.NumericCellValue, formatIndex, formatString);
+                         return formattedValue;
+@@ -1598,7 +1608,9 @@ public class ExcelMapper
+                     return cell.DateCellValue;
+                 }
+                 else
++                {
+                     return cell.NumericCellValue;
++                }
+             case CellType.Formula:
+                 return cell.CellFormula;
+             case CellType.Boolean:
+@@ -1648,7 +1660,7 @@ public class ExcelMapper
+     }
+ 
+     /// <summary>
+-    /// Action to call after an object is mapped
++    /// Action to call after an object is mapped.
+     /// </summary>
+     /// <typeparam name="T"></typeparam>
+     /// <param name="action"></param>
+@@ -1661,7 +1673,7 @@ public class ExcelMapper
+     }
+ 
+     /// <summary>
+-    /// Action to call before an object is mapped
++    /// Action to call before an object is mapped.
+     /// </summary>
+     /// <typeparam name="T"></typeparam>
+     /// <param name="action"></param>
+@@ -1688,7 +1700,7 @@ public class ExcelMapper
+             typeMapper.ColumnsByName.Add(columnName, []);
+ 
+         var columnInfo = typeMapper.ColumnsByName[columnName].Find(ci => ci.Property.Name == prop.Name);
+-        if (columnInfo is null)
++        if (columnInfo == null)
+         {
+             columnInfo = new ColumnInfo(prop);
+             typeMapper.ColumnsByName[columnName].Add(columnInfo);
+@@ -1713,7 +1725,7 @@ public class ExcelMapper
+             typeMapper.ColumnsByIndex.Add(idx, []);
+ 
+         var columnInfo = typeMapper.ColumnsByIndex[idx].Find(ci => ci.Property.Name == prop.Name);
+-        if (columnInfo is null)
++        if (columnInfo == null)
+         {
+             columnInfo = new ColumnInfo(prop);
+             typeMapper.ColumnsByIndex[idx].Add(columnInfo);
+@@ -1737,7 +1749,7 @@ public class ExcelMapper
+             typeMapper.ColumnsByName.Add(columnName, []);
+ 
+         var columnInfo = typeMapper.ColumnsByName[columnName].Find(ci => ci.Property.Name == prop.Name);
+-        if (columnInfo is null)
++        if (columnInfo == null)
+         {
+             columnInfo = new ColumnInfo(prop);
+             typeMapper.ColumnsByName[columnName].Add(columnInfo);
+@@ -1762,7 +1774,7 @@ public class ExcelMapper
+             typeMapper.ColumnsByIndex.Add(idx, []);
+ 
+         var columnInfo = typeMapper.ColumnsByIndex[idx].Find(ci => ci.Property.Name == prop.Name);
+-        if (columnInfo is null)
++        if (columnInfo == null)
+         {
+             columnInfo = new ColumnInfo(prop);
+             typeMapper.ColumnsByIndex[idx].Add(columnInfo);
+@@ -1820,7 +1832,8 @@ public class ExcelMapper
+         var prop = GetPropertyInfo(propertyExpression);
+ 
+         typeMapper.ColumnsByName.Where(c => c.Value.Exists(cc => cc.Property.IsIdenticalTo(prop)))
+-            .ToList().ForEach(kvp => typeMapper.ColumnsByName.Remove(kvp.Key));
++            .ToList()
++            .ForEach(kvp => typeMapper.ColumnsByName.Remove(kvp.Key));
+     }
+ 
+     /// <summary>
+@@ -1834,7 +1847,8 @@ public class ExcelMapper
+         var prop = t.GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public);
+ 
+         typeMapper.ColumnsByName.Where(c => c.Value.Exists(cc => cc.Property.IsIdenticalTo(prop)))
+-            .ToList().ForEach(kvp => typeMapper.ColumnsByName.Remove(kvp.Key));
++            .ToList()
++            .ForEach(kvp => typeMapper.ColumnsByName.Remove(kvp.Key));
+     }
+ 
+     /// <summary>
+diff --git a/ExcelMapper/Exceptions/ExcelMapperConvertException.cs b/ExcelMapper/Exceptions/ExcelMapperConvertException.cs
+index 3d61cc1..22e7583 100644
+--- a/ExcelMapper/Exceptions/ExcelMapperConvertException.cs
++++ b/ExcelMapper/Exceptions/ExcelMapperConvertException.cs
+@@ -1,125 +1,125 @@
+-﻿using System;
+-using System.Runtime.Serialization;
+-
+-namespace Ganss.Excel.Exceptions;
+-
+-/// <summary>
+-/// Represents an error that occurs when conversion of a cell value to the mapped property type fails.
+-/// </summary>
+-[Serializable]
+-public class ExcelMapperConvertException : Exception
+-{
+-    /// <summary>
+-    /// Gets the original cell value.
+-    /// </summary>
+-    /// <value>
+-    /// The original cell value.
+-    /// </value>
+-    public object CellValue { get; }
+-
+-    /// <summary>
+-    /// Gets the type of the property that the cell is mapped to.
+-    /// </summary>
+-    /// <value>
+-    /// The type of the property that the cell is mapped to.
+-    /// </value>
+-    public Type TargetType { get; }
+-
+-    /// <summary>
+-    /// Gets the line number of the cell where the error occurred.
+-    /// </summary>
+-    /// <value>
+-    /// The line number of the cell where the error occurred.
+-    /// </value>
+-    public int Line { get; }
+-
+-    /// <summary>
+-    /// Gets the column number of the cell where the error occurred.
+-    /// </summary>
+-    /// <value>
+-    /// The column number of the cell where the error occurred.
+-    /// </value>
+-    public int Column { get; }
+-
+-    /// <summary>
+-    /// Initializes a new instance of the <see cref="ExcelMapperConvertException"/> class.
+-    /// </summary>
+-    public ExcelMapperConvertException() { }
+-
+-    /// <summary>
+-    /// Initializes a new instance of the <see cref="ExcelMapperConvertException"/> class.
+-    /// </summary>
+-    /// <param name="message">The message the describes the error.</param>
+-    public ExcelMapperConvertException(string message) : base(message) { }
+-
+-    /// <summary>
+-    /// Initializes a new instance of the <see cref="ExcelMapperConvertException"/> class.
+-    /// </summary>
+-    /// <param name="message">The message the describes the error.</param>
+-    /// <param name="innerException">The exception that is the cause of the current exception, or a null reference if no inner exception is specified.</param>
+-    public ExcelMapperConvertException(string message, Exception innerException) : base(message, innerException) { }
+-
+-    /// <summary>
+-    /// Initializes a new instance of the <see cref="ExcelMapperConvertException"/> class.
+-    /// </summary>
+-    /// <param name="cellValue">The value of the cell where the error occurred.</param>
+-    /// <param name="targetType">The type of the property the cell is mapped to.</param>
+-    /// <param name="line">The line number of the cell where the error occurred.</param>
+-    /// <param name="column">The column number of the cell where the error occurred.</param>
+-    public ExcelMapperConvertException(object cellValue, Type targetType, int line, int column) : base(FormatMessage(cellValue, targetType, line, column))
+-    {
+-        CellValue = cellValue;
+-        TargetType = targetType;
+-        Line = line;
+-        Column = column;
+-    }
+-
+-    /// <summary>
+-    /// Initializes a new instance of the <see cref="ExcelMapperConvertException"/> class.
+-    /// </summary>
+-    /// <param name="cellValue">The value of the cell where the error occurred.</param>
+-    /// <param name="targetType">The type of the property the cell is mapped to.</param>
+-    /// <param name="line">The line number of the cell where the error occurred.</param>
+-    /// <param name="column">The column number of the cell where the error occurred.</param>
+-    /// <param name="innerException">The exception that is the cause of the current exception, or a null reference if no inner exception is specified.</param>
+-    public ExcelMapperConvertException(object cellValue, Type targetType, int line, int column, Exception innerException)
+-        : this(FormatMessage(cellValue, targetType, line, column), innerException)
+-    {
+-        CellValue = cellValue;
+-        TargetType = targetType;
+-        Line = line;
+-        Column = column;
+-    }
+-
+-    /// <summary>
+-    /// Initializes a new instance of the <see cref="ExcelMapperConvertException"/> class with serialized data.
+-    /// </summary>
+-    /// <param name="info">The object that holds the serialized data.</param>
+-    /// <param name="context">The contextual information about the source or destination.</param>
+-    protected ExcelMapperConvertException(SerializationInfo info, StreamingContext context) : base(info, context)
+-    {
+-        Line = info.GetInt32("Line");
+-        Column = info.GetInt32("Column");
+-    }
+-
+-    /// <summary>
+-    /// Sets the <see cref="SerializationInfo"/> with information about the exception.
+-    /// </summary>
+-    /// <param name="info">The <see cref="SerializationInfo"/> that holds the serialized object data about the exception being thrown.</param>
+-    /// <param name="context">The <see cref="StreamingContext"/> that contains contextual information about the source or destination.</param>
+-    public override void GetObjectData(SerializationInfo info, StreamingContext context)
+-    {
+-        if (info == null)
+-        {
+-            throw new ArgumentNullException(nameof(info));
+-        }
+-
+-        info.AddValue("Line", Line);
+-        info.AddValue("Column", Column);
+-
+-        base.GetObjectData(info, context);
+-    }
+-
+-    private static string FormatMessage(object cellValue, Type targetType, int line, int column)
+-        => $"Unable to convert \"{(cellValue == null || string.IsNullOrWhiteSpace(cellValue.ToString()) ? "<EMPTY>" : cellValue)}\" from [L:{line}]:[C:{column}] to {targetType}.";
++﻿using System;
++using System.Runtime.Serialization;
++
++namespace Ganss.Excel.Exceptions;
++
++/// <summary>
++/// Represents an error that occurs when conversion of a cell value to the mapped property type fails.
++/// </summary>
++[Serializable]
++public class ExcelMapperConvertException : Exception
++{
++    /// <summary>
++    /// Gets the original cell value.
++    /// </summary>
++    /// <value>
++    /// The original cell value.
++    /// </value>
++    public object CellValue { get; }
++
++    /// <summary>
++    /// Gets the type of the property that the cell is mapped to.
++    /// </summary>
++    /// <value>
++    /// The type of the property that the cell is mapped to.
++    /// </value>
++    public Type TargetType { get; }
++
++    /// <summary>
++    /// Gets the line number of the cell where the error occurred.
++    /// </summary>
++    /// <value>
++    /// The line number of the cell where the error occurred.
++    /// </value>
++    public int Line { get; }
++
++    /// <summary>
++    /// Gets the column number of the cell where the error occurred.
++    /// </summary>
++    /// <value>
++    /// The column number of the cell where the error occurred.
++    /// </value>
++    public int Column { get; }
++
++    /// <summary>
++    /// Initializes a new instance of the <see cref="ExcelMapperConvertException"/> class.
++    /// </summary>
++    public ExcelMapperConvertException() { }
++
++    /// <summary>
++    /// Initializes a new instance of the <see cref="ExcelMapperConvertException"/> class.
++    /// </summary>
++    /// <param name="message">The message the describes the error.</param>
++    public ExcelMapperConvertException(string message) : base(message) { }
++
++    /// <summary>
++    /// Initializes a new instance of the <see cref="ExcelMapperConvertException"/> class.
++    /// </summary>
++    /// <param name="message">The message the describes the error.</param>
++    /// <param name="innerException">The exception that is the cause of the current exception, or a null reference if no inner exception is specified.</param>
++    public ExcelMapperConvertException(string message, Exception innerException) : base(message, innerException) { }
++
++    /// <summary>
++    /// Initializes a new instance of the <see cref="ExcelMapperConvertException"/> class.
++    /// </summary>
++    /// <param name="cellValue">The value of the cell where the error occurred.</param>
++    /// <param name="targetType">The type of the property the cell is mapped to.</param>
++    /// <param name="line">The line number of the cell where the error occurred.</param>
++    /// <param name="column">The column number of the cell where the error occurred.</param>
++    public ExcelMapperConvertException(object cellValue, Type targetType, int line, int column) : base(FormatMessage(cellValue, targetType, line, column))
++    {
++        CellValue = cellValue;
++        TargetType = targetType;
++        Line = line;
++        Column = column;
++    }
++
++    /// <summary>
++    /// Initializes a new instance of the <see cref="ExcelMapperConvertException"/> class.
++    /// </summary>
++    /// <param name="cellValue">The value of the cell where the error occurred.</param>
++    /// <param name="targetType">The type of the property the cell is mapped to.</param>
++    /// <param name="line">The line number of the cell where the error occurred.</param>
++    /// <param name="column">The column number of the cell where the error occurred.</param>
++    /// <param name="innerException">The exception that is the cause of the current exception, or a null reference if no inner exception is specified.</param>
++    public ExcelMapperConvertException(object cellValue, Type targetType, int line, int column, Exception innerException)
++        : this(FormatMessage(cellValue, targetType, line, column), innerException)
++    {
++        CellValue = cellValue;
++        TargetType = targetType;
++        Line = line;
++        Column = column;
++    }
++
++    /// <summary>
++    /// Initializes a new instance of the <see cref="ExcelMapperConvertException"/> class with serialized data.
++    /// </summary>
++    /// <param name="info">The object that holds the serialized data.</param>
++    /// <param name="context">The contextual information about the source or destination.</param>
++    protected ExcelMapperConvertException(SerializationInfo info, StreamingContext context) : base(info, context)
++    {
++        Line = info.GetInt32("Line");
++        Column = info.GetInt32("Column");
++    }
++
++    /// <summary>
++    /// Sets the <see cref="SerializationInfo"/> with information about the exception.
++    /// </summary>
++    /// <param name="info">The <see cref="SerializationInfo"/> that holds the serialized object data about the exception being thrown.</param>
++    /// <param name="context">The <see cref="StreamingContext"/> that contains contextual information about the source or destination.</param>
++    public override void GetObjectData(SerializationInfo info, StreamingContext context)
++    {
++        if (info == null)
++        {
++            throw new ArgumentNullException(nameof(info));
++        }
++
++        info.AddValue("Line", Line);
++        info.AddValue("Column", Column);
++
++        base.GetObjectData(info, context);
++    }
++
++    private static string FormatMessage(object cellValue, Type targetType, int line, int column) =>
++        $"Unable to convert \"{(cellValue == null || string.IsNullOrWhiteSpace(cellValue.ToString()) ? "<EMPTY>" : cellValue)}\" from [L:{line}]:[C:{column}] to {targetType}.";
+ }
+\ No newline at end of file
+diff --git a/ExcelMapper/Extensions.cs b/ExcelMapper/Extensions.cs
+index 1c894af..a11c2c5 100644
+--- a/ExcelMapper/Extensions.cs
++++ b/ExcelMapper/Extensions.cs
+@@ -21,7 +21,7 @@ static class Extensions
+     }
+ 
+     /// <summary>
+-    /// convert to Nullable type
++    /// convert to Nullable type.
+     /// </summary>
+     /// <param name="type"></param>
+     /// <returns></returns>
+@@ -31,6 +31,7 @@ static class Extensions
+         {
+             return typeof(Nullable<>).MakeGenericType(type);
+         }
++
+         return type;
+     }
+ }
+diff --git a/ExcelMapper/ParsingErrorEventArgs.cs b/ExcelMapper/ParsingErrorEventArgs.cs
+index 42aa6b7..d9ea051 100644
+--- a/ExcelMapper/ParsingErrorEventArgs.cs
++++ b/ExcelMapper/ParsingErrorEventArgs.cs
+@@ -15,7 +15,7 @@ namespace Ganss.Excel;
+ public class ParsingErrorEventArgs(ExcelMapperConvertException error) : CancelEventArgs
+ {
+     /// <summary>
+-    /// The error captured
++    /// Gets the error captured.
+     /// </summary>
+     public ExcelMapperConvertException Error { get; private set; } = error;
+ }
+diff --git a/ExcelMapper/TypeMapper.cs b/ExcelMapper/TypeMapper.cs
+index 031f086..b7b9492 100644
+--- a/ExcelMapper/TypeMapper.cs
++++ b/ExcelMapper/TypeMapper.cs
+@@ -8,7 +8,6 @@ using System.Text.RegularExpressions;
+ 
+ namespace Ganss.Excel;
+ 
+-
+ /// <summary>
+ /// Maps a <see cref="Type"/>'s properties to columns in an Excel sheet.
+ /// </summary>
+@@ -192,7 +191,9 @@ public class TypeMapper
+                         ColumnsByName[columnAttribute.Name].Add(ci);
+                     }
+                     else if (!ColumnsByName.ContainsKey(prop.Name))
++                    {
+                         ColumnsByName.Add(prop.Name, [ci]);
++                    }
+ 
+                     if (columnAttribute.Index > 0)
+                     {
+@@ -207,7 +208,9 @@ public class TypeMapper
+                 }
+             }
+             else if (!ColumnsByName.ContainsKey(prop.Name))
++            {
+                 ColumnsByName.Add(prop.Name, [ci]);
++            }
+ 
+             if (Attribute.GetCustomAttribute(prop, typeof(DataFormatAttribute)) is DataFormatAttribute dataFormatAttribute)
+             {
+@@ -230,7 +233,8 @@ public class TypeMapper
+         if (!hasDefaultConstructor)
+         {
+             Constructor = Type.GetConstructors(BindingFlags.Public | BindingFlags.Instance)
+-                .OrderByDescending(c => c.GetParameters().Length).FirstOrDefault();
++                .OrderByDescending(c => c.GetParameters().Length)
++                .FirstOrDefault();
+ 
+             if (Constructor != null)
+             {

@@ -447,9 +447,9 @@ public class ParameterLayoutTests
 
             void N
                 (
-                    int a,
-                    int b,
-                        int c)
+                int a,
+                int b,
+                int c)
             {
             }
         }
@@ -511,6 +511,55 @@ public class ParameterLayoutTests
         }
         """,
         "dotnet_diagnostic.BRO1116.severity = none");
+
+    // Trial 61 (Respawn): a '(' that starts its line, which BRO1109 moves up to the name: the first item is indented from
+    // the name's line, as when BRO1109 runs first; with BRO1109 off, from the '(' line.
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public Task OpenParenthesisOnItsOwnLine_IndentsFromTheLineBRO1109MovesItTo(bool bro1109)
+    {
+        var indentation = bro1109 ? "            " : "                ";
+        return VerifyFixAsync(
+            """
+            class G
+            {
+                public G(int a, int b)
+                {
+                }
+            }
+
+            class C
+            {
+                void M()
+                {
+                    var g = new G
+                        ({|BRO1107:1|},
+                        2);
+                }
+            }
+            """,
+            $$"""
+            class G
+            {
+                public G(int a, int b)
+                {
+                }
+            }
+
+            class C
+            {
+                void M()
+                {
+                    var g = new G
+                        (
+            {{indentation}}1,
+                        2);
+                }
+            }
+            """,
+            bro1109 ? null : "dotnet_diagnostic.BRO1109.severity = none");
+    }
 
     [Fact]
     public Task SameLine_KeepsTheFirstItem_AndCopiesTheListsIndentation() => VerifyFixAsync(
