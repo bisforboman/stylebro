@@ -39,6 +39,11 @@ the build: `bro format` still leaves files outside the repository alone (it does
 fix them by hand or in their own repository. In a submodule's own checkout, its own files are checked: the superproject's
 `.gitmodules` above it doesn't count for it.
 
+**A submodule that isn't checked out** (cloned without `--recursive`: the folder is empty) leaves the code that compiles
+files from it unable to compile. `format`, `check` and the preview name it (`Missing: the git submodule lib/Shared isn't
+checked out: ...`) and leave out IDE0005, which would otherwise remove `using` directives that only look unused; run
+`git submodule update --init`, then run again. The verdict doesn't change; `check --build` says what didn't compile.
+
 **File-based programs.** A script run with `dotnet run app.cs` (.NET 10) imports the repository's Directory.Build.props
 like any project, StyleBro's package reference included, but `dotnet format` can't load it, so `bro format` can't fix it.
 The package's build targets leave StyleBro's analyzers out where the SDK builds such a program (`FileBasedProgram`), so
