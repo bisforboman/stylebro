@@ -819,6 +819,14 @@
                 'StyleCop output only: Third.cs: []'
                 'StyleCop output only: Third.cs: []'
                 'StyleCop output only: Third.cs: []'
+                # The file header's empty '//' lines stay (owner's decision 2026-10-29, trial 60: log4net's license header).
+                'only StyleCop: BRO1120 Header.cs(1,1)'
+                'only StyleCop: BRO1120 Header.cs(4,1)'
+                'StyleBro output only: Header.cs: [//]'
+                'StyleBro output only: Header.cs: [//]'
+                # '}', '#endregion', a doc comment: BRO1513's fix also adds the blank line BRO1505 (on here, not compared)
+                # wants above the '#endregion', which BRO1505's own fix would add first in another order (trial 60).
+                'StyleBro output only: Fourth.cs: []'
             )
         }
         @{
