@@ -2,3 +2,10 @@ base start 19:57
 base done 20:01
 CHAIN-DONE
 default start 20:39
+default done 20:46
+dotnet start 20:46
+dotnet done 20:57
+CHAIN-DONE
+soak start 20:57
+soak done rc=1 21:02
+soak-compare done 21:02

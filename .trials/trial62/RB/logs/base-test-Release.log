@@ -178,3 +178,20 @@ Assert.That(messageCounts.All(c => c.Value == 1), Is.True)
   Skipped TakeTime(100000,10,Default) [< 1 ms]
   Skipped TakeTime(100000,10,DefaultNew) [< 1 ms]
   Skipped DoesNotImmediatelyDeadlettersWhenDeliveryCountHeaderDoesNotExceedMaxRetries [< 1 ms]
+  Failed CanDoItSyncWithoutBlocking [9 ms]
+  Error Message:
+   System.PlatformNotSupportedException : COM Interop is not supported on this platform.
+  Stack Trace:
+     at System.Threading.Thread.SetApartmentStateUnchecked(ApartmentState state, Boolean throwOnError)
+   at System.Threading.Thread.SetApartmentState(ApartmentState state)
+   at Rebus.Tests.Synchronous.TestSyncBus.CanDoItSyncWithoutBlocking() in /home/user/w62/RB/base/Rebus.Tests/Synchronous/TestSyncBus.cs:line 45
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+1)    at System.Threading.Thread.SetApartmentStateUnchecked(ApartmentState state, Boolean throwOnError)
+   at System.Threading.Thread.SetApartmentState(ApartmentState state)
+   at Rebus.Tests.Synchronous.TestSyncBus.CanDoItSyncWithoutBlocking() in /home/user/w62/RB/base/Rebus.Tests/Synchronous/TestSyncBus.cs:line 45
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+
+Failed!  - Failed:     5, Passed:   620, Skipped:     5, Total:   630, Duration: 8 m 42 s - Rebus.Tests.dll (net10.0)

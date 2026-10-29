@@ -10,3 +10,24 @@ Checked net462 (run 5 of 5)
 == net10.0 (3 project(s), 25 files with findings)
 == net462 (3 project(s), 18 files with findings)
 == net8.0 (1 project(s), 11 files with findings)
+== net9.0 (1 project(s), 12 files with findings)
+== netstandard2.0 (2 project(s), 14 files with findings)
+Run 1: 30 files changed:
+  sample/Sample/CustomPolicy.cs
+  sample/Sample/LoginData.cs
+  sample/Sample/Program.cs
+  sample/Sample/SampleFailureListener.cs
+  src/Serilog.Settings.Configuration/ConfigurationLoggerConfigurationExtensions.cs
+  src/Serilog.Settings.Configuration/Settings/Configuration/Assemblies/CompositeAssemblyFinder.cs
+  src/Serilog.Settings.Configuration/Settings/Configuration/ConfigurationArgumentValue.cs
+  src/Serilog.Settings.Configuration/Settings/Configuration/ConfigurationReader.cs
+  src/Serilog.Settings.Configuration/Settings/Configuration/IConfigurationReader.cs
+  src/Serilog.Settings.Configuration/Settings/Configuration/LoggingFilterSwitchProxy.cs
+  ... and 20 more
+Checked netstandard2.0 (run 1 of 5)
+Checked net8.0 (run 2 of 5)
+Checked net9.0 (run 3 of 5)
+Checked net10.0 (run 4 of 5)
+Checked net462 (run 5 of 5)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

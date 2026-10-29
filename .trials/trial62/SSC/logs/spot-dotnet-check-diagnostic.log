@@ -1,0 +1,95 @@
+Checking StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Not built: test/TestApp/: no configuration of serilog-settings-configuration.sln builds the project there, so 'dotnet restore' skips it and 'format' leaves it alone. Where a Directory.Build.props above brings StyleBro into its build, format it on its own: 'bro format test/TestApp/TestApp.csproj'.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net462, net9.0, netstandard2.0). net8.0: no run of its own, the code compiles the same as for another framework of the same kind (the same '#if' symbols tested, files and settings). net9.0: only the projects whose code compiles differently there.
+Checked netstandard2.0 (run 1 of 4)
+Checked net462 (run 2 of 4)
+Checked net9.0 (run 3 of 4)
+Checked net10.0 (run 4 of 4)
+The dotnet runtime version is '10.0.13'.
+Formatting code files in workspace '/home/user/w62/SSC/dotnet/.stylebro-format-0.slnf'.
+Loading workspace.
+Found project reference without a matching metadata reference: /home/user/w62/SSC/dotnet/test/TestDummies/TestDummies.csproj
+Project Serilog.Settings.Configuration is using configuration from '/home/user/w62/SSC/dotnet/.editorconfig'.
+Project Serilog.Settings.Configuration is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial62.1/build/presets/stylebro.1.0.globalconfig'.
+Project Serilog.Settings.Configuration is using configuration from '/home/user/w62/SSC/dotnet/src/Serilog.Settings.Configuration/obj/Debug/net10.0/Serilog.Settings.Configuration.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Serilog.Settings.Configuration is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_10_default.globalconfig'.
+Project Serilog.Settings.Configuration.Tests is using configuration from '/home/user/w62/SSC/dotnet/.editorconfig'.
+Project Serilog.Settings.Configuration.Tests is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial62.1/build/presets/stylebro.1.0.globalconfig'.
+Project Serilog.Settings.Configuration.Tests is using configuration from '/home/user/w62/SSC/dotnet/test/Serilog.Settings.Configuration.Tests/obj/Debug/net10.0/Serilog.Settings.Configuration.Tests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Serilog.Settings.Configuration.Tests is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_10_default.globalconfig'.
+Project Sample is using configuration from '/home/user/w62/SSC/dotnet/.editorconfig'.
+Project Sample is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial62.1/build/presets/stylebro.1.0.globalconfig'.
+Project Sample is using configuration from '/home/user/w62/SSC/dotnet/sample/Sample/obj/Debug/net10.0/Sample.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Sample is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_10_default.globalconfig'.
+Project TestDummies(netstandard2.0) is using configuration from '/home/user/w62/SSC/dotnet/.editorconfig'.
+Project TestDummies(netstandard2.0) is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial62.1/build/presets/stylebro.1.0.globalconfig'.
+Project TestDummies(netstandard2.0) is using configuration from '/home/user/w62/SSC/dotnet/test/TestDummies/obj/Debug/netstandard2.0/TestDummies.GeneratedMSBuildEditorConfig.editorconfig'.
+Project TestDummies(net462) is using configuration from '/home/user/w62/SSC/dotnet/.editorconfig'.
+Project TestDummies(net462) is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial62.1/build/presets/stylebro.1.0.globalconfig'.
+Project TestDummies(net462) is using configuration from '/home/user/w62/SSC/dotnet/test/TestDummies/obj/Debug/net462/TestDummies.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 7314ms.
+Determining formattable files.
+Complete in 1023ms.
+Running formatters.
+Running Code Style analysis.
+Determining diagnostics...
+Running 2 analyzers on Serilog.Settings.Configuration.
+Running 2 analyzers on Serilog.Settings.Configuration.Tests.
+Running 2 analyzers on Sample.
+Complete in 5766ms.
+Analysis complete in 5766ms.
+Running Analyzer Reference analysis.
+Running 72 analyzers on Serilog.Settings.Configuration.
+Running 91 analyzers on Serilog.Settings.Configuration.Tests.
+Running 72 analyzers on Sample.
+Complete in 6626ms.
+Analysis complete in 6626ms.
+Complete in 14141ms.
+Formatted 0 of 121 files.
+Format complete in 22479ms.
+Formatting code files in workspace '/home/user/w62/SSC/dotnet/.stylebro-format-1.slnf'.
+Project Serilog.Settings.Configuration is using configuration from '/home/user/w62/SSC/dotnet/src/Serilog.Settings.Configuration/obj/Debug/net462/Serilog.Settings.Configuration.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Sample is using configuration from '/home/user/w62/SSC/dotnet/sample/Sample/obj/Debug/net462/Sample.GeneratedMSBuildEditorConfig.editorconfig'.
+Project TestDummies is using configuration from '/home/user/w62/SSC/dotnet/.editorconfig'.
+Project TestDummies is using configuration from '/root/.nuget/packages/stylebro.analyzers/0.8.0-trial62.1/build/presets/stylebro.1.0.globalconfig'.
+Project TestDummies is using configuration from '/home/user/w62/SSC/dotnet/test/TestDummies/obj/Debug/net462/TestDummies.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 5481ms.
+Complete in 535ms.
+Running 2 analyzers on TestDummies.
+Complete in 2914ms.
+Analysis complete in 2923ms.
+Running 72 analyzers on TestDummies.
+Complete in 3555ms.
+Analysis complete in 3555ms.
+Complete in 8419ms.
+Formatted 0 of 59 files.
+Format complete in 14435ms.
+Formatting code files in workspace '/home/user/w62/SSC/dotnet/.stylebro-format-2.slnf'.
+Project Serilog.Settings.Configuration is using configuration from '/home/user/w62/SSC/dotnet/src/Serilog.Settings.Configuration/obj/Debug/net9.0/Serilog.Settings.Configuration.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Serilog.Settings.Configuration is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_9_default.globalconfig'.
+Project Serilog.Settings.Configuration.Tests is using configuration from '/home/user/w62/SSC/dotnet/test/Serilog.Settings.Configuration.Tests/obj/Debug/net9.0/Serilog.Settings.Configuration.Tests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Serilog.Settings.Configuration.Tests is using configuration from '/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_9_default.globalconfig'.
+Complete in 7934ms.
+Complete in 780ms.
+Complete in 4943ms.
+Analysis complete in 4943ms.
+Complete in 5767ms.
+Analysis complete in 5772ms.
+Complete in 12584ms.
+Formatted 0 of 112 files.
+Format complete in 21299ms.
+Formatting code files in workspace '/home/user/w62/SSC/dotnet/.stylebro-format-3.slnf'.
+Project Serilog.Settings.Configuration is using configuration from '/home/user/w62/SSC/dotnet/src/Serilog.Settings.Configuration/obj/Debug/netstandard2.0/Serilog.Settings.Configuration.GeneratedMSBuildEditorConfig.editorconfig'.
+Project TestDummies is using configuration from '/home/user/w62/SSC/dotnet/test/TestDummies/obj/Debug/netstandard2.0/TestDummies.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 5849ms.
+Complete in 560ms.
+Complete in 2534ms.
+Analysis complete in 2534ms.
+Complete in 3314ms.
+Analysis complete in 3314ms.
+Complete in 8049ms.
+Formatted 0 of 50 files.
+Format complete in 14458ms.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Clean.
