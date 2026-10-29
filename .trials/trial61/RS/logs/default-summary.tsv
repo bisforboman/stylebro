@@ -1,0 +1,5 @@
+preview	0	50s	bro preview init
+setup	0	9s	bash -c python3 /home/user/stylebro/.trials/trial61/addref.py Directory.Build.props "<PackageReference Include=\"StyleBro.Analyzers\" Version=\"${V:-0.8.0-trial61.1}\" PrivateAssets=\"all\" />" && git diff --stat && bro init --write
+format	0	39s	bro format
+check	0	1s	bro check
+check-json	0
