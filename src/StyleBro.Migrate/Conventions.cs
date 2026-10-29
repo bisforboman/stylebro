@@ -2117,7 +2117,6 @@ internal static class Conventions
             }
         }
 
-
         // Unit = private constants and private static readonly fields (BRO1306's): PascalCase, camelCase or _camelCase.
         // Other names ('s_x', '_X', 'x_y') are other rules' (BRO1307, BRO1308) and don't count.
         void StaticFieldCasing()
