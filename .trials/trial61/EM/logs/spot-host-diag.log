@@ -1,0 +1,48 @@
+Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net462, net8.0, netstandard2.0).
+Checked netstandard2.0 (run 1 of 3)
+Checked net462 (run 2 of 3)
+Checked net8.0 (run 3 of 3)
+Formatting code files in workspace '/home/user/w61/EM/default/.stylebro-format-0.slnf'.
+Loading workspace.
+Msbuild failed when processing the file '/home/user/w61/EM/default/ExcelMapper/ExcelMapper.csproj' with message: The URL of repository remote 'origin' is invalid: '/home/user/cand61/mganss-ExcelMapper'.
+Complete in 16755ms.
+Determining formattable files.
+Complete in 1004ms.
+Running formatters.
+Running Code Style analysis.
+Determining diagnostics...
+Running 2 analyzers on ExcelMapper.
+Complete in 1747ms.
+Analysis complete in 1747ms.
+Running Analyzer Reference analysis.
+Running 71 analyzers on ExcelMapper.
+Complete in 3691ms.
+Analysis complete in 3691ms.
+Complete in 5871ms.
+Formatted 0 of 20 files.
+Format complete in 23630ms.
+Formatting code files in workspace '/home/user/w61/EM/default/.stylebro-format-1.slnf'.
+Complete in 16752ms.
+Complete in 438ms.
+Running 2 analyzers on ExcelMapper.Tests.
+Complete in 2495ms.
+Analysis complete in 2495ms.
+Running 71 analyzers on ExcelMapper.Tests.
+Complete in 3702ms.
+Analysis complete in 3702ms.
+Complete in 7551ms.
+Formatted 0 of 25 files.
+Format complete in 24741ms.
+Formatting code files in workspace '/home/user/w61/EM/default/.stylebro-format-2.slnf'.
+Complete in 16753ms.
+Complete in 601ms.
+Complete in 1746ms.
+Analysis complete in 1746ms.
+Complete in 3692ms.
+Analysis complete in 3692ms.
+Complete in 6278ms.
+Format complete in 23632ms.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Clean.

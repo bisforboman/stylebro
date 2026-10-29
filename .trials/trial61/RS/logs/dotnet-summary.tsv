@@ -5,3 +5,9 @@ check	0	0s	bro check --engine dotnet-format
 check-json	0
 check-full	0	26s	bro check --engine dotnet-format
 checkbuild	0	57s	bro check --build --engine dotnet-format
+checkbuild-json	0
+twae-Debug	0	6s	twae Debug
+test-Debug	0	5s	env CFG=Debug bash -c dotnet test Respawn.UnitTests -c $CFG
+twae-Release	0	7s	twae Release
+test-Release	0	5s	env CFG=Release bash -c dotnet test Respawn.UnitTests -c $CFG
+DONE

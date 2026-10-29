@@ -238,6 +238,9 @@ A few settings work a little differently:
   `for_non_interface_members`, so [BRO1404](rules/BRO1404.md) doesn't add them.
 - **`else`/`catch`/`finally` placement** counts only blocks that span lines: in a one-line method
   (`{ if (x) { return 1; } else return 2; }`) the layout isn't a choice.
+- **Blank lines below a type's `{`** ([BRO1503](rules/BRO1503.md)) count the `{` of namespaces and types (not blocks in
+  members, empty or one-line bodies, or `{ // note`): right above the code inside or with a blank line below. Mostly right
+  above: the rule stays on; mostly with one or mixed: it's turned off (cecil puts one below 543 of 720).
 - **Blank lines below doc comments** ([BRO1511](rules/BRO1511.md)) count doc comments right above their element or with
   a blank line between. Mostly right above: the rule stays on; mostly with one or mixed: it's turned off (MoreLINQ).
 - **Primary-constructor parameters** ([BRO1302](rules/BRO1302.md)) count those named like parameters (`logger`) or like
@@ -348,6 +351,7 @@ A few settings work a little differently:
 | Nested `if`s | `if`s nested alone in another `if` that BRO1149 would merge (3 turn the rule off) | [BRO1149](rules/BRO1149.md) | `dotnet_diagnostic.BRO1149.severity` |
 | Namespace braces | files whose block namespace has its `{` where `csharp_new_line_before_open_brace` doesn't put it (`types` covers namespaces): when most do, IDE0055 is off until you decide (the report says how many files would change) | SDK formatter (IDE0055) | `dotnet_diagnostic.IDE0055.severity` |
 | Member separation | neighbouring members that need a blank line, with or without one (without: [BRO1519](rules/BRO1519.md) goes off too, else it adds the blank line after a member's `}`) | [BRO1505](rules/BRO1505.md) | `dotnet_diagnostic.BRO1505.severity` |
+| Blank line below a type's `{` | the `{` of namespaces and types right above the code inside or with a blank line below | [BRO1503](rules/BRO1503.md) | `dotnet_diagnostic.BRO1503.severity` |
 | Blank line above doc comments | doc comments right below code or after a blank line | [BRO1513](rules/BRO1513.md) | `dotnet_diagnostic.BRO1513.severity` |
 | Blank line below comments | `//` comments right above code or with a blank line below | [BRO1506](rules/BRO1506.md) | `dotnet_diagnostic.BRO1506.severity` |
 | Blank line above comments | `//` comments right below code or after a blank line | [BRO1504](rules/BRO1504.md) | `dotnet_diagnostic.BRO1504.severity` |

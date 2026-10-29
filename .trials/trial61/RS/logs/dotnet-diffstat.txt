@@ -1,0 +1,25 @@
+ Directory.Build.props                      |  4 ++++
+ Respawn.DatabaseTests/DB2Tests.cs          | 17 ++++++++---------
+ Respawn.DatabaseTests/EmptyDbTests.cs      |  5 ++---
+ Respawn.DatabaseTests/InformixFixture.cs   |  9 ++++-----
+ Respawn.DatabaseTests/InformixTests.cs     | 16 ++++++++--------
+ Respawn.DatabaseTests/MySqlTests.cs        |  4 +---
+ Respawn.DatabaseTests/OracleTests.cs       | 11 +++++------
+ Respawn.DatabaseTests/PostgresTests.cs     |  2 --
+ Respawn.DatabaseTests/SkipOnCIAttribute.cs | 16 ++++++++--------
+ Respawn.DatabaseTests/SnowflakeTests.cs    |  4 ++--
+ Respawn.DatabaseTests/SqlServerTests.cs    |  5 +++--
+ Respawn.UnitTests/GraphTests.cs            |  6 +++---
+ Respawn/DB2DbAdapter.cs                    |  8 +++-----
+ Respawn/Graph/GraphBuilder.cs              | 12 ++++++++----
+ Respawn/Graph/Table.cs                     |  7 +++----
+ Respawn/IDbAdapter.cs                      |  8 ++++++++
+ Respawn/IsExternalInit.cs                  | 11 ++++++-----
+ Respawn/MySqlAdapter.cs                    |  2 ++
+ Respawn/OracleDbAdapter.cs                 |  1 +
+ Respawn/Respawner.cs                       |  7 +++++--
+ Respawn/RespawnerOptions.cs                |  4 ++--
+ Respawn/SnowflakeDbAdapter.cs              |  8 ++++----
+ Respawn/SqlServerDbAdapter.cs              |  2 +-
+ Respawn/SqliteDbAdapter.cs                 |  4 ++++
+ 24 files changed, 95 insertions(+), 78 deletions(-)

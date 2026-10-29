@@ -1,0 +1,15 @@
+ Directory.Build.props                              |   8 +
+ .../ExcelMapperConvertExceptionTests.cs            | 114 ++++----
+ ExcelMapper.Tests/Tests.cs                         | 291 +++++++++++----------
+ ExcelMapper/ActionInvoker.cs                       |  22 +-
+ ExcelMapper/Attributes/ColumnAttribute.cs          |   8 +-
+ ExcelMapper/Attributes/DataFormatAttribute.cs      |   2 +-
+ ExcelMapper/ColumnInfo.cs                          |  72 +++--
+ ExcelMapper/ColumnInfoDirections.cs                |  11 +-
+ ExcelMapper/EventArgs.cs                           |   2 +-
+ ExcelMapper/ExcelMapper.cs                         | 258 +++++++++---------
+ .../Exceptions/ExcelMapperConvertException.cs      | 248 +++++++++---------
+ ExcelMapper/Extensions.cs                          |   3 +-
+ ExcelMapper/ParsingErrorEventArgs.cs               |   2 +-
+ ExcelMapper/TypeMapper.cs                          |   8 +-
+ 14 files changed, 564 insertions(+), 485 deletions(-)

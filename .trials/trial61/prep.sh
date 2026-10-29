@@ -4,6 +4,8 @@ set -e
 KEY=$1; DEST=$2; T=/home/user/stylebro/.trials/trial61
 . $T/$KEY/env.sh
 rm -rf "$DEST"; git clone -q "$SRC" "$DEST"; cd "$DEST"; git checkout -q "$COMMIT"
+# the real remote: SourceLink fails a project's MSBuild load on a local-path origin (trial 61, EM round 1)
+git remote set-url origin "$(git -C "$SRC" remote get-url origin)"
 git config user.name trial; git config user.email noreply@example.com
 [ "${SUBMODULES:-}" = 1 ] && git submodule update --init --depth 1 -q
 # global.json files that pin an SDK (not test resources named global.json)

@@ -1,3 +1,13 @@
 base start 13:37
 base done 13:38
 CHAIN-DONE
+default start 15:02
+default done 15:06
+dotnet start 15:06
+restart 15:29: FS dotnet killed by the worker restart, rerun
+dotnet start 15:29
+dotnet done 15:35
+CHAIN-DONE
+soak start 15:35
+soak done rc=0 15:38
+soak-compare done 15:38

@@ -1,0 +1,68 @@
+  Determining projects to restore...
+  Restored /home/user/w61/EM/dotnet/ExcelMapper/ExcelMapper.csproj (in 536 ms).
+  Restored /home/user/w61/EM/dotnet/ExcelMapper.Tests/ExcelMapper.Tests.csproj (in 536 ms).
+/root/.nuget/packages/npoi/2.8.1/build/NPOI.targets(8,5): warning : NPOI: You must accept the OSMF EULA license to use NPOI. Add <AcceptNPOIOSMFLicense>true</AcceptNPOIOSMFLicense> to your project file. [/home/user/w61/EM/dotnet/ExcelMapper/ExcelMapper.csproj::TargetFramework=net462]
+  ExcelMapper -> /home/user/w61/EM/dotnet/ExcelMapper/bin/Release/net462/ExcelMapper.dll
+/root/.nuget/packages/npoi/2.8.1/build/NPOI.targets(8,5): warning : NPOI: You must accept the OSMF EULA license to use NPOI. Add <AcceptNPOIOSMFLicense>true</AcceptNPOIOSMFLicense> to your project file. [/home/user/w61/EM/dotnet/ExcelMapper/ExcelMapper.csproj::TargetFramework=netstandard2.0]
+/root/.nuget/packages/microsoft.build.tasks.git/10.0.403/build/Microsoft.Build.Tasks.Git.targets(25,5): warning : The URL of repository remote 'origin' is invalid: '/home/user/cand61/mganss-ExcelMapper'. [/home/user/w61/EM/dotnet/ExcelMapper/ExcelMapper.csproj::TargetFramework=netstandard2.0]
+/root/.nuget/packages/microsoft.sourcelink.common/10.0.403/build/Microsoft.SourceLink.Common.targets(56,5): warning : Source control information is not available - the generated source link is empty. [/home/user/w61/EM/dotnet/ExcelMapper/ExcelMapper.csproj::TargetFramework=netstandard2.0]
+  ExcelMapper -> /home/user/w61/EM/dotnet/ExcelMapper/bin/Release/netstandard2.0/ExcelMapper.dll
+  ExcelMapper.Tests -> /home/user/w61/EM/dotnet/ExcelMapper.Tests/bin/Release/net8.0/ExcelMapper.Tests.dll
+Test run for /home/user/w61/EM/dotnet/ExcelMapper.Tests/bin/Release/net8.0/ExcelMapper.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+  Failed SaveTest [26 ms]
+  Error Message:
+   System.TypeInitializationException : The type initializer for 'SkiaSharp.SkiaApi' threw an exception.
+  TypeName: SkiaSharp.SkiaApi
+  ----> System.InvalidOperationException : The version of the native libSkiaSharp library (119.0) is incompatible with this version of SkiaSharp. Supported versions of the native libSkiaSharp library are in the range [154.0, 155.0).
+  Stack Trace:
+     at SkiaSharp.SkiaApi.sk_fontstyle_new(Int32 weight, Int32 width, SKFontStyleSlant slant)
+   at SkiaSharp.SKFontStyle..ctor(Int32 weight, Int32 width, SKFontStyleSlant slant)
+   at SkiaSharp.SKFontStyle..ctor(SKFontStyleWeight weight, SKFontStyleWidth width, SKFontStyleSlant slant)
+   at NPOI.SS.Util.SheetUtil.IFont2TypefaceImpl(FontCacheKey cacheKey)
+   at System.Collections.Concurrent.ConcurrentDictionary`2.GetOrAdd(TKey key, Func`2 valueFactory)
+   at NPOI.SS.Util.SheetUtil.IFont2Font(IFont font1)
+   at NPOI.SS.Util.SheetUtil.GetDefaultCharWidth(IWorkbook wb)
+   at NPOI.SS.Util.SheetUtil.GetColumnWidth(ISheet sheet, Int32 column, Boolean useMergedCells, Int32 firstRow, Int32 lastRow, Int32 maxRows)
+   at NPOI.SS.Util.SheetUtil.GetColumnWidth(ISheet sheet, Int32 column, Boolean useMergedCells, Int32 maxRows)
+   at NPOI.XSSF.UserModel.XSSFSheet.AutoSizeColumn(Int32 column, Boolean useMergedCells, Int32 maxRows)
+   at NPOI.XSSF.UserModel.XSSFSheet.AutoSizeColumn(Int32 column)
+   at Ganss.Excel.Tests.Tests.<>c__DisplayClass58_0.<SaveTest>b__0(Object s, SavingEventArgs e) in /home/user/w61/EM/dotnet/ExcelMapper.Tests/Tests.cs:line 1115
+   at Ganss.Excel.ExcelMapper.Save[T](Stream stream, ISheet sheet, IEnumerable`1 objects, Func`2 valueConverter) in /home/user/w61/EM/dotnet/ExcelMapper/ExcelMapper.cs:line 1120
+   at Ganss.Excel.ExcelMapper.Save[T](Stream stream, IEnumerable`1 objects, String sheetName, Boolean xlsx, Func`2 valueConverter) in /home/user/w61/EM/dotnet/ExcelMapper/ExcelMapper.cs:line 972
+   at Ganss.Excel.ExcelMapper.Save[T](String file, IEnumerable`1 objects, String sheetName, Boolean xlsx, Func`2 valueConverter) in /home/user/w61/EM/dotnet/ExcelMapper/ExcelMapper.cs:line 940
+   at Ganss.Excel.Tests.Tests.SaveTest() in /home/user/w61/EM/dotnet/ExcelMapper.Tests/Tests.cs:line 1118
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+--InvalidOperationException
+   at SkiaSharp.SkiaSharpVersion.CheckNativeLibraryCompatible(Version minSupported, Version current, Boolean throwIfIncompatible)
+   at SkiaSharp.SkiaSharpVersion.CheckNativeLibraryCompatible(Boolean throwIfIncompatible)
+   at SkiaSharp.SkiaApi..cctor()
+1)    at SkiaSharp.SkiaApi.sk_fontstyle_new(Int32 weight, Int32 width, SKFontStyleSlant slant)
+   at SkiaSharp.SKFontStyle..ctor(Int32 weight, Int32 width, SKFontStyleSlant slant)
+   at SkiaSharp.SKFontStyle..ctor(SKFontStyleWeight weight, SKFontStyleWidth width, SKFontStyleSlant slant)
+   at NPOI.SS.Util.SheetUtil.IFont2TypefaceImpl(FontCacheKey cacheKey)
+   at System.Collections.Concurrent.ConcurrentDictionary`2.GetOrAdd(TKey key, Func`2 valueFactory)
+   at NPOI.SS.Util.SheetUtil.IFont2Font(IFont font1)
+   at NPOI.SS.Util.SheetUtil.GetDefaultCharWidth(IWorkbook wb)
+   at NPOI.SS.Util.SheetUtil.GetColumnWidth(ISheet sheet, Int32 column, Boolean useMergedCells, Int32 firstRow, Int32 lastRow, Int32 maxRows)
+   at NPOI.SS.Util.SheetUtil.GetColumnWidth(ISheet sheet, Int32 column, Boolean useMergedCells, Int32 maxRows)
+   at NPOI.XSSF.UserModel.XSSFSheet.AutoSizeColumn(Int32 column, Boolean useMergedCells, Int32 maxRows)
+   at NPOI.XSSF.UserModel.XSSFSheet.AutoSizeColumn(Int32 column)
+   at Ganss.Excel.Tests.Tests.<>c__DisplayClass58_0.<SaveTest>b__0(Object s, SavingEventArgs e) in /home/user/w61/EM/dotnet/ExcelMapper.Tests/Tests.cs:line 1115
+   at Ganss.Excel.ExcelMapper.Save[T](Stream stream, ISheet sheet, IEnumerable`1 objects, Func`2 valueConverter) in /home/user/w61/EM/dotnet/ExcelMapper/ExcelMapper.cs:line 1120
+   at Ganss.Excel.ExcelMapper.Save[T](Stream stream, IEnumerable`1 objects, String sheetName, Boolean xlsx, Func`2 valueConverter) in /home/user/w61/EM/dotnet/ExcelMapper/ExcelMapper.cs:line 972
+   at Ganss.Excel.ExcelMapper.Save[T](String file, IEnumerable`1 objects, String sheetName, Boolean xlsx, Func`2 valueConverter) in /home/user/w61/EM/dotnet/ExcelMapper/ExcelMapper.cs:line 940
+   at Ganss.Excel.Tests.Tests.SaveTest() in /home/user/w61/EM/dotnet/ExcelMapper.Tests/Tests.cs:line 1118
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+--InvalidOperationException
+   at SkiaSharp.SkiaSharpVersion.CheckNativeLibraryCompatible(Version minSupported, Version current, Boolean throwIfIncompatible)
+   at SkiaSharp.SkiaSharpVersion.CheckNativeLibraryCompatible(Boolean throwIfIncompatible)
+   at SkiaSharp.SkiaApi..cctor()
+
+
+Failed!  - Failed:     1, Passed:   121, Skipped:     0, Total:   122, Duration: 5 s - ExcelMapper.Tests.dll (net8.0)
