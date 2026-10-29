@@ -1,0 +1,85 @@
+242 files, 76 / 76 analyzers, 10 runs
+## Analyzer performance (Newtonsoft.Json, all rules, base vs head, alternated, fastest run each)
+
+| Analyzer | Base | Head | Change | Reports (base / head) |
+|---|---:|---:|---:|---:|
+| DocumentationAnalyzer | 53.2 ms | 50.4 ms | -2.8 ms | 259 / 259 |
+| TreeWalk (shared walk of every tree) | 52.4 ms | 49.5 ms | -2.9 ms | 0 / 0 |
+| NullForgivingAnalyzer | 46.1 ms | 50.6 ms | +4.5 ms | 18 / 18 |
+| FieldNamingAnalyzer | 33.1 ms | 31.8 ms | -1.3 ms | 208 / 208 |
+| CamelCaseNamingAnalyzer | 28.5 ms | 27.0 ms | -1.4 ms | 3 / 3 |
+| BlankLineRunsAnalyzer | 23.7 ms | 20.8 ms | -2.9 ms | 391 / 391 |
+| MemberOrderingAnalyzer | 20.1 ms | 17.5 ms | -2.6 ms | 69 / 69 |
+| CommentTextAnalyzer | 16.7 ms | 15.4 ms | -1.3 ms | 13 / 13 |
+| ParameterLayoutAnalyzer | 13.1 ms | 11.9 ms | -1.2 ms | 21 / 21 |
+| NullCheckAnalyzer | 11.3 ms | 12.7 ms | +1.4 ms | 1067 / 1067 |
+| NestedIfAnalyzer | 11.6 ms | 10.8 ms | -0.9 ms | 29 / 29 |
+| ParenthesisPlacementAnalyzer | 11.3 ms | 10.3 ms | -1.0 ms | 1 / 1 |
+| ListGapsAnalyzer | 10.0 ms | 8.7 ms | -1.3 ms | 0 / 0 |
+| ConstantOnLeftAnalyzer | 8.9 ms | 9.8 ms | +0.8 ms | 9 / 9 |
+| ElseIfAnalyzer | 9.7 ms | 8.9 ms | -0.8 ms | 21 / 21 |
+| PascalCaseNamingAnalyzer | 7.9 ms | 8.4 ms | +0.5 ms | 0 / 0 |
+| BlankLineAfterAnalyzer | 7.9 ms | 7.3 ms | -0.7 ms | 36 / 36 |
+| DocumentationStyleAnalyzer | 7.8 ms | 7.5 ms | -0.3 ms | 295 / 295 |
+| DocumentationBlankLinesAnalyzer | 7.2 ms | 7.0 ms | -0.2 ms | 186 / 186 |
+| BaseCallsAnalyzer | 6.2 ms | 7.2 ms | +1.0 ms | 0 / 0 |
+| WrappingPlacementAnalyzer | 7.1 ms | 6.1 ms | -0.9 ms | 56 / 56 |
+| RegionsAnalyzer | 6.9 ms | 6.0 ms | -0.9 ms | 234 / 234 |
+| ElementSeparationAnalyzer | 6.7 ms | 5.8 ms | -0.9 ms | 26 / 26 |
+| ParenthesesAnalyzer | 6.3 ms | 5.8 ms | -0.5 ms | 330 / 330 |
+| ContextualKeywordAnalyzer | 5.9 ms | 5.2 ms | -0.7 ms | 0 / 0 |
+| TupleElementNameAnalyzer | 5.0 ms | 5.8 ms | +0.7 ms | 0 / 0 |
+| PrefixNamingAnalyzer | 5.5 ms | 5.0 ms | -0.5 ms | 6 / 6 |
+| CallChainAnalyzer | 5.4 ms | 4.9 ms | -0.5 ms | 1 / 1 |
+| SingleLineBlocksAnalyzer | 5.2 ms | 4.6 ms | -0.6 ms | 4 / 4 |
+| DefaultValueConstructorAnalyzer | 5.2 ms | 4.9 ms | -0.3 ms | 7 / 7 |
+| BlankLineBeforeAnalyzer | 5.1 ms | 4.4 ms | -0.7 ms | 0 / 0 |
+| AttributeBlankLinesAnalyzer | 4.0 ms | 3.6 ms | -0.5 ms | 1 / 1 |
+| InternalTypeMethodAnalyzer | 3.6 ms | 3.6 ms | +0.0 ms | 263 / 263 |
+| ElseAfterJumpAnalyzer | 3.5 ms | 3.0 ms | -0.5 ms | 39 / 39 |
+| BracesAnalyzer | 3.1 ms | 2.9 ms | -0.2 ms | 83 / 83 |
+| SummaryLayoutAnalyzer | 3.0 ms | 2.6 ms | -0.4 ms | 11 / 11 |
+| TupleSyntaxAnalyzer | 2.3 ms | 2.4 ms | +0.1 ms | 0 / 0 |
+| AccessModifiersAnalyzer | 2.4 ms | 1.9 ms | -0.5 ms | 1 / 1 |
+| ConstraintPlacementAnalyzer | 2.3 ms | 2.3 ms | +0.1 ms | 30 / 30 |
+| CombinedFieldsAnalyzer | 2.1 ms | 1.8 ms | -0.3 ms | 0 / 0 |
+| ConditionalLayoutAnalyzer | 2.0 ms | 1.8 ms | -0.2 ms | 0 / 0 |
+| EmptyStringAnalyzer | 1.8 ms | 1.7 ms | -0.1 ms | 1 / 1 |
+| ParamsArrayAnalyzer | 1.5 ms | 1.6 ms | +0.1 ms | 0 / 0 |
+| SwitchSectionBlankLinesAnalyzer | 1.5 ms | 1.4 ms | -0.2 ms | 601 / 601 |
+| DirectiveSpacingAnalyzer | 1.5 ms | 1.4 ms | +0.0 ms | 0 / 0 |
+| HasValueAnalyzer | 1.0 ms | 1.2 ms | +0.2 ms | 17 / 17 |
+| TrailingCommaAnalyzer | 1.1 ms | 0.9 ms | -0.1 ms | 53 / 53 |
+| EmptyStatementAnalyzer | 1.0 ms | 0.8 ms | -0.2 ms | 0 / 0 |
+| AutoAccessorLinesAnalyzer | 0.9 ms | 0.9 ms | +0.0 ms | 0 / 0 |
+| TrailingBlankLinesAnalyzer | 0.9 ms | 0.8 ms | -0.1 ms | 0 / 0 |
+| RedundantJumpAnalyzer | 0.9 ms | 0.7 ms | -0.2 ms | 0 / 0 |
+| PrecedenceAnalyzer | 0.8 ms | 0.7 ms | -0.1 ms | 5 / 5 |
+| LiteralSuffixAnalyzer | 0.8 ms | 0.8 ms | +0.0 ms | 0 / 0 |
+| CombinedAttributesAnalyzer | 0.8 ms | 0.6 ms | -0.2 ms | 0 / 0 |
+| EmbeddedCommentAnalyzer | 0.8 ms | 0.6 ms | -0.2 ms | 3 / 3 |
+| WhereBeforeTerminalAnalyzer | 0.7 ms | 0.7 ms | +0.0 ms | 0 / 0 |
+| CommentSpacingAnalyzer | 0.6 ms | 0.5 ms | -0.1 ms | 5 / 5 |
+| EmptyTypeBodyAnalyzer | 0.6 ms | 0.5 ms | -0.1 ms | 9 / 9 |
+| ConstructorInitializerLineAnalyzer | 0.5 ms | 0.5 ms | +0.1 ms | 6 / 6 |
+| ObjectCreationParenthesesAnalyzer | 0.5 ms | 0.4 ms | -0.1 ms | 0 / 0 |
+| AccessorLayoutAnalyzer | 0.4 ms | 0.4 ms | +0.0 ms | 1 / 1 |
+| NullableShorthandAnalyzer | 0.4 ms | 0.3 ms | +0.0 ms | 0 / 0 |
+| EnumValueLinesAnalyzer | 0.4 ms | 0.3 ms | +0.0 ms | 0 / 0 |
+| QualifiedUsingsAnalyzer | 0.4 ms | 0.4 ms | +0.0 ms | 0 / 0 |
+| StringPrefixAnalyzer | 0.4 ms | 0.3 ms | +0.0 ms | 13 / 13 |
+| AccessorOrderAnalyzer | 0.4 ms | 0.3 ms | -0.1 ms | 0 / 0 |
+| EmptyAttributeParenthesesAnalyzer | 0.3 ms | 0.2 ms | -0.1 ms | 0 / 0 |
+| NamespaceNamingAnalyzer | 0.2 ms | 0.2 ms | +0.0 ms | 0 / 0 |
+| QueryLayoutAnalyzer | 0.2 ms | 0.1 ms | -0.1 ms | 0 / 0 |
+| RedundantBaseTypeAnalyzer | 0.2 ms | 0.2 ms | +0.0 ms | 0 / 0 |
+| EmptyRecordBodyAnalyzer | 0.1 ms | 0.1 ms | -0.1 ms | 0 / 0 |
+| LambdaParenthesesAnalyzer | 0.1 ms | 0.1 ms | +0.0 ms | 1 / 1 |
+| FileHeaderAnalyzer | 0.1 ms | 0.1 ms | +0.0 ms | 0 / 0 |
+| RecordClassKeywordAnalyzer | 0.1 ms | 0.0 ms | +0.0 ms | 0 / 0 |
+| UsingPlacementAnalyzer | 0.1 ms | 0.1 ms | +0.0 ms | 0 / 0 |
+| LambdaSyntaxAnalyzer | 0.0 ms | 0.0 ms | +0.0 ms | 0 / 0 |
+| TupleElementNamingAnalyzer | 0.0 ms | 0.0 ms | +0.0 ms | 0 / 0 |
+| **total** | **500.9 ms** | **477.6 ms** | **-23.3 ms** | |
+
+No regression.

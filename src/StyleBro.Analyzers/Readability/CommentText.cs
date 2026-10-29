@@ -104,8 +104,23 @@ internal static class CommentText
     /// header, inside '#region Apache License', lost its first and last '//' in 325 files; IDE0073 writes them from a
     /// file_header_template starting with a line break, Ical.Net).
     /// </summary>
-    public static bool IsFileHeader(int start, SourceText text) =>
-        text.ToString(TextSpan.FromBounds(0, start)).Split('\n').Select(l => l.Trim()).All(l => l.Length == 0 || l.StartsWith("#region", System.StringComparison.Ordinal));
+    public static bool IsFileHeader(int start, SourceText text)
+    {
+        // Line by line from the top: the first line that isn't blank or '#region' decides (a later group stops at the header).
+        var last = text.Lines.GetLineFromPosition(start).LineNumber;
+        for (var i = 0; i <= last; i++)
+        {
+            var line = text.Lines[i];
+            var end = i == last ? start : line.End;
+            var content = text.ToString(TextSpan.FromBounds(line.Start, end)).Trim();
+            if (content.Length > 0 && !content.StartsWith("#region", System.StringComparison.Ordinal))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     /// <summary>
     /// The edits that remove a run of empty comments on consecutive lines (<see cref="GetEmptyComments"/>). When whole
