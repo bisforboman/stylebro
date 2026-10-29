@@ -6,5 +6,6 @@ export PATH=${BRO_DIR:-/home/user/bro60}:$PATH NuGetAudit=false NUGET_CERT_REVOC
 $T/prep.sh $K $W/${SOAK_SRC:-soak-src} > $T/$K/prep-soak.log 2>&1 || { echo "soak prep failed" >> $T/$K/chain.log; exit 1; }
 cd $W/${SOAK_SRC:-soak-src} && bash -c "$SETUP" >> $T/$K/prep-soak.log 2>&1 && git add -A && git commit -q -m "stylebro step 1" 
 echo "soak start $(date -u +%H:%M)" >> $T/$K/chain.log
-pwsh $T/../../scripts/format-speed/Compare-Format.ps1 -Repository $W/${SOAK_SRC:-soak-src} -Work $W/${SOAK_WORK:-parity} -Bro bro > $T/$K/logs/${SOAK_LOG:-soak-compare}.log 2>&1
+BRO=bro; [ -n "${FMT:-}" ] && { BRO=$T/bro-sln.sh; export FMT; }
+pwsh $T/../../scripts/format-speed/Compare-Format.ps1 -Repository $W/${SOAK_SRC:-soak-src} -Work $W/${SOAK_WORK:-parity} -Bro $BRO > $T/$K/logs/${SOAK_LOG:-soak-compare}.log 2>&1
 echo "soak done rc=$? $(date -u +%H:%M)" >> $T/$K/chain.log

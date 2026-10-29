@@ -1,0 +1,6 @@
+build	0	76s	dotnet build EasyCaching.sln -c Debug
+twae-Debug	1	36s	twae Debug
+test-Debug	1	38s	env CFG=Debug bash -c dotnet test test/EasyCaching.UnitTests/EasyCaching.UnitTests.csproj -c $CFG --filter "$EC_FILTER"
+twae-Release	1	41s	twae Release
+test-Release	0	48s	env CFG=Release bash -c dotnet test test/EasyCaching.UnitTests/EasyCaching.UnitTests.csproj -c $CFG --filter "$EC_FILTER"
+DONE

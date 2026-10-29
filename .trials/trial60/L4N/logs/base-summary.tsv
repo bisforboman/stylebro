@@ -1,0 +1,6 @@
+build	0	57s	dotnet build src/log4net.sln -c Debug
+twae-Debug	0	29s	twae Debug
+test-Debug	0	53s	env CFG=Debug bash -c cd src && dotnet test log4net.sln -c $CFG
+twae-Release	0	31s	twae Release
+test-Release	0	54s	env CFG=Release bash -c cd src && dotnet test log4net.sln -c $CFG
+DONE
