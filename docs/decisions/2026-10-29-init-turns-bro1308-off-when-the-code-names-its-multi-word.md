@@ -1,4 +1,4 @@
-# init turns BRO1303 off when the code names its multi-word private fields snake_case (2026-10-29)
+# init turns BRO1308 off when the code names its multi-word private fields snake_case (2026-10-29)
 
 ## Question
 
@@ -18,5 +18,10 @@ do when the code names its multi-word private fields snake_case?
 
 ## Decision
 
-Detect it, BRO1303 off (owner, 2026-10-29). The usual thresholds: 3 places or more, below 10 all must agree, from 10 on
+Detect it, the rule off (owner, 2026-10-29; the question said BRO1303, the rule is BRO1308: see the correction below). The usual thresholds: 3 places or more, below 10 all must agree, from 10 on
 75 %; mostly camelCase keeps BRO1303 on.
+
+Correction (same day): the rule that renamed the fields is BRO1308 (SA1310, an underscore inside a field name), not
+BRO1303 (casing and the leading `_`), which the question named. Round 2 still renamed them with BRO1303 off, the build
+showed BRO1308's warnings. The choice stands with the rule that does it: init turns BRO1308 off. (Its counts in round 2:
+11 of 13 multi-word private fields snake_case.)

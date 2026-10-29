@@ -235,9 +235,7 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
 - **BRO1303** (SA1306 + SA1309, private fields only; user's decision: configurable, `camelCase` default)
   `stylebro_private_field_naming = camelCase | _camelCase` (`Naming/FieldNames.cs`, `FieldNamingAnalyzer`, a symbol
   action; same fix provider/renamer). Checked: private, not const, not static readonly. One-letter prefixes (`m_`,
-  `s_`) left alone in both styles (SA1308; `s_` is the runtime's static convention). init counts multi-word private
-  field names, camelCase against snake_case (`Migration.CountMultiWordPrivateFields`), and turns BRO1303 off when
-  snake_case wins or the code mixes them (trial 62, mono.linq.expressions: 11 of 11 snake_case renamed). Analyzer skips (whole type, all
+  `s_`) left alone in both styles (SA1308; `s_` is the runtime's static convention). Analyzer skips (whole type, all
   partial parts via DeclaringSyntaxReferences): member with the new name in the type or a base, another checked field
   with the same new name, attributes or [Serializable], old name as a string literal in the type, in disabled `#if`
   text, or as an inferred anonymous/tuple name. The fix qualifies references a local/parameter would hide
@@ -277,7 +275,9 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   casing (Pascal for const/static readonly/non-private, the BRO1303 style for private, camel for protected); an
   all-caps word of 2+ letters counts as a word (`MAX_VALUE` -> `MaxValue`). Skipped: digit_digit (`Int32_0` would
   become `Int320`, found in Newtonsoft.Json), results that are keywords (`s_static`) or empty (`m_`); `t_` fields are
-  usually `[ThreadStatic]` (attributed -> skipped).
+  usually `[ThreadStatic]` (attributed -> skipped). init counts multi-word private field names, camelCase against
+  snake_case (`Migration.CountMultiWordPrivateFields`), and turns BRO1308 off when snake_case wins or the code mixes them
+  (trial 62, mono.linq.expressions: 11 of 13 snake_case, renamed).
 - **BRO1309** (SA1300, not namespaces): types (not interfaces), methods, properties, events (incl. field-like), enum
   members, local functions (`PascalCaseNamingAnalyzer`, syntax node actions). Skips: extern/DllImport/LibraryImport,
   attributed properties/enum members, partial methods, indexers/operators, inherited names (explicit

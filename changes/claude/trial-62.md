@@ -1,6 +1,6 @@
 ### Changed
 
-- **`bro init`** turns **BRO1303** off when your code names its private fields with two or more words in snake_case
+- **`bro init`** turns **BRO1308** off when your code names its private fields with two or more words in snake_case
   (`break_target`), or mixes snake_case and camelCase, so `bro format` no longer renames them.
 
 ### Fixed

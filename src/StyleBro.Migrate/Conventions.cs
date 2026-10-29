@@ -189,7 +189,7 @@ internal static class Conventions
     public static readonly IReadOnlyList<Convention> All = new Convention[]
     {
         new(StyleBro.Analyzers.Naming.FieldNames.StyleKey, "private fields", "camelCase", ("camelCase", "named 'field'"), ("_camelCase", "named '_field'"), Off(DiagnosticIds.PrivateFieldNaming)),
-        new(SnakeFieldKey, "multi-word private fields", "warning", ("warning", "camelCase ('breakTarget')"), ("none", "snake_case ('break_target')"), Off(DiagnosticIds.PrivateFieldNaming)) { Unit = "field" },
+        new(SnakeFieldKey, "multi-word private fields", "warning", ("warning", "camelCase ('breakTarget')"), ("none", "snake_case ('break_target')"), Off(DiagnosticIds.FieldUnderscore)) { Unit = "field" },
         new("csharp_new_line_before_open_brace", "'{' of multi-line blocks", "all", ("all", "on its own line"), ("none", "at the end of the line"), null),
         new("csharp_new_line_before_else", "else/catch/finally after '}'", "true", ("true", "on a new line"), ("false", "on the '}' line"), null, "csharp_new_line_before_catch", "csharp_new_line_before_finally"),
         new("csharp_prefer_braces", "one-line if/else/loop/using/lock bodies", "true", ("true", "with braces"), ("when_multiline", "without braces"), "csharp_prefer_braces = when_multiline") { Enforcer = DiagnosticIds.BracesOmitted, EnforcedValues = new[] { "true" } },
@@ -418,11 +418,11 @@ internal static class Conventions
     private const string BraceBlankLineKey = "dotnet_diagnostic." + DiagnosticIds.BlankLineAfterOpenBrace + ".severity";
 
     /// <summary>
-    /// BRO1303's severity, judged on private fields whose name has two words or more: camelCase, or snake_case (owner's
-    /// decision 2026-10-29, trial 62: mono.linq.expressions names all 11 of its multi-word fields 'break_target' style, and
-    /// BRO1303 renamed them). One-word names fit both and don't count.
+    /// BRO1308's severity, judged on private fields whose name has two words or more: camelCase, or snake_case (owner's
+    /// decision 2026-10-29, trial 62: mono.linq.expressions names 11 of its 13 multi-word fields 'break_target' style, and
+    /// BRO1308 renamed them). One-word names fit both and don't count.
     /// </summary>
-    private const string SnakeFieldKey = "dotnet_diagnostic." + DiagnosticIds.PrivateFieldNaming + ".severity";
+    private const string SnakeFieldKey = "dotnet_diagnostic." + DiagnosticIds.FieldUnderscore + ".severity";
 
     /// <summary>BRO1513's severity: doc comments right below code, or after a blank line (Kavita: 312 files changed).</summary>
     private const string DocBlankLineKey = "dotnet_diagnostic." + DiagnosticIds.BlankLineBeforeDocumentation + ".severity";

@@ -7,7 +7,7 @@ namespace StyleBro.Tests;
 /// <summary>What trial 62 found in bro.</summary>
 public sealed partial class MigrationTests
 {
-    private const string SnakeFieldKey = "dotnet_diagnostic.BRO1303.severity";
+    private const string SnakeFieldKey = "dotnet_diagnostic.BRO1308.severity";
 
     // jbevain/mono.linq.expressions commits its Directory.Build.props as UTF-16 with a BOM and CRLF: init read it as UTF-8 and
     // wrote the preset version back as UTF-8 with LF, so git showed the whole file as changed (a binary diff).
@@ -31,8 +31,8 @@ public sealed partial class MigrationTests
             File.ReadAllText(path));
     }
 
-    // jbevain/mono.linq.expressions names all 11 of its multi-word private fields snake_case ('break_target'), and BRO1303
-    // renamed them (owner's decision 2026-10-29). Only multi-word names of the private fields BRO1303 checks count: not
+    // jbevain/mono.linq.expressions names 11 of its 13 multi-word private fields snake_case ('break_target'), and BRO1308
+    // renamed them (owner's decision 2026-10-29). Only multi-word names of private fields count: not
     // one-word names, 'm_' prefixes, constants, static readonly or non-private fields.
     [Fact]
     public void Conventions_CountMultiWordPrivateFieldsCamelAndSnakeCase()
@@ -66,12 +66,12 @@ public sealed partial class MigrationTests
 
     [Theory]
     [InlineData(10, 0, null)]
-    [InlineData(0, 11, "dotnet_diagnostic.BRO1303.severity = none")]
-    [InlineData(0, 3, "dotnet_diagnostic.BRO1303.severity = none")]
-    [InlineData(5, 4, "dotnet_diagnostic.BRO1303.severity = none")]
+    [InlineData(2, 11, "dotnet_diagnostic.BRO1308.severity = none")]
+    [InlineData(0, 3, "dotnet_diagnostic.BRO1308.severity = none")]
+    [InlineData(5, 4, "dotnet_diagnostic.BRO1308.severity = none")]
     [InlineData(30, 2, null)]
     [InlineData(2, 0, null)]
-    public void Conventions_SnakeCaseFields_TurnBRO1303OffUnlessCamelCaseWins(int camel, int snake, string? line)
+    public void Conventions_SnakeCaseFields_TurnBRO1308OffUnlessCamelCaseWins(int camel, int snake, string? line)
     {
         var lines = Conventions.Decide(new Dictionary<string, int[]> { [SnakeFieldKey] = new[] { camel, snake } }, new Dictionary<string, string>()).Lines
             .Where(l => !l.StartsWith('#'))
@@ -80,16 +80,6 @@ public sealed partial class MigrationTests
         Assert.Equal(line is null ? [] : [line], lines);
     }
 
-    // '_field' against 'field' mixed and snake_case: one off line for BRO1303, not two.
-    [Fact]
-    public void Conventions_TwoConventionsTurningBRO1303Off_WriteItsLineOnce()
-    {
-        var lines = Conventions.Decide(
-            new Dictionary<string, int[]> { ["stylebro_private_field_naming"] = new[] { 10, 10 }, [SnakeFieldKey] = new[] { 0, 11 } },
-            new Dictionary<string, string>()).Lines;
-
-        Assert.Single(lines, l => l == "dotnet_diagnostic.BRO1303.severity = none");
-    }
 
     // Ninject's untouched code fails its TWAE build on xUnit1013 in both target frameworks; MSBuild's parallel output gave the
     // two lines in either order, so two check --build runs' logs differed.

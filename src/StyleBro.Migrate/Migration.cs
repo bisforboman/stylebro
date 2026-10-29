@@ -1367,7 +1367,7 @@ internal static partial class Migration
     /// <summary>
     /// Private fields (as <see cref="CountPrivateFields(SyntaxTree)"/> counts them) whose name, without a leading '_', has two
     /// words or more: camelCase ('breakTarget') or snake_case ('break_target'). One-word names fit both, and a one-letter
-    /// prefix ('m_count') is the prefix rules' (trial 62: mono.linq.expressions' 11 of 11 were snake_case).
+    /// prefix ('m_count') is the prefix rules' (trial 62: mono.linq.expressions' 11 of 13 were snake_case, and BRO1308 renamed them).
     /// </summary>
     internal static (int Camel, int Snake) CountMultiWordPrivateFields(SyntaxTree tree)
     {
