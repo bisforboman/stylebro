@@ -1,0 +1,7 @@
+preview	0	205s	bro preview migrate --engine dotnet-format
+setup	0	13s	bash -c bro migrate . --write && sed -i "s#<PackageReference Include=\"StyleCop.Analyzers\" Version=\"1.1.118\">#<PackageReference Include=\"StyleBro.Analyzers\" Version=\"${V:-0.8.0-trial62.1}\">#" src/Ninject/Ninject.csproj && git diff --stat
+format	0	128s	bro format --engine dotnet-format
+check	0	0s	bro check --engine dotnet-format
+check-json	0
+check-full	0	52s	bro check --engine dotnet-format
+checkbuild	3	122s	bro check --build --engine dotnet-format

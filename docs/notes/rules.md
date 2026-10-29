@@ -235,7 +235,9 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
 - **BRO1303** (SA1306 + SA1309, private fields only; user's decision: configurable, `camelCase` default)
   `stylebro_private_field_naming = camelCase | _camelCase` (`Naming/FieldNames.cs`, `FieldNamingAnalyzer`, a symbol
   action; same fix provider/renamer). Checked: private, not const, not static readonly. One-letter prefixes (`m_`,
-  `s_`) left alone in both styles (SA1308; `s_` is the runtime's static convention). Analyzer skips (whole type, all
+  `s_`) left alone in both styles (SA1308; `s_` is the runtime's static convention). init counts multi-word private
+  field names, camelCase against snake_case (`Migration.CountMultiWordPrivateFields`), and turns BRO1303 off when
+  snake_case wins or the code mixes them (trial 62, mono.linq.expressions: 11 of 11 snake_case renamed). Analyzer skips (whole type, all
   partial parts via DeclaringSyntaxReferences): member with the new name in the type or a base, another checked field
   with the same new name, attributes or [Serializable], old name as a string literal in the type, in disabled `#if`
   text, or as an inferred anonymous/tuple name. The fix qualifies references a local/parameter would hide

@@ -1,0 +1,137 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Debug/net462/Serilog.Settings.Configuration.dll
+  TestDummies -> /home/user/w62/SSC/base/test/TestDummies/bin/Debug/netstandard2.0/TestDummies.dll
+  TestDummies -> /home/user/w62/SSC/base/test/TestDummies/bin/Debug/net462/TestDummies.dll
+  Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Debug/netstandard2.0/Serilog.Settings.Configuration.dll
+  Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Debug/net9.0/Serilog.Settings.Configuration.dll
+  Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Debug/net8.0/Serilog.Settings.Configuration.dll
+  Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Debug/net10.0/Serilog.Settings.Configuration.dll
+  Sample -> /home/user/w62/SSC/base/sample/Sample/bin/Debug/net10.0/Sample.dll
+  Serilog.Settings.Configuration.Tests -> /home/user/w62/SSC/base/test/Serilog.Settings.Configuration.Tests/bin/Debug/net10.0/Serilog.Settings.Configuration.Tests.dll
+  Serilog.Settings.Configuration.Tests -> /home/user/w62/SSC/base/test/Serilog.Settings.Configuration.Tests/bin/Debug/net9.0/Serilog.Settings.Configuration.Tests.dll
+  Sample -> /home/user/w62/SSC/base/sample/Sample/bin/Debug/net9.0/Sample.dll
+  Sample -> /home/user/w62/SSC/base/sample/Sample/bin/Debug/net462/Sample.exe
+  Sample -> /home/user/w62/SSC/base/sample/Sample/bin/Debug/net8.0/Sample.dll
+  Serilog.Settings.Configuration.Tests -> /home/user/w62/SSC/base/test/Serilog.Settings.Configuration.Tests/bin/Debug/net8.0/Serilog.Settings.Configuration.Tests.dll
+Test run for /home/user/w62/SSC/base/test/Serilog.Settings.Configuration.Tests/bin/Debug/net10.0/Serilog.Settings.Configuration.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /home/user/w62/SSC/base/test/Serilog.Settings.Configuration.Tests/bin/Debug/net8.0/Serilog.Settings.Configuration.Tests.dll (.NETCoreApp,Version=v8.0)
+Test run for /home/user/w62/SSC/base/test/Serilog.Settings.Configuration.Tests/bin/Debug/net9.0/Serilog.Settings.Configuration.Tests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.61] Serilog.Settings.Configuration.Tests: Non-serializable data ('System.Object[]') found for 'Serilog.Settings.Configuration.Tests.ConfigurationReaderTests.FlatMinimumLevelCorrectOneIsEnabledOnLogger'; falling back to single test case.
+[xUnit.net 00:00:00.62] Serilog.Settings.Configuration.Tests: Non-serializable data ('System.Object[]') found for 'Serilog.Settings.Configuration.Tests.ConfigurationReaderTests.ObjectMinimumLevelCorrectOneIsEnabledOnLogger'; falling back to single test case.
+[xUnit.net 00:00:00.62] Serilog.Settings.Configuration.Tests: Non-serializable data ('System.Object[]') found for 'Serilog.Settings.Configuration.Tests.ConfigurationReaderTests.MixedMinimumLevelCorrectOneIsEnabledOnLogger'; falling back to single test case.
+[xUnit.net 00:00:00.61] Serilog.Settings.Configuration.Tests: Non-serializable data ('System.Object[]') found for 'Serilog.Settings.Configuration.Tests.ConfigurationReaderTests.FlatMinimumLevelCorrectOneIsEnabledOnLogger'; falling back to single test case.
+[xUnit.net 00:00:00.62] Serilog.Settings.Configuration.Tests: Non-serializable data ('System.Object[]') found for 'Serilog.Settings.Configuration.Tests.ConfigurationReaderTests.ObjectMinimumLevelCorrectOneIsEnabledOnLogger'; falling back to single test case.
+[xUnit.net 00:00:00.65] Serilog.Settings.Configuration.Tests: Non-serializable data ('System.Object[]') found for 'Serilog.Settings.Configuration.Tests.ConfigurationReaderTests.MixedMinimumLevelCorrectOneIsEnabledOnLogger'; falling back to single test case.
+[xUnit.net 00:00:00.95] Serilog.Settings.Configuration.Tests: Non-serializable data ('System.Object[]') found for 'Serilog.Settings.Configuration.Tests.ConfigurationReaderTests.FlatMinimumLevelCorrectOneIsEnabledOnLogger'; falling back to single test case.
+[xUnit.net 00:00:00.97] Serilog.Settings.Configuration.Tests: Non-serializable data ('System.Object[]') found for 'Serilog.Settings.Configuration.Tests.ConfigurationReaderTests.ObjectMinimumLevelCorrectOneIsEnabledOnLogger'; falling back to single test case.
+[xUnit.net 00:00:00.97] Serilog.Settings.Configuration.Tests: Non-serializable data ('System.Object[]') found for 'Serilog.Settings.Configuration.Tests.ConfigurationReaderTests.MixedMinimumLevelCorrectOneIsEnabledOnLogger'; falling back to single test case.
+[xUnit.net 00:00:03.14] Serilog.Settings.Configuration.Tests: cd /home/user/w62/SSC/base/test/TestApp-net8.0
+[xUnit.net 00:00:03.16] Serilog.Settings.Configuration.Tests: dotnet pack /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/Serilog.Settings.Configuration.csproj --configuration Release --output /home/user/w62/SSC/base/test/TestApp-net8.0 -p:Version=0.0.0-IntegrationTest.0
+[xUnit.net 00:00:03.66] Serilog.Settings.Configuration.Tests: cd /home/user/w62/SSC/base/test/TestApp-net10.0
+[xUnit.net 00:00:03.66] Serilog.Settings.Configuration.Tests: dotnet pack /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/Serilog.Settings.Configuration.csproj --configuration Release --output /home/user/w62/SSC/base/test/TestApp-net10.0 -p:Version=0.0.0-IntegrationTest.0
+[xUnit.net 00:00:05.43] Serilog.Settings.Configuration.Tests: cd /home/user/w62/SSC/base/test/TestApp-net9.0
+[xUnit.net 00:00:05.43] Serilog.Settings.Configuration.Tests: dotnet pack /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/Serilog.Settings.Configuration.csproj --configuration Release --output /home/user/w62/SSC/base/test/TestApp-net9.0 -p:Version=0.0.0-IntegrationTest.0
+[xUnit.net 00:00:06.86] Serilog.Settings.Configuration.Tests: ==> out:   Determining projects to restore...
+[xUnit.net 00:00:08.76] Serilog.Settings.Configuration.Tests: ==> out:   Determining projects to restore...
+[xUnit.net 00:00:10.01] Serilog.Settings.Configuration.Tests: ==> out:   Determining projects to restore...
+[xUnit.net 00:00:14.38] Serilog.Settings.Configuration.Tests: ==> out:   Restored /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/Serilog.Settings.Configuration.csproj (in 3.2 sec).
+[xUnit.net 00:00:16.60] Serilog.Settings.Configuration.Tests: ==> out:   Restored /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/Serilog.Settings.Configuration.csproj (in 3.14 sec).
+[xUnit.net 00:00:15.45] Serilog.Settings.Configuration.Tests: ==> out:   All projects are up-to-date for restore.
+[xUnit.net 00:00:28.97] Serilog.Settings.Configuration.Tests: ==> out:   Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Release/net462/Serilog.Settings.Configuration.dll
+[xUnit.net 00:00:30.00] Serilog.Settings.Configuration.Tests: ==> out:   Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Release/net462/Serilog.Settings.Configuration.dll
+[xUnit.net 00:00:33.42] Serilog.Settings.Configuration.Tests: ==> out:   Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Release/netstandard2.0/Serilog.Settings.Configuration.dll
+[xUnit.net 00:00:34.04] Serilog.Settings.Configuration.Tests: ==> out:   Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Release/net462/Serilog.Settings.Configuration.dll
+[xUnit.net 00:00:32.56] Serilog.Settings.Configuration.Tests: ==> out:   Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Release/netstandard2.0/Serilog.Settings.Configuration.dll
+[xUnit.net 00:00:34.20] Serilog.Settings.Configuration.Tests: ==> out:   Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Release/net8.0/Serilog.Settings.Configuration.dll
+[xUnit.net 00:00:35.98] Serilog.Settings.Configuration.Tests: ==> out: /usr/lib/dotnet/sdk/10.0.113/Microsoft.Common.CurrentVersion.targets(4903,5): warning MSB3026: Could not copy "obj/Release/net8.0/Serilog.Settings.Configuration.dll" to "bin/Release/net8.0/Serilog.Settings.Configuration.dll". Beginning retry 1 in 1000ms. The process cannot access the file '/home/user/w62/SSC/base/src/Serilog.Settings.Configuration/obj/Release/net8.0/Serilog.Settings.Configuration.dll' because it is being used by another process.  [/home/user/w62/SSC/base/src/Serilog.Settings.Configuration/Serilog.Settings.Configuration.csproj::TargetFramework=net8.0]
+[xUnit.net 00:00:34.71] Serilog.Settings.Configuration.Tests: ==> out:   Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Release/net8.0/Serilog.Settings.Configuration.dll
+[xUnit.net 00:00:36.61] Serilog.Settings.Configuration.Tests: ==> out:   Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Release/netstandard2.0/Serilog.Settings.Configuration.dll
+[xUnit.net 00:00:36.16] Serilog.Settings.Configuration.Tests: ==> out:   Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Release/net9.0/Serilog.Settings.Configuration.dll
+[xUnit.net 00:00:35.28] Serilog.Settings.Configuration.Tests: ==> out:   Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Release/net9.0/Serilog.Settings.Configuration.dll
+[xUnit.net 00:00:36.88] Serilog.Settings.Configuration.Tests: ==> out:   Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Release/net9.0/Serilog.Settings.Configuration.dll
+[xUnit.net 00:00:35.38] Serilog.Settings.Configuration.Tests: ==> out:   Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Release/net10.0/Serilog.Settings.Configuration.dll
+[xUnit.net 00:00:36.43] Serilog.Settings.Configuration.Tests: ==> out:   Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Release/net10.0/Serilog.Settings.Configuration.dll
+[xUnit.net 00:00:37.01] Serilog.Settings.Configuration.Tests: ==> out:   Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Release/net8.0/Serilog.Settings.Configuration.dll
+[xUnit.net 00:00:37.14] Serilog.Settings.Configuration.Tests: ==> out:   Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Release/net10.0/Serilog.Settings.Configuration.dll
+[xUnit.net 00:00:41.64] Serilog.Settings.Configuration.Tests: ==> out:   Successfully created package '/home/user/w62/SSC/base/test/TestApp-net10.0/Serilog.Settings.Configuration.0.0.0-IntegrationTest.0.nupkg'.
+[xUnit.net 00:00:41.81] Serilog.Settings.Configuration.Tests: ==> out:   Successfully created package '/home/user/w62/SSC/base/test/TestApp-net10.0/Serilog.Settings.Configuration.0.0.0-IntegrationTest.0.snupkg'.
+[xUnit.net 00:00:42.06] Serilog.Settings.Configuration.Tests: cd /home/user/w62/SSC/base/test/TestApp-net10.0
+[xUnit.net 00:00:42.07] Serilog.Settings.Configuration.Tests: dotnet restore --configfile nuget.config -p:Configuration=Release -p:TargetFramework=net10.0
+[xUnit.net 00:00:42.92] Serilog.Settings.Configuration.Tests: ==> out:   Successfully created package '/home/user/w62/SSC/base/test/TestApp-net8.0/Serilog.Settings.Configuration.0.0.0-IntegrationTest.0.nupkg'.
+[xUnit.net 00:00:41.39] Serilog.Settings.Configuration.Tests: ==> out:   Successfully created package '/home/user/w62/SSC/base/test/TestApp-net9.0/Serilog.Settings.Configuration.0.0.0-IntegrationTest.0.nupkg'.
+[xUnit.net 00:00:43.00] Serilog.Settings.Configuration.Tests: ==> out:   Successfully created package '/home/user/w62/SSC/base/test/TestApp-net8.0/Serilog.Settings.Configuration.0.0.0-IntegrationTest.0.snupkg'.
+[xUnit.net 00:00:41.63] Serilog.Settings.Configuration.Tests: ==> out:   Successfully created package '/home/user/w62/SSC/base/test/TestApp-net9.0/Serilog.Settings.Configuration.0.0.0-IntegrationTest.0.snupkg'.
+[xUnit.net 00:00:43.21] Serilog.Settings.Configuration.Tests: cd /home/user/w62/SSC/base/test/TestApp-net8.0
+[xUnit.net 00:00:43.21] Serilog.Settings.Configuration.Tests: dotnet restore --configfile nuget.config -p:Configuration=Release -p:TargetFramework=net8.0
+[xUnit.net 00:00:41.92] Serilog.Settings.Configuration.Tests: cd /home/user/w62/SSC/base/test/TestApp-net9.0
+[xUnit.net 00:00:41.92] Serilog.Settings.Configuration.Tests: dotnet restore --configfile nuget.config -p:Configuration=Release -p:TargetFramework=net9.0
+[xUnit.net 00:00:43.43] Serilog.Settings.Configuration.Tests: ==> out:   Determining projects to restore...
+[xUnit.net 00:00:44.37] Serilog.Settings.Configuration.Tests: ==> out:   Determining projects to restore...
+[xUnit.net 00:00:43.35] Serilog.Settings.Configuration.Tests: ==> out:   Determining projects to restore...
+[xUnit.net 00:00:50.39] Serilog.Settings.Configuration.Tests: ==> out:   Restored /home/user/w62/SSC/base/test/TestApp-net8.0/TestApp.csproj (in 5.03 sec).
+[xUnit.net 00:00:50.65] Serilog.Settings.Configuration.Tests: cd /home/user/w62/SSC/base/test/TestApp-net8.0
+[xUnit.net 00:00:50.65] Serilog.Settings.Configuration.Tests: dotnet publish --no-restore --configuration Release --output /home/user/w62/SSC/base/test/TestApp-net8.0/publish/Standard -p:TargetFramework=net8.0 -p:PublishSingleFile=False -p:SelfContained=False
+[xUnit.net 00:00:51.04] Serilog.Settings.Configuration.Tests: ==> out:   Restored /home/user/w62/SSC/base/test/TestApp-net10.0/TestApp.csproj (in 7.12 sec).
+[xUnit.net 00:00:51.22] Serilog.Settings.Configuration.Tests: cd /home/user/w62/SSC/base/test/TestApp-net10.0
+[xUnit.net 00:00:51.23] Serilog.Settings.Configuration.Tests: dotnet publish --no-restore --configuration Release --output /home/user/w62/SSC/base/test/TestApp-net10.0/publish/Standard -p:TargetFramework=net10.0 -p:PublishSingleFile=False -p:SelfContained=False
+[xUnit.net 00:00:54.77] Serilog.Settings.Configuration.Tests: ==> out: MSBUILD : warning : Fody: No configuration entry found for the installed weaver Costura. This weaver will be skipped. You may want to add this weaver to your FodyWeavers.xml [/home/user/w62/SSC/base/test/TestApp-net8.0/TestApp.csproj]
+[xUnit.net 00:00:54.36] Serilog.Settings.Configuration.Tests: ==> out:   Restored /home/user/w62/SSC/base/test/TestApp-net9.0/TestApp.csproj (in 9.79 sec).
+[xUnit.net 00:00:54.49] Serilog.Settings.Configuration.Tests: cd /home/user/w62/SSC/base/test/TestApp-net9.0
+[xUnit.net 00:00:54.49] Serilog.Settings.Configuration.Tests: dotnet publish --no-restore --configuration Release --output /home/user/w62/SSC/base/test/TestApp-net9.0/publish/Standard -p:TargetFramework=net9.0 -p:PublishSingleFile=False -p:SelfContained=False
+[xUnit.net 00:00:56.10] Serilog.Settings.Configuration.Tests: ==> out:   TestApp -> /home/user/w62/SSC/base/test/TestApp-net8.0/bin/Release/net8.0/linux-x64/TestApp.dll
+[xUnit.net 00:00:56.15] Serilog.Settings.Configuration.Tests: ==> out:   TestApp -> /home/user/w62/SSC/base/test/TestApp-net8.0/publish/Standard/
+[xUnit.net 00:00:56.29] Serilog.Settings.Configuration.Tests: cd /home/user/w62/SSC/base/test/TestApp-net8.0
+[xUnit.net 00:00:56.29] Serilog.Settings.Configuration.Tests: dotnet publish --no-restore --configuration Release --output /home/user/w62/SSC/base/test/TestApp-net8.0/publish/SingleFile -p:TargetFramework=net8.0 -p:PublishSingleFile=True -p:SelfContained=False
+[xUnit.net 00:00:55.92] Serilog.Settings.Configuration.Tests: ==> out: MSBUILD : warning : Fody: No configuration entry found for the installed weaver Costura. This weaver will be skipped. You may want to add this weaver to your FodyWeavers.xml [/home/user/w62/SSC/base/test/TestApp-net10.0/TestApp.csproj]
+[xUnit.net 00:00:56.86] Serilog.Settings.Configuration.Tests: ==> out:   TestApp -> /home/user/w62/SSC/base/test/TestApp-net10.0/bin/Release/net10.0/linux-x64/TestApp.dll
+[xUnit.net 00:00:56.97] Serilog.Settings.Configuration.Tests: ==> out:   TestApp -> /home/user/w62/SSC/base/test/TestApp-net10.0/publish/Standard/
+[xUnit.net 00:00:57.04] Serilog.Settings.Configuration.Tests: cd /home/user/w62/SSC/base/test/TestApp-net10.0
+[xUnit.net 00:00:57.04] Serilog.Settings.Configuration.Tests: dotnet publish --no-restore --configuration Release --output /home/user/w62/SSC/base/test/TestApp-net10.0/publish/SingleFile -p:TargetFramework=net10.0 -p:PublishSingleFile=True -p:SelfContained=False
+[xUnit.net 00:00:58.91] Serilog.Settings.Configuration.Tests: ==> out: MSBUILD : warning : Fody: No configuration entry found for the installed weaver Costura. This weaver will be skipped. You may want to add this weaver to your FodyWeavers.xml [/home/user/w62/SSC/base/test/TestApp-net8.0/TestApp.csproj]
+[xUnit.net 00:00:58.95] Serilog.Settings.Configuration.Tests: ==> out: MSBUILD : warning : Fody: No configuration entry found for the installed weaver Costura. This weaver will be skipped. You may want to add this weaver to your FodyWeavers.xml [/home/user/w62/SSC/base/test/TestApp-net10.0/TestApp.csproj]
+[xUnit.net 00:00:58.03] Serilog.Settings.Configuration.Tests: ==> out: MSBUILD : warning : Fody: No configuration entry found for the installed weaver Costura. This weaver will be skipped. You may want to add this weaver to your FodyWeavers.xml [/home/user/w62/SSC/base/test/TestApp-net9.0/TestApp.csproj]
+[xUnit.net 00:01:00.15] Serilog.Settings.Configuration.Tests: ==> out:   TestApp -> /home/user/w62/SSC/base/test/TestApp-net8.0/bin/Release/net8.0/linux-x64/TestApp.dll
+[xUnit.net 00:00:58.65] Serilog.Settings.Configuration.Tests: ==> out:   TestApp -> /home/user/w62/SSC/base/test/TestApp-net9.0/bin/Release/net9.0/linux-x64/TestApp.dll
+[xUnit.net 00:01:00.28] Serilog.Settings.Configuration.Tests: ==> out:   TestApp -> /home/user/w62/SSC/base/test/TestApp-net8.0/publish/SingleFile/
+[xUnit.net 00:00:59.77] Serilog.Settings.Configuration.Tests: ==> out:   TestApp -> /home/user/w62/SSC/base/test/TestApp-net10.0/bin/Release/net10.0/linux-x64/TestApp.dll
+[xUnit.net 00:00:58.75] Serilog.Settings.Configuration.Tests: ==> out:   TestApp -> /home/user/w62/SSC/base/test/TestApp-net9.0/publish/Standard/
+[xUnit.net 00:01:00.33] Serilog.Settings.Configuration.Tests: cd /home/user/w62/SSC/base/test/TestApp-net8.0
+[xUnit.net 00:01:00.33] Serilog.Settings.Configuration.Tests: dotnet publish --no-restore --configuration Release --output /home/user/w62/SSC/base/test/TestApp-net8.0/publish/SelfContained -p:TargetFramework=net8.0 -p:PublishSingleFile=True -p:SelfContained=True
+[xUnit.net 00:00:59.88] Serilog.Settings.Configuration.Tests: ==> out:   TestApp -> /home/user/w62/SSC/base/test/TestApp-net10.0/publish/SingleFile/
+[xUnit.net 00:00:58.85] Serilog.Settings.Configuration.Tests: cd /home/user/w62/SSC/base/test/TestApp-net9.0
+[xUnit.net 00:00:58.85] Serilog.Settings.Configuration.Tests: dotnet publish --no-restore --configuration Release --output /home/user/w62/SSC/base/test/TestApp-net9.0/publish/SingleFile -p:TargetFramework=net9.0 -p:PublishSingleFile=True -p:SelfContained=False
+[xUnit.net 00:00:59.99] Serilog.Settings.Configuration.Tests: cd /home/user/w62/SSC/base/test/TestApp-net10.0
+[xUnit.net 00:00:59.99] Serilog.Settings.Configuration.Tests: dotnet publish --no-restore --configuration Release --output /home/user/w62/SSC/base/test/TestApp-net10.0/publish/SelfContained -p:TargetFramework=net10.0 -p:PublishSingleFile=True -p:SelfContained=True
+[xUnit.net 00:01:01.91] Serilog.Settings.Configuration.Tests: ==> out: MSBUILD : warning : Fody: No configuration entry found for the installed weaver Costura. This weaver will be skipped. You may want to add this weaver to your FodyWeavers.xml [/home/user/w62/SSC/base/test/TestApp-net10.0/TestApp.csproj]
+[xUnit.net 00:01:02.76] Serilog.Settings.Configuration.Tests: ==> out: MSBUILD : warning : Fody: No configuration entry found for the installed weaver Costura. This weaver will be skipped. You may want to add this weaver to your FodyWeavers.xml [/home/user/w62/SSC/base/test/TestApp-net8.0/TestApp.csproj]
+[xUnit.net 00:01:01.62] Serilog.Settings.Configuration.Tests: ==> out: MSBUILD : warning : Fody: No configuration entry found for the installed weaver Costura. This weaver will be skipped. You may want to add this weaver to your FodyWeavers.xml [/home/user/w62/SSC/base/test/TestApp-net9.0/TestApp.csproj]
+[xUnit.net 00:01:03.69] Serilog.Settings.Configuration.Tests: ==> out:   TestApp -> /home/user/w62/SSC/base/test/TestApp-net10.0/bin/Release/net10.0/linux-x64/TestApp.dll
+[xUnit.net 00:01:02.79] Serilog.Settings.Configuration.Tests: ==> out:   TestApp -> /home/user/w62/SSC/base/test/TestApp-net9.0/bin/Release/net9.0/linux-x64/TestApp.dll
+[xUnit.net 00:01:04.50] Serilog.Settings.Configuration.Tests: ==> out:   TestApp -> /home/user/w62/SSC/base/test/TestApp-net8.0/bin/Release/net8.0/linux-x64/TestApp.dll
+[xUnit.net 00:01:03.41] Serilog.Settings.Configuration.Tests: ==> out:   TestApp -> /home/user/w62/SSC/base/test/TestApp-net9.0/publish/SingleFile/
+[xUnit.net 00:01:03.65] Serilog.Settings.Configuration.Tests: cd /home/user/w62/SSC/base/test/TestApp-net9.0
+[xUnit.net 00:01:03.65] Serilog.Settings.Configuration.Tests: dotnet publish --no-restore --configuration Release --output /home/user/w62/SSC/base/test/TestApp-net9.0/publish/SelfContained -p:TargetFramework=net9.0 -p:PublishSingleFile=True -p:SelfContained=True
+[xUnit.net 00:01:05.71] Serilog.Settings.Configuration.Tests: ==> out:   TestApp -> /home/user/w62/SSC/base/test/TestApp-net10.0/publish/SelfContained/
+[xUnit.net 00:01:06.70] Serilog.Settings.Configuration.Tests: ==> out:   TestApp -> /home/user/w62/SSC/base/test/TestApp-net8.0/publish/SelfContained/
+[xUnit.net 00:01:06.29] Serilog.Settings.Configuration.Tests: ==> out: MSBUILD : warning : Fody: No configuration entry found for the installed weaver Costura. This weaver will be skipped. You may want to add this weaver to your FodyWeavers.xml [/home/user/w62/SSC/base/test/TestApp-net9.0/TestApp.csproj]
+[xUnit.net 00:01:07.42] Serilog.Settings.Configuration.Tests: ==> out:   TestApp -> /home/user/w62/SSC/base/test/TestApp-net9.0/bin/Release/net9.0/linux-x64/TestApp.dll
+[xUnit.net 00:01:09.21] Serilog.Settings.Configuration.Tests: ==> out:   TestApp -> /home/user/w62/SSC/base/test/TestApp-net9.0/publish/SelfContained/
+
+Passed!  - Failed:     0, Passed:   331, Skipped:     0, Total:   331, Duration: 1 m 14 s - Serilog.Settings.Configuration.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   331, Skipped:     0, Total:   331, Duration: 1 m 16 s - Serilog.Settings.Configuration.Tests.dll (net8.0)
+
+Passed!  - Failed:     0, Passed:   332, Skipped:     0, Total:   332, Duration: 1 m 15 s - Serilog.Settings.Configuration.Tests.dll (net9.0)

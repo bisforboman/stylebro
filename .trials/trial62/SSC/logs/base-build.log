@@ -1,0 +1,25 @@
+  Determining projects to restore...
+  Restored /home/user/w62/SSC/base/sample/Sample/Sample.csproj (in 1.26 sec).
+  Restored /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/Serilog.Settings.Configuration.csproj (in 1.26 sec).
+  Restored /home/user/w62/SSC/base/test/Serilog.Settings.Configuration.Tests/Serilog.Settings.Configuration.Tests.csproj (in 1.26 sec).
+  Restored /home/user/w62/SSC/base/test/TestDummies/TestDummies.csproj (in 1.26 sec).
+  TestDummies -> /home/user/w62/SSC/base/test/TestDummies/bin/Debug/netstandard2.0/TestDummies.dll
+  Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Debug/net462/Serilog.Settings.Configuration.dll
+  Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Debug/net8.0/Serilog.Settings.Configuration.dll
+  Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Debug/netstandard2.0/Serilog.Settings.Configuration.dll
+  Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Debug/net9.0/Serilog.Settings.Configuration.dll
+  Serilog.Settings.Configuration -> /home/user/w62/SSC/base/src/Serilog.Settings.Configuration/bin/Debug/net10.0/Serilog.Settings.Configuration.dll
+  TestDummies -> /home/user/w62/SSC/base/test/TestDummies/bin/Debug/net462/TestDummies.dll
+  Sample -> /home/user/w62/SSC/base/sample/Sample/bin/Debug/net9.0/Sample.dll
+  Serilog.Settings.Configuration.Tests -> /home/user/w62/SSC/base/test/Serilog.Settings.Configuration.Tests/bin/Debug/net10.0/Serilog.Settings.Configuration.Tests.dll
+  Serilog.Settings.Configuration.Tests -> /home/user/w62/SSC/base/test/Serilog.Settings.Configuration.Tests/bin/Debug/net9.0/Serilog.Settings.Configuration.Tests.dll
+  Sample -> /home/user/w62/SSC/base/sample/Sample/bin/Debug/net10.0/Sample.dll
+  Sample -> /home/user/w62/SSC/base/sample/Sample/bin/Debug/net8.0/Sample.dll
+  Sample -> /home/user/w62/SSC/base/sample/Sample/bin/Debug/net462/Sample.exe
+  Serilog.Settings.Configuration.Tests -> /home/user/w62/SSC/base/test/Serilog.Settings.Configuration.Tests/bin/Debug/net8.0/Serilog.Settings.Configuration.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:22.36
