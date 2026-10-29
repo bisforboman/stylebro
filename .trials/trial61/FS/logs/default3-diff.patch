@@ -1,0 +1,1883 @@
+diff --git a/.editorconfig b/.editorconfig
+index 77386e1..f01d13e 100644
+--- a/.editorconfig
++++ b/.editorconfig
+@@ -1250,4 +1250,62 @@ dotnet_diagnostic.IDE0350.severity = error
+ dotnet_diagnostic.IDE1005.severity = error
+ 
+ # Naming styles
+-dotnet_diagnostic.IDE1006.severity = error
+\ No newline at end of file
++dotnet_diagnostic.IDE1006.severity = error
++
++# BEGIN stylebro-migrate (stylebro-migrate init: built-in .NET rules for StyleBro's preset; edits inside are replaced)
++[*.cs]
++# Built-in .NET rules that cover StyleCop rules, at the preset's severities. Their options (brace placement, modifier
++# order, ...) come from StyleBro's preset. The severities have to be here: 'dotnet format' ignores rule severities in a
++# package's global config. Add <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> to report them on build too.
++
++# Braces (SA1503, SA1519, SA1520) are StyleBro's BRO1514-BRO1516: IDE0011's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0011.severity = none
++# Access modifiers (SA1400, SA1205) are StyleBro's BRO1404/BRO1007: IDE0040's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0040.severity = none
++# Modifier order: access modifier first, then static (SA1206, SA1207)
++dotnet_diagnostic.IDE0036.severity = warning
++# 'int' instead of 'Int32' (SA1121)
++dotnet_diagnostic.IDE0049.severity = warning
++# Unnecessary parentheses (SA1119) are StyleBro's BRO1405: IDE0047's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0047.severity = none
++# Parentheses that show precedence (SA1407, SA1408) are StyleBro's BRO1406/BRO1407: IDE0048's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0048.severity = none
++# Using placement (SA1200) is StyleBro's BRO1008: IDE0065's fix can change what names bind to (CS0104, CS0118)
++dotnet_diagnostic.IDE0065.severity = none
++# Blank lines (SA1507, SA1508, SA1513) are StyleBro's BRO1517-BRO1519: the SDK's fixes break multi-targeted projects
++dotnet_diagnostic.IDE2000.severity = none
++dotnet_diagnostic.IDE2002.severity = none
++dotnet_diagnostic.IDE2003.severity = none
++
++# Conventions in this repository's code (stylebro-migrate init counted them; delete a line to have it counted again)
++# init: private fields: named '_field' in 27 of 27 places in your code
++stylebro_private_field_naming = _camelCase
++# init: one-line if/else/loop/using/lock bodies: without braces in 63 of 80 places in your code
++csharp_prefer_braces = when_multiline
++# init: one-line jumps ('if (x) return;'): allowed, because your code has some (5 of 8 places on the 'if' line without braces; any 3 keep them allowed: without it BRO1514 would add braces to each)
++stylebro_allow_single_line_jump_statements = true
++# init: operators where a line wraps: your code mixes both forms (3 at the start of the line, 5 at the end of the line), so BRO1520 is off. To choose one: set dotnet_style_operator_placement_when_wrapping and remove the next line.
++dotnet_diagnostic.BRO1520.severity = none
++# init: null checks: '== null' in 32 of 34 places in your code
++stylebro_null_check_style = equality_operator
++# init: ')' of split lists: your code mixes both forms (15 after the last item, 39 on its own line), so BRO1110 is off. To choose one: set stylebro_closing_parenthesis_placement and remove the next line.
++dotnet_diagnostic.BRO1110.severity = none
++# init: ': base(...)'/': this(...)': on the constructor's line in 3 of 3 places in your code
++stylebro_constructor_initializer_placement = same_line
++# init: files' using directives: inside the namespace in 30 of 33 places in your code
++csharp_using_directive_placement = inside_namespace
++# init: statements on their 'if'/loop/'case' line: allowed, because your code has some (5 of 70 places on their owner's line; any 3 keep them allowed: csharp_preserve_single_line_statements = false would move each to a line of its own)
++csharp_preserve_single_line_statements = true
++# init: overrides/interface implementations: 10 of 10 in your code are without a doc comment, so BRO1601 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1601.severity = none
++# init: private-by-default members: your code mixes both forms (45 with 'private', 29 without 'private'), so BRO1404 is off. To choose one: set dotnet_style_require_accessibility_modifiers and remove the next line.
++dotnet_diagnostic.BRO1404.severity = none
++# init: property summaries: 9 of 9 in your code are in their own words, so BRO1604 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1604.severity = none
++# init: empty blocks ('{ }'): on one line in 5 of 5 blocks in your code
++stylebro_allow_empty_single_line_blocks = true
++# init: doc comment texts: your code mixes both forms (122 ending with a period, 61 without a period), so BRO1603 is off. To choose one: set dotnet_diagnostic.BRO1603.severity and remove the next line.
++dotnet_diagnostic.BRO1603.severity = none
++# init: using directives: 23 of 24 files sorted, 0 of 2 with System first
++dotnet_sort_system_directives_first = true
++# END stylebro-migrate
+diff --git a/Directory.Build.props b/Directory.Build.props
+new file mode 100644
+index 0000000..a44aacf
+--- /dev/null
++++ b/Directory.Build.props
+@@ -0,0 +1,8 @@
++<Project>
++  <PropertyGroup>
++    <StyleBroPreset>1.0</StyleBroPreset>
++  </PropertyGroup>
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial61.3" PrivateAssets="all" />
++  </ItemGroup>
++</Project>
+diff --git a/FluentScheduler.TestApplication/Program.cs b/FluentScheduler.TestApplication/Program.cs
+index 040da8f..10cb2be 100644
+--- a/FluentScheduler.TestApplication/Program.cs
++++ b/FluentScheduler.TestApplication/Program.cs
+@@ -1,9 +1,9 @@
+ namespace FluentScheduler.TestApplication;
+ 
+-using Serilog;
+ using System;
+-using static Serilog.Log;
++using Serilog;
+ using static System.Threading.Thread;
++using static Serilog.Log;
+ 
+ internal static class Program
+ {
+@@ -148,5 +148,5 @@ internal static class Program
+         Logger.Information("JobStarted");
+ 
+     private static void JobEndedHandler(object sender, JobEndedEventArgs ea) =>
+-        Logger.Information(ea.Exception is null ? $"JobEnded" : $"JobEnded: {ea.Exception}");
++        Logger.Information(ea.Exception == null ? "JobEnded" : $"JobEnded: {ea.Exception}");
+ }
+diff --git a/FluentScheduler.UnitTests/Cron/CronTimeCalculatorTests.cs b/FluentScheduler.UnitTests/Cron/CronTimeCalculatorTests.cs
+index aee9345..25c53ca 100644
+--- a/FluentScheduler.UnitTests/Cron/CronTimeCalculatorTests.cs
++++ b/FluentScheduler.UnitTests/Cron/CronTimeCalculatorTests.cs
+@@ -6,7 +6,6 @@ using static Xunit.Assert;
+ 
+ public class CronTimeCalculatorTests
+ {
+-
+     [Fact]
+     public void At0405()
+     {
+@@ -14,11 +13,11 @@ public class CronTimeCalculatorTests
+         var calculator = new CronTimeCalculator("5 4 * * *");
+ 
+         var date = new DateTime(2018, 12, 22);
+-        var expected =  new DateTime(2018, 12, 22, 4, 5, 0);
++        var expected = new DateTime(2018, 12, 22, 4, 5, 0);
+ 
+         // Act
+         var calculated = calculator.Calculate(date);
+-        
++
+         // Assert
+         Equal(expected, calculated);
+     }
+@@ -30,11 +29,11 @@ public class CronTimeCalculatorTests
+         var calculator = new CronTimeCalculator("5 0 * 8 *");
+ 
+         var date = new DateTime(2018, 12, 22);
+-        var expected =  new DateTime(2019, 8, 1, 0, 5, 0);
++        var expected = new DateTime(2019, 8, 1, 0, 5, 0);
+ 
+         // Act
+         var calculated = calculator.Calculate(date);
+-        
++
+         // Assert
+         Equal(expected, calculated);
+     }
+@@ -46,11 +45,11 @@ public class CronTimeCalculatorTests
+         var calculator = new CronTimeCalculator("5 4 * * sun");
+ 
+         var date = new DateTime(2018, 12, 22);
+-        var expected =  new DateTime(2018, 12, 23, 4, 5, 0);
++        var expected = new DateTime(2018, 12, 23, 4, 5, 0);
+ 
+         // Act
+         var calculated = calculator.Calculate(date);
+-        
++
+         // Assert
+         Equal(expected, calculated);
+     }
+@@ -62,7 +61,7 @@ public class CronTimeCalculatorTests
+         var calculator = new CronTimeCalculator("0 4 8-14 * *");
+ 
+         var date = new DateTime(2018, 12, 22);
+-        var expected =  new DateTime(2019, 01, 08, 4, 0, 0);
++        var expected = new DateTime(2019, 01, 08, 4, 0, 0);
+ 
+         // Act
+         var calculated = calculator.Calculate(date);
+@@ -78,7 +77,7 @@ public class CronTimeCalculatorTests
+         var calculator = new CronTimeCalculator("15 14 1 * *");
+ 
+         var date = new DateTime(2018, 12, 22);
+-        var expected =  new DateTime(2019, 1, 1, 14, 15, 0);
++        var expected = new DateTime(2019, 1, 1, 14, 15, 0);
+ 
+         // Act
+         var calculated = calculator.Calculate(date);
+@@ -94,7 +93,7 @@ public class CronTimeCalculatorTests
+         var calculator = new CronTimeCalculator("0 22 * * 1-5");
+ 
+         var date = new DateTime(2018, 12, 22);
+-        var expected =  new DateTime(2018, 12, 24, 22, 0, 0);
++        var expected = new DateTime(2018, 12, 24, 22, 0, 0);
+ 
+         // Act
+         var calculated = calculator.Calculate(date);
+@@ -110,7 +109,7 @@ public class CronTimeCalculatorTests
+         var calculator = new CronTimeCalculator("0 5,17 * * *");
+ 
+         var date = new DateTime(2018, 12, 22);
+-        var expected =  new DateTime(2018, 12, 22, 5, 0, 0);
++        var expected = new DateTime(2018, 12, 22, 5, 0, 0);
+ 
+         // Act
+         var calculated = calculator.Calculate(date);
+@@ -126,7 +125,7 @@ public class CronTimeCalculatorTests
+         var calculator = new CronTimeCalculator("* * * * *");
+ 
+         var date = new DateTime(2018, 12, 22);
+-        var expected =  new DateTime(2018, 12, 22, 0, 1, 0);
++        var expected = new DateTime(2018, 12, 22, 0, 1, 0);
+ 
+         // Act
+         var calculated = calculator.Calculate(date);
+@@ -142,7 +141,7 @@ public class CronTimeCalculatorTests
+         var calculator = new CronTimeCalculator("*/10 * * * *");
+ 
+         var date = new DateTime(2018, 12, 22);
+-        var expected =  new DateTime(2018, 12, 22, 0, 10, 0);
++        var expected = new DateTime(2018, 12, 22, 0, 10, 0);
+ 
+         // Act
+         var calculated = calculator.Calculate(date);
+@@ -158,7 +157,7 @@ public class CronTimeCalculatorTests
+         var calculator = new CronTimeCalculator("0 17 * * sun,fri");
+ 
+         var date = new DateTime(2018, 12, 22);
+-        var expected =  new DateTime(2018, 12, 23, 17, 0, 0);
++        var expected = new DateTime(2018, 12, 23, 17, 0, 0);
+ 
+         // Act
+         var calculated = calculator.Calculate(date);
+@@ -173,8 +172,8 @@ public class CronTimeCalculatorTests
+         // Arrange
+         var calculator = new CronTimeCalculator("* * * * * *");
+ 
+-        var date = new DateTime(2018, 12, 23, 17, 0 , 0);
+-        var expected =  new DateTime(2018, 12, 23, 17, 0, 1);
++        var date = new DateTime(2018, 12, 23, 17, 0, 0);
++        var expected = new DateTime(2018, 12, 23, 17, 0, 1);
+ 
+         // Act
+         var calculated = calculator.Calculate(date);
+diff --git a/FluentScheduler.UnitTests/Fluent/2.Once/OnceDurationSetTests.cs b/FluentScheduler.UnitTests/Fluent/2.Once/OnceDurationSetTests.cs
+index 78a44de..12b41ae 100644
+--- a/FluentScheduler.UnitTests/Fluent/2.Once/OnceDurationSetTests.cs
++++ b/FluentScheduler.UnitTests/Fluent/2.Once/OnceDurationSetTests.cs
+@@ -6,7 +6,6 @@ using static Xunit.Assert;
+ 
+ public class OnceDurationSetTests
+ {
+-
+     [Fact]
+     public void Minutes()
+     {
+diff --git a/FluentScheduler.UnitTests/Fluent/2.Once/OnceSetTests.cs b/FluentScheduler.UnitTests/Fluent/2.Once/OnceSetTests.cs
+index f931c4a..a86a28b 100644
+--- a/FluentScheduler.UnitTests/Fluent/2.Once/OnceSetTests.cs
++++ b/FluentScheduler.UnitTests/Fluent/2.Once/OnceSetTests.cs
+@@ -6,7 +6,6 @@ using static Xunit.Assert;
+ 
+ public class OnceSetTests
+ {
+-
+     [Fact]
+     public void AndEveryDayOfWeek()
+     {
+@@ -26,7 +25,7 @@ public class OnceSetTests
+         var expected = new DateTime(2018, 2, 18);
+         Equal(expected, calculated);
+ 
+-        //Act
++        // Act
+         calculated = calculator.Calculate(monday);
+ 
+         // Assert
+@@ -38,7 +37,6 @@ public class OnceSetTests
+ 
+         // Assert
+         Equal(sunday, calculated);
+-
+     }
+ 
+     [Fact]
+diff --git a/FluentScheduler.UnitTests/Fluent/3.Duration/EverydayUnitTests.cs b/FluentScheduler.UnitTests/Fluent/3.Duration/EverydayUnitTests.cs
+index 029ddf2..466f7ca 100644
+--- a/FluentScheduler.UnitTests/Fluent/3.Duration/EverydayUnitTests.cs
++++ b/FluentScheduler.UnitTests/Fluent/3.Duration/EverydayUnitTests.cs
+@@ -1,397 +1,397 @@
+-namespace FluentScheduler.UnitTests;
+-
+-using System;
+-using Xunit;
+-using static Xunit.Assert;
+-
+-public class EverydayUnitTests
+-{
+-    [Fact]
+-    public void At()
+-    {
+-        // Arrange
+-        var now = new DateTime(2025, 8, 20, 10, 0, 0);
+-        var expected = new DateTime(2025, 8, 20, 15, 0, 0);
+-
+-        var fluentCalculator = new FluentTimeCalculator();
+-        var calculator = fluentCalculator;
+-        var run = new EverydayUnit(fluentCalculator);
+-
+-        calculator.Now = () => now;
+-
+-        // Act
+-        run.At(15, 0);
+-        var calculated = calculator.Calculate(now);
+-
+-        // Assert
+-        Equal(expected, calculated.Value);
+-
+-        // Arrange
+-        now = now.AddHours(6);
+-        expected = expected.AddDays(1);
+-
+-        // Act
+-        calculated = calculator.Calculate(now);
+-
+-        // Assert
+-        Equal(expected, calculated.Value);
+-    }
+-
+-    [Fact]
+-    public void AtTimeSpan()
+-    {
+-        // Arrange
+-        var now = new DateTime(2025, 8, 20, 10, 0, 0);
+-        var expected = new DateTime(2025, 8, 20, 15, 0, 0);
+-
+-        var timeSpan = new TimeSpan(15, 0, 0);
+-
+-        var fluentCalculator = new FluentTimeCalculator();
+-        var calculator = fluentCalculator;
+-        var run = new EverydayUnit(fluentCalculator);
+-
+-        calculator.Now = () => now;
+-
+-        // Act
+-        run.At(timeSpan);
+-        var calculated = calculator.Calculate(now);
+-
+-        // Assert
+-        Equal(expected, calculated.Value);
+-
+-        // Arrange
+-        now = now.AddHours(6);
+-        expected = expected.AddDays(1);
+-
+-        // Act
+-        calculated = calculator.Calculate(now);
+-
+-        // Assert
+-        Equal(expected, calculated.Value);
+-    }
+-
+-    [Fact]
+-    public void AtMultipleTimeSpan()
+-    {
+-        // Arrange
+-        var timeSpans = new TimeSpan[] { new(15, 0, 0), new(16, 0, 0), new(17, 0, 0) };
+-        var now = new DateTime(2025, 8, 20, 10, 0, 0);
+-        var expected = new DateTime(2025, 8, 20).Add(timeSpans[0]);
+-
+-        var fluentCalculator = new FluentTimeCalculator();
+-        var calculator = fluentCalculator;
+-        var run = new RunSpecifier(fluentCalculator);
+-
+-        calculator.Now = () => now;
+-
+-        // Act
+-        run.Everyday().At(timeSpans);
+-        var calculated = calculator.Calculate(now);
+-
+-        // Assert
+-        Equal(expected, calculated.Value);
+-
+-        // Arrange
+-        now = now.AddHours(5.1);
+-        expected = expected.Date.Add(timeSpans[1]);
+-
+-        // Act
+-        calculated = calculator.Calculate(now);
+-
+-        // Assert
+-        Equal(expected, calculated.Value);
+-
+-        // Arrange
+-        now = now.AddHours(1.1);
+-        expected = expected.Date.Add(timeSpans[2]);
+-
+-        // Act
+-        calculated = calculator.Calculate(now);
+-
+-        // Assert
+-        Equal(expected, calculated.Value);
+-
+-        // Arrange
+-        now = now.AddHours(1.1);
+-        expected = new DateTime(2025, 8, 21, 15, 0, 0);
+-
+-        // Act
+-        calculated = calculator.Calculate(now);
+-
+-        // Assert
+-        Equal(expected, calculated.Value);
+-    }
+-
+-    [Fact]
+-    public void AtMultipleTimeSpan2()
+-    {
+-        // Arrange
+-        var timeSpans = new TimeSpan[] { new(15, 0, 0), new(16, 0, 0), new(17, 0, 0) };
+-        var now = new DateTime(2025, 8, 20, 15, 1, 0);
+-        var expected = new DateTime(2025, 8, 20).Add(timeSpans[1]);
+-
+-        var fluentCalculator = new FluentTimeCalculator();
+-        var calculator = fluentCalculator;
+-        var run = new RunSpecifier(fluentCalculator);
+-
+-        calculator.Now = () => now;
+-
+-        // Act
+-        run.Everyday().At(timeSpans);
+-        var calculated = calculator.Calculate(now);
+-
+-        // Assert
+-        Equal(expected, calculated.Value);
+-
+-        // Arrange
+-        now = now.AddHours(1.1);
+-        expected = expected.Date.Add(timeSpans[2]);
+-
+-        // Act
+-        calculated = calculator.Calculate(now);
+-
+-        // Assert
+-        Equal(expected, calculated.Value);
+-
+-        // Arrange
+-        now = now.AddHours(1.1);
+-        expected = new DateTime(2025, 8, 21, 15, 0, 0);
+-
+-        // Act
+-        calculated = calculator.Calculate(now);
+-
+-        // Assert
+-        Equal(expected, calculated.Value);
+-    }
+-
+-    [Fact]
+-    public void AtMultipleEmptyTimeSpan()
+-    {
+-        var fluentCalculator = new FluentTimeCalculator();
+-        var run = new EverydayUnit(fluentCalculator);
+-
+-        // Act Assert
+-        Throws<ArgumentException>(() => run.At());
+-    }
+-
+-    [Fact]
+-    public void AtMultipleNullTimeSpan()
+-    {
+-        // Arrange
+-        var fluentCalculator = new FluentTimeCalculator();
+-        var run = new EverydayUnit(fluentCalculator);
+-
+-        // Act Assert
+-        Throws<ArgumentNullException>(() => run.At(null));
+-    }
+-
+-    [Fact]
+-    public void EverydayAt15()
+-    {
+-        // Arrange
+-        var now = new DateTime(2025, 08, 24, 14, 30, 0);
+-        var expectedDate = new DateTime(2025, 08, 24, 15, 0, 0);
+-
+-        var fluentCalculator = new FluentTimeCalculator();
+-        var calculator = fluentCalculator;
+-        var run = new RunSpecifier(fluentCalculator);
+-
+-        calculator.Now = () => now;
+-
+-        // Act
+-        run.Everyday().At(15, 0);
+-        var calculated = calculator.Calculate(now);
+-
+-        // Assert
+-        Equal(expectedDate, calculated.Value);
+-
+-        now = expectedDate;
+-
+-        calculated = calculator.Calculate(expectedDate);
+-
+-        expectedDate = expectedDate.AddDays(1);
+-
+-        // Assert
+-        Equal(expectedDate, calculated.Value);
+-    }
+-
+-    [Fact]
+-    public void EverydayAt16()
+-    {
+-        // Arrange
+-        var now = new DateTime(2025, 08, 24, 16, 0, 0);
+-        var expectedDate = new DateTime(2025, 08, 24, 16, 0, 0);
+-
+-        var fluentCalculator = new FluentTimeCalculator();
+-        var calculator = fluentCalculator;
+-        var run = new RunSpecifier(fluentCalculator);
+-
+-        calculator.Now = () => now;
+-
+-        // Act
+-        run.Everyday().At(16, 0);
+-        var calculated = calculator.Calculate(now);
+-
+-        // Assert
+-        Equal(expectedDate, calculated.Value);
+-
+-        now = expectedDate;
+-
+-        calculated = calculator.Calculate(expectedDate);
+-
+-        expectedDate = expectedDate.AddDays(1);
+-
+-        // Assert
+-        Equal(expectedDate, calculated.Value);
+-    }
+-
+-    [Fact]
+-    public void Between17and19TimeSpan()
+-    {
+-        // Arrange
+-        var now = new DateTime(2025, 08, 24, 16, 30, 0);
+-        var expectedDate = new DateTime(2025, 08, 24, 17, 30, 0);
+-
+-        var from = new TimeSpan(17, 30, 0);
+-        var to = new TimeSpan(19, 30, 0);
+-
+-        var fluentCalculator = new FluentTimeCalculator();
+-        var calculator = fluentCalculator;
+-        var run = new RunSpecifier(fluentCalculator);
+-
+-        calculator.Now = () => now;
+-
+-        // Act
+-        run.Everyday().Between(from, to);
+-        var calculated = calculator.Calculate(now);
+-
+-        // Assert
+-        Equal(expectedDate, calculated.Value);
+-    }
+-
+-    [Fact]
+-    public void Between21and23TimeSpan()
+-    {
+-        // Arrange
+-        var now = new DateTime(2025, 09, 10, 23, 40, 0);
+-        var expectedDate = new DateTime(2025, 09, 10, 21, 30, 0);
+-
+-        var from = new TimeSpan(21, 30, 0);
+-        var to = new TimeSpan(23, 30, 0);
+-
+-        var calculator = new FluentTimeCalculator();
+-        var run = new RunSpecifier(calculator);
+-
+-        calculator.Now = () => now;
+-
+-        // Act
+-        run.Everyday().Between(from, to);
+-
+-        var calculated = calculator.Calculate(now);
+-
+-        // Assert
+-        Equal(expectedDate, calculated.Value);
+-    }
+-
+-    [Fact]
+-    public void Between23and2TimeSpan()
+-    {
+-        // Arrange
+-        var now = new DateTime(2025, 08, 24, 22, 30, 0);
+-        var expectedDate = new DateTime(2025, 08, 24, 23, 0, 0);
+-
+-        var from = new TimeSpan(23, 0, 0);
+-        var to = new TimeSpan(2, 0, 0);
+-
+-        var calculator = new FluentTimeCalculator();
+-        var run = new RunSpecifier(calculator);
+-
+-        calculator.Now = () => now;
+-
+-        // Act
+-        run.Everyday().Between(from, to);
+-        var calculated = calculator.Calculate(now);
+-
+-        // Assert
+-        Equal(expectedDate, calculated.Value);
+-
+-        expectedDate = expectedDate.AddDays(1);
+-
+-        calculated = calculator.Calculate(now);
+-
+-        // Assert
+-        Equal(expectedDate, calculated.Value);
+-    }
+-
+-    [Fact]
+-    public void Between23and2()
+-    {
+-        // Arrange
+-        var now = new DateTime(2025, 08, 24, 22, 30, 0);
+-        var expectedDate = new DateTime(2025, 08, 24, 23, 0, 0);
+-
+-        var calculator = new FluentTimeCalculator();
+-        var run = new RunSpecifier(calculator);
+-
+-        calculator.Now = () => now;
+-
+-        // Act
+-        run.Everyday().Between(23, 0, 2, 0);
+-        var calculated = calculator.Calculate(now);
+-
+-        // Assert
+-        Equal(expectedDate, calculated.Value);
+-
+-        expectedDate = expectedDate.AddDays(1);
+-
+-        calculated = calculator.Calculate(now);
+-
+-        // Assert
+-        Equal(expectedDate, calculated.Value);
+-    }
+-
+-    [Fact]
+-    public void Between19and22()
+-    {
+-        // Arrange
+-        var now = new DateTime(2025, 08, 24, 20, 0, 0);
+-        var expectedDate = new DateTime(2025, 08, 24, 20, 0, 0);
+-
+-        var calculator = new FluentTimeCalculator();
+-        var run = new RunSpecifier(calculator);
+-
+-        calculator.Now = () => now;
+-
+-        // Act
+-        run.Everyday().Between(19, 0, 22, 0);
+-        var calculated = calculator.Calculate(now);
+-
+-        // Assert
+-        Equal(expectedDate, calculated.Value);
+-
+-        calculated = calculator.Calculate(expectedDate);
+-
+-        expectedDate = expectedDate.Date.AddDays(1).Add(new TimeSpan(19, 0, 0));
+-
+-        // Assert
+-        Equal(expectedDate, calculated.Value);
+-
+-        calculated = calculator.Calculate(expectedDate);
+-
+-        expectedDate = expectedDate.AddDays(1);
+-
+-        // Assert
+-        Equal(expectedDate, calculated.Value);
+-    }
+-
+-    [Fact]
+-    public void ThrowIfAtEmpty()
+-    {
+-        // Arrange
+-        var fluentCalculator = new FluentTimeCalculator();
+-        var run = new EverydayUnit(fluentCalculator);
+-
+-        // Act
+-        Throws<ArgumentException>(() => run.At());
+-    }
++namespace FluentScheduler.UnitTests;
++
++using System;
++using Xunit;
++using static Xunit.Assert;
++
++public class EverydayUnitTests
++{
++    [Fact]
++    public void At()
++    {
++        // Arrange
++        var now = new DateTime(2025, 8, 20, 10, 0, 0);
++        var expected = new DateTime(2025, 8, 20, 15, 0, 0);
++
++        var fluentCalculator = new FluentTimeCalculator();
++        var calculator = fluentCalculator;
++        var run = new EverydayUnit(fluentCalculator);
++
++        calculator.Now = () => now;
++
++        // Act
++        run.At(15, 0);
++        var calculated = calculator.Calculate(now);
++
++        // Assert
++        Equal(expected, calculated.Value);
++
++        // Arrange
++        now = now.AddHours(6);
++        expected = expected.AddDays(1);
++
++        // Act
++        calculated = calculator.Calculate(now);
++
++        // Assert
++        Equal(expected, calculated.Value);
++    }
++
++    [Fact]
++    public void AtTimeSpan()
++    {
++        // Arrange
++        var now = new DateTime(2025, 8, 20, 10, 0, 0);
++        var expected = new DateTime(2025, 8, 20, 15, 0, 0);
++
++        var timeSpan = new TimeSpan(15, 0, 0);
++
++        var fluentCalculator = new FluentTimeCalculator();
++        var calculator = fluentCalculator;
++        var run = new EverydayUnit(fluentCalculator);
++
++        calculator.Now = () => now;
++
++        // Act
++        run.At(timeSpan);
++        var calculated = calculator.Calculate(now);
++
++        // Assert
++        Equal(expected, calculated.Value);
++
++        // Arrange
++        now = now.AddHours(6);
++        expected = expected.AddDays(1);
++
++        // Act
++        calculated = calculator.Calculate(now);
++
++        // Assert
++        Equal(expected, calculated.Value);
++    }
++
++    [Fact]
++    public void AtMultipleTimeSpan()
++    {
++        // Arrange
++        var timeSpans = new TimeSpan[] { new(15, 0, 0), new(16, 0, 0), new(17, 0, 0) };
++        var now = new DateTime(2025, 8, 20, 10, 0, 0);
++        var expected = new DateTime(2025, 8, 20).Add(timeSpans[0]);
++
++        var fluentCalculator = new FluentTimeCalculator();
++        var calculator = fluentCalculator;
++        var run = new RunSpecifier(fluentCalculator);
++
++        calculator.Now = () => now;
++
++        // Act
++        run.Everyday().At(timeSpans);
++        var calculated = calculator.Calculate(now);
++
++        // Assert
++        Equal(expected, calculated.Value);
++
++        // Arrange
++        now = now.AddHours(5.1);
++        expected = expected.Date.Add(timeSpans[1]);
++
++        // Act
++        calculated = calculator.Calculate(now);
++
++        // Assert
++        Equal(expected, calculated.Value);
++
++        // Arrange
++        now = now.AddHours(1.1);
++        expected = expected.Date.Add(timeSpans[2]);
++
++        // Act
++        calculated = calculator.Calculate(now);
++
++        // Assert
++        Equal(expected, calculated.Value);
++
++        // Arrange
++        now = now.AddHours(1.1);
++        expected = new DateTime(2025, 8, 21, 15, 0, 0);
++
++        // Act
++        calculated = calculator.Calculate(now);
++
++        // Assert
++        Equal(expected, calculated.Value);
++    }
++
++    [Fact]
++    public void AtMultipleTimeSpan2()
++    {
++        // Arrange
++        var timeSpans = new TimeSpan[] { new(15, 0, 0), new(16, 0, 0), new(17, 0, 0) };
++        var now = new DateTime(2025, 8, 20, 15, 1, 0);
++        var expected = new DateTime(2025, 8, 20).Add(timeSpans[1]);
++
++        var fluentCalculator = new FluentTimeCalculator();
++        var calculator = fluentCalculator;
++        var run = new RunSpecifier(fluentCalculator);
++
++        calculator.Now = () => now;
++
++        // Act
++        run.Everyday().At(timeSpans);
++        var calculated = calculator.Calculate(now);
++
++        // Assert
++        Equal(expected, calculated.Value);
++
++        // Arrange
++        now = now.AddHours(1.1);
++        expected = expected.Date.Add(timeSpans[2]);
++
++        // Act
++        calculated = calculator.Calculate(now);
++
++        // Assert
++        Equal(expected, calculated.Value);
++
++        // Arrange
++        now = now.AddHours(1.1);
++        expected = new DateTime(2025, 8, 21, 15, 0, 0);
++
++        // Act
++        calculated = calculator.Calculate(now);
++
++        // Assert
++        Equal(expected, calculated.Value);
++    }
++
++    [Fact]
++    public void AtMultipleEmptyTimeSpan()
++    {
++        var fluentCalculator = new FluentTimeCalculator();
++        var run = new EverydayUnit(fluentCalculator);
++
++        // Act Assert
++        Throws<ArgumentException>(() => run.At());
++    }
++
++    [Fact]
++    public void AtMultipleNullTimeSpan()
++    {
++        // Arrange
++        var fluentCalculator = new FluentTimeCalculator();
++        var run = new EverydayUnit(fluentCalculator);
++
++        // Act Assert
++        Throws<ArgumentNullException>(() => run.At(null));
++    }
++
++    [Fact]
++    public void EverydayAt15()
++    {
++        // Arrange
++        var now = new DateTime(2025, 08, 24, 14, 30, 0);
++        var expectedDate = new DateTime(2025, 08, 24, 15, 0, 0);
++
++        var fluentCalculator = new FluentTimeCalculator();
++        var calculator = fluentCalculator;
++        var run = new RunSpecifier(fluentCalculator);
++
++        calculator.Now = () => now;
++
++        // Act
++        run.Everyday().At(15, 0);
++        var calculated = calculator.Calculate(now);
++
++        // Assert
++        Equal(expectedDate, calculated.Value);
++
++        now = expectedDate;
++
++        calculated = calculator.Calculate(expectedDate);
++
++        expectedDate = expectedDate.AddDays(1);
++
++        // Assert
++        Equal(expectedDate, calculated.Value);
++    }
++
++    [Fact]
++    public void EverydayAt16()
++    {
++        // Arrange
++        var now = new DateTime(2025, 08, 24, 16, 0, 0);
++        var expectedDate = new DateTime(2025, 08, 24, 16, 0, 0);
++
++        var fluentCalculator = new FluentTimeCalculator();
++        var calculator = fluentCalculator;
++        var run = new RunSpecifier(fluentCalculator);
++
++        calculator.Now = () => now;
++
++        // Act
++        run.Everyday().At(16, 0);
++        var calculated = calculator.Calculate(now);
++
++        // Assert
++        Equal(expectedDate, calculated.Value);
++
++        now = expectedDate;
++
++        calculated = calculator.Calculate(expectedDate);
++
++        expectedDate = expectedDate.AddDays(1);
++
++        // Assert
++        Equal(expectedDate, calculated.Value);
++    }
++
++    [Fact]
++    public void Between17and19TimeSpan()
++    {
++        // Arrange
++        var now = new DateTime(2025, 08, 24, 16, 30, 0);
++        var expectedDate = new DateTime(2025, 08, 24, 17, 30, 0);
++
++        var from = new TimeSpan(17, 30, 0);
++        var to = new TimeSpan(19, 30, 0);
++
++        var fluentCalculator = new FluentTimeCalculator();
++        var calculator = fluentCalculator;
++        var run = new RunSpecifier(fluentCalculator);
++
++        calculator.Now = () => now;
++
++        // Act
++        run.Everyday().Between(from, to);
++        var calculated = calculator.Calculate(now);
++
++        // Assert
++        Equal(expectedDate, calculated.Value);
++    }
++
++    [Fact]
++    public void Between21and23TimeSpan()
++    {
++        // Arrange
++        var now = new DateTime(2025, 09, 10, 23, 40, 0);
++        var expectedDate = new DateTime(2025, 09, 10, 21, 30, 0);
++
++        var from = new TimeSpan(21, 30, 0);
++        var to = new TimeSpan(23, 30, 0);
++
++        var calculator = new FluentTimeCalculator();
++        var run = new RunSpecifier(calculator);
++
++        calculator.Now = () => now;
++
++        // Act
++        run.Everyday().Between(from, to);
++
++        var calculated = calculator.Calculate(now);
++
++        // Assert
++        Equal(expectedDate, calculated.Value);
++    }
++
++    [Fact]
++    public void Between23and2TimeSpan()
++    {
++        // Arrange
++        var now = new DateTime(2025, 08, 24, 22, 30, 0);
++        var expectedDate = new DateTime(2025, 08, 24, 23, 0, 0);
++
++        var from = new TimeSpan(23, 0, 0);
++        var to = new TimeSpan(2, 0, 0);
++
++        var calculator = new FluentTimeCalculator();
++        var run = new RunSpecifier(calculator);
++
++        calculator.Now = () => now;
++
++        // Act
++        run.Everyday().Between(from, to);
++        var calculated = calculator.Calculate(now);
++
++        // Assert
++        Equal(expectedDate, calculated.Value);
++
++        expectedDate = expectedDate.AddDays(1);
++
++        calculated = calculator.Calculate(now);
++
++        // Assert
++        Equal(expectedDate, calculated.Value);
++    }
++
++    [Fact]
++    public void Between23and2()
++    {
++        // Arrange
++        var now = new DateTime(2025, 08, 24, 22, 30, 0);
++        var expectedDate = new DateTime(2025, 08, 24, 23, 0, 0);
++
++        var calculator = new FluentTimeCalculator();
++        var run = new RunSpecifier(calculator);
++
++        calculator.Now = () => now;
++
++        // Act
++        run.Everyday().Between(23, 0, 2, 0);
++        var calculated = calculator.Calculate(now);
++
++        // Assert
++        Equal(expectedDate, calculated.Value);
++
++        expectedDate = expectedDate.AddDays(1);
++
++        calculated = calculator.Calculate(now);
++
++        // Assert
++        Equal(expectedDate, calculated.Value);
++    }
++
++    [Fact]
++    public void Between19and22()
++    {
++        // Arrange
++        var now = new DateTime(2025, 08, 24, 20, 0, 0);
++        var expectedDate = new DateTime(2025, 08, 24, 20, 0, 0);
++
++        var calculator = new FluentTimeCalculator();
++        var run = new RunSpecifier(calculator);
++
++        calculator.Now = () => now;
++
++        // Act
++        run.Everyday().Between(19, 0, 22, 0);
++        var calculated = calculator.Calculate(now);
++
++        // Assert
++        Equal(expectedDate, calculated.Value);
++
++        calculated = calculator.Calculate(expectedDate);
++
++        expectedDate = expectedDate.Date.AddDays(1).Add(new TimeSpan(19, 0, 0));
++
++        // Assert
++        Equal(expectedDate, calculated.Value);
++
++        calculated = calculator.Calculate(expectedDate);
++
++        expectedDate = expectedDate.AddDays(1);
++
++        // Assert
++        Equal(expectedDate, calculated.Value);
++    }
++
++    [Fact]
++    public void ThrowIfAtEmpty()
++    {
++        // Arrange
++        var fluentCalculator = new FluentTimeCalculator();
++        var run = new EverydayUnit(fluentCalculator);
++
++        // Act
++        Throws<ArgumentException>(() => run.At());
++    }
+ }
+\ No newline at end of file
+diff --git a/FluentScheduler.UnitTests/Scheduler/ScheduleGroupTests.cs b/FluentScheduler.UnitTests/Scheduler/ScheduleGroupTests.cs
+index cc0029d..e3003d5 100644
+--- a/FluentScheduler.UnitTests/Scheduler/ScheduleGroupTests.cs
++++ b/FluentScheduler.UnitTests/Scheduler/ScheduleGroupTests.cs
+@@ -145,7 +145,7 @@ public class ScheduleGroupTests
+         var scheduleGroup = new List<Schedule>
+         {
+             new(() => { } , run => run.Now().AndEvery(1).Months()),
+-            new(() => { } , run => run.Now().AndEvery(1).Months())
++            new(() => { } , run => run.Now().AndEvery(1).Months()),
+         };
+ 
+         // Act
+diff --git a/FluentScheduler.UnitTests/Scheduler/ScheduleTests.cs b/FluentScheduler.UnitTests/Scheduler/ScheduleTests.cs
+index 131e7ca..43491a9 100644
+--- a/FluentScheduler.UnitTests/Scheduler/ScheduleTests.cs
++++ b/FluentScheduler.UnitTests/Scheduler/ScheduleTests.cs
+@@ -235,7 +235,7 @@ public class ScheduleTests
+ 
+         // Act
+         schedule.UseUtc();
+-        var resultedNow = schedule.Internal._calculator.Now();
++        var resultedNow = schedule.Internal.Calculator.Now();
+ 
+         // Assert
+         Equal(expectedNow.Hour, resultedNow.Hour);
+@@ -250,7 +250,7 @@ public class ScheduleTests
+         var schedule = new Schedule(() => { }, run => run.Now());
+ 
+         // Act
+-        var resultedNow = schedule.Internal._calculator.Now();
++        var resultedNow = schedule.Internal.Calculator.Now();
+ 
+         // Assert
+         Equal(expectedNow.Hour, resultedNow.Hour);
+@@ -271,7 +271,6 @@ public class ScheduleTests
+         Throws<InvalidOperationException>(schedule.UseUtc);
+     }
+ 
+-
+     [Fact]
+     public void UseUtcBeforeStart()
+     {
+@@ -283,7 +282,7 @@ public class ScheduleTests
+         schedule.UseUtc();
+         schedule.Start();
+ 
+-        var resultedNow = schedule.Internal._calculator.Now();
++        var resultedNow = schedule.Internal.Calculator.Now();
+ 
+         // Assert
+         Equal(expectedNow.Hour, resultedNow.Hour);
+@@ -303,7 +302,7 @@ public class ScheduleTests
+         schedule.UseUtc();
+         schedule.Start();
+ 
+-        var resultedNow = schedule.Internal._calculator.Now();
++        var resultedNow = schedule.Internal.Calculator.Now();
+ 
+         // Assert
+         Equal(expectedNow.Hour, resultedNow.Hour);
+@@ -315,8 +314,9 @@ public class ScheduleTests
+     {
+         // Arrange
+         var cancelled = false;
+-        var schedule = new Schedule(async (token) =>
+-            await Task.Delay(1000, token).ContinueWith(_ => cancelled = token.IsCancellationRequested).ConfigureAwait(false),
++        var schedule = new Schedule(
++            async token =>
++                await Task.Delay(1000, token).ContinueWith(_ => cancelled = token.IsCancellationRequested).ConfigureAwait(false),
+             run => run.Now()
+         );
+ 
+diff --git a/FluentScheduler/Common/ThrowHelper.cs b/FluentScheduler/Common/ThrowHelper.cs
+index 9115f46..81517ec 100644
+--- a/FluentScheduler/Common/ThrowHelper.cs
++++ b/FluentScheduler/Common/ThrowHelper.cs
+@@ -1,8 +1,8 @@
++namespace FluentScheduler;
++
+ using System;
+ using System.Diagnostics.CodeAnalysis;
+ 
+-namespace FluentScheduler;
+-
+ // helper methods for performing simple validations and that should throw an exception
+ internal static class ThrowHelper
+ {
+@@ -20,9 +20,11 @@ internal static class ThrowHelper
+     internal static void ThrowIfGreaterThan(int value, int other, string paramName)
+     {
+         if (value > other)
++        {
+             throw new ArgumentOutOfRangeException(
+                 paramName, value, $"'{paramName}' must be less than or equal to '{other}'."
+             );
++        }
+     }
+ 
+     // throws if the given hours and minutes are outside 00:00 to 23:59
+@@ -70,7 +72,7 @@ internal static class ThrowHelper
+     // equivalent of ArgumentNullException.ThrowIfNull(value) which is not available for .NET 4.8
+     internal static void ThrowIfNull(object value, string paramName)
+     {
+-        if (value is null)
++        if (value == null)
+             throw new ArgumentNullException(paramName);
+     }
+ 
+@@ -83,14 +85,16 @@ internal static class ThrowHelper
+ 
+     // throws if the given value is not present in the given enum T
+     [SuppressMessage("Usage", "CA2263", Justification = "The generic overload is actually not available.")]
+-    internal static void ThrowIfNotDefinedInEnum<T>(T value, string paramName) where T : struct, Enum
++    internal static void ThrowIfNotDefinedInEnum<T>(T value, string paramName)
++        where T : struct, Enum
+     {
+         if (!Enum.IsDefined(typeof(T), value))
+             throw new ArgumentOutOfRangeException(paramName, value, "Enumeration value out of range.");
+     }
+ 
+     // a version of the existing helper that operates on an array instead
+-    internal static void ThrowIfNotDefinedInEnum<T>(T[] values, string paramName) where T : struct, Enum
++    internal static void ThrowIfNotDefinedInEnum<T>(T[] values, string paramName)
++        where T : struct, Enum
+     {
+         ThrowIfNull(values, paramName);
+ 
+diff --git a/FluentScheduler/Cron/CronTimeCalculator.cs b/FluentScheduler/Cron/CronTimeCalculator.cs
+index 3e24b75..fd9796d 100644
+--- a/FluentScheduler/Cron/CronTimeCalculator.cs
++++ b/FluentScheduler/Cron/CronTimeCalculator.cs
+@@ -1,7 +1,7 @@
+ namespace FluentScheduler;
+ 
+-using NCrontab;
+ using System;
++using FluentScheduler.NCrontab;
+ 
+ internal class CronTimeCalculator : ITimeCalculator
+ {
+@@ -12,14 +12,14 @@ internal class CronTimeCalculator : ITimeCalculator
+         var cronFields = cronExpression.Split(StringSeparatorStock.Space, StringSplitOptions.RemoveEmptyEntries).Length;
+         var parseOptions = new CrontabSchedule.ParseOptions
+         {
+-            IncludingSeconds = cronFields == 6
++            IncludingSeconds = cronFields == 6,
+         };
+ 
+         _calculator = CrontabSchedule.Parse(cronExpression, parseOptions);
+     }
+-    
++
+     public Func<DateTime> Now { get; set; } = () => DateTime.Now;
+-    
++
+     public void UseUtc() => ((ITimeCalculator)this).Now = () => DateTime.UtcNow;
+ 
+     public DateTime? Calculate(DateTime last) => _calculator.GetNextOccurrence(last);
+diff --git a/FluentScheduler/Fluent/3.Duration/DayUnit.cs b/FluentScheduler/Fluent/3.Duration/DayUnit.cs
+index 7963be7..4fa4dc3 100644
+--- a/FluentScheduler/Fluent/3.Duration/DayUnit.cs
++++ b/FluentScheduler/Fluent/3.Duration/DayUnit.cs
+@@ -1,61 +1,59 @@
+-using System;
+-
+-namespace FluentScheduler;
+-
+-using static DayOfWeek;
+-
+-/// <summary>
+-/// The days the job should run
+-/// </summary>
+-public class DayUnit
+-{
+-    private readonly FluentTimeCalculator _calculator;
+-
+-    internal DayUnit(FluentTimeCalculator calculator) => _calculator = calculator;
+-
+-    /// <summary>
+-    /// Runs the job only on weekdays.
+-    /// </summary>
+-    public RestrictionUnit Weekday()
+-    {
+-        _calculator.PeriodCalculations.Add(last =>
+-        {
+-            var daysToNextWeekday = 1;
+-
+-            if (last.DayOfWeek == Friday)
+-                daysToNextWeekday = 3;
+-            
+-            if (last.DayOfWeek == Saturday)
+-                daysToNextWeekday = 2;
+-
+-            last = last.AddDays(daysToNextWeekday);
+-
+-            return last;
+-        });
+-
+-        return new RestrictionUnit(_calculator);
+-    }
+-
+-    /// <summary>
+-    /// Runs the job only on the weekends.
+-    /// </summary>
+-    public RestrictionUnit Weekend()
+-    {
+-        _calculator.PeriodCalculations.Add(last =>
+-        {
+-            var daysToNextWeekend = 6 - (int)last.DayOfWeek;
+-            
+-            if (last.DayOfWeek == Saturday)
+-                daysToNextWeekend = 1;
+-
+-            if (last.DayOfWeek == Sunday)
+-                daysToNextWeekend = 6;
+-
+-            last = last.AddDays(daysToNextWeekend);
+-
+-            return last;
+-        });
+-
+-        return new RestrictionUnit(_calculator);
+-    }
+-}
++namespace FluentScheduler;
++
++using static System.DayOfWeek;
++
++/// <summary>
++/// The days the job should run
++/// </summary>
++public class DayUnit
++{
++    private readonly FluentTimeCalculator _calculator;
++
++    internal DayUnit(FluentTimeCalculator calculator) => _calculator = calculator;
++
++    /// <summary>
++    /// Runs the job only on weekdays.
++    /// </summary>
++    public RestrictionUnit Weekday()
++    {
++        _calculator.PeriodCalculations.Add(last =>
++        {
++            var daysToNextWeekday = 1;
++
++            if (last.DayOfWeek == Friday)
++                daysToNextWeekday = 3;
++
++            if (last.DayOfWeek == Saturday)
++                daysToNextWeekday = 2;
++
++            last = last.AddDays(daysToNextWeekday);
++
++            return last;
++        });
++
++        return new RestrictionUnit(_calculator);
++    }
++
++    /// <summary>
++    /// Runs the job only on the weekends.
++    /// </summary>
++    public RestrictionUnit Weekend()
++    {
++        _calculator.PeriodCalculations.Add(last =>
++        {
++            var daysToNextWeekend = 6 - (int)last.DayOfWeek;
++
++            if (last.DayOfWeek == Saturday)
++                daysToNextWeekend = 1;
++
++            if (last.DayOfWeek == Sunday)
++                daysToNextWeekend = 6;
++
++            last = last.AddDays(daysToNextWeekend);
++
++            return last;
++        });
++
++        return new RestrictionUnit(_calculator);
++    }
++}
+diff --git a/FluentScheduler/Fluent/3.Duration/EverydayUnit.cs b/FluentScheduler/Fluent/3.Duration/EverydayUnit.cs
+index 6e9bd2d..c21ab4c 100644
+--- a/FluentScheduler/Fluent/3.Duration/EverydayUnit.cs
++++ b/FluentScheduler/Fluent/3.Duration/EverydayUnit.cs
+@@ -1,100 +1,100 @@
+-using System;
+-using System.Linq;
+-
+-namespace FluentScheduler;
+-
+-/// <summary>
+-/// The "period" run has been set, but not its unit.
+-/// </summary>
+-public class EverydayUnit
+-{
+-    private readonly FluentTimeCalculator _calculator;
+-
+-    internal EverydayUnit(FluentTimeCalculator calculator) => _calculator = calculator;
+-
+-    /// <summary>
+-    /// Runs the job at the given time of day (military format).
+-    /// </summary>
+-    /// <param name="hour">The hour (0 through 23).</param>
+-    /// <param name="minute">The minute (0 through 59).</param>
+-    public void At(int hour, int minute)
+-    {
+-        ThrowHelper.ThrowIfOutOfMilitaryTimeRange(hour, minute, nameof(hour), nameof(minute));
+-
+-        _calculator.PeriodCalculations.Add(last =>
+-        {
+-            var timeCalculator = _calculator;
+-            var now = timeCalculator.Now();
+-
+-            var next = new DateTime(last.Year, last.Month, last.Day, hour, minute, 0);
+-
+-            return now > next ? next.AddDays(1) : next;
+-        });
+-    }
+-
+-    /// <summary>
+-    /// Runs the job at the given time of day.
+-    /// </summary>
+-    /// <param name="timeCollection">Time of day.</param>
+-    public void At(params TimeSpan[] timeCollection)
+-    {
+-        ThrowHelper.ThrowIfEmpty(timeCollection, nameof(timeCollection));
+-        ThrowHelper.ThrowIfOutOfMilitaryTimeRange(timeCollection, nameof(timeCollection));
+-
+-        _calculator.PeriodCalculations.Add(_ =>
+-        {
+-            var timeCalculator = _calculator;
+-            var now = timeCalculator.Now();
+-
+-            var orderedTimes = timeCollection.OrderBy(t => t).ToArray();
+-
+-            var nextTime = orderedTimes.FirstOrDefault(t => now.TimeOfDay < t);
+-
+-            if (nextTime == default)
+-                nextTime = orderedTimes.First();
+-
+-            var next = new DateTime(now.Year, now.Month, now.Day).Add(nextTime);
+-
+-            return now > next ? next.AddDays(1) : next;
+-        });
+-    }
+-
+-    /// <summary>
+-    /// Runs the job at the given period of time.
+-    /// </summary>
+-    /// <param name="hourFrom">Hour to delimitate period beginning.</param>
+-    /// <param name="minuteFrom">Minute to delimitade period beginning.</param>
+-    /// <param name="hourTo">Hour to delimitate period end.</param>
+-    /// <param name="minuteTo">Minute to delimitade period end.</param>
+-    public void Between(int hourFrom, int minuteFrom, int hourTo, int minuteTo) =>
+-        Between(new TimeSpan(hourFrom, minuteFrom, 0), new TimeSpan(hourTo, minuteTo, 0));
+-
+-    /// <summary>
+-    /// Runs the job at the given period of time.
+-    /// </summary>
+-    /// <param name="from">Time of the day to delimitate the period beginnig.</param>
+-    /// <param name="to">Time of the day to delimitade the period end.</param>
+-    public void Between(TimeSpan from, TimeSpan to)
+-    {
+-        if (from == to)
+-            throw new ArgumentException($"The parameters '{nameof(from)}' and '{nameof(to)}' must not be equal.");
+-
+-        _calculator.PeriodCalculations.Add(
+-            last =>
+-            {
+-                var fromDate = new DateTime(last.Year, last.Month, last.Day).Add(from);
+-                var toDate = new DateTime(last.Year, last.Month, last.Day).Add(to);
+-                var now = ((ITimeCalculator)_calculator).Now();
+-
+-                var next = new DateTime(last.Year, last.Month, last.Day).Add(from);
+-
+-                if (now >= fromDate && now <= toDate)
+-                {
+-                    next = now;
+-                }
+-
+-                return next;
+-            }
+-        );
+-    }
++namespace FluentScheduler;
++
++using System;
++using System.Linq;
++
++/// <summary>
++/// The "period" run has been set, but not its unit.
++/// </summary>
++public class EverydayUnit
++{
++    private readonly FluentTimeCalculator _calculator;
++
++    internal EverydayUnit(FluentTimeCalculator calculator) => _calculator = calculator;
++
++    /// <summary>
++    /// Runs the job at the given time of day (military format).
++    /// </summary>
++    /// <param name="hour">The hour (0 through 23).</param>
++    /// <param name="minute">The minute (0 through 59).</param>
++    public void At(int hour, int minute)
++    {
++        ThrowHelper.ThrowIfOutOfMilitaryTimeRange(hour, minute, nameof(hour), nameof(minute));
++
++        _calculator.PeriodCalculations.Add(last =>
++        {
++            var timeCalculator = _calculator;
++            var now = timeCalculator.Now();
++
++            var next = new DateTime(last.Year, last.Month, last.Day, hour, minute, 0);
++
++            return now > next ? next.AddDays(1) : next;
++        });
++    }
++
++    /// <summary>
++    /// Runs the job at the given time of day.
++    /// </summary>
++    /// <param name="timeCollection">Time of day.</param>
++    public void At(params TimeSpan[] timeCollection)
++    {
++        ThrowHelper.ThrowIfEmpty(timeCollection, nameof(timeCollection));
++        ThrowHelper.ThrowIfOutOfMilitaryTimeRange(timeCollection, nameof(timeCollection));
++
++        _calculator.PeriodCalculations.Add(_ =>
++        {
++            var timeCalculator = _calculator;
++            var now = timeCalculator.Now();
++
++            var orderedTimes = timeCollection.OrderBy(t => t).ToArray();
++
++            var nextTime = orderedTimes.FirstOrDefault(t => now.TimeOfDay < t);
++
++            if (nextTime == default)
++                nextTime = orderedTimes.First();
++
++            var next = new DateTime(now.Year, now.Month, now.Day).Add(nextTime);
++
++            return now > next ? next.AddDays(1) : next;
++        });
++    }
++
++    /// <summary>
++    /// Runs the job at the given period of time.
++    /// </summary>
++    /// <param name="hourFrom">Hour to delimitate period beginning.</param>
++    /// <param name="minuteFrom">Minute to delimitade period beginning.</param>
++    /// <param name="hourTo">Hour to delimitate period end.</param>
++    /// <param name="minuteTo">Minute to delimitade period end.</param>
++    public void Between(int hourFrom, int minuteFrom, int hourTo, int minuteTo) =>
++        Between(new TimeSpan(hourFrom, minuteFrom, 0), new TimeSpan(hourTo, minuteTo, 0));
++
++    /// <summary>
++    /// Runs the job at the given period of time.
++    /// </summary>
++    /// <param name="from">Time of the day to delimitate the period beginnig.</param>
++    /// <param name="to">Time of the day to delimitade the period end.</param>
++    public void Between(TimeSpan from, TimeSpan to)
++    {
++        if (from == to)
++            throw new ArgumentException($"The parameters '{nameof(from)}' and '{nameof(to)}' must not be equal.");
++
++        _calculator.PeriodCalculations.Add(
++            last =>
++            {
++                var fromDate = new DateTime(last.Year, last.Month, last.Day).Add(from);
++                var toDate = new DateTime(last.Year, last.Month, last.Day).Add(to);
++                var now = ((ITimeCalculator)_calculator).Now();
++
++                var next = new DateTime(last.Year, last.Month, last.Day).Add(from);
++
++                if (now >= fromDate && now <= toDate)
++                {
++                    next = now;
++                }
++
++                return next;
++            }
++        );
++    }
+ }
+\ No newline at end of file
+diff --git a/FluentScheduler/Fluent/3.Duration/MonthUnit.cs b/FluentScheduler/Fluent/3.Duration/MonthUnit.cs
+index 4b7ffbf..6b698b7 100644
+--- a/FluentScheduler/Fluent/3.Duration/MonthUnit.cs
++++ b/FluentScheduler/Fluent/3.Duration/MonthUnit.cs
+@@ -1,28 +1,28 @@
+-namespace FluentScheduler;
+-
+-using System;
+-
+-/// <summary>
+-/// The months the job should run
+-/// </summary>
+-public class MonthUnit
+-{
+-    private readonly FluentTimeCalculator _calculator;
+-
+-    internal MonthUnit(FluentTimeCalculator calculator) => _calculator = calculator;
+-
+-    /// <summary>
+-    /// Runs the job on the given day of the month.
+-    /// </summary>
+-    /// <param name="day">The day (1 through the number of days in month)</param>
+-    public RestrictionUnit On(int day)
+-    {
+-        ThrowHelper.ThrowIfNegative(day, nameof(day));
+-        ThrowHelper.ThrowIfGreaterThan(day, 31, nameof(day));
+-
+-        _calculator.PeriodCalculations.Add(
+-            last => new DateTime(last.Year, last.Month, day, last.Hour, last.Minute, last.Second));
+-
+-        return new RestrictionUnit(_calculator);
+-    }
+-}
++namespace FluentScheduler;
++
++using System;
++
++/// <summary>
++/// The months the job should run
++/// </summary>
++public class MonthUnit
++{
++    private readonly FluentTimeCalculator _calculator;
++
++    internal MonthUnit(FluentTimeCalculator calculator) => _calculator = calculator;
++
++    /// <summary>
++    /// Runs the job on the given day of the month.
++    /// </summary>
++    /// <param name="day">The day (1 through the number of days in month)</param>
++    public RestrictionUnit On(int day)
++    {
++        ThrowHelper.ThrowIfNegative(day, nameof(day));
++        ThrowHelper.ThrowIfGreaterThan(day, 31, nameof(day));
++
++        _calculator.PeriodCalculations.Add(
++            last => new DateTime(last.Year, last.Month, day, last.Hour, last.Minute, last.Second));
++
++        return new RestrictionUnit(_calculator);
++    }
++}
+diff --git a/FluentScheduler/Fluent/3.Duration/PeriodDurationSet.cs b/FluentScheduler/Fluent/3.Duration/PeriodDurationSet.cs
+index aba45e5..35b498a 100644
+--- a/FluentScheduler/Fluent/3.Duration/PeriodDurationSet.cs
++++ b/FluentScheduler/Fluent/3.Duration/PeriodDurationSet.cs
+@@ -1,7 +1,7 @@
+-using System;
+-
+ namespace FluentScheduler;
+ 
++using System;
++
+ /// <summary>
+ /// Duration of "period" run has been set, but not its unit.
+ /// </summary>
+@@ -39,7 +39,7 @@ public class PeriodDurationSet
+     {
+         if (_duration == 1)
+             throw new InvalidOperationException($"Use {nameof(RunSpecifier.Everyday)} instead.");
+-        
++
+         _calculator.PeriodCalculations.Add(last => last.AddDays(_duration));
+         return new RestrictionUnit(_calculator);
+     }
+@@ -62,5 +62,3 @@ public class PeriodDurationSet
+         return new MonthUnit(_calculator);
+     }
+ }
+-
+-
+diff --git a/FluentScheduler/Fluent/3.Duration/PeriodOnceSet.cs b/FluentScheduler/Fluent/3.Duration/PeriodOnceSet.cs
+index c9588b2..497a5dc 100644
+--- a/FluentScheduler/Fluent/3.Duration/PeriodOnceSet.cs
++++ b/FluentScheduler/Fluent/3.Duration/PeriodOnceSet.cs
+@@ -1,5 +1,3 @@
+-using System.Globalization;
+-
+ namespace FluentScheduler;
+ 
+ using System;
+diff --git a/FluentScheduler/Fluent/4.Restriction/RestrictionUnit.cs b/FluentScheduler/Fluent/4.Restriction/RestrictionUnit.cs
+index 12eb7c6..e521eda 100644
+--- a/FluentScheduler/Fluent/4.Restriction/RestrictionUnit.cs
++++ b/FluentScheduler/Fluent/4.Restriction/RestrictionUnit.cs
+@@ -55,9 +55,11 @@ public class RestrictionUnit
+         var allDays = Enum.GetValues(typeof(DayOfWeek)).Cast<DayOfWeek>().ToArray();
+ 
+         if (allDays.All(day => exceptionalDays.Contains(day)))
++        {
+             throw new ArgumentException(
+                 "The given exceptional days must not contain all days of the week.", nameof(exceptionalDays)
+             );
++        }
+ 
+         _calculator.PeriodCalculations.Add(
+             last =>
+diff --git a/FluentScheduler/Fluent/FluentTimeCalculator.cs b/FluentScheduler/Fluent/FluentTimeCalculator.cs
+index 78626c9..a6aaa94 100644
+--- a/FluentScheduler/Fluent/FluentTimeCalculator.cs
++++ b/FluentScheduler/Fluent/FluentTimeCalculator.cs
+@@ -1,15 +1,17 @@
+ namespace FluentScheduler;
+ 
+ using System;
+-using System.Linq;
+ using System.Collections.Generic;
++using System.Linq;
+ 
+ internal class FluentTimeCalculator : ITimeCalculator
+ {
+     private bool _firstCalculation = true;
+-    
++
+     internal FluentTimeCalculator() { }
+ 
++    internal FluentTimeCalculator(Action<RunSpecifier> specifier) => specifier(new RunSpecifier(this));
++
+     public Func<DateTime> Now { get; set; } = () => DateTime.Now;
+ 
+     internal Func<DateTime, DateTime> OnceCalculation { get; set; }
+@@ -17,8 +19,6 @@ internal class FluentTimeCalculator : ITimeCalculator
+     internal IList<Func<DateTime, DateTime>> PeriodCalculations { get; private set; } =
+         new List<Func<DateTime, DateTime>>();
+ 
+-    internal FluentTimeCalculator(Action<RunSpecifier> specifier) => specifier(new RunSpecifier(this));
+-
+     public void Reset() => _firstCalculation = true;
+ 
+     public DateTime? Calculate(DateTime last) => CalculateOnce(last) ?? CalculatePeriod(last);
+diff --git a/FluentScheduler/Scheduler/ITimeCalculator.cs b/FluentScheduler/Scheduler/ITimeCalculator.cs
+index fe5abd0..9e33288 100644
+--- a/FluentScheduler/Scheduler/ITimeCalculator.cs
++++ b/FluentScheduler/Scheduler/ITimeCalculator.cs
+@@ -6,11 +6,11 @@ using System;
+ internal interface ITimeCalculator
+ {
+     // a mockable DateTime.Now
+-	Func<DateTime> Now { get; set; }
++    Func<DateTime> Now { get; set; }
+ 
+     // resets any stored state in the calculator
+-	void Reset();
++    void Reset();
+ 
+     // returns the next run based on the given last run
+-	DateTime? Calculate(DateTime last);
++    DateTime? Calculate(DateTime last);
+ }
+\ No newline at end of file
+diff --git a/FluentScheduler/Scheduler/InternalSchedule.cs b/FluentScheduler/Scheduler/InternalSchedule.cs
+index da16c8e..fcb028b 100644
+--- a/FluentScheduler/Scheduler/InternalSchedule.cs
++++ b/FluentScheduler/Scheduler/InternalSchedule.cs
+@@ -14,7 +14,7 @@ internal class InternalSchedule
+     private readonly Func<CancellationToken, Task> _job;
+ 
+     // the calculator for the next run, internal access to allow unit test mocking
+-    internal ITimeCalculator _calculator;
++    internal ITimeCalculator Calculator;
+ 
+     // the task when a job is running, or null when not running
+     private Task _task;
+@@ -48,14 +48,14 @@ internal class InternalSchedule
+     internal void ResetScheduling()
+     {
+         NextRun = null;
+-        _calculator.Reset();
++        Calculator.Reset();
+     }
+ 
+     // changes the scheduling of this schedule
+     internal void SetScheduling(ITimeCalculator calculator)
+     {
+         NextRun = null;
+-        _calculator = calculator;
++        Calculator = calculator;
+     }
+ 
+     // shorthand for throwing an exception if the job is currently running
+@@ -115,13 +115,13 @@ internal class InternalSchedule
+     }
+ 
+     // use UTC time instead of the machine's time (UtcNow instead of Now)
+-    internal void UseUtc() => _calculator.Now = () => DateTime.UtcNow;
++    internal void UseUtc() => Calculator.Now = () => DateTime.UtcNow;
+ 
+     // computes and sets the next run
+     private void CalculateNextRun()
+     {
+         LastRun = NextRun;
+-        NextRun = _calculator.Calculate(LastRun ?? _calculator.Now());
++        NextRun = Calculator.Calculate(LastRun ?? Calculator.Now());
+     }
+ 
+     // the main method of scheduling, runs user's job, raise events, computes next run, and sleeps
+@@ -137,7 +137,7 @@ internal class InternalSchedule
+             return;
+ 
+         // calculating delay
+-        var delay = NextRun.Value - _calculator.Now();
++        var delay = NextRun.Value - Calculator.Now();
+ 
+         // delaying until it's time to run or a cancellation was requested
+         // the empty ContinueWith() swallows TaskCanceledException
+@@ -155,7 +155,7 @@ internal class InternalSchedule
+         CalculateNextRun();
+ 
+         // used on both JobStarted and JobEnded events
+-        var startTime = _calculator.Now();
++        var startTime = Calculator.Now();
+ 
+         // raising JobStarted event
+         JobStarted?.Invoke(this, new JobStartedEventArgs(startTime));
+@@ -176,7 +176,7 @@ internal class InternalSchedule
+         }
+ 
+         // used on JobEnded event
+-        var endTime = _calculator.Now();
++        var endTime = Calculator.Now();
+ 
+         // raising JobEnded event
+         JobEnded?.Invoke(this, new JobEndedEventArgs(exception, startTime, endTime, NextRun));
+diff --git a/FluentScheduler/Scheduler/Schedule.cs b/FluentScheduler/Scheduler/Schedule.cs
+index fd0cf9a..77dcf62 100644
+--- a/FluentScheduler/Scheduler/Schedule.cs
++++ b/FluentScheduler/Scheduler/Schedule.cs
+@@ -89,10 +89,22 @@ public class Schedule
+         Internal = new InternalSchedule(job, new CronTimeCalculator(cronExpression));
+     }
+ 
+-    private static Task MakeAsync(Action action)
++    /// <summary>
++    /// Event raised when the job starts.
++    /// </summary>
++    public event EventHandler<JobStartedEventArgs> JobStarted
+     {
+-        action();
+-        return Task.CompletedTask;
++        add => Internal.JobStarted += value;
++        remove => Internal.JobStarted -= value;
++    }
++
++    /// <summary>
++    /// Event raised when the job ends.
++    /// </summary>
++    public event EventHandler<JobEndedEventArgs> JobEnded
++    {
++        add => Internal.JobEnded += value;
++        remove => Internal.JobEnded -= value;
+     }
+ 
+     /// <summary>
+@@ -119,24 +131,6 @@ public class Schedule
+     /// </summary>
+     public DateTime? NextRun => Internal.NextRun;
+ 
+-    /// <summary>
+-    /// Event raised when the job starts.
+-    /// </summary>
+-    public event EventHandler<JobStartedEventArgs> JobStarted
+-    {
+-        add => Internal.JobStarted += value;
+-        remove => Internal.JobStarted -= value;
+-    }
+-
+-    /// <summary>
+-    /// Event raised when the job ends.
+-    /// </summary>
+-    public event EventHandler<JobEndedEventArgs> JobEnded
+-    {
+-        add => Internal.JobEnded += value;
+-        remove => Internal.JobEnded -= value;
+-    }
+-
+     /// <summary>
+     /// Sets the scheduling to use UTC time system.
+     /// You must not call this method if the schedule is running.
+@@ -257,4 +251,10 @@ public class Schedule
+             Internal.Stop(true, (int)timeout.TotalMilliseconds);
+         }
+     }
++
++    private static Task MakeAsync(Action action)
++    {
++        action();
++        return Task.CompletedTask;
++    }
+ }
+diff --git a/FluentScheduler/Scheduler/ScheduleGroup.cs b/FluentScheduler/Scheduler/ScheduleGroup.cs
+index a47d055..efcc80c 100644
+--- a/FluentScheduler/Scheduler/ScheduleGroup.cs
++++ b/FluentScheduler/Scheduler/ScheduleGroup.cs
+@@ -83,7 +83,6 @@ public static class ScheduleGroup
+         );
+     }
+ 
+-
+     /// <summary>
+     /// Resets the scheduling of the schedules. You must not call this method if any of the schedules is running.
+     /// </summary>

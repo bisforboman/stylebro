@@ -84,4 +84,29 @@ Summary:
 Vendored code in symbols/pdb/Microsoft.Cci.Pdb: marked generated_code = true, so formatting and StyleBro leave it alone.
 Settings: 76 lines in .editorconfig; 4 lines in Directory.Build.props (StyleBro.Analyzers)
   StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial61.3 to Directory.Build.props for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).
-Format run 1... 
+Format run 1... 1m 26s
+Format run 2... 11s
+Format: 131 files, 1,110 reported changes, clean after 1 run
+  IDE0055  Whitespace and formatting                   93 files
+  IMPORTS                                              31 files
+  BRO1505  Elements should be separated by a bla...    30 files
+  BRO1519  Closing brace should be followed by b...    27 files
+  BRO1515  Braces should not be omitted from mul...    23 files
+  BRO1108  Parameters should be on the same line...    17 files
+  BRO1504  Single-line comments should be preced...    16 files
+  BRO1405  Statement should not use unnecessary ...    15 files
+  BRO1518  Closing braces should not be preceded...    14 files
+  BRO1104  Use default instead of a value type's...    13 files
+  ... and 33 more rules
+Sample (IDE0055, Mono.Cecil.Cil/Document.cs):
+  -		public byte[] EmbeddedSource {
+  +		public byte [] EmbeddedSource {
+Sample (IMPORTS, rocks/Test/Mono.Cecil.Tests/ModuleDefinitionRocksTests.cs):
+  -
+  -using NUnit.Framework;
+  -
+Sample (BRO1505, Mono.Cecil/ExportedType.cs):
+  (adds a blank line)
+Full diff: .git/stylebro-preview.patch (14,380 lines)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 1m 50s.

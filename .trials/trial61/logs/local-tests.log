@@ -1,0 +1,21 @@
+Test run for /home/user/stylebro/tests/StyleBro.Tests/bin/Debug/net10.0/StyleBro.Tests.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:02:56.35]     StyleBro.Tests.MigrationTests.Migrate_WithALockedFile_WritesNothing [FAIL]
+  Failed StyleBro.Tests.MigrationTests.Migrate_WithALockedFile_WritesNothing [38 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 1
+Actual:   0
+  Stack Trace:
+     at StyleBro.Tests.MigrationTests.<Migrate_WithALockedFile_WritesNothing>b__542_1() in /home/user/stylebro/tests/StyleBro.Tests/MigrationTests.Trial28Init.cs:line 58
+   at StyleBro.Tests.MigrationTests.Capture(Action action) in /home/user/stylebro/tests/StyleBro.Tests/MigrationTests.cs:line 1647
+   at StyleBro.Tests.MigrationTests.Migrate_WithALockedFile_WritesNothing() in /home/user/stylebro/tests/StyleBro.Tests/MigrationTests.Trial28Init.cs:line 58
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+
+Failed!  - Failed:     1, Passed:  2785, Skipped:     0, Total:  2786, Duration: 7 m 12 s - StyleBro.Tests.dll (net10.0)

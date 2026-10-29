@@ -1165,3 +1165,42 @@ engines (`.trials/README.md`, "Engine soak").
   and its submodule cloned with `--depth 1`; `-p:NuGetAudit=false`; MasterMemory's net9.0 tests with `DOTNET_ROLL_FORWARD=Major`;
   `pkill -f` with a pattern from its own command line killed the shell again; editing a running script with `sed -i` doesn't
   reach the running bash (it keeps the old file).
+
+## Trial 61 (2026-10-29, not clean: owner "Not clean", tally 0; host soak: clean, the sixth clean soak with the host as the default)
+
+- Repos (three random plus one targeted): fluentscheduler/FluentScheduler, jbogard/Respawn, mganss/ExcelMapper (random, seed
+  61: draws 63, 23, 71 of 95 entries; 0-75, 78-80 and 82-84 are used, Vogen/PdfPig/DotNetty too large, so they walked to 85,
+  86, 87; `.trials/trial61/logs/picks.md`), jbevain/cecil (targeted at trial 60's BRO1120 fix: every file starts with a Mono
+  header whose first and last lines are an empty `//`; added to the pool). Tested main f44e4c9 (after #318) plus this PR's
+  commits: round 1 on 0.8.0-trial61.1 (`default`/`dotnet`), round 2 on .2 (`default2`/`dotnet2`), round 3 on .3
+  (`default3`/`dotnet3`). Logs: `.trials/trial61/<repo>/logs/`; the scripts are trial 60's.
+- One session, two lanes (base, host, `--engine dotnet-format`, `Compare-Format.ps1`), resumable; the worker restarted three
+  times (FS's round 1 old engine and two full test runs were rerun). Wall clock: 13:31 start (smoke builds and baselines
+  while #318 merged at 14:25), round 1 14:27-15:38, round 2 15:45-16:36, round 3 16:37-17:24, verdict 18:00.
+- Cecil: the empty `//` header lines stayed (trial 60's fix held). BRO1503 removed the blank line Cecil puts below 543 of 720
+  type and namespace `{` (5 of 5,334 in member bodies) in ~200 files: init had no convention for it. Owner's decision: init
+  counts them and turns BRO1503 off when the code does that, or mixes both
+  ([decision](../decisions/2026-10-29-init-turns-bro1503-off-when-the-code-puts-a-blank-line.md)); round 2: 541 with, 190
+  without -> off; 133 files changed instead of 199. Also from Cecil: tabs inside lines before trailing comments became spaces
+  (the SDK's whitespace pass), 116 of 466 split lists not one item per line were split (BRO1108's 75 % default holds at 350).
+- Respawn: `new GraphBuilder` / `    (new HashSet<Table>(...), ` / `    new HashSet<Relationship>(...));`. BRO1107 run before
+  BRO1109 indented the first argument from the `(` line (20 spaces), BRO1109 then moved the `(` up; run after it, from the
+  name's line (16). Both clean in their own check; the old engine's round 2 run took the other order (the only tree
+  difference between the engines; the round's Compare-Format run happened to agree). BRO1107/BRO1108 now indent from the name's line when BRO1109 is on and moves the `(` (two FixOrderTests cases,
+  unit tests); a split list whose `(` starts its line now gets its items realigned too (an older test's expectation updated).
+- ExcelMapper: in round 1 the engines' load-warning notes named different runs (net462, net8.0): SourceLink failed one
+  project's MSBuild load because the trial clones' origin was a local path. The trial's prep and `Compare-Format.ps1` now
+  keep the source's remote; rounds 2 and 3 identical. FluentScheduler: `end_of_line = crlf` with 4 LF files (init's note
+  said so; format converted them).
+- #312: `bro check` after a clean format answered from the record in about a second with the same verdict and exit code as
+  the full check after deleting the record and as `check --build` (Clean, exit 0), on both engines and all four repos.
+- Every TWAE build (Debug, Release) passed untouched and after, and the tests matched the untouched code: FluentScheduler 98,
+  Respawn 14 unit tests (the database tests need servers), ExcelMapper 121 with SaveTest failing untouched, Cecil 335 + 15 +
+  43 + 4 on net8.0 with the same 19 failing (no ilasm on Linux; net40 needs mono).
+- Host soak: no fallback; round 3 trees, exit codes, verdicts, --json, logs, builds and tests identical on all four, and all
+  four Compare-Format runs the same. Format (s, host/dotnet-format, r3): Cecil 122/208, Respawn 40/142, ExcelMapper 52/131,
+  FluentScheduler 24/58; check --build: 107/109, 59/59, 72/58, 77/82; full check: 51/50, 18/27, 26/22, 13/14. Soak
+  (Compare-Format, check; format): Cecil 107/207; 81/175, Respawn 45/106; 40/103, ExcelMapper 54/115; 37/105, FluentScheduler
+  25/51; 19/52.
+- Environment: SDK 10.0.113 + 8.0.132; the trial feed in the user NuGet.Config; `-p:NuGetAudit=false`; Respawn's global.json
+  (10.0.100, latestFeature) left as is; clones from a local path need the real remote for SourceLink.

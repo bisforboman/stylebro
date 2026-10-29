@@ -1,0 +1,3 @@
+Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Clean.
