@@ -29,3 +29,4 @@ CHAIN-DONE
 soak start 21:53
 soak done rc=0 21:56
 soak2-compare done 21:56
+default3 start 22:49

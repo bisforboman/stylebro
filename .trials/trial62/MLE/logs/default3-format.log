@@ -1,0 +1,2 @@
+Fixing StyleBro's rules and the built-in rules init and migrate turn on (141 ids); --all applies every analyzer's and compiler fix.
+No whitespace pass: IDE0055 is off in the settings, so no whitespace formatting: style and analyzer fixes only.
