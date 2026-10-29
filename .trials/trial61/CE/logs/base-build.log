@@ -1,0 +1,31 @@
+  Determining projects to restore...
+  Restored /home/user/w61/CE/base/symbols/mdb/Mono.Cecil.Mdb.csproj (in 560 ms).
+  Restored /home/user/w61/CE/base/Mono.Cecil.csproj (in 556 ms).
+  Restored /home/user/w61/CE/base/rocks/Mono.Cecil.Rocks.csproj (in 560 ms).
+  Restored /home/user/w61/CE/base/symbols/mdb/Test/Mono.Cecil.Mdb.Tests.csproj (in 849 ms).
+  Restored /home/user/w61/CE/base/rocks/Test/Mono.Cecil.Rocks.Tests.csproj (in 182 ms).
+  Restored /home/user/w61/CE/base/symbols/pdb/Mono.Cecil.Pdb.csproj (in 2 ms).
+  Restored /home/user/w61/CE/base/symbols/pdb/Test/Mono.Cecil.Pdb.Tests.csproj (in 176 ms).
+  Restored /home/user/w61/CE/base/Test/Mono.Cecil.Tests.csproj (in 232 ms).
+  Mono.Cecil -> /home/user/w61/CE/base/bin/Debug/net40/Mono.Cecil.dll
+  Mono.Cecil -> /home/user/w61/CE/base/bin/Debug/netstandard2.0/Mono.Cecil.dll
+  Mono.Cecil.Mdb -> /home/user/w61/CE/base/symbols/mdb/bin/Debug/netstandard2.0/Mono.Cecil.Mdb.dll
+  Mono.Cecil.Rocks -> /home/user/w61/CE/base/rocks/bin/Debug/netstandard2.0/Mono.Cecil.Rocks.dll
+  Mono.Cecil.Rocks -> /home/user/w61/CE/base/rocks/bin/Debug/net40/Mono.Cecil.Rocks.dll
+  Mono.Cecil.Pdb -> /home/user/w61/CE/base/symbols/pdb/bin/Debug/netstandard2.0/Mono.Cecil.Pdb.dll
+  Mono.Cecil.Mdb -> /home/user/w61/CE/base/symbols/mdb/bin/Debug/net40/Mono.Cecil.Mdb.dll
+  Mono.Cecil.Pdb -> /home/user/w61/CE/base/symbols/pdb/bin/Debug/net40/Mono.Cecil.Pdb.dll
+  Mono.Cecil.Tests -> /home/user/w61/CE/base/Test/bin/Debug/net40/Mono.Cecil.Tests.dll
+  Mono.Cecil.Pdb.Tests -> /home/user/w61/CE/base/symbols/pdb/Test/bin/Debug/net40/Mono.Cecil.Pdb.Tests.dll
+  Mono.Cecil.Mdb.Tests -> /home/user/w61/CE/base/symbols/mdb/Test/bin/Debug/net40/Mono.Cecil.Mdb.Tests.dll
+  Mono.Cecil.Rocks.Tests -> /home/user/w61/CE/base/rocks/Test/bin/Debug/net40/Mono.Cecil.Rocks.Tests.dll
+  Mono.Cecil.Tests -> /home/user/w61/CE/base/Test/bin/Debug/net8.0/Mono.Cecil.Tests.dll
+  Mono.Cecil.Mdb.Tests -> /home/user/w61/CE/base/symbols/mdb/Test/bin/Debug/net8.0/Mono.Cecil.Mdb.Tests.dll
+  Mono.Cecil.Rocks.Tests -> /home/user/w61/CE/base/rocks/Test/bin/Debug/net8.0/Mono.Cecil.Rocks.Tests.dll
+  Mono.Cecil.Pdb.Tests -> /home/user/w61/CE/base/symbols/pdb/Test/bin/Debug/net8.0/Mono.Cecil.Pdb.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:18.11

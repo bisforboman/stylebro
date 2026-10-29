@@ -1,0 +1,6 @@
+build	0	4s	dotnet build FluentScheduler.sln -c Debug
+twae-Debug	0	3s	twae Debug
+test-Debug	0	10s	env CFG=Debug bash -c dotnet test FluentScheduler.sln -c $CFG
+twae-Release	0	4s	twae Release
+test-Release	0	10s	env CFG=Release bash -c dotnet test FluentScheduler.sln -c $CFG
+DONE

@@ -1,0 +1,6 @@
+build	0	12s	dotnet build Respawn.sln -c Debug
+twae-Debug	0	11s	twae Debug
+test-Debug	0	11s	env CFG=Debug bash -c dotnet test Respawn.UnitTests -c $CFG
+twae-Release	0	11s	twae Release
+test-Release	0	7s	env CFG=Release bash -c dotnet test Respawn.UnitTests -c $CFG
+DONE

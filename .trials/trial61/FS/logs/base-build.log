@@ -1,0 +1,14 @@
+  Determining projects to restore...
+  Restored /home/user/w61/FS/base/FluentScheduler/FluentScheduler.csproj (in 348 ms).
+  Restored /home/user/w61/FS/base/FluentScheduler.TestApplication/FluentScheduler.TestApplication.csproj (in 348 ms).
+  Restored /home/user/w61/FS/base/FluentScheduler.UnitTests/FluentScheduler.UnitTests.csproj (in 348 ms).
+  FluentScheduler -> /home/user/w61/FS/base/FluentScheduler/bin/Debug/net48/FluentScheduler.dll
+  FluentScheduler -> /home/user/w61/FS/base/FluentScheduler/bin/Debug/net8.0/FluentScheduler.dll
+  FluentScheduler.UnitTests -> /home/user/w61/FS/base/FluentScheduler.UnitTests/bin/Debug/net8.0/FluentScheduler.UnitTests.dll
+  FluentScheduler.TestApplication -> /home/user/w61/FS/base/FluentScheduler.TestApplication/bin/Debug/net8.0/FluentScheduler.TestApplication.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.06
