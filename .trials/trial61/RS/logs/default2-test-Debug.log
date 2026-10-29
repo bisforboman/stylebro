@@ -1,0 +1,12 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Respawn -> /home/user/w61/RS/default2/Respawn/bin/Debug/netstandard2.1/Respawn.dll
+  Respawn.UnitTests -> /home/user/w61/RS/default2/Respawn.UnitTests/bin/Debug/net8.0/Respawn.UnitTests.dll
+Test run for /home/user/w61/RS/default2/Respawn.UnitTests/bin/Debug/net8.0/Respawn.UnitTests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Results File: /home/user/w61/RS/default2/Respawn.UnitTests/TestResults/Respawn.UnitTests-net8.0.trx
+
+Passed!  - Failed:     0, Passed:    14, Skipped:     0, Total:    14, Duration: 233 ms - Respawn.UnitTests.dll (net8.0)

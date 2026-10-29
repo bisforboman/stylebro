@@ -1,0 +1,25 @@
+ M Directory.Build.props
+ M Respawn.DatabaseTests/DB2Tests.cs
+ M Respawn.DatabaseTests/EmptyDbTests.cs
+ M Respawn.DatabaseTests/InformixFixture.cs
+ M Respawn.DatabaseTests/InformixTests.cs
+ M Respawn.DatabaseTests/MySqlTests.cs
+ M Respawn.DatabaseTests/OracleTests.cs
+ M Respawn.DatabaseTests/PostgresTests.cs
+ M Respawn.DatabaseTests/SkipOnCIAttribute.cs
+ M Respawn.DatabaseTests/SnowflakeTests.cs
+ M Respawn.DatabaseTests/SqlServerTests.cs
+ M Respawn.UnitTests/GraphTests.cs
+ M Respawn/DB2DbAdapter.cs
+ M Respawn/Graph/GraphBuilder.cs
+ M Respawn/Graph/Table.cs
+ M Respawn/IDbAdapter.cs
+ M Respawn/IsExternalInit.cs
+ M Respawn/MySqlAdapter.cs
+ M Respawn/OracleDbAdapter.cs
+ M Respawn/Respawner.cs
+ M Respawn/RespawnerOptions.cs
+ M Respawn/SnowflakeDbAdapter.cs
+ M Respawn/SqlServerDbAdapter.cs
+ M Respawn/SqliteDbAdapter.cs
+?? .editorconfig

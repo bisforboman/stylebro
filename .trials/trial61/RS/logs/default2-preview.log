@@ -69,4 +69,28 @@ Summary:
     dotnet_diagnostic.BRO1511.severity, stylebro_tuple_element_name_casing.
 Settings: 57 lines in .editorconfig; 4 lines in Directory.Build.props (StyleBro.Analyzers)
   StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial61.2 to Directory.Build.props for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).
-Format run 1... 
+Format run 1... 46s
+Format run 2... 4s
+Format: 23 files, 88 reported changes, clean after 1 run
+  BRO1517  Code should not contain multiple blan...     7 files
+  IMPORTS                                               7 files
+  BRO1505  Elements should be separated by a bla...     6 files
+  BRO1138  A string literal should be a plain st...     5 files
+  BRO1002  Single-line comments should begin wit...     4 files
+  BRO1514  Braces should not be omitted                 4 files
+  BRO1141  Object creation with an initializer: ...     3 files
+  BRO1401  Use a trailing comma in multi-line in...     3 files
+  BRO1008  Using directives should be placed cor...     2 files
+  BRO1106  Use string.Empty for empty strings           2 files
+  ... and 9 more rules
+Sample (BRO1517, Respawn.DatabaseTests/PostgresTests.cs):
+  (removes a blank line)
+Sample (IMPORTS, Respawn.DatabaseTests/SnowflakeTests.cs):
+  -using Respawn.Graph;
+  +using System.Threading.Tasks;
+  +using Respawn.Graph;
+Sample (BRO1505, Respawn/IDbAdapter.cs):
+  (adds a blank line)
+Full diff: .git/stylebro-preview.patch (775 lines)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 55s.
