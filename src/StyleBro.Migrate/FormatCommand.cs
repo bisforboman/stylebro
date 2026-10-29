@@ -573,15 +573,10 @@ internal static partial class FormatCommand
     /// </summary>
     public static List<string> UncheckedOutSubmodules(string root)
     {
-        var file = Path.Combine(root, ".gitmodules");
-        if (!File.Exists(file))
-        {
-            return [];
-        }
-
+        // No .gitmodules: FileNotFoundException, an IOException.
         try
         {
-            return File.ReadAllLines(file)
+            return File.ReadAllLines(Path.Combine(root, ".gitmodules"))
                 .Select(l => Regex.Match(l, @"^\s*path\s*=\s*(?<path>.+?)\s*$"))
                 .Where(m => m.Success)
                 .Select(m => m.Groups["path"].Value.Replace('\\', '/').TrimEnd('/'))
