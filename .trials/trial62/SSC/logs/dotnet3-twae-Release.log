@@ -1,0 +1,23 @@
+  Determining projects to restore...
+  Restored /home/user/w62/SSC/dotnet3/src/Serilog.Settings.Configuration/Serilog.Settings.Configuration.csproj (in 441 ms).
+  3 of 4 projects are up-to-date for restore.
+  TestDummies -> /home/user/w62/SSC/dotnet3/test/TestDummies/bin/Release/netstandard2.0/TestDummies.dll
+  Serilog.Settings.Configuration -> /home/user/w62/SSC/dotnet3/src/Serilog.Settings.Configuration/bin/Release/net462/Serilog.Settings.Configuration.dll
+  Serilog.Settings.Configuration -> /home/user/w62/SSC/dotnet3/src/Serilog.Settings.Configuration/bin/Release/net9.0/Serilog.Settings.Configuration.dll
+  Serilog.Settings.Configuration -> /home/user/w62/SSC/dotnet3/src/Serilog.Settings.Configuration/bin/Release/net10.0/Serilog.Settings.Configuration.dll
+  Serilog.Settings.Configuration -> /home/user/w62/SSC/dotnet3/src/Serilog.Settings.Configuration/bin/Release/net8.0/Serilog.Settings.Configuration.dll
+  Serilog.Settings.Configuration -> /home/user/w62/SSC/dotnet3/src/Serilog.Settings.Configuration/bin/Release/netstandard2.0/Serilog.Settings.Configuration.dll
+  Sample -> /home/user/w62/SSC/dotnet3/sample/Sample/bin/Release/net8.0/Sample.dll
+  Sample -> /home/user/w62/SSC/dotnet3/sample/Sample/bin/Release/net462/Sample.exe
+  Sample -> /home/user/w62/SSC/dotnet3/sample/Sample/bin/Release/net9.0/Sample.dll
+  TestDummies -> /home/user/w62/SSC/dotnet3/test/TestDummies/bin/Release/net462/TestDummies.dll
+  Sample -> /home/user/w62/SSC/dotnet3/sample/Sample/bin/Release/net10.0/Sample.dll
+  Serilog.Settings.Configuration.Tests -> /home/user/w62/SSC/dotnet3/test/Serilog.Settings.Configuration.Tests/bin/Release/net10.0/Serilog.Settings.Configuration.Tests.dll
+  Serilog.Settings.Configuration.Tests -> /home/user/w62/SSC/dotnet3/test/Serilog.Settings.Configuration.Tests/bin/Release/net9.0/Serilog.Settings.Configuration.Tests.dll
+  Serilog.Settings.Configuration.Tests -> /home/user/w62/SSC/dotnet3/test/Serilog.Settings.Configuration.Tests/bin/Release/net8.0/Serilog.Settings.Configuration.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:07.02

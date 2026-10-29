@@ -1,0 +1,1461 @@
+diff --git a/.editorconfig b/.editorconfig
+index 38a28be..b74ae80 100644
+--- a/.editorconfig
++++ b/.editorconfig
+@@ -10,3 +10,75 @@ indent_size = 4
+ indent_size = 2
+ 
+ csharp_style_namespace_declarations = file_scoped:suggestion
++
++# BEGIN stylebro-migrate (stylebro-migrate init: built-in .NET rules for StyleBro's preset; edits inside are replaced)
++[*.cs]
++# Built-in .NET rules that cover StyleCop rules, at the preset's severities. Their options (brace placement, modifier
++# order, ...) come from StyleBro's preset. The severities have to be here: 'dotnet format' ignores rule severities in a
++# package's global config. Add <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> to report them on build too.
++
++# Braces (SA1503, SA1519, SA1520) are StyleBro's BRO1514-BRO1516: IDE0011's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0011.severity = none
++# Formatting: spacing, indentation, line breaks (SA1000-SA1028, SA1107, SA1134, SA1137, SA1500)
++dotnet_diagnostic.IDE0055.severity = warning
++# Access modifiers (SA1400, SA1205) are StyleBro's BRO1404/BRO1007: IDE0040's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0040.severity = none
++# Modifier order: access modifier first, then static (SA1206, SA1207)
++dotnet_diagnostic.IDE0036.severity = warning
++# 'int' instead of 'Int32' (SA1121)
++dotnet_diagnostic.IDE0049.severity = warning
++# Unnecessary parentheses (SA1119) are StyleBro's BRO1405: IDE0047's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0047.severity = none
++# Parentheses that show precedence (SA1407, SA1408) are StyleBro's BRO1406/BRO1407: IDE0048's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0048.severity = none
++# Using placement (SA1200) is StyleBro's BRO1008: IDE0065's fix can change what names bind to (CS0104, CS0118)
++dotnet_diagnostic.IDE0065.severity = none
++# Blank lines (SA1507, SA1508, SA1513) are StyleBro's BRO1517-BRO1519: the SDK's fixes break multi-targeted projects
++dotnet_diagnostic.IDE2000.severity = none
++dotnet_diagnostic.IDE2002.severity = none
++dotnet_diagnostic.IDE2003.severity = none
++# 'this.' qualification isn't required (SA1101 is off in the preset)
++dotnet_diagnostic.IDE0009.severity = none
++
++# Conventions in this repository's code (stylebro-migrate init counted them; delete a line to have it counted again)
++# init: private fields: named '_field' in 38 of 40 places in your code
++stylebro_private_field_naming = _camelCase
++# init: one-line if/else/loop/using/lock bodies: your code mixes both forms (57 with braces, 55 without braces), so both are allowed. To choose with braces: change the next line to csharp_prefer_braces = true.
++csharp_prefer_braces = when_multiline
++# init: one-line jumps ('if (x) return;'): allowed, because your code has some (18 of 46 places on the 'if' line without braces; any 3 keep them allowed: without it BRO1514 would add braces to each)
++stylebro_allow_single_line_jump_statements = true
++# init: operators where a line wraps: your code mixes both forms (17 at the start of the line, 15 at the end of the line), so BRO1520 is off. To choose one: set dotnet_style_operator_placement_when_wrapping and remove the next line.
++dotnet_diagnostic.BRO1520.severity = none
++# init: '=>' where a line wraps: at the start of the line in 21 of 24 places in your code
++stylebro_arrow_placement_when_wrapping = beginning_of_line
++# init: multi-line initializers: your code mixes both forms (16 with a trailing comma, 13 without a trailing comma), so BRO1401 is off. To choose one: set stylebro_trailing_comma and remove the next line.
++dotnet_diagnostic.BRO1401.severity = none
++# init: empty strings: your code mixes both forms (1 string.Empty, 8 ""), so BRO1106 is off. To choose one: set stylebro_empty_string_style and remove the next line.
++dotnet_diagnostic.BRO1106.severity = none
++# init: null checks: '== null' in 61 of 70 places in your code
++stylebro_null_check_style = equality_operator
++# init: ': base(...)'/': this(...)': on the constructor's line in 3 of 3 places in your code
++stylebro_constructor_initializer_placement = same_line
++# init: statements on their 'if'/loop/'case' line: allowed, because your code has some (22 of 57 places on their owner's line; any 3 keep them allowed: csharp_preserve_single_line_statements = false would move each to a line of its own)
++csharp_preserve_single_line_statements = true
++# init: overrides/interface implementations: 6 of 6 in your code are without a doc comment, so BRO1601 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1601.severity = none
++# init: types' members: your code mixes both forms (18 in BRO1001's order, 31 in another order), so BRO1001 is off. To choose one: set dotnet_diagnostic.BRO1001.severity and remove the next line.
++dotnet_diagnostic.BRO1001.severity = none
++# init: private-by-default members: without 'private' in 131 of 136 members in your code
++dotnet_style_require_accessibility_modifiers = omit_if_default
++# init: internal-by-default types: 24 of 25 in your code are without an access modifier, so BRO1404 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1404.severity = none
++# init: property summaries: 7 of 7 in your code are in their own words, so BRO1604 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1604.severity = none
++# init: empty blocks ('{ }'): your code mixes both forms (2 on two lines, 3 on one line), so both are allowed. To choose on two lines: change the next line to stylebro_allow_empty_single_line_blocks = false.
++stylebro_allow_empty_single_line_blocks = true
++# init: C# files' line endings: LF in 67 of 67 files in your code
++end_of_line = lf
++# init: nested ifs BRO1149 would merge: kept, because your code has some (4 nested ifs; any 3 keep them: BRO1149 would merge each), so BRO1149 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1149.severity = none
++# init: keywords in doc comments: your code mixes both forms (3 '<see langword="null"/>', 2 '<c>null</c>'), so BRO1618 is off. To choose one: set dotnet_diagnostic.BRO1618.severity and remove the next line.
++dotnet_diagnostic.BRO1618.severity = none
++# init: using directives: 44 of 45 files sorted, 16 of 19 with System first
++dotnet_sort_system_directives_first = true
++# END stylebro-migrate
+diff --git a/Directory.Build.props b/Directory.Build.props
+index c114992..5f06845 100644
+--- a/Directory.Build.props
++++ b/Directory.Build.props
+@@ -3,6 +3,7 @@
+    a property value is project-specific, please record it in the CSPROJ file instead. -->
+   <Import Project="$(MSBuildThisFileDirectory)Directory.Version.props" />
+   <PropertyGroup>
++    <StyleBroPreset>1.0</StyleBroPreset>
+     <LangVersion>latest</LangVersion>
+     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+     <!-- The condition is required to support BenchmarkDotNet -->
+@@ -22,4 +23,7 @@
+     <Reference Include="System.Core" />
+     <Reference Include="Microsoft.CSharp" />
+   </ItemGroup>
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial62.5" PrivateAssets="all" />
++  </ItemGroup>
+ </Project>
+diff --git a/sample/Sample/CustomPolicy.cs b/sample/Sample/CustomPolicy.cs
+index 56e1b2a..45325cb 100644
+--- a/sample/Sample/CustomPolicy.cs
++++ b/sample/Sample/CustomPolicy.cs
+@@ -19,6 +19,6 @@ public class CustomPolicy : IDestructuringPolicy
+                 });
+         }
+ 
+-        return (result != null);
++        return result != null;
+     }
+ }
+diff --git a/sample/Sample/LoginData.cs b/sample/Sample/LoginData.cs
+index 2d517a7..54ab635 100644
+--- a/sample/Sample/LoginData.cs
++++ b/sample/Sample/LoginData.cs
+@@ -3,6 +3,7 @@ namespace Sample;
+ public class LoginData
+ {
+     public string? Username;
++
+     // ReSharper disable once NotAccessedField.Global
+     public string? Password;
+ }
+diff --git a/sample/Sample/Program.cs b/sample/Sample/Program.cs
+index 8440c57..75f5b16 100644
+--- a/sample/Sample/Program.cs
++++ b/sample/Sample/Program.cs
+@@ -29,16 +29,20 @@ do
+     logger.ForContext(Constants.SourceContextPropertyName, "Microsoft").Error("Hello, world!");
+     logger.ForContext(Constants.SourceContextPropertyName, "MyApp.Something.Tricky").Verbose("Hello, world!");
+ 
+-    logger.Information("Destructure with max object nesting depth:\n{@NestedObject}",
++    logger.Information(
++        "Destructure with max object nesting depth:\n{@NestedObject}",
+         new { FiveDeep = new { Two = new { Three = new { Four = new { Five = "the end" } } } } });
+ 
+-    logger.Information("Destructure with max string length:\n{@LongString}",
++    logger.Information(
++        "Destructure with max string length:\n{@LongString}",
+         new { TwentyChars = "0123456789abcdefghij" });
+ 
+-    logger.Information("Destructure with max collection count:\n{@BigData}",
++    logger.Information(
++        "Destructure with max collection count:\n{@BigData}",
+         new { TenItems = new[] { "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten" } });
+ 
+-    logger.Information("Destructure with policy to strip password:\n{@LoginData}",
++    logger.Information(
++        "Destructure with policy to strip password:\n{@LoginData}",
+         new LoginData { Username = "BGates", Password = "isityearoflinuxyet" });
+ 
+     Console.WriteLine("\nPress \"q\" to quit, or any other key to run again.\n");
+diff --git a/sample/Sample/SampleFailureListener.cs b/sample/Sample/SampleFailureListener.cs
+index 0f3df8c..e94d906 100644
+--- a/sample/Sample/SampleFailureListener.cs
++++ b/sample/Sample/SampleFailureListener.cs
+@@ -13,7 +13,7 @@ public class SampleFailureListener : ILoggingFailureListener
+         IReadOnlyCollection<LogEvent>? events,
+         Exception? exception)
+     {
+-        var exceptionDetail = exception is null
++        var exceptionDetail = exception == null
+             ? string.Empty
+             : $" — {exception.GetType().Name}: {exception.Message}";
+         SelfLog.WriteLine(
+diff --git a/src/Serilog.Settings.Configuration/ConfigurationLoggerConfigurationExtensions.cs b/src/Serilog.Settings.Configuration/ConfigurationLoggerConfigurationExtensions.cs
+index 25f77dd..78223c8 100644
+--- a/src/Serilog.Settings.Configuration/ConfigurationLoggerConfigurationExtensions.cs
++++ b/src/Serilog.Settings.Configuration/ConfigurationLoggerConfigurationExtensions.cs
+@@ -79,7 +79,7 @@ public static class ConfigurationLoggerConfigurationExtensions
+     /// extension method that takes the full configuration object.
+     /// </summary>
+     /// <param name="settingConfiguration">Logger setting configuration.</param>
+-    /// <param name="configSection">The Serilog configuration section</param>
++    /// <param name="configSection">The Serilog configuration section.</param>
+     /// <param name="dependencyContext">The dependency context from which sink/enricher packages can be located. If not supplied, the platform
+     /// default will be used.</param>
+     /// <returns>An object allowing configuration to continue.</returns>
+@@ -150,7 +150,7 @@ public static class ConfigurationLoggerConfigurationExtensions
+     /// extension method that takes the full configuration object.
+     /// </summary>
+     /// <param name="settingConfiguration">Logger setting configuration.</param>
+-    /// <param name="configSection">The Serilog configuration section</param>
++    /// <param name="configSection">The Serilog configuration section.</param>
+     /// <param name="configurationAssemblySource">Defines how the package identifies assemblies to scan for sinks and other types.</param>
+     /// <returns>An object allowing configuration to continue.</returns>
+     [Obsolete("Use ReadFrom.Configuration(IConfiguration configuration, string sectionName, ConfigurationAssemblySource configurationAssemblySource) instead.")]
+diff --git a/src/Serilog.Settings.Configuration/Settings/Configuration/Assemblies/CompositeAssemblyFinder.cs b/src/Serilog.Settings.Configuration/Settings/Configuration/Assemblies/CompositeAssemblyFinder.cs
+index 9f3c9ef..514421d 100644
+--- a/src/Serilog.Settings.Configuration/Settings/Configuration/Assemblies/CompositeAssemblyFinder.cs
++++ b/src/Serilog.Settings.Configuration/Settings/Configuration/Assemblies/CompositeAssemblyFinder.cs
+@@ -18,6 +18,7 @@ class CompositeAssemblyFinder : AssemblyFinder
+         {
+             assemblyNames.AddRange(assemblyFinder.FindAssembliesContainingName(nameToFind));
+         }
++
+         return assemblyNames;
+     }
+ }
+diff --git a/src/Serilog.Settings.Configuration/Settings/Configuration/ConfigurationArgumentValue.cs b/src/Serilog.Settings.Configuration/Settings/Configuration/ConfigurationArgumentValue.cs
+index 239853e..fe2f91c 100644
+--- a/src/Serilog.Settings.Configuration/Settings/Configuration/ConfigurationArgumentValue.cs
++++ b/src/Serilog.Settings.Configuration/Settings/Configuration/ConfigurationArgumentValue.cs
+@@ -14,11 +14,13 @@ abstract class ConfigurationArgumentValue
+         // Reject configurations where an element has both scalar and complex
+         // values as a result of reading multiple configuration sources.
+         if (argumentSection.Value != null && argumentSection.GetChildren().Any())
++        {
+             throw new InvalidOperationException(
+                 $"The value for the argument '{argumentSection.Path}' is assigned different value " +
+                 "types in more than one configuration source. Ensure all configurations consistently " +
+                 "use either a scalar (int, string, boolean) or a complex (array, section, list, " +
+                 "POCO, etc.) type for this argument value.");
++        }
+ 
+         if (argumentSection.Value != null)
+         {
+diff --git a/src/Serilog.Settings.Configuration/Settings/Configuration/ConfigurationReader.cs b/src/Serilog.Settings.Configuration/Settings/Configuration/ConfigurationReader.cs
+index c7befb7..c3b94b9 100644
+--- a/src/Serilog.Settings.Configuration/Settings/Configuration/ConfigurationReader.cs
++++ b/src/Serilog.Settings.Configuration/Settings/Configuration/ConfigurationReader.cs
+@@ -64,11 +64,12 @@ class ConfigurationReader : IConfigurationReader
+             var filterSwitch = LoggingFilterSwitchProxy.Create();
+             if (filterSwitch == null)
+             {
+-                SelfLog.WriteLine($"FilterSwitches section found, but neither Serilog.Expressions nor Serilog.Filters.Expressions is referenced.");
++                SelfLog.WriteLine("FilterSwitches section found, but neither Serilog.Expressions nor Serilog.Filters.Expressions is referenced.");
+                 break;
+             }
+ 
+             var switchName = filterSwitchDeclaration.Key;
++
+             // switchName must be something like $switch to avoid ambiguities
+             if (!IsValidSwitchName(switchName))
+             {
+@@ -120,6 +121,7 @@ class ConfigurationReader : IConfigurationReader
+         {
+             var switchName = levelSwitchDeclaration.Key;
+             var switchInitialLevel = levelSwitchDeclaration.Value;
++
+             // switchName must be something like $switch to avoid ambiguities
+             if (!IsValidSwitchName(switchName))
+             {
+@@ -159,6 +161,7 @@ class ConfigurationReader : IConfigurationReader
+         if (minLevelControlledByDirective.Value != null)
+         {
+             var globalMinimumLevelSwitch = _resolutionContext.LookUpLevelSwitchByName(minLevelControlledByDirective.Value);
++
+             // not calling ApplyMinimumLevel local function because here we have a reference to a LogLevelSwitch already
+             loggerConfiguration.MinimumLevel.ControlledBy(globalMinimumLevelSwitch);
+         }
+@@ -178,6 +181,7 @@ class ConfigurationReader : IConfigurationReader
+             else if (!string.IsNullOrEmpty(overridenLevelOrSwitch))
+             {
+                 var overrideSwitch = _resolutionContext.LookUpLevelSwitchByName(overridenLevelOrSwitch!);
++
+                 // not calling ApplyMinimumLevel local function because here we have a reference to a LogLevelSwitch already
+                 loggerConfiguration.MinimumLevel.Override(overridePrefix, overrideSwitch);
+             }
+@@ -312,16 +316,16 @@ class ConfigurationReader : IConfigurationReader
+              where child.Value != null // Plain string
+              select new { Name = child.Value, Args = new Dictionary<string, ConfigurationArgumentValue>() })
+                  .Concat(
+-            (from child in children
+-             where child.Value == null
+-             let name = GetSectionName(child)
+-             let callArgs = (from argument in child.GetSection("Args").GetChildren()
+-                             select new
+-                             {
+-                                 Name = argument.Key,
+-                                 Value = ConfigurationArgumentValue.FromSection(argument, _configurationAssemblies)
+-                             }).ToDictionary(p => p.Name, p => p.Value)
+-             select new { Name = name, Args = callArgs }))
++            from child in children
++            where child.Value == null
++            let name = GetSectionName(child)
++            let callArgs = (from argument in child.GetSection("Args").GetChildren()
++                            select new
++                            {
++                                Name = argument.Key,
++                                Value = ConfigurationArgumentValue.FromSection(argument, _configurationAssemblies)
++                            }).ToDictionary(p => p.Name, p => p.Value)
++            select new { Name = name, Args = callArgs })
+                  .ToLookup(p => p.Name, p => p.Args);
+ 
+         return result;
+@@ -347,8 +351,10 @@ class ConfigurationReader : IConfigurationReader
+             foreach (var simpleName in usingSection.GetChildren().Select(c => c.Value))
+             {
+                 if (string.IsNullOrWhiteSpace(simpleName))
++                {
+                     throw new InvalidOperationException(
+                         $"A zero-length or whitespace assembly name was supplied to a {usingSection.Path} configuration statement.");
++                }
+ 
+                 var assembly = Assembly.Load(new AssemblyName(simpleName));
+                 assemblies.Add(assembly);
+@@ -427,6 +433,7 @@ class ConfigurationReader : IConfigurationReader
+             {
+                 return _resolutionContext.AppConfiguration;
+             }
++
+             if (parameter.HasDefaultValue)
+             {
+                 return parameter.DefaultValue;
+@@ -463,7 +470,7 @@ class ConfigurationReader : IConfigurationReader
+                 {
+                     return Activator.CreateInstance(paramType);
+                 }
+-                catch(Exception ex)
++                catch (Exception ex)
+                 {
+                     // Activator.CreateInstance is unlikely to succeed for collections lacking a parameterless constructor,
+                     // or those relying on the [CollectionBuilder] attribute for initialization. 
+@@ -527,6 +534,7 @@ class ConfigurationReader : IConfigurationReader
+                 + string.Join(Environment.NewLine, methodsByName));
+             }
+         }
++
+         return selectedMethod;
+     }
+ 
+@@ -602,9 +610,9 @@ class ConfigurationReader : IConfigurationReader
+         return configurationAssemblies
+             .SelectMany(a => (allowInternalTypes ? a.GetTypes() : a.ExportedTypes)
+                 .Select(t => t.GetTypeInfo())
+-                .Where(t => t.IsSealed && t.IsAbstract && !t.IsNested && (t.IsPublic || allowInternalTypes && !t.IsVisible)))
++                .Where(t => t.IsSealed && t.IsAbstract && !t.IsNested && (t.IsPublic || (allowInternalTypes && !t.IsVisible))))
+             .SelectMany(t => t.DeclaredMethods)
+-            .Where(m => m.IsStatic && (m.IsPublic || allowInternalMethods && m.IsAssembly) && (m.IsDefined(typeof(ExtensionAttribute), false) || HasCustomExtensionAttribute(m)))
++            .Where(m => m.IsStatic && (m.IsPublic || (allowInternalMethods && m.IsAssembly)) && (m.IsDefined(typeof(ExtensionAttribute), false) || HasCustomExtensionAttribute(m)))
+             .Where(m => m.GetParameters()[0].ParameterType == configType)
+             .ToList();
+     }
+@@ -630,5 +638,4 @@ class ConfigurationReader : IConfigurationReader
+ 
+         throw new InvalidOperationException($"The value {value} is not a valid Serilog level.");
+     }
+-
+ }
+diff --git a/src/Serilog.Settings.Configuration/Settings/Configuration/IConfigurationReader.cs b/src/Serilog.Settings.Configuration/Settings/Configuration/IConfigurationReader.cs
+index f3dd36f..f5deda3 100644
+--- a/src/Serilog.Settings.Configuration/Settings/Configuration/IConfigurationReader.cs
++++ b/src/Serilog.Settings.Configuration/Settings/Configuration/IConfigurationReader.cs
+@@ -5,5 +5,6 @@ namespace Serilog.Settings.Configuration;
+ interface IConfigurationReader : ILoggerSettings
+ {
+     void ApplySinks(LoggerSinkConfiguration loggerSinkConfiguration);
++
+     void ApplyEnrichment(LoggerEnrichmentConfiguration loggerEnrichmentConfiguration);
+ }
+diff --git a/src/Serilog.Settings.Configuration/Settings/Configuration/LoggingFilterSwitchProxy.cs b/src/Serilog.Settings.Configuration/Settings/Configuration/LoggingFilterSwitchProxy.cs
+index 8da70d0..575b76d 100644
+--- a/src/Serilog.Settings.Configuration/Settings/Configuration/LoggingFilterSwitchProxy.cs
++++ b/src/Serilog.Settings.Configuration/Settings/Configuration/LoggingFilterSwitchProxy.cs
+@@ -37,7 +37,7 @@ class LoggingFilterSwitchProxy : ILoggingFilterSwitch
+             Type.GetType("Serilog.Expressions.LoggingFilterSwitch, Serilog.Expressions") ??
+             Type.GetType("Serilog.Filters.Expressions.LoggingFilterSwitch, Serilog.Filters.Expressions");
+ 
+-        if (filterSwitchType is null)
++        if (filterSwitchType == null)
+         {
+             return null;
+         }
+diff --git a/src/Serilog.Settings.Configuration/Settings/Configuration/ObjectArgumentValue.cs b/src/Serilog.Settings.Configuration/Settings/Configuration/ObjectArgumentValue.cs
+index 04aa9b7..709220d 100644
+--- a/src/Serilog.Settings.Configuration/Settings/Configuration/ObjectArgumentValue.cs
++++ b/src/Serilog.Settings.Configuration/Settings/Configuration/ObjectArgumentValue.cs
+@@ -90,6 +90,7 @@ class ObjectArgumentValue : ConfigurationArgumentValue
+                     var value = argumentValue.ConvertTo(valueType, resolutionContext);
+                     addMethod.Invoke(result, [key, value]);
+                 }
++
+                 return true;
+             }
+ 
+@@ -103,6 +104,7 @@ class ObjectArgumentValue : ConfigurationArgumentValue
+                     var value = argumentValue.ConvertTo(elementType, resolutionContext);
+                     addMethod.Invoke(result, [value]);
+                 }
++
+                 return true;
+             }
+ 
+@@ -140,7 +142,6 @@ class ObjectArgumentValue : ConfigurationArgumentValue
+                 .ToDictionary(s => s.Key, StringComparer.OrdinalIgnoreCase);
+             return TryCallCtor(type, suppliedArguments, resolutionContext, out value);
+         }
+-
+     }
+ 
+     bool TryCallCtorImplicit(
+@@ -177,24 +178,21 @@ class ObjectArgumentValue : ConfigurationArgumentValue
+                             suppliedNames.Add(p.Name);
+                         }
+                     }
++                    else if (p.HasDefaultValue)
++                    {
++                        args.Add(p.DefaultValue);
++                    }
+                     else
+                     {
+-                        if (p.HasDefaultValue)
+-                        {
+-                            args.Add(p.DefaultValue);
+-                        }
+-                        else
++                        return new
+                         {
+-                            return new
+-                            {
+-                                ci,
+-                                args,
+-                                isCallable = false,
+-                                matches,
+-                                stringMatches,
+-                                usedArguments = suppliedNames
+-                            };
+-                        }
++                            ci,
++                            args,
++                            isCallable = false,
++                            matches,
++                            stringMatches,
++                            usedArguments = suppliedNames
++                        };
+                     }
+                 }
+ 
+@@ -262,6 +260,7 @@ class ObjectArgumentValue : ConfigurationArgumentValue
+             elementType = type.GetGenericArguments()[0];
+             return true;
+         }
++
+         foreach (var iface in type.GetInterfaces())
+         {
+             if (iface.IsGenericType)
+@@ -287,6 +286,7 @@ class ObjectArgumentValue : ConfigurationArgumentValue
+         {
+             return false;
+         }
++
+         var argumentTypes = elementType.GetGenericArguments();
+         keyType = argumentTypes[0];
+         valueType = argumentTypes[1];
+@@ -302,10 +302,12 @@ class ObjectArgumentValue : ConfigurationArgumentValue
+         {
+             concreteType = type;
+         }
++
+         if (concreteType.GetConstructor(Type.EmptyTypes) == null)
+         {
+             return false;
+         }
++
+         foreach (var method in concreteType.GetMethods())
+         {
+             if (method is { IsStatic: false, Name: "Add" })
+@@ -318,6 +320,7 @@ class ObjectArgumentValue : ConfigurationArgumentValue
+                 }
+             }
+         }
++
+         return false;
+     }
+ 
+@@ -341,10 +344,12 @@ class ObjectArgumentValue : ConfigurationArgumentValue
+         {
+             concreteType = type;
+         }
++
+         if (concreteType.GetConstructor(Type.EmptyTypes) == null)
+         {
+             return false;
+         }
++
+         foreach (var method in concreteType.GetMethods())
+         {
+             if (method is { IsStatic: false, Name: "Add" })
+@@ -357,6 +362,7 @@ class ObjectArgumentValue : ConfigurationArgumentValue
+                 }
+             }
+         }
++
+         return false;
+     }
+ }
+diff --git a/src/Serilog.Settings.Configuration/Settings/Configuration/ResolutionContext.cs b/src/Serilog.Settings.Configuration/Settings/Configuration/ResolutionContext.cs
+index 493cad2..37c5030 100644
+--- a/src/Serilog.Settings.Configuration/Settings/Configuration/ResolutionContext.cs
++++ b/src/Serilog.Settings.Configuration/Settings/Configuration/ResolutionContext.cs
+@@ -24,11 +24,11 @@ sealed class ResolutionContext
+     public ConfigurationReaderOptions ReaderOptions { get; }
+ 
+     /// <summary>
+-    /// Looks up a switch in the declared LoggingLevelSwitches
++    /// Looks up a switch in the declared LoggingLevelSwitches.
+     /// </summary>
+-    /// <param name="switchName">the name of a switch to look up</param>
+-    /// <returns>the LoggingLevelSwitch registered with the name</returns>
+-    /// <exception cref="InvalidOperationException">if no switch has been registered with <paramref name="switchName"/></exception>
++    /// <param name="switchName">the name of a switch to look up.</param>
++    /// <returns>the LoggingLevelSwitch registered with the name.</returns>
++    /// <exception cref="InvalidOperationException">if no switch has been registered with <paramref name="switchName"/>.</exception>
+     public LoggingLevelSwitch LookUpLevelSwitchByName(string switchName)
+     {
+         if (_declaredLevelSwitches.TryGetValue(switchName, out var levelSwitch))
+diff --git a/src/Serilog.Settings.Configuration/Settings/Configuration/StringArgumentValue.cs b/src/Serilog.Settings.Configuration/Settings/Configuration/StringArgumentValue.cs
+index c6aeda1..c161c88 100644
+--- a/src/Serilog.Settings.Configuration/Settings/Configuration/StringArgumentValue.cs
++++ b/src/Serilog.Settings.Configuration/Settings/Configuration/StringArgumentValue.cs
+@@ -184,6 +184,7 @@ class StringArgumentValue : ConfigurationArgumentValue
+             memberName = null;
+             return false;
+         }
++
+         if (StaticMemberAccessorRegex.IsMatch(input))
+         {
+             var match = StaticMemberAccessorRegex.Match(input);
+@@ -195,6 +196,7 @@ class StringArgumentValue : ConfigurationArgumentValue
+             accessorTypeName = shortAccessorTypeName.Trim() + extraQualifiers.TrimEnd();
+             return true;
+         }
++
+         accessorTypeName = null;
+         memberName = null;
+         return false;
+diff --git a/src/Serilog.Settings.Configuration/Settings/Configuration/SurrogateConfigurationMethods.cs b/src/Serilog.Settings.Configuration/Settings/Configuration/SurrogateConfigurationMethods.cs
+index 92d8a29..f0fbf0a 100644
+--- a/src/Serilog.Settings.Configuration/Settings/Configuration/SurrogateConfigurationMethods.cs
++++ b/src/Serilog.Settings.Configuration/Settings/Configuration/SurrogateConfigurationMethods.cs
+@@ -17,11 +17,11 @@ namespace Serilog.Settings.Configuration;
+ static class SurrogateConfigurationMethods
+ {
+     static readonly Dictionary<Type, MethodInfo[]> SurrogateMethodCandidates = typeof(SurrogateConfigurationMethods)
+-        .GetTypeInfo().DeclaredMethods
++        .GetTypeInfo()
++        .DeclaredMethods
+         .GroupBy(m => m.GetParameters().First().ParameterType)
+         .ToDictionary(g => g.Key, g => g.ToArray());
+ 
+-
+     internal static readonly MethodInfo[] WriteTo = SurrogateMethodCandidates[typeof(LoggerSinkConfiguration)];
+     internal static readonly MethodInfo[] AuditTo = SurrogateMethodCandidates[typeof(LoggerAuditSinkConfiguration)];
+     internal static readonly MethodInfo[] Enrich = SurrogateMethodCandidates[typeof(LoggerEnrichmentConfiguration)];
+@@ -123,7 +123,8 @@ static class SurrogateConfigurationMethods
+         Action<LoggerEnrichmentConfiguration> configureEnricher,
+         LogEventLevel enrichFromLevel = LevelAlias.Minimum,
+         LoggingLevelSwitch? levelSwitch = null)
+-        => levelSwitch != null ? loggerEnrichmentConfiguration.AtLevel(levelSwitch, configureEnricher)
++        => levelSwitch != null
++                               ? loggerEnrichmentConfiguration.AtLevel(levelSwitch, configureEnricher)
+                                : loggerEnrichmentConfiguration.AtLevel(enrichFromLevel, configureEnricher);
+ 
+     static LoggerConfiguration FromLogContext(LoggerEnrichmentConfiguration loggerEnrichmentConfiguration)
+diff --git a/test/Serilog.Settings.Configuration.Tests/Approval/ApiApprovalTests.cs b/test/Serilog.Settings.Configuration.Tests/Approval/ApiApprovalTests.cs
+index fd50fc6..f61d488 100644
+--- a/test/Serilog.Settings.Configuration.Tests/Approval/ApiApprovalTests.cs
++++ b/test/Serilog.Settings.Configuration.Tests/Approval/ApiApprovalTests.cs
+@@ -15,7 +15,7 @@ public class ApiApprovalTests
+             new()
+             {
+                 IncludeAssemblyAttributes = false,
+-                ExcludeAttributes = [ "System.Diagnostics.DebuggerDisplayAttribute" ],
++                ExcludeAttributes = ["System.Diagnostics.DebuggerDisplayAttribute"],
+             });
+ 
+         publicApi.ShouldMatchApproved(options => options.WithFilenameGenerator((_, _, fileType, fileExtension) => $"{assembly.GetName().Name!}.{fileType}.{fileExtension}"));
+diff --git a/test/Serilog.Settings.Configuration.Tests/ConfigurationReaderTests.cs b/test/Serilog.Settings.Configuration.Tests/ConfigurationReaderTests.cs
+index 603ce62..4cc18ca 100644
+--- a/test/Serilog.Settings.Configuration.Tests/ConfigurationReaderTests.cs
++++ b/test/Serilog.Settings.Configuration.Tests/ConfigurationReaderTests.cs
+@@ -1,9 +1,9 @@
++using System.Reflection;
+ using Microsoft.Extensions.Configuration;
+ using Serilog.Events;
+ using Serilog.Formatting;
+ using Serilog.Settings.Configuration.Assemblies;
+ using Serilog.Settings.Configuration.Tests.Support;
+-using System.Reflection;
+ using static Serilog.Settings.Configuration.Tests.DummyLoggerConfigurationExtensions;
+ using static Serilog.Settings.Configuration.Tests.Support.ConfigurationReaderTestHelpers;
+ 
+@@ -188,12 +188,12 @@ public class ConfigurationReaderTests
+ 
+     public static IEnumerable<object[]> FlatMinimumLevel =>
+     [
+-        [GetConfigRoot(appsettingsJsonLevel: minimumLevelFlatTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error],
+-        [GetConfigRoot(appsettingsDevelopmentJsonLevel: minimumLevelFlatTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error],
+-        [GetConfigRoot(envVariables: new Dictionary<string, string?> {{minimumLevelFlatKey, LogEventLevel.Error.ToString()}}), LogEventLevel.Error],
++        [GetConfigRoot(appsettingsJsonLevel: MinimumLevelFlatTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error],
++        [GetConfigRoot(appsettingsDevelopmentJsonLevel: MinimumLevelFlatTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error],
++        [GetConfigRoot(envVariables: new Dictionary<string, string?> {{MinimumLevelFlatKey, LogEventLevel.Error.ToString()}}), LogEventLevel.Error],
+         [GetConfigRoot(
+-                appsettingsJsonLevel: minimumLevelFlatTemplate.Format(LogEventLevel.Debug),
+-                envVariables: new Dictionary<string, string?> {{minimumLevelFlatKey, LogEventLevel.Error.ToString()}}),
++                appsettingsJsonLevel: MinimumLevelFlatTemplate.Format(LogEventLevel.Debug),
++                envVariables: new Dictionary<string, string?> {{MinimumLevelFlatKey, LogEventLevel.Error.ToString()}}),
+             LogEventLevel.Error
+         ]
+     ];
+@@ -212,13 +212,13 @@ public class ConfigurationReaderTests
+ 
+     public static IEnumerable<object[]> ObjectMinimumLevel =>
+     [
+-        [GetConfigRoot(appsettingsJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error],
+-        [GetConfigRoot(appsettingsJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error.ToString().ToUpper())), LogEventLevel.Error],
+-        [GetConfigRoot(appsettingsDevelopmentJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error],
+-        [GetConfigRoot(envVariables: new Dictionary<string, string?>{{minimumLevelObjectKey, LogEventLevel.Error.ToString() } }), LogEventLevel.Error],
++        [GetConfigRoot(appsettingsJsonLevel: MinimumLevelObjectTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error],
++        [GetConfigRoot(appsettingsJsonLevel: MinimumLevelObjectTemplate.Format(LogEventLevel.Error.ToString().ToUpper())), LogEventLevel.Error],
++        [GetConfigRoot(appsettingsDevelopmentJsonLevel: MinimumLevelObjectTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error],
++        [GetConfigRoot(envVariables: new Dictionary<string, string?>{{MinimumLevelObjectKey, LogEventLevel.Error.ToString() } }), LogEventLevel.Error],
+         [GetConfigRoot(
+-            appsettingsJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error),
+-            appsettingsDevelopmentJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Debug)),
++            appsettingsJsonLevel: MinimumLevelObjectTemplate.Format(LogEventLevel.Error),
++            appsettingsDevelopmentJsonLevel: MinimumLevelObjectTemplate.Format(LogEventLevel.Debug)),
+             LogEventLevel.Debug ]
+     ];
+ 
+@@ -239,23 +239,23 @@ public class ConfigurationReaderTests
+     [
+         [
+             GetConfigRoot(
+-                appsettingsJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error),
+-                appsettingsDevelopmentJsonLevel: minimumLevelFlatTemplate.Format(LogEventLevel.Debug)),
++                appsettingsJsonLevel: MinimumLevelObjectTemplate.Format(LogEventLevel.Error),
++                appsettingsDevelopmentJsonLevel: MinimumLevelFlatTemplate.Format(LogEventLevel.Debug)),
+             LogEventLevel.Debug
+         ],
+         [
+             GetConfigRoot(
+-                appsettingsJsonLevel: minimumLevelFlatTemplate.Format(LogEventLevel.Error),
+-                appsettingsDevelopmentJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Debug)),
++                appsettingsJsonLevel: MinimumLevelFlatTemplate.Format(LogEventLevel.Error),
++                appsettingsDevelopmentJsonLevel: MinimumLevelObjectTemplate.Format(LogEventLevel.Debug)),
+             LogEventLevel.Debug
+         ],
+         // precedence should be flat > object if from the same source
+         [
+             GetConfigRoot(
+-                envVariables: new Dictionary<string, string?>()
++                envVariables: new Dictionary<string, string?>
+                 {
+-                    {minimumLevelObjectKey, LogEventLevel.Error.ToString()},
+-                    {minimumLevelFlatKey, LogEventLevel.Debug.ToString()}
++                    {MinimumLevelObjectKey, LogEventLevel.Error.ToString()},
++                    {MinimumLevelFlatKey, LogEventLevel.Debug.ToString()}
+                 }),
+             LogEventLevel.Debug
+         ]
+diff --git a/test/Serilog.Settings.Configuration.Tests/ConfigurationSettingsTests.cs b/test/Serilog.Settings.Configuration.Tests/ConfigurationSettingsTests.cs
+index 6ced053..1678e4b 100644
+--- a/test/Serilog.Settings.Configuration.Tests/ConfigurationSettingsTests.cs
++++ b/test/Serilog.Settings.Configuration.Tests/ConfigurationSettingsTests.cs
+@@ -472,7 +472,8 @@ public class ConfigurationSettingsTests
+     [InlineData("$switch_name", false)]
+     public void LoggingLevelSwitchNameValidityScenarios(string switchName, bool expectedValid)
+     {
+-        Assert.True(ConfigurationReader.IsValidSwitchName(switchName) == expectedValid,
++        Assert.True(
++            ConfigurationReader.IsValidSwitchName(switchName) == expectedValid,
+             $"expected IsValidSwitchName({switchName}) to return {expectedValid} ");
+     }
+ 
+@@ -550,9 +551,9 @@ public class ConfigurationSettingsTests
+             .CreateLogger();
+ 
+         log.Write(Some.DebugEvent());
+-        Assert.True(evt is null, "LoggingLevelSwitch initial level was Warning. It should not log Debug messages");
++        Assert.True(evt == null, "LoggingLevelSwitch initial level was Warning. It should not log Debug messages");
+         log.Write(Some.InformationEvent());
+-        Assert.True(evt is null, "LoggingLevelSwitch initial level was Warning. It should not log Information messages");
++        Assert.True(evt == null, "LoggingLevelSwitch initial level was Warning. It should not log Information messages");
+         log.Write(Some.WarningEvent());
+         Assert.True(evt != null, "LoggingLevelSwitch initial level was Warning. It should log Warning messages");
+     }
+@@ -612,7 +613,7 @@ public class ConfigurationSettingsTests
+         Assert.NotNull(controlSwitch);
+ 
+         log.Write(Some.DebugEvent());
+-        Assert.True(evt is null, "LoggingLevelSwitch initial level was information. It should not log Debug messages");
++        Assert.True(evt == null, "LoggingLevelSwitch initial level was information. It should not log Debug messages");
+ 
+         controlSwitch.MinimumLevel = LogEventLevel.Debug;
+         log.Write(Some.DebugEvent());
+@@ -679,16 +680,16 @@ public class ConfigurationSettingsTests
+         var systemLogger = log.ForContext(Constants.SourceContextPropertyName, "System.Bar");
+ 
+         log.Write(Some.InformationEvent());
+-        Assert.False(evt is null, "Minimum level is Debug. It should log Information messages");
++        Assert.False(evt == null, "Minimum level is Debug. It should log Information messages");
+ 
+         evt = null;
++
+         // ReSharper disable HeuristicUnreachableCode
+         systemLogger.Write(Some.InformationEvent());
+-        Assert.True(evt is null, "LoggingLevelSwitch initial level was Warning for logger System.*. It should not log Information messages for SourceContext System.Bar");
++        Assert.True(evt == null, "LoggingLevelSwitch initial level was Warning for logger System.*. It should not log Information messages for SourceContext System.Bar");
+ 
+         systemLogger.Write(Some.WarningEvent());
+-        Assert.False(evt is null, "LoggingLevelSwitch initial level was Warning for logger System.*. It should log Warning messages for SourceContext System.Bar");
+-
++        Assert.False(evt == null, "LoggingLevelSwitch initial level was Warning for logger System.*. It should log Warning messages for SourceContext System.Bar");
+ 
+         evt = null;
+         var controlSwitch = DummyWithLevelSwitchSink.ControlLevelSwitch;
+@@ -696,12 +697,12 @@ public class ConfigurationSettingsTests
+ 
+         controlSwitch.MinimumLevel = LogEventLevel.Information;
+         systemLogger.Write(Some.InformationEvent());
+-        Assert.False(evt is null, "LoggingLevelSwitch level was changed to Information for logger System.*. It should now log Information events for SourceContext System.Bar.");
++        Assert.False(evt == null, "LoggingLevelSwitch level was changed to Information for logger System.*. It should now log Information events for SourceContext System.Bar.");
++
+         // ReSharper restore HeuristicUnreachableCode
+     }
+ 
+     [Fact]
+-
+     [Trait("BugFix", "https://github.com/serilog/serilog-settings-configuration/issues/142")]
+     public void SinkWithIConfigurationArguments()
+     {
+@@ -782,7 +783,6 @@ public class ConfigurationSettingsTests
+         Assert.Equal("bar", DummyConfigurationSink.ConfigSection["foo"]);
+     }
+ 
+-
+     [Fact]
+     public void SinkWithConfigurationBindingArgument()
+     {
+@@ -1115,7 +1115,7 @@ public class ConfigurationSettingsTests
+             }
+             """;
+ 
+-        var NestedObject = new
++        var nestedObject = new
+         {
+             A = new
+             {
+@@ -1129,7 +1129,7 @@ public class ConfigurationSettingsTests
+             }
+         };
+ 
+-        var msg = GetDestructuredProperty(NestedObject, json);
++        var msg = GetDestructuredProperty(nestedObject, json);
+ 
+         Assert.Contains("C", msg);
+         Assert.DoesNotContain("D", msg);
+diff --git a/test/Serilog.Settings.Configuration.Tests/DummyLoggerConfigurationExtensions.cs b/test/Serilog.Settings.Configuration.Tests/DummyLoggerConfigurationExtensions.cs
+index 16b50a8..0dff9eb 100644
+--- a/test/Serilog.Settings.Configuration.Tests/DummyLoggerConfigurationExtensions.cs
++++ b/test/Serilog.Settings.Configuration.Tests/DummyLoggerConfigurationExtensions.cs
+@@ -71,6 +71,6 @@ public class BrokenCollection<T> : List<T>
+     {
+         throw new InvalidOperationException("I am broken by design!");
+     }
++
+     public BrokenCollection(int capacity) : base(capacity) { }
+ }
+-
+diff --git a/test/Serilog.Settings.Configuration.Tests/DynamicLevelChangeTests.cs b/test/Serilog.Settings.Configuration.Tests/DynamicLevelChangeTests.cs
+index 4cc743a..b5f83a7 100644
+--- a/test/Serilog.Settings.Configuration.Tests/DynamicLevelChangeTests.cs
++++ b/test/Serilog.Settings.Configuration.Tests/DynamicLevelChangeTests.cs
+@@ -1,8 +1,7 @@
+-﻿using Serilog.Core;
++﻿using Microsoft.Extensions.Configuration;
++using Serilog.Core;
+ using Serilog.Events;
+ using Serilog.Settings.Configuration.Tests.Support;
+-using Microsoft.Extensions.Configuration;
+-
+ using TestDummies.Console;
+ 
+ namespace Serilog.Settings.Configuration.Tests;
+diff --git a/test/Serilog.Settings.Configuration.Tests/LoggerConfigurationExtensionsTests.cs b/test/Serilog.Settings.Configuration.Tests/LoggerConfigurationExtensionsTests.cs
+index 583a53a..1e0d27f 100644
+--- a/test/Serilog.Settings.Configuration.Tests/LoggerConfigurationExtensionsTests.cs
++++ b/test/Serilog.Settings.Configuration.Tests/LoggerConfigurationExtensionsTests.cs
+@@ -77,11 +77,11 @@ public class LoggerConfigurationExtensionsTests
+ #pragma warning restore CS0618 // Type or member is obsolete
+                .CreateLogger());
+ 
+-        Assert.Equal("Trying to invoke a configuration method accepting a `IConfiguration` argument. " +
+-                     "This is not supported when only a `IConfigSection` has been provided. " +
+-                     "(method 'Serilog.LoggerConfiguration DummyWithConfiguration(Serilog.Configuration.LoggerSinkConfiguration, Microsoft.Extensions.Configuration.IConfiguration, Serilog.Events.LogEventLevel)')",
++        Assert.Equal(
++            "Trying to invoke a configuration method accepting a `IConfiguration` argument. " +
++                         "This is not supported when only a `IConfigSection` has been provided. " +
++                         "(method 'Serilog.LoggerConfiguration DummyWithConfiguration(Serilog.Configuration.LoggerSinkConfiguration, Microsoft.Extensions.Configuration.IConfiguration, Serilog.Events.LogEventLevel)')",
+             exception.Message);
+-
+     }
+ 
+     [Fact]
+@@ -107,7 +107,6 @@ public class LoggerConfigurationExtensionsTests
+         _ = new LoggerConfiguration()
+                .ReadFrom.Configuration(config, new ConfigurationReaderOptions { SectionName = "NotSerilog" })
+                .CreateLogger();
+-
+     }
+ 
+     [Fact]
+@@ -137,7 +136,6 @@ public class LoggerConfigurationExtensionsTests
+             .ReadFrom.ConfigurationSection(config.GetSection("NotSerilog"))
+ #pragma warning restore CS0618 // Type or member is obsolete
+             .CreateLogger();
+-
+     }
+ 
+     [Fact]
+@@ -150,7 +148,6 @@ public class LoggerConfigurationExtensionsTests
+                 ["Serilog"] = "",
+                 ["Serilog:MinimumLevel"] = "",
+                 ["Serilog:MinimumLevel:Default"] = "Information",
+-
+             })
+             .Build();
+ 
+diff --git a/test/Serilog.Settings.Configuration.Tests/ObjectArgumentValueTests.cs b/test/Serilog.Settings.Configuration.Tests/ObjectArgumentValueTests.cs
+index b7f3791..e3291ec 100644
+--- a/test/Serilog.Settings.Configuration.Tests/ObjectArgumentValueTests.cs
++++ b/test/Serilog.Settings.Configuration.Tests/ObjectArgumentValueTests.cs
+@@ -8,6 +8,7 @@ using Serilog.Formatting.Display;
+ using Serilog.Settings.Configuration.Tests.Support;
+ using TestDummies;
+ using TestDummies.Console;
++
+ // ReSharper disable NotDisposedResourceIsReturned
+ // ReSharper disable UnusedAutoPropertyAccessor.Local
+ 
+@@ -133,7 +134,8 @@ public class ObjectArgumentValueTests
+         log.Write(Some.InformationEvent());
+         log.Write(Some.WarningEvent());
+ 
+-        Assert.Collection(DummyRollingFileSink.Emitted,
++        Assert.Collection(
++            DummyRollingFileSink.Emitted,
+             info => Assert.False(info.Properties.ContainsKey("ThreadId"), "Information event or lower should not have enriched property ThreadId"),
+             warn => Assert.True(warn.Properties.ContainsKey("ThreadId"), "Warning event or higher should have enriched property ThreadId"));
+     }
+@@ -238,7 +240,8 @@ public class ObjectArgumentValueTests
+ 
+         var array = AssertConvertsToType<AnAbstractClass[]>(value);
+ 
+-        Assert.Collection(array,
++        Assert.Collection(
++            array,
+             first => Assert.IsType<ConcreteImpl>(first),
+             second => Assert.IsType<PrivateImplWithPublicCtor>(second));
+     }
+@@ -326,7 +329,8 @@ public class ObjectArgumentValueTests
+ 
+         var list = AssertConvertsToType<List<AnAbstractClass>>(value);
+ 
+-        Assert.Collection(list,
++        Assert.Collection(
++            list,
+             first => Assert.IsType<ConcreteImpl>(first),
+             second => Assert.IsType<PrivateImplWithPublicCtor>(second));
+     }
+@@ -496,74 +500,77 @@ public class ObjectArgumentValueTests
+ 
+     class DictionaryWithoutPublicDefaultConstructor : IDictionary<string, int>
+     {
+-        readonly IDictionary<string, int> backing;
++        readonly IDictionary<string, int> _backing;
+ 
+-        public int this[string key] { get => backing[key]; set => backing[key] = value; }
++        public int this[string key] { get => _backing[key]; set => _backing[key] = value; }
+ 
+-        public ICollection<string> Keys => backing.Keys;
++        public ICollection<string> Keys => _backing.Keys;
+ 
+-        public ICollection<int> Values => backing.Values;
++        public ICollection<int> Values => _backing.Values;
+ 
+-        public int Count => backing.Count;
++        public int Count => _backing.Count;
+ 
+-        public bool IsReadOnly => backing.IsReadOnly;
++        public bool IsReadOnly => _backing.IsReadOnly;
+ 
+         // Normally there would be a default constructor here, like: public DictionaryWithoutPublicDefaultConstructor() {}
+-        public DictionaryWithoutPublicDefaultConstructor(IDictionary<string, int> values) { backing = values; }
++        public DictionaryWithoutPublicDefaultConstructor(IDictionary<string, int> values)
++        {
++            _backing = values;
++        }
+ 
+         public void Add(string key, int value)
+         {
+-            backing.Add(key, value);
++            _backing.Add(key, value);
+         }
+ 
+         public void Add(KeyValuePair<string, int> item)
+         {
+-            backing.Add(item);
++            _backing.Add(item);
+         }
+ 
+         public void Clear()
+         {
+-            backing.Clear();
++            _backing.Clear();
+         }
+ 
+         public bool Contains(KeyValuePair<string, int> item)
+         {
+-            return backing.Contains(item);
++            return _backing.Contains(item);
+         }
+ 
+         public bool ContainsKey(string key)
+         {
+-            return backing.ContainsKey(key);
++            return _backing.ContainsKey(key);
+         }
+ 
+         public void CopyTo(KeyValuePair<string, int>[] array, int arrayIndex)
+         {
+-            backing.CopyTo(array, arrayIndex);
++            _backing.CopyTo(array, arrayIndex);
+         }
+ 
+         public IEnumerator<KeyValuePair<string, int>> GetEnumerator()
+         {
+-            return backing.GetEnumerator();
++            return _backing.GetEnumerator();
+         }
+ 
+         public bool Remove(string key)
+         {
+-            return backing.Remove(key);
++            return _backing.Remove(key);
+         }
+ 
+         public bool Remove(KeyValuePair<string, int> item)
+         {
+-            return backing.Remove(item);
++            return _backing.Remove(item);
+         }
+ 
+         public bool TryGetValue(string key, out int value)
+         {
+-            return backing.TryGetValue(key, out value);
++            return _backing.TryGetValue(key, out value);
+         }
+ 
+         IEnumerator IEnumerable.GetEnumerator()
+         {
+-            return ((IEnumerable)backing).GetEnumerator();
++            return ((IEnumerable)_backing).GetEnumerator();
+         }
+     }
+ 
+@@ -600,14 +607,23 @@ public class ObjectArgumentValueTests
+         public abstract bool IsReadOnly { get; }
+ 
+         public abstract void Add(string key, int value);
++
+         public abstract void Add(KeyValuePair<string, int> item);
++
+         public abstract void Clear();
++
+         public abstract bool Contains(KeyValuePair<string, int> item);
++
+         public abstract bool ContainsKey(string key);
++
+         public abstract void CopyTo(KeyValuePair<string, int>[] array, int arrayIndex);
++
+         public abstract IEnumerator<KeyValuePair<string, int>> GetEnumerator();
++
+         public abstract bool Remove(string key);
++
+         public abstract bool Remove(KeyValuePair<string, int> item);
++
+         public abstract bool TryGetValue(string key, out int value);
+ 
+         IEnumerator IEnumerable.GetEnumerator()
+@@ -710,7 +726,10 @@ public class ObjectArgumentValueTests
+     {
+         public string Type { get; }
+ 
+-        public WithTypeArgumentClassCtor(string type) { Type = type; }
++        public WithTypeArgumentClassCtor(string type)
++        {
++            Type = type;
++        }
+     }
+ 
+     [Fact]
+@@ -817,9 +836,29 @@ public class ObjectArgumentValueTests
+         public object C { get; }
+         public int D { get; }
+ 
+-        public WithSimilarOverloads(int a, int b, int c, int d = 1) { A = a; B = b; C = c; D = d; }
+-        public WithSimilarOverloads(int a, string b, string c) { A = a; B = b; C = c; D = 2; }
+-        public WithSimilarOverloads(string a, string b, string c) { A = a; B = b; C = c; D = 3; }
++        public WithSimilarOverloads(int a, int b, int c, int d = 1)
++        {
++            A = a;
++            B = b;
++            C = c;
++            D = d;
++        }
++
++        public WithSimilarOverloads(int a, string b, string c)
++        {
++            A = a;
++            B = b;
++            C = c;
++            D = 2;
++        }
++
++        public WithSimilarOverloads(string a, string b, string c)
++        {
++            A = a;
++            B = b;
++            C = c;
++            D = 3;
++        }
+     }
+ 
+     [Fact]
+@@ -853,8 +892,15 @@ public class ObjectArgumentValueTests
+     {
+         public object Value { get; }
+ 
+-        public OnlyDifferentTypeOverloads(int value) { Value = value; }
+-        public OnlyDifferentTypeOverloads(long value) { Value = value; }
++        public OnlyDifferentTypeOverloads(int value)
++        {
++            Value = value;
++        }
++
++        public OnlyDifferentTypeOverloads(long value)
++        {
++            Value = value;
++        }
+     }
+ 
+     // Is only guaranteed to work when Type.GetConstructors returns constructors in a deterministic order
+@@ -926,7 +972,10 @@ public class ObjectArgumentValueTests
+     {
+         public IReadOnlyList<int> Values { get; }
+ 
+-        public WithParamsArray(params int[] values) { Values = values; }
++        public WithParamsArray(params int[] values)
++        {
++            Values = values;
++        }
+     }
+ 
+     [Fact]
+@@ -1011,7 +1060,6 @@ public class ObjectArgumentValueTests
+         Assert.Equal([1, 2], set);
+     }
+ 
+-
+     [Theory]
+     [InlineData(typeof(IEnumerable<KeyValuePair<string, int>>))]
+     [InlineData(typeof(ICollection<KeyValuePair<string, int>>))]
+@@ -1093,7 +1141,11 @@ public class ObjectArgumentValueTests
+     readonly struct Struct : IAmAnInterface
+     {
+         public string String { get; }
+-        public Struct(string str) { String = str; }
++
++        public Struct(string str)
++        {
++            String = str;
++        }
+     }
+ 
+     [Fact]
+diff --git a/test/Serilog.Settings.Configuration.Tests/StringArgumentValueTests.cs b/test/Serilog.Settings.Configuration.Tests/StringArgumentValueTests.cs
+index 7ad3ba2..745586c 100644
+--- a/test/Serilog.Settings.Configuration.Tests/StringArgumentValueTests.cs
++++ b/test/Serilog.Settings.Configuration.Tests/StringArgumentValueTests.cs
+@@ -1,10 +1,10 @@
+-﻿using Serilog.Core;
++﻿using System.Globalization;
++using System.Reflection;
++using Serilog.Core;
+ using Serilog.Events;
+ using Serilog.Formatting;
+ using Serilog.Formatting.Json;
+ using Serilog.Settings.Configuration.Tests.Support;
+-using System.Globalization;
+-using System.Reflection;
+ 
+ namespace Serilog.Settings.Configuration.Tests;
+ 
+@@ -31,32 +31,55 @@ public class StringArgumentValueTests
+     }
+ 
+     [Theory]
+-    [InlineData("My.NameSpace.Class+InnerClass::Member",
+-               "My.NameSpace.Class+InnerClass", "Member")]
+-    [InlineData("  TrimMe.NameSpace.Class::NeedsTrimming  ",
+-               "TrimMe.NameSpace.Class", "NeedsTrimming")]
+-    [InlineData("My.NameSpace.Class::Member",
+-               "My.NameSpace.Class", "Member")]
+-    [InlineData("My.NameSpace.Class::Member, MyAssembly",
+-               "My.NameSpace.Class, MyAssembly", "Member")]
+-    [InlineData("My.NameSpace.Class::Member, MyAssembly, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+-               "My.NameSpace.Class, MyAssembly, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "Member")]
+-    [InlineData("Just a random string with :: in it",
+-               null, null)]
+-    [InlineData("Its::a::trapWithColonsAppearingTwice",
+-               null, null)]
+-    [InlineData("ThereIsNoMemberHere::",
+-               null, null)]
+-    [InlineData(null,
+-               null, null)]
+-    [InlineData(" ",
+-               null, null)]
++    [InlineData(
++        "My.NameSpace.Class+InnerClass::Member",
++        "My.NameSpace.Class+InnerClass",
++        "Member")]
++    [InlineData(
++        "  TrimMe.NameSpace.Class::NeedsTrimming  ",
++        "TrimMe.NameSpace.Class",
++        "NeedsTrimming")]
++    [InlineData(
++        "My.NameSpace.Class::Member",
++        "My.NameSpace.Class",
++        "Member")]
++    [InlineData(
++        "My.NameSpace.Class::Member, MyAssembly",
++        "My.NameSpace.Class, MyAssembly",
++        "Member")]
++    [InlineData(
++        "My.NameSpace.Class::Member, MyAssembly, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
++        "My.NameSpace.Class, MyAssembly, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
++        "Member")]
++    [InlineData(
++        "Just a random string with :: in it",
++        null,
++        null)]
++    [InlineData(
++        "Its::a::trapWithColonsAppearingTwice",
++        null,
++        null)]
++    [InlineData(
++        "ThereIsNoMemberHere::",
++        null,
++        null)]
++    [InlineData(
++        null,
++        null,
++        null)]
++    [InlineData(
++        " ",
++        null,
++        null)]
+     // a full-qualified type name should not be considered a static member accessor
+-    [InlineData("My.NameSpace.Class, MyAssembly, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+-       null, null)]
++    [InlineData(
++        "My.NameSpace.Class, MyAssembly, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
++        null,
++        null)]
+     public void TryParseStaticMemberAccessorReturnsExpectedResults(string? input, string? expectedAccessorType, string? expectedPropertyName)
+     {
+-        var actual = StringArgumentValue.TryParseStaticMemberAccessor(input,
++        var actual = StringArgumentValue.TryParseStaticMemberAccessor(
++            input,
+             out var actualAccessorType,
+             out var actualMemberName);
+ 
+@@ -141,7 +164,9 @@ public class StringArgumentValueTests
+ 
+     [Theory]
+     [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::IntProperty, Serilog.Settings.Configuration.Tests", typeof(int), 42)]
+-    [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::StringProperty, Serilog.Settings.Configuration.Tests", typeof(string),
++    [InlineData(
++        "Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::StringProperty, Serilog.Settings.Configuration.Tests",
++        typeof(string),
+         "Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::StringProperty, Serilog.Settings.Configuration.Tests")]
+     public void StaticMembersAccessorsCanBeUsedForBuiltInTypes(string input, Type targetType, object expected)
+     {
+@@ -163,8 +188,7 @@ public class StringArgumentValueTests
+     {
+         var stringArgumentValue = new StringArgumentValue($"{input}");
+         Assert.Throws<TypeLoadException>(() =>
+-            stringArgumentValue.ConvertTo(targetType, new ResolutionContext())
+-        );
++            stringArgumentValue.ConvertTo(targetType, new ResolutionContext()));
+     }
+ 
+     [Theory]
+@@ -182,8 +206,7 @@ public class StringArgumentValueTests
+     {
+         var stringArgumentValue = new StringArgumentValue($"{input}");
+         var exception = Assert.Throws<InvalidOperationException>(() =>
+-            stringArgumentValue.ConvertTo(targetType, new ResolutionContext())
+-        );
++            stringArgumentValue.ConvertTo(targetType, new ResolutionContext()));
+ 
+         Assert.Contains("Could not find a public static property or field ", exception.Message);
+         Assert.Contains("on type `Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors, Serilog.Settings.Configuration.Tests`", exception.Message);
+@@ -205,7 +228,6 @@ public class StringArgumentValueTests
+         Assert.Same(@switch, resolvedSwitch);
+     }
+ 
+-
+     [Fact]
+     public void ReferencingUndeclaredLevelSwitchThrows()
+     {
+@@ -215,8 +237,7 @@ public class StringArgumentValueTests
+         var stringArgumentValue = new StringArgumentValue("$mySwitch");
+ 
+         var ex = Assert.Throws<InvalidOperationException>(() =>
+-            stringArgumentValue.ConvertTo(typeof(LoggingLevelSwitch), resolutionContext)
+-        );
++            stringArgumentValue.ConvertTo(typeof(LoggingLevelSwitch), resolutionContext));
+ 
+         Assert.Contains("$mySwitch", ex.Message);
+         Assert.Contains("\"LevelSwitches\":{\"$mySwitch\":", ex.Message);
+diff --git a/test/Serilog.Settings.Configuration.Tests/Support/ConfigurationReaderTestHelpers.cs b/test/Serilog.Settings.Configuration.Tests/Support/ConfigurationReaderTestHelpers.cs
+index 2d56813..42c2e25 100644
+--- a/test/Serilog.Settings.Configuration.Tests/Support/ConfigurationReaderTestHelpers.cs
++++ b/test/Serilog.Settings.Configuration.Tests/Support/ConfigurationReaderTestHelpers.cs
+@@ -5,14 +5,15 @@ namespace Serilog.Settings.Configuration.Tests.Support;
+ 
+ static class ConfigurationReaderTestHelpers
+ {
+-    public const string minimumLevelFlatTemplate = """
++    public const string MinimumLevelFlatTemplate = """
+     {{
+         "Serilog": {{
+             "MinimumLevel": "{0}"
+         }}
+     }}
+     """;
+-    public const string minimumLevelObjectTemplate = """
++
++    public const string MinimumLevelObjectTemplate = """
+     {{
+         "Serilog": {{
+             "MinimumLevel": {{
+@@ -21,8 +22,9 @@ static class ConfigurationReaderTestHelpers
+         }}
+     }}
+     """;
+-    public const string minimumLevelFlatKey = "Serilog:MinimumLevel";
+-    public const string minimumLevelObjectKey = "Serilog:MinimumLevel:Default";
++
++    public const string MinimumLevelFlatKey = "Serilog:MinimumLevel";
++    public const string MinimumLevelObjectKey = "Serilog:MinimumLevel:Default";
+ 
+     public static void AssertLogEventLevels(LoggerConfiguration loggerConfig, LogEventLevel expectedMinimumLevel)
+     {
+@@ -34,12 +36,14 @@ static class ConfigurationReaderTestHelpers
+         {
+             if (logEvent < expectedMinimumLevel)
+             {
+-                Assert.False(logger.IsEnabled(logEvent),
++                Assert.False(
++                    logger.IsEnabled(logEvent),
+                     $"The log level {logEvent} should be disabled as it's lower priority than the minimum level of {expectedMinimumLevel}.");
+             }
+             else
+             {
+-                Assert.True(logger.IsEnabled(logEvent),
++                Assert.True(
++                    logger.IsEnabled(logEvent),
+                     $"The log level {logEvent} should be enabled as it's {(logEvent == expectedMinimumLevel ? "the same" : "higher")} priority {(logEvent == expectedMinimumLevel ? "as" : "than")} the minimum level of {expectedMinimumLevel}.");
+             }
+         }
+diff --git a/test/Serilog.Settings.Configuration.Tests/Support/Some.cs b/test/Serilog.Settings.Configuration.Tests/Support/Some.cs
+index ba4f6af..b0c02f6 100644
+--- a/test/Serilog.Settings.Configuration.Tests/Support/Some.cs
++++ b/test/Serilog.Settings.Configuration.Tests/Support/Some.cs
+@@ -6,11 +6,11 @@ namespace Serilog.Settings.Configuration.Tests.Support;
+ 
+ static class Some
+ {
+-    static int Counter;
++    static int _counter;
+ 
+     public static int Int()
+     {
+-        return Interlocked.Increment(ref Counter);
++        return Interlocked.Increment(ref _counter);
+     }
+ 
+     public static decimal Decimal()
+@@ -40,15 +40,22 @@ static class Some
+ 
+     public static LogEvent LogEvent(string sourceContext, DateTimeOffset? timestamp = null, LogEventLevel level = LogEventLevel.Information)
+     {
+-        return new LogEvent(timestamp ?? OffsetInstant(), level,
+-            null, MessageTemplate(),
++        return new LogEvent(
++            timestamp ?? OffsetInstant(),
++            level,
++            null,
++            MessageTemplate(),
+             new List<LogEventProperty> { new LogEventProperty(Constants.SourceContextPropertyName, new ScalarValue(sourceContext)) });
+     }
+ 
+     public static LogEvent LogEvent(DateTimeOffset? timestamp = null, LogEventLevel level = LogEventLevel.Information)
+     {
+-        return new LogEvent(timestamp ?? OffsetInstant(), level,
+-            null, MessageTemplate(), Enumerable.Empty<LogEventProperty>());
++        return new LogEvent(
++            timestamp ?? OffsetInstant(),
++            level,
++            null,
++            MessageTemplate(),
++            Enumerable.Empty<LogEventProperty>());
+     }
+ 
+     public static LogEvent InformationEvent(DateTimeOffset? timestamp = null)
+diff --git a/test/Serilog.Settings.Configuration.Tests/Support/StaticAccessorClasses.cs b/test/Serilog.Settings.Configuration.Tests/Support/StaticAccessorClasses.cs
+index b9728f2..8fbfe28 100644
+--- a/test/Serilog.Settings.Configuration.Tests/Support/StaticAccessorClasses.cs
++++ b/test/Serilog.Settings.Configuration.Tests/Support/StaticAccessorClasses.cs
+@@ -44,17 +44,24 @@ public class ClassWithStaticAccessors
+     private static IAmAnInterface PrivateInterfaceProperty => ConcreteImpl.Instance;
+ 
+ #pragma warning disable 169
+-    private static IAmAnInterface PrivateInterfaceField = ConcreteImpl.Instance;
++    private static IAmAnInterface _privateInterfaceField = ConcreteImpl.Instance;
++
+ #pragma warning restore 169
+     public IAmAnInterface InstanceInterfaceProperty => ConcreteImpl.Instance;
++
+     public IAmAnInterface InstanceInterfaceField = ConcreteImpl.Instance;
+ 
+     public static Func<string, int> FuncIntParseField = int.Parse;
+     public static NamedIntParse NamedIntParseField = int.Parse;
++
+     public static Func<string, int> FuncIntParseProperty => int.Parse;
+     public static NamedIntParse NamedIntParseProperty => int.Parse;
++
+     public static int IntParseMethod(string value) => int.Parse(value);
++
+     public static int IntParseMethod(string value, string otherValue) => throw new NotImplementedException(); // will not be chosen, extra parameter
++
+     public static int IntParseMethod(object value) => throw new NotImplementedException(); // will not be chosen, wrong parameter type
++
+     public static int IntParseMethodNoOverloads(string value) => int.Parse(value);
+ }
+diff --git a/test/Serilog.Settings.Configuration.Tests/Support/TestApp.cs b/test/Serilog.Settings.Configuration.Tests/Support/TestApp.cs
+index 69a01d3..a0f9e98 100644
+--- a/test/Serilog.Settings.Configuration.Tests/Support/TestApp.cs
++++ b/test/Serilog.Settings.Configuration.Tests/Support/TestApp.cs
+@@ -25,6 +25,7 @@ public class TestApp : IAsyncLifetime
+         {
+             file.CopyTo(_workingDirectory.File(file.Name).FullName, overwrite: true);
+         }
++
+         _executables = [];
+     }
+ 
+diff --git a/test/TestDummies/Console/DummyConsoleSink.cs b/test/TestDummies/Console/DummyConsoleSink.cs
+index 5605086..3c0159d 100644
+--- a/test/TestDummies/Console/DummyConsoleSink.cs
++++ b/test/TestDummies/Console/DummyConsoleSink.cs
+@@ -24,4 +24,3 @@ public class DummyConsoleSink : ILogEventSink
+         Emitted.Add(logEvent);
+     }
+ }
+-
+diff --git a/test/TestDummies/DummyConfigurationSink.cs b/test/TestDummies/DummyConfigurationSink.cs
+index 86b24a0..08209ec 100644
+--- a/test/TestDummies/DummyConfigurationSink.cs
++++ b/test/TestDummies/DummyConfigurationSink.cs
+@@ -21,7 +21,6 @@ public class DummyConfigurationSink : ILogEventSink
+ 
+     public static IConfigurationSection? ConfigSection => _configSection;
+ 
+-
+     public DummyConfigurationSink(IConfiguration? configuration, IConfigurationSection? configSection)
+     {
+         _configuration = configuration;
+@@ -39,5 +38,4 @@ public class DummyConfigurationSink : ILogEventSink
+         _configuration = null;
+         _configSection = null;
+     }
+-
+ }
+diff --git a/test/TestDummies/DummyLoggerConfigurationExtensions.cs b/test/TestDummies/DummyLoggerConfigurationExtensions.cs
+index d7118f6..d349649 100644
+--- a/test/TestDummies/DummyLoggerConfigurationExtensions.cs
++++ b/test/TestDummies/DummyLoggerConfigurationExtensions.cs
+@@ -140,13 +140,13 @@ public static class DummyLoggerConfigurationExtensions
+ 
+     public static LoggerConfiguration WithDummyHardCodedString(
+         this LoggerDestructuringConfiguration loggerDestructuringConfiguration,
+-        string hardCodedString
+-    )
++        string hardCodedString)
+     {
+         return loggerDestructuringConfiguration.With(new DummyHardCodedStringDestructuringPolicy(hardCodedString));
+     }
+ 
+-    public static LoggerConfiguration DummyArrayOfType(this LoggerDestructuringConfiguration loggerSinkConfiguration,
++    public static LoggerConfiguration DummyArrayOfType(
++        this LoggerDestructuringConfiguration loggerSinkConfiguration,
+         List<Type> list,
+         Type[]? array = null,
+         Type? type = null,
+@@ -163,7 +163,8 @@ public static class DummyLoggerConfigurationExtensions
+         });
+     }
+ 
+-    public static LoggerConfiguration DummyNumbers(this LoggerDestructuringConfiguration loggerSinkConfiguration,
++    public static LoggerConfiguration DummyNumbers(
++        this LoggerDestructuringConfiguration loggerSinkConfiguration,
+         float floatValue,
+         double doubleValue,
+         decimal decimalValue)
+diff --git a/test/TestDummies/DummyPolicy.cs b/test/TestDummies/DummyPolicy.cs
+index 3fe44e8..020dbb7 100644
+--- a/test/TestDummies/DummyPolicy.cs
++++ b/test/TestDummies/DummyPolicy.cs
+@@ -1,7 +1,7 @@
+-﻿using Serilog.Core;
+-using Serilog.Events;
+-using System.Collections;
++﻿using System.Collections;
+ using System.Diagnostics.CodeAnalysis;
++using Serilog.Core;
++using Serilog.Events;
+ 
+ namespace TestDummies;
+ 
+@@ -34,9 +34,9 @@ public class DummyPolicy : IDestructuringPolicy
+ 
+ public class CustomCollection<T> : IEnumerable<T>
+ {
+-    private readonly List<T> inner = [];
++    private readonly List<T> _inner = [];
+ 
+-    public void Add(T item) => inner.Add(item);
++    public void Add(T item) => _inner.Add(item);
+ 
+     // wrong signature for collection initializer
+     public int Add() => 0;
+@@ -44,9 +44,9 @@ public class CustomCollection<T> : IEnumerable<T>
+     // wrong signature for collection initializer
+     public void Add(string a, byte b) { }
+ 
+-    public T? First => inner.Count > 0 ? inner[0] : default;
++    public T? First => _inner.Count > 0 ? _inner[0] : default;
+ 
+-    public IEnumerator<T> GetEnumerator() => inner.GetEnumerator();
++    public IEnumerator<T> GetEnumerator() => _inner.GetEnumerator();
+ 
+-    IEnumerator IEnumerable.GetEnumerator() => inner.GetEnumerator();
++    IEnumerator IEnumerable.GetEnumerator() => _inner.GetEnumerator();
+ }

@@ -123,7 +123,7 @@ public static class Views
     /// has, and the host named that run instead (trial 62).
     /// </summary>
     public static string? UnsupportedFramework(string message) =>
-        Regex.Match(message, @"doesn't support (?<framework>net[0-9a-z.]*[0-9a-z])", RegexOptions.IgnoreCase) is { Success: true } match ? match.Groups["framework"].Value : null;
+        Regex.Match(message, "doesn't support (?<framework>net[0-9a-z.]*[0-9a-z])", RegexOptions.IgnoreCase) is { Success: true } match ? match.Groups["framework"].Value : null;
 
     /// <summary>The frameworks <paramref name="selections"/> ('path|framework') name.</summary>
     public static HashSet<string> FrameworksOf(IEnumerable<string> selections) =>

@@ -1,3 +1,29 @@
 Fixing StyleBro's rules and the built-in rules init and migrate turn on (141 ids); --all applies every analyzer's and compiler fix.
 Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
 Multi-targeted: one 'dotnet format' run per target framework (net10.0, net6.0, net8.0, netstandard2.0). net7.0, net9.0: no run of their own, the code compiles the same as for another framework of the same kind (the same '#if' symbols tested, files and settings). net8.0: only the projects whose code compiles differently there.
+Checked net8.0 (run 1 of 4)
+Checked netstandard2.0 (run 2 of 4)
+Checked net6.0 (run 3 of 4)
+Checked net10.0 (run 4 of 4)
+== net10.0 (2 project(s), 267 files with findings)
+== net6.0 (2 project(s), 169 files with findings)
+'dotnet format' had warnings loading the workspace in its net6.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+== netstandard2.0 (1 project(s), 143 files with findings)
+Run 1: 293 files changed:
+  Rebus.Tests.Contracts/Activation/ActivationContextExtensions.cs
+  Rebus.Tests.Contracts/Activation/ContainerTests.cs
+  Rebus.Tests.Contracts/DataBus/GeneralDataBusStorageTests.cs
+  Rebus.Tests.Contracts/DataBus/IDataBusStorageFactory.cs
+  Rebus.Tests.Contracts/Errors/ExceptionInfoTests.cs
+  Rebus.Tests.Contracts/Extensions/Ponder.cs
+  Rebus.Tests.Contracts/Extensions/TestEx.cs
+  Rebus.Tests.Contracts/Sagas/BasicLoadAndSaveAndFindOperations.cs
+  Rebus.Tests.Contracts/Sagas/ISagaSnapshotStorageFactory.cs
+  Rebus.Tests.Contracts/Sagas/SagaIntegrationTests.cs
+  ... and 283 more
+Checked net8.0 (run 1 of 4)
+Checked netstandard2.0 (run 2 of 4)
+Checked net6.0 (run 3 of 4)
+Checked net10.0 (run 4 of 4)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

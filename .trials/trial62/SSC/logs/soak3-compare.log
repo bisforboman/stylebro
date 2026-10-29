@@ -1,0 +1,79 @@
+Note: switching to 'dd7c1969a7204f690607b30250ac2bd37c1d9b9c'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+Note: switching to 'dd7c1969a7204f690607b30250ac2bd37c1d9b9c'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+== soak3-src: dotnet-format check
+== soak3-src: host check
+== soak3-src: dotnet-format format
+== soak3-src: host format
+== soak3-src: dotnet-format recheck
+== soak3-src: host recheck
+Times (soak3-src):
+  dotnet-format check       121.8 s
+  host check                 49.1 s
+  dotnet-format format      107.0 s
+  host format                37.8 s
+  dotnet-format recheck       0.4 s
+  host recheck                0.5 s
+DIFFERENT (soak3-src):
+  check output differs (/home/user/w62/SSC/parity3/soak3-src-dotnet-format-check.txt vs /home/user/w62/SSC/parity3/soak3-src-host-check.txt):
+  => <root>/sample/Sample/CustomPolicy.cs(22,16): error BRO1405: Remove the unnecessary parentheses [<root>/sample/Sample/Sample.csproj]
+  <= 'dotnet format' had warnings loading the workspace in its net10.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+  => <root>/sample/Sample/LoginData.cs(6,5): error BRO1504: Add a blank line before the comment [<root>/sample/Sample/Sample.csproj]
+  <= <root>/sample/Sample/CustomPolicy.cs(22,16): error BRO1405: Remove the unnecessary parentheses [<root>/sample/Sample/Sample.csproj]
+  => <root>/sample/Sample/Program.cs(32,24): error BRO1107: Move the first item to the line after the opening parenthesis [<root>/sample/Sample/Sample.csproj]
+  <= <root>/sample/Sample/LoginData.cs(6,5): error BRO1504: Add a blank line before the comment [<root>/sample/Sample/Sample.csproj]
+  => <root>/sample/Sample/Program.cs(35,24): error BRO1107: Move the first item to the line after the opening parenthesis [<root>/sample/Sample/Sample.csproj]
+  <= <root>/sample/Sample/Program.cs(32,24): error BRO1107: Move the first item to the line after the opening parenthesis [<root>/sample/Sample/Sample.csproj]
+  => <root>/sample/Sample/Program.cs(38,24): error BRO1107: Move the first item to the line after the opening parenthesis [<root>/sample/Sample/Sample.csproj]
+  <= <root>/sample/Sample/Program.cs(35,24): error BRO1107: Move the first item to the line after the opening parenthesis [<root>/sample/Sample/Sample.csproj]
+  => <root>/sample/Sample/Program.cs(41,24): error BRO1107: Move the first item to the line after the opening parenthesis [<root>/sample/Sample/Sample.csproj]
+  <= <root>/sample/Sample/Program.cs(38,24): error BRO1107: Move the first item to the line after the opening parenthesis [<root>/sample/Sample/Sample.csproj]
+  => <root>/sample/Sample/SampleFailureListener.cs(16,31): error BRO1133: Use '== null' [<root>/sample/Sample/Sample.csproj]
+  <= <root>/sample/Sample/Program.cs(41,24): error BRO1107: Move the first item to the line after the opening parenthesis [<root>/sample/Sample/Sample.csproj]
+  => <root>/src/Serilog.Settings.Configuration/ConfigurationLoggerConfigurationExtensions.cs(153,70): error BRO1603: End the documentation text with a period [<root>/src/Serilog.Settings.Configuration/Serilog.Settings.Configuration.csproj]
+  <= <root>/sample/Sample/SampleFailureListener.cs(16,31): error BRO1133: Use '== null' [<root>/sample/Sample/Sample.csproj]
+  => <root>/src/Serilog.Settings.Configuration/ConfigurationLoggerConfigurationExtensions.cs(82,70): error BRO1603: End the documentation text with a period [<root>/src/Serilog.Settings.Configuration/Serilog.Settings.Configuration.csproj]
+  <= <root>/src/Serilog.Settings.Configuration/ConfigurationLoggerConfigurationExtensions.cs(153,70): error BRO1603: End the documentation text with a period [<root>/src/Serilog.Settings.Configuration/Serilog.Settings.Configuration.csproj]
+  => <root>/src/Serilog.Settings.Configuration/Settings/Configuration/Assemblies/CompositeAssemblyFinder.cs(20,10): error BRO1519: Add a blank line after the closing brace [<root>/src/Serilog.Settings.Configuration/Serilog.Settings.Configuration.csproj]
+  <= <root>/src/Serilog.Settings.Configuration/ConfigurationLoggerConfigurationExtensions.cs(82,70): error BRO1603: End the documentation text with a period [<root>/src/Serilog.Settings.Configuration/Serilog.Settings.Configuration.csproj]
+  format output differs (/home/user/w62/SSC/parity3/soak3-src-dotnet-format-format.txt vs /home/user/w62/SSC/parity3/soak3-src-host-format.txt):
+  => Checked net10.0
+  <= 'dotnet format' had warnings loading the workspace in its net10.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+  => Checked net462
+  <= Checked net10.0
+  => Checked net9.0
+  <= Checked net462
+  => Checked netstandard2.0
+  <= Checked net9.0
+  <= Checked netstandard2.0
