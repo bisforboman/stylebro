@@ -1,2 +1,4 @@
 build	0	44s	dotnet build Rebus8.sln -c Debug
 twae-Debug	1	18s	twae Debug
+test-Debug	1	613s	env CFG=Debug bash -c dotnet test Rebus.Tests -c $CFG
+twae-Release	1	14s	twae Release

@@ -90,4 +90,16 @@ public sealed partial class MigrationTests
 
         Assert.Single(lines, l => l == "dotnet_diagnostic.BRO1303.severity = none");
     }
+
+    // Ninject's untouched code fails its TWAE build on xUnit1013 in both target frameworks; MSBuild's parallel output gave the
+    // two lines in either order, so two check --build runs' logs differed.
+    [Fact]
+    public void StoppedLines_AreSortedAndDistinct()
+    {
+        FormatCommand.BuildMessage Csc(string framework) => new("k" + framework, "xUnit1013", true, $"  CSC: xUnit1013: Public method 'Dispose' ({framework})", InSource: false);
+
+        var lines = FormatCommand.StoppedLines([Csc("net6.0"), Csc("net462"), Csc("net6.0"), new("k", "CS0001", true, "  in source", InSource: true)]);
+
+        Assert.Equal(["  CSC: xUnit1013: Public method 'Dispose' (net462)", "  CSC: xUnit1013: Public method 'Dispose' (net6.0)"], lines);
+    }
 }

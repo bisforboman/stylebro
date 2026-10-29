@@ -5,3 +5,9 @@ check	0	0s	bro check --engine dotnet-format
 check-json	0
 check-full	0	52s	bro check --engine dotnet-format
 checkbuild	3	122s	bro check --build --engine dotnet-format
+checkbuild-json	3
+twae-Debug	1	9s	twae Debug
+test-Debug	1	12s	env CFG=Debug bash -c dotnet test Ninject.sln -c $CFG -f net6.0
+twae-Release	1	9s	twae Release
+test-Release	1	12s	env CFG=Release bash -c dotnet test Ninject.sln -c $CFG -f net6.0
+DONE

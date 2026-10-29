@@ -1,0 +1,24 @@
+  Determining projects to restore...
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/w62/NJ/dotnet/src/Ninject.Benchmarks/Ninject.Benchmarks.csproj::TargetFramework=net6.0]
+  All projects are up-to-date for restore.
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/w62/NJ/dotnet/src/Ninject.Benchmarks/Ninject.Benchmarks.csproj::TargetFramework=net6.0]
+  Ninject.Tests.TestAssembly -> /home/user/w62/NJ/dotnet/src/Ninject.Tests.TestAssembly/bin/Debug/netstandard2.0/Ninject.Tests.TestAssembly.dll
+  Ninject -> /home/user/w62/NJ/dotnet/src/Ninject/bin/Debug/netstandard2.0/Ninject.dll
+  Ninject -> /home/user/w62/NJ/dotnet/src/Ninject/bin/Debug/net46/Ninject.dll
+  Ninject.Tests.TestAssembly -> /home/user/w62/NJ/dotnet/src/Ninject.Tests.TestAssembly/bin/Debug/net46/Ninject.Tests.TestAssembly.dll
+  Ninject.Tests.TestModule -> /home/user/w62/NJ/dotnet/src/Ninject.Tests.TestModule/bin/Debug/net46/Ninject.Tests.TestModule.dll
+  Ninject -> /home/user/w62/NJ/dotnet/src/Ninject/bin/Debug/net6.0/Ninject.dll
+CSC : error xUnit1013: Public method 'Dispose' on test class 'DisposableObject' should be marked as a Theory. Reduce the visibility of the method, or add a Theory attribute to the method. (https://xunit.net/xunit.analyzers/rules/xUnit1013) [/home/user/w62/NJ/dotnet/src/Ninject.Tests/Ninject.Tests.csproj::TargetFramework=net462]
+  Ninject.Tests.TestModule -> /home/user/w62/NJ/dotnet/src/Ninject.Tests.TestModule/bin/Debug/netstandard2.0/Ninject.Tests.TestModule.dll
+CSC : error xUnit1013: Public method 'Dispose' on test class 'DisposableObject' should be marked as a Theory. Reduce the visibility of the method, or add a Theory attribute to the method. (https://xunit.net/xunit.analyzers/rules/xUnit1013) [/home/user/w62/NJ/dotnet/src/Ninject.Tests/Ninject.Tests.csproj::TargetFramework=net6.0]
+
+Build FAILED.
+
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/w62/NJ/dotnet/src/Ninject.Benchmarks/Ninject.Benchmarks.csproj::TargetFramework=net6.0]
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/w62/NJ/dotnet/src/Ninject.Benchmarks/Ninject.Benchmarks.csproj::TargetFramework=net6.0]
+CSC : error xUnit1013: Public method 'Dispose' on test class 'DisposableObject' should be marked as a Theory. Reduce the visibility of the method, or add a Theory attribute to the method. (https://xunit.net/xunit.analyzers/rules/xUnit1013) [/home/user/w62/NJ/dotnet/src/Ninject.Tests/Ninject.Tests.csproj::TargetFramework=net462]
+CSC : error xUnit1013: Public method 'Dispose' on test class 'DisposableObject' should be marked as a Theory. Reduce the visibility of the method, or add a Theory attribute to the method. (https://xunit.net/xunit.analyzers/rules/xUnit1013) [/home/user/w62/NJ/dotnet/src/Ninject.Tests/Ninject.Tests.csproj::TargetFramework=net6.0]
+    2 Warning(s)
+    2 Error(s)
+
+Time Elapsed 00:00:08.28
