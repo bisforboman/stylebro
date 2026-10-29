@@ -1,0 +1,91 @@
+  Determining projects to restore...
+  Restored /home/user/w60/EC/base/src/EasyCaching.Disk/EasyCaching.Disk.csproj (in 752 ms).
+  Restored /home/user/w60/EC/base/serialization/EasyCaching.Serialization.MemoryPack/EasyCaching.Serialization.MemoryPack.csproj (in 968 ms).
+  Restored /home/user/w60/EC/base/src/EasyCaching.FasterKv/EasyCaching.FasterKv.csproj (in 965 ms).
+  Restored /home/user/w60/EC/base/interceptor/EasyCaching.Interceptor.AspectCore/EasyCaching.Interceptor.AspectCore.csproj (in 964 ms).
+  Restored /home/user/w60/EC/base/src/EasyCaching.Core/EasyCaching.Core.csproj (in 27 ms).
+  Restored /home/user/w60/EC/base/serialization/EasyCaching.Serialization.Protobuf/EasyCaching.Serialization.Protobuf.csproj (in 35 ms).
+  Restored /home/user/w60/EC/base/serialization/EasyCaching.Serialization.SystemTextJson/EasyCaching.Serialization.SystemTextJson.csproj (in 45 ms).
+  Restored /home/user/w60/EC/base/src/EasyCaching.CSRedis/EasyCaching.CSRedis.csproj (in 45 ms).
+  Restored /home/user/w60/EC/base/serialization/EasyCaching.Serialization.MessagePack/EasyCaching.Serialization.MessagePack.csproj (in 41 ms).
+  Restored /home/user/w60/EC/base/src/EasyCaching.SQLite/EasyCaching.SQLite.csproj (in 96 ms).
+  Restored /home/user/w60/EC/base/src/EasyCaching.Redis/EasyCaching.Redis.csproj (in 110 ms).
+  Restored /home/user/w60/EC/base/src/EasyCaching.ResponseCaching/EasyCaching.ResponseCaching.csproj (in 130 ms).
+  Restored /home/user/w60/EC/base/src/EasyCaching.LiteDB/EasyCaching.LiteDB.csproj (in 13 ms).
+  Restored /home/user/w60/EC/base/src/EasyCaching.InMemory/EasyCaching.InMemory.csproj (in 34 ms).
+  Restored /home/user/w60/EC/base/src/EasyCaching.HybridCache/EasyCaching.HybridCache.csproj (in 13 ms).
+  Restored /home/user/w60/EC/base/src/EasyCaching.Memcached/EasyCaching.Memcached.csproj (in 185 ms).
+  Restored /home/user/w60/EC/base/serialization/EasyCaching.Serialization.Json/EasyCaching.Serialization.Json.csproj (in 34 ms).
+  Restored /home/user/w60/EC/base/bus/EasyCaching.Bus.RabbitMQ/EasyCaching.Bus.RabbitMQ.csproj (in 52 ms).
+  Restored /home/user/w60/EC/base/bus/EasyCaching.Bus.Redis/EasyCaching.Bus.Redis.csproj (in 104 ms).
+  Restored /home/user/w60/EC/base/bus/EasyCaching.Bus.CSRedis/EasyCaching.Bus.CSRedis.csproj (in 112 ms).
+  Restored /home/user/w60/EC/base/test/EasyCaching.UnitTests/EasyCaching.UnitTests.csproj (in 703 ms).
+  Restored /home/user/w60/EC/base/interceptor/EasyCaching.Interceptor.Castle/EasyCaching.Interceptor.Castle.csproj (in 346 ms).
+  12 of 34 projects are up-to-date for restore.
+  EasyCaching.Core -> /home/user/w60/EC/base/src/EasyCaching.Core/bin/Release/netstandard2.0/EasyCaching.Core.dll
+  EasyCaching.Core -> /home/user/w60/EC/base/src/EasyCaching.Core/bin/Release/net8.0/EasyCaching.Core.dll
+  EasyCaching.Bus.Redis -> /home/user/w60/EC/base/bus/EasyCaching.Bus.Redis/bin/Release/netstandard2.0/EasyCaching.Bus.Redis.dll
+  EasyCaching.Interceptor.AspectCore -> /home/user/w60/EC/base/interceptor/EasyCaching.Interceptor.AspectCore/bin/Release/netstandard2.0/EasyCaching.Interceptor.AspectCore.dll
+  EasyCaching.Serialization.Protobuf -> /home/user/w60/EC/base/serialization/EasyCaching.Serialization.Protobuf/bin/Release/netstandard2.0/EasyCaching.Serialization.Protobuf.dll
+  EasyCaching.ResponseCaching -> /home/user/w60/EC/base/src/EasyCaching.ResponseCaching/bin/Release/netcoreapp3.1/EasyCaching.ResponseCaching.dll
+  EasyCaching.Interceptor.AspectCore -> /home/user/w60/EC/base/interceptor/EasyCaching.Interceptor.AspectCore/bin/Release/net8.0/EasyCaching.Interceptor.AspectCore.dll
+  EasyCaching.HybridCache -> /home/user/w60/EC/base/src/EasyCaching.HybridCache/bin/Release/netstandard2.0/EasyCaching.HybridCache.dll
+  EasyCaching.InMemory -> /home/user/w60/EC/base/src/EasyCaching.InMemory/bin/Release/netstandard2.0/EasyCaching.InMemory.dll
+  EasyCaching.Memcached -> /home/user/w60/EC/base/src/EasyCaching.Memcached/bin/Release/netstandard2.0/EasyCaching.Memcached.dll
+  EasyCaching.HybridCache -> /home/user/w60/EC/base/src/EasyCaching.HybridCache/bin/Release/net8.0/EasyCaching.HybridCache.dll
+  EasyCaching.InMemory -> /home/user/w60/EC/base/src/EasyCaching.InMemory/bin/Release/net8.0/EasyCaching.InMemory.dll
+  EasyCaching.Interceptor.Castle -> /home/user/w60/EC/base/interceptor/EasyCaching.Interceptor.Castle/bin/Release/netstandard2.0/EasyCaching.Interceptor.Castle.dll
+  EasyCaching.Redis -> /home/user/w60/EC/base/src/EasyCaching.Redis/bin/Release/net8.0/EasyCaching.Redis.dll
+  EasyCaching.Interceptor.Castle -> /home/user/w60/EC/base/interceptor/EasyCaching.Interceptor.Castle/bin/Release/net8.0/EasyCaching.Interceptor.Castle.dll
+  EasyCaching.SQLite -> /home/user/w60/EC/base/src/EasyCaching.SQLite/bin/Release/net8.0/EasyCaching.SQLite.dll
+  EasyCaching.Bus.Redis -> /home/user/w60/EC/base/bus/EasyCaching.Bus.Redis/bin/Release/net8.0/EasyCaching.Bus.Redis.dll
+  EasyCaching.Serialization.MessagePack -> /home/user/w60/EC/base/serialization/EasyCaching.Serialization.MessagePack/bin/Release/net8.0/EasyCaching.Serialization.MessagePack.dll
+  EasyCaching.SQLite -> /home/user/w60/EC/base/src/EasyCaching.SQLite/bin/Release/netstandard2.0/EasyCaching.SQLite.dll
+  EasyCaching.Bus.RabbitMQ -> /home/user/w60/EC/base/bus/EasyCaching.Bus.RabbitMQ/bin/Release/netstandard2.0/EasyCaching.Bus.RabbitMQ.dll
+  EasyCaching.Serialization.MessagePack -> /home/user/w60/EC/base/serialization/EasyCaching.Serialization.MessagePack/bin/Release/netstandard2.0/EasyCaching.Serialization.MessagePack.dll
+  EasyCaching.CSRedis -> /home/user/w60/EC/base/src/EasyCaching.CSRedis/bin/Release/netstandard2.0/EasyCaching.CSRedis.dll
+  EasyCaching.Bus.RabbitMQ -> /home/user/w60/EC/base/bus/EasyCaching.Bus.RabbitMQ/bin/Release/net8.0/EasyCaching.Bus.RabbitMQ.dll
+  EasyCaching.Bus.CSRedis -> /home/user/w60/EC/base/bus/EasyCaching.Bus.CSRedis/bin/Release/netstandard2.0/EasyCaching.Bus.CSRedis.dll
+  EasyCaching.Serialization.Json -> /home/user/w60/EC/base/serialization/EasyCaching.Serialization.Json/bin/Release/net8.0/EasyCaching.Serialization.Json.dll
+  EasyCaching.Serialization.Json -> /home/user/w60/EC/base/serialization/EasyCaching.Serialization.Json/bin/Release/netstandard2.0/EasyCaching.Serialization.Json.dll
+  EasyCaching.Bus.CSRedis -> /home/user/w60/EC/base/bus/EasyCaching.Bus.CSRedis/bin/Release/net8.0/EasyCaching.Bus.CSRedis.dll
+  EasyCaching.CSRedis -> /home/user/w60/EC/base/src/EasyCaching.CSRedis/bin/Release/net8.0/EasyCaching.CSRedis.dll
+  Microsoft.Extensions.Caching.EasyCachingLib -> /home/user/w60/EC/base/extensions/Microsoft.Extensions.Caching.EasyCachingLib/bin/Release/netstandard2.0/Microsoft.Extensions.Caching.EasyCachingLib.dll
+  Build -> /home/user/w60/EC/base/bin/Release/netcoreapp3.1/Build.dll
+  EasyCaching.Memcached -> /home/user/w60/EC/base/src/EasyCaching.Memcached/bin/Release/net8.0/EasyCaching.Memcached.dll
+  EasyCaching.Redis -> /home/user/w60/EC/base/src/EasyCaching.Redis/bin/Release/netstandard2.0/EasyCaching.Redis.dll
+  EasyCaching.Serialization.Protobuf -> /home/user/w60/EC/base/serialization/EasyCaching.Serialization.Protobuf/bin/Release/net8.0/EasyCaching.Serialization.Protobuf.dll
+  EasyCaching.Bus.Zookeeper -> /home/user/w60/EC/base/bus/EasyCaching.Bus.Zookeeper/bin/Release/netstandard2.0/EasyCaching.Bus.Zookeeper.dll
+  EasyCaching.Disk -> /home/user/w60/EC/base/src/EasyCaching.Disk/bin/Release/netstandard2.0/EasyCaching.Disk.dll
+  EasyCaching.Bus.RabbitMQStream -> /home/user/w60/EC/base/bus/EasyCaching.Bus.RabbitMQStream/bin/Release/netstandard2.0/EasyCaching.Bus.RabbitMQStream.dll
+  EasyCaching.Disk -> /home/user/w60/EC/base/src/EasyCaching.Disk/bin/Release/net8.0/EasyCaching.Disk.dll
+  EasyCaching.FasterKv -> /home/user/w60/EC/base/src/EasyCaching.FasterKv/bin/Release/net8.0/EasyCaching.FasterKv.dll
+  EasyCaching.Serialization.SystemTextJson -> /home/user/w60/EC/base/serialization/EasyCaching.Serialization.SystemTextJson/bin/Release/net8.0/EasyCaching.Serialization.SystemTextJson.dll
+  EasyCaching.LiteDB -> /home/user/w60/EC/base/src/EasyCaching.LiteDB/bin/Release/net8.0/EasyCaching.LiteDB.dll
+  EasyCaching.Serialization.SystemTextJson -> /home/user/w60/EC/base/serialization/EasyCaching.Serialization.SystemTextJson/bin/Release/netstandard2.0/EasyCaching.Serialization.SystemTextJson.dll
+  EasyCaching.Serialization.MemoryPack -> /home/user/w60/EC/base/serialization/EasyCaching.Serialization.MemoryPack/bin/Release/net8.0/EasyCaching.Serialization.MemoryPack.dll
+  EasyCaching.Bus.ConfluentKafka -> /home/user/w60/EC/base/bus/EasyCaching.Bus.ConfluentKafka/bin/Release/net8.0/EasyCaching.Bus.ConfluentKafka.dll
+  EasyCaching.Demo.Interceptors -> /home/user/w60/EC/base/sample/EasyCaching.Demo.Interceptors/bin/Release/net8.0/EasyCaching.Demo.Interceptors.dll
+  EasyCaching.PerformanceTests -> /home/user/w60/EC/base/test/EasyCaching.PerformanceTests/bin/Release/net8.0/EasyCaching.PerformanceTests.dll
+  EasyCaching.Demo.ResponseCaching -> /home/user/w60/EC/base/sample/EasyCaching.Demo.ResponseCaching/bin/Release/net8.0/EasyCaching.Demo.ResponseCaching.dll
+/home/user/w60/EC/base/test/EasyCaching.UnitTests/CachingTests/MemcachedProviderTest.cs(420,27): error xUnit1048: Support for 'async void' unit tests is being removed from xUnit.net v3. To simplify upgrading, convert the test to 'async Task' instead. (https://xunit.net/xunit.analyzers/rules/xUnit1048) [/home/user/w60/EC/base/test/EasyCaching.UnitTests/EasyCaching.UnitTests.csproj]
+/home/user/w60/EC/base/test/EasyCaching.UnitTests/CachingTests/MemoryCachingProviderTest.cs(91,13): error xUnit2013: Do not use Assert.Equal() to check for collection size. Use Assert.Single instead. (https://xunit.net/xunit.analyzers/rules/xUnit2013) [/home/user/w60/EC/base/test/EasyCaching.UnitTests/EasyCaching.UnitTests.csproj]
+/home/user/w60/EC/base/test/EasyCaching.UnitTests/CachingTests/MemoryCachingProviderTest.cs(159,27): error xUnit1048: Support for 'async void' unit tests is being removed from xUnit.net v3. To simplify upgrading, convert the test to 'async Task' instead. (https://xunit.net/xunit.analyzers/rules/xUnit1048) [/home/user/w60/EC/base/test/EasyCaching.UnitTests/EasyCaching.UnitTests.csproj]
+  EasyCaching.Demo.ConsoleApp -> /home/user/w60/EC/base/sample/EasyCaching.Demo.ConsoleApp/bin/Release/net8.0/EasyCaching.Demo.ConsoleApp.dll
+  EasyCaching.Bus.Zookeeper -> /home/user/w60/EC/base/bus/EasyCaching.Bus.Zookeeper/bin/Release/net8.0/EasyCaching.Bus.Zookeeper.dll
+  EasyCaching.Demo.Locks -> /home/user/w60/EC/base/sample/EasyCaching.Demo.Locks/bin/Release/net8.0/EasyCaching.Demo.Locks.dll
+  EasyCaching.Demo.Providers -> /home/user/w60/EC/base/sample/EasyCaching.Demo.Providers/bin/Release/net8.0/EasyCaching.Demo.Providers.dll
+  EasyCaching.LiteDB -> /home/user/w60/EC/base/src/EasyCaching.LiteDB/bin/Release/netstandard2.0/EasyCaching.LiteDB.dll
+  EasyCaching.Bus.RabbitMQStream -> /home/user/w60/EC/base/bus/EasyCaching.Bus.RabbitMQStream/bin/Release/net8.0/EasyCaching.Bus.RabbitMQStream.dll
+  EasyCaching.Bus.ConfluentKafka -> /home/user/w60/EC/base/bus/EasyCaching.Bus.ConfluentKafka/bin/Release/netstandard2.0/EasyCaching.Bus.ConfluentKafka.dll
+  EasyCaching.FasterKv -> /home/user/w60/EC/base/src/EasyCaching.FasterKv/bin/Release/netstandard2.0/EasyCaching.FasterKv.dll
+
+Build FAILED.
+
+/home/user/w60/EC/base/test/EasyCaching.UnitTests/CachingTests/MemcachedProviderTest.cs(420,27): error xUnit1048: Support for 'async void' unit tests is being removed from xUnit.net v3. To simplify upgrading, convert the test to 'async Task' instead. (https://xunit.net/xunit.analyzers/rules/xUnit1048) [/home/user/w60/EC/base/test/EasyCaching.UnitTests/EasyCaching.UnitTests.csproj]
+/home/user/w60/EC/base/test/EasyCaching.UnitTests/CachingTests/MemoryCachingProviderTest.cs(91,13): error xUnit2013: Do not use Assert.Equal() to check for collection size. Use Assert.Single instead. (https://xunit.net/xunit.analyzers/rules/xUnit2013) [/home/user/w60/EC/base/test/EasyCaching.UnitTests/EasyCaching.UnitTests.csproj]
+/home/user/w60/EC/base/test/EasyCaching.UnitTests/CachingTests/MemoryCachingProviderTest.cs(159,27): error xUnit1048: Support for 'async void' unit tests is being removed from xUnit.net v3. To simplify upgrading, convert the test to 'async Task' instead. (https://xunit.net/xunit.analyzers/rules/xUnit1048) [/home/user/w60/EC/base/test/EasyCaching.UnitTests/EasyCaching.UnitTests.csproj]
+    0 Warning(s)
+    3 Error(s)
+
+Time Elapsed 00:00:40.02

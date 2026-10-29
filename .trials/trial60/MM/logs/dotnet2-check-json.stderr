@@ -1,0 +1,5 @@
+Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+Configurations: MasterMemory.Tests: it takes an in-solution source generator, so a build of its other configurations checks the code only those compile ('#if !DEBUG') at the end too.
+Building MasterMemory.Tests in Release to check it (it takes an in-solution source generator)...
+Release build of MasterMemory.Tests: no findings.
+Clean.

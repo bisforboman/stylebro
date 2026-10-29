@@ -1,0 +1,20 @@
+  Determining projects to restore...
+  Restored /home/user/stylebro/samples/Messy/Messy.csproj (in 210 ms).
+  Restored /home/user/stylebro/src/StyleBro.Package/StyleBro.Package.csproj (in 446 ms).
+  5 of 7 projects are up-to-date for restore.
+  StyleBro.FormatHost -> /home/user/stylebro/src/StyleBro.FormatHost/bin/Debug/net8.0/StyleBro.FormatHost.dll
+  StyleBro.Analyzers -> /home/user/stylebro/src/StyleBro.Analyzers/bin/Debug/netstandard2.0/StyleBro.Analyzers.dll
+/home/user/stylebro/src/StyleBro.Migrate/Conventions.cs(2119,1): warning BRO1517: Keep one blank line (https://bisforboman.github.io/stylebro/rules/BRO1517/) [/home/user/stylebro/src/StyleBro.Migrate/StyleBro.Migrate.csproj]
+  StyleBro.Migrate -> /home/user/stylebro/src/StyleBro.Migrate/bin/Debug/net8.0/StyleBro.Migrate.dll
+  StyleBro.CodeFixes -> /home/user/stylebro/src/StyleBro.CodeFixes/bin/Debug/netstandard2.0/StyleBro.CodeFixes.dll
+  StyleBro.Tests -> /home/user/stylebro/tests/StyleBro.Tests/bin/Debug/net10.0/StyleBro.Tests.dll
+  StyleBro.Package -> /home/user/stylebro/src/StyleBro.Package/bin/Debug/netstandard2.0/StyleBro.Package.dll
+  Messy -> /home/user/stylebro/samples/Messy/bin/Debug/net10.0/Messy.dll
+
+Build succeeded.
+
+/home/user/stylebro/src/StyleBro.Migrate/Conventions.cs(2119,1): warning BRO1517: Keep one blank line (https://bisforboman.github.io/stylebro/rules/BRO1517/) [/home/user/stylebro/src/StyleBro.Migrate/StyleBro.Migrate.csproj]
+    1 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:29.49

@@ -1,0 +1,77 @@
+Note: switching to '41f80726f63c6c3268944ecde9b11b3299d83717'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+Note: switching to '41f80726f63c6c3268944ecde9b11b3299d83717'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+== soak2-src: dotnet-format check
+== soak2-src: host check
+== soak2-src: dotnet-format format
+== soak2-src: host format
+== soak2-src: dotnet-format recheck
+== soak2-src: host recheck
+Times (soak2-src):
+  dotnet-format check       536.3 s
+  host check                268.4 s
+  dotnet-format format      438.5 s
+  host format               237.8 s
+  dotnet-format recheck       1.1 s
+  host recheck                1.3 s
+DIFFERENT (soak2-src):
+  check output differs (/home/user/w60/EC/parity2/soak2-src-dotnet-format-check.txt vs /home/user/w60/EC/parity2/soak2-src-host-check.txt):
+  => <root>/build/BuildScript.cs(1,1): warning BRO1008: Move the using directive inside the namespace [<root>/Build.csproj]
+  <= 'dotnet format' had warnings loading the workspace in its net8.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+  => <root>/build/BuildScript.cs(2,1): warning BRO1008: Move the using directive inside the namespace [<root>/Build.csproj]
+  <= <root>/build/BuildScript.cs(1,1): warning BRO1008: Move the using directive inside the namespace [<root>/Build.csproj]
+  => <root>/build/BuildScript.cs(3,1): warning BRO1008: Move the using directive inside the namespace [<root>/Build.csproj]
+  <= <root>/build/BuildScript.cs(2,1): warning BRO1008: Move the using directive inside the namespace [<root>/Build.csproj]
+  => <root>/build/BuildScript.cs(4,1): warning BRO1008: Move the using directive inside the namespace [<root>/Build.csproj]
+  <= <root>/build/BuildScript.cs(3,1): warning BRO1008: Move the using directive inside the namespace [<root>/Build.csproj]
+  => <root>/build/BuildScript.cs(5,1): warning BRO1008: Move the using directive inside the namespace [<root>/Build.csproj]
+  <= <root>/build/BuildScript.cs(4,1): warning BRO1008: Move the using directive inside the namespace [<root>/Build.csproj]
+  => <root>/build/BuildScript.cs(6,1): warning BRO1008: Move the using directive inside the namespace [<root>/Build.csproj]
+  <= <root>/build/BuildScript.cs(5,1): warning BRO1008: Move the using directive inside the namespace [<root>/Build.csproj]
+  => <root>/build/BuildScript.cs(7,1): warning BRO1008: Move the using directive inside the namespace [<root>/Build.csproj]
+  <= <root>/build/BuildScript.cs(6,1): warning BRO1008: Move the using directive inside the namespace [<root>/Build.csproj]
+  => <root>/build/BuildScript.cs(71,26): warning BRO1136: Remove the parentheses around 'c' [<root>/Build.csproj]
+  <= <root>/build/BuildScript.cs(7,1): warning BRO1008: Move the using directive inside the namespace [<root>/Build.csproj]
+  => <root>/build/BuildScript.cs(8,1): warning BRO1008: Move the using directive inside the namespace [<root>/Build.csproj]
+  <= <root>/build/BuildScript.cs(71,26): warning BRO1136: Remove the parentheses around 'c' [<root>/Build.csproj]
+  => <root>/build/BuildScript.cs(86,39): warning BRO1136: Remove the parentheses around 'e' [<root>/Build.csproj]
+  <= <root>/build/BuildScript.cs(8,1): warning BRO1008: Move the using directive inside the namespace [<root>/Build.csproj]
+  format output differs (/home/user/w60/EC/parity2/soak2-src-dotnet-format-format.txt vs /home/user/w60/EC/parity2/soak2-src-host-format.txt):
+  => Checked net8.0
+  <= 'dotnet format' had warnings loading the workspace in its net8.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+  => Checked netcoreapp3.1
+  <= Checked net8.0
+  => Checked netstandard2.0
+  <= Checked netcoreapp3.1
+  <= Checked netstandard2.0

@@ -1,0 +1,16 @@
+base start 06:59
+base done 07:03
+default start 07:03
+default start 07:27
+default done 07:44
+dotnet start 07:44
+L4N restarted after the worker restart 08:43
+dotnet start 08:43
+default2 start 09:33
+default2 done 09:57
+dotnet2 start 09:57
+dotnet2 done 10:39
+CHAIN-DONE
+soak start 10:39
+soak done rc=1 11:06
+soak2 done 11:06

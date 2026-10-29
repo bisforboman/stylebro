@@ -1,0 +1,107 @@
+Previewing 'bro init --write' and 'bro format' on a copy; nothing in /home/user/w60/MW/default2 changes.
+Copying the repository to /tmp/stylebro-preview-Rqdcks/default2... 8s
+Conventions in the code (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  too few  private fields: 2 places -> default stays (camelCase)
+  default  '{' of multi-line blocks: 512 of 512 on its own line -> all
+  default  else/catch/finally after '}': 8 of 8 on a new line -> true
+  default  one-line if/else/loop/using/lock bodies: 76 of 76 with braces -> true
+  default  one-line jumps ('if (x) return;'): 39 in braces -> false
+  too few  operators where a line wraps: 1 place -> default stays (beginning_of_line)
+  off      '=>' where a line wraps: 1 at the end of the line, 3 at the start of the line -> BRO1521 is off
+  default  '=' where a line wraps: 4 of 4 at the end of the line -> end_of_line
+  off      multi-line initializers: 15 with a trailing comma, 10 without a trailing comma -> BRO1401 is off
+  default  empty strings: 23 of 23 string.Empty -> string_empty
+  off      null checks: 14 'is null', 11 '== null' -> BRO1133 is off
+  default  one-line <summary> texts: 28 of 28 on three lines -> multi_line
+  too few  <inheritdoc/> tags: 1 place -> default stays (compact)
+  kept     default values: 8 of 8 'default' -> true
+  default  ')' of split lists: 15 of 15 after the last item -> last_item
+  default  split lists: 10 of 10 first item on the next line -> next_line
+  off      ': base(...)'/': this(...)': 6 on its own line, 5 on the constructor's line -> BRO1105 is off
+  off      'where' constraints: 1 on their own line, 8 on the declaration's line -> BRO1111 is off
+  off      'new T { ... }' with an initializer: 17 without '()', 9 with '()' -> BRO1141 is off
+  default  files' using directives: 50 of 50 outside the namespace -> outside_namespace
+  too few  mixed arithmetic ('a + b * c'): 2 places -> default stays (always_for_clarity)
+  off      overrides/interface implementations: 1 with a doc comment, 4 without a doc comment -> BRO1601 is off
+  default  types' members: 35 of 40 in BRO1001's order -> warning
+  too few  overloads BRO1001 could split: 1 place -> default stays (false)
+  default  split lists' items: 10 of 10 one per line -> warning
+  default  private-by-default members: 97 of 97 with 'private' -> for_non_interface_members
+  default  internal-by-default types: 12 of 12 with 'internal' -> warning
+  off      property summaries: 11 starting with 'Gets'/'Sets', 20 in their own words -> BRO1604 is off
+  default  declarations with 2+ attributes: 15 of 15 one per list ('[A]' '[B]') -> warning
+  default  adjacent fields of one type: 11 of 11 declared one by one -> warning
+  default  private static fields: 9 of 9 without a prefix -> warning
+  default  built-in type names: 41 of 41 only keywords ('int') -> warning
+  default  empty blocks ('{ }'): 7 of 7 on two lines -> false
+  too few  block-bodied properties/methods: 1 member -> default stays (warning)
+  default  statement blocks ('if (x) { y(); }'): 81 of 81 on several lines -> warning
+  default  auto-property accessors ('{ get; set; }'): 105 of 105 on one line -> warning
+  kept     C# files' line endings: 56 of 57 LF -> lf
+  default  statements after a block's '}': 82 of 82 after a blank line -> warning
+  default  neighbouring members: 266 of 266 with a blank line between -> warning
+  default  doc comments below code: 49 of 49 after a blank line -> warning
+  default  '//' comments above code: 65 of 65 right above the code -> warning
+  default  '//' comments below code: 33 of 33 after a blank line -> warning
+  default  doc comment texts: 95 of 98 ending with a period -> warning
+  off      doc element order (typeparam, param, remarks): 4 in BRO1619's order, 3 in another order -> BRO1619 is off
+  off      keywords in doc comments: 9 of 9 '<c>null</c>' -> BRO1618 is off
+  default  doc comments above their element: 59 of 59 right above it -> warning
+  default  using directives: 45 of 46 files sorted, 31 of 33 with System first -> sorted, System first
+  default  private constants/static readonly fields: 13 of 17 PascalCase -> PascalCase
+  default  spacing, control-flow keywords: 118 of 118 'if (x)' -> 'if (x)'
+  default  spacing, control-flow parentheses: 118 of 118 'if (x)' -> 'if (x)'
+  default  spacing, parenthesized expressions: 5 of 5 '(a + b)' -> '(a + b)'
+  default  spacing, cast parentheses: 18 of 18 '(int)x' -> '(int)x'
+  default  spacing, casts: 15 of 18 '(int)x' -> '(int)x'
+  default  spacing, call arguments: 606 of 606 'F(x)' -> 'F(x)'
+  default  spacing, declared parameters: 184 of 184 'void F(int x)' -> 'void F(int x)'
+Summary:
+  Kept your style for 39 settings: wrote csharp_prefer_simple_default_expression,
+    end_of_line; 37 were already StyleBro's default.
+  Turned 9 rules off because your code mixes both forms: BRO1521 ('=>' where a line wraps),
+    BRO1401 (multi-line initializers), BRO1133 (null checks), BRO1105 (': base(...)'/': this(...)'),
+    BRO1111 ('where' constraints), BRO1141 ('new T { ... }' with an initializer),
+    BRO1601 (overrides/interface implementations), BRO1604 (property summaries), BRO1619 (doc element order (typeparam,
+    param, remarks)).
+  Turned 1 rule off because your code doesn't do what it enforces: BRO1618 (keywords in doc comments: 9 of 9
+    '<c>null</c>').
+  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
+  6 settings had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_private_field_naming,
+    dotnet_style_operator_placement_when_wrapping, stylebro_inheritdoc_style,
+    dotnet_style_parentheses_in_arithmetic_binary_operators, stylebro_keep_overloads_together,
+    dotnet_diagnostic.BRO1509.severity.
+  note     Charset: your .editorconfig says charset = utf-8, but 32 of 57 C# files start with a BOM: nothing enforced it, so charset = unset is written for C# files and 'format' leaves each file's BOM (or its absence) as it is. To have charset = utf-8 everywhere: put that line below the stylebro-migrate block, in a [*.cs] section (a later line wins; the block's own lines come back on the next init) and run 'bro format' (it rewrites the files).
+  note     Final line breaks: your .editorconfig says insert_final_newline = true, and 2 of 57 C# files end without a line break: 'format' adds a last line break to them. To keep that out of the formatting changes, change them in a commit of their own first.
+Settings: 60 lines in .editorconfig; 9 lines in Directory.Build.props (StyleBro.Analyzers); 4 lines in src/Directory.Build.props (StyleBro.Analyzers); 4 lines in test/Directory.Build.props (StyleBro.Analyzers)
+  StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial60.2 to Directory.Build.props, src/Directory.Build.props, test/Directory.Build.props for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).
+Format run 1... 44s
+Format run 2... 5s
+Format: 17 files, 58 reported changes, clean after 1 run
+  BRO1001  Members should be ordered                    5 files
+  IDE0055  Whitespace and formatting                    3 files
+  IMPORTS                                               3 files
+  BRO1303  Private field names should be camelCase      2 files
+  BRO1518  Closing braces should not be preceded...     2 files
+  BRO1603  Documentation text should end with a ...     2 files
+  FINALNEWLINE                                              2 files
+  BRO1002  Single-line comments should begin wit...     1 file
+  BRO1132  Block statements should not contain e...     1 file
+  BRO1507  Files should not end with blank lines        1 file
+  ... and 2 more rules
+Sample (BRO1001, src/ProblemDetails/Mvc/ProblemDetailsApplicationModelProvider.cs):
+  -
+  -        void IApplicationModelProvider.OnProvidersExecuted(ApplicationModelProviderContext context)
+  -        {
+  -            // Not needed.
+  -        }
+Sample (IDE0055, src/RateLimiting/IPNetwork.cs):
+  -                mask[i] = (byte) (0xFF << (8 - remainingBits));
+  +                mask[i] = (byte)(0xFF << (8 - remainingBits));
+Sample (IMPORTS, samples/ProblemDetails.Mvc.Sample/Controllers/MvcController.cs; BRO1518 changed this file too):
+  +using System.ComponentModel.DataAnnotations;
+Full diff: .git/stylebro-preview.patch (631 lines)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 1m 19s.

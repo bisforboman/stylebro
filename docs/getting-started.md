@@ -101,7 +101,8 @@ That includes the [baseline](kept-findings.md#findings-kept-on-purpose) with the
 lists (`Baseline (in the patch): ...`). Files a project compiles from outside the repository (a sibling repository's
 `..\..\other\*.cs`) are copied next to the copy, so its code compiles there as it does in yours. Where such files are
 missing (the other repository isn't checked out), `format` says so (`Missing: ...`) and leaves out IDE0005, which would
-remove the `using` directives the missing code needs.
+remove the `using` directives the missing code needs. The same for a git submodule that isn't checked out
+([vendored code](vendored-code.md)).
 
 ## A. A new project, or no StyleCop
 

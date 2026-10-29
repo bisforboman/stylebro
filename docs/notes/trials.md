@@ -1116,3 +1116,52 @@ engines (`.trials/README.md`, "Engine soak").
   SharpYaml 10.0.103); `-p:NuGetAudit=false` (DelegateDecompiler's EF Core 10 tests); DelegateDecompiler's EF tests need SQL
   Server and its net40/net45 tests mono (net8.0 + the VB project only); `pkill -f` with a pattern from its own command line
   killed the shell again.
+
+## Trial 60 (2026-10-29, not clean: owner "Not clean", tally 0; host soak: clean, the fifth clean soak with the host as the default)
+
+- Repos (three random plus one targeted): apache/logging-log4net, Cysharp/MasterMemory, dotnetcore/EasyCaching (random,
+  seed 60: draws 39, 36, 73 of 95 entries; 0-75, 78, 79 and 83 are used, Vogen/PdfPig (as in trial 59) and Azure/DotNetty
+  (898 files) too large, so they walked to 80, 82, 84; `.trials/trial60/logs/picks.md`), khellang/Middleware (targeted at
+  trial 59's shadowed-props fix: `src/` and `test/` props, neither importing, no root one; added to the pool). Tested main
+  f85bb6c (after #312-#316) plus this PR's commits: round 1 on 0.8.0-trial60.1 (`default`/`dotnet`), round 2 on .2
+  (`default2`/`dotnet2`). Logs: `.trials/trial60/<repo>/logs/`; run.sh's `check-full` deletes format's clean record first
+  (`rmrecord.py`; the record is keyed on the solution's folder, `src/` for log4net).
+- One session, two chains (base, host, `--engine dotnet-format`, `Compare-Format.ps1`), resumable since the worker restarted
+  five times (`queue2.sh` skips finished tags). Wall clock: 06:35 start, round 1 06:59-08:43 (MasterMemory and log4net's
+  old engine cut off by restarts), round 2 09:33-11:31, local checks and verdict until 13:10.
+- EasyCaching: a method's `}`, `#region Mainly For Memcached  `, a doc comment: BRO1505 accepts a blank line above or below
+  the region line but adds it above; BRO1513 adds its own below. Run first, BRO1513's line satisfied BRO1505: the host
+  wrote one blank line, the old engine two, each clean in its own check (the soak's tree difference). BRO1513's fix now
+  adds BRO1505's line too when BRO1505 is on (FixOrderTests case, unit tests); round 2 identical.
+- log4net: BRO1120 removed the first and last empty `//` of the Apache license header (inside `#region Apache License`) in
+  325 of 402 files. Owner's decision: BRO1120 leaves the file header alone, also below a leading `#region` line
+  ([decision](../decisions/2026-10-29-bro1120-leaves-the-file-header-alone.md)); init's trial 11 convention that turned
+  BRO1120 off for such headers is gone. log4net has two solutions (`examples/`, `src/`): format asks for one, as documented.
+- Middleware: with the reference in a new root props as getting-started says, format named both shadowing files (trial 59's
+  fix held; init said nothing, but pinned the preset in all three props once they had the reference). Cloned without its
+  submodule (ProblemDetails compiles `lib/AspNetCore/src/Shared/**/*.cs`), format and check said clean on code that doesn't
+  compile; only `check --build` said Not verified. Owner's decision: format, check and the preview name the submodule and
+  leave out IDE0005 ([decision](../decisions/2026-10-29-format-names-a-git-submodule-that-isnt-checked-out.md)); new fixture
+  shape `submodule-not-checked-out` (fails without the fix). The soak's own clones have no submodule either.
+- MasterMemory: format Not verified (exit 3) on the in-solution generator's Release configuration, check builds it: clean
+  (documented). EasyCaching: a `Build.csproj` at the root in the solution, no props or .editorconfig; 84 files changed only
+  their line endings (33 CRLF, 51 mixed: init's `end_of_line = lf` from 225 of 258); its untouched TWAE build fails
+  (xUnit1048/xUnit2013), passes after.
+- #312: `bro check` after a clean format answered from the record in about a second (MasterMemory 6-14 s: the generator's
+  Release build) with the same verdict and exit code as the full check after deleting the record and as `check --build`, on
+  both engines. The full check adds the load-warning note the fast one can't (it loads nothing).
+- Every TWAE build and test suite matched or beat the untouched code in round 2 (log4net 447 + 52, MasterMemory 28 + 7,
+  EasyCaching 893 of 897 offline with Redis/Memcached/Hybrid left out (a FasterKv test flaky untouched), Middleware 14 + 57 +
+  9 with the untouched TWAE's 7 errors).
+- Host soak: no fallback; round 2 trees, exit codes, verdicts, --json, builds and tests identical on all four. The old
+  engine's check on unformatted code listed duplicate findings from a second instance of a multi-targeted referenced
+  project (log4net 3, at the line before the imports fix; EasyCaching 39 IDE0055 next to the same WHITESPACE): owner's
+  decision, an allowed difference
+  ([decision](../decisions/2026-10-29-the-old-engines-duplicate-findings-from-a-second-project.md)). Format (s, host/
+  dotnet-format, r2): log4net 199/702, EasyCaching 233/449, MasterMemory 83/97, Middleware 55/104; check --build:
+  305/410, 450/474, 129/105, 135/126; full check: 84/149, 148/181, 53/48, 37/36. Soak (Compare-Format, check; format):
+  log4net 176/549; 176/660, EasyCaching 268/536; 238/439, MasterMemory 101/142; 76/101, Middleware 74/122; 44/102.
+- Environment: SDK 10.0.113 + 8.0.132; the trial feed in the user NuGet.Config; Middleware's dead dotnetfeed feeds removed
+  and its submodule cloned with `--depth 1`; `-p:NuGetAudit=false`; MasterMemory's net9.0 tests with `DOTNET_ROLL_FORWARD=Major`;
+  `pkill -f` with a pattern from its own command line killed the shell again; editing a running script with `sed -i` doesn't
+  reach the running bash (it keeps the old file).

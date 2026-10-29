@@ -1,0 +1,31 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Authentication.JwtBearer.Google -> /home/user/w60/MW/default2/src/Authentication.JwtBearer.Google/bin/Debug/netstandard2.0/Hellang.Authentication.JwtBearer.Google.dll
+/home/user/w60/MW/default2/src/Authentication.JwtBearer.Google/JwtBearerOptionsExtensions.cs(47,13): error CS0618: 'JwtBearerOptions.SecurityTokenValidators' is obsolete: 'SecurityTokenValidators is no longer used by default. Use TokenHandlers instead. To continue using SecurityTokenValidators, set UseSecurityTokenValidators to true. See https://aka.ms/aspnetcore8/security-token-changes' [/home/user/w60/MW/default2/src/Authentication.JwtBearer.Google/Authentication.JwtBearer.Google.csproj::TargetFramework=net8.0]
+/home/user/w60/MW/default2/src/Authentication.JwtBearer.Google/JwtBearerOptionsExtensions.cs(48,13): error CS0618: 'JwtBearerOptions.SecurityTokenValidators' is obsolete: 'SecurityTokenValidators is no longer used by default. Use TokenHandlers instead. To continue using SecurityTokenValidators, set UseSecurityTokenValidators to true. See https://aka.ms/aspnetcore8/security-token-changes' [/home/user/w60/MW/default2/src/Authentication.JwtBearer.Google/Authentication.JwtBearer.Google.csproj::TargetFramework=net8.0]
+  RateLimiting -> /home/user/w60/MW/default2/src/RateLimiting/bin/Debug/netstandard2.0/Hellang.Middleware.RateLimiting.dll
+  SpaFallback -> /home/user/w60/MW/default2/src/SpaFallback/bin/Debug/net8.0/Hellang.Middleware.SpaFallback.dll
+  ProblemDetails -> /home/user/w60/MW/default2/src/ProblemDetails/bin/Debug/net8.0/Hellang.Middleware.ProblemDetails.dll
+/home/user/w60/MW/default2/src/RateLimiting/RateLimitingOptionsExtensions.cs(10,47): error CS8602: Dereference of a possibly null reference. [/home/user/w60/MW/default2/src/RateLimiting/RateLimiting.csproj::TargetFramework=net8.0]
+/home/user/w60/MW/default2/src/RateLimiting/RateLimitingOptionsExtensions.cs(15,64): error CS8604: Possible null reference argument for parameter 'address' in 'bool IPNetwork.Contains(IPAddress address)'. [/home/user/w60/MW/default2/src/RateLimiting/RateLimiting.csproj::TargetFramework=net8.0]
+/home/user/w60/MW/default2/src/RateLimiting/RateLimitingOptionsExtensions.cs(25,47): error CS8602: Dereference of a possibly null reference. [/home/user/w60/MW/default2/src/RateLimiting/RateLimiting.csproj::TargetFramework=net8.0]
+/home/user/w60/MW/default2/src/RateLimiting/RateLimitingOptionsExtensions.cs(30,64): error CS8604: Possible null reference argument for parameter 'address' in 'bool IPNetwork.Contains(IPAddress address)'. [/home/user/w60/MW/default2/src/RateLimiting/RateLimiting.csproj::TargetFramework=net8.0]
+  SpaFallback.Tests -> /home/user/w60/MW/default2/test/SpaFallback.Tests/bin/Debug/net8.0/Hellang.Middleware.SpaFallback.Tests.dll
+/home/user/w60/MW/default2/samples/ProblemDetails.Mvc.Sample/Program.cs(62,36): error CS8602: Dereference of a possibly null reference. [/home/user/w60/MW/default2/samples/ProblemDetails.Mvc.Sample/ProblemDetails.Mvc.Sample.csproj]
+  ProblemDetails.MinimalApiSample -> /home/user/w60/MW/default2/samples/ProblemDetails.MinimalApiSample/bin/Debug/net8.0/Hellang.Middleware.ProblemDetails.MinimalApiSample.dll
+  SpaFallback.Sample -> /home/user/w60/MW/default2/samples/SpaFallback.Sample/bin/Debug/net8.0/SpaFallback.Sample.dll
+  ProblemDetails.Tests -> /home/user/w60/MW/default2/test/ProblemDetails.Tests/bin/Debug/net8.0/Hellang.Middleware.ProblemDetails.Tests.dll
+
+Build FAILED.
+
+/home/user/w60/MW/default2/src/Authentication.JwtBearer.Google/JwtBearerOptionsExtensions.cs(47,13): error CS0618: 'JwtBearerOptions.SecurityTokenValidators' is obsolete: 'SecurityTokenValidators is no longer used by default. Use TokenHandlers instead. To continue using SecurityTokenValidators, set UseSecurityTokenValidators to true. See https://aka.ms/aspnetcore8/security-token-changes' [/home/user/w60/MW/default2/src/Authentication.JwtBearer.Google/Authentication.JwtBearer.Google.csproj::TargetFramework=net8.0]
+/home/user/w60/MW/default2/src/Authentication.JwtBearer.Google/JwtBearerOptionsExtensions.cs(48,13): error CS0618: 'JwtBearerOptions.SecurityTokenValidators' is obsolete: 'SecurityTokenValidators is no longer used by default. Use TokenHandlers instead. To continue using SecurityTokenValidators, set UseSecurityTokenValidators to true. See https://aka.ms/aspnetcore8/security-token-changes' [/home/user/w60/MW/default2/src/Authentication.JwtBearer.Google/Authentication.JwtBearer.Google.csproj::TargetFramework=net8.0]
+/home/user/w60/MW/default2/src/RateLimiting/RateLimitingOptionsExtensions.cs(10,47): error CS8602: Dereference of a possibly null reference. [/home/user/w60/MW/default2/src/RateLimiting/RateLimiting.csproj::TargetFramework=net8.0]
+/home/user/w60/MW/default2/src/RateLimiting/RateLimitingOptionsExtensions.cs(15,64): error CS8604: Possible null reference argument for parameter 'address' in 'bool IPNetwork.Contains(IPAddress address)'. [/home/user/w60/MW/default2/src/RateLimiting/RateLimiting.csproj::TargetFramework=net8.0]
+/home/user/w60/MW/default2/src/RateLimiting/RateLimitingOptionsExtensions.cs(25,47): error CS8602: Dereference of a possibly null reference. [/home/user/w60/MW/default2/src/RateLimiting/RateLimiting.csproj::TargetFramework=net8.0]
+/home/user/w60/MW/default2/src/RateLimiting/RateLimitingOptionsExtensions.cs(30,64): error CS8604: Possible null reference argument for parameter 'address' in 'bool IPNetwork.Contains(IPAddress address)'. [/home/user/w60/MW/default2/src/RateLimiting/RateLimiting.csproj::TargetFramework=net8.0]
+/home/user/w60/MW/default2/samples/ProblemDetails.Mvc.Sample/Program.cs(62,36): error CS8602: Dereference of a possibly null reference. [/home/user/w60/MW/default2/samples/ProblemDetails.Mvc.Sample/ProblemDetails.Mvc.Sample.csproj]
+    0 Warning(s)
+    7 Error(s)
+
+Time Elapsed 00:00:09.44

@@ -1,0 +1,6 @@
+build	0	13s	dotnet build Hellang.Middleware.sln -c Debug
+twae-Debug	1	7s	twae Debug
+test-Debug	0	22s	env CFG=Debug bash -c dotnet test Hellang.Middleware.sln -c $CFG
+twae-Release	1	9s	twae Release
+test-Release	0	21s	env CFG=Release bash -c dotnet test Hellang.Middleware.sln -c $CFG
+DONE

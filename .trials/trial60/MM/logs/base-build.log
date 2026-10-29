@@ -1,0 +1,30 @@
+  Determining projects to restore...
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/w60/MM/base/sandbox/Benchmark/Benchmark.csproj]
+  Restored /home/user/w60/MM/base/sandbox/GeneratorSandbox/GeneratorSandbox.csproj (in 413 ms).
+  Restored /home/user/w60/MM/base/tests/MasterMemory.Tests/MasterMemory.Tests.csproj (in 413 ms).
+  Restored /home/user/w60/MM/base/src/MasterMemory.Annotations/MasterMemory.Annotations.csproj (in 412 ms).
+  Restored /home/user/w60/MM/base/src/MasterMemory.SourceGenerator/MasterMemory.SourceGenerator.csproj (in 411 ms).
+  Restored /home/user/w60/MM/base/sandbox/ConsoleApp/ConsoleApp.csproj (in 3 ms).
+  Restored /home/user/w60/MM/base/src/MasterMemory/MasterMemory.csproj (in 21 ms).
+  Restored /home/user/w60/MM/base/tests/MasterMemory.SourceGenerator.Tests/MasterMemory.SourceGenerator.Tests.csproj (in 55 ms).
+  Restored /home/user/w60/MM/base/sandbox/PerfTest2/PerfTest2.csproj (in 68 ms).
+  Restored /home/user/w60/MM/base/sandbox/Benchmark/Benchmark.csproj (in 248 ms).
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/w60/MM/base/sandbox/Benchmark/Benchmark.csproj]
+  MasterMemory.Annotations -> /home/user/w60/MM/base/src/MasterMemory.Annotations/bin/Debug/netstandard2.0/MasterMemory.Annotations.dll
+  MasterMemory.SourceGenerator -> /home/user/w60/MM/base/src/MasterMemory.SourceGenerator/bin/Debug/netstandard2.0/MasterMemory.SourceGenerator.dll
+  MasterMemory -> /home/user/w60/MM/base/src/MasterMemory/bin/Debug/netstandard2.0/MasterMemory.dll
+  MasterMemory.SourceGenerator.Tests -> /home/user/w60/MM/base/tests/MasterMemory.SourceGenerator.Tests/bin/Debug/net9.0/MasterMemory.SourceGenerator.Tests.dll
+  PerfTest2 -> /home/user/w60/MM/base/sandbox/PerfTest2/bin/Debug/net9.0/PerfTest2.dll
+  ConsoleApp -> /home/user/w60/MM/base/sandbox/ConsoleApp/bin/Debug/net9.0/ConsoleApp.dll
+  GeneratorSandbox -> /home/user/w60/MM/base/sandbox/GeneratorSandbox/bin/Debug/net9.0/GeneratorSandbox.dll
+  MasterMemory.Tests -> /home/user/w60/MM/base/tests/MasterMemory.Tests/bin/Debug/net9.0/MasterMemory.Tests.dll
+  Benchmark -> /home/user/w60/MM/base/sandbox/Benchmark/bin/Debug/net6.0/Benchmark.dll
+
+Build succeeded.
+
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/w60/MM/base/sandbox/Benchmark/Benchmark.csproj]
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/w60/MM/base/sandbox/Benchmark/Benchmark.csproj]
+    2 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:09.23

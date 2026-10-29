@@ -1,0 +1,12 @@
+base start 08:06
+base done 08:08
+default start 08:08
+MM restarted after the worker restart 08:43
+default2 start 11:05
+default2 done 11:14
+dotnet2 start 11:14
+dotnet2 done 11:24
+CHAIN-DONE
+soak start 11:24
+soak done rc=0 11:31
+soak2 done 11:31

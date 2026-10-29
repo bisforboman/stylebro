@@ -193,10 +193,6 @@ A few settings work a little differently:
   when an enclosing namespace has a namespace or type your code declares with its first part (`using H = Helper;` next
   to a class `App.Helper`), or, inside a `System` or `Microsoft` namespace, one of the runtime's (`using Text;` inside
   `namespace System.IO.Abstractions`); a namespace from a package doesn't count.
-- **File headers with empty `//` lines**: when your `file_header_template` starts or ends with a line break (IDE0073
-  writes an empty `//` line there), or most files' headers start or end with an empty `//` line, `init` turns
-  [BRO1120](rules/BRO1120.md) off: it would remove those lines, and every new file from the template would bring them
-  back (Ical.Net: 222 of 223 files).
 - **Charset** and **final line breaks**: when your `.editorconfig` sets `charset` (`utf-8` or `utf-8-bom`) or
   `insert_final_newline` but the C# files don't clearly follow it (BOM or not, last line break or not, the same 75 %),
   nothing ever enforced it, and `format` would add or strip the BOM or the last line break in every file. Like a line
@@ -335,7 +331,6 @@ A few settings work a little differently:
 | Type names | files with only keywords (`int`) or framework names (`Int32`) | IDE0049 | `dotnet_diagnostic.IDE0049.severity` |
 | Private constants and static readonly fields | `PascalCase`, `camelCase` or `_camelCase` | [BRO1306](rules/BRO1306.md) | `stylebro_private_static_field_naming` |
 | Usings inside a namespace | fully qualified or relative to an enclosing namespace | [BRO1126](rules/BRO1126.md) | `dotnet_diagnostic.BRO1126.severity` |
-| File headers | headers with or without an empty `//` line at the top or bottom (or a `file_header_template` with one) | [BRO1120](rules/BRO1120.md) | `dotnet_diagnostic.BRO1120.severity` |
 | One-line jumps | `if (x) return;` on the `if` line, or a lone jump in braces | [BRO1514](rules/BRO1514.md) | `stylebro_allow_single_line_jump_statements` |
 | Empty blocks | `{ }` on one line or on two (mixed: both allowed; on one line also writes `csharp_preserve_single_line_statements = true`, else IDE0055 splits `else { }`) | [BRO1508](rules/BRO1508.md), [BRO1509](rules/BRO1509.md) | `stylebro_allow_empty_single_line_blocks` |
 | One-line properties and methods | properties with a block-bodied accessor on one line (`X { get { return x; } }`) or on several; method bodies with one statement that fits a line (`int Next() { return ++count; }`), counted apart: the one that keeps one-line bodies decides | [BRO1509](rules/BRO1509.md) | `dotnet_diagnostic.BRO1509.severity` |

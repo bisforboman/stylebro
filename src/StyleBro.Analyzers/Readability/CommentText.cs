@@ -66,10 +66,9 @@ internal static class CommentText
     /// BRO1120: the empty comments StyleCop reports, each with the comments the fix removes. Comments on consecutive
     /// lines form a group, and like StyleCop an empty comment is only reported at the start or end of a group (empty
     /// lines in the middle separate paragraphs). The fix removes all empty comments at that end of the group, so one
-    /// pass is enough. <paramref name="skipHeader"/>: the group of comments the file starts with isn't checked (the SDK's
-    /// file_header_template is set, and IDE0073 writes that header, empty '//' lines included).
+    /// pass is enough. The group of comments the file starts with, the file header, isn't checked (<see cref="IsFileHeader"/>).
     /// </summary>
-    public static IEnumerable<(SyntaxTrivia Reported, IReadOnlyList<SyntaxTrivia> Removed)> GetEmptyComments(IEnumerable<SyntaxTrivia> trivia, SourceText text, bool skipHeader = false)
+    public static IEnumerable<(SyntaxTrivia Reported, IReadOnlyList<SyntaxTrivia> Removed)> GetEmptyComments(IEnumerable<SyntaxTrivia> trivia, SourceText text)
     {
         var comments = trivia
             .Where(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia) || t.IsKind(SyntaxKind.MultiLineCommentTrivia))
@@ -82,7 +81,7 @@ internal static class CommentText
             var afterCode = text.ToString(TextSpan.FromBounds(line.Start, comment.SpanStart)).Trim().Length > 0;
             if (group.Count > 0 && (afterCode || line.LineNumber != Line(text, group[group.Count - 1].Span.End) + 1))
             {
-                foreach (var finding in GetGroupFindings(group, skipHeader, text))
+                foreach (var finding in GetGroupFindings(group, text))
                 {
                     yield return finding;
                 }
@@ -93,15 +92,35 @@ internal static class CommentText
             group.Add(comment);
         }
 
-        foreach (var finding in GetGroupFindings(group, skipHeader, text))
+        foreach (var finding in GetGroupFindings(group, text))
         {
             yield return finding;
         }
     }
 
-    /// <summary>Whether the SDK's file_header_template is set (IDE0073 then owns the file header, BRO1120 leaves it alone).</summary>
-    public static bool HasHeaderTemplate(AnalyzerConfigOptions options) =>
-        options.TryGetValue("file_header_template", out var value) && value.Trim().Length > 0 && value.Trim() != "unset";
+    /// <summary>
+    /// Whether a comment group starting at <paramref name="start"/> is the file header: only blank lines and '#region' lines
+    /// above it. Its empty '//' lines are the header's own (owner's decision 2026-10-29, trial 60: log4net's Apache license
+    /// header, inside '#region Apache License', lost its first and last '//' in 325 files; IDE0073 writes them from a
+    /// file_header_template starting with a line break, Ical.Net).
+    /// </summary>
+    public static bool IsFileHeader(int start, SourceText text)
+    {
+        // Line by line from the top: the first line that isn't blank or '#region' decides (a later group stops at the header).
+        var last = text.Lines.GetLineFromPosition(start).LineNumber;
+        for (var i = 0; i <= last; i++)
+        {
+            var line = text.Lines[i];
+            var end = i == last ? start : line.End;
+            var content = text.ToString(TextSpan.FromBounds(line.Start, end)).Trim();
+            if (content.Length > 0 && !content.StartsWith("#region", System.StringComparison.Ordinal))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     /// <summary>
     /// The edits that remove a run of empty comments on consecutive lines (<see cref="GetEmptyComments"/>). When whole
@@ -161,9 +180,9 @@ internal static class CommentText
         return new TextChange(TextSpan.FromBounds(start, comment.Span.End), string.Empty);
     }
 
-    private static IEnumerable<(SyntaxTrivia, IReadOnlyList<SyntaxTrivia>)> GetGroupFindings(List<SyntaxTrivia> group, bool skipHeader, SourceText text)
+    private static IEnumerable<(SyntaxTrivia, IReadOnlyList<SyntaxTrivia>)> GetGroupFindings(List<SyntaxTrivia> group, SourceText text)
     {
-        if (group.Count == 0 || (skipHeader && text.ToString(TextSpan.FromBounds(0, group[0].SpanStart)).Trim().Length == 0)
+        if (group.Count == 0 || IsFileHeader(group[0].SpanStart, text)
             || MarksEmptyBraces(group))
         {
             yield break;

@@ -1,0 +1,31 @@
+  Determining projects to restore...
+  Restored /home/user/cand60/apache-logging-log4net/src/integration-testing/log4net-672/log4net-672.csproj (in 1.66 sec).
+  Restored /home/user/cand60/apache-logging-log4net/src/integration-testing/log4net-681/log4net-681.csproj (in 1.66 sec).
+  Restored /home/user/cand60/apache-logging-log4net/src/log4net.Tests/log4net.Tests.csproj (in 1.75 sec).
+  Restored /home/user/cand60/apache-logging-log4net/src/log4net.Tests.Aot/log4net.Tests.Aot.csproj (in 2.46 sec).
+  Restored /home/user/cand60/apache-logging-log4net/src/log4net.Ext.Mail.Tests/log4net.Ext.Mail.Tests.csproj (in 2.38 sec).
+  Restored /home/user/cand60/apache-logging-log4net/src/integration-testing/log4net-673/log4net-673.csproj (in 73 ms).
+  Restored /home/user/cand60/apache-logging-log4net/src/log4net.Ext.Mail/log4net.Ext.Mail.csproj (in 2.52 sec).
+  Restored /home/user/cand60/apache-logging-log4net/src/integration-testing/log4net-611-lib/log4net-611-lib.csproj (in 12 ms).
+  Restored /home/user/cand60/apache-logging-log4net/src/integration-testing/log4net-611-main/log4net-611-main.csproj (in 630 ms).
+  Restored /home/user/cand60/apache-logging-log4net/src/log4net/log4net.csproj (in 3.09 sec).
+  Restored /home/user/cand60/apache-logging-log4net/src/integration-testing/log4net2-SerializeEvent/log4net2-SerializeEvent.csproj (in 2.87 sec).
+  log4net-611-lib -> /home/user/cand60/apache-logging-log4net/src/integration-testing/log4net-611-lib/bin/Debug/netstandard2.0/log4net-611-lib.dll
+  log4net-673 -> /home/user/cand60/apache-logging-log4net/src/integration-testing/log4net-673/bin/Debug/net10.0/log4net-673.dll
+  log4net-611-main -> /home/user/cand60/apache-logging-log4net/src/integration-testing/log4net-611-main/bin/Debug/net462/log4net-611-main.exe
+  log4net-611-main -> /home/user/cand60/apache-logging-log4net/src/integration-testing/log4net-611-main/bin/Debug/net10.0/log4net-611-main.dll
+  log4net2-SerializeEvent -> /home/user/cand60/apache-logging-log4net/src/integration-testing/log4net2-SerializeEvent/bin/Debug/net472/log4net2-SerializeEvent.exe
+  log4net -> /home/user/cand60/apache-logging-log4net/build/Debug/net462/log4net.dll
+  log4net -> /home/user/cand60/apache-logging-log4net/build/Debug/netstandard2.0/log4net.dll
+  log4net.Tests -> /home/user/cand60/apache-logging-log4net/src/log4net.Tests/bin/Debug/net10.0/log4net.Tests.dll
+  log4net.Tests.Aot -> /home/user/cand60/apache-logging-log4net/src/log4net.Tests.Aot/bin/Debug/net10.0/log4net.Tests.Aot.dll
+  log4net.Ext.Mail -> /home/user/cand60/apache-logging-log4net/build/Debug/netstandard2.0/log4net.Ext.Mail.dll
+  log4net-681 -> /home/user/cand60/apache-logging-log4net/src/integration-testing/log4net-681/bin/Debug/net10.0/log4net-681.dll
+  log4net-672 -> /home/user/cand60/apache-logging-log4net/src/integration-testing/log4net-672/bin/Debug/net10.0/log4net-672.dll
+  log4net.Ext.Mail.Tests -> /home/user/cand60/apache-logging-log4net/src/log4net.Ext.Mail.Tests/bin/Debug/net10.0/log4net.Ext.Mail.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:28.32

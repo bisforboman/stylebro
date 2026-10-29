@@ -1,0 +1,23 @@
+{
+  "repo": "khellang/Middleware",
+  "branch": "master",
+  "commit": "f31305e1dcfe865501a3daa3d07d037063ddcb7c",
+  "csFiles": 57,
+  "tags": [
+    "library",
+    "multi-target",
+    "submodule",
+    "nested-props"
+  ],
+  "setups": "Hellang.Middleware.sln at the root; src/Directory.Build.props and test/Directory.Build.props, neither importing a parent, none at the root; ProblemDetails compiles '../../lib/AspNetCore/src/Shared/**/*.cs' from the lib/AspNetCore submodule (dotnet/aspnetcore at 718171e); net8.0 + netstandard2.0, strong naming (signing.snk), .editorconfig (charset utf-8, 32 of 57 files with a BOM), xunit 2.",
+  "build": "ok with workaround",
+  "workaround": "NuGet.config <clear/>s and lists two dead dotnetfeed.blob.core.windows.net feeds: remove them (NU1301). 'git submodule update --init --depth 1' (11 s, 195 MB).",
+  "tests": "dotnet test Hellang.Middleware.sln: 14 + 57 + 9 pass. The untouched TWAE build fails (7 errors: CS8602/CS8604 in RateLimiting, CS0618 in the Google JwtBearer project, CS8602 in a sample), so RateLimiting.Tests doesn't compile under TWAE.",
+  "usedIn": "trial 60",
+  "verified": {
+    "by": "trial 60 session",
+    "date": "2026-10-29",
+    "sdks": "10.0.113, 8.0.132"
+  },
+  "notes": "Nested props without a root one: getting-started's root Directory.Build.props is shadowed for src/ and test/ (format names both files). Without the submodule checked out ProblemDetails doesn't compile: format now names it (trial 60)."
+}

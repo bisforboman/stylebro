@@ -1,0 +1,13 @@
+preview	0	126s	bro preview init --engine dotnet-format
+setup	0	13s	bash -c printf "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"StyleBro.Analyzers\" Version=\"${V:-0.8.0-trial60.1}\" PrivateAssets=\"all\" />\n  </ItemGroup>\n</Project>\n" > Directory.Build.props && git add -N Directory.Build.props && for p in src test; do python3 /home/user/stylebro/.trials/trial60/addref.py $p/Directory.Build.props "<PackageReference Include=\"StyleBro.Analyzers\" Version=\"${V:-0.8.0-trial60.1}\" PrivateAssets=\"all\" />"; done && git diff --stat && bro init --write
+format	0	104s	bro format --engine dotnet-format
+check	0	1s	bro check --engine dotnet-format
+check-json	0
+check-full	0	36s	bro check --engine dotnet-format
+checkbuild	3	126s	bro check --build --engine dotnet-format
+checkbuild-json	3
+twae-Debug	1	8s	twae Debug
+test-Debug	0	24s	env CFG=Debug bash -c dotnet test Hellang.Middleware.sln -c $CFG
+twae-Release	1	9s	twae Release
+test-Release	0	28s	env CFG=Release bash -c dotnet test Hellang.Middleware.sln -c $CFG
+DONE

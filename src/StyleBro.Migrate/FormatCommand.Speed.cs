@@ -333,6 +333,13 @@ internal static partial class FormatCommand
         }
 
         log($"{FromRecordHeader} (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.");
+
+        // What format said about submodules that aren't checked out, said again: it reads only .gitmodules (trial 60).
+        if (UncheckedOutSubmodules(RepositoryRoot(root) ?? root) is { Count: > 0 } submodules)
+        {
+            log(MissingSubmoduleLine(submodules));
+        }
+
         if (record.Builds.Count > 0)
         {
             if (record.GeneratorLine is { } generatorLine)

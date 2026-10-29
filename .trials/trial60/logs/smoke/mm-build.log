@@ -1,0 +1,30 @@
+  Determining projects to restore...
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/cand60/Cysharp-MasterMemory/sandbox/Benchmark/Benchmark.csproj]
+  Restored /home/user/cand60/Cysharp-MasterMemory/src/MasterMemory.Annotations/MasterMemory.Annotations.csproj (in 534 ms).
+  Restored /home/user/cand60/Cysharp-MasterMemory/src/MasterMemory/MasterMemory.csproj (in 5.19 sec).
+  Restored /home/user/cand60/Cysharp-MasterMemory/sandbox/GeneratorSandbox/GeneratorSandbox.csproj (in 5.29 sec).
+  Restored /home/user/cand60/Cysharp-MasterMemory/tests/MasterMemory.Tests/MasterMemory.Tests.csproj (in 5.32 sec).
+  Restored /home/user/cand60/Cysharp-MasterMemory/sandbox/ConsoleApp/ConsoleApp.csproj (in 5 ms).
+  Restored /home/user/cand60/Cysharp-MasterMemory/src/MasterMemory.SourceGenerator/MasterMemory.SourceGenerator.csproj (in 197 ms).
+  Restored /home/user/cand60/Cysharp-MasterMemory/tests/MasterMemory.SourceGenerator.Tests/MasterMemory.SourceGenerator.Tests.csproj (in 5.07 sec).
+  Restored /home/user/cand60/Cysharp-MasterMemory/sandbox/PerfTest2/PerfTest2.csproj (in 3.4 sec).
+  Restored /home/user/cand60/Cysharp-MasterMemory/sandbox/Benchmark/Benchmark.csproj (in 5.58 sec).
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/cand60/Cysharp-MasterMemory/sandbox/Benchmark/Benchmark.csproj]
+  MasterMemory.Annotations -> /home/user/cand60/Cysharp-MasterMemory/src/MasterMemory.Annotations/bin/Debug/netstandard2.0/MasterMemory.Annotations.dll
+  MasterMemory.SourceGenerator -> /home/user/cand60/Cysharp-MasterMemory/src/MasterMemory.SourceGenerator/bin/Debug/netstandard2.0/MasterMemory.SourceGenerator.dll
+  MasterMemory -> /home/user/cand60/Cysharp-MasterMemory/src/MasterMemory/bin/Debug/netstandard2.0/MasterMemory.dll
+  MasterMemory.SourceGenerator.Tests -> /home/user/cand60/Cysharp-MasterMemory/tests/MasterMemory.SourceGenerator.Tests/bin/Debug/net9.0/MasterMemory.SourceGenerator.Tests.dll
+  GeneratorSandbox -> /home/user/cand60/Cysharp-MasterMemory/sandbox/GeneratorSandbox/bin/Debug/net9.0/GeneratorSandbox.dll
+  MasterMemory.Tests -> /home/user/cand60/Cysharp-MasterMemory/tests/MasterMemory.Tests/bin/Debug/net9.0/MasterMemory.Tests.dll
+  ConsoleApp -> /home/user/cand60/Cysharp-MasterMemory/sandbox/ConsoleApp/bin/Debug/net9.0/ConsoleApp.dll
+  PerfTest2 -> /home/user/cand60/Cysharp-MasterMemory/sandbox/PerfTest2/bin/Debug/net9.0/PerfTest2.dll
+  Benchmark -> /home/user/cand60/Cysharp-MasterMemory/sandbox/Benchmark/bin/Debug/net6.0/Benchmark.dll
+
+Build succeeded.
+
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/cand60/Cysharp-MasterMemory/sandbox/Benchmark/Benchmark.csproj]
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/cand60/Cysharp-MasterMemory/sandbox/Benchmark/Benchmark.csproj]
+    2 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:19.03

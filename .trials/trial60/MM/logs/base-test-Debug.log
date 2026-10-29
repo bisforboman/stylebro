@@ -1,0 +1,30 @@
+  Determining projects to restore...
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/w60/MM/base/sandbox/Benchmark/Benchmark.csproj]
+  Restored /home/user/w60/MM/base/sandbox/ConsoleApp/ConsoleApp.csproj (in 1.1 sec).
+  Restored /home/user/w60/MM/base/sandbox/GeneratorSandbox/GeneratorSandbox.csproj (in 1.12 sec).
+  Restored /home/user/w60/MM/base/sandbox/PerfTest2/PerfTest2.csproj (in 1.13 sec).
+  Restored /home/user/w60/MM/base/tests/MasterMemory.Tests/MasterMemory.Tests.csproj (in 63 ms).
+  Restored /home/user/w60/MM/base/sandbox/Benchmark/Benchmark.csproj (in 1.28 sec).
+  Restored /home/user/w60/MM/base/src/MasterMemory.SourceGenerator/MasterMemory.SourceGenerator.csproj (in 106 ms).
+  Restored /home/user/w60/MM/base/src/MasterMemory.Annotations/MasterMemory.Annotations.csproj (in 4 ms).
+  Restored /home/user/w60/MM/base/src/MasterMemory/MasterMemory.csproj (in 132 ms).
+  Restored /home/user/w60/MM/base/tests/MasterMemory.SourceGenerator.Tests/MasterMemory.SourceGenerator.Tests.csproj (in 141 ms).
+  MasterMemory.Annotations -> /home/user/w60/MM/base/src/MasterMemory.Annotations/bin/Debug/netstandard2.0/MasterMemory.Annotations.dll
+  MasterMemory.SourceGenerator -> /home/user/w60/MM/base/src/MasterMemory.SourceGenerator/bin/Debug/netstandard2.0/MasterMemory.SourceGenerator.dll
+  MasterMemory -> /home/user/w60/MM/base/src/MasterMemory/bin/Debug/netstandard2.0/MasterMemory.dll
+  MasterMemory.SourceGenerator.Tests -> /home/user/w60/MM/base/tests/MasterMemory.SourceGenerator.Tests/bin/Debug/net9.0/MasterMemory.SourceGenerator.Tests.dll
+  MasterMemory.Tests -> /home/user/w60/MM/base/tests/MasterMemory.Tests/bin/Debug/net9.0/MasterMemory.Tests.dll
+Test run for /home/user/w60/MM/base/tests/MasterMemory.SourceGenerator.Tests/bin/Debug/net9.0/MasterMemory.SourceGenerator.Tests.dll (.NETCoreApp,Version=v9.0)
+Test run for /home/user/w60/MM/base/tests/MasterMemory.Tests/bin/Debug/net9.0/MasterMemory.Tests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    28, Skipped:     0, Total:    28, Duration: 806 ms - MasterMemory.Tests.dll (net9.0)
+
+Passed!  - Failed:     0, Passed:     7, Skipped:     0, Total:     7, Duration: 3 s - MasterMemory.SourceGenerator.Tests.dll (net9.0)

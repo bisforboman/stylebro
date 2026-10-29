@@ -1,0 +1,121 @@
+== Packing 0.0.0-fixture.20261029093013 into /home/user/fx60/main/feed
+You can invoke the tool using the following command: bro
+Tool 'stylebro.tool' (version '0.0.0-fixture.20261029093013') was successfully installed.
+== submodule-not-checked-out : a project compiles files from a git submodule that isn't checked out
+fatal: not a git repository (or any of the parent directories): .git
+  preview                      exit 0 (23 s)
+  init                         exit 0 (2 s)
+  host-format                  exit 0 (17 s)
+  host-check                   exit 0 (11 s)
+  host-check-build             exit 0 (25 s)
+  dotnet-format-format         exit 0 (26 s)
+  dotnet-format-check          exit 0 (13 s)
+  dotnet-format-check-build    exit 0 (24 s)
+  FAIL submodule-not-checked-out (149 s)
+    - host format didn't name the submodule:
+Fixing StyleBro's rules and the built-in rules init and migrate turn on (141 ids); --all applies every analyzer's and compiler fix.
+Run 1: 1 file changed:
+  src/Lib/Calc.cs
+Run 2: 0 files changed, clean.
+
+    - host check didn't name the submodule:
+Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Clean.
+
+    - dotnet-format format didn't name the submodule:
+Fixing StyleBro's rules and the built-in rules init and migrate turn on (141 ids); --all applies every analyzer's and compiler fix.
+Run 1: 1 file changed:
+  src/Lib/Calc.cs
+Run 2: 0 files changed, clean.
+
+    - dotnet-format check didn't name the submodule:
+Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Clean.
+
+    --- build.txt (last 12 lines)
+        Determining projects to restore...
+        Restored /home/user/fx60/main/submodule-not-checked-out/host/src/Lib/Lib.csproj (in 576 ms).
+      /home/user/fx60/main/submodule-not-checked-out/host/src/Lib/Names.cs(5,36): error CS0103: The name 'Shared' does not exist in the current context [/home/user/fx60/main/submodule-not-checked-out/host/src/Lib/Lib.csproj]
+      
+      Build FAILED.
+      
+      /home/user/fx60/main/submodule-not-checked-out/host/src/Lib/Names.cs(5,36): error CS0103: The name 'Shared' does not exist in the current context [/home/user/fx60/main/submodule-not-checked-out/host/src/Lib/Lib.csproj]
+          0 Warning(s)
+          1 Error(s)
+      
+      Time Elapsed 00:00:02.87
+    --- dotnet-format-check-build.txt (last 12 lines)
+      Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+      Building Fixture.slnx in Debug, Release with warnings as errors, and a copy of HEAD to compare...
+      Debug: no findings, no new errors (1 error the untouched code has too, not counted).
+      Release: no findings, no new errors (1 error the untouched code has too, not counted).
+      Clean.
+    --- dotnet-format-check.txt (last 12 lines)
+      Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+      Clean.
+    --- dotnet-format-format.txt (last 12 lines)
+      Fixing StyleBro's rules and the built-in rules init and migrate turn on (141 ids); --all applies every analyzer's and compiler fix.
+      Run 1: 1 file changed:
+        src/Lib/Calc.cs
+      Run 2: 0 files changed, clean.
+    --- host-check-build.txt (last 12 lines)
+      Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+      Building Fixture.slnx in Debug, Release with warnings as errors, and a copy of HEAD to compare...
+      Debug: no findings, no new errors (1 error the untouched code has too, not counted).
+      Release: no findings, no new errors (1 error the untouched code has too, not counted).
+      Clean.
+    --- host-check.txt (last 12 lines)
+      Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+      Clean.
+    --- host-format.txt (last 12 lines)
+      Fixing StyleBro's rules and the built-in rules init and migrate turn on (141 ids); --all applies every analyzer's and compiler fix.
+      Run 1: 1 file changed:
+        src/Lib/Calc.cs
+      Run 2: 0 files changed, clean.
+    --- init.txt (last 12 lines)
+        too few  spacing, declared parameters: 1 of 1 'void F(int x)' -> default stays
+      Summary:
+        8 settings had fewer than 3 places to tell, StyleBro's defaults stay: csharp_new_line_before_open_brace,
+          stylebro_empty_string_style, dotnet_diagnostic.BRO1001.severity, dotnet_diagnostic.IDE0049.severity, end_of_line,
+          dotnet_diagnostic.BRO1505.severity, dotnet_diagnostic.BRO1306.severity,
+          csharp_space_between_method_declaration_parameter_list_parentheses.
+      
+      Wrote the built-in rule severities to .editorconfig.
+      Set the preset version in Directory.Build.props (<StyleBroPreset>1.0</StyleBroPreset>): rules of newer releases stay off until you raise it.
+      To report them on build too: <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> in Directory.Build.props.
+      Tip: --agents-md writes a StyleBro section into AGENTS.md for AI coding agents.
+      Next: run 'bro format'. Plain 'dotnet format' also applies every other analyzer's and the compiler's fixes.
+    --- preview.txt (last 12 lines)
+        IDE0036  Modifier order                               1 file
+      Sample (BRO1001, BRO1106, src/Lib/Calc.cs; BRO1509, IDE0036 changed this file too):
+        -    public string Name = "";
+        +    public static int Twice(int x)
+        +    {
+        +        return x * 2;
+        +    }
+      Sample (BRO1509, src/Lib/Calc.cs; BRO1001, BRO1106, IDE0036 changed this file too):
+        -    static public int Twice(int x) { return x * 2; }
+        +    public string Name = string.Empty;
+      Full diff: .git/stylebro-preview.patch (73 lines)
+      Done in 22s.
+| Shape | Result | Time |
+| --- | --- | --- |
+| submodule-not-checked-out | FAIL: host format didn't name the submodule:
+Fixing StyleBro's rules and the built-in rules init and migrate turn on (141 ids); --all applies every analyzer's and compiler fix.
+Run 1: 1 file changed:
+  src/Lib/Calc.cs
+Run 2: 0 files changed, clean.
+<br>host check didn't name the submodule:
+Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Clean.
+<br>dotnet-format format didn't name the submodule:
+Fixing StyleBro's rules and the built-in rules init and migrate turn on (141 ids); --all applies every analyzer's and compiler fix.
+Run 1: 1 file changed:
+  src/Lib/Calc.cs
+Run 2: 0 files changed, clean.
+<br>dotnet-format check didn't name the submodule:
+Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Clean.
+ | 149 s |
+Work folder: /home/user/fx60/main
+rc=1

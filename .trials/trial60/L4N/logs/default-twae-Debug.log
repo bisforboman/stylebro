@@ -1,0 +1,21 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  log4net2-SerializeEvent -> /home/user/w60/L4N/default/src/integration-testing/log4net2-SerializeEvent/bin/Debug/net472/log4net2-SerializeEvent.exe
+  log4net-611-lib -> /home/user/w60/L4N/default/src/integration-testing/log4net-611-lib/bin/Debug/netstandard2.0/log4net-611-lib.dll
+  log4net-673 -> /home/user/w60/L4N/default/src/integration-testing/log4net-673/bin/Debug/net10.0/log4net-673.dll
+  log4net-611-main -> /home/user/w60/L4N/default/src/integration-testing/log4net-611-main/bin/Debug/net10.0/log4net-611-main.dll
+  log4net-611-main -> /home/user/w60/L4N/default/src/integration-testing/log4net-611-main/bin/Debug/net462/log4net-611-main.exe
+  log4net -> /home/user/w60/L4N/default/build/Debug/net462/log4net.dll
+  log4net -> /home/user/w60/L4N/default/build/Debug/netstandard2.0/log4net.dll
+  log4net-672 -> /home/user/w60/L4N/default/src/integration-testing/log4net-672/bin/Debug/net10.0/log4net-672.dll
+  log4net.Tests.Aot -> /home/user/w60/L4N/default/src/log4net.Tests.Aot/bin/Debug/net10.0/log4net.Tests.Aot.dll
+  log4net-681 -> /home/user/w60/L4N/default/src/integration-testing/log4net-681/bin/Debug/net10.0/log4net-681.dll
+  log4net.Ext.Mail -> /home/user/w60/L4N/default/build/Debug/netstandard2.0/log4net.Ext.Mail.dll
+  log4net.Ext.Mail.Tests -> /home/user/w60/L4N/default/src/log4net.Ext.Mail.Tests/bin/Debug/net10.0/log4net.Ext.Mail.Tests.dll
+  log4net.Tests -> /home/user/w60/L4N/default/src/log4net.Tests/bin/Debug/net10.0/log4net.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:41.21

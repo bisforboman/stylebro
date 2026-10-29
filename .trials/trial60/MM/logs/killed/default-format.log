@@ -1,0 +1,3 @@
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+Generators: building MasterMemory.SourceGenerator first (in the default configuration, the one 'dotnet format' loads): the code uses it as a source generator, and without its output the generated code would be missing from the checks.
+'dotnet format' had warnings loading the workspace; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.

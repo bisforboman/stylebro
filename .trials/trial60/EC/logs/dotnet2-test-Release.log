@@ -1,0 +1,61 @@
+  Determining projects to restore...
+  Restored /home/user/w60/EC/dotnet2/src/EasyCaching.SQLite/EasyCaching.SQLite.csproj (in 1.03 sec).
+  Restored /home/user/w60/EC/dotnet2/src/EasyCaching.InMemory/EasyCaching.InMemory.csproj (in 1.03 sec).
+  Restored /home/user/w60/EC/dotnet2/serialization/EasyCaching.Serialization.Json/EasyCaching.Serialization.Json.csproj (in 1.03 sec).
+  Restored /home/user/w60/EC/dotnet2/src/EasyCaching.ResponseCaching/EasyCaching.ResponseCaching.csproj (in 138 ms).
+  Restored /home/user/w60/EC/dotnet2/src/EasyCaching.Redis/EasyCaching.Redis.csproj (in 148 ms).
+  Restored /home/user/w60/EC/dotnet2/src/EasyCaching.Memcached/EasyCaching.Memcached.csproj (in 166 ms).
+  Restored /home/user/w60/EC/dotnet2/src/EasyCaching.LiteDB/EasyCaching.LiteDB.csproj (in 27 ms).
+  Restored /home/user/w60/EC/dotnet2/serialization/EasyCaching.Serialization.SystemTextJson/EasyCaching.Serialization.SystemTextJson.csproj (in 48 ms).
+  Restored /home/user/w60/EC/dotnet2/serialization/EasyCaching.Serialization.Protobuf/EasyCaching.Serialization.Protobuf.csproj (in 64 ms).
+  Restored /home/user/w60/EC/dotnet2/serialization/EasyCaching.Serialization.MemoryPack/EasyCaching.Serialization.MemoryPack.csproj (in 11 ms).
+  Restored /home/user/w60/EC/dotnet2/serialization/EasyCaching.Serialization.MessagePack/EasyCaching.Serialization.MessagePack.csproj (in 56 ms).
+  Restored /home/user/w60/EC/dotnet2/test/EasyCaching.UnitTests/EasyCaching.UnitTests.csproj (in 1.43 sec).
+  Restored /home/user/w60/EC/dotnet2/interceptor/EasyCaching.Interceptor.AspectCore/EasyCaching.Interceptor.AspectCore.csproj (in 170 ms).
+  Restored /home/user/w60/EC/dotnet2/bus/EasyCaching.Bus.RabbitMQ/EasyCaching.Bus.RabbitMQ.csproj (in 24 ms).
+  Restored /home/user/w60/EC/dotnet2/src/EasyCaching.HybridCache/EasyCaching.HybridCache.csproj (in 26 ms).
+  Restored /home/user/w60/EC/dotnet2/bus/EasyCaching.Bus.Redis/EasyCaching.Bus.Redis.csproj (in 224 ms).
+  Restored /home/user/w60/EC/dotnet2/bus/EasyCaching.Bus.CSRedis/EasyCaching.Bus.CSRedis.csproj (in 55 ms).
+  Restored /home/user/w60/EC/dotnet2/src/EasyCaching.Disk/EasyCaching.Disk.csproj (in 51 ms).
+  Restored /home/user/w60/EC/dotnet2/src/EasyCaching.Core/EasyCaching.Core.csproj (in 34 ms).
+  Restored /home/user/w60/EC/dotnet2/src/EasyCaching.FasterKv/EasyCaching.FasterKv.csproj (in 92 ms).
+  Restored /home/user/w60/EC/dotnet2/src/EasyCaching.CSRedis/EasyCaching.CSRedis.csproj (in 67 ms).
+  Restored /home/user/w60/EC/dotnet2/interceptor/EasyCaching.Interceptor.Castle/EasyCaching.Interceptor.Castle.csproj (in 422 ms).
+  EasyCaching.Core -> /home/user/w60/EC/dotnet2/src/EasyCaching.Core/bin/Release/net8.0/EasyCaching.Core.dll
+  EasyCaching.FasterKv -> /home/user/w60/EC/dotnet2/src/EasyCaching.FasterKv/bin/Release/net8.0/EasyCaching.FasterKv.dll
+  EasyCaching.Serialization.Protobuf -> /home/user/w60/EC/dotnet2/serialization/EasyCaching.Serialization.Protobuf/bin/Release/net8.0/EasyCaching.Serialization.Protobuf.dll
+  EasyCaching.Redis -> /home/user/w60/EC/dotnet2/src/EasyCaching.Redis/bin/Release/net8.0/EasyCaching.Redis.dll
+  EasyCaching.Bus.Redis -> /home/user/w60/EC/dotnet2/bus/EasyCaching.Bus.Redis/bin/Release/net8.0/EasyCaching.Bus.Redis.dll
+  EasyCaching.Interceptor.Castle -> /home/user/w60/EC/dotnet2/interceptor/EasyCaching.Interceptor.Castle/bin/Release/net8.0/EasyCaching.Interceptor.Castle.dll
+  EasyCaching.SQLite -> /home/user/w60/EC/dotnet2/src/EasyCaching.SQLite/bin/Release/net8.0/EasyCaching.SQLite.dll
+  EasyCaching.Serialization.SystemTextJson -> /home/user/w60/EC/dotnet2/serialization/EasyCaching.Serialization.SystemTextJson/bin/Release/net8.0/EasyCaching.Serialization.SystemTextJson.dll
+  EasyCaching.Memcached -> /home/user/w60/EC/dotnet2/src/EasyCaching.Memcached/bin/Release/net8.0/EasyCaching.Memcached.dll
+  EasyCaching.CSRedis -> /home/user/w60/EC/dotnet2/src/EasyCaching.CSRedis/bin/Release/net8.0/EasyCaching.CSRedis.dll
+  EasyCaching.Serialization.MemoryPack -> /home/user/w60/EC/dotnet2/serialization/EasyCaching.Serialization.MemoryPack/bin/Release/net8.0/EasyCaching.Serialization.MemoryPack.dll
+  EasyCaching.Bus.CSRedis -> /home/user/w60/EC/dotnet2/bus/EasyCaching.Bus.CSRedis/bin/Release/net8.0/EasyCaching.Bus.CSRedis.dll
+  EasyCaching.Serialization.MessagePack -> /home/user/w60/EC/dotnet2/serialization/EasyCaching.Serialization.MessagePack/bin/Release/net8.0/EasyCaching.Serialization.MessagePack.dll
+  EasyCaching.Bus.RabbitMQ -> /home/user/w60/EC/dotnet2/bus/EasyCaching.Bus.RabbitMQ/bin/Release/net8.0/EasyCaching.Bus.RabbitMQ.dll
+  EasyCaching.Interceptor.AspectCore -> /home/user/w60/EC/dotnet2/interceptor/EasyCaching.Interceptor.AspectCore/bin/Release/net8.0/EasyCaching.Interceptor.AspectCore.dll
+  EasyCaching.Serialization.Json -> /home/user/w60/EC/dotnet2/serialization/EasyCaching.Serialization.Json/bin/Release/net8.0/EasyCaching.Serialization.Json.dll
+  EasyCaching.Disk -> /home/user/w60/EC/dotnet2/src/EasyCaching.Disk/bin/Release/net8.0/EasyCaching.Disk.dll
+  EasyCaching.HybridCache -> /home/user/w60/EC/dotnet2/src/EasyCaching.HybridCache/bin/Release/net8.0/EasyCaching.HybridCache.dll
+  EasyCaching.InMemory -> /home/user/w60/EC/dotnet2/src/EasyCaching.InMemory/bin/Release/net8.0/EasyCaching.InMemory.dll
+  EasyCaching.LiteDB -> /home/user/w60/EC/dotnet2/src/EasyCaching.LiteDB/bin/Release/net8.0/EasyCaching.LiteDB.dll
+  EasyCaching.Core -> /home/user/w60/EC/dotnet2/src/EasyCaching.Core/bin/Release/netstandard2.0/EasyCaching.Core.dll
+  EasyCaching.ResponseCaching -> /home/user/w60/EC/dotnet2/src/EasyCaching.ResponseCaching/bin/Release/netcoreapp3.1/EasyCaching.ResponseCaching.dll
+  EasyCaching.UnitTests -> /home/user/w60/EC/dotnet2/test/EasyCaching.UnitTests/bin/Release/net8.0/EasyCaching.UnitTests.dll
+Test run for /home/user/w60/EC/dotnet2/test/EasyCaching.UnitTests/bin/Release/net8.0/EasyCaching.UnitTests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:04.85]     EasyCaching.UnitTests.AspectCoreInterceptorTest.Interceptor_Attribute_Method_Should_Handle_Caching [SKIP]
+  Skipped EasyCaching.UnitTests.AspectCoreInterceptorTest.Interceptor_Attribute_Method_Should_Handle_Caching [1 ms]
+[xUnit.net 00:00:04.96]     EasyCaching.UnitTests.AspectCoreInterceptorTest.Interceptor_Should_Recognize_Subclass_Of_EasyCachingAble_Attribute [SKIP]
+  Skipped EasyCaching.UnitTests.AspectCoreInterceptorTest.Interceptor_Should_Recognize_Subclass_Of_EasyCachingAble_Attribute [1 ms]
+[xUnit.net 00:00:10.47]     EasyCaching.UnitTests.DiskCachingProviderTest.GetAsync_Parallel_Should_Succeed [SKIP]
+  Skipped EasyCaching.UnitTests.DiskCachingProviderTest.GetAsync_Parallel_Should_Succeed [1 ms]
+[xUnit.net 00:00:13.02]     EasyCaching.UnitTests.ResponseCachingTests.ServesCachedContent_IfBodySize_IsCacheable [SKIP]
+  Skipped EasyCaching.UnitTests.ResponseCachingTests.ServesCachedContent_IfBodySize_IsCacheable [1 ms]
+
+Passed!  - Failed:     0, Passed:   893, Skipped:     4, Total:   897, Duration: 16 s - EasyCaching.UnitTests.dll (net8.0)

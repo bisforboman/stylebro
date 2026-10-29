@@ -190,31 +190,10 @@ public class CommentTextTests
         }
         """);
 
-    // Like StyleCop's SA1120, the empty lines of a file header are reported...
+    // The file header's empty lines stay (owner's decision 2026-10-29; StyleCop's SA1120 reports them), with or without a
+    // file_header_template (IDE0073 writes them from one starting with a line break, Ical.Net: 222 files).
     [Fact]
-    public Task EmptyLinesInTheHeader_AreReported() => VerifyFixAsync(
-        """
-        {|BRO1120://|}
-        // Copyright (c) Example Authors.
-        // Licensed under the MIT license.
-        {|BRO1120://|}
-
-        public class C
-        {
-        }
-        """,
-        """
-        // Copyright (c) Example Authors.
-        // Licensed under the MIT license.
-
-        public class C
-        {
-        }
-        """);
-
-    // ...unless file_header_template is set: IDE0073 writes that header, empty lines included (Ical.Net: 222 files).
-    [Fact]
-    public Task EmptyLinesInTheHeader_StayWithAHeaderTemplate() => VerifyFixAsync(
+    public Task EmptyLinesInTheHeader_Stay() => VerifyFixAsync(
         """
         //
         // Copyright (c) Example Authors.
@@ -239,6 +218,34 @@ public class CommentTextTests
             // Not the header.
             public int M() => 1;
         }
+        """);
+
+    // Trial 60, log4net: the Apache license header inside '#region Apache License' (325 files) is the header too.
+    [Fact]
+    public Task EmptyLinesInAHeaderBelowARegionLine_Stay() => VerifyFixAsync(
+        """
+        #region Apache License
+        //
+        // Licensed to the Apache Software Foundation (ASF).
+        //
+        #endregion
+
+        {|BRO1120://|}
+        // Not the header: code-less, but below the region.
+        public class C
+        {
+        }
         """,
-        editorConfig: @"file_header_template = \nCopyright (c) Example Authors.\nLicensed under the MIT license.\n");
+        """
+        #region Apache License
+        //
+        // Licensed to the Apache Software Foundation (ASF).
+        //
+        #endregion
+
+        // Not the header: code-less, but below the region.
+        public class C
+        {
+        }
+        """);
 }

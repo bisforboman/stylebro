@@ -1,0 +1,13 @@
+preview	0	190s	bro preview init
+setup	0	26s	bash -c printf "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"StyleBro.Analyzers\" Version=\"${V:-0.8.0-trial60.1}\" PrivateAssets=\"all\" />\n  </ItemGroup>\n</Project>\n" > Directory.Build.props && git add -N Directory.Build.props && git diff --stat && bro init --write
+format	0	152s	bro format
+check	0	1s	bro check
+check-json	0
+check-full	0	82s	bro check
+checkbuild	0	223s	bro check --build
+checkbuild-json	0
+twae-Debug	0	22s	twae Debug
+test-Debug	0	36s	env CFG=Debug bash -c dotnet test test/EasyCaching.UnitTests/EasyCaching.UnitTests.csproj -c $CFG --filter "$EC_FILTER"
+twae-Release	0	29s	twae Release
+test-Release	0	33s	env CFG=Release bash -c dotnet test test/EasyCaching.UnitTests/EasyCaching.UnitTests.csproj -c $CFG --filter "$EC_FILTER"
+DONE

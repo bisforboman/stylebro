@@ -157,44 +157,6 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
-    public void Conventions_CountFileHeadersWithEmptyCommentLines()
-    {
-        var counts = Conventions.NewCounts();
-        foreach (var text in new[]
-        {
-            "//\n// Copyright A.\n//\n\nclass A { }",
-            "// Copyright B.\n//\nusing System;\nclass B { }",
-            "// Copyright C.\nclass C { }",
-            "/// <summary>Doc.</summary>\nclass D { }",
-            "class E { }",
-        })
-        {
-            Conventions.Count(CSharpSyntaxTree.ParseText(text), counts);
-        }
-
-        Assert.Equal(new[] { 1, 2 }, counts[Conventions.HeaderKey]);
-    }
-
-    [Theory]
-    [InlineData(@"\nCopyright ical.net project maintainers and contributors.\nLicensed under the MIT license.\n", new[] { 1, 0 }, true)]   // Ical.Net
-    [InlineData("Copyright A.", new[] { 10, 0 }, false)]
-    [InlineData(null, new[] { 1, 9 }, true)]         // the headers have them
-    [InlineData(null, new[] { 5, 5 }, false)]
-    [InlineData(null, new[] { 0, 2 }, false)]        // too few
-    public void EmptyHeaderLines_TurnBRO1120Off(string? template, int[] headers, bool off)
-    {
-        var counts = Conventions.NewCounts();
-        counts[Conventions.HeaderKey] = headers;
-        var own = template is null ? new Dictionary<string, string>() : new Dictionary<string, string> { ["file_header_template"] = template };
-
-        var lines = Conventions.EmptyHeaderLines(counts, own);
-
-        Assert.Equal(off, lines?.Contains("dotnet_diagnostic.BRO1120.severity = none") == true);
-        own["dotnet_diagnostic.BRO1120.severity"] = "warning";
-        Assert.Null(Conventions.EmptyHeaderLines(counts, own));   // the repository's own severity stays
-    }
-
-    [Fact]
     public void Sonar_MappingsStricterThanSonar_AreNotCovered()
     {
         // S1905: IDE0004 removed '(Service)' and '(int)' casts Sonar accepted (Autofac). S100/S101: BRO1309 also checks events,

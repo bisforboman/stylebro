@@ -1,0 +1,1420 @@
+diff --git a/.editorconfig b/.editorconfig
+index 515296c..a2258cf 100644
+--- a/.editorconfig
++++ b/.editorconfig
+@@ -39,3 +39,83 @@ dotnet_diagnostic.IDE0044.severity = none # IDE0044: Make field readonly
+ # https://stackoverflow.com/questions/79195382/how-to-disable-fading-unused-methods-in-visual-studio-2022-17-12-0
+ dotnet_diagnostic.IDE0051.severity = none # IDE0051: Remove unused private member
+ dotnet_diagnostic.IDE0130.severity = none # IDE0130: Namespace does not match folder structure
++
++# BEGIN stylebro-migrate (stylebro-migrate init: built-in .NET rules for StyleBro's preset; edits inside are replaced)
++[*.cs]
++# Built-in .NET rules that cover StyleCop rules, at the preset's severities. Their options (brace placement, modifier
++# order, ...) come from StyleBro's preset. The severities have to be here: 'dotnet format' ignores rule severities in a
++# package's global config. Add <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> to report them on build too.
++
++# Braces (SA1503, SA1519, SA1520) are StyleBro's BRO1514-BRO1516: IDE0011's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0011.severity = none
++# Formatting: spacing, indentation, line breaks (SA1000-SA1028, SA1107, SA1134, SA1137, SA1500)
++dotnet_diagnostic.IDE0055.severity = warning
++# Access modifiers (SA1400, SA1205) are StyleBro's BRO1404/BRO1007: IDE0040's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0040.severity = none
++# Modifier order: access modifier first, then static (SA1206, SA1207)
++dotnet_diagnostic.IDE0036.severity = warning
++# 'int' instead of 'Int32' (SA1121)
++dotnet_diagnostic.IDE0049.severity = warning
++# Unnecessary parentheses (SA1119) are StyleBro's BRO1405: IDE0047's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0047.severity = none
++# Parentheses that show precedence (SA1407, SA1408) are StyleBro's BRO1406/BRO1407: IDE0048's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0048.severity = none
++# Using placement (SA1200) is StyleBro's BRO1008: IDE0065's fix can change what names bind to (CS0104, CS0118)
++dotnet_diagnostic.IDE0065.severity = none
++# Blank lines (SA1507, SA1508, SA1513) are StyleBro's BRO1517-BRO1519: the SDK's fixes break multi-targeted projects
++dotnet_diagnostic.IDE2000.severity = none
++dotnet_diagnostic.IDE2002.severity = none
++dotnet_diagnostic.IDE2003.severity = none
++# 'this.' qualification isn't required (SA1101 is off in the preset)
++dotnet_diagnostic.IDE0009.severity = none
++
++# Conventions in this repository's code (stylebro-migrate init counted them; delete a line to have it counted again)
++# init: private fields: your code mixes both forms (56 named 'field', 20 named '_field'), so BRO1303 is off. To choose one: set stylebro_private_field_naming and remove the next line.
++dotnet_diagnostic.BRO1303.severity = none
++# init: one-line if/else/loop/using/lock bodies: your code mixes both forms (149 with braces, 54 without braces), so both are allowed. To choose with braces: change the next line to csharp_prefer_braces = true.
++csharp_prefer_braces = when_multiline
++# init: one-line jumps ('if (x) return;'): allowed, because your code has some (41 of 82 places on the 'if' line without braces; any 3 keep them allowed: without it BRO1514 would add braces to each)
++stylebro_allow_single_line_jump_statements = true
++# init: multi-line initializers: your code mixes both forms (21 with a trailing comma, 19 without a trailing comma), so BRO1401 is off. To choose one: set stylebro_trailing_comma and remove the next line.
++dotnet_diagnostic.BRO1401.severity = none
++# init: empty strings: "" in 6 of 6 places in your code
++stylebro_empty_string_style = literal
++# init: null checks: '== null' in 45 of 45 places in your code
++stylebro_null_check_style = equality_operator
++# init: default values: 'default' in 12 of 13 places in your code
++csharp_prefer_simple_default_expression = true
++# init: split lists: your code mixes both forms (5 first item on the next line, 8 first item after '('), so BRO1107 is off. To choose one: set stylebro_split_list_first_item and remove the next line.
++dotnet_diagnostic.BRO1107.severity = none
++# init: switch sections: without a blank line in 14 of 14 places in your code
++stylebro_blank_line_between_switch_sections = omit
++# init: statements on their 'if'/loop/'case' line: allowed, because your code has some (51 of 71 places on their owner's line; any 3 keep them allowed: csharp_preserve_single_line_statements = false would move each to a line of its own)
++csharp_preserve_single_line_statements = true
++# init: overrides/interface implementations: 19 of 19 in your code are without a doc comment, so BRO1601 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1601.severity = none
++# init: types' members: your code mixes both forms (28 in BRO1001's order, 44 in another order), so BRO1001 is off. To choose one: set dotnet_diagnostic.BRO1001.severity and remove the next line.
++dotnet_diagnostic.BRO1001.severity = none
++# init: split lists' items: your code mixes both forms (7 one per line, 10 grouped on lines), so BRO1108 is off. To choose one: set dotnet_diagnostic.BRO1108.severity and remove the next line.
++dotnet_diagnostic.BRO1108.severity = none
++# init: private-by-default members: without 'private' in 101 of 122 members in your code
++dotnet_style_require_accessibility_modifiers = omit_if_default
++# init: internal-by-default types: your code mixes both forms (12 with 'internal', 8 without an access modifier), so BRO1404 is off. To choose one: set dotnet_diagnostic.BRO1404.severity and remove the next line.
++dotnet_diagnostic.BRO1404.severity = none
++# init: declarations with 2+ attributes: 28 of 33 in your code are combined ('[A, B]'), so BRO1102 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1102.severity = none
++# init: block-bodied properties/methods: your code mixes both forms (6 on several lines, 15 on one line), so BRO1509 is off. To choose one: set dotnet_diagnostic.BRO1509.severity and remove the next line.
++dotnet_diagnostic.BRO1509.severity = none
++# init: C# files' line endings: LF in 68 of 68 files in your code
++end_of_line = lf
++# init: statements after a block's '}': your code mixes both forms (88 after a blank line, 40 right below the '}'), so BRO1519 is off. To choose one: set dotnet_diagnostic.BRO1519.severity and remove the next line.
++dotnet_diagnostic.BRO1519.severity = none
++# init: nested ifs BRO1149 would merge: kept, because your code has some (8 nested ifs; any 3 keep them: BRO1149 would merge each), so BRO1149 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1149.severity = none
++# init: non-private fields: your code mixes both forms (2 PascalCase or as your naming rule says, 6 named otherwise), so BRO1306 is off. To choose one: set dotnet_diagnostic.BRO1306.severity and remove the next line.
++dotnet_diagnostic.BRO1306.severity = none
++# init: tuple element names: your code mixes both forms (6 '(int Count, ...)', 8 '(int count, ...)'), so BRO1311 is off. To choose one: set stylebro_tuple_element_name_casing and remove the next line.
++dotnet_diagnostic.BRO1311.severity = none
++# init: using directives: 44 of 55 files sorted, 3 of 22 with System first
++dotnet_sort_system_directives_first = false
++# init: Final line breaks: your .editorconfig says insert_final_newline = true, but 45 of 68 C# files end with a line break: nothing enforced it, so insert_final_newline = unset is written for C# files and 'format' leaves each file's last line break (or its absence) as it is. To have insert_final_newline = true everywhere: put that line below the stylebro-migrate block, in a [*.cs] section (a later line wins; the block's own lines come back on the next init) and run 'bro format' (it rewrites the files).
++insert_final_newline = unset
++# END stylebro-migrate
+diff --git a/Directory.Build.props b/Directory.Build.props
+index 2e4250f..efe9812 100644
+--- a/Directory.Build.props
++++ b/Directory.Build.props
+@@ -1,6 +1,7 @@
+-﻿<?xml version="1.0" encoding="utf-8"?>
++<?xml version="1.0" encoding="utf-8"?>
+ <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+   <PropertyGroup>
++    <StyleBroPreset>1.0</StyleBroPreset>
+     <LangVersion>13</LangVersion>
+ 
+     <!-- NuGet Package Information -->
+@@ -23,4 +24,7 @@
+     <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" />
+     <EmbeddedResource Include="$(MSBuildThisFileDirectory)LICENSE" />
+   </ItemGroup>
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial60.2" PrivateAssets="all" />
++  </ItemGroup>
+ </Project>
+diff --git a/sandbox/Benchmark/Program.cs b/sandbox/Benchmark/Program.cs
+index d72a692..969f630 100644
+--- a/sandbox/Benchmark/Program.cs
++++ b/sandbox/Benchmark/Program.cs
+@@ -1,7 +1,6 @@
+ ﻿#pragma warning disable
+ 
+ using BenchmarkDotNet.Attributes;
+-using System.Linq;
+ using BenchmarkDotNet.Configs;
+ using BenchmarkDotNet.Diagnosers;
+ using BenchmarkDotNet.Environments;
+@@ -9,22 +8,23 @@ using BenchmarkDotNet.Exporters;
+ using BenchmarkDotNet.Exporters.Csv;
+ using BenchmarkDotNet.Jobs;
+ using BenchmarkDotNet.Running;
++using Enyim.Caching;
++using Enyim.Caching.Configuration;
++using Enyim.Caching.Memcached;
++using Enyim.Caching.Memcached.Transcoders;
+ using LiteDB;
++using MessagePack;
++using Microsoft.Extensions.Logging;
++using Microsoft.Extensions.Options;
++using RocksDbSharp;
+ using System;
+ using System.Collections.Generic;
+ using System.Data;
+ using System.Data.SQLite;
+ using System.IO;
+-using TestPerfLiteDB;
+-using Enyim.Caching;
+-using Enyim.Caching.Configuration;
+-using Enyim.Caching.Memcached;
+-using Microsoft.Extensions.Options;
+-using Microsoft.Extensions.Logging;
+-using Enyim.Caching.Memcached.Transcoders;
+-using RocksDbSharp;
+-using MessagePack;
++using System.Linq;
+ using System.Text;
++using TestPerfLiteDB;
+ 
+ namespace Benchmark
+ {
+diff --git a/sandbox/Benchmark/Utils/Helper.cs b/sandbox/Benchmark/Utils/Helper.cs
+index 51c7a3d..71ed441 100644
+--- a/sandbox/Benchmark/Utils/Helper.cs
++++ b/sandbox/Benchmark/Utils/Helper.cs
+@@ -1,14 +1,14 @@
+ ﻿#pragma warning disable
+ 
++using LiteDB;
++using MasterMemory;
++using MessagePack;
+ using System;
+ using System.Collections.Generic;
+ using System.Diagnostics;
+ using System.Linq;
+ using System.Text;
+ using System.Threading.Tasks;
+-using MessagePack;
+-using LiteDB;
+-using MasterMemory;
+ 
+ namespace TestPerfLiteDB
+ {
+diff --git a/sandbox/ConsoleApp/Program.cs b/sandbox/ConsoleApp/Program.cs
+index ea25bc2..2d17de5 100644
+--- a/sandbox/ConsoleApp/Program.cs
++++ b/sandbox/ConsoleApp/Program.cs
+@@ -14,11 +14,10 @@ using System.Linq;
+ using System.Runtime.CompilerServices;
+ using System.Text;
+ 
+-
+ [assembly: MasterMemoryGeneratorOptions(
+     Namespace = "ConsoleApp" // ,
+-    // IsReturnNullIfKeyNotFound = true,
+-    // PrefixClassName = "Foo"
++                             // IsReturnNullIfKeyNotFound = true,
++                             // PrefixClassName = "Foo"
+ )]
+ 
+ public class FooItem
+@@ -61,7 +60,9 @@ public class Quest : IValidatable<Quest>
+ 
+     public enum MyEnum
+     {
+-        A, B, C
++        A,
++        B,
++        C
+     }
+ }
+ 
+@@ -113,7 +114,8 @@ namespace ConsoleApp
+ 
+     public enum Gender
+     {
+-        Male, Female
++        Male,
++        Female
+     }
+ 
+     [MemoryTable("person"), MessagePackObject(true)]
+@@ -147,10 +149,6 @@ namespace ConsoleApp
+         }
+     }
+ 
+-
+-
+-
+-
+     class ByteBufferWriter : IBufferWriter<byte>
+     {
+         byte[] buffer;
+@@ -218,8 +216,6 @@ namespace ConsoleApp
+         public int Id { get; set; }
+     }
+ 
+-
+-
+     class Program
+     {
+         static void Main(string[] args)
+@@ -240,7 +236,7 @@ namespace ConsoleApp
+             using (var sr = new StreamReader(ms, Encoding.UTF8))
+             using (var reader = new TinyCsvReader(sr))
+             {
+-                while ((reader.ReadValuesWithHeader() is Dictionary<string, string> values))
++                while (reader.ReadValuesWithHeader() is Dictionary<string, string> values)
+                 {
+                     // create data without call constructor
+                     var data = RuntimeHelpers.GetUninitializedObject(table.DataType);
+@@ -297,31 +293,31 @@ namespace ConsoleApp
+                     {
+                         return Convert.ToBoolean(intBool);
+                     }
+-                    return Boolean.Parse(rawValue);
++                    return bool.Parse(rawValue);
+                 case TypeCode.Char:
+-                    return Char.Parse(rawValue);
++                    return char.Parse(rawValue);
+                 case TypeCode.SByte:
+-                    return SByte.Parse(rawValue, CultureInfo.InvariantCulture);
++                    return sbyte.Parse(rawValue, CultureInfo.InvariantCulture);
+                 case TypeCode.Byte:
+-                    return Byte.Parse(rawValue, CultureInfo.InvariantCulture);
++                    return byte.Parse(rawValue, CultureInfo.InvariantCulture);
+                 case TypeCode.Int16:
+-                    return Int16.Parse(rawValue, CultureInfo.InvariantCulture);
++                    return short.Parse(rawValue, CultureInfo.InvariantCulture);
+                 case TypeCode.UInt16:
+-                    return UInt16.Parse(rawValue, CultureInfo.InvariantCulture);
++                    return ushort.Parse(rawValue, CultureInfo.InvariantCulture);
+                 case TypeCode.Int32:
+-                    return Int32.Parse(rawValue, CultureInfo.InvariantCulture);
++                    return int.Parse(rawValue, CultureInfo.InvariantCulture);
+                 case TypeCode.UInt32:
+-                    return UInt32.Parse(rawValue, CultureInfo.InvariantCulture);
++                    return uint.Parse(rawValue, CultureInfo.InvariantCulture);
+                 case TypeCode.Int64:
+-                    return Int64.Parse(rawValue, CultureInfo.InvariantCulture);
++                    return long.Parse(rawValue, CultureInfo.InvariantCulture);
+                 case TypeCode.UInt64:
+-                    return UInt64.Parse(rawValue, CultureInfo.InvariantCulture);
++                    return ulong.Parse(rawValue, CultureInfo.InvariantCulture);
+                 case TypeCode.Single:
+-                    return Single.Parse(rawValue, CultureInfo.InvariantCulture);
++                    return float.Parse(rawValue, CultureInfo.InvariantCulture);
+                 case TypeCode.Double:
+-                    return Double.Parse(rawValue, CultureInfo.InvariantCulture);
++                    return double.Parse(rawValue, CultureInfo.InvariantCulture);
+                 case TypeCode.Decimal:
+-                    return Decimal.Parse(rawValue, CultureInfo.InvariantCulture);
++                    return decimal.Parse(rawValue, CultureInfo.InvariantCulture);
+                 case TypeCode.DateTime:
+                     return DateTime.Parse(rawValue, CultureInfo.InvariantCulture);
+                 default:
+@@ -349,6 +345,7 @@ namespace ConsoleApp
+             static char[] trim = new[] { ' ', '\t' };
+ 
+             readonly StreamReader reader;
++
+             public IReadOnlyList<string> Header { get; private set; }
+ 
+             public TinyCsvReader(StreamReader reader)
+@@ -423,8 +420,4 @@ namespace ConsoleApp
+             }
+         }
+     }
+-
+-
+ }
+-
+-
+diff --git a/sandbox/GeneratorSandbox/Program.cs b/sandbox/GeneratorSandbox/Program.cs
+index 4892223..d63df4b 100644
+--- a/sandbox/GeneratorSandbox/Program.cs
++++ b/sandbox/GeneratorSandbox/Program.cs
+@@ -1,9 +1,9 @@
+-﻿using MasterMemory;
++﻿using GeneratorSandbox;
++using MasterMemory;
+ using MessagePack;
+-using GeneratorSandbox;
+ using System.Runtime.CompilerServices;
+ 
+-//[assembly: MasterMemoryGeneratorOptions(
++// [assembly: MasterMemoryGeneratorOptions(
+ //    Namespace = "Z",
+ //    IsReturnNullIfKeyNotFound = true,
+ //    PrefixClassName = "")]
+@@ -27,7 +27,6 @@ builder.Append(new Person[]
+ // build database binary(you can also use `WriteToStream` for save to file).
+ byte[] data = builder.Build();
+ 
+-
+ var db = new MemoryDatabase(data);
+ 
+ // .PersonTable.FindByPersonId is fully typed by code-generation.
+@@ -42,14 +41,13 @@ RangeView<Person> age1 = db.PersonTable.FindClosestByAge(31);
+ // Get range(min-max inclusive).
+ RangeView<Person> age2 = db.PersonTable.FindRangeByAge(20, 29);
+ 
+-
+ public enum Gender
+ {
+-    Male, Female, Unknown
++    Male,
++    Female,
++    Unknown
+ }
+ 
+-
+-
+ // table definition marked by MemoryTableAttribute.
+ // database-table must be serializable by MessagePack-CSsharp
+ [MemoryTable("person"), MessagePackObject(true)]
+diff --git a/sandbox/PerfTest2/Engines/ITest.cs b/sandbox/PerfTest2/Engines/ITest.cs
+index fd260de..8b52cfa 100644
+--- a/sandbox/PerfTest2/Engines/ITest.cs
++++ b/sandbox/PerfTest2/Engines/ITest.cs
+@@ -1,4 +1,5 @@
+-﻿using System;
++﻿using LiteDB;
++using System;
+ using System.Collections.Generic;
+ using System.Data;
+ using System.Data.SQLite;
+@@ -7,7 +8,6 @@ using System.IO;
+ using System.Linq;
+ using System.Text;
+ using System.Threading.Tasks;
+-using LiteDB;
+ 
+ namespace TestPerfLiteDB
+ {
+@@ -17,12 +17,18 @@ namespace TestPerfLiteDB
+         int FileLength { get; }
+ 
+         void Prepare();
++
+         void Insert();
++
+         void Bulk();
++
+         void Update();
++
+         void CreateIndex();
++
+         void Query();
+-        //void Delete();
+-        //void Drop();
++
++        // void Delete();
++        // void Drop();
+     }
+ }
+diff --git a/sandbox/PerfTest2/Engines/LiteDB_Test.cs b/sandbox/PerfTest2/Engines/LiteDB_Test.cs
+index 27bc448..80eb460 100644
+--- a/sandbox/PerfTest2/Engines/LiteDB_Test.cs
++++ b/sandbox/PerfTest2/Engines/LiteDB_Test.cs
+@@ -1,4 +1,5 @@
+-﻿using System;
++﻿using LiteDB;
++using System;
+ using System.Collections.Generic;
+ using System.Data;
+ using System.Data.SQLite;
+@@ -7,7 +8,6 @@ using System.IO;
+ using System.Linq;
+ using System.Text;
+ using System.Threading.Tasks;
+-using LiteDB;
+ 
+ namespace TestPerfLiteDB
+ {
+@@ -37,7 +37,7 @@ namespace TestPerfLiteDB
+ 
+             var ms = new MemoryStream();
+             var disk = new LiteDB.StreamDiskService(ms);
+-            //var disk = new FileDiskService(_filename, options);
++            // var disk = new FileDiskService(_filename, options);
+ 
+             _db = new LiteEngine(disk);
+         }
+diff --git a/sandbox/PerfTest2/Engines/RavenDB_Test.cs b/sandbox/PerfTest2/Engines/RavenDB_Test.cs
+index 700d7e6..bfd11d4 100644
+--- a/sandbox/PerfTest2/Engines/RavenDB_Test.cs
++++ b/sandbox/PerfTest2/Engines/RavenDB_Test.cs
+@@ -1,15 +1,15 @@
+-﻿//using Raven.Client;
+-//using Raven.Client.Embedded;
+-//using Raven.Client.Indexes;
+-//using System;
+-//using System.Collections.Generic;
+-//using System.IO;
+-//using System.Linq;
+-//using System.Text;
+-//using System.Threading.Tasks;
+-
+-//namespace TestPerfLiteDB
+-//{
++﻿// using Raven.Client;
++// using Raven.Client.Embedded;
++// using Raven.Client.Indexes;
++// using System;
++// using System.Collections.Generic;
++// using System.IO;
++// using System.Linq;
++// using System.Text;
++// using System.Threading.Tasks;
++
++// namespace TestPerfLiteDB
++// {
+ //    public class TestDocCreation : AbstractIndexCreationTask<TestDoc>
+ //    {
+ //        public TestDocCreation()
+@@ -124,4 +124,4 @@
+ 
+ //        }
+ //    }
+-//}
++// }
+diff --git a/sandbox/PerfTest2/Engines/SQLite_Test.cs b/sandbox/PerfTest2/Engines/SQLite_Test.cs
+index ae73e5d..becafe6 100644
+--- a/sandbox/PerfTest2/Engines/SQLite_Test.cs
++++ b/sandbox/PerfTest2/Engines/SQLite_Test.cs
+@@ -23,7 +23,7 @@ namespace TestPerfLiteDB
+         {
+             _count = count;
+             _filename = "sqlite-" + Guid.NewGuid().ToString("n") + ".db";
+-            
++
+             if (memory)
+             {
+                 var cs = "Data Source=:memory:;New=True;";
+diff --git a/sandbox/PerfTest2/Program.cs b/sandbox/PerfTest2/Program.cs
+index 6a33b6a..586c39c 100644
+--- a/sandbox/PerfTest2/Program.cs
++++ b/sandbox/PerfTest2/Program.cs
+@@ -1,13 +1,13 @@
+ ﻿#pragma warning disable
++using LiteDB;
+ using System;
+ using System.Collections.Generic;
+ using System.Data.SQLite;
+ using System.Diagnostics;
++using System.IO;
+ using System.Linq;
+ using System.Text;
+ using System.Threading.Tasks;
+-using LiteDB;
+-using System.IO;
+ 
+ // based test code -> https://github.com/mbdavid/LiteDB-Perf
+ 
+diff --git a/sandbox/PerfTest2/Utils/Helper.cs b/sandbox/PerfTest2/Utils/Helper.cs
+index 20c74fb..3538c50 100644
+--- a/sandbox/PerfTest2/Utils/Helper.cs
++++ b/sandbox/PerfTest2/Utils/Helper.cs
+@@ -1,4 +1,7 @@
+ ﻿#pragma warning disable
++using LiteDB;
++using MasterMemory;
++using MessagePack;
+ using System;
+ using System.Collections.Generic;
+ using System.Data.SQLite;
+@@ -6,9 +9,6 @@ using System.Diagnostics;
+ using System.Linq;
+ using System.Text;
+ using System.Threading.Tasks;
+-using LiteDB;
+-using MasterMemory;
+-using MessagePack;
+ 
+ namespace TestPerfLiteDB
+ {
+diff --git a/src/MasterMemory.Annotations/Attributes.cs b/src/MasterMemory.Annotations/Attributes.cs
+index 71967d1..166137d 100644
+--- a/src/MasterMemory.Annotations/Attributes.cs
++++ b/src/MasterMemory.Annotations/Attributes.cs
+@@ -40,7 +40,6 @@ namespace MasterMemory
+     [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
+     public class NonUniqueAttribute : Attribute
+     {
+-
+     }
+ 
+     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+diff --git a/src/MasterMemory.SourceGenerator/GeneratorCore/CodeGenerator.cs b/src/MasterMemory.SourceGenerator/GeneratorCore/CodeGenerator.cs
+index e17bff3..709239f 100644
+--- a/src/MasterMemory.SourceGenerator/GeneratorCore/CodeGenerator.cs
++++ b/src/MasterMemory.SourceGenerator/GeneratorCore/CodeGenerator.cs
+@@ -69,7 +69,6 @@ namespace MasterMemory.GeneratorCore
+             return context;
+         }
+ 
+-
+         static (PrimaryKey, List<SecondaryKey>, PropertyDeclarationSyntax)? ExtractPropertyAttribute(PropertyDeclarationSyntax property, DiagnosticReporter reporter)
+         {
+             // Attribute Parterns:
+@@ -101,7 +100,7 @@ namespace MasterMemory.GeneratorCore
+                         }
+ 
+                         primaryKey = new PrimaryKey();
+-                        var keyProperty = new KeyProperty()
++                        var keyProperty = new KeyProperty
+                         {
+                             Name = property.Identifier.ToFullStringTrim(),
+                             TypeName = property.Type.ToFullStringTrim()
+@@ -109,7 +108,7 @@ namespace MasterMemory.GeneratorCore
+ 
+                         foreach (var arg in attr.ArgumentList?.Arguments ?? default)
+                         {
+-                            keyProperty.KeyOrder = (int)((arg.Expression as LiteralExpressionSyntax).Token.Value);
++                            keyProperty.KeyOrder = (int)(arg.Expression as LiteralExpressionSyntax).Token.Value;
+                         }
+ 
+                         primaryKey.Properties = new[] { keyProperty };
+@@ -123,17 +122,17 @@ namespace MasterMemory.GeneratorCore
+                         }
+ 
+                         secondaryKey = new SecondaryKey();
+-                        var keyProperty = new KeyProperty()
++                        var keyProperty = new KeyProperty
+                         {
+                             Name = property.Identifier.ToFullStringTrim(),
+                             TypeName = property.Type.ToFullStringTrim()
+                         };
+ 
+                         var args = attr.ArgumentList.Arguments;
+-                        secondaryKey.IndexNo = (int)((args[0].Expression as LiteralExpressionSyntax).Token.Value);
++                        secondaryKey.IndexNo = (int)(args[0].Expression as LiteralExpressionSyntax).Token.Value;
+                         if (args.Count == 2)
+                         {
+-                            keyProperty.KeyOrder = (int)((args[1].Expression as LiteralExpressionSyntax).Token.Value);
++                            keyProperty.KeyOrder = (int)(args[1].Expression as LiteralExpressionSyntax).Token.Value;
+                         }
+                         secondaryKey.Properties = new[] { keyProperty };
+                     }
+diff --git a/src/MasterMemory.SourceGenerator/GeneratorCore/GenerationContext.cs b/src/MasterMemory.SourceGenerator/GeneratorCore/GenerationContext.cs
+index ed6398c..92a7cd6 100644
+--- a/src/MasterMemory.SourceGenerator/GeneratorCore/GenerationContext.cs
++++ b/src/MasterMemory.SourceGenerator/GeneratorCore/GenerationContext.cs
+@@ -5,7 +5,6 @@ using System.Linq;
+ 
+ namespace MasterMemory.GeneratorCore
+ {
+-
+     public record GenerationContext
+     {
+         public string ClassName { get; set; }
+@@ -105,16 +104,13 @@ namespace MasterMemory.GeneratorCore
+             {
+                 return $"System.Collections.Generic.Comparer<{BuildTypeName()}>.Default";
+             }
++            else if (StringComparisonOption != null)
++            {
++                return "System.StringComparer." + StringComparisonOption.Split('.').Last();
++            }
+             else
+             {
+-                if (StringComparisonOption != null)
+-                {
+-                    return "System.StringComparer." + StringComparisonOption.Split('.').Last();
+-                }
+-                else
+-                {
+-                    return "System.StringComparer.Ordinal";
+-                }
++                return "System.StringComparer.Ordinal";
+             }
+         }
+ 
+@@ -197,7 +193,7 @@ namespace MasterMemory.GeneratorCore
+         {
+             get
+             {
+-                return (this is PrimaryKey) && (IsComparableNumberType) && !IsNonUnique;
++                return (this is PrimaryKey) && IsComparableNumberType && !IsNonUnique;
+             }
+         }
+     }
+diff --git a/src/MasterMemory.SourceGenerator/MasterMemoryGenerator.cs b/src/MasterMemory.SourceGenerator/MasterMemoryGenerator.cs
+index ef2cb9f..058bd4d 100644
+--- a/src/MasterMemory.SourceGenerator/MasterMemoryGenerator.cs
++++ b/src/MasterMemory.SourceGenerator/MasterMemoryGenerator.cs
+@@ -86,7 +86,7 @@ public partial class MasterMemoryGenerator : IIncrementalGenerator
+         var resolverTemplate = new MessagePackResolverTemplate();
+         builderTemplate.Namespace = databaseTemplate.Namespace = immutableBuilderTemplate.Namespace = resolverTemplate.Namespace = usingNamespace;
+         builderTemplate.PrefixClassName = databaseTemplate.PrefixClassName = immutableBuilderTemplate.PrefixClassName = resolverTemplate.PrefixClassName = prefixClassName;
+-        builderTemplate.Using = databaseTemplate.Using = immutableBuilderTemplate.Using = resolverTemplate.Using = (usingStrings + Environment.NewLine + ("using " + usingNamespace + ".Tables;"));
++        builderTemplate.Using = databaseTemplate.Using = immutableBuilderTemplate.Using = resolverTemplate.Using = usingStrings + Environment.NewLine + ("using " + usingNamespace + ".Tables;");
+         builderTemplate.GenerationContexts = databaseTemplate.GenerationContexts = immutableBuilderTemplate.GenerationContexts = resolverTemplate.GenerationContexts = memoryTables.ToArray();
+ 
+         Log(AddSource(context, builderTemplate.ClassName, builderTemplate.TransformText()));
+@@ -96,7 +96,7 @@ public partial class MasterMemoryGenerator : IIncrementalGenerator
+ 
+         foreach (var generationContext in memoryTables)
+         {
+-            var template = new TableTemplate()
++            var template = new TableTemplate
+             {
+                 Namespace = usingNamespace,
+                 GenerationContext = generationContext,
+diff --git a/src/MasterMemory.SourceGenerator/MasterMemoryGeneratorOptions.cs b/src/MasterMemory.SourceGenerator/MasterMemoryGeneratorOptions.cs
+index e63119c..7abb357 100644
+--- a/src/MasterMemory.SourceGenerator/MasterMemoryGeneratorOptions.cs
++++ b/src/MasterMemory.SourceGenerator/MasterMemoryGeneratorOptions.cs
+@@ -1,6 +1,5 @@
+ ﻿using Microsoft.CodeAnalysis;
+ 
+-
+ namespace MasterMemory.SourceGenerator;
+ 
+ readonly record struct MasterMemoryGeneratorOptions(string? Namespace, string PrefixClassName, bool IsReturnNullIfKeyNotFound)
+diff --git a/src/MasterMemory.SourceGenerator/Polyfill/System.CodeDom.cs b/src/MasterMemory.SourceGenerator/Polyfill/System.CodeDom.cs
+index 7aa7a2a..f02b315 100644
+--- a/src/MasterMemory.SourceGenerator/Polyfill/System.CodeDom.cs
++++ b/src/MasterMemory.SourceGenerator/Polyfill/System.CodeDom.cs
+@@ -6,16 +6,16 @@ using System.Text;
+ 
+ namespace System.CodeDom.Compiler
+ {
+-	public class CompilerError
+-	{
+-		public string ErrorText { get; set; }
+-		public bool IsWarning { get; set; }
+-	}
++    public class CompilerError
++    {
++        public string ErrorText { get; set; }
++        public bool IsWarning { get; set; }
++    }
+ 
+-	public class CompilerErrorCollection
+-	{
+-		public void Add(CompilerError error)
+-		{
+-		}
+-	}
++    public class CompilerErrorCollection
++    {
++        public void Add(CompilerError error)
++        {
++        }
++    }
+ }
+\ No newline at end of file
+diff --git a/src/MasterMemory/DatabaseBuilderBase.cs b/src/MasterMemory/DatabaseBuilderBase.cs
+index 9784106..ece297b 100644
+--- a/src/MasterMemory/DatabaseBuilderBase.cs
++++ b/src/MasterMemory/DatabaseBuilderBase.cs
+@@ -33,7 +33,6 @@ namespace MasterMemory
+                     .WithCompression(MessagePackCompression.Lz4Block)
+                     .WithResolver(resolver);
+             }
+-
+         }
+ 
+         protected void AppendCore<T, TKey>(IEnumerable<T> datasource, Func<T, TKey> indexSelector, IComparer<TKey> comparer)
+diff --git a/src/MasterMemory/DatabaseBuilderBaseExtensions.cs b/src/MasterMemory/DatabaseBuilderBaseExtensions.cs
+index 0be85d7..c6f6984 100644
+--- a/src/MasterMemory/DatabaseBuilderBaseExtensions.cs
++++ b/src/MasterMemory/DatabaseBuilderBaseExtensions.cs
+@@ -10,8 +10,7 @@ namespace MasterMemory
+         {
+             var appendMethod = builder.GetType().GetMethods()
+                 .Where(x => x.Name == "Append")
+-                .Where(x => x.GetParameters()[0].ParameterType.GetGenericArguments()[0] == dataType)
+-                .FirstOrDefault();
++                .FirstOrDefault(x => x.GetParameters()[0].ParameterType.GetGenericArguments()[0] == dataType);
+ 
+             if (appendMethod == null)
+             {
+diff --git a/src/MasterMemory/IValidatable.cs b/src/MasterMemory/IValidatable.cs
+index 290fe6d..6a8440c 100644
+--- a/src/MasterMemory/IValidatable.cs
++++ b/src/MasterMemory/IValidatable.cs
+@@ -12,12 +12,19 @@ namespace MasterMemory
+     public interface IValidator<T>
+     {
+         ValidatableSet<T> GetTableSet();
++
+         ReferenceSet<T, TRef> GetReferenceSet<TRef>();
++
+         void Validate(Expression<Func<T, bool>> predicate);
++
+         void Validate(Func<T, bool> predicate, string message);
++
+         void ValidateAction(Expression<Func<bool>> predicate);
++
+         void ValidateAction(Func<bool> predicate, string message);
++
+         void Fail(string message);
++
+         bool CallOnce();
+     }
+ }
+\ No newline at end of file
+diff --git a/src/MasterMemory/ImmutableBuilderBase.cs b/src/MasterMemory/ImmutableBuilderBase.cs
+index c7f0474..69c57ff 100644
+--- a/src/MasterMemory/ImmutableBuilderBase.cs
++++ b/src/MasterMemory/ImmutableBuilderBase.cs
+@@ -6,7 +6,7 @@ namespace MasterMemory
+ {
+     public abstract class ImmutableBuilderBase
+     {
+-        static protected TElement[] CloneAndSortBy<TElement, TKey>(IList<TElement> elementData, Func<TElement, TKey> indexSelector, IComparer<TKey> comparer)
++        protected static TElement[] CloneAndSortBy<TElement, TKey>(IList<TElement> elementData, Func<TElement, TKey> indexSelector, IComparer<TKey> comparer)
+         {
+             var array = new TElement[elementData.Count];
+             var sortSource = new TKey[elementData.Count];
+@@ -20,7 +20,7 @@ namespace MasterMemory
+             return array;
+         }
+ 
+-        static protected List<TElement> RemoveCore<TElement, TKey>(TElement[] array, TKey[] keys, Func<TElement, TKey> keySelector, IComparer<TKey> comparer)
++        protected static List<TElement> RemoveCore<TElement, TKey>(TElement[] array, TKey[] keys, Func<TElement, TKey> keySelector, IComparer<TKey> comparer)
+         {
+             var removeIndexes = new HashSet<int>();
+             foreach (var key in keys)
+@@ -44,7 +44,7 @@ namespace MasterMemory
+             return newList;
+         }
+ 
+-        static protected List<TElement> DiffCore<TElement, TKey>(TElement[] array, TElement[] addOrReplaceData, Func<TElement, TKey> keySelector, IComparer<TKey> comparer)
++        protected static List<TElement> DiffCore<TElement, TKey>(TElement[] array, TElement[] addOrReplaceData, Func<TElement, TKey> keySelector, IComparer<TKey> comparer)
+         {
+             var newList = new List<TElement>(array.Length);
+             var replaceIndexes = new Dictionary<int, TElement>();
+diff --git a/src/MasterMemory/Internal/BinarySearch.cs b/src/MasterMemory/Internal/BinarySearch.cs
+index 19af7a5..0684eba 100644
+--- a/src/MasterMemory/Internal/BinarySearch.cs
++++ b/src/MasterMemory/Internal/BinarySearch.cs
+@@ -37,6 +37,7 @@ namespace MasterMemory.Internal
+             while (lo <= hi)
+             {
+                 var mid = (int)(((uint)hi + (uint)lo) >> 1);
++
+                 // compare inlining
+                 var selectedValue = selector(array[mid]);
+                 var found = (selectedValue < key) ? -1 : (selectedValue > key) ? 1 : 0;
+@@ -144,10 +145,9 @@ namespace MasterMemory.Internal
+                 : -1;
+         }
+ 
+-
+-        //... want the lowest index of  Key <= Value
+-        //... returns 0 if key is <= all values in array
+-        //... returns array.Length if key is > all values in array
++        // ... want the lowest index of  Key <= Value
++        // ... returns 0 if key is <= all values in array
++        // ... returns array.Length if key is > all values in array
+ 
+         public static int LowerBoundClosest<T, TKey>(T[] array, int lo, int hi, TKey key, Func<T, TKey> selector, IComparer<TKey> comparer)
+         {
+@@ -156,21 +156,22 @@ namespace MasterMemory.Internal
+                 var mid = lo + ((hi - lo) >> 1);
+                 var found = comparer.Compare(key, selector(array[mid]));
+ 
+-                if (found <= 0)     //... Key is <= value at mid
++                if (found <= 0)
+                 {
++                    // ... Key is <= value at mid
+                     hi = mid;
+                 }
+                 else
+                 {
+-                    lo = mid + 1;   //... Notice that lo starts at zero and can only increase
++                    lo = mid + 1;   // ... Notice that lo starts at zero and can only increase
+                 }
+             }
+ 
+-            var index = lo;         //... index will always be zero or greater
++            var index = lo;         // ... index will always be zero or greater
+ 
+-            if ( array.Length <= index)
++            if (array.Length <= index)
+             {
+-               return array.Length;
++                return array.Length;
+             }
+ 
+             // check final
+@@ -179,10 +180,9 @@ namespace MasterMemory.Internal
+                 : -1;
+         }
+ 
+- 
+-        //... want the highest index of  Key >= Value
+-        //... returns -1 if key is < than all values in array
+-        //... returns array.Length - 1 if key is >= than all values in array
++        // ... want the highest index of  Key >= Value
++        // ... returns -1 if key is < than all values in array
++        // ... returns array.Length - 1 if key is >= than all values in array
+ 
+         public static int UpperBoundClosest<T, TKey>(T[] array, int lo, int hi, TKey key, Func<T, TKey> selector, IComparer<TKey> comparer)
+         {
+@@ -191,9 +191,10 @@ namespace MasterMemory.Internal
+                 var mid = lo + ((hi - lo) >> 1);
+                 var found = comparer.Compare(key, selector(array[mid]));
+ 
+-                if (found >= 0)     //... Key >= value at mid
++                if (found >= 0)
+                 {
+-                    lo = mid + 1;   //... Note lo starts at zero and can only increase
++                    // ... Key >= value at mid
++                    lo = mid + 1;   // ... Note lo starts at zero and can only increase
+                 }
+                 else
+                 {
+@@ -201,11 +202,11 @@ namespace MasterMemory.Internal
+                 }
+             }
+ 
+-            var index = (lo == 0) ? 0 : lo - 1;   //... index will always be zero or greater
++            var index = (lo == 0) ? 0 : lo - 1;   // ... index will always be zero or greater
+ 
+-            if ( index >= array.Length )
++            if (index >= array.Length)
+             {
+-               return array.Length;
++                return array.Length;
+             }
+ 
+             // check final
+@@ -213,8 +214,5 @@ namespace MasterMemory.Internal
+                 ? index
+                 : -1;
+         }
+-
+-
+-
+     }
+ }
+\ No newline at end of file
+diff --git a/src/MasterMemory/Internal/ByteBufferWriter.cs b/src/MasterMemory/Internal/ByteBufferWriter.cs
+index 73a215d..9e7eae3 100644
+--- a/src/MasterMemory/Internal/ByteBufferWriter.cs
++++ b/src/MasterMemory/Internal/ByteBufferWriter.cs
+@@ -25,7 +25,7 @@ namespace MasterMemory
+ 
+         public Memory<byte> GetMemory(int sizeHint = 0)
+         {
+-            AGAIN:
++        AGAIN:
+             var nextSize = index + sizeHint;
+             if (buffer.Length < nextSize)
+             {
+diff --git a/src/MasterMemory/Internal/HeaderFormatterResolver.cs b/src/MasterMemory/Internal/HeaderFormatterResolver.cs
+index ace38fd..cab63ad 100644
+--- a/src/MasterMemory/Internal/HeaderFormatterResolver.cs
++++ b/src/MasterMemory/Internal/HeaderFormatterResolver.cs
+@@ -34,7 +34,7 @@ namespace MasterMemory.Internal
+         }
+     }
+ 
+-    internal sealed class IntIntValueTupleFormatter : IMessagePackFormatter<ValueTuple<int, int>>
++    internal sealed class IntIntValueTupleFormatter : IMessagePackFormatter<(int, int)>
+     {
+         public void Serialize(ref MessagePackWriter writer, (int, int) value, MessagePackSerializerOptions options)
+         {
+diff --git a/src/MasterMemory/MemoryDatabaseBase.cs b/src/MasterMemory/MemoryDatabaseBase.cs
+index 1b1bb17..d5d4844 100644
+--- a/src/MasterMemory/MemoryDatabaseBase.cs
++++ b/src/MasterMemory/MemoryDatabaseBase.cs
+@@ -1,12 +1,12 @@
+ ﻿using MasterMemory.Internal;
++using MasterMemory.Validation;
+ using MessagePack;
+ using MessagePack.Formatters;
+ using System;
++using System.Buffers;
+ using System.Collections.Generic;
+-using System.Reflection;
+ using System.Linq;
+-using System.Buffers;
+-using MasterMemory.Validation;
++using System.Reflection;
+ 
+ namespace MasterMemory
+ {
+@@ -14,7 +14,6 @@ namespace MasterMemory
+     {
+         protected MemoryDatabaseBase()
+         {
+-
+         }
+ 
+         public MemoryDatabaseBase(byte[] databaseBinary, bool internString = true, IFormatterResolver? formatterResolver = null, int maxDegreeOfParallelism = 1)
+@@ -86,6 +85,7 @@ namespace MasterMemory
+     {
+         public string TableName { get; }
+         public int Size { get; }
++
+         byte[]? binaryData;
+ 
+         public TableInfo(string tableName, int size, byte[]? rawBinary, int offset)
+diff --git a/src/MasterMemory/Meta/Meta.cs b/src/MasterMemory/Meta/Meta.cs
+index f341852..823bd72 100644
+--- a/src/MasterMemory/Meta/Meta.cs
++++ b/src/MasterMemory/Meta/Meta.cs
+@@ -1,6 +1,6 @@
+ ﻿using System;
+-using System.Linq;
+ using System.Collections.Generic;
++using System.Linq;
+ using System.Reflection;
+ using System.Text;
+ 
+@@ -75,7 +75,7 @@ namespace MasterMemory.Meta
+         }
+ 
+         /// <summary>
+-        /// MyProperty -> myProperty
++        /// MyProperty -> myProperty.
+         /// </summary>
+         static string ToCamelCase(string s)
+         {
+@@ -101,15 +101,16 @@ namespace MasterMemory.Meta
+             {
+                 var c = s[i];
+ 
+-                if (Char.IsUpper(c))
++                if (char.IsUpper(c))
+                 {
+                     // first
+                     if (i == 0)
+                     {
+                         sb.Append(char.ToLowerInvariant(c));
+                     }
+-                    else if (char.IsUpper(s[i - 1])) // WriteIO => write_io
++                    else if (char.IsUpper(s[i - 1]))
+                     {
++                        // WriteIO => write_io
+                         sb.Append(char.ToLowerInvariant(c));
+                     }
+                     else
+diff --git a/src/MasterMemory/RangeView.cs b/src/MasterMemory/RangeView.cs
+index e59e38a..4b03893 100644
+--- a/src/MasterMemory/RangeView.cs
++++ b/src/MasterMemory/RangeView.cs
+@@ -116,6 +116,7 @@ namespace MasterMemory
+             {
+                 return this[index];
+             }
++
+             set
+             {
+                 throw new NotImplementedException();
+diff --git a/src/MasterMemory/TableBase.cs b/src/MasterMemory/TableBase.cs
+index ecbd896..61c65d1 100644
+--- a/src/MasterMemory/TableBase.cs
++++ b/src/MasterMemory/TableBase.cs
+@@ -14,6 +14,7 @@ namespace MasterMemory
+         public int Count => data.Length;
+         public RangeView<TElement> All => new RangeView<TElement>(data, 0, data.Length - 1, true);
+         public RangeView<TElement> AllReverse => new RangeView<TElement>(data, 0, data.Length - 1, false);
++
+         public TElement[] GetRawDataUnsafe() => data;
+ 
+         public TableBase(TElement[] sortedData)
+@@ -23,7 +24,7 @@ namespace MasterMemory
+ 
+         // Validate
+ 
+-        static protected void ValidateUniqueCore<TKey>(TElement[] indexArray, Func<TElement, TKey> keySelector, string message, ValidateResult resultSet)
++        protected static void ValidateUniqueCore<TKey>(TElement[] indexArray, Func<TElement, TKey> keySelector, string message, ValidateResult resultSet)
+         {
+             var set = new HashSet<TKey>();
+             foreach (var item in indexArray)
+@@ -52,14 +53,14 @@ namespace MasterMemory
+             return array;
+         }
+ 
+-        static protected TElement ThrowKeyNotFound<TKey>(TKey key)
++        protected static TElement ThrowKeyNotFound<TKey>(TKey key)
+         {
+             throw new KeyNotFoundException("DataType: " + typeof(TElement).FullName + ", Key: " + key?.ToString());
+         }
+ 
+         // Unique
+ 
+-        static protected TElement FindUniqueCore<TKey>(TElement[] indexArray, Func<TElement, TKey> keySelector, IComparer<TKey> comparer, TKey key, bool throwIfNotFound = true)
++        protected static TElement FindUniqueCore<TKey>(TElement[] indexArray, Func<TElement, TKey> keySelector, IComparer<TKey> comparer, TKey key, bool throwIfNotFound = true)
+         {
+             var index = BinarySearch.FindFirst(indexArray, key, keySelector, comparer);
+             if (index != -1)
+@@ -77,7 +78,7 @@ namespace MasterMemory
+         }
+ 
+         // Optimize for IntKey
+-        static protected TElement FindUniqueCoreInt(TElement[] indexArray, Func<TElement, int> keySelector, IComparer<int> _, int key, bool throwIfNotFound = true)
++        protected static TElement FindUniqueCoreInt(TElement[] indexArray, Func<TElement, int> keySelector, IComparer<int> _, int key, bool throwIfNotFound = true)
+         {
+             var index = BinarySearch.FindFirstIntKey(indexArray, key, keySelector);
+             if (index != -1)
+@@ -94,7 +95,7 @@ namespace MasterMemory
+             }
+         }
+ 
+-        static protected bool TryFindUniqueCore<TKey>(TElement[] indexArray, Func<TElement, TKey> keySelector, IComparer<TKey> comparer, TKey key, out TElement result)
++        protected static bool TryFindUniqueCore<TKey>(TElement[] indexArray, Func<TElement, TKey> keySelector, IComparer<TKey> comparer, TKey key, out TElement result)
+         {
+             var index = BinarySearch.FindFirst(indexArray, key, keySelector, comparer);
+             if (index != -1)
+@@ -109,7 +110,7 @@ namespace MasterMemory
+             }
+         }
+ 
+-        static protected bool TryFindUniqueCoreInt(TElement[] indexArray, Func<TElement, int> keySelector, IComparer<int> _, int key, out TElement result)
++        protected static bool TryFindUniqueCoreInt(TElement[] indexArray, Func<TElement, int> keySelector, IComparer<int> _, int key, out TElement result)
+         {
+             var index = BinarySearch.FindFirstIntKey(indexArray, key, keySelector);
+             if (index != -1)
+@@ -124,26 +125,26 @@ namespace MasterMemory
+             }
+         }
+ 
+-        static protected TElement? FindUniqueClosestCore<TKey>(TElement[] indexArray, Func<TElement, TKey> keySelector, IComparer<TKey> comparer, TKey key, bool selectLower)
++        protected static TElement? FindUniqueClosestCore<TKey>(TElement[] indexArray, Func<TElement, TKey> keySelector, IComparer<TKey> comparer, TKey key, bool selectLower)
+         {
+             var index = BinarySearch.FindClosest(indexArray, 0, indexArray.Length, key, keySelector, comparer, selectLower);
+             return (index != -1) ? indexArray[index] : default(TElement);
+         }
+ 
+-        static protected RangeView<TElement> FindUniqueRangeCore<TKey>(TElement[] indexArray, Func<TElement, TKey> keySelector, IComparer<TKey> comparer, TKey min, TKey max, bool ascendant)
++        protected static RangeView<TElement> FindUniqueRangeCore<TKey>(TElement[] indexArray, Func<TElement, TKey> keySelector, IComparer<TKey> comparer, TKey min, TKey max, bool ascendant)
+         {
+             var lo = BinarySearch.FindClosest(indexArray, 0, indexArray.Length, min, keySelector, comparer, false);
+             var hi = BinarySearch.FindClosest(indexArray, 0, indexArray.Length, max, keySelector, comparer, true);
+ 
+-            if ( lo == -1 ) lo = 0;
+-            if ( hi == indexArray.Length ) hi -= 1;
++            if (lo == -1) lo = 0;
++            if (hi == indexArray.Length) hi -= 1;
+ 
+             return new RangeView<TElement>(indexArray, lo, hi, ascendant);
+         }
+ 
+         // Many
+ 
+-        static protected RangeView<TElement> FindManyCore<TKey>(TElement[] indexKeys, Func<TElement, TKey> keySelector, IComparer<TKey> comparer, TKey key)
++        protected static RangeView<TElement> FindManyCore<TKey>(TElement[] indexKeys, Func<TElement, TKey> keySelector, IComparer<TKey> comparer, TKey key)
+         {
+             var lo = BinarySearch.LowerBound(indexKeys, 0, indexKeys.Length, key, keySelector, comparer);
+             if (lo == -1) return RangeView<TElement>.Empty;
+@@ -154,39 +155,39 @@ namespace MasterMemory
+             return new RangeView<TElement>(indexKeys, lo, hi, true);
+         }
+ 
+-        static protected RangeView<TElement> FindManyClosestCore<TKey>(TElement[] indexArray, Func<TElement, TKey> keySelector, IComparer<TKey> comparer, TKey key, bool selectLower)
++        protected static RangeView<TElement> FindManyClosestCore<TKey>(TElement[] indexArray, Func<TElement, TKey> keySelector, IComparer<TKey> comparer, TKey key, bool selectLower)
+         {
+             var closest = BinarySearch.FindClosest(indexArray, 0, indexArray.Length, key, keySelector, comparer, selectLower);
+ 
+-            if ((closest == -1) || ( closest >= indexArray.Length ))
++            if ((closest == -1) || (closest >= indexArray.Length))
+                 return RangeView<TElement>.Empty;
+ 
+             return FindManyCore(indexArray, keySelector, comparer, keySelector(indexArray[closest]));
+         }
+ 
+-        static protected RangeView<TElement> FindManyRangeCore<TKey>(TElement[] indexArray, Func<TElement, TKey> keySelector, IComparer<TKey> comparer, TKey min, TKey max, bool ascendant)
++        protected static RangeView<TElement> FindManyRangeCore<TKey>(TElement[] indexArray, Func<TElement, TKey> keySelector, IComparer<TKey> comparer, TKey min, TKey max, bool ascendant)
+         {
+-            //... Empty set when min > max
+-            //... Alternatively, could treat this as between and swap min and max.
++            // ... Empty set when min > max
++            // ... Alternatively, could treat this as between and swap min and max.
+ 
+-            if ( Comparer<TKey>.Default.Compare( min, max ) > 0 )
+-               return RangeView<TElement>.Empty;
++            if (Comparer<TKey>.Default.Compare(min, max) > 0)
++                return RangeView<TElement>.Empty;
+ 
+-            //... want lo to be the lowest  index of the values >= than min.
+-            //... lo should be in the range [0,arraylength]
++            // ... want lo to be the lowest  index of the values >= than min.
++            // ... lo should be in the range [0,arraylength]
+ 
+-            var lo = BinarySearch.LowerBoundClosest(indexArray, 0, indexArray.Length, min, keySelector, comparer );
++            var lo = BinarySearch.LowerBoundClosest(indexArray, 0, indexArray.Length, min, keySelector, comparer);
+ 
+-            //... want hi to be the highest index of the values <= than max
+-            //... hi should be in the range [-1,arraylength-1]
++            // ... want hi to be the highest index of the values <= than max
++            // ... hi should be in the range [-1,arraylength-1]
+ 
+-            var hi = BinarySearch.UpperBoundClosest(indexArray, 0, indexArray.Length, max, keySelector, comparer );
++            var hi = BinarySearch.UpperBoundClosest(indexArray, 0, indexArray.Length, max, keySelector, comparer);
+ 
+-            Debug.Assert( lo >= 0 );
+-            Debug.Assert( hi < indexArray.Length );
++            Debug.Assert(lo >= 0);
++            Debug.Assert(hi < indexArray.Length);
+ 
+-            if ( hi < lo )
+-               return RangeView<TElement>.Empty;
++            if (hi < lo)
++                return RangeView<TElement>.Empty;
+ 
+             return new RangeView<TElement>(indexArray, lo, hi, ascendant);
+         }
+diff --git a/src/MasterMemory/Validation/ExpressionDumper.cs b/src/MasterMemory/Validation/ExpressionDumper.cs
+index a5eebc7..eb33272 100644
+--- a/src/MasterMemory/Validation/ExpressionDumper.cs
++++ b/src/MasterMemory/Validation/ExpressionDumper.cs
+@@ -1,6 +1,6 @@
+ ﻿using System;
+-using System.Linq;
+ using System.Collections.Generic;
++using System.Linq;
+ using System.Linq.Expressions;
+ using System.Reflection;
+ using System.Text;
+diff --git a/src/MasterMemory/Validation/ReferenceSet.cs b/src/MasterMemory/Validation/ReferenceSet.cs
+index 963c8c1..8c8fa8e 100644
+--- a/src/MasterMemory/Validation/ReferenceSet.cs
++++ b/src/MasterMemory/Validation/ReferenceSet.cs
+@@ -1,6 +1,6 @@
+ ﻿using System;
+-using System.Linq;
+ using System.Collections.Generic;
++using System.Linq;
+ using System.Linq.Expressions;
+ 
+ namespace MasterMemory.Validation
+diff --git a/tests/MasterMemory.SourceGenerator.Tests/AssemblyAtrributeTest.cs b/tests/MasterMemory.SourceGenerator.Tests/AssemblyAtrributeTest.cs
+index a9dbf53..1143dbd 100644
+--- a/tests/MasterMemory.SourceGenerator.Tests/AssemblyAtrributeTest.cs
++++ b/tests/MasterMemory.SourceGenerator.Tests/AssemblyAtrributeTest.cs
+@@ -24,7 +24,6 @@ public class Item
+         mainCode.ShouldContain("public sealed partial class ItemTable");
+     }
+ 
+-
+     [Fact]
+     public void FullOptions()
+     {
+diff --git a/tests/MasterMemory.Tests/BinarySearchTest.cs b/tests/MasterMemory.Tests/BinarySearchTest.cs
+index f1e3e7a..711f66f 100644
+--- a/tests/MasterMemory.Tests/BinarySearchTest.cs
++++ b/tests/MasterMemory.Tests/BinarySearchTest.cs
+@@ -1,4 +1,5 @@
+ ﻿using MasterMemory.Internal;
++using MessagePack;
+ using MessagePack.Resolvers;
+ using System;
+ using System.Collections.Generic;
+@@ -6,7 +7,6 @@ using System.Linq;
+ using System.Text;
+ using System.Threading.Tasks;
+ using Xunit;
+-using MessagePack;
+ 
+ namespace MasterMemory.Tests
+ {
+@@ -84,7 +84,8 @@ namespace MasterMemory.Tests
+             };
+ 
+             BinarySearch.FindClosest(source, 0, source.Length, -100, x => x.bound, Comparer<int>.Default, true).ShouldBe(-1);
+-//          BinarySearch.FindClosest(source, 0, source.Length, -100, x => x.bound, Comparer<int>.Default, true).ShouldBe(0);
++
++            //          BinarySearch.FindClosest(source, 0, source.Length, -100, x => x.bound, Comparer<int>.Default, true).ShouldBe(0);
+             BinarySearch.FindClosest(source, 0, source.Length, 0, x => x.bound, Comparer<int>.Default, true).ShouldBe(0);
+             BinarySearch.FindClosest(source, 0, source.Length, 10, x => x.bound, Comparer<int>.Default, true).ShouldBe(0);
+             BinarySearch.FindClosest(source, 0, source.Length, 50, x => x.bound, Comparer<int>.Default, true).ShouldBe(0);
+@@ -98,8 +99,8 @@ namespace MasterMemory.Tests
+             source[BinarySearch.FindClosest(source, 0, source.Length, 1000, x => x.bound, Comparer<int>.Default, true)].id.ShouldBe(5);
+             source[BinarySearch.FindClosest(source, 0, source.Length, 1001, x => x.bound, Comparer<int>.Default, true)].id.ShouldBe(5);
+             source[BinarySearch.FindClosest(source, 0, source.Length, 10000, x => x.bound, Comparer<int>.Default, true)].id.ShouldBe(5);
+-//          source[BinarySearch.FindClosest(source, 0, source.Length, 10000, x => x.bound, Comparer<int>.Default, false)].id.ShouldBe(5);
+- 
++            //          source[BinarySearch.FindClosest(source, 0, source.Length, 10000, x => x.bound, Comparer<int>.Default, false)].id.ShouldBe(5);
++
+             BinarySearch.FindClosest(source, 0, source.Length, 10000, x => x.bound, Comparer<int>.Default, false).ShouldBe(6);
+         }
+     }
+diff --git a/tests/MasterMemory.Tests/IssueTest.cs b/tests/MasterMemory.Tests/IssueTest.cs
+index f2a1205..62ca4fb 100644
+--- a/tests/MasterMemory.Tests/IssueTest.cs
++++ b/tests/MasterMemory.Tests/IssueTest.cs
+@@ -9,9 +9,9 @@ namespace MasterMemory.Tests
+ {
+     public class IssueTest
+     {
+-        //[Fact]
+-        //public void Issue49()
+-        //{
++        // [Fact]
++        // public void Issue49()
++        // {
+         //    var builder = new DatabaseBuilder().Append(new[]
+         //    {
+         //        new PersonModel { FirstName = "realname", LastName="reallast" },
+@@ -26,7 +26,7 @@ namespace MasterMemory.Tests
+ 
+         //    var firstIs = firstEntry.FirstName;
+ 
+-        //}
++        // }
+ 
+         Sample[] CreateData()
+         {
+@@ -61,6 +61,5 @@ namespace MasterMemory.Tests
+             db.SampleTable.FindRangeByAge(30, 50).Select(x => x.Id).ToArray().ShouldBeEquivalentTo(new int[] { 7, 8 });
+             db.SampleTable.FindRangeByAge(100, 100).Select(x => x.Id).ToArray().ShouldBeEquivalentTo(new int[] { });
+         }
+-
+     }
+ }
+diff --git a/tests/MasterMemory.Tests/MemoryKeyTest.cs b/tests/MasterMemory.Tests/MemoryKeyTest.cs
+index 8df9b93..32f7278 100644
+--- a/tests/MasterMemory.Tests/MemoryKeyTest.cs
++++ b/tests/MasterMemory.Tests/MemoryKeyTest.cs
+@@ -1,9 +1,9 @@
+ ﻿#pragma warning disable
+-using Xunit;
+-using System.Linq;
+ using MasterMemory.Tests.Tables;
+ using MessagePack;
+ using System.Collections.Generic;
++using System.Linq;
++using Xunit;
+ 
+ namespace MasterMemory.Tests
+ {
+diff --git a/tests/MasterMemory.Tests/MemoryTest.cs b/tests/MasterMemory.Tests/MemoryTest.cs
+index 6521b99..2d485c1 100644
+--- a/tests/MasterMemory.Tests/MemoryTest.cs
++++ b/tests/MasterMemory.Tests/MemoryTest.cs
+@@ -86,7 +86,6 @@ namespace MasterMemory.Tests
+         {
+             var data = CreateData();
+             var table = CreateTable(data);
+-
+             {
+                 table.FindClosestByAge(56, true).First.Age.ShouldBe(49);
+                 table.FindClosestByAge(56, false).First.Age.ShouldBe(59);
+@@ -96,7 +95,8 @@ namespace MasterMemory.Tests
+                 for (int i = 0; i < 9; i++)
+                 {
+                     table.FindClosestByAge(i, selectLower: true).Count.ShouldBe(0);
+-//                  table.FindClosestByAge(i, selectLower: true).First.Age.ShouldBe(9);
++
++                    //                  table.FindClosestByAge(i, selectLower: true).First.Age.ShouldBe(9);
+                 }
+ 
+                 var lastAge = 9;
+@@ -116,7 +116,8 @@ namespace MasterMemory.Tests
+                 for (int i = 100; i < 120; i++)
+                 {
+                     table.FindClosestByAge(i, selectLower: false).Count.ShouldBe(0);
+-//                  table.FindClosestByAge(i, selectLower: true).First.Age.ShouldBe(99);
++
++                    //                  table.FindClosestByAge(i, selectLower: true).First.Age.ShouldBe(99);
+                 }
+             }
+             {
+@@ -153,10 +154,10 @@ namespace MasterMemory.Tests
+             var table = CreateTable(data);
+ 
+             // Age of aaa
+-            //new Sample { Id = 5, Age = 19, FirstName = "aaa", LastName = "foo" },
+-            //new Sample { Id = 2, Age = 89, FirstName = "aaa", LastName = "bar" },
+-            //new Sample { Id = 4, Age = 89, FirstName = "aaa", LastName = "tako" },
+-            //new Sample { Id = 9, Age = 99, FirstName = "aaa", LastName = "ika" },
++            // new Sample { Id = 5, Age = 19, FirstName = "aaa", LastName = "foo" },
++            // new Sample { Id = 2, Age = 89, FirstName = "aaa", LastName = "bar" },
++            // new Sample { Id = 4, Age = 89, FirstName = "aaa", LastName = "tako" },
++            // new Sample { Id = 9, Age = 99, FirstName = "aaa", LastName = "ika" },
+ 
+             table.FindClosestByFirstNameAndAge(("aaa", 10), true).Count.ShouldBe(0);
+             table.FindClosestByFirstNameAndAge(("aaa", 10), false).First.Age.ShouldBe(19);
+diff --git a/tests/MasterMemory.Tests/RangeViewTest.cs b/tests/MasterMemory.Tests/RangeViewTest.cs
+index 948f1cc..0e82bc3 100644
+--- a/tests/MasterMemory.Tests/RangeViewTest.cs
++++ b/tests/MasterMemory.Tests/RangeViewTest.cs
+@@ -43,7 +43,6 @@ namespace MasterMemory.Tests
+                 range.IndexOf(5).ShouldBe(1);
+                 range.IndexOf(9).ShouldBe(-1);
+ 
+-
+                 range.Contains(5).ShouldBeTrue();
+                 range.Contains(9).ShouldBeFalse();
+             }
+diff --git a/tests/MasterMemory.Tests/TestStructures/TestMaster.cs b/tests/MasterMemory.Tests/TestStructures/TestMaster.cs
+index 586d673..fc37c49 100644
+--- a/tests/MasterMemory.Tests/TestStructures/TestMaster.cs
++++ b/tests/MasterMemory.Tests/TestStructures/TestMaster.cs
+@@ -1,4 +1,4 @@
+-using MessagePack;
++﻿using MessagePack;
+ using System;
+ using System.Collections.Generic;
+ using System.Text;
+diff --git a/tests/MasterMemory.Tests/TestStructures/UserLevel.cs b/tests/MasterMemory.Tests/TestStructures/UserLevel.cs
+index 5fb6bcc..e4b81d6 100644
+--- a/tests/MasterMemory.Tests/TestStructures/UserLevel.cs
++++ b/tests/MasterMemory.Tests/TestStructures/UserLevel.cs
+@@ -1,4 +1,4 @@
+-using MessagePack;
++﻿using MessagePack;
+ 
+ namespace MasterMemory.Tests
+ {
+@@ -12,7 +12,6 @@ namespace MasterMemory.Tests
+ 
+         public UserLevel()
+         {
+-
+         }
+ 
+         public UserLevel(int Level, int Exp)
+@@ -20,6 +19,5 @@ namespace MasterMemory.Tests
+             this.Level = Level;
+             this.Exp = Exp;
+         }
+-
+     }
+ }
+\ No newline at end of file
+diff --git a/tests/MasterMemory.Tests/ValidatorTest.cs b/tests/MasterMemory.Tests/ValidatorTest.cs
+index 620db54..866fccb 100644
+--- a/tests/MasterMemory.Tests/ValidatorTest.cs
++++ b/tests/MasterMemory.Tests/ValidatorTest.cs
+@@ -2,9 +2,9 @@
+ using MessagePack;
+ using System;
+ using System.Collections.Generic;
++using System.Linq;
+ using System.Text;
+ using Xunit;
+-using System.Linq;
+ 
+ namespace MasterMemory.Tests
+ {
+@@ -28,7 +28,6 @@ namespace MasterMemory.Tests
+ 
+         MemoryDatabase CreateDatabase(Fail[] data1)
+         {
+-
+             var bin = new DatabaseBuilder()
+                 .Append(data1)
+                 .Build();
+@@ -38,7 +37,6 @@ namespace MasterMemory.Tests
+ 
+         MemoryDatabase CreateDatabase(SingleMaster[] data1)
+         {
+-
+             var bin = new DatabaseBuilder()
+                 .Append(data1)
+                 .Build();
+@@ -48,7 +46,6 @@ namespace MasterMemory.Tests
+ 
+         MemoryDatabase CreateDatabase(SequentialCheckMaster[] data1)
+         {
+-
+             var bin = new DatabaseBuilder()
+                 .Append(data1)
+                 .Build();
+@@ -58,7 +55,6 @@ namespace MasterMemory.Tests
+ 
+         MemoryDatabase CreateDatabase(QuestMaster[] data1, ItemMaster[] data2)
+         {
+-
+             var bin = new DatabaseBuilder()
+                 .Append(data1)
+                 .Append(data2)
+@@ -69,7 +65,6 @@ namespace MasterMemory.Tests
+ 
+         MemoryDatabase CreateDatabase(QuestMasterEmptyValidate[] data1, ItemMasterEmptyValidate[] data2)
+         {
+-
+             var bin = new DatabaseBuilder()
+                 .Append(data1)
+                 .Append(data2)
+@@ -223,7 +218,6 @@ namespace MasterMemory.Tests
+                 new SingleMaster { Id = 4},
+             }).Validate();
+ 
+-
+             SingleMaster.CalledValidateCount.ShouldBe(4);
+             SingleMaster.CalledOnceCount.ShouldBe(1);
+         }

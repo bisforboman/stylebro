@@ -1,0 +1,24 @@
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+Generators: building MasterMemory.SourceGenerator first (in the default configuration, the one 'dotnet format' loads): the code uses it as a source generator, and without its output the generated code would be missing from the checks.
+'dotnet format' had warnings loading the workspace; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+Run 1: 38 files changed:
+  sandbox/Benchmark/Program.cs
+  sandbox/Benchmark/Utils/Helper.cs
+  sandbox/ConsoleApp/Program.cs
+  sandbox/GeneratorSandbox/Program.cs
+  sandbox/PerfTest2/Engines/ITest.cs
+  sandbox/PerfTest2/Engines/LiteDB_Test.cs
+  sandbox/PerfTest2/Engines/RavenDB_Test.cs
+  sandbox/PerfTest2/Engines/SQLite_Test.cs
+  sandbox/PerfTest2/Program.cs
+  sandbox/PerfTest2/Utils/Helper.cs
+  ... and 28 more
+Checked 9 projects (run 1 of 1)
+Run 2: 0 files changed, but not everything was checked (below).
+sandbox/PerfTest2/Generated/DatabaseBuilder.cs is generated and checked in: rebuild and commit it.
+sandbox/PerfTest2/Generated/ImmutableBuilder.cs is generated and checked in: rebuild and commit it.
+sandbox/PerfTest2/Generated/MasterMemoryResolver.cs is generated and checked in: rebuild and commit it.
+sandbox/PerfTest2/Generated/MemoryDatabase.cs is generated and checked in: rebuild and commit it.
+sandbox/PerfTest2/Generated/Tables/TestDocTable.cs is generated and checked in: rebuild and commit it.
+Not checked: MasterMemory.Tests in Release: it takes an in-solution source generator, so only a build checks that configuration ('bro check' builds it)
+Not verified: 1 part of the build wasn't checked (the 'Not checked:' line above); the rest is clean. The build may still report findings there: fix what's named, or build it (bro check --build).

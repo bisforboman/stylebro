@@ -1,0 +1,36 @@
+Fixing StyleBro's rules and the built-in rules init and migrate turn on (142 ids); --all applies every analyzer's and compiler fix.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net462, net472, netstandard2.0).
+Shared files: these projects compile the same files with other '#if' symbols or settings, so each group gets a run of its own (loaded together, 'dotnet format' crashes: https://github.com/dotnet/roslyn/issues/86001): log4net-611-main, log4net-672, log4net-673, log4net-681 and 1 more | log4net.Ext.Mail.Tests | log4net.Tests.
+Checked net472 (run 1 of 6)
+Checked net10.0, part 1 of 3 (run 2 of 6)
+Checked netstandard2.0 (run 3 of 6)
+Checked net10.0, part 3 of 3 (run 4 of 6)
+Checked net10.0, part 2 of 3 (run 5 of 6)
+Checked net462 (run 6 of 6)
+== net10.0, part 1 of 3 (5 project(s), 7 files with findings)
+'dotnet format' had warnings loading the workspace in its net10.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+== net10.0, part 2 of 3 (1 project(s), 24 files with findings)
+== net10.0, part 3 of 3 (1 project(s), 174 files with findings)
+== net462 (2 project(s), 252 files with findings)
+== netstandard2.0 (3 project(s), 256 files with findings)
+Run 1: 347 files changed:
+  integration-testing/log4net-611-lib/DerivedAppender.cs
+  integration-testing/log4net-611-main/Program.cs
+  integration-testing/log4net-672/Program.cs
+  integration-testing/log4net-673/Program.cs
+  log4net.Ext.Mail.Tests/Appender/FakeSmtpTransport.cs
+  log4net.Ext.Mail.Tests/Appender/SmtpAppenderTest.cs
+  log4net.Ext.Mail/Appender/Internal/ISmtpTransport.cs
+  log4net.Ext.Mail/Appender/Internal/MailKitSmtpTransport.cs
+  log4net.Ext.Mail/Appender/SmtpAppender.cs
+  log4net.Ext.Mail/Appender/SmtpTransportSecurity.cs
+  ... and 337 more
+Checked net472 (run 1 of 6)
+Checked net10.0, part 1 of 3 (run 2 of 6)
+Checked netstandard2.0 (run 3 of 6)
+Checked net10.0, part 3 of 3 (run 4 of 6)
+Checked net10.0, part 2 of 3 (run 5 of 6)
+Checked net462 (run 6 of 6)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

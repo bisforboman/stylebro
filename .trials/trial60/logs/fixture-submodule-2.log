@@ -1,0 +1,20 @@
+== Packing 0.0.0-fixture.20261029092725 into /home/user/fx60/b/feed
+/home/user/stylebro/src/StyleBro.Migrate/Conventions.cs(2119,1): warning BRO1517: Keep one blank line (https://bisforboman.github.io/stylebro/rules/BRO1517/) [/home/user/stylebro/src/StyleBro.Migrate/StyleBro.Migrate.csproj]
+You can invoke the tool using the following command: bro
+Tool 'stylebro.tool' (version '0.0.0-fixture.20261029092725') was successfully installed.
+== submodule-not-checked-out : a project compiles files from a git submodule that isn't checked out
+fatal: not a git repository (or any of the parent directories): .git
+  preview                      exit 0 (21 s)
+  init                         exit 0 (3 s)
+  host-format                  exit 0 (20 s)
+  host-check                   exit 0 (1 s)
+  host-check-build             exit 0 (16 s)
+  dotnet-format-format         exit 0 (24 s)
+  dotnet-format-check          exit 0 (1 s)
+  dotnet-format-check-build    exit 0 (16 s)
+  PASS submodule-not-checked-out (107 s)
+| Shape | Result | Time |
+| --- | --- | --- |
+| submodule-not-checked-out | pass | 107 s |
+Work folder: /home/user/fx60/b
+rc=0

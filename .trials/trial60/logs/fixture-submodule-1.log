@@ -1,0 +1,103 @@
+== Packing 0.0.0-fixture.20261029092434 into /home/user/fx60/a/feed
+/home/user/stylebro/src/StyleBro.Migrate/Conventions.cs(2119,1): warning BRO1517: Keep one blank line (https://bisforboman.github.io/stylebro/rules/BRO1517/) [/home/user/stylebro/src/StyleBro.Migrate/StyleBro.Migrate.csproj]
+You can invoke the tool using the following command: bro
+Tool 'stylebro.tool' (version '0.0.0-fixture.20261029092434') was successfully installed.
+== submodule-not-checked-out : a project compiles files from a git submodule that isn't checked out
+fatal: not a git repository (or any of the parent directories): .git
+  preview                      exit 0 (26 s)
+  init                         exit 0 (3 s)
+  host-format                  exit 0 (19 s)
+  host-check                   exit 0 (1 s)
+  host-check-build             exit 0 (16 s)
+  dotnet-format-format         exit 0 (25 s)
+  dotnet-format-check          exit 0 (1 s)
+  dotnet-format-check-build    exit 0 (14 s)
+  FAIL submodule-not-checked-out (113 s)
+    - host check didn't name the submodule:
+Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+Clean.
+
+    - dotnet-format check didn't name the submodule:
+Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+Clean.
+
+    --- build.txt (last 12 lines)
+        Determining projects to restore...
+        Restored /home/user/fx60/a/submodule-not-checked-out/host/src/Lib/Lib.csproj (in 526 ms).
+      /home/user/fx60/a/submodule-not-checked-out/host/src/Lib/Names.cs(5,36): error CS0103: The name 'Shared' does not exist in the current context [/home/user/fx60/a/submodule-not-checked-out/host/src/Lib/Lib.csproj]
+      
+      Build FAILED.
+      
+      /home/user/fx60/a/submodule-not-checked-out/host/src/Lib/Names.cs(5,36): error CS0103: The name 'Shared' does not exist in the current context [/home/user/fx60/a/submodule-not-checked-out/host/src/Lib/Lib.csproj]
+          0 Warning(s)
+          1 Error(s)
+      
+      Time Elapsed 00:00:02.50
+    --- dotnet-format-check-build.txt (last 12 lines)
+      Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+      Building Fixture.slnx in Debug, Release with warnings as errors, and a copy of HEAD to compare...
+      Debug: no findings, no new errors (1 error the untouched code has too, not counted).
+      Release: no findings, no new errors (1 error the untouched code has too, not counted).
+      Clean.
+    --- dotnet-format-check.txt (last 12 lines)
+      Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+      Clean.
+    --- dotnet-format-format.txt (last 12 lines)
+      Fixing StyleBro's rules and the built-in rules init and migrate turn on (141 ids); --all applies every analyzer's and compiler fix.
+      Missing: the git submodule lib/Shared isn't checked out: code that compiles files from there doesn't compile, so 'using' directives can look unused, and IDE0005 (unused usings) is left out. Run 'git submodule update --init' (or clone with --recursive), then run again.
+      Run 1: 1 file changed:
+        src/Lib/Calc.cs
+      Checked 1 project (run 1 of 1)
+      Run 2: 0 files changed, clean.
+    --- host-check-build.txt (last 12 lines)
+      Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+      Building Fixture.slnx in Debug, Release with warnings as errors, and a copy of HEAD to compare...
+      Debug: no findings, no new errors (1 error the untouched code has too, not counted).
+      Release: no findings, no new errors (1 error the untouched code has too, not counted).
+      Clean.
+    --- host-check.txt (last 12 lines)
+      Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+      Clean.
+    --- host-format.txt (last 12 lines)
+      Fixing StyleBro's rules and the built-in rules init and migrate turn on (141 ids); --all applies every analyzer's and compiler fix.
+      Missing: the git submodule lib/Shared isn't checked out: code that compiles files from there doesn't compile, so 'using' directives can look unused, and IDE0005 (unused usings) is left out. Run 'git submodule update --init' (or clone with --recursive), then run again.
+      Run 1: 1 file changed:
+        src/Lib/Calc.cs
+      Checked 1 project (run 1 of 1)
+      Run 2: 0 files changed, clean.
+    --- init.txt (last 12 lines)
+        too few  spacing, declared parameters: 1 of 1 'void F(int x)' -> default stays
+      Summary:
+        8 settings had fewer than 3 places to tell, StyleBro's defaults stay: csharp_new_line_before_open_brace,
+          stylebro_empty_string_style, dotnet_diagnostic.BRO1001.severity, dotnet_diagnostic.IDE0049.severity, end_of_line,
+          dotnet_diagnostic.BRO1505.severity, dotnet_diagnostic.BRO1306.severity,
+          csharp_space_between_method_declaration_parameter_list_parentheses.
+      
+      Wrote the built-in rule severities to .editorconfig.
+      Set the preset version in Directory.Build.props (<StyleBroPreset>1.0</StyleBroPreset>): rules of newer releases stay off until you raise it.
+      To report them on build too: <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> in Directory.Build.props.
+      Tip: --agents-md writes a StyleBro section into AGENTS.md for AI coding agents.
+      Next: run 'bro format'. Plain 'dotnet format' also applies every other analyzer's and the compiler's fixes.
+    --- preview.txt (last 12 lines)
+        IDE0036  Modifier order                               1 file
+      Sample (BRO1001, BRO1106, src/Lib/Calc.cs; BRO1509, IDE0036 changed this file too):
+        -    public string Name = "";
+        +    public static int Twice(int x)
+        +    {
+        +        return x * 2;
+        +    }
+      Sample (BRO1509, src/Lib/Calc.cs; BRO1001, BRO1106, IDE0036 changed this file too):
+        -    static public int Twice(int x) { return x * 2; }
+        +    public string Name = string.Empty;
+      Full diff: .git/stylebro-preview.patch (73 lines)
+      Done in 22s.
+| Shape | Result | Time |
+| --- | --- | --- |
+| submodule-not-checked-out | FAIL: host check didn't name the submodule:
+Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+Clean.
+<br>dotnet-format check didn't name the submodule:
+Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+Clean.
+ | 113 s |
+Work folder: /home/user/fx60/a

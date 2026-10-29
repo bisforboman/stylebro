@@ -1,0 +1,24 @@
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+Missing: the git submodule lib/AspNetCore isn't checked out: code that compiles files from there doesn't compile, so 'using' directives can look unused, and IDE0005 (unused usings) is left out. Run 'git submodule update --init' (or clone with --recursive), then run again.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net8.0, netstandard2.0).
+Checked netstandard2.0 (run 1 of 2)
+Checked net8.0 (run 2 of 2)
+== net8.0 (10 project(s), 17 files with findings)
+== netstandard2.0 (2 project(s), 4 files with findings)
+Run 1: 17 files changed:
+  samples/ProblemDetails.Mvc.Sample/Controllers/MvcController.cs
+  samples/ProblemDetails.Mvc.Sample/Program.cs
+  src/ProblemDetails/ExceptionProblemDetails.cs
+  src/ProblemDetails/MediaTypeCollectionExtensions.cs
+  src/ProblemDetails/Mvc/ProblemDetailsApplicationModelProvider.cs
+  src/ProblemDetails/Mvc/ProblemDetailsResultFilter.cs
+  src/ProblemDetails/Mvc/ProblemDetailsResultFilterConvention.cs
+  src/ProblemDetails/ProblemDetailsMiddleware.cs
+  src/ProblemDetails/ProblemDetailsOptions.cs
+  src/ProblemDetails/ProblemDetailsOptionsSetup.cs
+  ... and 7 more
+Checked netstandard2.0 (run 1 of 2)
+Checked net8.0 (run 2 of 2)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
