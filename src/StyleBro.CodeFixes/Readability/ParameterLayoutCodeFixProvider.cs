@@ -68,6 +68,7 @@ public sealed class ParameterLayoutCodeFixProvider : CodeFixProvider
         // too, in the same pass. Moving the first item alone could indent the line where it ends (a lambda's '}') deeper
         // than the next item's continuation lines, which BRO1108's move then left behind (Newtonsoft.Json).
         var allForFirst = Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.ParametersOnSameOrSeparateLines, cancellationToken);
+        var openMoves = Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.OpenParenthesisOnNameLine, cancellationToken);
 
         // One entry per list: its span, the position of its '(' and whether every item moves (BRO1108) or only the first.
         var remaining = diagnostics
@@ -96,7 +97,7 @@ public sealed class ParameterLayoutCodeFixProvider : CodeFixProvider
                         ? ParameterLayout.GetFirstMisplacedItem(node, currentText, JoinsEmptyLists, options) ?? ParameterLayout.GetFirstItemToMove(node, currentText, options, JoinsEmptyLists)
                         : ParameterLayout.GetFirstItemToMove(node, currentText, options, JoinsEmptyLists)) is not null)
                 {
-                    foreach (var change in ParameterLayout.GetChanges(node, currentText, indentUnit, firstOnly: !list.All, sameLine, Indentation.GetTabWidth(options)))
+                    foreach (var change in ParameterLayout.GetChanges(node, currentText, indentUnit, firstOnly: !list.All, sameLine, Indentation.GetTabWidth(options), openMoves))
                     {
                         changes[change.Span.Start] = change;
                     }

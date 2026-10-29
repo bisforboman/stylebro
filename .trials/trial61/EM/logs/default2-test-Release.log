@@ -1,0 +1,4 @@
+  Determining projects to restore...
+  Restored /home/user/w61/EM/default2/ExcelMapper.Tests/ExcelMapper.Tests.csproj (in 657 ms).
+  Restored /home/user/w61/EM/default2/ExcelMapper/ExcelMapper.csproj (in 666 ms).
+/root/.nuget/packages/npoi/2.8.1/build/NPOI.targets(8,5): warning : NPOI: You must accept the OSMF EULA license to use NPOI. Add <AcceptNPOIOSMFLicense>true</AcceptNPOIOSMFLicense> to your project file. [/home/user/w61/EM/default2/ExcelMapper/ExcelMapper.csproj::TargetFramework=net462]

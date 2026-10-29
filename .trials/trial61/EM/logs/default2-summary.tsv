@@ -1,0 +1,11 @@
+preview	0	96s	bro preview init
+setup	0	8s	bash -c printf "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"StyleBro.Analyzers\" Version=\"${V:-0.8.0-trial61.1}\" PrivateAssets=\"all\" />\n  </ItemGroup>\n</Project>\n" > Directory.Build.props && git add -N Directory.Build.props && git diff --stat && bro init --write
+format	0	80s	bro format
+check	0	1s	bro check
+check-json	0
+check-full	0	33s	bro check
+checkbuild	0	128s	bro check --build
+checkbuild-json	0
+twae-Debug	0	15s	twae Debug
+test-Debug	1	18s	env CFG=Debug bash -c dotnet test ExcelMapper.sln -c $CFG
+twae-Release	0	7s	twae Release

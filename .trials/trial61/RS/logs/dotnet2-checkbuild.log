@@ -7,3 +7,5 @@ Checked net8.0 (run 2 of 2)
 Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
 Building Respawn.sln in Debug, Release with warnings as errors, and a copy of HEAD to compare...
 Debug: no findings, no new errors.
+Release: no findings, no new errors.
+Clean.

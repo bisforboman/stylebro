@@ -96,11 +96,18 @@ internal static class ParameterLayout
     /// alone moves only the first item); everything else in the list stays as it is. With <paramref name="sameLine"/>, a first item on the opening parenthesis's line stays there,
     /// and moved items are indented like the first item that already starts a line (aligned under the first item, or
     /// one level deeper: whatever the list does), else one level deeper than the line with the parenthesis.
+    /// With <paramref name="openMoves"/> (BRO1109 moves a '(' that starts its line up to the name), that line is the name's,
+    /// as when BRO1109 runs first (trial 61, Respawn: run after BRO1109, the first item was indented from the '(' line).
     /// </summary>
-    public static IEnumerable<TextChange> GetChanges(SyntaxNode list, SourceText text, string indentUnit, bool firstOnly = false, bool sameLine = false, int tabWidth = 4)
+    public static IEnumerable<TextChange> GetChanges(SyntaxNode list, SourceText text, string indentUnit, bool firstOnly = false, bool sameLine = false, int tabWidth = 4, bool openMoves = false)
     {
         var (open, items) = GetList(list);
         var openLine = text.Lines.GetLineFromPosition(open.SpanStart);
+        if (openMoves && ParenthesisPlacement.GetMisplacedOpen(list, text) is not null)
+        {
+            openLine = text.Lines.GetLineFromPosition(open.GetPreviousToken().Span.End);
+        }
+
         var indentation = Indentation.InStyle(new string(text.ToString(openLine.Span).TakeWhile(c => c is ' ' or '\t').ToArray()), indentUnit, tabWidth) + indentUnit;
         if (sameLine && items.FirstOrDefault(i => Line(text, i.SpanStart) > Line(text, i.GetFirstToken().GetPreviousToken().Span.End)) is { } lineStart)
         {
@@ -141,8 +148,8 @@ internal static class ParameterLayout
 
         // Splitting the list: items that already started a line move to the same indentation as the moved ones, with
         // their later lines (Spectre.Console's TextPrompt: one item two levels deeper stayed there, a staircase); with
-        // same_line, the first such item's indentation. Not when the '(' starts its line: BRO1109 moves it up
-        // to the name, which changes the indentation the items get (BRO1105 measures the line as the fixes leave it).
+        // same_line, the first such item's indentation. Not when the '(' stays at the start of its line (BRO1109 off);
+        // when BRO1109 moves it up to the name, the indentation is already the name line's (openMoves).
         if (lineStarts is not null && openLine.Start + LeadingWhitespace(text, openLine).Length != open.SpanStart)
         {
             foreach (var item in lineStarts)

@@ -141,6 +141,8 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   1.2.0-beta.556 misses records/primary constructors (documented deviation) and has no working SA1117 fix. An item
   moved to its own line takes its later lines along (a lambda body; StyleCop #1620/#3183, 2026-10-04); nested split
   lists are fixed outer first, in rounds, so single fix and Fix All give the same result (no `batchFixedSource`).
+  A `(` that starts its line and that BRO1109 (on) moves up: the items are indented from the name's line, as if BRO1109
+  ran first (trial 61, Respawn: run first, BRO1107 indented the first item one level deeper than its neighbour).
 - **BRO1109** (SA1110) `(`/`[` on the name's line and **BRO1110** (SA1111) `)`/`]` on the last item's line
   (`Readability/ParenthesisPlacement.cs`, same list kinds as BRO1107). BRO1109 only for lists that belong to a name
   (declarations, calls, `new`, element access, attributes, constructor initializers; not lambdas); the fix swaps the

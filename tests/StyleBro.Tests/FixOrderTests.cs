@@ -2489,6 +2489,52 @@ public class FixOrderTests
         "BRO1114",
         "BRO1513");
 
+    // Trial 61 (Respawn): 'new GraphBuilder' / '(new HashSet<Table>(...),' / '    new HashSet<Relationship>(...));'. BRO1107 run
+    // first indented the first item from the '(' line, which BRO1109 then moved up; run after it, from the name's line.
+    [Fact]
+    public Task OpenParenthesisOnItsOwnLine_FirstItemIndentedFromTheName() => AssertConvergesInEveryOrderAsync(
+        """
+        using System.Collections.Generic;
+
+        public class GraphBuilder
+        {
+            public GraphBuilder(HashSet<int> a, HashSet<int> b)
+            {
+            }
+        }
+
+        public class GraphTests
+        {
+            public void M()
+            {
+                var a = 1;
+                var builder = new GraphBuilder
+                    (new HashSet<int>(new[] {a}), 
+                    new HashSet<int>());
+            }
+        }
+        """,
+        "BRO1107",
+        "BRO1109",
+        "IDE0055");
+
+    // The same with BRO1108: the items that already start a line get the name line's indentation in every order.
+    [Fact]
+    public Task OpenParenthesisOnItsOwnLine_SplitItemsIndentedFromTheName() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public void N
+                (int a, int b,
+                        int c)
+            {
+            }
+        }
+        """,
+        "BRO1108",
+        "BRO1109",
+        "IDE0055");
+
     [Fact]
     public Task EmptyParentheses_InsideASplitList() => AssertConvergesInEveryOrderAsync(
         """

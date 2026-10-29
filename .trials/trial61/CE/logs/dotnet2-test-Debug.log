@@ -1,0 +1,19 @@
+  Determining projects to restore...
+  Restored /home/user/w61/CE/dotnet2/Mono.Cecil.csproj (in 632 ms).
+  Restored /home/user/w61/CE/dotnet2/symbols/mdb/Mono.Cecil.Mdb.csproj (in 638 ms).
+  Restored /home/user/w61/CE/dotnet2/symbols/pdb/Mono.Cecil.Pdb.csproj (in 626 ms).
+  Restored /home/user/w61/CE/dotnet2/Test/Mono.Cecil.Tests.csproj (in 726 ms).
+  Restored /home/user/w61/CE/dotnet2/rocks/Mono.Cecil.Rocks.csproj (in 15 ms).
+  Restored /home/user/w61/CE/dotnet2/symbols/mdb/Test/Mono.Cecil.Mdb.Tests.csproj (in 128 ms).
+  Restored /home/user/w61/CE/dotnet2/symbols/pdb/Test/Mono.Cecil.Pdb.Tests.csproj (in 132 ms).
+  Restored /home/user/w61/CE/dotnet2/rocks/Test/Mono.Cecil.Rocks.Tests.csproj (in 125 ms).
+  Mono.Cecil -> /home/user/w61/CE/dotnet2/bin/Debug/netstandard2.0/Mono.Cecil.dll
+  Mono.Cecil.Mdb -> /home/user/w61/CE/dotnet2/symbols/mdb/bin/Debug/netstandard2.0/Mono.Cecil.Mdb.dll
+  Mono.Cecil.Pdb -> /home/user/w61/CE/dotnet2/symbols/pdb/bin/Debug/netstandard2.0/Mono.Cecil.Pdb.dll
+  Mono.Cecil.Rocks -> /home/user/w61/CE/dotnet2/rocks/bin/Debug/netstandard2.0/Mono.Cecil.Rocks.dll
+  Mono.Cecil.Tests -> /home/user/w61/CE/dotnet2/Test/bin/Debug/net8.0/Mono.Cecil.Tests.dll
+Test run for /home/user/w61/CE/dotnet2/Test/bin/Debug/net8.0/Mono.Cecil.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.

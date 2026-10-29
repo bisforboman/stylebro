@@ -39,6 +39,7 @@ Conventions in the code (a convention needs 3 places or more: below 10 they must
   kept     C# files' line endings: 35 of 37 LF -> lf
   off      statements after a block's '}': 139 after a blank line, 50 right below the '}' -> BRO1519 is off
   default  neighbouring members: 250 of 265 with a blank line between -> warning
+  default  types' and namespaces' '{': 68 of 68 right above the code -> warning
   too few  doc comments below code: 1 doc comment -> default stays (warning)
   default  '//' comments above code: 29 of 29 right above the code -> warning
   default  '//' comments below code: 16 of 16 after a blank line -> warning
@@ -57,9 +58,9 @@ Conventions in the code (a convention needs 3 places or more: below 10 they must
   default  spacing, call arguments: 1852 of 1852 'F(x)' -> 'F(x)'
   default  spacing, declared parameters: 120 of 120 'void F(int x)' -> 'void F(int x)'
 Summary:
-  Kept your style for 37 settings: wrote stylebro_private_field_naming, stylebro_allow_single_line_jump_statements,
+  Kept your style for 38 settings: wrote stylebro_private_field_naming, stylebro_allow_single_line_jump_statements,
     dotnet_style_operator_placement_when_wrapping, stylebro_trailing_comma, stylebro_null_check_style,
-    csharp_preserve_single_line_statements, end_of_line; 30 were already StyleBro's default.
+    csharp_preserve_single_line_statements, end_of_line; 31 were already StyleBro's default.
   Turned 5 rules off because your code mixes both forms: BRO1105 (': base(...)'/': this(...)'),
     BRO1001 (types' members), BRO1519 (statements after a block's '}'), BRO1603 (doc comment texts),
     IDE0055 (spacing: casts).
