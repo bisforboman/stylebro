@@ -506,7 +506,10 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   first version flagged 367 lines in Polly, which enforces SA1004);
   **BRO1120** (SA1120) empty `//`/`/* */` reported at the start/end of a group of consecutive comment lines (a comment
   after code starts a group; `////` isn't empty), the fix removes the whole empty run at that end (StyleCop one per
-  run). **BRO1121** (SA1136, `Readability/EnumValueLines.cs`) one enum value per line; a one-line enum gets BRO1509's
+  run); init counts the groups it checks with text, framed by an empty comment at an end or not
+  (`CommentText.GetGroupFraming`), and turns BRO1120 off when framing wins or the code mixes them (trial 62,
+  mono.linq.expressions: 4 of 11 framed, Mono style). **BRO1121** (SA1136, `Readability/EnumValueLines.cs`) one enum
+  value per line; a one-line enum gets BRO1509's
   expansion, and BRO1509 now puts every enum value on its own line (StyleCop's SA1502 fix leaves `A, B`, which its
   SA1136 then reports). `Layout/DocumentationBlankLines.cs`: **BRO1511** (SA1506) blank lines between docs and element,
   also between two `///` blocks; **BRO1512** (SA1511) blank before do-while's `while`; **BRO1513** (SA1514) blank line

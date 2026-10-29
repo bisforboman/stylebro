@@ -189,6 +189,7 @@ internal static class Conventions
     public static readonly IReadOnlyList<Convention> All = new Convention[]
     {
         new(StyleBro.Analyzers.Naming.FieldNames.StyleKey, "private fields", "camelCase", ("camelCase", "named 'field'"), ("_camelCase", "named '_field'"), Off(DiagnosticIds.PrivateFieldNaming)),
+        new(IndentStyleKey, "indentation", "space", ("space", "indented with spaces"), ("tab", "indented with tabs"), null) { Unit = "file" },
         new(SnakeFieldKey, "multi-word private fields", "warning", ("warning", "camelCase ('breakTarget')"), ("none", "snake_case ('break_target')"), Off(DiagnosticIds.FieldUnderscore)) { Unit = "field" },
         new("csharp_new_line_before_open_brace", "'{' of multi-line blocks", "all", ("all", "on its own line"), ("none", "at the end of the line"), null),
         new("csharp_new_line_before_else", "else/catch/finally after '}'", "true", ("true", "on a new line"), ("false", "on the '}' line"), null, "csharp_new_line_before_catch", "csharp_new_line_before_finally"),
@@ -239,6 +240,7 @@ internal static class Conventions
         new(AfterBlockKey, "statements after a block's '}'", "warning", ("warning", "after a blank line"), ("none", "right below the '}'"), Off(DiagnosticIds.BlankLineAfterCloseBrace)) { Unit = "statement" },
         new(NestedIfKey, "nested ifs BRO1149 would merge", "warning", ("warning", "merged ('if (a && b)')"), ("none", "nested"), Off(DiagnosticIds.NestedIf)) { Unit = "nested if", KeepAny = true, Keeps = $"{DiagnosticIds.NestedIf} would merge each" },
         new(SeparationKey, "neighbouring members", "warning", ("warning", "with a blank line between"), ("none", "without one"), Off(DiagnosticIds.ElementsSeparatedByBlankLine)) { Unit = "member pair" },
+        new(CommentFrameKey, "'//' comments in code", "warning", ("warning", "with text at both ends"), ("none", "framed by an empty '//'"), Off(DiagnosticIds.EmptyComment)) { Unit = "comment" },
         new(BraceBlankLineKey, "types' and namespaces' '{'", "warning", ("warning", "right above the code"), ("none", "with a blank line below"), Off(DiagnosticIds.BlankLineAfterOpenBrace)) { Unit = "brace" },
         new(DocBlankLineKey, "doc comments below code", "warning", ("warning", "after a blank line"), ("none", "right below the code"), Off(DiagnosticIds.BlankLineBeforeDocumentation)) { Unit = "doc comment" },
         new(CommentBlankLineKey, "'//' comments above code", "warning", ("warning", "right above the code"), ("none", "with a blank line below"), Off(DiagnosticIds.BlankLineAfterComment)) { Unit = "comment" },
@@ -422,6 +424,19 @@ internal static class Conventions
     /// decision 2026-10-29, trial 62: mono.linq.expressions names 11 of its 13 multi-word fields 'break_target' style, and
     /// BRO1308 renamed them). One-word names fit both and don't count.
     /// </summary>
+    /// <summary>
+    /// The SDK's indent_style, judged per file: most indented lines start with a tab, or with spaces (owner's decision
+    /// 2026-10-29, trial 62: mono.linq.expressions indents with tabs and has no .editorconfig, and BRO1107 indented its new
+    /// lines with spaces).
+    /// </summary>
+    private const string IndentStyleKey = "indent_style";
+
+    /// <summary>
+    /// BRO1120's severity, judged on the comment groups it checks: framed by an empty '//' line at an end, or not (owner's
+    /// decision 2026-10-29, trial 62: mono.linq.expressions frames 4 of its 11, Mono style, and BRO1120 removed the frames).
+    /// </summary>
+    private const string CommentFrameKey = "dotnet_diagnostic." + DiagnosticIds.EmptyComment + ".severity";
+
     private const string SnakeFieldKey = "dotnet_diagnostic." + DiagnosticIds.FieldUnderscore + ".severity";
 
     /// <summary>BRO1513's severity: doc comments right below code, or after a blank line (Kavita: 312 files changed).</summary>
@@ -1617,6 +1632,12 @@ internal static class Conventions
             MemberOrder();
             Separation();
             BraceBlankLines();
+            IndentStyle();
+            foreach (var framed in StyleBro.Analyzers.Readability.CommentText.GetGroupFraming(StyleBro.Analyzers.Readability.CommentText.GetComments(root), text))
+            {
+                Add(CommentFrameKey, framed);
+            }
+
             CommentBlankLines();
             CommentsBelowCode();
             Documentation();
@@ -2302,6 +2323,28 @@ internal static class Conventions
                 }
 
                 Add(BraceBlankLineKey, StyleBro.Analyzers.Layout.BlankLines.GetBlankLinesBelow(open, text).Count > 0);
+            }
+        }
+
+        // Unit = files with indented lines: most of them start with a tab, or with spaces.
+        void IndentStyle()
+        {
+            var (tabs, spaces) = (0, 0);
+            foreach (var line in text.Lines)
+            {
+                if (line.Span.Length > 0 && text[line.Start] == '\t')
+                {
+                    tabs++;
+                }
+                else if (line.Span.Length > 1 && text[line.Start] == ' ' && text[line.Start + 1] == ' ')
+                {
+                    spaces++;
+                }
+            }
+
+            if (tabs != spaces)
+            {
+                Add(IndentStyleKey, tabs > spaces);
             }
         }
 
