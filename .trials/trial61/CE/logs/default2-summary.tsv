@@ -4,3 +4,10 @@ format	0	121s	bro format
 check	0	1s	bro check
 check-json	0
 check-full	0	48s	bro check
+checkbuild	0	101s	bro check --build
+checkbuild-json	0
+twae-Debug	0	12s	twae Debug
+test-Debug	1	50s	env CFG=Debug bash -c dotnet test Mono.Cecil.sln -c $CFG -f net8.0
+twae-Release	0	13s	twae Release
+test-Release	1	44s	env CFG=Release bash -c dotnet test Mono.Cecil.sln -c $CFG -f net8.0
+DONE
