@@ -1,0 +1,11 @@
+== nj-build: dotnet build /home/user/cand62/ninject-Ninject/Ninject.sln -p:NuGetAudit=false (19:29:42)
+   exit 0 (19:30:25) 0 error lines
+== nj-test: bash -c cd /home/user/cand62/ninject-Ninject && timeout 900 dotnet test Ninject.sln --no-build -f net6.0 (19:30:25)
+   exit 1 (19:30:39) 0 error lines
+== ssc-build: dotnet build /home/user/cand62/serilog-serilog-settings-configuration/serilog-settings-configuration.sln -p:NuGetAudit=false (19:30:39)
+   exit 0 (19:30:53) 0 error lines
+== ssc-test: bash -c cd /home/user/cand62/serilog-serilog-settings-configuration && timeout 900 dotnet test serilog-settings-configuration.sln --no-build (19:30:53)
+   exit 0 (19:44:29) 0 error lines
+== rb-build: dotnet build /home/user/cand62/rebus-org-Rebus/Rebus8.sln -p:NuGetAudit=false (19:44:29)
+   exit 0 (19:44:54) 0 error lines
+== rb-test: bash -c cd /home/user/cand62/rebus-org-Rebus && timeout 1800 dotnet test Rebus.Tests --no-build (19:44:54)

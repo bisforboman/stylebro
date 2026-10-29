@@ -1,0 +1,37 @@
+Test run for /home/user/cand62/ninject-Ninject/src/Ninject.Tests/bin/Debug/net6.0/Ninject.Tests.dll (.NETCoreApp,Version=v6.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:02.53]     Ninject.Tests.Integration.StandardKernelTests.WhenTryGetIsCalledForServiceWithMultipleBindingsOfSameWeight.TryGet_ServiceAndNameAndParameters_ResolvesUsingFirstMatchingBindingWhenTypeIsNotSelfBinding [SKIP]
+[xUnit.net 00:00:02.53]     Ninject.Tests.Integration.StandardKernelTests.WhenTryGetIsCalledForServiceWithMultipleBindingsOfSameWeight.TryGet_ServiceAndConstraintAndParameters_ResolvesUsingFirstMatchingBindingWhenTypeIsSelfBinding [SKIP]
+[xUnit.net 00:00:02.54]     Ninject.Tests.Integration.StandardKernelTests.WhenTryGetIsCalledForServiceWithMultipleBindingsOfSameWeight.TryGet_ServiceAndConstraintAndParameters_ResolvesUsingFirstMatchingBindingWhenTypeIsNotSelfBindingAndNotGeneric [SKIP]
+[xUnit.net 00:00:02.54]     Ninject.Tests.Integration.StandardKernelTests.WhenTryGetIsCalledForServiceWithMultipleBindingsOfSameWeight.TryGet_ServiceAndNameAndParameters_ResolvesUsingFirstMatchingBindingWhenTypeIsSelfBinding [SKIP]
+  Skipped Ninject.Tests.Integration.StandardKernelTests.WhenTryGetIsCalledForServiceWithMultipleBindingsOfSameWeight.TryGet_ServiceAndNameAndParameters_ResolvesUsingFirstMatchingBindingWhenTypeIsNotSelfBinding [1 ms]
+  Skipped Ninject.Tests.Integration.StandardKernelTests.WhenTryGetIsCalledForServiceWithMultipleBindingsOfSameWeight.TryGet_ServiceAndConstraintAndParameters_ResolvesUsingFirstMatchingBindingWhenTypeIsSelfBinding [1 ms]
+  Skipped Ninject.Tests.Integration.StandardKernelTests.WhenTryGetIsCalledForServiceWithMultipleBindingsOfSameWeight.TryGet_ServiceAndConstraintAndParameters_ResolvesUsingFirstMatchingBindingWhenTypeIsNotSelfBindingAndNotGeneric [1 ms]
+  Skipped Ninject.Tests.Integration.StandardKernelTests.WhenTryGetIsCalledForServiceWithMultipleBindingsOfSameWeight.TryGet_ServiceAndNameAndParameters_ResolvesUsingFirstMatchingBindingWhenTypeIsSelfBinding [1 ms]
+[xUnit.net 00:00:03.04]     Ninject.Tests.Unit.ModuleLoaderTests.WhenLoadModulesIsCalled.PassesMatchingFilesToAppropriatePlugin [FAIL]
+  Failed Ninject.Tests.Unit.ModuleLoaderTests.WhenLoadModulesIsCalled.PassesMatchingFilesToAppropriatePlugin [12 ms]
+  Error Message:
+   Moq.MockException : 
+Expected invocation on the mock at least once, but was never performed: x => x.LoadModules(It.Is<IEnumerable<string>>(e => e.SequenceEqual<string>(fooFiles)))
+
+Performed invocations:
+
+   Mock<IModuleLoaderPlugin:1> (x):
+
+      IModuleLoaderPlugin.SupportedExtensions
+      IModuleLoaderPlugin.SupportedExtensions
+      IModuleLoaderPlugin.LoadModules(Grouping<string, string>)
+
+  Stack Trace:
+     at Moq.Mock.Verify(Mock mock, LambdaExpression expression, Times times, String failMessage) in C:\projects\moq4\src\Moq\Mock.cs:line 330
+   at Moq.Mock`1.Verify(Expression`1 expression) in C:\projects\moq4\src\Moq\Mock`1.cs:line 713
+   at Ninject.Tests.Unit.ModuleLoaderTests.WhenLoadModulesIsCalled.PassesMatchingFilesToAppropriatePlugin() in /home/user/cand62/ninject-Ninject/src/Ninject.Tests/Unit/ModuleLoaderTests.cs:line 48
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+[xUnit.net 00:00:04.81]     Ninject.Tests.Unit.Modules.NinjectModuleTests+WhenOnUnloadIsCalledAfterOnLoad.BindingsShouldCleared [SKIP]
+  Skipped Ninject.Tests.Unit.Modules.NinjectModuleTests+WhenOnUnloadIsCalledAfterOnLoad.BindingsShouldCleared [1 ms]
+
+Failed!  - Failed:     1, Passed:   748, Skipped:     5, Total:   754, Duration: 3 s - Ninject.Tests.dll (net6.0)

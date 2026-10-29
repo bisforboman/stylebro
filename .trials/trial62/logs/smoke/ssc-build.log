@@ -1,0 +1,25 @@
+  Determining projects to restore...
+  Restored /home/user/cand62/serilog-serilog-settings-configuration/test/TestDummies/TestDummies.csproj (in 1.81 sec).
+  Restored /home/user/cand62/serilog-serilog-settings-configuration/src/Serilog.Settings.Configuration/Serilog.Settings.Configuration.csproj (in 3.02 sec).
+  Restored /home/user/cand62/serilog-serilog-settings-configuration/sample/Sample/Sample.csproj (in 3.02 sec).
+  Restored /home/user/cand62/serilog-serilog-settings-configuration/test/Serilog.Settings.Configuration.Tests/Serilog.Settings.Configuration.Tests.csproj (in 3.06 sec).
+  TestDummies -> /home/user/cand62/serilog-serilog-settings-configuration/test/TestDummies/bin/Debug/netstandard2.0/TestDummies.dll
+  Serilog.Settings.Configuration -> /home/user/cand62/serilog-serilog-settings-configuration/src/Serilog.Settings.Configuration/bin/Debug/netstandard2.0/Serilog.Settings.Configuration.dll
+  Serilog.Settings.Configuration -> /home/user/cand62/serilog-serilog-settings-configuration/src/Serilog.Settings.Configuration/bin/Debug/net462/Serilog.Settings.Configuration.dll
+  Serilog.Settings.Configuration -> /home/user/cand62/serilog-serilog-settings-configuration/src/Serilog.Settings.Configuration/bin/Debug/net9.0/Serilog.Settings.Configuration.dll
+  Serilog.Settings.Configuration -> /home/user/cand62/serilog-serilog-settings-configuration/src/Serilog.Settings.Configuration/bin/Debug/net8.0/Serilog.Settings.Configuration.dll
+  TestDummies -> /home/user/cand62/serilog-serilog-settings-configuration/test/TestDummies/bin/Debug/net462/TestDummies.dll
+  Serilog.Settings.Configuration -> /home/user/cand62/serilog-serilog-settings-configuration/src/Serilog.Settings.Configuration/bin/Debug/net10.0/Serilog.Settings.Configuration.dll
+  Sample -> /home/user/cand62/serilog-serilog-settings-configuration/sample/Sample/bin/Debug/net8.0/Sample.dll
+  Sample -> /home/user/cand62/serilog-serilog-settings-configuration/sample/Sample/bin/Debug/net9.0/Sample.dll
+  Serilog.Settings.Configuration.Tests -> /home/user/cand62/serilog-serilog-settings-configuration/test/Serilog.Settings.Configuration.Tests/bin/Debug/net8.0/Serilog.Settings.Configuration.Tests.dll
+  Sample -> /home/user/cand62/serilog-serilog-settings-configuration/sample/Sample/bin/Debug/net10.0/Sample.dll
+  Serilog.Settings.Configuration.Tests -> /home/user/cand62/serilog-serilog-settings-configuration/test/Serilog.Settings.Configuration.Tests/bin/Debug/net9.0/Serilog.Settings.Configuration.Tests.dll
+  Serilog.Settings.Configuration.Tests -> /home/user/cand62/serilog-serilog-settings-configuration/test/Serilog.Settings.Configuration.Tests/bin/Debug/net10.0/Serilog.Settings.Configuration.Tests.dll
+  Sample -> /home/user/cand62/serilog-serilog-settings-configuration/sample/Sample/bin/Debug/net462/Sample.exe
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:13.92

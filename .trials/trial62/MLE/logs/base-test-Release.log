@@ -1,0 +1,13 @@
+  Determining projects to restore...
+  Restored /home/user/w62/MLE/base/Mono.Linq.Expressions.csproj (in 439 ms).
+  Restored /home/user/w62/MLE/base/dbg/dbg.csproj (in 442 ms).
+  Restored /home/user/w62/MLE/base/Test/Mono.Linq.Expressions.Tests.csproj (in 552 ms).
+  Mono.Linq.Expressions -> /home/user/w62/MLE/base/bin/Release/netstandard2.0/Mono.Linq.Expressions.dll
+  Mono.Linq.Expressions.Tests -> /home/user/w62/MLE/base/Test/bin/Release/netcoreapp2.1/Mono.Linq.Expressions.Tests.dll
+Test run for /home/user/w62/MLE/base/Test/bin/Release/netcoreapp2.1/Mono.Linq.Expressions.Tests.dll (.NETCoreApp,Version=v2.1)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    75, Skipped:     0, Total:    75, Duration: 22 ms - Mono.Linq.Expressions.Tests.dll (netcoreapp2.1)

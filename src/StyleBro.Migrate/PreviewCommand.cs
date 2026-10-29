@@ -1253,14 +1253,26 @@ internal static class PreviewCommand
 
     /// <summary>
     /// Rewrites a file (null text: it doesn't exist yet) keeping its UTF-8 byte order mark (File.ReadAllText drops it and
-    /// File.WriteAllText wouldn't write it back: Soulseek.NET's .csproj lost its BOM in the preview) and its line endings
+    /// File.WriteAllText wouldn't write it back: Soulseek.NET's .csproj lost its BOM in the preview), its encoding (a UTF-16
+    /// file read as UTF-8 came back UTF-8 and LF: mono.linq.expressions' Directory.Build.props, trial 62) and its line endings
     /// (<see cref="KeepLineEndings"/>). Every settings and project file the tool edits goes through here.
     /// </summary>
     public static void EditFile(string file, Func<string?, string> edit)
     {
         var bytes = File.Exists(file) ? File.ReadAllBytes(file) : null;
         var bom = bytes is [0xEF, 0xBB, 0xBF, ..];
-        var text = bytes is null ? null : Encoding.UTF8.GetString(bytes, bom ? 3 : 0, bytes.Length - (bom ? 3 : 0));
+        Encoding encoding = new UTF8Encoding(bom);
+        string? text = null;
+        if (bytes is not null)
+        {
+            using var reader = new StreamReader(new MemoryStream(bytes), new UTF8Encoding(false), detectEncodingFromByteOrderMarks: true);
+            text = reader.ReadToEnd();
+            if (reader.CurrentEncoding is not UTF8Encoding)
+            {
+                encoding = reader.CurrentEncoding;
+            }
+        }
+
         var edited = edit(text);
 
         // Never an empty MSBuild file: one with only whitespace breaks every build below it (an untracked src/Directory.Build.props
@@ -1270,7 +1282,7 @@ internal static class PreviewCommand
             return;
         }
 
-        File.WriteAllText(file, KeepLineEndings(text ?? FolderLineEnding(file), edited), new UTF8Encoding(bom));
+        File.WriteAllText(file, KeepLineEndings(text ?? FolderLineEnding(file), edited), encoding);
     }
 
     /// <summary>
