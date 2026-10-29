@@ -10,3 +10,27 @@ Checked net10.0, part 2 of 3 (run 5 of 6)
 Checked net462 (run 6 of 6)
 == net10.0, part 1 of 3 (5 project(s), 7 files with findings)
 'dotnet format' had warnings loading the workspace in its net10.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+== net10.0, part 2 of 3 (1 project(s), 24 files with findings)
+== net10.0, part 3 of 3 (1 project(s), 174 files with findings)
+== net462 (2 project(s), 252 files with findings)
+== netstandard2.0 (3 project(s), 256 files with findings)
+Run 1: 347 files changed:
+  integration-testing/log4net-611-lib/DerivedAppender.cs
+  integration-testing/log4net-611-main/Program.cs
+  integration-testing/log4net-672/Program.cs
+  integration-testing/log4net-673/Program.cs
+  log4net.Ext.Mail.Tests/Appender/FakeSmtpTransport.cs
+  log4net.Ext.Mail.Tests/Appender/SmtpAppenderTest.cs
+  log4net.Ext.Mail/Appender/Internal/ISmtpTransport.cs
+  log4net.Ext.Mail/Appender/Internal/MailKitSmtpTransport.cs
+  log4net.Ext.Mail/Appender/SmtpAppender.cs
+  log4net.Ext.Mail/Appender/SmtpTransportSecurity.cs
+  ... and 337 more
+Checked net472 (run 1 of 6)
+Checked net10.0, part 1 of 3 (run 2 of 6)
+Checked netstandard2.0 (run 3 of 6)
+Checked net10.0, part 3 of 3 (run 4 of 6)
+Checked net10.0, part 2 of 3 (run 5 of 6)
+Checked net462 (run 6 of 6)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

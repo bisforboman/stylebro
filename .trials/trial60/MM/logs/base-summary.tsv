@@ -1,0 +1,6 @@
+build	0	10s	dotnet build MasterMemory.sln -c Debug
+twae-Debug	0	18s	twae Debug
+test-Debug	0	20s	env CFG=Debug bash -c dotnet test MasterMemory.sln -c $CFG
+twae-Release	0	18s	twae Release
+test-Release	0	25s	env CFG=Release bash -c dotnet test MasterMemory.sln -c $CFG
+DONE

@@ -4,3 +4,5 @@ default start 07:03
 default start 07:27
 default done 07:44
 dotnet start 07:44
+L4N restarted after the worker restart 08:43
+dotnet start 08:43

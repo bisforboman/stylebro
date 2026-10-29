@@ -1,0 +1,7 @@
+Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Building log4net.sln in Debug, Release with warnings as errors, and a copy of HEAD to compare...
+Debug: no findings, no new errors.
+Release: no findings, no new errors.
+Clean.
+The builds above check IDE0049: every project enforces code style in the build (EnforceCodeStyleInBuild) and every file has it at warning or error.
