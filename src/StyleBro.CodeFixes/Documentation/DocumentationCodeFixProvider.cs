@@ -253,7 +253,7 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
         var newText = text.WithChanges(slashes);
         var newRoot = CSharpSyntaxTree.ParseText(newText, (CSharpParseOptions)tree.Options, cancellationToken: cancellationToken).GetRoot(cancellationToken);
         var removed = new List<(int First, int Last)>();
-        foreach (var (_, empty) in CommentText.GetEmptyComments(CommentText.GetComments(newRoot), newText, CommentText.HasHeaderTemplate(options)))
+        foreach (var (_, empty) in CommentText.GetEmptyComments(CommentText.GetComments(newRoot), newText))
         {
             foreach (var change in CommentText.GetRemovals(empty, newText))
             {

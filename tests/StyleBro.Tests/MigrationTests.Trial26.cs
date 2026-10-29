@@ -206,18 +206,6 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
-    public void EmptyHeaderLines_MentionTheTemplate_OnlyWithOne()
-    {
-        var counts = Conventions.NewCounts();
-        counts[Conventions.HeaderKey] = [0, 12];
-        var fromCode = Conventions.EmptyHeaderLines(counts, new Dictionary<string, string>())!;
-        Assert.DoesNotContain("from the template", fromCode[0], StringComparison.Ordinal);
-
-        var fromTemplate = Conventions.EmptyHeaderLines(Conventions.NewCounts(), new Dictionary<string, string> { ["file_header_template"] = @"\nCopyright X" })!;
-        Assert.Contains("(and the empty lines from the template)", fromTemplate[0], StringComparison.Ordinal);
-    }
-
-    [Fact]
     public void Migrate_StyleSharpsIsNull_IsBro1133WithPatternMatching()
     {
         // SST1149 is on by default: BRO1103 turned 'null == who' into 'who == null', which SST1149 reported.

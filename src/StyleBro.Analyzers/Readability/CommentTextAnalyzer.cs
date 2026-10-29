@@ -31,7 +31,7 @@ public sealed class CommentTextAnalyzer : DiagnosticAnalyzer
                 c.ReportDiagnostic(Diagnostic.Create(Descriptors.DocumentationLineSpace, Location.Create(c.Tree, span)));
             }
 
-            foreach (var (reported, _) in CommentText.GetEmptyComments(trivia, text, CommentText.HasHeaderTemplate(c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Tree))))
+            foreach (var (reported, _) in CommentText.GetEmptyComments(trivia, text))
             {
                 c.ReportDiagnostic(Diagnostic.Create(Descriptors.EmptyComment, Location.Create(c.Tree, reported.Span)));
             }

@@ -714,12 +714,6 @@ internal static class InitCommand
             endings.AddRange(endingLines.Take(lowersIde ? 3 : 2));
         }
 
-        if (Conventions.EmptyHeaderLines(counts, own) is { } headerLines)
-        {
-            report.Add($"  {"off",-8} {headerLines[0].Substring("# init: ".Length)}");
-            endings.AddRange(headerLines);
-        }
-
         // A charset or final line break the files don't follow wasn't enforced either: the files decide, like the line endings.
         // What the last init wrote stays: counted again after 'format', the files are StyleBro's output.
         foreach (var key in new[] { Conventions.CharsetKey, Conventions.FinalNewlineKey })

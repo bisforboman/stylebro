@@ -55,9 +55,6 @@ internal static class Conventions
     /// </summary>
     public const string EndOfLineKey = "end_of_line";
 
-    /// <summary>Files with a '//' header: [without, with] an empty '//' line at its top or bottom (<see cref="EmptyHeaderLines"/>).</summary>
-    public const string HeaderKey = "file header";
-
     /// <summary>The C# files' charset (unit: files): [no BOM, BOM] (<see cref="ContradictedFileSetting"/>).</summary>
     public const string CharsetKey = "charset";
 
@@ -1034,7 +1031,6 @@ internal static class Conventions
         counts[CharsetKey] = new int[2];
         counts[FinalNewlineKey] = new int[2];
         counts[TrailingWhitespaceKey] = new int[2];
-        counts[HeaderKey] = new int[2];
         counts[ConvertedKey] = new int[2];
         counts[InterfaceAccessKey] = new int[2];
         counts[BinaryOperatorSpacingKey] = new int[3];
@@ -1520,40 +1516,6 @@ internal static class Conventions
             $"  {"off",-8} column alignment ({named} = true) -> IDE0055 is off: its whitespace formatting would flatten aligned code");
     }
 
-    /// <summary>
-    /// The lines that turn BRO1120 off, or null, when the repository's file headers keep empty '//' lines: its
-    /// file_header_template starts or ends with a line break (IDE0073 writes '//' lines there), or most files' headers have
-    /// them (owner's policy, trial 11: Ical.Net's template is '\nCopyright ...\nLicensed under the MIT license.\n', and BRO1120
-    /// removed both empty lines in 222 of 223 files, which every new file from the template brings back). A BRO1120
-    /// severity the repository sets stays.
-    /// </summary>
-    public static List<string>? EmptyHeaderLines(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> own)
-    {
-        var rule = DiagnosticIds.EmptyComment;
-        if (own.ContainsKey($"dotnet_diagnostic.{rule}.severity"))
-        {
-            return null;
-        }
-
-        string why;
-        var fromTemplate = false;
-        if (own.TryGetValue("file_header_template", out var template) && (template.StartsWith(@"\n", StringComparison.Ordinal) || template.EndsWith(@"\n", StringComparison.Ordinal)))
-        {
-            why = "your file_header_template starts or ends with an empty line, which IDE0073 writes as an empty '//' line";
-            fromTemplate = true;
-        }
-        else if (counts.TryGetValue(HeaderKey, out var headers) && headers.Sum() >= MinimumAgreeing && Winner(headers[0], headers[1]) == 1)
-        {
-            why = $"{headers[1]} of {Plural(headers.Sum(), "file header")} start or end with an empty '//' line";
-        }
-        else
-        {
-            return null;
-        }
-
-        return [$"# init: file headers: {why}; {rule} would remove those lines, so it is off. To turn it on: remove the next line{(fromTemplate ? " (and the empty lines from the template)" : string.Empty)}.", Off(rule)];
-    }
-
     /// <summary>Whether a file starts with the UTF-8 byte order mark.</summary>
     public static bool HasBom(string file)
     {
@@ -1632,7 +1594,6 @@ internal static class Conventions
             StaticPrefixes();
             ThisQualification();
             StaticFieldCasing();
-            HeaderEmptyLines();
             TypeAliases();
             Overloads();
             MemberOrder();
@@ -2156,19 +2117,6 @@ internal static class Conventions
             }
         }
 
-        // Unit = files starting with a '//' comment group (a file header): with an empty '//' line at its top or bottom (what
-        // BRO1120 removes, and what a file_header_template starting with '\n' writes) or without.
-        void HeaderEmptyLines()
-        {
-            var group = root.GetLeadingTrivia().TakeWhile(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia) || t.IsKind(SyntaxKind.WhitespaceTrivia) || t.IsKind(SyntaxKind.EndOfLineTrivia))
-                .Where(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia))
-                .Select(t => t.ToString())
-                .ToList();
-            if (group.Count > 0 && !group[0].StartsWith("///", StringComparison.Ordinal))
-            {
-                counts[HeaderKey][group[0].Trim() == "//" || group[^1].Trim() == "//" ? 1 : 0]++;
-            }
-        }
 
         // Unit = private constants and private static readonly fields (BRO1306's): PascalCase, camelCase or _camelCase.
         // Other names ('s_x', '_X', 'x_y') are other rules' (BRO1307, BRO1308) and don't count.
