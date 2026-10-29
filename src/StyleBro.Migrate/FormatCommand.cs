@@ -557,6 +557,45 @@ internal static partial class FormatCommand
         + $"Get what provides {(missing.Count == 1 ? "it" : "them")} (another repository next to this one, a generated file), then run again.";
 
     /// <summary>
+    /// What format says about git submodules that aren't checked out (<paramref name="folders"/>, relative): files a project
+    /// compiles from them aren't there, like <see cref="MissingCompileLine"/>'s, but a wildcard into an empty folder names no
+    /// file (owner's decision 2026-10-29; trial 60, khellang/Middleware cloned without --recursive: ProblemDetails compiles
+    /// 'lib/AspNetCore/src/Shared/**/*.cs', didn't compile, and format and check said clean).
+    /// </summary>
+    public static string MissingSubmoduleLine(IReadOnlyList<string> folders) =>
+        $"{MissingHeader} {(folders.Count == 1 ? "the git submodule" : "the git submodules")} {string.Join(", ", folders)} {(folders.Count == 1 ? "isn't" : "aren't")} checked out: "
+        + "code that compiles files from there doesn't compile, so 'using' directives can look unused, and IDE0005 (unused usings) is left out. "
+        + "Run 'git submodule update --init' (or clone with --recursive), then run again.";
+
+    /// <summary>
+    /// The submodules the root's .gitmodules lists whose folder is missing or empty (not checked out), relative with '/', in
+    /// .gitmodules' order.
+    /// </summary>
+    public static List<string> UncheckedOutSubmodules(string root)
+    {
+        var file = Path.Combine(root, ".gitmodules");
+        if (!File.Exists(file))
+        {
+            return [];
+        }
+
+        try
+        {
+            return File.ReadAllLines(file)
+                .Select(l => Regex.Match(l, @"^\s*path\s*=\s*(?<path>.+?)\s*$"))
+                .Where(m => m.Success)
+                .Select(m => m.Groups["path"].Value.Replace('\\', '/').TrimEnd('/'))
+                .Where(p => Path.Combine(root, p) is var folder && (!Directory.Exists(folder) || !Directory.EnumerateFileSystemEntries(folder).Any()))
+                .Distinct(StringComparer.Ordinal)
+                .ToList();
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            return [];
+        }
+    }
+
+    /// <summary>
     /// The options without IDE0005 (<see cref="MissingCompileLine"/>): taken out of '--diagnostics' when others are left there,
     /// else '--exclude-diagnostics IDE0005' added when no '--diagnostics' names the rules (an emptied list would mean all of them).
     /// </summary>
@@ -5554,9 +5593,19 @@ internal static partial class FormatCommand
         // Files a project compiles that aren't there (a sibling repository not checked out, the preview's copy without it): the
         // code using them doesn't compile, and IDE0005 would remove the usings it needs.
         var missing = projects.Values.SelectMany(p => p.Compile).Where(f => !File.Exists(f)).Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList();
-        if (missing.Count > 0)
+        var submodulesMissing = UncheckedOutSubmodules(RepositoryRoot(root) ?? root);
+        if (missing.Count > 0 || submodulesMissing.Count > 0)
         {
-            log(MissingCompileLine(root, missing));
+            if (missing.Count > 0)
+            {
+                log(MissingCompileLine(root, missing));
+            }
+
+            if (submodulesMissing.Count > 0)
+            {
+                log(MissingSubmoduleLine(submodulesMissing));
+            }
+
             MissingCompileRoots[root] = true;
             if (passThrough.Contains(UnusedUsings))
             {
