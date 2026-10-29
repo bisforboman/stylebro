@@ -1,0 +1,23 @@
+{
+  "repo": "jbevain/mono.linq.expressions",
+  "branch": "master",
+  "commit": "7973f862ddfea552457c7b2bc457fb87c481a791",
+  "csFiles": 31,
+  "tags": [
+    "library",
+    "multi-target",
+    "tabs",
+    "encoding"
+  ],
+  "setups": "Mono.Linq.Expressions.sln; netstandard2.0;net40 library, netcoreapp2.1;net40 NUnit tests, a net40 dbg exe; Directory.Build.props in UTF-16 LE with a BOM and CRLF, EnableDefaultItems false, net40 against /usr/lib/mono/4.0-api on Linux; no .editorconfig: tabs, Mono spacing, a blank line below 65 of 78 type/namespace '{', snake_case private fields (11 of 13 multi-word), comments framed by empty '//' lines.",
+  "build": "ok with workaround",
+  "workaround": "net40 needs reference assemblies at /usr/lib/mono/4.0-api: link it to Microsoft.NETFramework.ReferenceAssemblies.net40 1.0.3's build/.NETFramework/v4.0 (environment only, the repository stays untouched).",
+  "tests": "dotnet test Mono.Linq.Expressions.sln -f netcoreapp2.1: 75 pass (net40 needs mono).",
+  "usedIn": "trial 62",
+  "verified": {
+    "by": "trial 62 session",
+    "date": "2026-10-29",
+    "sdks": "10.0.113, 8.0.132"
+  },
+  "notes": "Targeted at trial 61's BRO1503 convention (held: BRO1503 off). Found: init rewrote the UTF-16 props as UTF-8/LF, no tab convention (BRO1107 indented with spaces), BRO1308 renamed snake_case fields, BRO1120 removed comment frames."
+}
