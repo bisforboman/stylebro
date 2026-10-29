@@ -1,0 +1,19 @@
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (162 ids); --all applies every analyzer's and compiler fix.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net48, net8.0).
+Checked net48 (run 1 of 2)
+Checked net8.0 (run 2 of 2)
+== net48 (1 project(s), 13 files with findings)
+== net8.0 (3 project(s), 20 files with findings)
+Run 1: 20 files changed:
+  FluentScheduler.TestApplication/Program.cs
+  FluentScheduler.UnitTests/Cron/CronTimeCalculatorTests.cs
+  FluentScheduler.UnitTests/Fluent/2.Once/OnceDurationSetTests.cs
+  FluentScheduler.UnitTests/Fluent/2.Once/OnceSetTests.cs
+  FluentScheduler.UnitTests/Fluent/3.Duration/EverydayUnitTests.cs
+  FluentScheduler.UnitTests/Scheduler/ScheduleGroupTests.cs
+  FluentScheduler.UnitTests/Scheduler/ScheduleTests.cs
+  FluentScheduler/Common/ThrowHelper.cs
+  FluentScheduler/Cron/CronTimeCalculator.cs
+  FluentScheduler/Fluent/3.Duration/DayUnit.cs
+  ... and 10 more

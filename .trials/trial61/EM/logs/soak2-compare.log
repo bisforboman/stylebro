@@ -36,3 +36,19 @@ Turn off this advice by setting config variable advice.detachedHead to false
 == soak2-src: host check
 == soak2-src: dotnet-format format
 == soak2-src: host format
+== soak2-src: dotnet-format recheck
+== soak2-src: host recheck
+Times (soak2-src):
+  dotnet-format check       115.1 s
+  host check                 58.1 s
+  dotnet-format format       99.8 s
+  host format                38.2 s
+  dotnet-format recheck       0.6 s
+  host recheck                0.6 s
+DIFFERENT (soak2-src):
+  check output differs (/home/user/w61/EM/parity2/soak2-src-dotnet-format-check.txt vs /home/user/w61/EM/parity2/soak2-src-host-check.txt):
+  => 'dotnet format' had warnings loading the workspace in its net462 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+  <= 'dotnet format' had warnings loading the workspace in its net8.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+  format output differs (/home/user/w61/EM/parity2/soak2-src-dotnet-format-format.txt vs /home/user/w61/EM/parity2/soak2-src-host-format.txt):
+  => 'dotnet format' had warnings loading the workspace in its net462 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+  <= 'dotnet format' had warnings loading the workspace in its net8.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.

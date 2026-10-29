@@ -15,3 +15,5 @@ dotnet2 start 16:12
 dotnet2 done 16:20
 CHAIN-DONE
 soak start 16:20
+soak done rc=1 16:25
+soak2-compare done 16:25
