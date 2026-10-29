@@ -4,6 +4,8 @@ Conventions in the code (a convention needs 3 places or more: below 10 they must
   off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
   mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
   kept     private fields: 38 of 40 named '_field' -> _camelCase
+  set      indentation: 63 of 63 indented with spaces -> set in .editorconfig (space)
+  default  multi-word private fields: 24 of 24 camelCase ('breakTarget') -> warning
   default  '{' of multi-line blocks: 645 of 645 on its own line -> all
   default  else/catch/finally after '}': 27 of 27 on a new line -> true
   both     one-line if/else/loop/using/lock bodies: 57 with braces, 55 without braces -> both allowed
@@ -41,6 +43,7 @@ Conventions in the code (a convention needs 3 places or more: below 10 they must
   default  statements after a block's '}': 62 of 79 after a blank line -> warning
   off      nested ifs BRO1149 would merge: 4 nested -> BRO1149 is off
   default  neighbouring members: 439 of 462 with a blank line between -> warning
+  default  '//' comments in code: 195 of 195 with text at both ends -> warning
   default  types' and namespaces' '{': 83 of 83 right above the code -> warning
   default  doc comments below code: 26 of 26 after a blank line -> warning
   default  '//' comments above code: 176 of 176 right above the code -> warning
@@ -61,10 +64,10 @@ Conventions in the code (a convention needs 3 places or more: below 10 they must
   default  spacing, call arguments: 1513 of 1513 'F(x)' -> 'F(x)'
   default  spacing, declared parameters: 229 of 229 'void F(int x)' -> 'void F(int x)'
 Summary:
-  Kept your style for 43 settings: wrote stylebro_private_field_naming, stylebro_allow_single_line_jump_statements,
+  Kept your style for 45 settings: wrote stylebro_private_field_naming, stylebro_allow_single_line_jump_statements,
     stylebro_arrow_placement_when_wrapping, stylebro_null_check_style, stylebro_constructor_initializer_placement,
     csharp_preserve_single_line_statements, dotnet_style_require_accessibility_modifiers,
-    end_of_line; 35 were already StyleBro's default.
+    end_of_line; 37 were already StyleBro's default.
   Allowed both forms for 2 settings because your code mixes them: csharp_prefer_braces = when_multiline (one-line
     if/else/loop/using/lock bodies), stylebro_allow_empty_single_line_blocks = true (empty blocks ('{ }')).
   Turned 5 rules off because your code mixes both forms: BRO1520 (operators where a line wraps),

@@ -4,4 +4,25 @@ Copying the repository to /tmp/stylebro-preview-tu6uKK/default2... 0s
 Warning: Not restored: src/Ninject/Ninject.csproj. A package can bring a global config that sets StyleCop's rules (GlobalAnalyzerConfigFiles), and it is read from the restore: run 'dotnet restore', then this again.
 Settings: 334 lines in .editorconfig; 6 lines in Directory.Build.props (StyleBroPreset=none)
   StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial62.4 to src/Ninject/Ninject.csproj, the packages.config way to src/CommonServiceLocator.NinjectAdapter.Tests/CommonServiceLocator.NinjectAdapter.Tests.csproj, src/CommonServiceLocator.NinjectAdapter/CommonServiceLocator.NinjectAdapter.csproj for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it, except in the packages.config projects it leaves out).
-Format run 1... 
+Format run 1... 37s
+Format run 2... 5s
+Format: 6 files, 836 reported changes, clean after 1 run
+  ENDOFLINE                                              5 files
+  IDE0055  Whitespace and formatting                    1 file
+Sample (ENDOFLINE, src/Ninject/Activation/Pipeline.cs):
+  (changes only line endings or whitespace)
+Sample (IDE0055, src/Ninject/Infrastructure/Language/ExtensionsForType.cs):
+  -         public static IEnumerable<Type> GetAllBaseTypes(this Type type)
+  -         {
+  -             while (type != null)
+  -             {
+  -                 yield return type;
+  +        public static IEnumerable<Type> GetAllBaseTypes(this Type type)
+  +        {
+  +            while (type != null)
+  +            {
+  +                yield return type;
+Full diff: .git/stylebro-preview.patch (2,098 lines)
+Note: packages.config projects left out of the preview: src/CommonServiceLocator.NinjectAdapter.Tests/CommonServiceLocator.NinjectAdapter.Tests.csproj, src/CommonServiceLocator.NinjectAdapter/CommonServiceLocator.NinjectAdapter.csproj ('dotnet restore' can't restore packages.config, and the copy has no packages folder). The other projects are previewed; 'bro format' covers those too once Visual Studio's MSBuild restored them (msbuild -t:restore -p:RestorePackagesConfig=true).
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 58s.

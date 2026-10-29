@@ -1,0 +1,18 @@
+== Packing 0.0.0-fixture.20261029223948 into /home/user/fx62/w3/feed
+/home/user/stylebro/src/StyleBro.FormatHost/Views.cs(126,30): warning BRO1138: Write this string as a plain string (https://bisforboman.github.io/stylebro/rules/BRO1138/) [/home/user/stylebro/src/StyleBro.FormatHost/StyleBro.FormatHost.csproj]
+You can invoke the tool using the following command: bro
+Tool 'stylebro.tool' (version '0.0.0-fixture.20261029223948') was successfully installed.
+== package-unsupported-framework : a package that warns about one of a multi-targeted project's frameworks
+  preview                      exit 0 (19 s)
+  init                         exit 0 (4 s)
+  host-format                  exit 0 (17 s)
+  host-check                   exit 0 (1 s)
+  host-check-build             exit 0 (69 s)
+  dotnet-format-format         exit 0 (49 s)
+  dotnet-format-check          exit 0 (1 s)
+  dotnet-format-check-build    exit 0 (71 s)
+  PASS package-unsupported-framework (244 s)
+| Shape | Result | Time |
+| --- | --- | --- |
+| package-unsupported-framework | pass | 244 s |
+Work folder: /home/user/fx62/w3

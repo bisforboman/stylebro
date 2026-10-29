@@ -1,0 +1,13 @@
+preview	0	151s	bro preview init --engine dotnet-format
+setup	0	5s	bash -c python3 /home/user/stylebro/.trials/trial62/addref.py Directory.Build.props "<PackageReference Include=\"StyleBro.Analyzers\" Version=\"${V:-0.8.0-trial62.1}\" PrivateAssets=\"all\" />" && git diff --stat && bro init --write
+format	0	168s	bro format --engine dotnet-format
+check	0	0s	bro check --engine dotnet-format
+check-json	0
+check-full	0	38s	bro check --engine dotnet-format
+checkbuild	0	114s	bro check --build --engine dotnet-format
+checkbuild-json	0
+twae-Debug	0	10s	twae Debug
+test-Debug	0	89s	env CFG=Debug bash -c MSBUILDDISABLENODEREUSE=1 dotnet test serilog-settings-configuration.sln -c $CFG
+twae-Release	0	13s	twae Release
+test-Release	0	66s	env CFG=Release bash -c MSBUILDDISABLENODEREUSE=1 dotnet test serilog-settings-configuration.sln -c $CFG
+DONE

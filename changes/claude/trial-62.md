@@ -14,3 +14,5 @@
 - **BRO1505** no longer needs a second `bro format` run for a comment between two elements with a blank line below it
   (`using ...;` / `// ReSharper disable ...` / blank line / `namespace`): it adds the blank line above the comment and
   removes the one below, as **BRO1506** wants.
+- `bro format`'s note about warnings loading the workspace names the run of the framework a package warns about ("doesn't
+  support net6.0"), as with `--engine dotnet-format`, instead of the run of a test project that references it.

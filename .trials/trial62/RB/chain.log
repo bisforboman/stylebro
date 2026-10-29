@@ -9,3 +9,8 @@ dotnet start 21:22
 dotnet done 21:51
 CHAIN-DONE
 soak start 21:51
+soak done rc=1 22:02
+soak-compare done 22:02
+default2 start 22:03
+default2 done 22:30
+dotnet2 start 22:30
