@@ -1,0 +1,13 @@
+preview	0	180s	bro preview init --project src/log4net.sln
+setup	0	14s	bash -c python3 /home/user/stylebro/.trials/trial60/addref.py src/Directory.Build.props "<PackageReference Include=\"StyleBro.Analyzers\" Version=\"${V:-0.8.0-trial60.1}\" PrivateAssets=\"all\" />" && git diff --stat && bro init --write
+format	0	193s	bro format src/log4net.sln
+check	0	1s	bro check src/log4net.sln
+check-json	0
+check-full	0	1s	bro check src/log4net.sln
+checkbuild	0	185s	bro check src/log4net.sln --build
+checkbuild-json	0
+twae-Debug	0	42s	twae Debug
+test-Debug	0	43s	env CFG=Debug bash -c cd src && dotnet test log4net.sln -c $CFG
+twae-Release	0	43s	twae Release
+test-Release	0	38s	env CFG=Release bash -c cd src && dotnet test log4net.sln -c $CFG
+DONE

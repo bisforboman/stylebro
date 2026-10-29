@@ -54,6 +54,7 @@ public sealed class DocumentationBlankLinesCodeFixProvider : CodeFixProvider
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
         var changes = new List<TextChange>();
+        List<(SyntaxNode Previous, SyntaxNode Current)>? separations = null;
         foreach (var diagnostic in diagnostics)
         {
             var start = diagnostic.Location.SourceSpan.Start;
@@ -82,9 +83,32 @@ public sealed class DocumentationBlankLinesCodeFixProvider : CodeFixProvider
                 var line = text.Lines.GetLineFromPosition(position);
                 var lineBreak = text.ToString(TextSpan.FromBounds(line.End, line.EndIncludingLineBreak));
                 changes.Add(new TextChange(new TextSpan(position, 0), lineBreak.Length > 0 ? lineBreak : "\n"));
+
+                // BRO1505's blank line too, where it goes above a directive ('}', '#region X', the doc): this one below the
+                // directive would count for BRO1505, so its fix would add nothing if it ran later (trial 60, EasyCaching).
+                // Where both go at the same place, Merge keeps the one line break.
+                separations ??= GetSeparations(document, root, text, cancellationToken);
+                if (separations.FirstOrDefault(s => s.Current == member) is { Current: not null } separation
+                    && ElementSeparation.GetChange(separation.Previous, separation.Current, text) is { } separate)
+                {
+                    changes.Add(separate);
+                }
             }
         }
 
         return document.WithText(text.WithChanges(LinkedFileFixAllProvider.Merge(changes)));
+    }
+
+    /// <summary>The members BRO1505 reports (none when it's off), with its options, as its analyzer finds them.</summary>
+    private static List<(SyntaxNode Previous, SyntaxNode Current)> GetSeparations(Document document, SyntaxNode root, SourceText text, CancellationToken cancellationToken)
+    {
+        bool IsOn(string id) => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, id, cancellationToken);
+        if (!IsOn(DiagnosticIds.ElementsSeparatedByBlankLine))
+        {
+            return [];
+        }
+
+        var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
+        return ElementSeparation.GetViolations(root, text, IsOn(DiagnosticIds.AutoAccessorsOnOneLine) ? options : null, ElementSeparation.AllowsAdjacentSingleLineMembers(options)).ToList();
     }
 }

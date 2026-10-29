@@ -1,0 +1,63 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  EasyCaching.Core -> /home/user/w60/EC/default/src/EasyCaching.Core/bin/Debug/net8.0/EasyCaching.Core.dll
+  EasyCaching.Core -> /home/user/w60/EC/default/src/EasyCaching.Core/bin/Debug/netstandard2.0/EasyCaching.Core.dll
+  Build -> /home/user/w60/EC/default/bin/Debug/netcoreapp3.1/Build.dll
+  EasyCaching.Serialization.Protobuf -> /home/user/w60/EC/default/serialization/EasyCaching.Serialization.Protobuf/bin/Debug/netstandard2.0/EasyCaching.Serialization.Protobuf.dll
+  EasyCaching.Serialization.MessagePack -> /home/user/w60/EC/default/serialization/EasyCaching.Serialization.MessagePack/bin/Debug/netstandard2.0/EasyCaching.Serialization.MessagePack.dll
+  EasyCaching.ResponseCaching -> /home/user/w60/EC/default/src/EasyCaching.ResponseCaching/bin/Debug/netcoreapp3.1/EasyCaching.ResponseCaching.dll
+  EasyCaching.InMemory -> /home/user/w60/EC/default/src/EasyCaching.InMemory/bin/Debug/netstandard2.0/EasyCaching.InMemory.dll
+  Microsoft.Extensions.Caching.EasyCachingLib -> /home/user/w60/EC/default/extensions/Microsoft.Extensions.Caching.EasyCachingLib/bin/Debug/netstandard2.0/Microsoft.Extensions.Caching.EasyCachingLib.dll
+  EasyCaching.Interceptor.AspectCore -> /home/user/w60/EC/default/interceptor/EasyCaching.Interceptor.AspectCore/bin/Debug/netstandard2.0/EasyCaching.Interceptor.AspectCore.dll
+  EasyCaching.InMemory -> /home/user/w60/EC/default/src/EasyCaching.InMemory/bin/Debug/net8.0/EasyCaching.InMemory.dll
+  EasyCaching.Interceptor.Castle -> /home/user/w60/EC/default/interceptor/EasyCaching.Interceptor.Castle/bin/Debug/net8.0/EasyCaching.Interceptor.Castle.dll
+  EasyCaching.Serialization.Json -> /home/user/w60/EC/default/serialization/EasyCaching.Serialization.Json/bin/Debug/net8.0/EasyCaching.Serialization.Json.dll
+  EasyCaching.Interceptor.AspectCore -> /home/user/w60/EC/default/interceptor/EasyCaching.Interceptor.AspectCore/bin/Debug/net8.0/EasyCaching.Interceptor.AspectCore.dll
+  EasyCaching.Serialization.SystemTextJson -> /home/user/w60/EC/default/serialization/EasyCaching.Serialization.SystemTextJson/bin/Debug/netstandard2.0/EasyCaching.Serialization.SystemTextJson.dll
+  EasyCaching.Serialization.Protobuf -> /home/user/w60/EC/default/serialization/EasyCaching.Serialization.Protobuf/bin/Debug/net8.0/EasyCaching.Serialization.Protobuf.dll
+  EasyCaching.Bus.RabbitMQ -> /home/user/w60/EC/default/bus/EasyCaching.Bus.RabbitMQ/bin/Debug/netstandard2.0/EasyCaching.Bus.RabbitMQ.dll
+  EasyCaching.Interceptor.Castle -> /home/user/w60/EC/default/interceptor/EasyCaching.Interceptor.Castle/bin/Debug/netstandard2.0/EasyCaching.Interceptor.Castle.dll
+  EasyCaching.Serialization.SystemTextJson -> /home/user/w60/EC/default/serialization/EasyCaching.Serialization.SystemTextJson/bin/Debug/net8.0/EasyCaching.Serialization.SystemTextJson.dll
+  EasyCaching.Redis -> /home/user/w60/EC/default/src/EasyCaching.Redis/bin/Debug/net8.0/EasyCaching.Redis.dll
+  EasyCaching.Serialization.Json -> /home/user/w60/EC/default/serialization/EasyCaching.Serialization.Json/bin/Debug/netstandard2.0/EasyCaching.Serialization.Json.dll
+  EasyCaching.Bus.Redis -> /home/user/w60/EC/default/bus/EasyCaching.Bus.Redis/bin/Debug/net8.0/EasyCaching.Bus.Redis.dll
+  EasyCaching.HybridCache -> /home/user/w60/EC/default/src/EasyCaching.HybridCache/bin/Debug/netstandard2.0/EasyCaching.HybridCache.dll
+  EasyCaching.Bus.RabbitMQ -> /home/user/w60/EC/default/bus/EasyCaching.Bus.RabbitMQ/bin/Debug/net8.0/EasyCaching.Bus.RabbitMQ.dll
+  EasyCaching.HybridCache -> /home/user/w60/EC/default/src/EasyCaching.HybridCache/bin/Debug/net8.0/EasyCaching.HybridCache.dll
+  EasyCaching.Serialization.MemoryPack -> /home/user/w60/EC/default/serialization/EasyCaching.Serialization.MemoryPack/bin/Debug/net8.0/EasyCaching.Serialization.MemoryPack.dll
+  EasyCaching.Serialization.MessagePack -> /home/user/w60/EC/default/serialization/EasyCaching.Serialization.MessagePack/bin/Debug/net8.0/EasyCaching.Serialization.MessagePack.dll
+  EasyCaching.Bus.RabbitMQStream -> /home/user/w60/EC/default/bus/EasyCaching.Bus.RabbitMQStream/bin/Debug/netstandard2.0/EasyCaching.Bus.RabbitMQStream.dll
+  EasyCaching.CSRedis -> /home/user/w60/EC/default/src/EasyCaching.CSRedis/bin/Debug/netstandard2.0/EasyCaching.CSRedis.dll
+  EasyCaching.Bus.Redis -> /home/user/w60/EC/default/bus/EasyCaching.Bus.Redis/bin/Debug/netstandard2.0/EasyCaching.Bus.Redis.dll
+  EasyCaching.Disk -> /home/user/w60/EC/default/src/EasyCaching.Disk/bin/Debug/netstandard2.0/EasyCaching.Disk.dll
+  EasyCaching.Bus.RabbitMQStream -> /home/user/w60/EC/default/bus/EasyCaching.Bus.RabbitMQStream/bin/Debug/net8.0/EasyCaching.Bus.RabbitMQStream.dll
+  EasyCaching.CSRedis -> /home/user/w60/EC/default/src/EasyCaching.CSRedis/bin/Debug/net8.0/EasyCaching.CSRedis.dll
+  EasyCaching.Redis -> /home/user/w60/EC/default/src/EasyCaching.Redis/bin/Debug/netstandard2.0/EasyCaching.Redis.dll
+  EasyCaching.FasterKv -> /home/user/w60/EC/default/src/EasyCaching.FasterKv/bin/Debug/net8.0/EasyCaching.FasterKv.dll
+  EasyCaching.Disk -> /home/user/w60/EC/default/src/EasyCaching.Disk/bin/Debug/net8.0/EasyCaching.Disk.dll
+  EasyCaching.Bus.ConfluentKafka -> /home/user/w60/EC/default/bus/EasyCaching.Bus.ConfluentKafka/bin/Debug/net8.0/EasyCaching.Bus.ConfluentKafka.dll
+  EasyCaching.Memcached -> /home/user/w60/EC/default/src/EasyCaching.Memcached/bin/Debug/net8.0/EasyCaching.Memcached.dll
+  EasyCaching.LiteDB -> /home/user/w60/EC/default/src/EasyCaching.LiteDB/bin/Debug/net8.0/EasyCaching.LiteDB.dll
+  EasyCaching.Bus.Zookeeper -> /home/user/w60/EC/default/bus/EasyCaching.Bus.Zookeeper/bin/Debug/net8.0/EasyCaching.Bus.Zookeeper.dll
+  EasyCaching.SQLite -> /home/user/w60/EC/default/src/EasyCaching.SQLite/bin/Debug/net8.0/EasyCaching.SQLite.dll
+  EasyCaching.Bus.CSRedis -> /home/user/w60/EC/default/bus/EasyCaching.Bus.CSRedis/bin/Debug/net8.0/EasyCaching.Bus.CSRedis.dll
+  EasyCaching.SQLite -> /home/user/w60/EC/default/src/EasyCaching.SQLite/bin/Debug/netstandard2.0/EasyCaching.SQLite.dll
+  EasyCaching.Memcached -> /home/user/w60/EC/default/src/EasyCaching.Memcached/bin/Debug/netstandard2.0/EasyCaching.Memcached.dll
+  EasyCaching.Bus.ConfluentKafka -> /home/user/w60/EC/default/bus/EasyCaching.Bus.ConfluentKafka/bin/Debug/netstandard2.0/EasyCaching.Bus.ConfluentKafka.dll
+  EasyCaching.Bus.CSRedis -> /home/user/w60/EC/default/bus/EasyCaching.Bus.CSRedis/bin/Debug/netstandard2.0/EasyCaching.Bus.CSRedis.dll
+  EasyCaching.Demo.Interceptors -> /home/user/w60/EC/default/sample/EasyCaching.Demo.Interceptors/bin/Debug/net8.0/EasyCaching.Demo.Interceptors.dll
+  EasyCaching.LiteDB -> /home/user/w60/EC/default/src/EasyCaching.LiteDB/bin/Debug/netstandard2.0/EasyCaching.LiteDB.dll
+  EasyCaching.PerformanceTests -> /home/user/w60/EC/default/test/EasyCaching.PerformanceTests/bin/Debug/net8.0/EasyCaching.PerformanceTests.dll
+  EasyCaching.Bus.Zookeeper -> /home/user/w60/EC/default/bus/EasyCaching.Bus.Zookeeper/bin/Debug/netstandard2.0/EasyCaching.Bus.Zookeeper.dll
+  EasyCaching.Demo.ResponseCaching -> /home/user/w60/EC/default/sample/EasyCaching.Demo.ResponseCaching/bin/Debug/net8.0/EasyCaching.Demo.ResponseCaching.dll
+  EasyCaching.FasterKv -> /home/user/w60/EC/default/src/EasyCaching.FasterKv/bin/Debug/netstandard2.0/EasyCaching.FasterKv.dll
+  EasyCaching.Demo.Providers -> /home/user/w60/EC/default/sample/EasyCaching.Demo.Providers/bin/Debug/net8.0/EasyCaching.Demo.Providers.dll
+  EasyCaching.Demo.ConsoleApp -> /home/user/w60/EC/default/sample/EasyCaching.Demo.ConsoleApp/bin/Debug/net8.0/EasyCaching.Demo.ConsoleApp.dll
+  EasyCaching.Demo.Locks -> /home/user/w60/EC/default/sample/EasyCaching.Demo.Locks/bin/Debug/net8.0/EasyCaching.Demo.Locks.dll
+  EasyCaching.UnitTests -> /home/user/w60/EC/default/test/EasyCaching.UnitTests/bin/Debug/net8.0/EasyCaching.UnitTests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:21.13

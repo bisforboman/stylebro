@@ -1455,6 +1455,41 @@ public class FixOrderTests
         "BRO1517",
         "BRO1518");
 
+    // Trial 60, EasyCaching: a method's '}' right above '#region X  ' (trailing spaces) and a doc comment.
+    [Fact]
+    public Task Regions_RegionRightBelowAMethodsBrace() => AssertConvergesInEveryOrderAsync(
+        """
+        using System.IO;
+
+        public class C
+        {
+            public byte[] M()
+            {
+                using (var ms = new MemoryStream())
+                {
+                    using (var sr = new StreamWriter(ms))
+                    {
+                        sr.Write(1);
+                    }
+                    return ms.ToArray();
+                }
+            }
+            #region Mainly For Memcached  
+            /// <summary>
+            /// Serializes the object.
+            /// </summary>
+            public void N()
+            {
+            }
+
+            #endregion
+        }
+        """,
+        "BRO1505",
+        "BRO1513",
+        "BRO1519",
+        "IDE0055");
+
     [Fact]
     public Task RedundantReturn_InSingleLineBodiesAndBelowABlankLine() => AssertConvergesInEveryOrderAsync(
         """

@@ -92,6 +92,75 @@ public class DocumentationBlankLinesTests
         }
         """);
 
+    // Trial 60, EasyCaching: BRO1513's blank line goes below the region line, where it would count for BRO1505; the fix
+    // adds BRO1505's above it too, which BRO1505's fix would have added had it run first (FixOrderTests).
+    [Fact]
+    public Task BlankLineBeforeDocumentation_BelowARegionRightAfterAMember_GetsBRO1505sToo() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M()
+            {
+            }
+            #region R
+            {|BRO1513:///|} <summary>After a region.</summary>
+            public void N()
+            {
+            }
+            #endregion
+        }
+        """,
+        """
+        public class C
+        {
+            public void M()
+            {
+            }
+
+            #region R
+
+            /// <summary>After a region.</summary>
+            public void N()
+            {
+            }
+            #endregion
+        }
+        """);
+
+    // With BRO1505 off, only BRO1513's own blank line.
+    [Fact]
+    public Task BlankLineBeforeDocumentation_WithBRO1505Off_AddsOnlyItsOwn() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M()
+            {
+            }
+            #region R
+            {|BRO1513:///|} <summary>After a region.</summary>
+            public void N()
+            {
+            }
+            #endregion
+        }
+        """,
+        """
+        public class C
+        {
+            public void M()
+            {
+            }
+            #region R
+
+            /// <summary>After a region.</summary>
+            public void N()
+            {
+            }
+            #endregion
+        }
+        """,
+        "dotnet_diagnostic.BRO1505.severity = none");
+
     [Fact]
     public Task NotReported() => VerifyNoDiagnosticsAsync("""
         /// <summary>At the start of the file.</summary>

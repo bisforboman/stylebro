@@ -5,3 +5,9 @@ check	0	1s	bro check
 check-json	0
 check-full	0	82s	bro check
 checkbuild	0	223s	bro check --build
+checkbuild-json	0
+twae-Debug	0	22s	twae Debug
+test-Debug	0	36s	env CFG=Debug bash -c dotnet test test/EasyCaching.UnitTests/EasyCaching.UnitTests.csproj -c $CFG --filter "$EC_FILTER"
+twae-Release	0	29s	twae Release
+test-Release	0	33s	env CFG=Release bash -c dotnet test test/EasyCaching.UnitTests/EasyCaching.UnitTests.csproj -c $CFG --filter "$EC_FILTER"
+DONE

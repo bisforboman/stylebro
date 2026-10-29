@@ -1,0 +1,2 @@
+preview	0	670s	bro preview init --project src/log4net.sln --engine dotnet-format
+setup	0	12s	bash -c python3 /home/user/stylebro/.trials/trial60/addref.py src/Directory.Build.props "<PackageReference Include=\"StyleBro.Analyzers\" Version=\"${V:-0.8.0-trial60.1}\" PrivateAssets=\"all\" />" && git diff --stat && bro init --write

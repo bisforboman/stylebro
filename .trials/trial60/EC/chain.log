@@ -1,3 +1,7 @@
 base start 06:59
 base done 07:03
 default start 07:03
+default done 07:20
+dotnet start 07:20
+dotnet done 07:45
+soak start 07:46
