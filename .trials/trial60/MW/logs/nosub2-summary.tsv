@@ -1,0 +1,6 @@
+base-build	1	40s
+setup	0	13s
+format	0	39s
+check	0	0s
+checkbuild	3	32s
+DONE

@@ -1,0 +1,22 @@
+  Determining projects to restore...
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/w60/MM/dotnet2/sandbox/Benchmark/Benchmark.csproj]
+  All projects are up-to-date for restore.
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/w60/MM/dotnet2/sandbox/Benchmark/Benchmark.csproj]
+  MasterMemory.Annotations -> /home/user/w60/MM/dotnet2/src/MasterMemory.Annotations/bin/Debug/netstandard2.0/MasterMemory.Annotations.dll
+  MasterMemory.SourceGenerator -> /home/user/w60/MM/dotnet2/src/MasterMemory.SourceGenerator/bin/Debug/netstandard2.0/MasterMemory.SourceGenerator.dll
+  MasterMemory.SourceGenerator.Tests -> /home/user/w60/MM/dotnet2/tests/MasterMemory.SourceGenerator.Tests/bin/Debug/net9.0/MasterMemory.SourceGenerator.Tests.dll
+  MasterMemory -> /home/user/w60/MM/dotnet2/src/MasterMemory/bin/Debug/netstandard2.0/MasterMemory.dll
+  PerfTest2 -> /home/user/w60/MM/dotnet2/sandbox/PerfTest2/bin/Debug/net9.0/PerfTest2.dll
+  GeneratorSandbox -> /home/user/w60/MM/dotnet2/sandbox/GeneratorSandbox/bin/Debug/net9.0/GeneratorSandbox.dll
+  Benchmark -> /home/user/w60/MM/dotnet2/sandbox/Benchmark/bin/Debug/net6.0/Benchmark.dll
+  MasterMemory.Tests -> /home/user/w60/MM/dotnet2/tests/MasterMemory.Tests/bin/Debug/net9.0/MasterMemory.Tests.dll
+  ConsoleApp -> /home/user/w60/MM/dotnet2/sandbox/ConsoleApp/bin/Debug/net9.0/ConsoleApp.dll
+
+Build succeeded.
+
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/w60/MM/dotnet2/sandbox/Benchmark/Benchmark.csproj]
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/w60/MM/dotnet2/sandbox/Benchmark/Benchmark.csproj]
+    2 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:06.52

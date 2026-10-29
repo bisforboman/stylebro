@@ -1,0 +1,630 @@
+diff --git a/.editorconfig b/.editorconfig
+index ff28325..e0d5499 100644
+--- a/.editorconfig
++++ b/.editorconfig
+@@ -9,3 +9,63 @@ trim_trailing_whitespace = true
+ 
+ [*.{yml,json,config,csproj,targets,props}]
+ indent_size = 2
++
++# BEGIN stylebro-migrate (stylebro-migrate init: built-in .NET rules for StyleBro's preset; edits inside are replaced)
++[*.cs]
++# Built-in .NET rules that cover StyleCop rules, at the preset's severities. Their options (brace placement, modifier
++# order, ...) come from StyleBro's preset. The severities have to be here: 'dotnet format' ignores rule severities in a
++# package's global config. Add <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> to report them on build too.
++
++# Braces (SA1503, SA1519, SA1520) are StyleBro's BRO1514-BRO1516: IDE0011's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0011.severity = none
++# Formatting: spacing, indentation, line breaks (SA1000-SA1028, SA1107, SA1134, SA1137, SA1500)
++dotnet_diagnostic.IDE0055.severity = warning
++# Access modifiers (SA1400, SA1205) are StyleBro's BRO1404/BRO1007: IDE0040's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0040.severity = none
++# Modifier order: access modifier first, then static (SA1206, SA1207)
++dotnet_diagnostic.IDE0036.severity = warning
++# 'int' instead of 'Int32' (SA1121)
++dotnet_diagnostic.IDE0049.severity = warning
++# Unnecessary parentheses (SA1119) are StyleBro's BRO1405: IDE0047's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0047.severity = none
++# Parentheses that show precedence (SA1407, SA1408) are StyleBro's BRO1406/BRO1407: IDE0048's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0048.severity = none
++# Using placement (SA1200) is StyleBro's BRO1008: IDE0065's fix can change what names bind to (CS0104, CS0118)
++dotnet_diagnostic.IDE0065.severity = none
++# Blank lines (SA1507, SA1508, SA1513) are StyleBro's BRO1517-BRO1519: the SDK's fixes break multi-targeted projects
++dotnet_diagnostic.IDE2000.severity = none
++dotnet_diagnostic.IDE2002.severity = none
++dotnet_diagnostic.IDE2003.severity = none
++# 'this.' qualification isn't required (SA1101 is off in the preset)
++dotnet_diagnostic.IDE0009.severity = none
++
++# Conventions in this repository's code (stylebro-migrate init counted them; delete a line to have it counted again)
++# init: '=>' where a line wraps: your code mixes both forms (1 at the end of the line, 3 at the start of the line), so BRO1521 is off. To choose one: set stylebro_arrow_placement_when_wrapping and remove the next line.
++dotnet_diagnostic.BRO1521.severity = none
++# init: multi-line initializers: your code mixes both forms (15 with a trailing comma, 10 without a trailing comma), so BRO1401 is off. To choose one: set stylebro_trailing_comma and remove the next line.
++dotnet_diagnostic.BRO1401.severity = none
++# init: null checks: your code mixes both forms (14 'is null', 11 '== null'), so BRO1133 is off. To choose one: set stylebro_null_check_style and remove the next line.
++dotnet_diagnostic.BRO1133.severity = none
++# init: default values: 'default' in 8 of 8 places in your code
++csharp_prefer_simple_default_expression = true
++# init: ': base(...)'/': this(...)': your code mixes both forms (6 on its own line, 5 on the constructor's line), so BRO1105 is off. To choose one: set stylebro_constructor_initializer_placement and remove the next line.
++dotnet_diagnostic.BRO1105.severity = none
++# init: 'where' constraints: your code mixes both forms (1 on their own line, 8 on the declaration's line), so BRO1111 is off. To choose one: set stylebro_constraint_placement and remove the next line.
++dotnet_diagnostic.BRO1111.severity = none
++# init: 'new T { ... }' with an initializer: your code mixes both forms (17 without '()', 9 with '()'), so BRO1141 is off. To choose one: set stylebro_object_creation_parentheses and remove the next line.
++dotnet_diagnostic.BRO1141.severity = none
++# init: overrides/interface implementations: your code mixes both forms (1 with a doc comment, 4 without a doc comment), so BRO1601 is off. To choose one: set dotnet_diagnostic.BRO1601.severity and remove the next line.
++dotnet_diagnostic.BRO1601.severity = none
++# init: property summaries: your code mixes both forms (11 starting with 'Gets'/'Sets', 20 in their own words), so BRO1604 is off. To choose one: set dotnet_diagnostic.BRO1604.severity and remove the next line.
++dotnet_diagnostic.BRO1604.severity = none
++# init: C# files' line endings: LF in 56 of 57 files in your code
++end_of_line = lf
++# init: doc element order (typeparam, param, remarks): your code mixes both forms (4 in BRO1619's order, 3 in another order), so BRO1619 is off. To choose one: set dotnet_diagnostic.BRO1619.severity and remove the next line.
++dotnet_diagnostic.BRO1619.severity = none
++# init: keywords in doc comments: 9 of 9 in your code are '<c>null</c>', so BRO1618 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1618.severity = none
++# init: using directives: 45 of 46 files sorted, 31 of 33 with System first
++dotnet_sort_system_directives_first = true
++# init: Charset: your .editorconfig says charset = utf-8, but 32 of 57 C# files start with a BOM: nothing enforced it, so charset = unset is written for C# files and 'format' leaves each file's BOM (or its absence) as it is. To have charset = utf-8 everywhere: put that line below the stylebro-migrate block, in a [*.cs] section (a later line wins; the block's own lines come back on the next init) and run 'bro format' (it rewrites the files).
++charset = unset
++# END stylebro-migrate
+diff --git a/Directory.Build.props b/Directory.Build.props
+new file mode 100644
+index 0000000..7d21b83
+--- /dev/null
++++ b/Directory.Build.props
+@@ -0,0 +1,8 @@
++<Project>
++  <PropertyGroup>
++    <StyleBroPreset>1.0</StyleBroPreset>
++  </PropertyGroup>
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial60.2" PrivateAssets="all" />
++  </ItemGroup>
++</Project>
+diff --git a/samples/ProblemDetails.Mvc.Sample/Controllers/MvcController.cs b/samples/ProblemDetails.Mvc.Sample/Controllers/MvcController.cs
+index 65531c2..fd092a1 100644
+--- a/samples/ProblemDetails.Mvc.Sample/Controllers/MvcController.cs
++++ b/samples/ProblemDetails.Mvc.Sample/Controllers/MvcController.cs
+@@ -1,6 +1,6 @@
++using System.ComponentModel.DataAnnotations;
+ using Hellang.Middleware.ProblemDetails;
+ using Microsoft.AspNetCore.Mvc;
+-using System.ComponentModel.DataAnnotations;
+ 
+ namespace ProblemDetails.Mvc.Sample.Controllers;
+ 
+@@ -60,5 +60,4 @@ public class MvcController : ControllerBase
+ 
+         return BadRequest(problem);
+     }
+-
+ }
+diff --git a/samples/ProblemDetails.Mvc.Sample/Program.cs b/samples/ProblemDetails.Mvc.Sample/Program.cs
+index ccfc8bd..50676eb 100644
+--- a/samples/ProblemDetails.Mvc.Sample/Program.cs
++++ b/samples/ProblemDetails.Mvc.Sample/Program.cs
+@@ -1,14 +1,14 @@
+ global using ProblemDetailsOptions = Hellang.Middleware.ProblemDetails.ProblemDetailsOptions;
++using System.Text.Json.Serialization;
+ using Hellang.Middleware.ProblemDetails;
+ using Hellang.Middleware.ProblemDetails.Mvc;
+ using ProblemDetails.Mvc.Sample;
+-using System.Text.Json.Serialization;
+ 
+ var builder = WebApplication.CreateBuilder(args);
+ 
+ builder.Host.UseEnvironment(Environments.Development);
+ // Uncomment line below to remove exception details from responses.
+-//builder.Host.UseEnvironment(Environments.Production);
++// builder.Host.UseEnvironment(Environments.Production);
+ 
+ // Add services to the container.
+ builder.Services
+@@ -34,7 +34,6 @@ builder.Services
+         // Because exceptions are handled polymorphically, this will act as a "catch all" mapping, which is why it's added last.
+         // If an exception other than NotImplementedException and HttpRequestException is thrown, this will handle it.
+         options.MapToStatusCode<Exception>(StatusCodes.Status500InternalServerError);
+-
+     })
+     .AddControllersWithViews()
+     .AddProblemDetailsConventions()
+@@ -72,4 +71,3 @@ static Task CustomMiddleware(HttpContext context, Func<Task> next)
+ 
+     return next();
+ }
+-
+diff --git a/src/Directory.Build.props b/src/Directory.Build.props
+index 0db2f41..842341e 100644
+--- a/src/Directory.Build.props
++++ b/src/Directory.Build.props
+@@ -1,5 +1,6 @@
+ <Project>
+   <PropertyGroup>
++    <StyleBroPreset>1.0</StyleBroPreset>
+     <Authors>Kristian Hellang</Authors>
+     <RepositoryUrl>https://github.com/khellang/Middleware</RepositoryUrl>
+     <PublishRepositoryUrl>true</PublishRepositoryUrl>
+@@ -21,4 +22,7 @@
+       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+     </PackageReference>
+   </ItemGroup>
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial60.2" PrivateAssets="all" />
++  </ItemGroup>
+ </Project>
+diff --git a/src/ProblemDetails/ExceptionProblemDetails.cs b/src/ProblemDetails/ExceptionProblemDetails.cs
+index 626834d..bd6dea8 100644
+--- a/src/ProblemDetails/ExceptionProblemDetails.cs
++++ b/src/ProblemDetails/ExceptionProblemDetails.cs
+@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Http;
+ namespace Hellang.Middleware.ProblemDetails
+ {
+     [ExcludeFromCodeCoverage]
+-    [Obsolete("From v5.0, the ProblemDetails middleware will automatically include exception details for all exceptions. " +
+-              "Because of that, there's no point in using this class. StatusCodeProblemDetails should be used instead.")]
++    [Obsolete("From v5.0, the ProblemDetails middleware will automatically include exception details for all exceptions. "
++              + "Because of that, there's no point in using this class. StatusCodeProblemDetails should be used instead.")]
+     public class ExceptionProblemDetails : StatusCodeProblemDetails
+     {
+         public ExceptionProblemDetails(Exception error) : this(error, StatusCodes.Status500InternalServerError)
+diff --git a/src/ProblemDetails/MediaTypeCollectionExtensions.cs b/src/ProblemDetails/MediaTypeCollectionExtensions.cs
+index d64d8a1..d7df8dc 100644
+--- a/src/ProblemDetails/MediaTypeCollectionExtensions.cs
++++ b/src/ProblemDetails/MediaTypeCollectionExtensions.cs
+@@ -1,34 +1,34 @@
+-using System;
+-using Microsoft.AspNetCore.Mvc.Formatters;
+-
+-namespace Hellang.Middleware.ProblemDetails
+-{
+-    /// <summary>
+-    /// Extension methods for <see cref="MediaTypeCollection"/>.
+-    /// </summary>
+-    internal static class MediaTypeCollectionExtensions
+-    {
+-        /// <summary>
+-        /// Creates a new <see cref="MediaTypeCollection"/> with the same items as an existing <see cref="MediaTypeCollection"/>.
+-        /// </summary>
+-        /// <param name="mediaTypeCollection">The source <see cref="MediaTypeCollection"/> to copy items from.</param>
+-        /// <returns>A new <see cref="MediaTypeCollection"/>.</returns>
+-        /// <exception cref="ArgumentNullException">If <paramref name="mediaTypeCollection"/> is <c>null</c>.</exception>
+-        public static MediaTypeCollection Clone(this MediaTypeCollection mediaTypeCollection)
+-        {
+-            if (mediaTypeCollection == null)
+-            {
+-                throw new ArgumentNullException(nameof(mediaTypeCollection));
+-            }
+-
+-            var clone = new MediaTypeCollection();
+-
+-            foreach (string mediaType in mediaTypeCollection)
+-            {
+-                clone.Add(mediaType);
+-            }
+-
+-            return clone;
+-        }
+-    }
+-}
++using System;
++using Microsoft.AspNetCore.Mvc.Formatters;
++
++namespace Hellang.Middleware.ProblemDetails
++{
++    /// <summary>
++    /// Extension methods for <see cref="MediaTypeCollection"/>.
++    /// </summary>
++    internal static class MediaTypeCollectionExtensions
++    {
++        /// <summary>
++        /// Creates a new <see cref="MediaTypeCollection"/> with the same items as an existing <see cref="MediaTypeCollection"/>.
++        /// </summary>
++        /// <param name="mediaTypeCollection">The source <see cref="MediaTypeCollection"/> to copy items from.</param>
++        /// <returns>A new <see cref="MediaTypeCollection"/>.</returns>
++        /// <exception cref="ArgumentNullException">If <paramref name="mediaTypeCollection"/> is <c>null</c>.</exception>
++        public static MediaTypeCollection Clone(this MediaTypeCollection mediaTypeCollection)
++        {
++            if (mediaTypeCollection == null)
++            {
++                throw new ArgumentNullException(nameof(mediaTypeCollection));
++            }
++
++            var clone = new MediaTypeCollection();
++
++            foreach (string mediaType in mediaTypeCollection)
++            {
++                clone.Add(mediaType);
++            }
++
++            return clone;
++        }
++    }
++}
+diff --git a/src/ProblemDetails/Mvc/ProblemDetailsApplicationModelProvider.cs b/src/ProblemDetails/Mvc/ProblemDetailsApplicationModelProvider.cs
+index 3f73213..7d81e59 100644
+--- a/src/ProblemDetails/Mvc/ProblemDetailsApplicationModelProvider.cs
++++ b/src/ProblemDetails/Mvc/ProblemDetailsApplicationModelProvider.cs
+@@ -44,6 +44,11 @@ namespace Hellang.Middleware.ProblemDetails.Mvc
+             }
+         }
+ 
++        void IApplicationModelProvider.OnProvidersExecuted(ApplicationModelProviderContext context)
++        {
++            // Not needed.
++        }
++
+         private static bool IsApiController(ControllerModel controller)
+         {
+             if (controller.Attributes.OfType<IApiBehaviorMetadata>().Any())
+@@ -56,10 +61,5 @@ namespace Hellang.Middleware.ProblemDetails.Mvc
+ 
+             return attributes.OfType<IApiBehaviorMetadata>().Any();
+         }
+-
+-        void IApplicationModelProvider.OnProvidersExecuted(ApplicationModelProviderContext context)
+-        {
+-            // Not needed.
+-        }
+     }
+ }
+diff --git a/src/ProblemDetails/Mvc/ProblemDetailsResultFilter.cs b/src/ProblemDetails/Mvc/ProblemDetailsResultFilter.cs
+index 18af07f..5bf90e9 100644
+--- a/src/ProblemDetails/Mvc/ProblemDetailsResultFilter.cs
++++ b/src/ProblemDetails/Mvc/ProblemDetailsResultFilter.cs
+@@ -17,7 +17,7 @@ namespace Hellang.Middleware.ProblemDetails.Mvc
+         }
+ 
+         /// <summary>
+-        /// Order is set to 1 so that execution is after <see cref="ProducesAttribute"/>, which clears and sets ObjectResult.ContentTypes
++        /// Order is set to 1 so that execution is after <see cref="ProducesAttribute"/>, which clears and sets ObjectResult.ContentTypes.
+         /// </summary>
+         public int Order => 1;
+ 
+diff --git a/src/ProblemDetails/Mvc/ProblemDetailsResultFilterConvention.cs b/src/ProblemDetails/Mvc/ProblemDetailsResultFilterConvention.cs
+index dd9db80..8f68748 100644
+--- a/src/ProblemDetails/Mvc/ProblemDetailsResultFilterConvention.cs
++++ b/src/ProblemDetails/Mvc/ProblemDetailsResultFilterConvention.cs
+@@ -4,11 +4,11 @@ namespace Hellang.Middleware.ProblemDetails.Mvc
+ {
+     internal class ProblemDetailsResultFilterConvention : IActionModelConvention
+     {
+-        private readonly ProblemDetailsResultFilterFactory _factory = new();
++        private readonly ProblemDetailsResultFilterFactory factory = new();
+ 
+         public void Apply(ActionModel action)
+         {
+-            action.Filters.Add(_factory);
++            action.Filters.Add(factory);
+         }
+     }
+ }
+diff --git a/src/ProblemDetails/ProblemDetailsMiddleware.cs b/src/ProblemDetails/ProblemDetailsMiddleware.cs
+index fcd60ff..9278982 100644
+--- a/src/ProblemDetails/ProblemDetailsMiddleware.cs
++++ b/src/ProblemDetails/ProblemDetailsMiddleware.cs
+@@ -114,8 +114,9 @@ namespace Hellang.Middleware.ProblemDetails
+ 
+                 var details = Factory.CreateExceptionProblemDetails(context, error);
+ 
+-                if (details != null) // Don't handle the exception if we can't or don't want to convert it to ProblemDetails
++                if (details != null)
+                 {
++                    // Don't handle the exception if we can't or don't want to convert it to ProblemDetails
+                     if (Options.ShouldLogUnhandledException(context, error, details))
+                     {
+                         Logger.UnhandledException(error);
+diff --git a/src/ProblemDetails/ProblemDetailsOptions.cs b/src/ProblemDetails/ProblemDetailsOptions.cs
+index 03fe85b..d0eafa6 100644
+--- a/src/ProblemDetails/ProblemDetailsOptions.cs
++++ b/src/ProblemDetails/ProblemDetailsOptions.cs
+@@ -290,23 +290,6 @@ namespace Hellang.Middleware.ProblemDetails
+ #endif
+         }
+ 
+-        private void AddTraceId(HttpContext context, MvcProblemDetails details)
+-        {
+-            var key = TraceIdPropertyName;
+-
+-            if (details.Extensions.ContainsKey(key))
+-            {
+-                return;
+-            }
+-
+-            var traceId = GetTraceId.Invoke(context);
+-
+-            if (!string.IsNullOrEmpty(traceId))
+-            {
+-                details.Extensions[key] = traceId;
+-            }
+-        }
+-
+         internal bool TryMapProblemDetails(HttpContext context, Exception? exception, out MvcProblemDetails? problem)
+         {
+             if (exception is null)
+@@ -327,6 +310,23 @@ namespace Hellang.Middleware.ProblemDetails
+             return false;
+         }
+ 
++        private void AddTraceId(HttpContext context, MvcProblemDetails details)
++        {
++            var key = TraceIdPropertyName;
++
++            if (details.Extensions.ContainsKey(key))
++            {
++                return;
++            }
++
++            var traceId = GetTraceId.Invoke(context);
++
++            if (!string.IsNullOrEmpty(traceId))
++            {
++                details.Extensions[key] = traceId;
++            }
++        }
++
+         private sealed class ExceptionMapper
+         {
+             public ExceptionMapper(Type type, Func<HttpContext, Exception, MvcProblemDetails?> mapping, Func<HttpContext, Exception, bool> predicate)
+diff --git a/src/ProblemDetails/ProblemDetailsOptionsSetup.cs b/src/ProblemDetails/ProblemDetailsOptionsSetup.cs
+index 061576c..df0e490 100644
+--- a/src/ProblemDetails/ProblemDetailsOptionsSetup.cs
++++ b/src/ProblemDetails/ProblemDetailsOptionsSetup.cs
+@@ -2,14 +2,31 @@ using System;
+ using System.Diagnostics;
+ using Microsoft.AspNetCore.Http;
+ using Microsoft.Extensions.DependencyInjection;
+-using Microsoft.Extensions.Options;
+ using Microsoft.Extensions.Hosting;
++using Microsoft.Extensions.Options;
+ using Microsoft.Net.Http.Headers;
+ 
+ namespace Hellang.Middleware.ProblemDetails
+ {
+     public class ProblemDetailsOptionsSetup : IConfigureOptions<ProblemDetailsOptions>
+     {
++        /// <summary>
++        /// Default implementation for determining if a http response status code should be consider a problem or not.
++        /// </summary>
++        /// <remarks>
++        /// A status code between 400 and 600 is considered a problem.
++        /// </remarks>
++        public static bool IsProblemStatusCode(int? statusCode)
++        {
++            return statusCode switch
++            {
++                >= 600 => false,
++                < 400 => false,
++                null => false,
++                _ => true
++            };
++        }
++
+         public void Configure(ProblemDetailsOptions options)
+         {
+             if (options.IncludeExceptionDetails is null)
+@@ -95,22 +112,5 @@ namespace Hellang.Middleware.ProblemDetails
+ 
+             return false;
+         }
+-
+-        /// <summary>
+-        /// Default implementation for determining if a http response status code should be consider a problem or not
+-        /// </summary>
+-        /// <remarks>
+-        /// A status code between 400 and 600 is considered a problem
+-        /// </remarks>
+-        public static bool IsProblemStatusCode(int? statusCode)
+-        {
+-            return statusCode switch
+-            {
+-                >= 600 => false,
+-                < 400 => false,
+-                null => false,
+-                _ => true
+-            };
+-        }
+     }
+ }
+diff --git a/src/ProblemDetails/StatusCodeProblemDetails.cs b/src/ProblemDetails/StatusCodeProblemDetails.cs
+index 88777be..bd20c27 100644
+--- a/src/ProblemDetails/StatusCodeProblemDetails.cs
++++ b/src/ProblemDetails/StatusCodeProblemDetails.cs
+@@ -32,16 +32,16 @@ namespace Hellang.Middleware.ProblemDetails
+             return details;
+         }
+ 
++        internal static string GetDefaultType(int statusCode)
++        {
++            return $"https://httpstatuses.io/{statusCode}";
++        }
++
+         private static void SetDetails(MvcProblemDetails details, int statusCode)
+         {
+             details.Status = statusCode;
+             details.Type = GetDefaultType(statusCode);
+             details.Title = ReasonPhrases.GetReasonPhrase(statusCode);
+         }
+-
+-        internal static string GetDefaultType(int statusCode)
+-        {
+-            return $"https://httpstatuses.io/{statusCode}";
+-        }
+     }
+ }
+diff --git a/src/RateLimiting/IPNetwork.cs b/src/RateLimiting/IPNetwork.cs
+index e50179a..b3ee104 100644
+--- a/src/RateLimiting/IPNetwork.cs
++++ b/src/RateLimiting/IPNetwork.cs
+@@ -54,7 +54,7 @@ namespace Hellang.Middleware.RateLimiting
+ 
+             if (remainingBits > 0)
+             {
+-                mask[i] = (byte) (0xFF << (8 - remainingBits));
++                mask[i] = (byte)(0xFF << (8 - remainingBits));
+             }
+ 
+             return mask;
+diff --git a/src/RateLimiting/RateLimitingMiddleware.cs b/src/RateLimiting/RateLimitingMiddleware.cs
+index 608a405..51a2b0c 100644
+--- a/src/RateLimiting/RateLimitingMiddleware.cs
++++ b/src/RateLimiting/RateLimitingMiddleware.cs
+@@ -15,7 +15,7 @@ namespace Hellang.Middleware.RateLimiting
+         }
+ 
+         private RequestDelegate Next { get; }
+-        
++
+         private RateLimitingOptions Options { get; }
+ 
+         public async Task Invoke(HttpContext context)
+diff --git a/src/RateLimiting/RateLimitingOptionsExtensions.cs b/src/RateLimiting/RateLimitingOptionsExtensions.cs
+index bb7d7cf..490421a 100644
+--- a/src/RateLimiting/RateLimitingOptionsExtensions.cs
++++ b/src/RateLimiting/RateLimitingOptionsExtensions.cs
+@@ -115,4 +115,4 @@ namespace Hellang.Middleware.RateLimiting
+             return options.Limit(name, _ => limit, _ => period, discriminator);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/RateLimiting/SelectorExtensions.cs b/src/RateLimiting/SelectorExtensions.cs
+index 82aa0f6..3e1013d 100644
+--- a/src/RateLimiting/SelectorExtensions.cs
++++ b/src/RateLimiting/SelectorExtensions.cs
+@@ -9,4 +9,4 @@ namespace Hellang.Middleware.RateLimiting
+             return ctx => new ValueTask<T>(selector(ctx));
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/test/Directory.Build.props b/test/Directory.Build.props
+index 5ca163d..2fb2860 100644
+--- a/test/Directory.Build.props
++++ b/test/Directory.Build.props
+@@ -1,5 +1,6 @@
+ <Project>
+   <PropertyGroup>
++    <StyleBroPreset>1.0</StyleBroPreset>
+     <OutputType>Exe</OutputType>
+     <IsPackable>False</IsPackable>
+     <LangVersion>9.0</LangVersion>
+@@ -20,4 +21,7 @@
+       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+     </PackageReference>
+   </ItemGroup>
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial60.2" PrivateAssets="all" />
++  </ItemGroup>
+ </Project>
+diff --git a/test/ProblemDetails.Tests/Helpers/InMemoryLogger.cs b/test/ProblemDetails.Tests/Helpers/InMemoryLogger.cs
+index 98960e8..56c55f6 100644
+--- a/test/ProblemDetails.Tests/Helpers/InMemoryLogger.cs
++++ b/test/ProblemDetails.Tests/Helpers/InMemoryLogger.cs
+@@ -9,15 +9,15 @@ namespace ProblemDetails.Tests.Helpers
+     {
+         private static readonly string CategoryName = typeof(T).FullName;
+ 
+-        private readonly List<LogEntry> _messages = new List<LogEntry>();
++        private readonly List<LogEntry> messages = new List<LogEntry>();
+ 
+         public IEnumerable<LogEntry> Messages
+         {
+             get
+             {
+-                lock (_messages)
++                lock (messages)
+                 {
+-                    return _messages.ToList();
++                    return messages.ToList();
+                 }
+             }
+         }
+@@ -33,9 +33,9 @@ namespace ProblemDetails.Tests.Helpers
+                 EventId = eventId.Id,
+             };
+ 
+-            lock (_messages)
++            lock (messages)
+             {
+-                _messages.Add(message);
++                messages.Add(message);
+             }
+         }
+ 
+diff --git a/test/ProblemDetails.Tests/ProblemDetailsMiddlewareTests.cs b/test/ProblemDetails.Tests/ProblemDetailsMiddlewareTests.cs
+index 837b5dd..65e5dd1 100644
+--- a/test/ProblemDetails.Tests/ProblemDetailsMiddlewareTests.cs
++++ b/test/ProblemDetails.Tests/ProblemDetailsMiddlewareTests.cs
+@@ -318,8 +318,8 @@ namespace ProblemDetails.Tests
+         [InlineData(HttpStatusCode.OK)]
+         [InlineData(HttpStatusCode.Created)]
+         [InlineData(HttpStatusCode.NoContent)]
+-        [InlineData((HttpStatusCode) 600)]
+-        [InlineData((HttpStatusCode) 800)]
++        [InlineData((HttpStatusCode)600)]
++        [InlineData((HttpStatusCode)800)]
+         public async Task SuccessStatusCode_IsNotHandled(HttpStatusCode expected)
+         {
+             using var client = CreateClient(handler: ResponseWithStatusCode(expected));
+@@ -409,7 +409,7 @@ namespace ProblemDetails.Tests
+         {
+             using var client = CreateClient(handler: ResponseThrows<DivideByZeroException>(), options =>
+             {
+-                options.Rethrow<DivideByZeroException>((ctx, ex ) => true);
++                options.Rethrow<DivideByZeroException>((ctx, ex) => true);
+             });
+ 
+             await AssertThrowsInnerAsync<DivideByZeroException>(() => client.GetAsync(string.Empty));
+@@ -598,6 +598,25 @@ namespace ProblemDetails.Tests
+             };
+         }
+ 
++        private static RequestDelegate ResponseWithStatusCode(HttpStatusCode statusCode)
++        {
++            return context =>
++            {
++                context.Response.StatusCode = (int)statusCode;
++                return Task.CompletedTask;
++            };
++        }
++
++        private static RequestDelegate ResponseThrows<TException>() where TException : Exception, new()
++        {
++            return ResponseThrows(new TException());
++        }
++
++        private static RequestDelegate ResponseThrows(Exception exception = null)
++        {
++            return context => Task.FromException(exception ?? new InvalidOperationException("Request failed."));
++        }
++
+         private HttpClient CreateClient(RequestDelegate handler = null, Action<ProblemDetailsOptions> configureOptions = null, string environment = null)
+         {
+             var builder = new WebHostBuilder()
+@@ -631,25 +650,6 @@ namespace ProblemDetails.Tests
+             return client;
+         }
+ 
+-        private static RequestDelegate ResponseWithStatusCode(HttpStatusCode statusCode)
+-        {
+-            return context =>
+-            {
+-                context.Response.StatusCode = (int)statusCode;
+-                return Task.CompletedTask;
+-            };
+-        }
+-
+-        private static RequestDelegate ResponseThrows<TException>() where TException : Exception, new()
+-        {
+-            return ResponseThrows(new TException());
+-        }
+-
+-        private static RequestDelegate ResponseThrows(Exception exception = null)
+-        {
+-            return context => Task.FromException(exception ?? new InvalidOperationException("Request failed."));
+-        }
+-
+         private class EvilProblemDetails : MvcProblemDetails
+         {
+             public string EvilProperty => throw new InvalidOperationException("This should throw during serialization.");

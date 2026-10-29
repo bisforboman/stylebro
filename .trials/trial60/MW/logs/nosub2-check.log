@@ -1,0 +1,4 @@
+Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+Missing: the git submodule lib/AspNetCore isn't checked out: code that compiles files from there doesn't compile, so 'using' directives can look unused, and IDE0005 (unused usings) is left out. Run 'git submodule update --init' (or clone with --recursive), then run again.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Clean.

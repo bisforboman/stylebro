@@ -35,3 +35,41 @@ Turn off this advice by setting config variable advice.detachedHead to false
 == soak2-src: dotnet-format check
 == soak2-src: host check
 == soak2-src: dotnet-format format
+== soak2-src: host format
+== soak2-src: dotnet-format recheck
+== soak2-src: host recheck
+Times (soak2-src):
+  dotnet-format check       549.3 s
+  host check                176.1 s
+  dotnet-format format      660.1 s
+  host format               176.2 s
+  dotnet-format recheck       0.7 s
+  host recheck                0.9 s
+DIFFERENT (soak2-src):
+  check output differs (/home/user/w60/L4N/parity2/soak2-src-dotnet-format-check.txt vs /home/user/w60/L4N/parity2/soak2-src-host-check.txt):
+  => Formatting a copy: net10.0, part 3 of 3 (1 project(s), 108 files with findings)
+  <= Formatting a copy: net10.0, part 3 of 3 (1 project(s), 109 files with findings)
+  => 'dotnet format' had warnings loading the workspace in its net462 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+  <= 'dotnet format' had warnings loading the workspace in its net10.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+  => <root>/src/log4net/Util/CompositeProperties.cs(39,7): warning BRO1606: Begin the constructor's summary with 'Initializes a new instance of ...' [<root>/src/log4net/log4net.csproj]
+  <= <root>/src/log4net/Util/AppenderAttachedImpl.cs(42,7): warning BRO1606: Begin the constructor's summary with 'Initializes a new instance of ...' [<root>/src/log4net/log4net.csproj]
+  => <root>/src/log4net/Util/ConverterInfo.cs(46,94): error WHITESPACE: Fix whitespace formatting. Replace 4 characters with '\n\s\s'. [<root>/src/log4net/log4net.csproj]
+  <= <root>/src/log4net/Util/CompositeProperties.cs(39,7): warning BRO1606: Begin the constructor's summary with 'Initializes a new instance of ...' [<root>/src/log4net/log4net.csproj]
+  => <root>/src/log4net/Util/CountingQuietTextWriter.cs(40,7): warning BRO1606: Begin the constructor's summary with 'Initializes a new instance of ...' [<root>/src/log4net/log4net.csproj]
+  <= <root>/src/log4net/Util/ConverterInfo.cs(46,94): error WHITESPACE: Fix whitespace formatting. Replace 4 characters with '\n\s\s'. [<root>/src/log4net/log4net.csproj]
+  => <root>/src/log4net/Util/CyclicBuffer.cs(107,7): warning BRO1504: Add a blank line before the comment [<root>/src/log4net/log4net.csproj]
+  <= <root>/src/log4net/Util/CountingQuietTextWriter.cs(40,7): warning BRO1606: Begin the constructor's summary with 'Initializes a new instance of ...' [<root>/src/log4net/log4net.csproj]
+  => <root>/src/log4net/Util/CyclicBuffer.cs(40,7): warning BRO1606: Begin the constructor's summary with 'Initializes a new instance of ...' [<root>/src/log4net/log4net.csproj]
+  <= <root>/src/log4net/Util/CyclicBuffer.cs(107,7): warning BRO1504: Add a blank line before the comment [<root>/src/log4net/log4net.csproj]
+  => <root>/src/log4net/Util/CyclicBuffer.cs(44,7): warning BRO1619: Put '<exception>' before '<remarks>' [<root>/src/log4net/log4net.csproj]
+  <= <root>/src/log4net/Util/CyclicBuffer.cs(40,7): warning BRO1606: Begin the constructor's summary with 'Initializes a new instance of ...' [<root>/src/log4net/log4net.csproj]
+  => <root>/src/log4net/Util/EmptyDictionary.cs(142,7): warning BRO1619: Put '<exception>' before '<remarks>' [<root>/src/log4net/log4net.csproj]
+  <= <root>/src/log4net/Util/CyclicBuffer.cs(44,7): warning BRO1619: Put '<exception>' before '<remarks>' [<root>/src/log4net/log4net.csproj]
+  => <root>/src/log4net/Util/EmptyDictionary.cs(154,7): warning BRO1619: Put '<exception>' before '<remarks>' [<root>/src/log4net/log4net.csproj]
+  <= <root>/src/log4net/Util/EmptyDictionary.cs(142,7): warning BRO1619: Put '<exception>' before '<remarks>' [<root>/src/log4net/log4net.csproj]
+  format output differs (/home/user/w60/L4N/parity2/soak2-src-dotnet-format-format.txt vs /home/user/w60/L4N/parity2/soak2-src-host-format.txt):
+  => == net10.0, part 3 of 3 (1 project(s), 108 files with findings)
+  <= == net10.0, part 3 of 3 (1 project(s), 109 files with findings)
+  => 'dotnet format' had warnings loading the workspace in its net462 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+  <= 'dotnet format' had warnings loading the workspace in its net10.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+  format --json report differs (/home/user/w60/L4N/parity2/soak2-src-dotnet-format-format.json vs /home/user/w60/L4N/parity2/soak2-src-host-format.json)

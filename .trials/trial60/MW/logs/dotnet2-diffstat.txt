@@ -1,0 +1,22 @@
+ .editorconfig                                      | 60 +++++++++++++++++++
+ Directory.Build.props                              |  8 +++
+ .../Controllers/MvcController.cs                   |  3 +-
+ samples/ProblemDetails.Mvc.Sample/Program.cs       |  6 +-
+ src/Directory.Build.props                          |  4 ++
+ src/ProblemDetails/ExceptionProblemDetails.cs      |  4 +-
+ .../MediaTypeCollectionExtensions.cs               | 68 +++++++++++-----------
+ .../Mvc/ProblemDetailsApplicationModelProvider.cs  | 10 ++--
+ .../Mvc/ProblemDetailsResultFilter.cs              |  2 +-
+ .../Mvc/ProblemDetailsResultFilterConvention.cs    |  4 +-
+ src/ProblemDetails/ProblemDetailsMiddleware.cs     |  3 +-
+ src/ProblemDetails/ProblemDetailsOptions.cs        | 34 +++++------
+ src/ProblemDetails/ProblemDetailsOptionsSetup.cs   | 36 ++++++------
+ src/ProblemDetails/StatusCodeProblemDetails.cs     | 10 ++--
+ src/RateLimiting/IPNetwork.cs                      |  2 +-
+ src/RateLimiting/RateLimitingMiddleware.cs         |  2 +-
+ src/RateLimiting/RateLimitingOptionsExtensions.cs  |  2 +-
+ src/RateLimiting/SelectorExtensions.cs             |  2 +-
+ test/Directory.Build.props                         |  4 ++
+ .../ProblemDetails.Tests/Helpers/InMemoryLogger.cs | 10 ++--
+ .../ProblemDetailsMiddlewareTests.cs               | 44 +++++++-------
+ 21 files changed, 196 insertions(+), 122 deletions(-)

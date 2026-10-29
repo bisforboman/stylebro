@@ -129,3 +129,7 @@ Since 2026-10-25 the in-process host is `bro format`'s default engine
 one. Until the next release, every trial still runs its soak on both: `scripts/format-speed/Compare-Format.ps1` on each
 repository (it names both engines, `check`, `format`, `check`), plus `bro check --build` with each engine. A difference
 between the engines makes the soak not clean (decision of 2026-10-23); the trial's own commands use the default (host).
+Allowed differences: the load-warning note (compared unordered), the old engine's loose load of a referenced project, C#
+projects that reference a Visual Basic project (Not checked on the old engine), and the old engine's duplicate finding lines
+from a second instance of a multi-targeted referenced project in `check` on unformatted code (compare the distinct findings
+as sets; [decision](../docs/decisions/2026-10-29-the-old-engines-duplicate-findings-from-a-second-project.md), trial 60).

@@ -1,0 +1,6 @@
+Checking StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Configurations: MasterMemory.Tests: it takes an in-solution source generator, so a build of its other configurations checks the code only those compile ('#if !DEBUG') at the end too.
+'dotnet format' had warnings loading the workspace; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+Building MasterMemory.Tests in Release to check it (it takes an in-solution source generator)...
+Release build of MasterMemory.Tests: no findings.
+Clean.

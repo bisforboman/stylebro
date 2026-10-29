@@ -1,0 +1,10 @@
+Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+Missing: the git submodule lib/AspNetCore isn't checked out: code that compiles files from there doesn't compile, so 'using' directives can look unused, and IDE0005 (unused usings) is left out. Run 'git submodule update --init' (or clone with --recursive), then run again.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Building Hellang.Middleware.sln in Debug, Release with warnings as errors, and a copy of HEAD to compare...
+Debug: no findings, no new errors (11 errors the untouched code has too, not counted).
+  Didn't compile: ProblemDetails.MinimalApiSample, ProblemDetails.Mvc.Sample, ProblemDetails.Tests, RateLimiting.Tests (a project they need failed).
+Release: no findings, no new errors (11 errors the untouched code has too, not counted).
+  Didn't compile: ProblemDetails.MinimalApiSample, ProblemDetails.Mvc.Sample, ProblemDetails.Tests, RateLimiting.Tests (a project they need failed).
+Formatting is clean. But:
+Not verified: the Debug (ProblemDetails.MinimalApiSample, ProblemDetails.Mvc.Sample, ProblemDetails.Tests and 1 more), Release (ProblemDetails.MinimalApiSample, ProblemDetails.Mvc.Sample, ProblemDetails.Tests and 1 more) builds didn't compile the projects named: a project they need failed, as in the untouched code's build (above), so StyleBro's rules didn't run there. Fix those errors, then run again.
