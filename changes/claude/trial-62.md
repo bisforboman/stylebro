@@ -11,3 +11,6 @@
 
 - `bro init` and `bro migrate` keep the encoding of a UTF-16 (or UTF-32) `Directory.Build.props` or project file they edit,
   and its line endings; they used to write it back as UTF-8 with LF line breaks.
+- **BRO1505** no longer needs a second `bro format` run for a comment between two elements with a blank line below it
+  (`using ...;` / `// ReSharper disable ...` / blank line / `namespace`): it adds the blank line above the comment and
+  removes the one below, as **BRO1506** wants.

@@ -429,7 +429,9 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
 - **BRO1505** (SA1516) elements separated by a blank line (`Layout/ElementSeparation.cs`). Elements: usings/externs/
   assembly attributes/members of a file or namespace (file-scoped `namespace X;` counts before its first element),
   type members, accessors (only when either neighbour is multi-line). Exempt like StyleCop: field+field, using+using,
-  extern+extern, attribute list+attribute list. A blank line ANYWHERE before the element's code counts (also below its
+  extern+extern, attribute list+attribute list. With BRO1506 on, the blank lines it removes below the element's
+  comments don't count, and the fix removes them while adding the line above the comments (trial 62, Rebus: usings,
+  `// ReSharper ...`, blank, `namespace` took the host a second run; FixOrderTests case). A blank line ANYWHERE before the element's code counts (also below its
   comment or `#if`); the fix inserts above the element's first line (comment/doc/attribute/directive), diagnostic at
   that line's start (FullSpan.Start). Same positions as StyleCop (28/28); StyleCop's fix misses doc comments and
   mangles two-members-on-one-line.

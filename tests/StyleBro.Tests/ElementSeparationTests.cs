@@ -355,7 +355,8 @@ public class ElementSeparationTests
         """);
 
     [Fact]
-    public Task BlankLineBelowACommentOrDirective_IsEnough() => VerifyNoDiagnosticsAsync("""
+    public Task BlankLineBelowACommentOrDirective_IsEnough() => VerifyNoDiagnosticsAsync(
+        """
         class C
         {
             void A() { }
@@ -366,6 +367,30 @@ public class ElementSeparationTests
 
             void C2() { }
         #endif
+        }
+        """,
+        "dotnet_diagnostic.BRO1506.severity = none");
+
+    // Trial 62, Rebus: with BRO1506 on, the blank line below the comment is BRO1506's to remove, so it doesn't separate
+    // the elements; the fix puts one above the comment and removes the one below, what BRO1506 run first leaves for it.
+    [Fact]
+    public Task BlankLineBelowAComment_BRO1506Removes_DoesNotCount() => VerifyFixAsync(
+        """
+        class C
+        {
+            void A() { }
+        {|BRO1505:|}    // A comment, then a blank line.
+
+            void B() { }
+        }
+        """,
+        """
+        class C
+        {
+            void A() { }
+
+            // A comment, then a blank line.
+            void B() { }
         }
         """);
 

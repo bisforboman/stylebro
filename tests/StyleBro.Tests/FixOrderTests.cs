@@ -363,6 +363,28 @@ public class FixOrderTests
         "BRO1506",
         "BRO1519");
 
+    // Rebus (trial 62): usings, '// ReSharper disable ...' lines right below them, a blank line, the namespace. BRO1506
+    // removes the blank line below the comments, and BRO1505 then wants one between the usings and the comments; run before
+    // BRO1506, BRO1505 took the blank line below the comments for the separation, and a second run added it.
+    [Fact]
+    public Task CommentsBetweenUsingsAndNamespace_WithABlankLineBelow() => AssertConvergesInEveryOrderAsync(
+        """
+        using System;
+        using System.Collections.Generic;
+        // ReSharper disable ArgumentsStyleLiteral
+        // ReSharper disable UnusedMember.Global
+
+        namespace N
+        {
+            public static class C
+            {
+                public static List<int> M() => new List<int> { Environment.ProcessorCount };
+            }
+        }
+        """,
+        "BRO1505",
+        "BRO1506");
+
     [Fact]
     public Task SingleLineBlocks_InsideOtherSingleLineBlocks() => AssertConvergesInEveryOrderAsync(
         """
