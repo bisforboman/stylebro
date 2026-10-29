@@ -17,3 +17,7 @@ Run 1: 20 files changed:
   FluentScheduler/Cron/CronTimeCalculator.cs
   FluentScheduler/Fluent/3.Duration/DayUnit.cs
   ... and 10 more
+Checked net48 (run 1 of 2)
+Checked net8.0 (run 2 of 2)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

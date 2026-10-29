@@ -12,3 +12,10 @@ soak start 15:35
 soak done rc=0 15:38
 soak-compare done 15:38
 default2 start 16:24
+default2 done 16:28
+dotnet2 start 16:28
+dotnet2 done 16:33
+CHAIN-DONE
+soak start 16:33
+soak done rc=0 16:36
+soak2-compare done 16:36

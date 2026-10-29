@@ -114,6 +114,10 @@ foreach ($engine in 'dotnet-format', 'host') {
     if (-not $Reuse) {
         if (Test-Path $clone) { Remove-Item -Recurse -Force $clone }
         git clone -q --no-hardlinks $Repository $clone
+        # The source's own remote, not the local path: SourceLink fails a project's MSBuild load on a local-path origin, and
+        # each engine hit it in another run (trial 61, ExcelMapper: the load-warning note named net462 or net8.0).
+        $origin = git -C $Repository remote get-url origin 2>$null
+        if ($origin) { git -C $clone remote set-url origin $origin }
     }
 
     $clones[$engine] = $clone

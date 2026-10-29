@@ -47,6 +47,7 @@ Conventions in the code (a convention needs 3 places or more: below 10 they must
   set      C# files' line endings: 35 of 39 CRLF -> set in .editorconfig (crlf)
   default  statements after a block's '}': 14 of 16 after a blank line -> warning
   default  neighbouring members: 291 of 294 with a blank line between -> warning
+  default  types' and namespaces' '{': 44 of 47 right above the code -> warning
   default  doc comments below code: 98 of 98 after a blank line -> warning
   default  '//' comments above code: 463 of 463 right above the code -> warning
   default  '//' comments below code: 368 of 368 after a blank line -> warning
@@ -58,10 +59,10 @@ Conventions in the code (a convention needs 3 places or more: below 10 they must
   default  private constants/static readonly fields: 3 of 3 PascalCase -> PascalCase
   set      spacing (csharp_space_*): your settings set IDE0055 (error)
 Summary:
-  Kept your style for 33 settings: wrote stylebro_private_field_naming, csharp_prefer_braces,
+  Kept your style for 34 settings: wrote stylebro_private_field_naming, csharp_prefer_braces,
     stylebro_allow_single_line_jump_statements, stylebro_null_check_style, stylebro_constructor_initializer_placement,
     csharp_using_directive_placement, csharp_preserve_single_line_statements,
-    stylebro_allow_empty_single_line_blocks; 25 were already StyleBro's default.
+    stylebro_allow_empty_single_line_blocks; 26 were already StyleBro's default.
   Turned 4 rules off because your code mixes both forms: BRO1520 (operators where a line wraps),
     BRO1110 (')' of split lists), BRO1404 (private-by-default members), BRO1603 (doc comment texts).
   Turned 2 rules off because your code doesn't do what they enforce: BRO1601 (overrides/interface implementations: 10 of
