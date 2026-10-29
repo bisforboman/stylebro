@@ -1,0 +1,34 @@
+Test run for /home/user/cand60/dotnetcore-EasyCaching/test/EasyCaching.UnitTests/bin/Debug/net8.0/EasyCaching.UnitTests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:02.28]     EasyCaching.UnitTests.AspectCoreInterceptorTest.Interceptor_Attribute_Method_Should_Handle_Caching [SKIP]
+  Skipped EasyCaching.UnitTests.AspectCoreInterceptorTest.Interceptor_Attribute_Method_Should_Handle_Caching [1 ms]
+[xUnit.net 00:00:02.33]     EasyCaching.UnitTests.AspectCoreInterceptorTest.Interceptor_Should_Recognize_Subclass_Of_EasyCachingAble_Attribute [SKIP]
+  Skipped EasyCaching.UnitTests.AspectCoreInterceptorTest.Interceptor_Should_Recognize_Subclass_Of_EasyCachingAble_Attribute [1 ms]
+[xUnit.net 00:00:06.74]     EasyCaching.UnitTests.ResponseCachingTests.ServesCachedContent_IfBodySize_IsCacheable [SKIP]
+  Skipped EasyCaching.UnitTests.ResponseCachingTests.ServesCachedContent_IfBodySize_IsCacheable [1 ms]
+[xUnit.net 00:00:09.40]     EasyCaching.UnitTests.DiskCachingProviderTest.GetAsync_Parallel_Should_Succeed [SKIP]
+  Skipped EasyCaching.UnitTests.DiskCachingProviderTest.GetAsync_Parallel_Should_Succeed [1 ms]
+[xUnit.net 00:00:13.93]     EasyCaching.UnitTests.CachingTests.FasterKvCachingProviderTest.SetAsync_And_GetAsync_Big_DataSet_Should_Succeed [FAIL]
+  Failed EasyCaching.UnitTests.CachingTests.FasterKvCachingProviderTest.SetAsync_And_GetAsync_Big_DataSet_Should_Succeed [2 s]
+  Error Message:
+   MessagePack.MessagePackSerializationException : Failed to deserialize System.String value.
+---- MessagePack.MessagePackSerializationException : Unexpected msgpack code 226 (negative fixint) encountered.
+  Stack Trace:
+     at MessagePack.MessagePackSerializer.Deserialize[T](MessagePackReader& reader, MessagePackSerializerOptions options)
+   at MessagePack.MessagePackSerializer.Deserialize[T](ReadOnlyMemory`1 buffer, MessagePackSerializerOptions options, CancellationToken cancellationToken)
+   at EasyCaching.Serialization.MessagePack.DefaultMessagePackSerializer.Deserialize[T](Byte[] bytes) in /home/user/cand60/dotnetcore-EasyCaching/serialization/EasyCaching.Serialization.MessagePack/DefaultMessagePackSerializer.cs:line 53
+   at EasyCaching.FasterKv.DefaultFasterKvCachingProvider.BaseGetInternalAsync[T](ClientSessionWrap session, String cacheKey, CancellationToken cancellationToken) in /home/user/cand60/dotnetcore-EasyCaching/src/EasyCaching.FasterKv/DefaultFasterKvCachingProvider.Async.cs:line 187
+   at EasyCaching.FasterKv.DefaultFasterKvCachingProvider.BaseGetAsync[T](String cacheKey, CancellationToken cancellationToken) in /home/user/cand60/dotnetcore-EasyCaching/src/EasyCaching.FasterKv/DefaultFasterKvCachingProvider.Async.cs:line 96
+   at EasyCaching.Core.EasyCachingAbstractProvider.GetAsync[T](String cacheKey, CancellationToken cancellationToken) in /home/user/cand60/dotnetcore-EasyCaching/src/EasyCaching.Core/EasyCachingAbstractProvider.cs:line 457
+   at EasyCaching.UnitTests.CachingTests.FasterKvCachingProviderTest.SetAsync_And_GetAsync_Big_DataSet_Should_Succeed() in /home/user/cand60/dotnetcore-EasyCaching/test/EasyCaching.UnitTests/CachingTests/FasterKvCachingProviderTest.cs:line 64
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at MessagePack.MessagePackReader.ThrowInvalidCode(Byte code)
+   at MessagePack.MessagePackReader.GetStringLengthInBytes()
+   at MessagePack.Formatters.NullableStringFormatter.Deserialize(MessagePackReader& reader, MessagePackSerializerOptions options)
+   at MessagePack.MessagePackSerializer.Deserialize[T](MessagePackReader& reader, MessagePackSerializerOptions options)
+
+Failed!  - Failed:     1, Passed:   892, Skipped:     4, Total:   897, Duration: 14 s - EasyCaching.UnitTests.dll (net8.0)

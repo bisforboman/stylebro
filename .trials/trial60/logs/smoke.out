@@ -1,0 +1,15 @@
+== mw-build: dotnet build /home/user/cand60/khellang-Middleware/Hellang.Middleware.sln -p:NuGetAudit=false (06:41:40)
+   exit 1 (06:42:25) 44 error lines
+== mw-test: bash -c cd /home/user/cand60/khellang-Middleware && dotnet test Hellang.Middleware.sln --no-build (06:42:25)
+   exit 0 (06:42:27) 0 error lines
+== mm-build: dotnet build /home/user/cand60/Cysharp-MasterMemory/MasterMemory.sln -p:NuGetAudit=false (06:42:27)
+   exit 0 (06:42:47) 0 error lines
+== mm-test: bash -c cd /home/user/cand60/Cysharp-MasterMemory && dotnet test MasterMemory.sln --no-build (06:42:47)
+   exit 0 (06:42:53) 0 error lines
+== l4n-build: dotnet build /home/user/cand60/apache-logging-log4net/src/log4net.sln -p:NuGetAudit=false (06:42:53)
+   exit 0 (06:43:22) 0 error lines
+== l4n-test: bash -c cd /home/user/cand60/apache-logging-log4net/src && dotnet test log4net.sln --no-build -f net10.0 (06:43:22)
+   exit 0 (06:43:37) 0 error lines
+== ec-build: dotnet build /home/user/cand60/dotnetcore-EasyCaching/EasyCaching.sln -p:NuGetAudit=false (06:43:37)
+   exit 0 (06:44:11) 0 error lines
+SMOKE-DONE
