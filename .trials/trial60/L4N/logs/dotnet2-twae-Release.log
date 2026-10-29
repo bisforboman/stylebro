@@ -1,0 +1,33 @@
+  Determining projects to restore...
+  Restored /home/user/w60/L4N/dotnet2/src/log4net.Ext.Mail.Tests/log4net.Ext.Mail.Tests.csproj (in 826 ms).
+  Restored /home/user/w60/L4N/dotnet2/src/integration-testing/log4net-673/log4net-673.csproj (in 832 ms).
+  Restored /home/user/w60/L4N/dotnet2/src/integration-testing/log4net-611-lib/log4net-611-lib.csproj (in 832 ms).
+  Restored /home/user/w60/L4N/dotnet2/src/integration-testing/log4net-672/log4net-672.csproj (in 830 ms).
+  Restored /home/user/w60/L4N/dotnet2/src/integration-testing/log4net-611-main/log4net-611-main.csproj (in 24 ms).
+  Restored /home/user/w60/L4N/dotnet2/src/log4net.Tests/log4net.Tests.csproj (in 24 ms).
+  Restored /home/user/w60/L4N/dotnet2/src/log4net.Tests.Aot/log4net.Tests.Aot.csproj (in 36 ms).
+  Restored /home/user/w60/L4N/dotnet2/src/log4net.Ext.Mail/log4net.Ext.Mail.csproj (in 26 ms).
+  Restored /home/user/w60/L4N/dotnet2/src/integration-testing/log4net2-SerializeEvent/log4net2-SerializeEvent.csproj (in 23 ms).
+  Restored /home/user/w60/L4N/dotnet2/src/integration-testing/log4net-681/log4net-681.csproj (in 3 ms).
+  Restored /home/user/w60/L4N/dotnet2/src/log4net/log4net.csproj (in 80 ms).
+  log4net-611-lib -> /home/user/w60/L4N/dotnet2/src/integration-testing/log4net-611-lib/bin/Release/netstandard2.0/log4net-611-lib.dll
+  log4net-673 -> /home/user/w60/L4N/dotnet2/src/integration-testing/log4net-673/bin/Release/net10.0/log4net-673.dll
+  log4net2-SerializeEvent -> /home/user/w60/L4N/dotnet2/src/integration-testing/log4net2-SerializeEvent/bin/Release/net472/log4net2-SerializeEvent.exe
+  log4net-611-main -> /home/user/w60/L4N/dotnet2/src/integration-testing/log4net-611-main/bin/Release/net462/log4net-611-main.exe
+  log4net-611-main -> /home/user/w60/L4N/dotnet2/src/integration-testing/log4net-611-main/bin/Release/net10.0/log4net-611-main.dll
+  log4net -> /home/user/w60/L4N/dotnet2/build/Release/net462/log4net.dll
+  log4net -> /home/user/w60/L4N/dotnet2/build/Release/netstandard2.0/log4net.dll
+  log4net-672 -> /home/user/w60/L4N/dotnet2/src/integration-testing/log4net-672/bin/Release/net10.0/log4net-672.dll
+  log4net-681 -> /home/user/w60/L4N/dotnet2/src/integration-testing/log4net-681/bin/Release/net10.0/log4net-681.dll
+  log4net.Tests.Aot -> /home/user/w60/L4N/dotnet2/src/log4net.Tests.Aot/bin/Release/net10.0/log4net.Tests.Aot.dll
+  Successfully created package '/home/user/w60/L4N/dotnet2/build/artifacts/log4net.3.5.1.nupkg'.
+  log4net.Ext.Mail -> /home/user/w60/L4N/dotnet2/build/Release/netstandard2.0/log4net.Ext.Mail.dll
+  log4net.Tests -> /home/user/w60/L4N/dotnet2/src/log4net.Tests/bin/Release/net10.0/log4net.Tests.dll
+  log4net.Ext.Mail.Tests -> /home/user/w60/L4N/dotnet2/src/log4net.Ext.Mail.Tests/bin/Release/net10.0/log4net.Ext.Mail.Tests.dll
+  Successfully created package '/home/user/w60/L4N/dotnet2/build/artifacts/log4net.Ext.Mail.3.5.1.nupkg'.
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:43.14

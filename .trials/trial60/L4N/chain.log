@@ -7,3 +7,8 @@ dotnet start 07:44
 L4N restarted after the worker restart 08:43
 dotnet start 08:43
 default2 start 09:33
+default2 done 09:57
+dotnet2 start 09:57
+dotnet2 done 10:39
+CHAIN-DONE
+soak start 10:39

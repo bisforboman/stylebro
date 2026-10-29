@@ -1,0 +1,27 @@
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net8.0, netcoreapp3.1, netstandard2.0).
+Checked netcoreapp3.1 (run 1 of 3)
+Checked netstandard2.0 (run 2 of 3)
+Checked net8.0 (run 3 of 3)
+== net8.0 (30 project(s), 235 files with findings)
+'dotnet format' had warnings loading the workspace in its net8.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+== netcoreapp3.1 (2 project(s), 257 files with findings)
+== netstandard2.0 (23 project(s), 172 files with findings)
+Run 1: 258 files changed:
+  build/BuildScript.cs
+  bus/EasyCaching.Bus.ConfluentKafka/Configurations/ConfluentKafkaBusOptions.cs
+  bus/EasyCaching.Bus.ConfluentKafka/Configurations/ConfluentKafkaOptionsExtension.cs
+  bus/EasyCaching.Bus.ConfluentKafka/Configurations/EasyCachingOptionsExtensions.cs
+  bus/EasyCaching.Bus.ConfluentKafka/DefaultConfluentKafkaBus.cs
+  bus/EasyCaching.Bus.CSRedis/Configurations/CSRedisBusOptions.cs
+  bus/EasyCaching.Bus.CSRedis/Configurations/EasyCachingCSRedisClient.cs
+  bus/EasyCaching.Bus.CSRedis/Configurations/EasyCachingOptionsExtensions.cs
+  bus/EasyCaching.Bus.CSRedis/DefaultCSRedisBus.cs
+  bus/EasyCaching.Bus.RabbitMQ/Configurations/EasyCachingOptionsExtensions.cs
+  ... and 248 more
+Checked netcoreapp3.1 (run 1 of 3)
+Checked netstandard2.0 (run 2 of 3)
+Checked net8.0 (run 3 of 3)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

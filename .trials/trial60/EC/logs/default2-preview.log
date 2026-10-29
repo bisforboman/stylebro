@@ -88,4 +88,27 @@ Summary:
     dotnet_diagnostic.BRO1149.severity.
 Settings: 82 lines in .editorconfig; 9 lines in Directory.Build.props (StyleBro.Analyzers)
   StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial60.2 to Directory.Build.props for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).
-Format run 1... 
+Format run 1... 3m 32s
+Format run 2... 7s
+Format: 258 files, 8,580 reported changes, clean after 1 run
+  IDE0055  Whitespace and formatting                  111 files
+  ENDOFLINE                                             84 files
+  BRO1002  Single-line comments should begin wit...    56 files
+  BRO1517  Code should not contain multiple blan...    48 files
+  BRO1603  Documentation text should end with a ...    45 files
+  BRO1519  Closing brace should be followed by b...    37 files
+  BRO1504  Single-line comments should be preced...    34 files
+  BRO1008  Using directives should be placed cor...    30 files
+  BRO1503  Opening braces should not be followed...    30 files
+  BRO1505  Elements should be separated by a bla...    25 files
+  ... and 46 more rules
+Sample (IDE0055, bus/EasyCaching.Bus.CSRedis/Configurations/CSRedisBusOptions.cs):
+  (removes trailing whitespace)
+Sample (ENDOFLINE, sample/EasyCaching.Demo.Interceptors/Controllers/ValuesController.cs):
+  (changes only line endings or whitespace)
+Sample (BRO1002, src/EasyCaching.Memcached/Configurations/EasyCachingMemcachedClientOptions.cs):
+  -        //public string SerializationType { get; set; }
+  +        // public string SerializationType { get; set; }
+Full diff: .git/stylebro-preview.patch (26,852 lines)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 4m 12s.

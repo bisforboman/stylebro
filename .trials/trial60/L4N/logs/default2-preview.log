@@ -92,4 +92,26 @@ Summary:
   note     Line endings: your .editorconfig says end_of_line = crlf, but git checks out 402 C# files with each machine's ending (a .gitattributes 'text' attribute without 'eol', or core.autocrlf), so Linux and macOS checkouts don't match it. Set end_of_line = unset for C# files and IDE0055 to suggestion, so neither 'format' nor the build touches endings. To settle it: '*.cs text eol=crlf' in .gitattributes (then 'git add --renormalize .'), or remove end_of_line from .editorconfig.
 Settings: 74 lines in .editorconfig; 3 lines in examples/Directory.Build.props (StyleBro.Analyzers); 3 lines in src/Directory.Build.props (StyleBro.Analyzers)
   StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial60.2 to examples/Directory.Build.props, src/Directory.Build.props for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).
-Format run 1... 
+Format run 1... 2m 47s
+Format run 2... 21s
+Format: 216 files, 830 reported changes, clean after 1 run
+  IMPORTS                                              73 files
+  BRO1504  Single-line comments should be preced...    56 files
+  IDE0055  Whitespace and formatting                   49 files
+  BRO1619  Put the documentation elements in the...    41 files
+  BRO1606  Constructor summary documentation sho...    32 files
+  BRO1616  Write the summary's tags consistently...    22 files
+  BRO1517  Code should not contain multiple blan...    16 files
+  BRO1601  Overrides and implementations should ...    15 files
+  BRO1120  Comments should contain text                13 files
+  BRO1401  Use a trailing comma in multi-line in...    13 files
+  ... and 33 more rules
+Sample (IMPORTS, src/log4net.Tests/Appender/AppenderSkeletonTest.cs):
+  -using log4net.Filter;
+Sample (BRO1504, src/log4net.Tests/Appender/AdoNetAppenderTest.cs):
+  (adds a blank line)
+Sample (IDE0055, src/log4net.Tests/Layout/XmlLayoutSchemaLog4jTest.cs):
+  (removes trailing whitespace)
+Full diff: .git/stylebro-preview.patch (9,331 lines)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 3m 29s.
