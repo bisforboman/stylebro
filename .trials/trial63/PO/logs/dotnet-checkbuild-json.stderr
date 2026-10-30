@@ -1,0 +1,12 @@
+Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Configurations: runs for Release (Pose) too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.
+Checked Release (run 1 of 2)
+Checked default configuration (run 2 of 2)
+Building Pose.sln in Debug, Debug|x64, Debug|x86, Release, Release|x64, Release|x86 with warnings as errors, and a copy of HEAD to compare...
+Debug: no findings, no new errors.
+Debug|x64: no findings, no new errors.
+Debug|x86: no findings, no new errors.
+Release: no findings, no new errors.
+Release|x64: no findings, no new errors.
+Release|x86: no findings, no new errors.
+Clean.

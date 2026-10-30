@@ -1,0 +1,19 @@
+ Directory.Build.props                              |   8 ++
+ src/Pose/Delegates/ActionRef.cs                    |   9 ++
+ src/Pose/Delegates/FuncRef.cs                      |   9 ++
+ .../Exceptions/InvalidShimSignatureException.cs    |   3 +
+ src/Pose/Extensions/DictionaryExtensions.cs        |   2 +-
+ src/Pose/Helpers/ShimHelper.cs                     |  19 +--
+ src/Pose/Helpers/StubHelper.cs                     |  11 +-
+ src/Pose/IL/DebugHelpers/BrowsableDynamicMethod.cs |  18 +--
+ src/Pose/IL/DebugHelpers/DynamicMethodBody.cs      |  12 +-
+ src/Pose/IL/DebugHelpers/DynamicModule.cs          |  16 +--
+ src/Pose/IL/MethodRewriter.cs                      |  64 ++++-----
+ src/Pose/IL/Stubs.cs                               |  25 ++--
+ src/Pose/PoseContext.cs                            |   6 +-
+ src/Pose/Shim.cs                                   | 154 ++++++++++-----------
+ test/Pose.Tests/Helpers/ShimHelperTests.cs         |   8 +-
+ test/Pose.Tests/Helpers/StubHelperTests.cs         |   6 +-
+ test/Pose.Tests/IL/MethodDisassemblerTests.cs      |   4 +-
+ test/Pose.Tests/ShimTests.cs                       |   9 +-
+ 18 files changed, 208 insertions(+), 175 deletions(-)

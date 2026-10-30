@@ -1,0 +1,946 @@
+diff --git a/.editorconfig b/.editorconfig
+index a853ae9..2521b9a 100644
+--- a/.editorconfig
++++ b/.editorconfig
+@@ -20,3 +20,76 @@ end_of_line = crlf
+ csharp_style_namespace_declarations = file_scoped:suggestion
+ 
+ csharp_style_prefer_switch_expression = true:suggestion
++
++# BEGIN stylebro-migrate (stylebro-migrate init: built-in .NET rules for StyleBro's preset; edits inside are replaced)
++[*.cs]
++# Built-in .NET rules that cover StyleCop rules, at the preset's severities. Their options (brace placement, modifier
++# order, ...) come from StyleBro's preset. The severities have to be here: 'dotnet format' ignores rule severities in a
++# package's global config. Add <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> to report them on build too.
++
++# Braces (SA1503, SA1519, SA1520) are StyleBro's BRO1514-BRO1516: IDE0011's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0011.severity = none
++# Formatting: spacing, indentation, line breaks (SA1000-SA1028, SA1107, SA1134, SA1137, SA1500)
++dotnet_diagnostic.IDE0055.severity = warning
++# Access modifiers (SA1400, SA1205) are StyleBro's BRO1404/BRO1007: IDE0040's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0040.severity = none
++# Modifier order: access modifier first, then static (SA1206, SA1207)
++dotnet_diagnostic.IDE0036.severity = warning
++# 'int' instead of 'Int32' (SA1121)
++dotnet_diagnostic.IDE0049.severity = warning
++# Unnecessary parentheses (SA1119) are StyleBro's BRO1405: IDE0047's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0047.severity = none
++# Parentheses that show precedence (SA1407, SA1408) are StyleBro's BRO1406/BRO1407: IDE0048's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0048.severity = none
++# Using placement (SA1200) is StyleBro's BRO1008: IDE0065's fix can change what names bind to (CS0104, CS0118)
++dotnet_diagnostic.IDE0065.severity = none
++# Blank lines (SA1507, SA1508, SA1513) are StyleBro's BRO1517-BRO1519: the SDK's fixes break multi-targeted projects
++dotnet_diagnostic.IDE2000.severity = none
++dotnet_diagnostic.IDE2002.severity = none
++dotnet_diagnostic.IDE2003.severity = none
++# 'this.' qualification isn't required (SA1101 is off in the preset)
++dotnet_diagnostic.IDE0009.severity = none
++
++# Conventions in this repository's code (stylebro-migrate init counted them; delete a line to have it counted again)
++# init: private fields: named '_field' in 54 of 54 places in your code
++stylebro_private_field_naming = _camelCase
++# init: one-line if/else/loop/using/lock bodies: your code mixes both forms (48 with braces, 59 without braces), so both are allowed. To choose with braces: change the next line to csharp_prefer_braces = true.
++csharp_prefer_braces = when_multiline
++# init: one-line jumps ('if (x) return;'): allowed, because your code has some (39 of 44 places on the 'if' line without braces; any 3 keep them allowed: without it BRO1514 would add braces to each)
++stylebro_allow_single_line_jump_statements = true
++# init: operators where a line wraps: at the end of the line in 12 of 14 places in your code
++dotnet_style_operator_placement_when_wrapping = end_of_line
++# init: multi-line initializers: without a trailing comma in 5 of 5 places in your code
++stylebro_trailing_comma = omit
++# init: empty strings: "" in 3 of 3 places in your code
++stylebro_empty_string_style = literal
++# init: null checks: '== null' in 50 of 50 places in your code
++stylebro_null_check_style = equality_operator
++# init: <inheritdoc/> tags: '<inheritdoc />' in 12 of 12 places in your code
++stylebro_inheritdoc_style = spaced
++# init: statements on their 'if'/loop/'case' line: allowed, because your code has some (39 of 59 places on their owner's line; any 3 keep them allowed: csharp_preserve_single_line_statements = false would move each to a line of its own)
++csharp_preserve_single_line_statements = true
++# init: overrides/interface implementations: 20 of 21 in your code are without a doc comment, so BRO1601 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1601.severity = none
++# init: types' members: your code mixes both forms (20 in BRO1001's order, 11 in another order), so BRO1001 is off. To choose one: set dotnet_diagnostic.BRO1001.severity and remove the next line.
++dotnet_diagnostic.BRO1001.severity = none
++# init: private-by-default members: without 'private' in 95 of 96 members in your code
++dotnet_style_require_accessibility_modifiers = omit_if_default
++# init: internal-by-default types: 21 of 21 in your code are without an access modifier, so BRO1404 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1404.severity = none
++# init: adjacent locals of one type: your code mixes both forms (9 declared one by one, 9 declared together ('int a, b;')), so BRO1142 is off. To choose one: set dotnet_diagnostic.BRO1142.severity and remove the next line.
++dotnet_diagnostic.BRO1142.severity = none
++# init: declarations with 2+ attributes: your code mixes both forms (4 one per list ('[A]' '[B]'), 6 combined ('[A, B]')), so BRO1102 is off. To choose one: set dotnet_diagnostic.BRO1102.severity and remove the next line.
++dotnet_diagnostic.BRO1102.severity = none
++# init: empty blocks ('{ }'): your code mixes both forms (5 on two lines, 2 on one line), so both are allowed. To choose on two lines: change the next line to stylebro_allow_empty_single_line_blocks = false.
++stylebro_allow_empty_single_line_blocks = true
++# init: C# files' line endings: LF in 46 of 46 files in your code
++end_of_line = lf
++# init: '//' comments below code: your code mixes both forms (11 after a blank line, 8 right below the code), so BRO1504 is off. To choose one: set dotnet_diagnostic.BRO1504.severity and remove the next line.
++dotnet_diagnostic.BRO1504.severity = none
++# init: doc element order (param, returns, exception, remarks, example): your code mixes both forms (8 in BRO1619's order, 6 in another order), so BRO1619 is off. To choose one: set dotnet_diagnostic.BRO1619.severity and remove the next line.
++dotnet_diagnostic.BRO1619.severity = none
++# init: using directives: sorted, but with System first and without (21 of 25 files sorted, 4 of 5 with System first), so they aren't sorted ('dotnet format' sorts them whenever dotnet_sort_system_directives_first is set). To sort them: add dotnet_sort_system_directives_first = true
++# init: Charset: your .editorconfig says charset = utf-8, but 26 of 46 C# files start with a BOM: nothing enforced it, so charset = unset is written for C# files and 'format' leaves each file's BOM (or its absence) as it is. To have charset = utf-8 everywhere: put that line below the stylebro-migrate block, in a [*.cs] section (a later line wins; the block's own lines come back on the next init) and run 'bro format' (it rewrites the files).
++charset = unset
++# END stylebro-migrate
+diff --git a/Directory.Build.props b/Directory.Build.props
+index c114992..99244b1 100644
+--- a/Directory.Build.props
++++ b/Directory.Build.props
+@@ -3,6 +3,7 @@
+    a property value is project-specific, please record it in the CSPROJ file instead. -->
+   <Import Project="$(MSBuildThisFileDirectory)Directory.Version.props" />
+   <PropertyGroup>
++    <StyleBroPreset>1.0</StyleBroPreset>
+     <LangVersion>latest</LangVersion>
+     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+     <!-- The condition is required to support BenchmarkDotNet -->
+@@ -22,4 +23,7 @@
+     <Reference Include="System.Core" />
+     <Reference Include="Microsoft.CSharp" />
+   </ItemGroup>
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial63.1" PrivateAssets="all" />
++  </ItemGroup>
+ </Project>
+diff --git a/src/Serilog.Sinks.File/FileLoggerConfigurationExtensions.cs b/src/Serilog.Sinks.File/FileLoggerConfigurationExtensions.cs
+index 7acab3e..02bdeaa 100644
+--- a/src/Serilog.Sinks.File/FileLoggerConfigurationExtensions.cs
++++ b/src/Serilog.Sinks.File/FileLoggerConfigurationExtensions.cs
+@@ -27,7 +27,9 @@ using Serilog.Sinks.File;
+ 
+ namespace Serilog;
+ 
+-/// <summary>Extends <see cref="LoggerConfiguration"/> with methods to add file sinks.</summary>
++/// <summary>
++/// Extends <see cref="LoggerConfiguration"/> with methods to add file sinks.
++/// </summary>
+ public static class FileLoggerConfigurationExtensions
+ {
+     const int DefaultRetainedFileCountLimit = 31; // A long month of logs
+@@ -42,14 +44,14 @@ public static class FileLoggerConfigurationExtensions
+     /// under the current working directory at runtime (i.e. <c>%WINDIR%\System32</c> for Windows services).</param>
+     /// <param name="restrictedToMinimumLevel">The minimum level for
+     /// events passed through the sink. Ignored when <paramref name="levelSwitch"/> is specified.</param>
+-    /// <param name="levelSwitch">A switch allowing the pass-through minimum level
+-    /// to be changed at runtime.</param>
+-    /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+     /// <param name="outputTemplate">A message template describing the format used to write to the sink.
+     /// the default is "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}".</param>
++    /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+     /// <param name="fileSizeLimitBytes">The approximate maximum size, in bytes, to which a log file will be allowed to grow.
+     /// For unrestricted growth, pass null. The default is 1 GB. To avoid writing partial events, the last event within the limit
+     /// will be written in full even if it exceeds the limit.</param>
++    /// <param name="levelSwitch">A switch allowing the pass-through minimum level
++    /// to be changed at runtime.</param>
+     /// <param name="buffered">Indicates if flushing of non-fatal <see cref="LogEventLevel.Fatal"/> events to the output file
+     /// can be buffered or not. The default is false.</param>
+     /// <param name="shared">Allow the log file to be shared by multiple processes. The default is false.</param>
+@@ -69,8 +71,22 @@ public static class FileLoggerConfigurationExtensions
+         bool shared,
+         TimeSpan? flushToDiskInterval)
+     {
+-        return File(sinkConfiguration, path, restrictedToMinimumLevel, outputTemplate, formatProvider, fileSizeLimitBytes,
+-            levelSwitch, buffered, shared, flushToDiskInterval, RollingInterval.Infinite, false, null, null, null);
++        return File(
++            sinkConfiguration,
++            path,
++            restrictedToMinimumLevel,
++            outputTemplate,
++            formatProvider,
++            fileSizeLimitBytes,
++            levelSwitch,
++            buffered,
++            shared,
++            flushToDiskInterval,
++            RollingInterval.Infinite,
++            false,
++            null,
++            null,
++            null);
+     }
+ 
+     /// <summary>
+@@ -86,11 +102,11 @@ public static class FileLoggerConfigurationExtensions
+     /// under the current working directory at runtime (i.e. <c>%WINDIR%\System32</c> for Windows services).</param>
+     /// <param name="restrictedToMinimumLevel">The minimum level for
+     /// events passed through the sink. Ignored when <paramref name="levelSwitch"/> is specified.</param>
+-    /// <param name="levelSwitch">A switch allowing the pass-through minimum level
+-    /// to be changed at runtime.</param>
+     /// <param name="fileSizeLimitBytes">The approximate maximum size, in bytes, to which a log file will be allowed to grow.
+     /// For unrestricted growth, pass null. The default is 1 GB. To avoid writing partial events, the last event within the limit
+     /// will be written in full even if it exceeds the limit.</param>
++    /// <param name="levelSwitch">A switch allowing the pass-through minimum level
++    /// to be changed at runtime.</param>
+     /// <param name="buffered">Indicates if flushing of non-fatal <see cref="LogEventLevel.Fatal"/> events to the output file
+     /// can be buffered or not. The default is false.</param>
+     /// <param name="shared">Allow the log file to be shared by multiple processes. The default is false.</param>
+@@ -109,8 +125,21 @@ public static class FileLoggerConfigurationExtensions
+         bool shared,
+         TimeSpan? flushToDiskInterval)
+     {
+-        return File(sinkConfiguration, formatter, path, restrictedToMinimumLevel, fileSizeLimitBytes, levelSwitch,
+-            buffered, shared, flushToDiskInterval, RollingInterval.Infinite, false, null, null, null);
++        return File(
++            sinkConfiguration,
++            formatter,
++            path,
++            restrictedToMinimumLevel,
++            fileSizeLimitBytes,
++            levelSwitch,
++            buffered,
++            shared,
++            flushToDiskInterval,
++            RollingInterval.Infinite,
++            false,
++            null,
++            null,
++            null);
+     }
+ 
+     /// <summary>
+@@ -121,14 +150,14 @@ public static class FileLoggerConfigurationExtensions
+     /// under the current working directory at runtime (i.e. <c>%WINDIR%\System32</c> for Windows services).</param>
+     /// <param name="restrictedToMinimumLevel">The minimum level for
+     /// events passed through the sink. Ignored when <paramref name="levelSwitch"/> is specified.</param>
+-    /// <param name="levelSwitch">A switch allowing the pass-through minimum level
+-    /// to be changed at runtime.</param>
+-    /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+     /// <param name="outputTemplate">A message template describing the format used to write to the sink.
+     /// the default is "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}".</param>
++    /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+     /// <param name="fileSizeLimitBytes">The approximate maximum size, in bytes, to which a log file will be allowed to grow.
+     /// For unrestricted growth, pass null. The default is 1 GB. To avoid writing partial events, the last event within the limit
+     /// will be written in full even if it exceeds the limit.</param>
++    /// <param name="levelSwitch">A switch allowing the pass-through minimum level
++    /// to be changed at runtime.</param>
+     /// <param name="buffered">Indicates if flushing of non-fatal <see cref="LogEventLevel.Fatal"/> events to the output file
+     /// can be buffered or not. The default is false.</param>
+     /// <param name="shared">Allow the log file to be shared by multiple processes. The default is false.</param>
+@@ -157,8 +186,22 @@ public static class FileLoggerConfigurationExtensions
+         int? retainedFileCountLimit,
+         Encoding encoding)
+     {
+-        return File(sinkConfiguration, path, restrictedToMinimumLevel, outputTemplate, formatProvider, fileSizeLimitBytes, levelSwitch, buffered,
+-            shared, flushToDiskInterval, rollingInterval, rollOnFileSizeLimit, retainedFileCountLimit, encoding, null);
++        return File(
++            sinkConfiguration,
++            path,
++            restrictedToMinimumLevel,
++            outputTemplate,
++            formatProvider,
++            fileSizeLimitBytes,
++            levelSwitch,
++            buffered,
++            shared,
++            flushToDiskInterval,
++            rollingInterval,
++            rollOnFileSizeLimit,
++            retainedFileCountLimit,
++            encoding,
++            null);
+     }
+ 
+     /// <summary>
+@@ -174,11 +217,11 @@ public static class FileLoggerConfigurationExtensions
+     /// under the current working directory at runtime (i.e. <c>%WINDIR%\System32</c> for Windows services).</param>
+     /// <param name="restrictedToMinimumLevel">The minimum level for
+     /// events passed through the sink. Ignored when <paramref name="levelSwitch"/> is specified.</param>
+-    /// <param name="levelSwitch">A switch allowing the pass-through minimum level
+-    /// to be changed at runtime.</param>
+     /// <param name="fileSizeLimitBytes">The approximate maximum size, in bytes, to which a log file will be allowed to grow.
+     /// For unrestricted growth, pass null. The default is 1 GB. To avoid writing partial events, the last event within the limit
+     /// will be written in full even if it exceeds the limit.</param>
++    /// <param name="levelSwitch">A switch allowing the pass-through minimum level
++    /// to be changed at runtime.</param>
+     /// <param name="buffered">Indicates if flushing of non-fatal <see cref="LogEventLevel.Fatal"/> events to the output file
+     /// can be buffered or not. The default is false.</param>
+     /// <param name="shared">Allow the log file to be shared by multiple processes. The default is false.</param>
+@@ -206,8 +249,21 @@ public static class FileLoggerConfigurationExtensions
+         int? retainedFileCountLimit,
+         Encoding encoding)
+     {
+-        return File(sinkConfiguration, formatter, path, restrictedToMinimumLevel, fileSizeLimitBytes, levelSwitch, buffered,
+-            shared, flushToDiskInterval, rollingInterval, rollOnFileSizeLimit, retainedFileCountLimit, encoding, null);
++        return File(
++            sinkConfiguration,
++            formatter,
++            path,
++            restrictedToMinimumLevel,
++            fileSizeLimitBytes,
++            levelSwitch,
++            buffered,
++            shared,
++            flushToDiskInterval,
++            rollingInterval,
++            rollOnFileSizeLimit,
++            retainedFileCountLimit,
++            encoding,
++            null);
+     }
+ 
+     /// <summary>
+@@ -218,14 +274,14 @@ public static class FileLoggerConfigurationExtensions
+     /// under the current working directory at runtime (i.e. <c>%WINDIR%\System32</c> for Windows services).</param>
+     /// <param name="restrictedToMinimumLevel">The minimum level for
+     /// events passed through the sink. Ignored when <paramref name="levelSwitch"/> is specified.</param>
+-    /// <param name="levelSwitch">A switch allowing the pass-through minimum level
+-    /// to be changed at runtime.</param>
+-    /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+     /// <param name="outputTemplate">A message template describing the format used to write to the sink.
+     /// the default is "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}".</param>
++    /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+     /// <param name="fileSizeLimitBytes">The approximate maximum size, in bytes, to which a log file will be allowed to grow.
+     /// For unrestricted growth, pass null. The default is 1 GB. To avoid writing partial events, the last event within the limit
+     /// will be written in full even if it exceeds the limit.</param>
++    /// <param name="levelSwitch">A switch allowing the pass-through minimum level
++    /// to be changed at runtime.</param>
+     /// <param name="buffered">Indicates if flushing of non-fatal <see cref="LogEventLevel.Fatal"/> events to the output file
+     /// can be buffered or not. The default is false.</param>
+     /// <param name="shared">Allow the log file to be shared by multiple processes. The default is false.</param>
+@@ -248,9 +304,9 @@ public static class FileLoggerConfigurationExtensions
+     /// <exception cref="IOException"></exception>
+     /// <exception cref="InvalidOperationException"></exception>
+     /// <exception cref="NotSupportedException"></exception>
+-    /// <exception cref="PathTooLongException">When <paramref name="path"/> is too long</exception>
+-    /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission to access the <paramref name="path"/></exception>
+-    /// <exception cref="ArgumentException">Invalid <paramref name="path"/></exception>
++    /// <exception cref="PathTooLongException">When <paramref name="path"/> is too long.</exception>
++    /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission to access the <paramref name="path"/>.</exception>
++    /// <exception cref="ArgumentException">Invalid <paramref name="path"/>.</exception>
+     public static LoggerConfiguration File(
+         this LoggerSinkConfiguration sinkConfiguration,
+         string path,
+@@ -274,9 +330,22 @@ public static class FileLoggerConfigurationExtensions
+         if (outputTemplate == null) throw new ArgumentNullException(nameof(outputTemplate));
+ 
+         var formatter = new MessageTemplateTextFormatter(outputTemplate, formatProvider);
+-        return File(sinkConfiguration, formatter, path, restrictedToMinimumLevel, fileSizeLimitBytes,
+-            levelSwitch, buffered, shared, flushToDiskInterval,
+-            rollingInterval, rollOnFileSizeLimit, retainedFileCountLimit, encoding, hooks, retainedFileTimeLimit);
++        return File(
++            sinkConfiguration,
++            formatter,
++            path,
++            restrictedToMinimumLevel,
++            fileSizeLimitBytes,
++            levelSwitch,
++            buffered,
++            shared,
++            flushToDiskInterval,
++            rollingInterval,
++            rollOnFileSizeLimit,
++            retainedFileCountLimit,
++            encoding,
++            hooks,
++            retainedFileTimeLimit);
+     }
+ 
+     /// <summary>
+@@ -292,11 +361,11 @@ public static class FileLoggerConfigurationExtensions
+     /// under the current working directory at runtime (i.e. <c>%WINDIR%\System32</c> for Windows services).</param>
+     /// <param name="restrictedToMinimumLevel">The minimum level for
+     /// events passed through the sink. Ignored when <paramref name="levelSwitch"/> is specified.</param>
+-    /// <param name="levelSwitch">A switch allowing the pass-through minimum level
+-    /// to be changed at runtime.</param>
+     /// <param name="fileSizeLimitBytes">The approximate maximum size, in bytes, to which a log file will be allowed to grow.
+     /// For unrestricted growth, pass null. The default is 1 GB. To avoid writing partial events, the last event within the limit
+     /// will be written in full even if it exceeds the limit.</param>
++    /// <param name="levelSwitch">A switch allowing the pass-through minimum level
++    /// to be changed at runtime.</param>
+     /// <param name="buffered">Indicates if flushing of non-fatal <see cref="LogEventLevel.Fatal"/> events to the output file
+     /// can be buffered or not. The default is false.</param>
+     /// <param name="shared">Allow the log file to be shared by multiple processes. The default is false.</param>
+@@ -319,9 +388,9 @@ public static class FileLoggerConfigurationExtensions
+     /// <exception cref="IOException"></exception>
+     /// <exception cref="InvalidOperationException"></exception>
+     /// <exception cref="NotSupportedException"></exception>
+-    /// <exception cref="PathTooLongException">When <paramref name="path"/> is too long</exception>
+-    /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission to access the <paramref name="path"/></exception>
+-    /// <exception cref="ArgumentException">Invalid <paramref name="path"/></exception>
++    /// <exception cref="PathTooLongException">When <paramref name="path"/> is too long.</exception>
++    /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission to access the <paramref name="path"/>.</exception>
++    /// <exception cref="ArgumentException">Invalid <paramref name="path"/>.</exception>
+     public static LoggerConfiguration File(
+         this LoggerSinkConfiguration sinkConfiguration,
+         ITextFormatter formatter,
+@@ -343,9 +412,23 @@ public static class FileLoggerConfigurationExtensions
+         if (formatter == null) throw new ArgumentNullException(nameof(formatter));
+         if (path == null) throw new ArgumentNullException(nameof(path));
+ 
+-        return ConfigureFile(sinkConfiguration.Sink, formatter, path, restrictedToMinimumLevel, fileSizeLimitBytes, levelSwitch,
+-            buffered, false, shared, flushToDiskInterval, encoding, rollingInterval, rollOnFileSizeLimit,
+-            retainedFileCountLimit, hooks, retainedFileTimeLimit);
++        return ConfigureFile(
++            sinkConfiguration.Sink,
++            formatter,
++            path,
++            restrictedToMinimumLevel,
++            fileSizeLimitBytes,
++            levelSwitch,
++            buffered,
++            false,
++            shared,
++            flushToDiskInterval,
++            encoding,
++            rollingInterval,
++            rollOnFileSizeLimit,
++            retainedFileCountLimit,
++            hooks,
++            retainedFileTimeLimit);
+     }
+ 
+     /// <summary>
+@@ -356,11 +439,11 @@ public static class FileLoggerConfigurationExtensions
+     /// under the current working directory at runtime (i.e. <c>%WINDIR%\System32</c> for Windows services).</param>
+     /// <param name="restrictedToMinimumLevel">The minimum level for
+     /// events passed through the sink. Ignored when <paramref name="levelSwitch"/> is specified.</param>
+-    /// <param name="levelSwitch">A switch allowing the pass-through minimum level
+-    /// to be changed at runtime.</param>
+-    /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+     /// <param name="outputTemplate">A message template describing the format used to write to the sink.
+     /// the default is "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}".</param>
++    /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
++    /// <param name="levelSwitch">A switch allowing the pass-through minimum level
++    /// to be changed at runtime.</param>
+     /// <returns>Configuration object allowing method chaining.</returns>
+     /// <remarks>The file will be written using the UTF-8 character set.</remarks>
+     /// <exception cref="ArgumentNullException">When <paramref name="sinkConfiguration"/> is <code>null</code></exception>
+@@ -368,9 +451,9 @@ public static class FileLoggerConfigurationExtensions
+     /// <exception cref="IOException"></exception>
+     /// <exception cref="InvalidOperationException"></exception>
+     /// <exception cref="NotSupportedException"></exception>
+-    /// <exception cref="PathTooLongException">When <paramref name="path"/> is too long</exception>
+-    /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission to access the <paramref name="path"/></exception>
+-    /// <exception cref="ArgumentException">Invalid <paramref name="path"/></exception>
++    /// <exception cref="PathTooLongException">When <paramref name="path"/> is too long.</exception>
++    /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission to access the <paramref name="path"/>.</exception>
++    /// <exception cref="ArgumentException">Invalid <paramref name="path"/>.</exception>
+     [Obsolete("New code should not be compiled against this obsolete overload"), EditorBrowsable(EditorBrowsableState.Never)]
+     public static LoggerConfiguration File(
+         this LoggerAuditSinkConfiguration sinkConfiguration,
+@@ -406,9 +489,9 @@ public static class FileLoggerConfigurationExtensions
+     /// <exception cref="IOException"></exception>
+     /// <exception cref="InvalidOperationException"></exception>
+     /// <exception cref="NotSupportedException"></exception>
+-    /// <exception cref="PathTooLongException">When <paramref name="path"/> is too long</exception>
+-    /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission to access the <paramref name="path"/></exception>
+-    /// <exception cref="ArgumentException">Invalid <paramref name="path"/></exception>
++    /// <exception cref="PathTooLongException">When <paramref name="path"/> is too long.</exception>
++    /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission to access the <paramref name="path"/>.</exception>
++    /// <exception cref="ArgumentException">Invalid <paramref name="path"/>.</exception>
+     [Obsolete("New code should not be compiled against this obsolete overload"), EditorBrowsable(EditorBrowsableState.Never)]
+     public static LoggerConfiguration File(
+         this LoggerAuditSinkConfiguration sinkConfiguration,
+@@ -428,11 +511,11 @@ public static class FileLoggerConfigurationExtensions
+     /// under the current working directory at runtime (i.e. <c>%WINDIR%\System32</c> for Windows services).</param>
+     /// <param name="restrictedToMinimumLevel">The minimum level for
+     /// events passed through the sink. Ignored when <paramref name="levelSwitch"/> is specified.</param>
+-    /// <param name="levelSwitch">A switch allowing the pass-through minimum level
+-    /// to be changed at runtime.</param>
+-    /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+     /// <param name="outputTemplate">A message template describing the format used to write to the sink.
+     /// the default is "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}".</param>
++    /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
++    /// <param name="levelSwitch">A switch allowing the pass-through minimum level
++    /// to be changed at runtime.</param>
+     /// <param name="encoding">Character encoding used to write the text file. The default is UTF-8 without BOM.</param>
+     /// <param name="hooks">Optionally enables hooking into log file lifecycle events.</param>
+     /// <returns>Configuration object allowing method chaining.</returns>
+@@ -442,9 +525,9 @@ public static class FileLoggerConfigurationExtensions
+     /// <exception cref="IOException"></exception>
+     /// <exception cref="InvalidOperationException"></exception>
+     /// <exception cref="NotSupportedException"></exception>
+-    /// <exception cref="PathTooLongException">When <paramref name="path"/> is too long</exception>
+-    /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission to access the <paramref name="path"/></exception>
+-    /// <exception cref="ArgumentException">Invalid <paramref name="path"/></exception>
++    /// <exception cref="PathTooLongException">When <paramref name="path"/> is too long.</exception>
++    /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission to access the <paramref name="path"/>.</exception>
++    /// <exception cref="ArgumentException">Invalid <paramref name="path"/>.</exception>
+     public static LoggerConfiguration File(
+         this LoggerAuditSinkConfiguration sinkConfiguration,
+         string path,
+@@ -487,9 +570,9 @@ public static class FileLoggerConfigurationExtensions
+     /// <exception cref="IOException"></exception>
+     /// <exception cref="InvalidOperationException"></exception>
+     /// <exception cref="NotSupportedException"></exception>
+-    /// <exception cref="PathTooLongException">When <paramref name="path"/> is too long</exception>
+-    /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission to access the <paramref name="path"/></exception>
+-    /// <exception cref="ArgumentException">Invalid <paramref name="path"/></exception>
++    /// <exception cref="PathTooLongException">When <paramref name="path"/> is too long.</exception>
++    /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission to access the <paramref name="path"/>.</exception>
++    /// <exception cref="ArgumentException">Invalid <paramref name="path"/>.</exception>
+     public static LoggerConfiguration File(
+         this LoggerAuditSinkConfiguration sinkConfiguration,
+         ITextFormatter formatter,
+@@ -503,8 +586,23 @@ public static class FileLoggerConfigurationExtensions
+         if (formatter == null) throw new ArgumentNullException(nameof(formatter));
+         if (path == null) throw new ArgumentNullException(nameof(path));
+ 
+-        return ConfigureFile(sinkConfiguration.Sink, formatter, path, restrictedToMinimumLevel, null, levelSwitch, false, true,
+-            false, null, encoding, RollingInterval.Infinite, false, null, hooks, null);
++        return ConfigureFile(
++            sinkConfiguration.Sink,
++            formatter,
++            path,
++            restrictedToMinimumLevel,
++            null,
++            levelSwitch,
++            false,
++            true,
++            false,
++            null,
++            encoding,
++            RollingInterval.Infinite,
++            false,
++            null,
++            hooks,
++            null);
+     }
+ 
+     static LoggerConfiguration ConfigureFile(
+@@ -554,7 +652,6 @@ public static class FileLoggerConfigurationExtensions
+                 {
+                     sink = new FileSink(path, formatter, fileSizeLimitBytes, encoding, buffered, hooks);
+                 }
+-
+             }
+         }
+         catch (Exception ex)
+diff --git a/src/Serilog.Sinks.File/Sinks/File/FileLifecycleHooks.cs b/src/Serilog.Sinks.File/Sinks/File/FileLifecycleHooks.cs
+index d83926a..d878c87 100644
+--- a/src/Serilog.Sinks.File/Sinks/File/FileLifecycleHooks.cs
++++ b/src/Serilog.Sinks.File/Sinks/File/FileLifecycleHooks.cs
+@@ -13,8 +13,8 @@
+ // limitations under the License.
+ 
+ using System.Text;
+-// ReSharper disable UnusedMember.Global
+ 
++// ReSharper disable UnusedMember.Global
+ namespace Serilog.Sinks.File;
+ 
+ /// <summary>
+@@ -57,7 +57,7 @@ public abstract class FileLifecycleHooks
+     /// This can be used to copy old logs to an archive location or send to a backup server.
+     /// </summary>
+     /// <param name="path">The full path to the file being deleted.</param>
+-    public virtual void OnFileDeleting(string path) {}
++    public virtual void OnFileDeleting(string path) { }
+ 
+     /// <summary>
+     /// Creates a chain of <see cref="FileLifecycleHooks"/> that have their methods called sequentially
+@@ -69,7 +69,7 @@ public abstract class FileLifecycleHooks
+     /// var hooks = new GZipHooks().Then(new HeaderWriter("File Header"));
+     /// </code>
+     /// </example>
+-    /// <param name="next">The next <see cref="FileLifecycleHooks"/> to have its methods called in the chain</param>
++    /// <param name="next">The next <see cref="FileLifecycleHooks"/> to have its methods called in the chain.</param>
+     /// <returns></returns>
+     public FileLifecycleHooks Then(FileLifecycleHooks next)
+     {
+diff --git a/src/Serilog.Sinks.File/Sinks/File/FileSink.cs b/src/Serilog.Sinks.File/Sinks/File/FileSink.cs
+index 14c9f56..a7c8d25 100644
+--- a/src/Serilog.Sinks.File/Sinks/File/FileSink.cs
++++ b/src/Serilog.Sinks.File/Sinks/File/FileSink.cs
+@@ -35,7 +35,9 @@ public sealed class FileSink : IFileSink, IDisposable, ISetLoggingFailureListene
+ 
+     ILoggingFailureListener _failureListener = SelfLog.FailureListener;
+ 
+-    /// <summary>Construct a <see cref="FileSink"/>.</summary>
++    /// <summary>
++    /// Construct a <see cref="FileSink"/>.
++    /// </summary>
+     /// <param name="path">Path to the file.</param>
+     /// <param name="textFormatter">Formatter used to convert log events to text.</param>
+     /// <param name="fileSizeLimitBytes">The approximate maximum size, in bytes, to which a log file will be allowed to grow.
+@@ -52,9 +54,9 @@ public sealed class FileSink : IFileSink, IDisposable, ISetLoggingFailureListene
+     /// <exception cref="IOException"></exception>
+     /// <exception cref="InvalidOperationException"></exception>
+     /// <exception cref="NotSupportedException"></exception>
+-    /// <exception cref="PathTooLongException">When <paramref name="path"/> is too long</exception>
+-    /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission to access the <paramref name="path"/></exception>
+-    /// <exception cref="ArgumentException">Invalid <paramref name="path"/></exception>
++    /// <exception cref="PathTooLongException">When <paramref name="path"/> is too long.</exception>
++    /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission to access the <paramref name="path"/>.</exception>
++    /// <exception cref="ArgumentException">Invalid <paramref name="path"/>.</exception>
+     [Obsolete("This type and constructor will be removed from the public API in a future version; use `WriteTo.File()` instead.")]
+     public FileSink(string path, ITextFormatter textFormatter, long? fileSizeLimitBytes, Encoding? encoding = null, bool buffered = false)
+         : this(path, textFormatter, fileSizeLimitBytes, encoding, buffered, null)
+@@ -115,11 +117,8 @@ public sealed class FileSink : IFileSink, IDisposable, ISetLoggingFailureListene
+         if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
+         lock (_syncRoot)
+         {
+-            if (_fileSizeLimitBytes != null)
+-            {
+-                if (_countingStreamWrapper!.CountedLength >= _fileSizeLimitBytes.Value)
+-                    return false;
+-            }
++            if (_fileSizeLimitBytes != null && _countingStreamWrapper!.CountedLength >= _fileSizeLimitBytes.Value)
++                return false;
+ 
+             _textFormatter.Format(logEvent, _output);
+ 
+diff --git a/src/Serilog.Sinks.File/Sinks/File/RollingFileSink.cs b/src/Serilog.Sinks.File/Sinks/File/RollingFileSink.cs
+index 93c02c5..a9c9906 100644
+--- a/src/Serilog.Sinks.File/Sinks/File/RollingFileSink.cs
++++ b/src/Serilog.Sinks.File/Sinks/File/RollingFileSink.cs
+@@ -41,17 +41,18 @@ sealed class RollingFileSink : ILogEventSink, IFlushableFileSink, IDisposable, I
+     IFileSink? _currentFile;
+     int? _currentFileSequence;
+ 
+-    public RollingFileSink(string path,
+-                          ITextFormatter textFormatter,
+-                          long? fileSizeLimitBytes,
+-                          int? retainedFileCountLimit,
+-                          Encoding? encoding,
+-                          bool buffered,
+-                          bool shared,
+-                          RollingInterval rollingInterval,
+-                          bool rollOnFileSizeLimit,
+-                          FileLifecycleHooks? hooks,
+-                          TimeSpan? retainedFileTimeLimit)
++    public RollingFileSink(
++        string path,
++        ITextFormatter textFormatter,
++        long? fileSizeLimitBytes,
++        int? retainedFileCountLimit,
++        Encoding? encoding,
++        bool buffered,
++        bool shared,
++        RollingInterval rollingInterval,
++        bool rollOnFileSizeLimit,
++        FileLifecycleHooks? hooks,
++        TimeSpan? retainedFileTimeLimit)
+     {
+         if (path == null) throw new ArgumentNullException(nameof(path));
+         if (fileSizeLimitBytes is < 1) throw new ArgumentException("Invalid value provided; file size limit must be at least 1 byte, or null.");
+@@ -157,11 +158,8 @@ sealed class RollingFileSink : ILogEventSink, IFlushableFileSink, IDisposable, I
+ #endif
+ 
+             var sequence = latestForThisCheckpoint?.SequenceNumber;
+-            if (minSequence != null)
+-            {
+-                if (sequence == null || sequence.Value < minSequence.Value)
+-                    sequence = minSequence;
+-            }
++            if (minSequence != null && (sequence == null || sequence.Value < minSequence.Value))
++                sequence = minSequence;
+ 
+             const int maxAttempts = 3;
+             for (var attempt = 0; attempt < maxAttempts; attempt++)
+diff --git a/src/Serilog.Sinks.File/Sinks/File/RollingLogFile.cs b/src/Serilog.Sinks.File/Sinks/File/RollingLogFile.cs
+index 3a5b493..12a5790 100644
+--- a/src/Serilog.Sinks.File/Sinks/File/RollingLogFile.cs
++++ b/src/Serilog.Sinks.File/Sinks/File/RollingLogFile.cs
+@@ -12,7 +12,6 @@
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
+ 
+-
+ namespace Serilog.Sinks.File;
+ 
+ class RollingLogFile(string filename, DateTime? dateTime, int? sequenceNumber)
+diff --git a/src/Serilog.Sinks.File/Sinks/File/SharedFileSink.OSMutex.cs b/src/Serilog.Sinks.File/Sinks/File/SharedFileSink.OSMutex.cs
+index 3d6a0a1..cddf561 100644
+--- a/src/Serilog.Sinks.File/Sinks/File/SharedFileSink.OSMutex.cs
++++ b/src/Serilog.Sinks.File/Sinks/File/SharedFileSink.OSMutex.cs
+@@ -40,7 +40,9 @@ public sealed class SharedFileSink : IFileSink, IDisposable, ISetLoggingFailureL
+     const int MutexWaitTimeout = 10000;
+     readonly Mutex _mutex;
+ 
+-    /// <summary>Construct a <see cref="FileSink"/>.</summary>
++    /// <summary>
++    /// Construct a <see cref="FileSink"/>.
++    /// </summary>
+     /// <param name="path">Path to the file.</param>
+     /// <param name="textFormatter">Formatter used to convert log events to text.</param>
+     /// <param name="fileSizeLimitBytes">The approximate maximum size, in bytes, to which a log file will be allowed to grow.
+@@ -54,9 +56,9 @@ public sealed class SharedFileSink : IFileSink, IDisposable, ISetLoggingFailureL
+     /// <exception cref="IOException"></exception>
+     /// <exception cref="InvalidOperationException"></exception>
+     /// <exception cref="NotSupportedException"></exception>
+-    /// <exception cref="PathTooLongException">When <paramref name="path"/> is too long</exception>
+-    /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission to access the <paramref name="path"/></exception>
+-    /// <exception cref="ArgumentException">Invalid <paramref name="path"/></exception>
++    /// <exception cref="PathTooLongException">When <paramref name="path"/> is too long.</exception>
++    /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission to access the <paramref name="path"/>.</exception>
++    /// <exception cref="ArgumentException">Invalid <paramref name="path"/>.</exception>
+     public SharedFileSink(string path, ITextFormatter textFormatter, long? fileSizeLimitBytes, Encoding? encoding = null)
+     {
+         if (path == null) throw new ArgumentNullException(nameof(path));
+@@ -93,11 +95,8 @@ public sealed class SharedFileSink : IFileSink, IDisposable, ISetLoggingFailureL
+             try
+             {
+                 _underlyingStream.Seek(0, SeekOrigin.End);
+-                if (_fileSizeLimitBytes != null)
+-                {
+-                    if (_underlyingStream.Length >= _fileSizeLimitBytes.Value)
+-                        return false;
+-                }
++                if (_fileSizeLimitBytes != null && _underlyingStream.Length >= _fileSizeLimitBytes.Value)
++                    return false;
+ 
+                 _textFormatter.Format(logEvent, _output);
+                 _output.Flush();
+diff --git a/src/Serilog.Sinks.File/Sinks/File/WriteCountingStream.cs b/src/Serilog.Sinks.File/Sinks/File/WriteCountingStream.cs
+index 39eec07..f478afd 100644
+--- a/src/Serilog.Sinks.File/Sinks/File/WriteCountingStream.cs
++++ b/src/Serilog.Sinks.File/Sinks/File/WriteCountingStream.cs
+@@ -41,6 +41,7 @@ sealed class WriteCountingStream : Stream
+     }
+ 
+     public override void Flush() => _stream.Flush();
++
+     public override bool CanRead => false;
+     public override bool CanSeek => _stream.CanSeek;
+     public override bool CanWrite => true;
+diff --git a/test/Serilog.Sinks.File.Tests/FileSinkTests.cs b/test/Serilog.Sinks.File.Tests/FileSinkTests.cs
+index fa7ea49..fe66b55 100644
+--- a/test/Serilog.Sinks.File.Tests/FileSinkTests.cs
++++ b/test/Serilog.Sinks.File.Tests/FileSinkTests.cs
+@@ -99,7 +99,6 @@ public class FileSinkTests
+         Assert.True(size > maxBytes * 2);
+     }
+ 
+-
+     [Fact]
+     public void WhenLimitIsSpecifiedAndEncodingHasPreambleDataIsCorrectlyAppendedToFileSink()
+     {
+@@ -271,17 +270,18 @@ public class FileSinkTests
+         {
+             sink.Emit(evt);
+         }
++
+         var size = new FileInfo(path).Length;
+         Assert.Equal(encoding.GetPreamble().Length + eventOuputLength, size);
+ 
+-        //write a second event to the same file
++        // write a second event to the same file
+         using (var sink = new FileSink(path, formatter, maxBytes, encoding: encoding))
+         {
+             sink.Emit(evt);
+         }
+ 
+         size = new FileInfo(path).Length;
+-        Assert.Equal(encoding.GetPreamble().Length + eventOuputLength * 2, size);
++        Assert.Equal(encoding.GetPreamble().Length + (eventOuputLength * 2), size);
+     }
+ 
+     private static string[] ReadAllLinesShared(string path)
+diff --git a/test/Serilog.Sinks.File.Tests/RollingFileSinkTests.cs b/test/Serilog.Sinks.File.Tests/RollingFileSinkTests.cs
+index 191e614..5f98546 100644
+--- a/test/Serilog.Sinks.File.Tests/RollingFileSinkTests.cs
++++ b/test/Serilog.Sinks.File.Tests/RollingFileSinkTests.cs
+@@ -71,7 +71,7 @@ public class RollingFileSinkTests : IDisposable
+ 
+         TestRollingEventSequence(
+             (pf, wt) => wt.File(pf, retainedFileCountLimit: 2, rollingInterval: RollingInterval.Day),
+-            new[] {e1, e2, e3},
++            new[] { e1, e2, e3 },
+             files =>
+             {
+                 Assert.Equal(3, files.Count);
+@@ -90,7 +90,7 @@ public class RollingFileSinkTests : IDisposable
+ 
+         TestRollingEventSequence(
+             (pf, wt) => wt.File(pf, retainedFileTimeLimit: TimeSpan.FromDays(1), rollingInterval: RollingInterval.Day),
+-            new[] {e1, e2, e3},
++            new[] { e1, e2, e3 },
+             files =>
+             {
+                 Assert.Equal(3, files.Count);
+@@ -109,7 +109,7 @@ public class RollingFileSinkTests : IDisposable
+ 
+         TestRollingEventSequence(
+             (pf, wt) => wt.File(pf, retainedFileCountLimit: 2, retainedFileTimeLimit: TimeSpan.FromDays(1), rollingInterval: RollingInterval.Day),
+-            new[] {e1, e2, e3},
++            new[] { e1, e2, e3 },
+             files =>
+             {
+                 Assert.Equal(3, files.Count);
+@@ -128,7 +128,7 @@ public class RollingFileSinkTests : IDisposable
+ 
+         TestRollingEventSequence(
+             (pf, wt) => wt.File(pf, retainedFileCountLimit: 2, retainedFileTimeLimit: TimeSpan.FromDays(10), rollingInterval: RollingInterval.Day),
+-            new[] {e1, e2, e3},
++            new[] { e1, e2, e3 },
+             files =>
+             {
+                 Assert.Equal(3, files.Count);
+@@ -148,7 +148,7 @@ public class RollingFileSinkTests : IDisposable
+ 
+         TestRollingEventSequence(
+             (pf, wt) => wt.File(pf, retainedFileCountLimit: 2, rollingInterval: RollingInterval.Day, hooks: new ArchiveOldLogsHook(archiveDirectory)),
+-            new[] {e1, e2, e3},
++            new[] { e1, e2, e3 },
+             files =>
+             {
+                 Assert.Equal(3, files.Count);
+@@ -312,7 +312,6 @@ public class RollingFileSinkTests : IDisposable
+             .WriteTo.File(Path.Combine(temp.Path, fileName), rollOnFileSizeLimit: true, fileSizeLimitBytes: 1, hooks: gzipWrapper)
+             .CreateLogger())
+         {
+-
+             foreach (var logEvent in logEvents)
+             {
+                 log.Write(logEvent);
+diff --git a/test/Serilog.Sinks.File.Tests/Support/ArchiveOldLogsHook.cs b/test/Serilog.Sinks.File.Tests/Support/ArchiveOldLogsHook.cs
+index c8b93a8..9e6488b 100644
+--- a/test/Serilog.Sinks.File.Tests/Support/ArchiveOldLogsHook.cs
++++ b/test/Serilog.Sinks.File.Tests/Support/ArchiveOldLogsHook.cs
+@@ -25,6 +25,7 @@ class ArchiveOldLogsHook : FileLifecycleHooks
+         {
+             Directory.CreateDirectory(directory);
+         }
++
+         return Path.Combine(directory, file);
+     }
+ }
+diff --git a/test/Serilog.Sinks.File.Tests/Support/CaptureFilePathHook.cs b/test/Serilog.Sinks.File.Tests/Support/CaptureFilePathHook.cs
+index 14fa452..61dd376 100644
+--- a/test/Serilog.Sinks.File.Tests/Support/CaptureFilePathHook.cs
++++ b/test/Serilog.Sinks.File.Tests/Support/CaptureFilePathHook.cs
+@@ -4,7 +4,7 @@ namespace Serilog.Sinks.File.Tests.Support;
+ 
+ /// <inheritdoc />
+ /// <summary>
+-/// Demonstrates the use of <seealso cref="T:Serilog.FileLifecycleHooks" />, by capturing the log file path
++/// Demonstrates the use of <seealso cref="T:Serilog.FileLifecycleHooks" />, by capturing the log file path.
+ /// </summary>
+ class CaptureFilePathHook : FileLifecycleHooks
+ {
+diff --git a/test/Serilog.Sinks.File.Tests/Support/CapturingLoggingFailureListener.cs b/test/Serilog.Sinks.File.Tests/Support/CapturingLoggingFailureListener.cs
+index 7bb4622..85cece5 100644
+--- a/test/Serilog.Sinks.File.Tests/Support/CapturingLoggingFailureListener.cs
++++ b/test/Serilog.Sinks.File.Tests/Support/CapturingLoggingFailureListener.cs
+@@ -3,7 +3,7 @@ using Serilog.Events;
+ 
+ namespace Serilog.Sinks.File.Tests.Support;
+ 
+-class CapturingLoggingFailureListener: ILoggingFailureListener
++class CapturingLoggingFailureListener : ILoggingFailureListener
+ {
+     public List<LogEvent> FailedEvents { get; } = [];
+ 
+diff --git a/test/Serilog.Sinks.File.Tests/Support/CollectingSink.cs b/test/Serilog.Sinks.File.Tests/Support/CollectingSink.cs
+index 323aba8..cff5195 100644
+--- a/test/Serilog.Sinks.File.Tests/Support/CollectingSink.cs
++++ b/test/Serilog.Sinks.File.Tests/Support/CollectingSink.cs
+@@ -7,9 +7,15 @@ class CollectingSink : ILogEventSink
+ {
+     readonly List<LogEvent> _events = new();
+ 
+-    public List<LogEvent> Events { get { return _events; } }
++    public List<LogEvent> Events
++    {
++        get { return _events; }
++    }
+ 
+-    public LogEvent SingleEvent { get { return _events.Single(); } }
++    public LogEvent SingleEvent
++    {
++        get { return _events.Single(); }
++    }
+ 
+     public void Emit(LogEvent logEvent)
+     {
+diff --git a/test/Serilog.Sinks.File.Tests/Support/DisposeTrackingSink.cs b/test/Serilog.Sinks.File.Tests/Support/DisposeTrackingSink.cs
+index c4e2559..b8b7afe 100644
+--- a/test/Serilog.Sinks.File.Tests/Support/DisposeTrackingSink.cs
++++ b/test/Serilog.Sinks.File.Tests/Support/DisposeTrackingSink.cs
+@@ -8,7 +8,7 @@ class DisposeTrackingSink : ILogEventSink, IDisposable
+     public bool IsDisposed { get; set; }
+ 
+     public void Emit(LogEvent logEvent)
+-    {            
++    {
+     }
+ 
+     public void Dispose()
+diff --git a/test/Serilog.Sinks.File.Tests/Support/FailOpeningHook.cs b/test/Serilog.Sinks.File.Tests/Support/FailOpeningHook.cs
+index 54ce65b..263499c 100644
+--- a/test/Serilog.Sinks.File.Tests/Support/FailOpeningHook.cs
++++ b/test/Serilog.Sinks.File.Tests/Support/FailOpeningHook.cs
+@@ -26,9 +26,9 @@ class FailOpeningHook : FileLifecycleHooks
+         {
+             var message = $"We failed on try {TimesOpened}, the file was locked: {_asFileLocked}";
+ 
+-            throw _asFileLocked
+-                ? new IOException(message)
+-                : new Exception(message);
++            throw _asFileLocked ?
++                new IOException(message) :
++                new Exception(message);
+         }
+ 
+         return base.OnFileOpened(path, stream, encoding);
+diff --git a/test/Serilog.Sinks.File.Tests/Support/GZipHooks.cs b/test/Serilog.Sinks.File.Tests/Support/GZipHooks.cs
+index 7191db1..522c825 100644
+--- a/test/Serilog.Sinks.File.Tests/Support/GZipHooks.cs
++++ b/test/Serilog.Sinks.File.Tests/Support/GZipHooks.cs
+@@ -5,7 +5,7 @@ namespace Serilog.Sinks.File.Tests.Support;
+ 
+ /// <inheritdoc />
+ /// <summary>
+-/// Demonstrates the use of <seealso cref="T:Serilog.FileLifecycleHooks" />, by compressing log output using GZip
++/// Demonstrates the use of <seealso cref="T:Serilog.FileLifecycleHooks" />, by compressing log output using GZip.
+ /// </summary>
+ public class GZipHooks : FileLifecycleHooks
+ {
+diff --git a/test/Serilog.Sinks.File.Tests/Support/Some.cs b/test/Serilog.Sinks.File.Tests/Support/Some.cs
+index 05ddc11..df18c0d 100644
+--- a/test/Serilog.Sinks.File.Tests/Support/Some.cs
++++ b/test/Serilog.Sinks.File.Tests/Support/Some.cs
+@@ -49,13 +49,18 @@ static class Some
+         {
+             throw new XunitException("Template could not be bound.");
+         }
++
+         return new LogEvent(DateTimeOffset.Now, LogEventLevel.Information, null, template, properties);
+     }
+ 
+     public static LogEvent LogEvent(DateTimeOffset? timestamp = null, LogEventLevel level = LogEventLevel.Information)
+     {
+-        return new LogEvent(timestamp ?? OffsetInstant(), level,
+-            null, MessageTemplate(), Enumerable.Empty<LogEventProperty>());
++        return new LogEvent(
++            timestamp ?? OffsetInstant(),
++            level,
++            null,
++            MessageTemplate(),
++            Enumerable.Empty<LogEventProperty>());
+     }
+ 
+     public static LogEvent InformationEvent(DateTimeOffset? timestamp = null)
+diff --git a/test/Serilog.Sinks.File.Tests/Support/TempFolder.cs b/test/Serilog.Sinks.File.Tests/Support/TempFolder.cs
+index 10d751e..747a217 100644
+--- a/test/Serilog.Sinks.File.Tests/Support/TempFolder.cs
++++ b/test/Serilog.Sinks.File.Tests/Support/TempFolder.cs
+@@ -39,7 +39,7 @@ class TempFolder : IDisposable
+     {
+         if (caller == null) throw new ArgumentNullException(nameof(caller));
+         if (sourceFileName == null) throw new ArgumentNullException(nameof(sourceFileName));
+-        
++
+         var folderName = System.IO.Path.GetFileNameWithoutExtension(sourceFileName) + "_" + caller;
+ 
+         return new TempFolder(folderName);
+diff --git a/test/Serilog.Sinks.File.Tests/Support/TruncateFileHook.cs b/test/Serilog.Sinks.File.Tests/Support/TruncateFileHook.cs
+index aecc413..283e7f8 100644
+--- a/test/Serilog.Sinks.File.Tests/Support/TruncateFileHook.cs
++++ b/test/Serilog.Sinks.File.Tests/Support/TruncateFileHook.cs
+@@ -4,7 +4,7 @@ namespace Serilog.Sinks.File.Tests.Support;
+ 
+ /// <inheritdoc />
+ /// <summary>
+-/// Demonstrates the use of <seealso cref="T:Serilog.FileLifecycleHooks" />, by emptying the file before it's written to
++/// Demonstrates the use of <seealso cref="T:Serilog.FileLifecycleHooks" />, by emptying the file before it's written to.
+ /// </summary>
+ public class TruncateFileHook : FileLifecycleHooks
+ {
+diff --git a/test/Serilog.Sinks.File.Tests/TemplatedPathRollerTests.cs b/test/Serilog.Sinks.File.Tests/TemplatedPathRollerTests.cs
+index e34c335..d0f0230 100644
+--- a/test/Serilog.Sinks.File.Tests/TemplatedPathRollerTests.cs
++++ b/test/Serilog.Sinks.File.Tests/TemplatedPathRollerTests.cs
+@@ -93,4 +93,3 @@ public class PathRollerTests
+         Assert.Equal(new[] { newer, older }, matched);
+     }
+ }
+-

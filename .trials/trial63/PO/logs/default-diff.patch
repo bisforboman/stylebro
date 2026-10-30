@@ -1,0 +1,936 @@
+diff --git a/Directory.Build.props b/Directory.Build.props
+new file mode 100644
+index 0000000..b768785
+--- /dev/null
++++ b/Directory.Build.props
+@@ -0,0 +1,8 @@
++<Project>
++  <PropertyGroup>
++    <StyleBroPreset>1.0</StyleBroPreset>
++  </PropertyGroup>
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial63.1" PrivateAssets="all" />
++  </ItemGroup>
++</Project>
+diff --git a/src/Pose/Delegates/ActionRef.cs b/src/Pose/Delegates/ActionRef.cs
+index 4264e7a..0fb78a2 100644
+--- a/src/Pose/Delegates/ActionRef.cs
++++ b/src/Pose/Delegates/ActionRef.cs
+@@ -3,13 +3,22 @@ using System;
+ namespace Pose.Delegates
+ {
+     public delegate void ActionRef<T>(ref T arg);
++
+     public delegate void ActionRef<T1, T2>(ref T1 arg1, T2 arg2);
++
+     public delegate void ActionRef<T1, T2, T3>(ref T1 arg1, T2 arg2, T3 arg3);
++
+     public delegate void ActionRef<T1, T2, T3, T4>(ref T1 arg1, T2 arg2, T3 arg3, T4 arg4);
++
+     public delegate void ActionRef<T1, T2, T3, T4, T5>(ref T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
++
+     public delegate void ActionRef<T1, T2, T3, T4, T5, T6>(ref T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6);
++
+     public delegate void ActionRef<T1, T2, T3, T4, T5, T6, T7>(ref T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7);
++
+     public delegate void ActionRef<T1, T2, T3, T4, T5, T6, T7, T8>(ref T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8);
++
+     public delegate void ActionRef<T1, T2, T3, T4, T5, T6, T7, T8, T9>(ref T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9);
++
+     public delegate void ActionRef<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(ref T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10);
+ }
+\ No newline at end of file
+diff --git a/src/Pose/Delegates/FuncRef.cs b/src/Pose/Delegates/FuncRef.cs
+index 48476fa..cd0e99d 100644
+--- a/src/Pose/Delegates/FuncRef.cs
++++ b/src/Pose/Delegates/FuncRef.cs
+@@ -3,13 +3,22 @@ using System;
+ namespace Pose.Delegates
+ {
+     public delegate TResult FuncRef<T1, TResult>(ref T1 arg1);
++
+     public delegate TResult FuncRef<T1, T2, TResult>(ref T1 arg1, T2 arg2);
++
+     public delegate TResult FuncRef<T1, T2, T3, TResult>(ref T1 arg1, T2 arg2, T3 arg3);
++
+     public delegate TResult FuncRef<T1, T2, T3, T4, TResult>(ref T1 arg1, T2 arg2, T3 arg3, T4 arg4);
++
+     public delegate TResult FuncRef<T1, T2, T3, T4, T5, TResult>(ref T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
++
+     public delegate TResult FuncRef<T1, T2, T3, T4, T5, T6, TResult>(ref T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6);
++
+     public delegate TResult FuncRef<T1, T2, T3, T4, T5, T6, T7, TResult>(ref T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7);
++
+     public delegate TResult FuncRef<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(ref T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8);
++
+     public delegate TResult FuncRef<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(ref T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9);
++
+     public delegate TResult FuncRef<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(ref T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10);
+ }
+\ No newline at end of file
+diff --git a/src/Pose/Exceptions/InvalidShimSignatureException.cs b/src/Pose/Exceptions/InvalidShimSignatureException.cs
+index ec2e386..c1d07ff 100644
+--- a/src/Pose/Exceptions/InvalidShimSignatureException.cs
++++ b/src/Pose/Exceptions/InvalidShimSignatureException.cs
+@@ -4,8 +4,11 @@ namespace Pose.Exceptions
+     internal class InvalidShimSignatureException : System.Exception
+     {
+         public InvalidShimSignatureException() : base() { }
++
+         public InvalidShimSignatureException(string message) : base(message) { }
++
+         public InvalidShimSignatureException(string message, System.Exception inner) : base(message, inner) { }
++
+         protected InvalidShimSignatureException(
+             System.Runtime.Serialization.SerializationInfo info,
+             System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+diff --git a/src/Pose/Extensions/DictionaryExtensions.cs b/src/Pose/Extensions/DictionaryExtensions.cs
+index d6e8d36..b8dd9eb 100644
+--- a/src/Pose/Extensions/DictionaryExtensions.cs
++++ b/src/Pose/Extensions/DictionaryExtensions.cs
+@@ -4,7 +4,7 @@ namespace Pose.Extensions
+ {
+     internal static class DictionaryExtensions
+     {
+-        public static bool TryAdd<T, U>(this Dictionary<T, U> dictionary, T key, U value)
++        public static bool TryAdd<T, TU>(this Dictionary<T, TU> dictionary, T key, TU value)
+         {
+             try
+             {
+diff --git a/src/Pose/Helpers/ShimHelper.cs b/src/Pose/Helpers/ShimHelper.cs
+index ef44f68..94aaffb 100644
+--- a/src/Pose/Helpers/ShimHelper.cs
++++ b/src/Pose/Helpers/ShimHelper.cs
+@@ -11,7 +11,7 @@ namespace Pose.Helpers
+ {
+     internal static class ShimHelper
+     {
+-        public static MethodBase GetMethodFromExpression(Expression expression, bool setter, out Object instanceOrType)
++        public static MethodBase GetMethodFromExpression(Expression expression, bool setter, out object instanceOrType)
+         {
+             switch (expression.NodeType)
+             {
+@@ -26,7 +26,9 @@ namespace Pose.Helpers
+                             return setter ? propertyInfo.GetSetMethod() : propertyInfo.GetGetMethod();
+                         }
+                         else
++                        {
+                             throw new NotImplementedException("Unsupported expression");
++                        }
+                     }
+                 case ExpressionType.Call:
+                     MethodCallExpression methodCallExpression = expression as MethodCallExpression;
+@@ -54,7 +56,8 @@ namespace Pose.Helpers
+ 
+             Type validOwningType = type;
+             Type shimOwningType = isStaticOrConstructor
+-                ? validOwningType : replacement.GetParameters().Select(p => p.ParameterType).FirstOrDefault();
++                ? validOwningType
++                : replacement.GetParameters().Select(p => p.ParameterType).FirstOrDefault();
+ 
+             var validParameterTypes = original.GetParameters().Select(p => p.ParameterType);
+             var shimParameterTypes = replacement.GetParameters()
+@@ -64,11 +67,8 @@ namespace Pose.Helpers
+             if (vaildReturnType != shimReturnType)
+                 throw new InvalidShimSignatureException("Mismatched return types");
+ 
+-            if (!isStaticOrConstructor)
+-            {
+-                if (isValueType && !shimOwningType.IsByRef)
+-                    throw new InvalidShimSignatureException("ValueType instances must be passed by ref");
+-            }
++            if (!isStaticOrConstructor && isValueType && !shimOwningType.IsByRef)
++                throw new InvalidShimSignatureException("ValueType instances must be passed by ref");
+ 
+             if ((isValueType && !isStaticOrConstructor ? validOwningType.MakeByRefType() : validOwningType) != shimOwningType)
+                 throw new InvalidShimSignatureException("Mismatched instance types");
+@@ -94,16 +94,17 @@ namespace Pose.Helpers
+                         ConstantExpression constantExpression = memberExpression.Expression as ConstantExpression;
+                         if (memberExpression.Member.MemberType == MemberTypes.Field)
+                         {
+-                            FieldInfo fieldInfo = (memberExpression.Member as FieldInfo);
++                            FieldInfo fieldInfo = memberExpression.Member as FieldInfo;
+                             var obj = fieldInfo.IsStatic ? null : constantExpression.Value;
+                             instanceOrType = fieldInfo.GetValue(obj);
+                         }
+                         else if (memberExpression.Member.MemberType == MemberTypes.Property)
+                         {
+-                            PropertyInfo propertyInfo = (memberExpression.Member as PropertyInfo);
++                            PropertyInfo propertyInfo = memberExpression.Member as PropertyInfo;
+                             var obj = propertyInfo.GetMethod.IsStatic ? null : constantExpression.Value;
+                             instanceOrType = propertyInfo.GetValue(obj);
+                         }
++
+                         EnsureInstanceNotValueType(instanceOrType);
+                         break;
+                     }
+diff --git a/src/Pose/Helpers/StubHelper.cs b/src/Pose/Helpers/StubHelper.cs
+index b6e966d..8a92bbf 100644
+--- a/src/Pose/Helpers/StubHelper.cs
++++ b/src/Pose/Helpers/StubHelper.cs
+@@ -35,8 +35,10 @@ namespace Pose.Helpers
+                 s => Object.ReferenceEquals(obj, s.Instance) && s.Original == methodBase);
+ 
+             if (index == -1)
++            {
+                 return Array.FindIndex(PoseContext.Shims,
+                             s => SignatureEquals(s, type, methodBase) && s.Instance == null);
++            }
+ 
+             return index;
+         }
+@@ -93,13 +95,10 @@ namespace Pose.Helpers
+             if (shim.Type == null || type == shim.Type)
+                 return $"{shim.Type}::{shim.Original.ToString()}" == $"{type}::{method.ToString()}";
+ 
+-            if (type.IsSubclassOf(shim.Type))
++            if (type.IsSubclassOf(shim.Type) && ((shim.Original.IsAbstract || !shim.Original.IsVirtual)
++                    || (shim.Original.IsVirtual && !method.IsOverride())))
+             {
+-                if ((shim.Original.IsAbstract || !shim.Original.IsVirtual)
+-                        || (shim.Original.IsVirtual && !method.IsOverride()))
+-                {
+-                    return $"{shim.Original.ToString()}" == $"{method.ToString()}";
+-                }
++                return $"{shim.Original.ToString()}" == $"{method.ToString()}";
+             }
+ 
+             return false;
+diff --git a/src/Pose/IL/DebugHelpers/BrowsableDynamicMethod.cs b/src/Pose/IL/DebugHelpers/BrowsableDynamicMethod.cs
+index b068d26..e1dd06b 100644
+--- a/src/Pose/IL/DebugHelpers/BrowsableDynamicMethod.cs
++++ b/src/Pose/IL/DebugHelpers/BrowsableDynamicMethod.cs
+@@ -7,14 +7,14 @@ namespace Pose.IL.DebugHelpers
+ {
+     internal class BrowsableDynamicMethod : MethodInfo
+     {
+-        private readonly DynamicMethod m_method;
++        private readonly DynamicMethod _method;
+ 
+-        private readonly MethodBody m_methodBody;
++        private readonly MethodBody _methodBody;
+ 
+         public BrowsableDynamicMethod(DynamicMethod method, MethodBody methodBody)
+         {
+-            m_method = method;
+-            m_methodBody = methodBody;
++            _method = method;
++            _methodBody = methodBody;
+         }
+ 
+         public override ICustomAttributeProvider ReturnTypeCustomAttributes => throw new NotImplementedException();
+@@ -23,11 +23,11 @@ namespace Pose.IL.DebugHelpers
+ 
+         public override RuntimeMethodHandle MethodHandle => throw new NotImplementedException();
+ 
+-        public override Module Module => new DynamicModule(m_method.GetILGenerator());
++        public override Module Module => new DynamicModule(_method.GetILGenerator());
+ 
+-        public override Type DeclaringType => m_method.DeclaringType;
++        public override Type DeclaringType => _method.DeclaringType;
+ 
+-        public override string Name => m_method.Name;
++        public override string Name => _method.Name;
+ 
+         public override Type ReflectedType => throw new NotImplementedException();
+ 
+@@ -39,11 +39,11 @@ namespace Pose.IL.DebugHelpers
+ 
+         public override Type[] GetGenericArguments() => Array.Empty<Type>();
+ 
+-        public override MethodBody GetMethodBody() => m_methodBody;
++        public override MethodBody GetMethodBody() => _methodBody;
+ 
+         public override MethodImplAttributes GetMethodImplementationFlags() => throw new NotImplementedException();
+ 
+-        public override ParameterInfo[] GetParameters() => m_method.GetParameters();
++        public override ParameterInfo[] GetParameters() => _method.GetParameters();
+ 
+         public override object Invoke(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture)
+             => throw new NotImplementedException();
+diff --git a/src/Pose/IL/DebugHelpers/DynamicMethodBody.cs b/src/Pose/IL/DebugHelpers/DynamicMethodBody.cs
+index c85f3ad..f1da2aa 100644
+--- a/src/Pose/IL/DebugHelpers/DynamicMethodBody.cs
++++ b/src/Pose/IL/DebugHelpers/DynamicMethodBody.cs
+@@ -6,25 +6,25 @@ namespace Pose.IL.DebugHelpers
+ {
+     internal class DynamicMethodBody : MethodBody
+     {
+-        private readonly byte[] m_ilBytes;
++        private readonly byte[] _ilBytes;
+ 
+-        private readonly IList<LocalVariableInfo> m_locals;
++        private readonly IList<LocalVariableInfo> _locals;
+ 
+         public DynamicMethodBody(byte[] ilBytes, IList<LocalVariableInfo> locals)
+         {
+-            m_ilBytes = ilBytes;
+-            m_locals = locals;
++            _ilBytes = ilBytes;
++            _locals = locals;
+         }
+ 
+         public override int LocalSignatureMetadataToken => throw new NotImplementedException();
+ 
+-        public override IList<LocalVariableInfo> LocalVariables => m_locals;
++        public override IList<LocalVariableInfo> LocalVariables => _locals;
+ 
+         public override int MaxStackSize => throw new NotImplementedException();
+ 
+         public override bool InitLocals => throw new NotImplementedException();
+ 
+-        public override byte[] GetILAsByteArray() => m_ilBytes;
++        public override byte[] GetILAsByteArray() => _ilBytes;
+ 
+         public override IList<ExceptionHandlingClause> ExceptionHandlingClauses => throw new NotImplementedException();
+     }
+diff --git a/src/Pose/IL/DebugHelpers/DynamicModule.cs b/src/Pose/IL/DebugHelpers/DynamicModule.cs
+index 45bfbf8..52a64f6 100644
+--- a/src/Pose/IL/DebugHelpers/DynamicModule.cs
++++ b/src/Pose/IL/DebugHelpers/DynamicModule.cs
+@@ -5,25 +5,25 @@ using System.Reflection.Emit;
+ 
+ namespace Pose.IL.DebugHelpers
+ {
+-    internal class DynamicModule: Module
++    internal class DynamicModule : Module
+     {
+         private static FieldInfo s_scopeField;
+ 
+-        private readonly ILGenerator m_ilGenerator;
++        private readonly ILGenerator _ilGenerator;
+ 
+         public DynamicModule(ILGenerator ilGenerator)
+         {
+-            m_ilGenerator = ilGenerator;
++            _ilGenerator = ilGenerator;
+ 
+             if (s_scopeField == null)
+             {
+-                s_scopeField = m_ilGenerator.GetType().GetField("m_scope", BindingFlags.Instance | BindingFlags.NonPublic);
++                s_scopeField = _ilGenerator.GetType().GetField("m_scope", BindingFlags.Instance | BindingFlags.NonPublic);
+             }
+         }
+ 
+         public override string ResolveString(int metadataToken)
+         {
+-            var dynamicScope = s_scopeField.GetValue(m_ilGenerator);
++            var dynamicScope = s_scopeField.GetValue(_ilGenerator);
+             Debug.Assert(dynamicScope != null);
+ 
+             return (string)dynamicScope.GetType().GetMethod("GetString", BindingFlags.Instance | BindingFlags.NonPublic)
+@@ -32,12 +32,12 @@ namespace Pose.IL.DebugHelpers
+ 
+         public override MemberInfo ResolveMember(int metadataToken, Type[] genericTypeArguments, Type[] genericMethodArguments)
+         {
+-            var dynamicScope = s_scopeField.GetValue(m_ilGenerator);
++            var dynamicScope = s_scopeField.GetValue(_ilGenerator);
+             Debug.Assert(dynamicScope != null);
+ 
+             var handle = dynamicScope.GetType().GetMethod("get_Item", BindingFlags.Instance | BindingFlags.NonPublic)
+                             .Invoke(dynamicScope, new object[] { metadataToken });
+-            
++
+             Debug.Assert(handle != null);
+ 
+             if (handle is RuntimeTypeHandle typeHandle)
+@@ -79,7 +79,7 @@ namespace Pose.IL.DebugHelpers
+ 
+         public override byte[] ResolveSignature(int metadataToken)
+         {
+-            var dynamicScope = s_scopeField.GetValue(m_ilGenerator);
++            var dynamicScope = s_scopeField.GetValue(_ilGenerator);
+             Debug.Assert(dynamicScope != null);
+ 
+             return (byte[])dynamicScope.GetType().GetMethod("ResolveSignature", BindingFlags.Instance | BindingFlags.NonPublic)
+diff --git a/src/Pose/IL/MethodRewriter.cs b/src/Pose/IL/MethodRewriter.cs
+index 2c56567..b1f96f8 100644
+--- a/src/Pose/IL/MethodRewriter.cs
++++ b/src/Pose/IL/MethodRewriter.cs
+@@ -16,30 +16,30 @@ namespace Pose.IL
+ {
+     internal class MethodRewriter
+     {
+-        private MethodBase m_method;
++        private MethodBase _method;
+ 
+-        private Type m_owningType;
++        private Type _owningType;
+ 
+-        private bool m_isInterfaceDispatch;
++        private bool _isInterfaceDispatch;
+ 
+-        private int m_exceptionBlockLevel;
++        private int _exceptionBlockLevel;
+ 
+-        private TypeInfo m_constrainedType;
++        private TypeInfo _constrainedType;
+ 
+-        private static List<OpCode> s_IngoredOpCodes = new List<OpCode> { OpCodes.Endfilter, OpCodes.Endfinally };
++        private static List<OpCode> s_ingoredOpCodes = new List<OpCode> { OpCodes.Endfilter, OpCodes.Endfinally };
+ 
+         public static MethodRewriter CreateRewriter(MethodBase method, bool isInterfaceDispatch)
+         {
+-            return new MethodRewriter { m_method = method, m_owningType = method.DeclaringType, m_isInterfaceDispatch = isInterfaceDispatch };
++            return new MethodRewriter { _method = method, _owningType = method.DeclaringType, _isInterfaceDispatch = isInterfaceDispatch };
+         }
+ 
+         public MethodBase Rewrite()
+         {
+             List<Type> parameterTypes = new List<Type>();
+-            if (!m_method.IsStatic)
++            if (!_method.IsStatic)
+             {
+-                Type thisType = m_isInterfaceDispatch ? typeof(object) : m_owningType;
+-                if (!m_isInterfaceDispatch && m_owningType.IsValueType)
++                Type thisType = _isInterfaceDispatch ? typeof(object) : _owningType;
++                if (!_isInterfaceDispatch && _owningType.IsValueType)
+                 {
+                     thisType = thisType.MakeByRefType();
+                 }
+@@ -47,23 +47,23 @@ namespace Pose.IL
+                 parameterTypes.Add(thisType);
+             }
+ 
+-            parameterTypes.AddRange(m_method.GetParameters().Select(p => p.ParameterType));
+-            Type returnType = m_method.IsConstructor ? typeof(void) : (m_method as MethodInfo).ReturnType;
++            parameterTypes.AddRange(_method.GetParameters().Select(p => p.ParameterType));
++            Type returnType = _method.IsConstructor ? typeof(void) : (_method as MethodInfo).ReturnType;
+ 
+             DynamicMethod dynamicMethod = new DynamicMethod(
+-                StubHelper.CreateStubNameFromMethod("impl", m_method),
++                StubHelper.CreateStubNameFromMethod("impl", _method),
+                 returnType,
+                 parameterTypes.ToArray(),
+                 StubHelper.GetOwningModule(),
+                 true);
+ 
+-            var methodBody = m_method.GetMethodBody();
++            var methodBody = _method.GetMethodBody();
+             var locals = methodBody.LocalVariables;
+             var targetInstructions = new Dictionary<int, Label>();
+             var handlers = new List<ExceptionHandler>();
+ 
+             var ilGenerator = dynamicMethod.GetILGenerator();
+-            var instructions = m_method.GetInstructions();
++            var instructions = _method.GetInstructions();
+ 
+             foreach (var clause in methodBody.ExceptionHandlingClauses)
+             {
+@@ -99,7 +99,7 @@ namespace Pose.IL
+             }
+ 
+ #if DEBUG
+-            Debug.WriteLine("\n" + m_method);
++            Debug.WriteLine("\n" + _method);
+ #endif
+ 
+             foreach (var instruction in instructions)
+@@ -113,7 +113,7 @@ namespace Pose.IL
+                 if (targetInstructions.TryGetValue(instruction.Offset, out Label label))
+                     ilGenerator.MarkLabel(label);
+ 
+-                if (s_IngoredOpCodes.Contains(instruction.OpCode)) continue;
++                if (s_ingoredOpCodes.Contains(instruction.OpCode)) continue;
+ 
+                 switch (instruction.OpCode.OperandType)
+                 {
+@@ -179,7 +179,7 @@ namespace Pose.IL
+             foreach (var tryBlock in tryBlocks)
+             {
+                 ilGenerator.BeginExceptionBlock();
+-                m_exceptionBlockLevel++;
++                _exceptionBlockLevel++;
+             }
+ 
+             var filterBlock = handlers.FirstOrDefault(h => h.FilterStart == instruction.Offset);
+@@ -195,13 +195,13 @@ namespace Pose.IL
+                 {
+                     // Finally blocks are always the last handler
+                     ilGenerator.EndExceptionBlock();
+-                    m_exceptionBlockLevel--;
++                    _exceptionBlockLevel--;
+                 }
+                 else if (handler.HandlerEnd == handlers.Where(h => h.TryStart == handler.TryStart && h.TryEnd == handler.TryEnd).Max(h => h.HandlerEnd))
+                 {
+                     // We're dealing with the last catch block
+                     ilGenerator.EndExceptionBlock();
+-                    m_exceptionBlockLevel--;
++                    _exceptionBlockLevel--;
+                 }
+             }
+ 
+@@ -230,13 +230,13 @@ namespace Pose.IL
+ 
+         private void EmitThisPointerAccessForBoxedValueType(ILGenerator ilGenerator)
+         {
+-            ilGenerator.Emit(OpCodes.Call, typeof(Unsafe).GetMethod("Unbox").MakeGenericMethod(m_method.DeclaringType));
++            ilGenerator.Emit(OpCodes.Call, typeof(Unsafe).GetMethod("Unbox").MakeGenericMethod(_method.DeclaringType));
+         }
+ 
+         private void EmitILForInlineNone(ILGenerator ilGenerator, Instruction instruction)
+         {
+             ilGenerator.Emit(instruction.OpCode);
+-            if (m_isInterfaceDispatch && m_owningType.IsValueType && instruction.OpCode == OpCodes.Ldarg_0)
++            if (_isInterfaceDispatch && _owningType.IsValueType && instruction.OpCode == OpCodes.Ldarg_0)
+             {
+                 EmitThisPointerAccessForBoxedValueType(ilGenerator);
+             }
+@@ -266,7 +266,8 @@ namespace Pose.IL
+             => ilGenerator.Emit(instruction.OpCode, (string)instruction.Operand);
+ 
+         private void EmitILForInlineBrTarget(ILGenerator ilGenerator,
+-            Instruction instruction, Dictionary<int, Label> targetInstructions)
++            Instruction instruction,
++            Dictionary<int, Label> targetInstructions)
+         {
+             Label targetLabel = targetInstructions[(instruction.Operand as Instruction).Offset];
+ 
+@@ -290,13 +291,14 @@ namespace Pose.IL
+ 
+             // Check if 'Leave' opcode is being used in an exception block,
+             // only emit it if that's not the case
+-            if (opCode == OpCodes.Leave && m_exceptionBlockLevel > 0) return;
++            if (opCode == OpCodes.Leave && _exceptionBlockLevel > 0) return;
+ 
+             ilGenerator.Emit(opCode, targetLabel);
+         }
+ 
+         private void EmitILForInlineSwitch(ILGenerator ilGenerator,
+-            Instruction instruction, Dictionary<int, Label> targetInstructions)
++            Instruction instruction,
++            Dictionary<int, Label> targetInstructions)
+         {
+             Instruction[] switchInstructions = (Instruction[])instruction.Operand;
+             Label[] targetLabels = new Label[switchInstructions.Length];
+@@ -315,7 +317,7 @@ namespace Pose.IL
+             else
+             {
+                 index = ((ParameterInfo)instruction.Operand).Position;
+-                index += m_method.IsStatic ? 0 : 1;
++                index += _method.IsStatic ? 0 : 1;
+             }
+ 
+             if (instruction.OpCode.OperandType == OperandType.ShortInlineVar)
+@@ -323,7 +325,7 @@ namespace Pose.IL
+             else
+                 ilGenerator.Emit(instruction.OpCode, (ushort)index);
+ 
+-            if (m_isInterfaceDispatch && m_owningType.IsValueType && instruction.OpCode.Name.StartsWith("ldarg") && index == 0)
++            if (_isInterfaceDispatch && _owningType.IsValueType && instruction.OpCode.Name.StartsWith("ldarg") && index == 0)
+             {
+                 EmitThisPointerAccessForBoxedValueType(ilGenerator);
+             }
+@@ -333,7 +335,7 @@ namespace Pose.IL
+         {
+             if (instruction.OpCode == OpCodes.Constrained)
+             {
+-                m_constrainedType = typeInfo;
++                _constrainedType = typeInfo;
+                 return;
+             }
+ 
+@@ -392,10 +394,10 @@ namespace Pose.IL
+ 
+             if (instruction.OpCode == OpCodes.Callvirt)
+             {
+-                if (m_constrainedType != null)
++                if (_constrainedType != null)
+                 {
+-                    ilGenerator.Emit(OpCodes.Call, Stubs.GenerateStubForVirtualCall(methodInfo, m_constrainedType));
+-                    m_constrainedType = null;
++                    ilGenerator.Emit(OpCodes.Call, Stubs.GenerateStubForVirtualCall(methodInfo, _constrainedType));
++                    _constrainedType = null;
+                     return;
+                 }
+ 
+diff --git a/src/Pose/IL/Stubs.cs b/src/Pose/IL/Stubs.cs
+index 05de1c5..5a77b71 100644
+--- a/src/Pose/IL/Stubs.cs
++++ b/src/Pose/IL/Stubs.cs
+@@ -108,6 +108,7 @@ namespace Pose.IL
+             {
+                 ilGenerator.Emit(OpCodes.Ldarg, i);
+             }
++
+             ilGenerator.Emit(OpCodes.Ldloc_0);
+             ilGenerator.EmitCalli(OpCodes.Calli, CallingConventions.Standard, returnType, signatureParamTypes.ToArray(), null);
+ 
+@@ -132,7 +133,7 @@ namespace Pose.IL
+                 signatureParamTypes.ToArray(),
+                 StubHelper.GetOwningModule(),
+                 true);
+-            
++
+             ILGenerator ilGenerator = stub.GetILGenerator();
+ 
+             if ((actualMethod.GetMethodBody() == null && !actualMethod.IsAbstract) || StubHelper.IsIntrinsic(actualMethod))
+@@ -182,17 +183,15 @@ namespace Pose.IL
+                         ilGenerator.Emit(OpCodes.Ldind_Ref);
+                         signatureParamTypes[i] = constrainedType;
+                     }
+-                    else
++                    else if (actualMethod.DeclaringType != constrainedType)
+                     {
+-                        if (actualMethod.DeclaringType != constrainedType)
+-                        {
+-                            ilGenerator.Emit(OpCodes.Ldobj, constrainedType);
+-                            ilGenerator.Emit(OpCodes.Box, constrainedType);
+-                            signatureParamTypes[i] = actualMethod.DeclaringType;
+-                        }
++                        ilGenerator.Emit(OpCodes.Ldobj, constrainedType);
++                        ilGenerator.Emit(OpCodes.Box, constrainedType);
++                        signatureParamTypes[i] = actualMethod.DeclaringType;
+                     }
+                 }
+             }
++
+             ilGenerator.Emit(OpCodes.Ldloc_0);
+             ilGenerator.EmitCalli(OpCodes.Calli, CallingConventions.Standard, method.ReturnType, signatureParamTypes.ToArray(), null);
+ 
+@@ -267,6 +266,7 @@ namespace Pose.IL
+             {
+                 ilGenerator.Emit(OpCodes.Ldarg, i);
+             }
++
+             ilGenerator.Emit(OpCodes.Ldloc_1);
+             ilGenerator.EmitCalli(OpCodes.Calli, CallingConventions.Standard, method.ReturnType, signatureParamTypes.ToArray(), null);
+ 
+@@ -294,7 +294,7 @@ namespace Pose.IL
+                 signatureParamTypes.Skip(1).ToArray(),
+                 StubHelper.GetOwningModule(),
+                 true);
+-            
++
+             ILGenerator ilGenerator = stub.GetILGenerator();
+ 
+             if (constructor.GetMethodBody() == null || StubHelper.IsIntrinsic(constructor))
+@@ -352,6 +352,7 @@ namespace Pose.IL
+             {
+                 ilGenerator.Emit(OpCodes.Ldarg, i);
+             }
++
+             ilGenerator.Emit(OpCodes.Ldloc_0);
+             ilGenerator.EmitCalli(OpCodes.Calli, CallingConventions.Standard, typeof(void), signatureParamTypes.ToArray(), null);
+ 
+@@ -370,7 +371,7 @@ namespace Pose.IL
+                 Array.Empty<Type>(),
+                 StubHelper.GetOwningModule(),
+                 true);
+-            
++
+             ILGenerator ilGenerator = stub.GetILGenerator();
+ 
+             if (method.GetMethodBody() == null || StubHelper.IsIntrinsic(method))
+@@ -421,7 +422,7 @@ namespace Pose.IL
+                 new Type[] { method.DeclaringType.IsInterface ? typeof(object) : method.DeclaringType },
+                 StubHelper.GetOwningModule(),
+                 true);
+-            
++
+             ILGenerator ilGenerator = stub.GetILGenerator();
+ 
+             if ((method.GetMethodBody() == null && !method.IsAbstract) || StubHelper.IsIntrinsic(method))
+@@ -462,7 +463,7 @@ namespace Pose.IL
+ 
+             ilGenerator.MarkLabel(returnLabel);
+             ilGenerator.Emit(OpCodes.Ret);
+-            
++
+             return stub;
+         }
+     }
+diff --git a/src/Pose/PoseContext.cs b/src/Pose/PoseContext.cs
+index 7c3c6e7..d66a02e 100644
+--- a/src/Pose/PoseContext.cs
++++ b/src/Pose/PoseContext.cs
+@@ -9,8 +9,8 @@ namespace Pose
+ {
+     public static class PoseContext
+     {
+-        internal static Shim[] Shims { private set; get; }
+-        internal static Dictionary<MethodBase, DynamicMethod> StubCache { private set; get; }
++        internal static Shim[] Shims { get; private set; }
++        internal static Dictionary<MethodBase, DynamicMethod> StubCache { get; private set; }
+ 
+         public static void Isolate(Action entryPoint, params Shim[] shims)
+         {
+@@ -25,7 +25,7 @@ namespace Pose
+ 
+             Type delegateType = typeof(Action<>).MakeGenericType(entryPoint.Target.GetType());
+             MethodRewriter rewriter = MethodRewriter.CreateRewriter(entryPoint.Method, false);
+-            ((MethodInfo)(rewriter.Rewrite())).CreateDelegate(delegateType).DynamicInvoke(entryPoint.Target);
++            ((MethodInfo)rewriter.Rewrite()).CreateDelegate(delegateType).DynamicInvoke(entryPoint.Target);
+         }
+     }
+ }
+\ No newline at end of file
+diff --git a/src/Pose/Shim.cs b/src/Pose/Shim.cs
+index 670b299..f01b46e 100644
+--- a/src/Pose/Shim.cs
++++ b/src/Pose/Shim.cs
+@@ -1,78 +1,78 @@
+-﻿using System;
+-using System.Linq;
+-using System.Linq.Expressions;
+-using System.Reflection;
+-
+-using Pose.Helpers;
+-
+-namespace Pose
+-{
+-    public partial class Shim
+-    {
+-        private MethodBase _original;
+-        private Delegate _replacement;
+-        private Object _instance;
+-        private Type _type;
+-        private bool _setter;
+-
+-        internal MethodBase Original
+-        {
+-            get
+-            {
+-                return _original;
+-            }
+-        }
+-
+-        internal Delegate Replacement
+-        {
+-            get
+-            {
+-                return _replacement;
+-            }
+-        }
+-
+-        internal Object Instance
+-        {
+-            get
+-            {
+-                return _instance;
+-            }
+-        }
+-
+-        internal Type Type
+-        {
+-            get
+-            {
+-                return _type;
+-            }
+-        }
+-
+-        private Shim(MethodBase original, object instanceOrType)
+-        {
+-            _original = original;
+-            if (instanceOrType is Type type)
+-                _type = type;
+-            else
+-                _instance = instanceOrType;
+-        }
+-
+-        public static Shim Replace(Expression<Action> expression, bool setter = false)
+-            => ReplaceImpl(expression, setter);
+-
+-        public static Shim Replace<T>(Expression<Func<T>> expression, bool setter = false)
+-            => ReplaceImpl(expression, setter);
+-
+-        private static Shim ReplaceImpl<T>(Expression<T> expression, bool setter)
+-        {
+-            MethodBase methodBase = ShimHelper.GetMethodFromExpression(expression.Body, setter, out object instance);
+-            return new Shim(methodBase, instance) { _setter = setter };
+-        }
+-
+-        private Shim WithImpl(Delegate replacement)
+-        {
+-            _replacement = replacement;
+-            ShimHelper.ValidateReplacementMethodSignature(this._original, this._replacement.Method, _instance?.GetType() ?? _type, _setter);
+-            return this;
+-        }
+-    }
++﻿using System;
++using System.Linq;
++using System.Linq.Expressions;
++using System.Reflection;
++
++using Pose.Helpers;
++
++namespace Pose
++{
++    public partial class Shim
++    {
++        private MethodBase _original;
++        private Delegate _replacement;
++        private object _instance;
++        private Type _type;
++        private bool _setter;
++
++        internal MethodBase Original
++        {
++            get
++            {
++                return _original;
++            }
++        }
++
++        internal Delegate Replacement
++        {
++            get
++            {
++                return _replacement;
++            }
++        }
++
++        internal object Instance
++        {
++            get
++            {
++                return _instance;
++            }
++        }
++
++        internal Type Type
++        {
++            get
++            {
++                return _type;
++            }
++        }
++
++        private Shim(MethodBase original, object instanceOrType)
++        {
++            _original = original;
++            if (instanceOrType is Type type)
++                _type = type;
++            else
++                _instance = instanceOrType;
++        }
++
++        public static Shim Replace(Expression<Action> expression, bool setter = false)
++            => ReplaceImpl(expression, setter);
++
++        public static Shim Replace<T>(Expression<Func<T>> expression, bool setter = false)
++            => ReplaceImpl(expression, setter);
++
++        private static Shim ReplaceImpl<T>(Expression<T> expression, bool setter)
++        {
++            MethodBase methodBase = ShimHelper.GetMethodFromExpression(expression.Body, setter, out object instance);
++            return new Shim(methodBase, instance) { _setter = setter };
++        }
++
++        private Shim WithImpl(Delegate replacement)
++        {
++            _replacement = replacement;
++            ShimHelper.ValidateReplacementMethodSignature(this._original, this._replacement.Method, _instance?.GetType() ?? _type, _setter);
++            return this;
++        }
++    }
+ }
+\ No newline at end of file
+diff --git a/test/Pose.Tests/Helpers/ShimHelperTests.cs b/test/Pose.Tests/Helpers/ShimHelperTests.cs
+index 0243602..325b24b 100644
+--- a/test/Pose.Tests/Helpers/ShimHelperTests.cs
++++ b/test/Pose.Tests/Helpers/ShimHelperTests.cs
+@@ -19,10 +19,10 @@ namespace Pose.Tests
+             Expression<Func<DateTime>> expr1 = () => DateTime.MaxValue;
+ 
+             Assert.ThrowsException<NotImplementedException>(
+-                () => ShimHelper.GetMethodFromExpression(expr.Body, false, out Object instance));
++                () => ShimHelper.GetMethodFromExpression(expr.Body, false, out object instance));
+ 
+             Assert.ThrowsException<NotImplementedException>(
+-                () => ShimHelper.GetMethodFromExpression(expr1.Body, false, out Object instance));
++                () => ShimHelper.GetMethodFromExpression(expr1.Body, false, out object instance));
+         }
+ 
+         [TestMethod]
+@@ -32,7 +32,7 @@ namespace Pose.Tests
+             Expression<Func<string>> expr1 = () => ReadLine();
+ 
+             Assert.AreEqual<MethodBase>(typeof(DateTime).GetMethod("get_Now"),
+-                ShimHelper.GetMethodFromExpression(expr.Body, false, out Object instance));
++                ShimHelper.GetMethodFromExpression(expr.Body, false, out object instance));
+ 
+             Assert.AreEqual<MethodBase>(typeof(Console).GetMethod("ReadLine"),
+                 ShimHelper.GetMethodFromExpression(expr1.Body, false, out instance));
+@@ -41,7 +41,7 @@ namespace Pose.Tests
+         [TestMethod]
+         public void TestGetObjectInstanceFromExpressionValueType()
+         {
+-            DateTime dateTime = new DateTime();
++            DateTime dateTime = default(DateTime);
+             Expression<Func<DateTime>> expression = () => dateTime.AddDays(2);
+ 
+             Assert.ThrowsException<NotSupportedException>(
+diff --git a/test/Pose.Tests/Helpers/StubHelperTests.cs b/test/Pose.Tests/Helpers/StubHelperTests.cs
+index ab2ecf0..0ae425a 100644
+--- a/test/Pose.Tests/Helpers/StubHelperTests.cs
++++ b/test/Pose.Tests/Helpers/StubHelperTests.cs
+@@ -15,8 +15,8 @@ namespace Pose.Tests
+         public void TestGetMethodPointer()
+         {
+             MethodInfo methodInfo = typeof(Console).GetMethod("Clear");
+-            DynamicMethod dynamicMethod
+-                = new DynamicMethod("Method", typeof(void), Type.EmptyTypes);
++            DynamicMethod dynamicMethod =
++                new DynamicMethod("Method", typeof(void), Type.EmptyTypes);
+             ILGenerator ilGenerator = dynamicMethod.GetILGenerator();
+             ilGenerator.Emit(OpCodes.Ret);
+ 
+@@ -51,7 +51,7 @@ namespace Pose.Tests
+         {
+             StubHelperTests stubHelperTests = new StubHelperTests();
+             Action staticAction = new Action(() => { });
+-            Action<StubHelperTests> instanceAction = new Action<StubHelperTests>((@this) => { });
++            Action<StubHelperTests> instanceAction = new Action<StubHelperTests>(@this => { });
+ 
+             Shim shim = Shim.Replace(() => Console.Clear()).With(staticAction);
+             Shim shim1 = Shim.Replace(() => Is.A<StubHelperTests>().TestGetIndexOfMatchingShim()).With(instanceAction);
+diff --git a/test/Pose.Tests/IL/MethodDisassemblerTests.cs b/test/Pose.Tests/IL/MethodDisassemblerTests.cs
+index 82e83bb..2d9dec6 100644
+--- a/test/Pose.Tests/IL/MethodDisassemblerTests.cs
++++ b/test/Pose.Tests/IL/MethodDisassemblerTests.cs
+@@ -13,8 +13,8 @@ namespace Pose.Tests
+         [TestMethod]
+         public void TestGetILInstructions()
+         {
+-            MethodDisassembler methodDisassembler
+-                = new MethodDisassembler(typeof(Console).GetMethod("Clear"));
++            MethodDisassembler methodDisassembler =
++                new MethodDisassembler(typeof(Console).GetMethod("Clear"));
+             Assert.AreNotEqual(0, methodDisassembler.GetILInstructions().Count);
+         }
+     }
+diff --git a/test/Pose.Tests/ShimTests.cs b/test/Pose.Tests/ShimTests.cs
+index 04c7ea5..8b4b268 100644
+--- a/test/Pose.Tests/ShimTests.cs
++++ b/test/Pose.Tests/ShimTests.cs
+@@ -51,7 +51,7 @@ namespace Pose.Tests
+         {
+             ShimTests shimTests = new ShimTests();
+             Action action = new Action(() => { });
+-            Action<ShimTests> actionInstance = new Action<ShimTests>((s) => { });
++            Action<ShimTests> actionInstance = new Action<ShimTests>(s => { });
+ 
+             Shim shim = Shim.Replace(() => Console.WriteLine()).With(action);
+             Shim shim1 = Shim.Replace(() => shimTests.TestReplace()).With(actionInstance);
+@@ -81,8 +81,7 @@ namespace Pose.Tests
+             Assert.AreEqual(typeof(Thread).GetProperty(nameof(Thread.CurrentCulture), typeof(CultureInfo)).SetMethod, shim.Original);
+             Assert.IsNull(shim.Replacement);
+         }
+-        
+-        
++
+         [TestMethod]
+         [Ignore]
+         public void TestReplacePropertySetterAction()
+@@ -110,7 +109,9 @@ namespace Pose.Tests
+             {
+                 var oldCulture = Thread.CurrentThread.CurrentCulture;
+                 Thread.CurrentThread.CurrentCulture = oldCulture;
+-            }, getterShim, setterShim);
++            },
++                getterShim,
++                setterShim);
+ 
+             Assert.IsTrue(getterExecuted, "Getter not executed");
+             Assert.IsTrue(setterExecuted, "Setter not executed");
