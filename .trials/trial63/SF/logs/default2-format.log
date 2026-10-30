@@ -1,0 +1,26 @@
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net48, net8.0, netstandard2.0). net6.0, net9.0: no run of their own, the code compiles the same as for another framework of the same kind (the same '#if' symbols tested, files and settings).
+Checked net48 (run 1 of 3)
+Checked netstandard2.0 (run 2 of 3)
+Checked net8.0 (run 3 of 3)
+'dotnet format' had warnings loading the workspace in its net48 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+== net8.0 (3 project(s), 20 files with findings)
+== netstandard2.0 (1 project(s), 7 files with findings)
+Run 1: 20 files changed:
+  src/Serilog.Sinks.File/FileLoggerConfigurationExtensions.cs
+  src/Serilog.Sinks.File/Sinks/File/FileLifecycleHooks.cs
+  src/Serilog.Sinks.File/Sinks/File/FileSink.cs
+  src/Serilog.Sinks.File/Sinks/File/RollingFileSink.cs
+  src/Serilog.Sinks.File/Sinks/File/RollingLogFile.cs
+  src/Serilog.Sinks.File/Sinks/File/SharedFileSink.OSMutex.cs
+  src/Serilog.Sinks.File/Sinks/File/WriteCountingStream.cs
+  test/Serilog.Sinks.File.Tests/FileSinkTests.cs
+  test/Serilog.Sinks.File.Tests/RollingFileSinkTests.cs
+  test/Serilog.Sinks.File.Tests/Support/ArchiveOldLogsHook.cs
+  ... and 10 more
+Checked net48 (run 1 of 3)
+Checked netstandard2.0 (run 2 of 3)
+Checked net8.0 (run 3 of 3)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

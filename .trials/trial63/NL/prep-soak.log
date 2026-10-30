@@ -51,7 +51,8 @@ Conventions in the code (a convention needs 3 places or more: below 10 they must
   set      C# files' line endings: 53 of 53 LF -> set in .editorconfig (crlf)
   default  statements after a block's '}': 102 of 124 after a blank line -> warning
   too few  nested ifs BRO1149 would merge: 1 nested if -> default stays (warning)
-  default  neighbouring members: 480 of 488 with a blank line between -> warning
+  default  neighbouring members: 456 of 464 with a blank line between -> warning
+  default  neighbouring one-line members: 24 after a blank line -> false
   default  '//' comments in code: 228 of 228 with text at both ends -> warning
   default  types' and namespaces' '{': 122 of 122 right above the code -> warning
   default  doc comments below code: 105 of 105 after a blank line -> warning
@@ -72,8 +73,8 @@ Conventions in the code (a convention needs 3 places or more: below 10 they must
   default  spacing, call arguments: 1638 of 1638 'F(x)' -> 'F(x)'
   default  spacing, declared parameters: 214 of 214 'void F(int x)' -> 'void F(int x)'
 Summary:
-  Kept your style for 42 settings: wrote stylebro_private_field_naming, stylebro_blank_line_between_switch_sections,
-    csharp_preserve_single_line_statements, stylebro_keep_overloads_together; 38 were already StyleBro's default.
+  Kept your style for 43 settings: wrote stylebro_private_field_naming, stylebro_blank_line_between_switch_sections,
+    csharp_preserve_single_line_statements, stylebro_keep_overloads_together; 39 were already StyleBro's default.
   Allowed both forms for 1 setting because your code mixes them: csharp_prefer_braces = when_multiline (one-line
     if/else/loop/using/lock bodies).
   Turned 10 rules off because your code mixes both forms: BRO1520 (operators where a line wraps),

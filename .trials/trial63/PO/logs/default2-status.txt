@@ -1,0 +1,19 @@
+ A Directory.Build.props
+ M src/Pose/Delegates/ActionRef.cs
+ M src/Pose/Delegates/FuncRef.cs
+ M src/Pose/Exceptions/InvalidShimSignatureException.cs
+ M src/Pose/Extensions/DictionaryExtensions.cs
+ M src/Pose/Helpers/ShimHelper.cs
+ M src/Pose/Helpers/StubHelper.cs
+ M src/Pose/IL/DebugHelpers/BrowsableDynamicMethod.cs
+ M src/Pose/IL/DebugHelpers/DynamicMethodBody.cs
+ M src/Pose/IL/DebugHelpers/DynamicModule.cs
+ M src/Pose/IL/MethodRewriter.cs
+ M src/Pose/IL/Stubs.cs
+ M src/Pose/PoseContext.cs
+ M src/Pose/Shim.cs
+ M test/Pose.Tests/Helpers/ShimHelperTests.cs
+ M test/Pose.Tests/Helpers/StubHelperTests.cs
+ M test/Pose.Tests/IL/MethodDisassemblerTests.cs
+ M test/Pose.Tests/ShimTests.cs
+?? .editorconfig

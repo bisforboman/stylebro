@@ -43,7 +43,8 @@ Conventions in the code (a convention needs 3 places or more: below 10 they must
   kept     C# files' line endings: 26 of 27 LF -> lf
   default  statements after a block's '}': 41 of 46 after a blank line -> warning
   too few  nested ifs BRO1149 would merge: 2 nested ifs -> default stays (warning)
-  default  neighbouring members: 133 of 136 with a blank line between -> warning
+  default  neighbouring members: 111 of 114 with a blank line between -> warning
+  default  neighbouring one-line members: 22 after a blank line -> false
   default  '//' comments in code: 38 of 38 with text at both ends -> warning
   default  types' and namespaces' '{': 51 of 51 right above the code -> warning
   default  '//' comments above code: 38 of 38 right above the code -> warning
@@ -59,11 +60,11 @@ Conventions in the code (a convention needs 3 places or more: below 10 they must
   default  spacing, declared parameters: 101 of 101 'void F(int x)' -> 'void F(int x)'
   note     your code looks like the Microsoft style (dotnet/runtime's: '_' fields, 's_' statics, no 'this.'): try 'bro init --style microsoft' (https://bisforboman.github.io/stylebro/styles/)
 Summary:
-  Kept your style for 38 settings: wrote stylebro_private_field_naming, stylebro_allow_single_line_jump_statements,
+  Kept your style for 39 settings: wrote stylebro_private_field_naming, stylebro_allow_single_line_jump_statements,
     stylebro_arrow_placement_when_wrapping, stylebro_null_check_style, stylebro_constructor_initializer_placement,
     stylebro_blank_line_between_switch_sections, csharp_preserve_single_line_statements,
     stylebro_private_mutable_static_field_naming, stylebro_allow_empty_single_line_blocks,
-    end_of_line; 28 were already StyleBro's default.
+    end_of_line; 29 were already StyleBro's default.
   Allowed both forms for 2 settings because your code mixes them: csharp_prefer_braces = when_multiline (one-line
     if/else/loop/using/lock bodies), dotnet_sort_system_directives_first not set (using directives).
   Turned 4 rules off because your code mixes both forms: BRO1520 (operators where a line wraps), BRO1107 (split lists),

@@ -1,0 +1,13 @@
+  Determining projects to restore...
+  Restored /home/user/w63/PO/default2/src/Pose/Pose.csproj (in 487 ms).
+  Restored /home/user/w63/PO/default2/test/Pose.Tests/Pose.Tests.csproj (in 526 ms).
+  Pose -> /home/user/w63/PO/default2/src/Pose/bin/Release/netstandard2.1/Pose.dll
+  Pose.Tests -> /home/user/w63/PO/default2/test/Pose.Tests/bin/Release/netcoreapp3.1/Pose.Tests.dll
+Test run for /home/user/w63/PO/default2/test/Pose.Tests/bin/Release/netcoreapp3.1/Pose.Tests.dll (.NETCoreApp,Version=v3.1)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+  Skipped TestReplacePropertySetterAction
+
+Passed!  - Failed:     0, Passed:    26, Skipped:     1, Total:    27, Duration: 116 ms - Pose.Tests.dll (netcoreapp3.1)

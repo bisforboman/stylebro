@@ -49,7 +49,8 @@ Conventions in the code (a convention needs 3 places or more: below 10 they must
   kept     C# files' line endings: 94 of 94 LF -> lf
   off      statements after a block's '}': 252 after a blank line, 152 right below the '}' -> BRO1519 is off
   off      nested ifs BRO1149 would merge: 4 nested -> BRO1149 is off
-  default  neighbouring members: 838 of 1022 with a blank line between -> warning
+  default  neighbouring members: 768 of 819 with a blank line between -> warning
+  kept     neighbouring one-line members: 133 of 203 next to each other -> true (3 are enough)
   default  '//' comments in code: 215 of 219 with text at both ends -> warning
   default  types' and namespaces' '{': 211 of 220 right above the code -> warning
   default  doc comments below code: 23 of 23 after a blank line -> warning
@@ -71,10 +72,10 @@ Conventions in the code (a convention needs 3 places or more: below 10 they must
   default  spacing, call arguments: 2629 of 2630 'F(x)' -> 'F(x)'
   default  spacing, declared parameters: 725 of 725 'void F(int x)' -> 'void F(int x)'
 Summary:
-  Kept your style for 34 settings: wrote stylebro_allow_single_line_jump_statements,
+  Kept your style for 35 settings: wrote stylebro_allow_single_line_jump_statements,
     stylebro_arrow_placement_when_wrapping, stylebro_empty_string_style, stylebro_null_check_style,
     stylebro_constraint_placement, csharp_preserve_single_line_statements, end_of_line,
-    stylebro_tuple_element_name_casing; 26 were already StyleBro's default.
+    stylebro_allow_adjacent_single_line_members, stylebro_tuple_element_name_casing; 26 were already StyleBro's default.
   Allowed both forms for 2 settings because your code mixes them: csharp_prefer_braces = when_multiline (one-line
     if/else/loop/using/lock bodies), stylebro_allow_empty_single_line_blocks = true (empty blocks ('{ }')).
   Turned 12 rules off because your code mixes both forms: BRO1520 (operators where a line wraps),

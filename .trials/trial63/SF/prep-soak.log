@@ -40,7 +40,8 @@ Conventions in the code (a convention needs 3 places or more: below 10 they must
   kept     C# files' line endings: 46 of 46 LF -> lf
   default  statements after a block's '}': 46 of 49 after a blank line -> warning
   too few  nested ifs BRO1149 would merge: 2 nested ifs -> default stays (warning)
-  default  neighbouring members: 174 of 175 with a blank line between -> warning
+  default  neighbouring members: 172 of 172 with a blank line between -> warning
+  mixed    neighbouring one-line members: 2 after a blank line, 1 next to each other -> default stays (false)
   default  '//' comments in code: 41 of 41 with text at both ends -> warning
   default  types' and namespaces' '{': 44 of 44 right above the code -> warning
   default  doc comments below code: 32 of 32 after a blank line -> warning
