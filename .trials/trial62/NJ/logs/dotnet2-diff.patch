@@ -1,0 +1,1746 @@
+diff --git a/src/Ninject/Activation/Pipeline.cs b/src/Ninject/Activation/Pipeline.cs
+index 6c26c7e..35adb4f 100644
+--- a/src/Ninject/Activation/Pipeline.cs
++++ b/src/Ninject/Activation/Pipeline.cs
+@@ -1,108 +1,108 @@
+-// -------------------------------------------------------------------------------------------------
+-// <copyright file="Pipeline.cs" company="Ninject Project Contributors">
+-//   Copyright (c) 2007-2010 Enkari, Ltd. All rights reserved.
+-//   Copyright (c) 2010-2017 Ninject Project Contributors. All rights reserved.
+-//
+-//   Dual-licensed under the Apache License, Version 2.0, and the Microsoft Public License (Ms-PL).
+-//   You may not use this file except in compliance with one of the Licenses.
+-//   You may obtain a copy of the License at
+-//
+-//       http://www.apache.org/licenses/LICENSE-2.0
+-//   or
+-//       http://www.microsoft.com/opensource/licenses.mspx
+-//
+-//   Unless required by applicable law or agreed to in writing, software
+-//   distributed under the License is distributed on an "AS IS" BASIS,
+-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-//   See the License for the specific language governing permissions and
+-//   limitations under the License.
+-// </copyright>
+-// -------------------------------------------------------------------------------------------------
+-
+-namespace Ninject.Activation
+-{
+-    using System;
+-    using System.Collections.Generic;
+-    using System.Linq;
+-
+-    using Ninject.Activation.Caching;
+-    using Ninject.Activation.Strategies;
+-    using Ninject.Components;
+-    using Ninject.Infrastructure;
+-
+-    /// <summary>
+-    /// Drives the activation (injection, etc.) of an instance.
+-    /// </summary>
+-    public class Pipeline : NinjectComponent, IPipeline
+-    {
+-        /// <summary>
+-        /// The activation cache.
+-        /// </summary>
+-        private readonly IActivationCache activationCache;
+-
+-        /// <summary>
+-        /// The strategies that contribute to the activation and deactivation processes.
+-        /// </summary>
+-        private readonly List<IActivationStrategy> strategies;
+-
+-        /// <summary>
+-        /// Initializes a new instance of the <see cref="Pipeline"/> class.
+-        /// </summary>
+-        /// <param name="strategies">The strategies to execute during activation and deactivation.</param>
+-        /// <param name="activationCache">The activation cache.</param>
+-        /// <exception cref="ArgumentNullException"><paramref name="strategies"/> is <see langword="null"/>.</exception>
+-        /// <exception cref="ArgumentNullException"><paramref name="activationCache"/> is <see langword="null"/>.</exception>
+-        public Pipeline(IEnumerable<IActivationStrategy> strategies, IActivationCache activationCache)
+-        {
+-            Ensure.ArgumentNotNull(strategies, nameof(strategies));
+-            Ensure.ArgumentNotNull(activationCache, nameof(activationCache));
+-
+-            this.strategies = strategies.ToList();
+-            this.activationCache = activationCache;
+-        }
+-
+-        /// <summary>
+-        /// Gets the strategies that contribute to the activation and deactivation processes.
+-        /// </summary>
+-        public IList<IActivationStrategy> Strategies
+-        {
+-            get { return this.strategies; }
+-        }
+-
+-        /// <summary>
+-        /// Activates the instance in the specified context.
+-        /// </summary>
+-        /// <param name="context">The context.</param>
+-        /// <param name="reference">The instance reference.</param>
+-        /// <exception cref="ArgumentNullException"><paramref name="context"/> is <see langword="null"/>.</exception>
+-        /// <exception cref="ArgumentNullException"><paramref name="reference"/> is <see langword="null"/>.</exception>
+-        public void Activate(IContext context, InstanceReference reference)
+-        {
+-            Ensure.ArgumentNotNull(context, nameof(context));
+-            Ensure.ArgumentNotNull(reference, nameof(reference));
+-
+-            if (!this.activationCache.IsActivated(reference.Instance))
+-            {
+-                this.strategies.ForEach(s => s.Activate(context, reference));
+-            }
+-        }
+-
+-        /// <summary>
+-        /// Deactivates the instance in the specified context.
+-        /// </summary>
+-        /// <param name="context">The context.</param>
+-        /// <param name="reference">The instance reference.</param>
+-        /// <exception cref="ArgumentNullException"><paramref name="context"/> is <see langword="null"/>.</exception>
+-        /// <exception cref="ArgumentNullException"><paramref name="reference"/> is <see langword="null"/>.</exception>
+-        public void Deactivate(IContext context, InstanceReference reference)
+-        {
+-            Ensure.ArgumentNotNull(context, nameof(context));
+-            Ensure.ArgumentNotNull(reference, nameof(reference));
+-
+-            if (!this.activationCache.IsDeactivated(reference.Instance))
+-            {
+-                this.strategies.ForEach(s => s.Deactivate(context, reference));
+-            }
+-        }
+-    }
++// -------------------------------------------------------------------------------------------------
++// <copyright file="Pipeline.cs" company="Ninject Project Contributors">
++//   Copyright (c) 2007-2010 Enkari, Ltd. All rights reserved.
++//   Copyright (c) 2010-2017 Ninject Project Contributors. All rights reserved.
++//
++//   Dual-licensed under the Apache License, Version 2.0, and the Microsoft Public License (Ms-PL).
++//   You may not use this file except in compliance with one of the Licenses.
++//   You may obtain a copy of the License at
++//
++//       http://www.apache.org/licenses/LICENSE-2.0
++//   or
++//       http://www.microsoft.com/opensource/licenses.mspx
++//
++//   Unless required by applicable law or agreed to in writing, software
++//   distributed under the License is distributed on an "AS IS" BASIS,
++//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++//   See the License for the specific language governing permissions and
++//   limitations under the License.
++// </copyright>
++// -------------------------------------------------------------------------------------------------
++
++namespace Ninject.Activation
++{
++    using System;
++    using System.Collections.Generic;
++    using System.Linq;
++
++    using Ninject.Activation.Caching;
++    using Ninject.Activation.Strategies;
++    using Ninject.Components;
++    using Ninject.Infrastructure;
++
++    /// <summary>
++    /// Drives the activation (injection, etc.) of an instance.
++    /// </summary>
++    public class Pipeline : NinjectComponent, IPipeline
++    {
++        /// <summary>
++        /// The activation cache.
++        /// </summary>
++        private readonly IActivationCache activationCache;
++
++        /// <summary>
++        /// The strategies that contribute to the activation and deactivation processes.
++        /// </summary>
++        private readonly List<IActivationStrategy> strategies;
++
++        /// <summary>
++        /// Initializes a new instance of the <see cref="Pipeline"/> class.
++        /// </summary>
++        /// <param name="strategies">The strategies to execute during activation and deactivation.</param>
++        /// <param name="activationCache">The activation cache.</param>
++        /// <exception cref="ArgumentNullException"><paramref name="strategies"/> is <see langword="null"/>.</exception>
++        /// <exception cref="ArgumentNullException"><paramref name="activationCache"/> is <see langword="null"/>.</exception>
++        public Pipeline(IEnumerable<IActivationStrategy> strategies, IActivationCache activationCache)
++        {
++            Ensure.ArgumentNotNull(strategies, nameof(strategies));
++            Ensure.ArgumentNotNull(activationCache, nameof(activationCache));
++
++            this.strategies = strategies.ToList();
++            this.activationCache = activationCache;
++        }
++
++        /// <summary>
++        /// Gets the strategies that contribute to the activation and deactivation processes.
++        /// </summary>
++        public IList<IActivationStrategy> Strategies
++        {
++            get { return this.strategies; }
++        }
++
++        /// <summary>
++        /// Activates the instance in the specified context.
++        /// </summary>
++        /// <param name="context">The context.</param>
++        /// <param name="reference">The instance reference.</param>
++        /// <exception cref="ArgumentNullException"><paramref name="context"/> is <see langword="null"/>.</exception>
++        /// <exception cref="ArgumentNullException"><paramref name="reference"/> is <see langword="null"/>.</exception>
++        public void Activate(IContext context, InstanceReference reference)
++        {
++            Ensure.ArgumentNotNull(context, nameof(context));
++            Ensure.ArgumentNotNull(reference, nameof(reference));
++
++            if (!this.activationCache.IsActivated(reference.Instance))
++            {
++                this.strategies.ForEach(s => s.Activate(context, reference));
++            }
++        }
++
++        /// <summary>
++        /// Deactivates the instance in the specified context.
++        /// </summary>
++        /// <param name="context">The context.</param>
++        /// <param name="reference">The instance reference.</param>
++        /// <exception cref="ArgumentNullException"><paramref name="context"/> is <see langword="null"/>.</exception>
++        /// <exception cref="ArgumentNullException"><paramref name="reference"/> is <see langword="null"/>.</exception>
++        public void Deactivate(IContext context, InstanceReference reference)
++        {
++            Ensure.ArgumentNotNull(context, nameof(context));
++            Ensure.ArgumentNotNull(reference, nameof(reference));
++
++            if (!this.activationCache.IsDeactivated(reference.Instance))
++            {
++                this.strategies.ForEach(s => s.Deactivate(context, reference));
++            }
++        }
++    }
+ }
+\ No newline at end of file
+diff --git a/src/Ninject/Infrastructure/Language/ExtensionsForType.cs b/src/Ninject/Infrastructure/Language/ExtensionsForType.cs
+index f8479f1..38bff2b 100644
+--- a/src/Ninject/Infrastructure/Language/ExtensionsForType.cs
++++ b/src/Ninject/Infrastructure/Language/ExtensionsForType.cs
+@@ -34,14 +34,14 @@ namespace Ninject.Infrastructure.Language
+         /// </summary>
+         /// <param name="type">The type.</param>
+         /// <returns>An enumerable containing the given type and all its base types.</returns>
+-         public static IEnumerable<Type> GetAllBaseTypes(this Type type)
+-         {
+-             while (type != null)
+-             {
+-                 yield return type;
++        public static IEnumerable<Type> GetAllBaseTypes(this Type type)
++        {
++            while (type != null)
++            {
++                yield return type;
+ 
+-                 type = type.BaseType;
+-             }
+-         }
++                type = type.BaseType;
++            }
++        }
+     }
+ }
+\ No newline at end of file
+diff --git a/src/Ninject/Ninject.csproj b/src/Ninject/Ninject.csproj
+index 20beb71..f2f6b36 100644
+--- a/src/Ninject/Ninject.csproj
++++ b/src/Ninject/Ninject.csproj
+@@ -48,7 +48,7 @@
+       <PrivateAssets>all</PrivateAssets>
+       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+     </PackageReference>
+-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial62.4">
+       <PrivateAssets>all</PrivateAssets>
+       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+     </PackageReference>
+diff --git a/src/Ninject/Planning/Directives/ConstructorInjectionDirective.cs b/src/Ninject/Planning/Directives/ConstructorInjectionDirective.cs
+index 0d56679..6c47cc6 100644
+--- a/src/Ninject/Planning/Directives/ConstructorInjectionDirective.cs
++++ b/src/Ninject/Planning/Directives/ConstructorInjectionDirective.cs
+@@ -1,64 +1,64 @@
+-// -------------------------------------------------------------------------------------------------
+-// <copyright file="ConstructorInjectionDirective.cs" company="Ninject Project Contributors">
+-//   Copyright (c) 2007-2010 Enkari, Ltd. All rights reserved.
+-//   Copyright (c) 2010-2017 Ninject Project Contributors. All rights reserved.
+-//
+-//   Dual-licensed under the Apache License, Version 2.0, and the Microsoft Public License (Ms-PL).
+-//   You may not use this file except in compliance with one of the Licenses.
+-//   You may obtain a copy of the License at
+-//
+-//       http://www.apache.org/licenses/LICENSE-2.0
+-//   or
+-//       http://www.microsoft.com/opensource/licenses.mspx
+-//
+-//   Unless required by applicable law or agreed to in writing, software
+-//   distributed under the License is distributed on an "AS IS" BASIS,
+-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-//   See the License for the specific language governing permissions and
+-//   limitations under the License.
+-// </copyright>
+-// -------------------------------------------------------------------------------------------------
+-
+-namespace Ninject.Planning.Directives
+-{
+-    using System;
+-    using System.Reflection;
+-
+-    using Ninject.Injection;
+-
+-    /// <summary>
+-    /// Describes the injection of a constructor.
+-    /// </summary>
+-    public class ConstructorInjectionDirective : MethodInjectionDirectiveBase<ConstructorInfo, ConstructorInjector>
+-    {
+-        /// <summary>
+-        /// Initializes a new instance of the <see cref="ConstructorInjectionDirective"/> class.
+-        /// </summary>
+-        /// <param name="constructor">The constructor described by the directive.</param>
+-        /// <param name="injector">The injector that will be triggered.</param>
+-        /// <exception cref="ArgumentNullException"><paramref name="constructor"/> is <see langword="null"/>.</exception>
+-        /// <exception cref="ArgumentNullException"><paramref name="injector"/> is <see langword="null"/>.</exception>
+-        public ConstructorInjectionDirective(ConstructorInfo constructor, ConstructorInjector injector)
+-            : base(constructor, injector)
+-        {
+-            this.Constructor = constructor;
+-        }
+-
+-        /// <summary>
+-        /// Gets or sets the base .ctor definition.
+-        /// </summary>
+-        public ConstructorInfo Constructor { get; set; }
+-
+-        /// <summary>
+-        /// Gets or sets a value indicating whether this constructor has an inject attribute.
+-        /// </summary>
+-        /// <value><c>true</c> if this constructor has an inject attribute; otherwise, <c>false</c>.</value>
+-        public bool HasInjectAttribute { get; set; }
+-
+-        /// <summary>
+-        /// Gets or sets a value indicating whether this contructor has an obsolete attribute.
+-        /// </summary>
+-        /// <value><c>true</c> if this constructor has an obsolete attribute; otherwise, <c>false</c>.</value>
+-        public bool HasObsoleteAttribute { get; set; }
+-    }
++// -------------------------------------------------------------------------------------------------
++// <copyright file="ConstructorInjectionDirective.cs" company="Ninject Project Contributors">
++//   Copyright (c) 2007-2010 Enkari, Ltd. All rights reserved.
++//   Copyright (c) 2010-2017 Ninject Project Contributors. All rights reserved.
++//
++//   Dual-licensed under the Apache License, Version 2.0, and the Microsoft Public License (Ms-PL).
++//   You may not use this file except in compliance with one of the Licenses.
++//   You may obtain a copy of the License at
++//
++//       http://www.apache.org/licenses/LICENSE-2.0
++//   or
++//       http://www.microsoft.com/opensource/licenses.mspx
++//
++//   Unless required by applicable law or agreed to in writing, software
++//   distributed under the License is distributed on an "AS IS" BASIS,
++//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++//   See the License for the specific language governing permissions and
++//   limitations under the License.
++// </copyright>
++// -------------------------------------------------------------------------------------------------
++
++namespace Ninject.Planning.Directives
++{
++    using System;
++    using System.Reflection;
++
++    using Ninject.Injection;
++
++    /// <summary>
++    /// Describes the injection of a constructor.
++    /// </summary>
++    public class ConstructorInjectionDirective : MethodInjectionDirectiveBase<ConstructorInfo, ConstructorInjector>
++    {
++        /// <summary>
++        /// Initializes a new instance of the <see cref="ConstructorInjectionDirective"/> class.
++        /// </summary>
++        /// <param name="constructor">The constructor described by the directive.</param>
++        /// <param name="injector">The injector that will be triggered.</param>
++        /// <exception cref="ArgumentNullException"><paramref name="constructor"/> is <see langword="null"/>.</exception>
++        /// <exception cref="ArgumentNullException"><paramref name="injector"/> is <see langword="null"/>.</exception>
++        public ConstructorInjectionDirective(ConstructorInfo constructor, ConstructorInjector injector)
++            : base(constructor, injector)
++        {
++            this.Constructor = constructor;
++        }
++
++        /// <summary>
++        /// Gets or sets the base .ctor definition.
++        /// </summary>
++        public ConstructorInfo Constructor { get; set; }
++
++        /// <summary>
++        /// Gets or sets a value indicating whether this constructor has an inject attribute.
++        /// </summary>
++        /// <value><c>true</c> if this constructor has an inject attribute; otherwise, <c>false</c>.</value>
++        public bool HasInjectAttribute { get; set; }
++
++        /// <summary>
++        /// Gets or sets a value indicating whether this contructor has an obsolete attribute.
++        /// </summary>
++        /// <value><c>true</c> if this constructor has an obsolete attribute; otherwise, <c>false</c>.</value>
++        public bool HasObsoleteAttribute { get; set; }
++    }
+ }
+\ No newline at end of file
+diff --git a/src/Ninject/Planning/IPlan.cs b/src/Ninject/Planning/IPlan.cs
+index ebf372e..dbf6937 100644
+--- a/src/Ninject/Planning/IPlan.cs
++++ b/src/Ninject/Planning/IPlan.cs
+@@ -1,82 +1,82 @@
+-// -------------------------------------------------------------------------------------------------
+-// <copyright file="IPlan.cs" company="Ninject Project Contributors">
+-//   Copyright (c) 2007-2010 Enkari, Ltd. All rights reserved.
+-//   Copyright (c) 2010-2017 Ninject Project Contributors. All rights reserved.
+-//
+-//   Dual-licensed under the Apache License, Version 2.0, and the Microsoft Public License (Ms-PL).
+-//   You may not use this file except in compliance with one of the Licenses.
+-//   You may obtain a copy of the License at
+-//
+-//       http://www.apache.org/licenses/LICENSE-2.0
+-//   or
+-//       http://www.microsoft.com/opensource/licenses.mspx
+-//
+-//   Unless required by applicable law or agreed to in writing, software
+-//   distributed under the License is distributed on an "AS IS" BASIS,
+-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-//   See the License for the specific language governing permissions and
+-//   limitations under the License.
+-// </copyright>
+-// -------------------------------------------------------------------------------------------------
+-
+-namespace Ninject.Planning
+-{
+-    using System;
+-    using System.Collections.Generic;
+-
+-    using Ninject.Planning.Directives;
+-
+-    /// <summary>
+-    /// Describes the means by which a type should be activated.
+-    /// </summary>
+-    public interface IPlan
+-    {
+-        /// <summary>
+-        /// Gets the type that the plan describes.
+-        /// </summary>
+-        Type Type { get; }
+-
+-        /// <summary>
+-        /// Gets the constructor injection directives.
+-        /// </summary>
+-        /// <value>The constructor injection directives.</value>
+-        IList<ConstructorInjectionDirective> ConstructorInjectionDirectives { get; }
+-
+-        /// <summary>
+-        /// Adds the specified directive to the plan.
+-        /// </summary>
+-        /// <param name="directive">The directive.</param>
+-        /// <exception cref="ArgumentNullException"><paramref name="directive"/> is <see langword="null"/>.</exception>
+-        void Add(IDirective directive);
+-
+-        /// <summary>
+-        /// Determines whether the plan contains one or more directives of the specified type.
+-        /// </summary>
+-        /// <typeparam name="TDirective">The type of directive.</typeparam>
+-        /// <returns>
+-        /// <see langword="true"/> if the plan has one or more directives of the type; otherwise, <see langword="false"/>.
+-        /// </returns>
+-        bool Has<TDirective>()
+-            where TDirective : IDirective;
+-
+-        /// <summary>
+-        /// Gets the first directive of the specified type from the plan.
+-        /// </summary>
+-        /// <typeparam name="TDirective">The type of directive.</typeparam>
+-        /// <returns>
+-        /// The first directive, or <see langword="null"/> if no matching directives exist.
+-        /// </returns>
+-        TDirective GetOne<TDirective>()
+-            where TDirective : IDirective;
+-
+-        /// <summary>
+-        /// Gets all directives of the specified type that exist in the plan.
+-        /// </summary>
+-        /// <typeparam name="TDirective">The type of directive.</typeparam>
+-        /// <returns>
+-        /// A series of directives of the specified type.
+-        /// </returns>
+-        IEnumerable<TDirective> GetAll<TDirective>()
+-            where TDirective : IDirective;
+-    }
++// -------------------------------------------------------------------------------------------------
++// <copyright file="IPlan.cs" company="Ninject Project Contributors">
++//   Copyright (c) 2007-2010 Enkari, Ltd. All rights reserved.
++//   Copyright (c) 2010-2017 Ninject Project Contributors. All rights reserved.
++//
++//   Dual-licensed under the Apache License, Version 2.0, and the Microsoft Public License (Ms-PL).
++//   You may not use this file except in compliance with one of the Licenses.
++//   You may obtain a copy of the License at
++//
++//       http://www.apache.org/licenses/LICENSE-2.0
++//   or
++//       http://www.microsoft.com/opensource/licenses.mspx
++//
++//   Unless required by applicable law or agreed to in writing, software
++//   distributed under the License is distributed on an "AS IS" BASIS,
++//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++//   See the License for the specific language governing permissions and
++//   limitations under the License.
++// </copyright>
++// -------------------------------------------------------------------------------------------------
++
++namespace Ninject.Planning
++{
++    using System;
++    using System.Collections.Generic;
++
++    using Ninject.Planning.Directives;
++
++    /// <summary>
++    /// Describes the means by which a type should be activated.
++    /// </summary>
++    public interface IPlan
++    {
++        /// <summary>
++        /// Gets the type that the plan describes.
++        /// </summary>
++        Type Type { get; }
++
++        /// <summary>
++        /// Gets the constructor injection directives.
++        /// </summary>
++        /// <value>The constructor injection directives.</value>
++        IList<ConstructorInjectionDirective> ConstructorInjectionDirectives { get; }
++
++        /// <summary>
++        /// Adds the specified directive to the plan.
++        /// </summary>
++        /// <param name="directive">The directive.</param>
++        /// <exception cref="ArgumentNullException"><paramref name="directive"/> is <see langword="null"/>.</exception>
++        void Add(IDirective directive);
++
++        /// <summary>
++        /// Determines whether the plan contains one or more directives of the specified type.
++        /// </summary>
++        /// <typeparam name="TDirective">The type of directive.</typeparam>
++        /// <returns>
++        /// <see langword="true"/> if the plan has one or more directives of the type; otherwise, <see langword="false"/>.
++        /// </returns>
++        bool Has<TDirective>()
++            where TDirective : IDirective;
++
++        /// <summary>
++        /// Gets the first directive of the specified type from the plan.
++        /// </summary>
++        /// <typeparam name="TDirective">The type of directive.</typeparam>
++        /// <returns>
++        /// The first directive, or <see langword="null"/> if no matching directives exist.
++        /// </returns>
++        TDirective GetOne<TDirective>()
++            where TDirective : IDirective;
++
++        /// <summary>
++        /// Gets all directives of the specified type that exist in the plan.
++        /// </summary>
++        /// <typeparam name="TDirective">The type of directive.</typeparam>
++        /// <returns>
++        /// A series of directives of the specified type.
++        /// </returns>
++        IEnumerable<TDirective> GetAll<TDirective>()
++            where TDirective : IDirective;
++    }
+ }
+\ No newline at end of file
+diff --git a/src/Ninject/Planning/Strategies/ConstructorReflectionStrategy.cs b/src/Ninject/Planning/Strategies/ConstructorReflectionStrategy.cs
+index ed532a8..dcf2781 100644
+--- a/src/Ninject/Planning/Strategies/ConstructorReflectionStrategy.cs
++++ b/src/Ninject/Planning/Strategies/ConstructorReflectionStrategy.cs
+@@ -1,95 +1,95 @@
+-// -------------------------------------------------------------------------------------------------
+-// <copyright file="ConstructorReflectionStrategy.cs" company="Ninject Project Contributors">
+-//   Copyright (c) 2007-2010 Enkari, Ltd. All rights reserved.
+-//   Copyright (c) 2010-2017 Ninject Project Contributors. All rights reserved.
+-//
+-//   Dual-licensed under the Apache License, Version 2.0, and the Microsoft Public License (Ms-PL).
+-//   You may not use this file except in compliance with one of the Licenses.
+-//   You may obtain a copy of the License at
+-//
+-//       http://www.apache.org/licenses/LICENSE-2.0
+-//   or
+-//       http://www.microsoft.com/opensource/licenses.mspx
+-//
+-//   Unless required by applicable law or agreed to in writing, software
+-//   distributed under the License is distributed on an "AS IS" BASIS,
+-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-//   See the License for the specific language governing permissions and
+-//   limitations under the License.
+-// </copyright>
+-// -------------------------------------------------------------------------------------------------
+-
+-namespace Ninject.Planning.Strategies
+-{
+-    using System;
+-    using System.Reflection;
+-
+-    using Ninject.Components;
+-    using Ninject.Infrastructure;
+-    using Ninject.Infrastructure.Language;
+-    using Ninject.Injection;
+-    using Ninject.Planning.Directives;
+-    using Ninject.Selection;
+-
+-    /// <summary>
+-    /// Adds a directive to plans indicating which constructor should be injected during activation.
+-    /// </summary>
+-    public class ConstructorReflectionStrategy : NinjectComponent, IPlanningStrategy
+-    {
+-        /// <summary>
+-        /// Initializes a new instance of the <see cref="ConstructorReflectionStrategy"/> class.
+-        /// </summary>
+-        /// <param name="selector">The selector component.</param>
+-        /// <param name="injectorFactory">The injector factory component.</param>
+-        /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
+-        /// <exception cref="ArgumentNullException"><paramref name="injectorFactory"/> is <see langword="null"/>.</exception>
+-        public ConstructorReflectionStrategy(ISelector selector, IInjectorFactory injectorFactory)
+-        {
+-            Ensure.ArgumentNotNull(selector, nameof(selector));
+-            Ensure.ArgumentNotNull(injectorFactory, nameof(injectorFactory));
+-
+-            this.Selector = selector;
+-            this.InjectorFactory = injectorFactory;
+-        }
+-
+-        /// <summary>
+-        /// Gets the selector component.
+-        /// </summary>
+-        public ISelector Selector { get; private set; }
+-
+-        /// <summary>
+-        /// Gets or sets the injector factory component.
+-        /// </summary>
+-        public IInjectorFactory InjectorFactory { get; set; }
+-
+-        /// <summary>
+-        /// Adds a <see cref="ConstructorInjectionDirective"/> to the plan for the constructor
+-        /// that should be injected.
+-        /// </summary>
+-        /// <param name="plan">The plan that is being generated.</param>
+-        /// <exception cref="ArgumentNullException"><paramref name="plan"/> is <see langword="null"/>.</exception>
+-        public void Execute(IPlan plan)
+-        {
+-            Ensure.ArgumentNotNull(plan, nameof(plan));
+-
+-            var constructors = this.Selector.SelectConstructorsForInjection(plan.Type);
+-            if (constructors == null)
+-            {
+-                return;
+-            }
+-
+-            foreach (ConstructorInfo constructor in constructors)
+-            {
+-                var hasInjectAttribute = constructor.HasAttribute(this.Settings.InjectAttribute);
+-                var hasObsoleteAttribute = constructor.HasAttribute(typeof(ObsoleteAttribute));
+-                var directive = new ConstructorInjectionDirective(constructor, this.InjectorFactory.Create(constructor))
+-                {
+-                    HasInjectAttribute = hasInjectAttribute,
+-                    HasObsoleteAttribute = hasObsoleteAttribute,
+-                };
+-
+-                plan.Add(directive);
+-            }
+-        }
+-    }
++// -------------------------------------------------------------------------------------------------
++// <copyright file="ConstructorReflectionStrategy.cs" company="Ninject Project Contributors">
++//   Copyright (c) 2007-2010 Enkari, Ltd. All rights reserved.
++//   Copyright (c) 2010-2017 Ninject Project Contributors. All rights reserved.
++//
++//   Dual-licensed under the Apache License, Version 2.0, and the Microsoft Public License (Ms-PL).
++//   You may not use this file except in compliance with one of the Licenses.
++//   You may obtain a copy of the License at
++//
++//       http://www.apache.org/licenses/LICENSE-2.0
++//   or
++//       http://www.microsoft.com/opensource/licenses.mspx
++//
++//   Unless required by applicable law or agreed to in writing, software
++//   distributed under the License is distributed on an "AS IS" BASIS,
++//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++//   See the License for the specific language governing permissions and
++//   limitations under the License.
++// </copyright>
++// -------------------------------------------------------------------------------------------------
++
++namespace Ninject.Planning.Strategies
++{
++    using System;
++    using System.Reflection;
++
++    using Ninject.Components;
++    using Ninject.Infrastructure;
++    using Ninject.Infrastructure.Language;
++    using Ninject.Injection;
++    using Ninject.Planning.Directives;
++    using Ninject.Selection;
++
++    /// <summary>
++    /// Adds a directive to plans indicating which constructor should be injected during activation.
++    /// </summary>
++    public class ConstructorReflectionStrategy : NinjectComponent, IPlanningStrategy
++    {
++        /// <summary>
++        /// Initializes a new instance of the <see cref="ConstructorReflectionStrategy"/> class.
++        /// </summary>
++        /// <param name="selector">The selector component.</param>
++        /// <param name="injectorFactory">The injector factory component.</param>
++        /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
++        /// <exception cref="ArgumentNullException"><paramref name="injectorFactory"/> is <see langword="null"/>.</exception>
++        public ConstructorReflectionStrategy(ISelector selector, IInjectorFactory injectorFactory)
++        {
++            Ensure.ArgumentNotNull(selector, nameof(selector));
++            Ensure.ArgumentNotNull(injectorFactory, nameof(injectorFactory));
++
++            this.Selector = selector;
++            this.InjectorFactory = injectorFactory;
++        }
++
++        /// <summary>
++        /// Gets the selector component.
++        /// </summary>
++        public ISelector Selector { get; private set; }
++
++        /// <summary>
++        /// Gets or sets the injector factory component.
++        /// </summary>
++        public IInjectorFactory InjectorFactory { get; set; }
++
++        /// <summary>
++        /// Adds a <see cref="ConstructorInjectionDirective"/> to the plan for the constructor
++        /// that should be injected.
++        /// </summary>
++        /// <param name="plan">The plan that is being generated.</param>
++        /// <exception cref="ArgumentNullException"><paramref name="plan"/> is <see langword="null"/>.</exception>
++        public void Execute(IPlan plan)
++        {
++            Ensure.ArgumentNotNull(plan, nameof(plan));
++
++            var constructors = this.Selector.SelectConstructorsForInjection(plan.Type);
++            if (constructors == null)
++            {
++                return;
++            }
++
++            foreach (ConstructorInfo constructor in constructors)
++            {
++                var hasInjectAttribute = constructor.HasAttribute(this.Settings.InjectAttribute);
++                var hasObsoleteAttribute = constructor.HasAttribute(typeof(ObsoleteAttribute));
++                var directive = new ConstructorInjectionDirective(constructor, this.InjectorFactory.Create(constructor))
++                {
++                    HasInjectAttribute = hasInjectAttribute,
++                    HasObsoleteAttribute = hasObsoleteAttribute,
++                };
++
++                plan.Add(directive);
++            }
++        }
++    }
+ }
+\ No newline at end of file
+diff --git a/src/Ninject/Syntax/ResolutionExtensions.cs b/src/Ninject/Syntax/ResolutionExtensions.cs
+index c875576..027a614 100644
+--- a/src/Ninject/Syntax/ResolutionExtensions.cs
++++ b/src/Ninject/Syntax/ResolutionExtensions.cs
+@@ -1,491 +1,491 @@
+-// -------------------------------------------------------------------------------------------------
+-// <copyright file="ResolutionExtensions.cs" company="Ninject Project Contributors">
+-//   Copyright (c) 2007-2010 Enkari, Ltd. All rights reserved.
+-//   Copyright (c) 2010-2017 Ninject Project Contributors. All rights reserved.
+-//
+-//   Dual-licensed under the Apache License, Version 2.0, and the Microsoft Public License (Ms-PL).
+-//   You may not use this file except in compliance with one of the Licenses.
+-//   You may obtain a copy of the License at
+-//
+-//       http://www.apache.org/licenses/LICENSE-2.0
+-//   or
+-//       http://www.microsoft.com/opensource/licenses.mspx
+-//
+-//   Unless required by applicable law or agreed to in writing, software
+-//   distributed under the License is distributed on an "AS IS" BASIS,
+-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-//   See the License for the specific language governing permissions and
+-//   limitations under the License.
+-// </copyright>
+-// -------------------------------------------------------------------------------------------------
+-
+-namespace Ninject
+-{
+-    using System;
+-    using System.Collections.Generic;
+-    using System.Linq;
+-
+-    using Ninject.Infrastructure;
+-    using Ninject.Parameters;
+-    using Ninject.Planning.Bindings;
+-    using Ninject.Syntax;
+-
+-    /// <summary>
+-    /// Extensions that enhance resolution of services.
+-    /// </summary>
+-    public static class ResolutionExtensions
+-    {
+-        /// <summary>
+-        /// Gets an instance of the specified service.
+-        /// </summary>
+-        /// <typeparam name="T">The service to resolve.</typeparam>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// An instance of the service.
+-        /// </returns>
+-        public static T Get<T>(this IResolutionRoot root, params IParameter[] parameters)
+-        {
+-            return (T)ResolveSingle(root, typeof(T), null, parameters, false, true);
+-        }
+-
+-        /// <summary>
+-        /// Gets an instance of the specified service by using the first binding with the specified name.
+-        /// </summary>
+-        /// <typeparam name="T">The service to resolve.</typeparam>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="name">The name of the binding.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// An instance of the service.
+-        /// </returns>
+-        public static T Get<T>(this IResolutionRoot root, string name, params IParameter[] parameters)
+-        {
+-            return (T)ResolveSingle(root, typeof(T), b => b.Name == name, parameters, false, true);
+-        }
+-
+-        /// <summary>
+-        /// Gets an instance of the specified service by using the first binding that matches the specified constraint.
+-        /// </summary>
+-        /// <typeparam name="T">The service to resolve.</typeparam>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="constraint">The constraint to apply to the binding.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// An instance of the service.
+-        /// </returns>
+-        public static T Get<T>(this IResolutionRoot root, Func<IBindingMetadata, bool> constraint, params IParameter[] parameters)
+-        {
+-            return (T)ResolveSingle(root, typeof(T), constraint, parameters, false, true);
+-        }
+-
+-        /// <summary>
+-        /// Tries to get an instance of the specified service.
+-        /// </summary>
+-        /// <typeparam name="T">The service to resolve.</typeparam>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// An instance of the service, or <see langword="null"/> if no implementation was available.
+-        /// </returns>
+-        public static T TryGet<T>(this IResolutionRoot root, params IParameter[] parameters)
+-        {
+-            return TryGet<T>(() => ResolveSingle(root, typeof(T), null, parameters, true, true));
+-        }
+-
+-        /// <summary>
+-        /// Tries to get an instance of the specified service by using the first binding with the specified name.
+-        /// </summary>
+-        /// <typeparam name="T">The service to resolve.</typeparam>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="name">The name of the binding.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// An instance of the service, or <see langword="null"/> if no implementation was available.
+-        /// </returns>
+-        public static T TryGet<T>(this IResolutionRoot root, string name, params IParameter[] parameters)
+-        {
+-            return TryGet<T>(() => ResolveSingle(root, typeof(T), b => b.Name == name, parameters, true, true));
+-        }
+-
+-        /// <summary>
+-        /// Tries to get an instance of the specified service by using the first binding that matches the specified constraint.
+-        /// </summary>
+-        /// <typeparam name="T">The service to resolve.</typeparam>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="constraint">The constraint to apply to the binding.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// An instance of the service, or <see langword="null"/> if no implementation was available.
+-        /// </returns>
+-        public static T TryGet<T>(this IResolutionRoot root, Func<IBindingMetadata, bool> constraint, params IParameter[] parameters)
+-        {
+-            return TryGet<T>(() => ResolveSingle(root, typeof(T), constraint, parameters, true, true));
+-        }
+-
+-        /// <summary>
+-        /// Tries to get an instance of the specified service.
+-        /// </summary>
+-        /// <typeparam name="T">The service to resolve.</typeparam>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// An instance of the service, or <see langword="null"/> if no implementation was available.
+-        /// </returns>
+-        public static T TryGetAndThrowOnInvalidBinding<T>(this IResolutionRoot root, params IParameter[] parameters)
+-        {
+-            return DoTryGetAndThrowOnInvalidBinding<T>(root, null, parameters);
+-        }
+-
+-        /// <summary>
+-        /// Tries to get an instance of the specified service by using the first binding with the specified name.
+-        /// </summary>
+-        /// <typeparam name="T">The service to resolve.</typeparam>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="name">The name of the binding.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// An instance of the service, or <see langword="null"/> if no implementation was available.
+-        /// </returns>
+-        public static T TryGetAndThrowOnInvalidBinding<T>(this IResolutionRoot root, string name, params IParameter[] parameters)
+-        {
+-            return DoTryGetAndThrowOnInvalidBinding<T>(root, b => b.Name == name, parameters);
+-        }
+-
+-        /// <summary>
+-        /// Tries to get an instance of the specified service by using the first binding that matches the specified constraint.
+-        /// </summary>
+-        /// <typeparam name="T">The service to resolve.</typeparam>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="constraint">The constraint to apply to the binding.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// An instance of the service, or <see langword="null"/> if no implementation was available.
+-        /// </returns>
+-        public static T TryGetAndThrowOnInvalidBinding<T>(this IResolutionRoot root, Func<IBindingMetadata, bool> constraint, params IParameter[] parameters)
+-        {
+-            return DoTryGetAndThrowOnInvalidBinding<T>(root, constraint, parameters);
+-        }
+-
+-        /// <summary>
+-        /// Gets all available instances of the specified service.
+-        /// </summary>
+-        /// <typeparam name="T">The service to resolve.</typeparam>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// A series of instances of the service.
+-        /// </returns>
+-        public static IEnumerable<T> GetAll<T>(this IResolutionRoot root, params IParameter[] parameters)
+-        {
+-            return GetResolutionIterator(root, typeof(T), null, parameters, true, false).Cast<T>();
+-        }
+-
+-        /// <summary>
+-        /// Gets all instances of the specified service using bindings registered with the specified name.
+-        /// </summary>
+-        /// <typeparam name="T">The service to resolve.</typeparam>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="name">The name of the binding.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// A series of instances of the service.
+-        /// </returns>
+-        public static IEnumerable<T> GetAll<T>(this IResolutionRoot root, string name, params IParameter[] parameters)
+-        {
+-            return GetResolutionIterator(root, typeof(T), b => b.Name == name, parameters, true, false).Cast<T>();
+-        }
+-
+-        /// <summary>
+-        /// Gets all instances of the specified service by using the bindings that match the specified constraint.
+-        /// </summary>
+-        /// <typeparam name="T">The service to resolve.</typeparam>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="constraint">The constraint to apply to the bindings.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// A series of instances of the service.
+-        /// </returns>
+-        public static IEnumerable<T> GetAll<T>(this IResolutionRoot root, Func<IBindingMetadata, bool> constraint, params IParameter[] parameters)
+-        {
+-            return GetResolutionIterator(root, typeof(T), constraint, parameters, true, false).Cast<T>();
+-        }
+-
+-        /// <summary>
+-        /// Gets an instance of the specified service.
+-        /// </summary>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="service">The service to resolve.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// An instance of the service.
+-        /// </returns>
+-        public static object Get(this IResolutionRoot root, Type service, params IParameter[] parameters)
+-        {
+-            return ResolveSingle(root, service, null, parameters, false, true);
+-        }
+-
+-        /// <summary>
+-        /// Gets an instance of the specified service by using the first binding with the specified name.
+-        /// </summary>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="service">The service to resolve.</param>
+-        /// <param name="name">The name of the binding.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// An instance of the service.
+-        /// </returns>
+-        public static object Get(this IResolutionRoot root, Type service, string name, params IParameter[] parameters)
+-        {
+-            return ResolveSingle(root, service, b => b.Name == name, parameters, false, true);
+-        }
+-
+-        /// <summary>
+-        /// Gets an instance of the specified service by using the first binding that matches the specified constraint.
+-        /// </summary>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="service">The service to resolve.</param>
+-        /// <param name="constraint">The constraint to apply to the binding.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// An instance of the service.
+-        /// </returns>
+-        public static object Get(this IResolutionRoot root, Type service, Func<IBindingMetadata, bool> constraint, params IParameter[] parameters)
+-        {
+-            return ResolveSingle(root, service, constraint, parameters, false, true);
+-        }
+-
+-        /// <summary>
+-        /// Tries to get an instance of the specified service.
+-        /// </summary>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="service">The service to resolve.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// An instance of the service, or <see langword="null"/> if no implementation was available.
+-        /// </returns>
+-        public static object TryGet(this IResolutionRoot root, Type service, params IParameter[] parameters)
+-        {
+-            return TryGet(() => ResolveSingle(root, service, null, parameters, true, true));
+-        }
+-
+-        /// <summary>
+-        /// Tries to get an instance of the specified service by using the first binding with the specified name.
+-        /// </summary>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="service">The service to resolve.</param>
+-        /// <param name="name">The name of the binding.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// An instance of the service, or <see langword="null"/> if no implementation was available.
+-        /// </returns>
+-        public static object TryGet(this IResolutionRoot root, Type service, string name, params IParameter[] parameters)
+-        {
+-            return TryGet(() => ResolveSingle(root, service, b => b.Name == name, parameters, true, true));
+-        }
+-
+-        /// <summary>
+-        /// Tries to get an instance of the specified service by using the first binding that matches the specified constraint.
+-        /// </summary>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="service">The service to resolve.</param>
+-        /// <param name="constraint">The constraint to apply to the binding.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// An instance of the service, or <see langword="null"/> if no implementation was available.
+-        /// </returns>
+-        public static object TryGet(this IResolutionRoot root, Type service, Func<IBindingMetadata, bool> constraint, params IParameter[] parameters)
+-        {
+-            return TryGet(() => ResolveSingle(root, service, constraint, parameters, true, true));
+-        }
+-
+-        /// <summary>
+-        /// Gets all available instances of the specified service.
+-        /// </summary>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="service">The service to resolve.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// A series of instances of the service.
+-        /// </returns>
+-        public static IEnumerable<object> GetAll(this IResolutionRoot root, Type service, params IParameter[] parameters)
+-        {
+-            return GetResolutionIterator(root, service, null, parameters, true, false);
+-        }
+-
+-        /// <summary>
+-        /// Gets all instances of the specified service using bindings registered with the specified name.
+-        /// </summary>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="service">The service to resolve.</param>
+-        /// <param name="name">The name of the binding.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// A series of instances of the service.
+-        /// </returns>
+-        public static IEnumerable<object> GetAll(this IResolutionRoot root, Type service, string name, params IParameter[] parameters)
+-        {
+-            return GetResolutionIterator(root, service, b => b.Name == name, parameters, true, false);
+-        }
+-
+-        /// <summary>
+-        /// Gets all instances of the specified service by using the bindings that match the specified constraint.
+-        /// </summary>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="service">The service to resolve.</param>
+-        /// <param name="constraint">The constraint to apply to the bindings.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// A series of instances of the service.
+-        /// </returns>
+-        public static IEnumerable<object> GetAll(this IResolutionRoot root, Type service, Func<IBindingMetadata, bool> constraint, params IParameter[] parameters)
+-        {
+-            return GetResolutionIterator(root, service, constraint, parameters, true, false);
+-        }
+-
+-        /// <summary>
+-        /// Evaluates if an instance of the specified service can be resolved.
+-        /// </summary>
+-        /// <typeparam name="T">The service to resolve.</typeparam>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// <see langword="true"/> if the request can be resolved; otherwise, <see langword="false"/>.
+-        /// </returns>
+-        public static bool CanResolve<T>(this IResolutionRoot root, params IParameter[] parameters)
+-        {
+-            return CanResolve(root, typeof(T), null, parameters, false, true);
+-        }
+-
+-        /// <summary>
+-        /// Evaluates if  an instance of the specified service by using the first binding with the specified name can be resolved.
+-        /// </summary>
+-        /// <typeparam name="T">The service to resolve.</typeparam>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="name">The name of the binding.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// <see langword="true"/> if the request can be resolved; otherwise, <see langword="false"/>.
+-        /// </returns>
+-        public static bool CanResolve<T>(this IResolutionRoot root, string name, params IParameter[] parameters)
+-        {
+-            return CanResolve(root, typeof(T), b => b.Name == name, parameters, false, true);
+-        }
+-
+-        /// <summary>
+-        /// Evaluates if  an instance of the specified service by using the first binding that matches the specified constraint can be resolved.
+-        /// </summary>
+-        /// <typeparam name="T">The service to resolve.</typeparam>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="constraint">The constraint to apply to the binding.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// <see langword="true"/> if the request can be resolved; otherwise, <see langword="false"/>.
+-        /// </returns>
+-        public static bool CanResolve<T>(this IResolutionRoot root, Func<IBindingMetadata, bool> constraint, params IParameter[] parameters)
+-        {
+-            return CanResolve(root, typeof(T), constraint, parameters, false, true);
+-        }
+-
+-        /// <summary>
+-        /// Gets an instance of the specified service.
+-        /// </summary>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="service">The service to resolve.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// <see langword="true"/> if the request can be resolved; otherwise, <see langword="false"/>.
+-        /// </returns>
+-        public static bool CanResolve(this IResolutionRoot root, Type service, params IParameter[] parameters)
+-        {
+-            return CanResolve(root, service, null, parameters, false, true);
+-        }
+-
+-        /// <summary>
+-        /// Gets an instance of the specified service by using the first binding with the specified name.
+-        /// </summary>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="service">The service to resolve.</param>
+-        /// <param name="name">The name of the binding.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// <see langword="true"/> if the request can be resolved; otherwise, <see langword="false"/>.
+-        /// </returns>
+-        public static bool CanResolve(this IResolutionRoot root, Type service, string name, params IParameter[] parameters)
+-        {
+-            return CanResolve(root, service, b => b.Name == name, parameters, false, true);
+-        }
+-
+-        /// <summary>
+-        /// Gets an instance of the specified service by using the first binding that matches the specified constraint.
+-        /// </summary>
+-        /// <param name="root">The resolution root.</param>
+-        /// <param name="service">The service to resolve.</param>
+-        /// <param name="constraint">The constraint to apply to the binding.</param>
+-        /// <param name="parameters">The parameters to pass to the request.</param>
+-        /// <returns>
+-        /// <see langword="true"/> if the request can be resolved; otherwise, <see langword="false"/>.
+-        /// </returns>
+-        public static bool CanResolve(this IResolutionRoot root, Type service, Func<IBindingMetadata, bool> constraint, params IParameter[] parameters)
+-        {
+-            return CanResolve(root, service, constraint, parameters, false, true);
+-        }
+-
+-        private static bool CanResolve(IResolutionRoot root, Type service, Func<IBindingMetadata, bool> constraint, IReadOnlyList<IParameter> parameters, bool isOptional, bool isUnique)
+-        {
+-            Ensure.ArgumentNotNull(root, nameof(root));
+-
+-            var request = root.CreateRequest(service, constraint, parameters, isOptional, isUnique);
+-            return root.CanResolve(request);
+-        }
+-
+-        private static object ResolveSingle(IResolutionRoot root, Type service, Func<IBindingMetadata, bool> constraint, IReadOnlyList<IParameter> parameters, bool isOptional, bool isUnique)
+-        {
+-            Ensure.ArgumentNotNull(root, nameof(root));
+-
+-            var request = root.CreateRequest(service, constraint, parameters, isOptional, isUnique);
+-            return root.ResolveSingle(request);
+-        }
+-
+-        private static IEnumerable<object> GetResolutionIterator(IResolutionRoot root, Type service, Func<IBindingMetadata, bool> constraint, IReadOnlyList<IParameter> parameters, bool isOptional, bool isUnique)
+-        {
+-            Ensure.ArgumentNotNull(root, nameof(root));
+-
+-            var request = root.CreateRequest(service, constraint, parameters, isOptional, isUnique);
+-            return root.Resolve(request);
+-        }
+-
+-        private static T TryGet<T>(Func<object> resolver)
+-        {
+-            try
+-            {
+-                return (T)resolver();
+-            }
+-            catch (ActivationException)
+-            {
+-                return default(T);
+-            }
+-        }
+-
+-        private static object TryGet(Func<object> resolver)
+-        {
+-            try
+-            {
+-                return resolver();
+-            }
+-            catch (ActivationException)
+-            {
+-                return null;
+-            }
+-        }
+-
+-        private static T DoTryGetAndThrowOnInvalidBinding<T>(IResolutionRoot root, Func<IBindingMetadata, bool> constraint, IReadOnlyList<IParameter> parameters)
+-        {
+-            Ensure.ArgumentNotNull(root, nameof(root));
+-
+-            var request = root.CreateRequest(typeof(T), constraint, parameters, true, true);
+-            request.ForceUnique = true;
+-            return (T)root.ResolveSingle(request);
+-        }
+-    }
++// -------------------------------------------------------------------------------------------------
++// <copyright file="ResolutionExtensions.cs" company="Ninject Project Contributors">
++//   Copyright (c) 2007-2010 Enkari, Ltd. All rights reserved.
++//   Copyright (c) 2010-2017 Ninject Project Contributors. All rights reserved.
++//
++//   Dual-licensed under the Apache License, Version 2.0, and the Microsoft Public License (Ms-PL).
++//   You may not use this file except in compliance with one of the Licenses.
++//   You may obtain a copy of the License at
++//
++//       http://www.apache.org/licenses/LICENSE-2.0
++//   or
++//       http://www.microsoft.com/opensource/licenses.mspx
++//
++//   Unless required by applicable law or agreed to in writing, software
++//   distributed under the License is distributed on an "AS IS" BASIS,
++//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++//   See the License for the specific language governing permissions and
++//   limitations under the License.
++// </copyright>
++// -------------------------------------------------------------------------------------------------
++
++namespace Ninject
++{
++    using System;
++    using System.Collections.Generic;
++    using System.Linq;
++
++    using Ninject.Infrastructure;
++    using Ninject.Parameters;
++    using Ninject.Planning.Bindings;
++    using Ninject.Syntax;
++
++    /// <summary>
++    /// Extensions that enhance resolution of services.
++    /// </summary>
++    public static class ResolutionExtensions
++    {
++        /// <summary>
++        /// Gets an instance of the specified service.
++        /// </summary>
++        /// <typeparam name="T">The service to resolve.</typeparam>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// An instance of the service.
++        /// </returns>
++        public static T Get<T>(this IResolutionRoot root, params IParameter[] parameters)
++        {
++            return (T)ResolveSingle(root, typeof(T), null, parameters, false, true);
++        }
++
++        /// <summary>
++        /// Gets an instance of the specified service by using the first binding with the specified name.
++        /// </summary>
++        /// <typeparam name="T">The service to resolve.</typeparam>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="name">The name of the binding.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// An instance of the service.
++        /// </returns>
++        public static T Get<T>(this IResolutionRoot root, string name, params IParameter[] parameters)
++        {
++            return (T)ResolveSingle(root, typeof(T), b => b.Name == name, parameters, false, true);
++        }
++
++        /// <summary>
++        /// Gets an instance of the specified service by using the first binding that matches the specified constraint.
++        /// </summary>
++        /// <typeparam name="T">The service to resolve.</typeparam>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="constraint">The constraint to apply to the binding.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// An instance of the service.
++        /// </returns>
++        public static T Get<T>(this IResolutionRoot root, Func<IBindingMetadata, bool> constraint, params IParameter[] parameters)
++        {
++            return (T)ResolveSingle(root, typeof(T), constraint, parameters, false, true);
++        }
++
++        /// <summary>
++        /// Tries to get an instance of the specified service.
++        /// </summary>
++        /// <typeparam name="T">The service to resolve.</typeparam>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// An instance of the service, or <see langword="null"/> if no implementation was available.
++        /// </returns>
++        public static T TryGet<T>(this IResolutionRoot root, params IParameter[] parameters)
++        {
++            return TryGet<T>(() => ResolveSingle(root, typeof(T), null, parameters, true, true));
++        }
++
++        /// <summary>
++        /// Tries to get an instance of the specified service by using the first binding with the specified name.
++        /// </summary>
++        /// <typeparam name="T">The service to resolve.</typeparam>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="name">The name of the binding.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// An instance of the service, or <see langword="null"/> if no implementation was available.
++        /// </returns>
++        public static T TryGet<T>(this IResolutionRoot root, string name, params IParameter[] parameters)
++        {
++            return TryGet<T>(() => ResolveSingle(root, typeof(T), b => b.Name == name, parameters, true, true));
++        }
++
++        /// <summary>
++        /// Tries to get an instance of the specified service by using the first binding that matches the specified constraint.
++        /// </summary>
++        /// <typeparam name="T">The service to resolve.</typeparam>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="constraint">The constraint to apply to the binding.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// An instance of the service, or <see langword="null"/> if no implementation was available.
++        /// </returns>
++        public static T TryGet<T>(this IResolutionRoot root, Func<IBindingMetadata, bool> constraint, params IParameter[] parameters)
++        {
++            return TryGet<T>(() => ResolveSingle(root, typeof(T), constraint, parameters, true, true));
++        }
++
++        /// <summary>
++        /// Tries to get an instance of the specified service.
++        /// </summary>
++        /// <typeparam name="T">The service to resolve.</typeparam>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// An instance of the service, or <see langword="null"/> if no implementation was available.
++        /// </returns>
++        public static T TryGetAndThrowOnInvalidBinding<T>(this IResolutionRoot root, params IParameter[] parameters)
++        {
++            return DoTryGetAndThrowOnInvalidBinding<T>(root, null, parameters);
++        }
++
++        /// <summary>
++        /// Tries to get an instance of the specified service by using the first binding with the specified name.
++        /// </summary>
++        /// <typeparam name="T">The service to resolve.</typeparam>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="name">The name of the binding.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// An instance of the service, or <see langword="null"/> if no implementation was available.
++        /// </returns>
++        public static T TryGetAndThrowOnInvalidBinding<T>(this IResolutionRoot root, string name, params IParameter[] parameters)
++        {
++            return DoTryGetAndThrowOnInvalidBinding<T>(root, b => b.Name == name, parameters);
++        }
++
++        /// <summary>
++        /// Tries to get an instance of the specified service by using the first binding that matches the specified constraint.
++        /// </summary>
++        /// <typeparam name="T">The service to resolve.</typeparam>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="constraint">The constraint to apply to the binding.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// An instance of the service, or <see langword="null"/> if no implementation was available.
++        /// </returns>
++        public static T TryGetAndThrowOnInvalidBinding<T>(this IResolutionRoot root, Func<IBindingMetadata, bool> constraint, params IParameter[] parameters)
++        {
++            return DoTryGetAndThrowOnInvalidBinding<T>(root, constraint, parameters);
++        }
++
++        /// <summary>
++        /// Gets all available instances of the specified service.
++        /// </summary>
++        /// <typeparam name="T">The service to resolve.</typeparam>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// A series of instances of the service.
++        /// </returns>
++        public static IEnumerable<T> GetAll<T>(this IResolutionRoot root, params IParameter[] parameters)
++        {
++            return GetResolutionIterator(root, typeof(T), null, parameters, true, false).Cast<T>();
++        }
++
++        /// <summary>
++        /// Gets all instances of the specified service using bindings registered with the specified name.
++        /// </summary>
++        /// <typeparam name="T">The service to resolve.</typeparam>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="name">The name of the binding.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// A series of instances of the service.
++        /// </returns>
++        public static IEnumerable<T> GetAll<T>(this IResolutionRoot root, string name, params IParameter[] parameters)
++        {
++            return GetResolutionIterator(root, typeof(T), b => b.Name == name, parameters, true, false).Cast<T>();
++        }
++
++        /// <summary>
++        /// Gets all instances of the specified service by using the bindings that match the specified constraint.
++        /// </summary>
++        /// <typeparam name="T">The service to resolve.</typeparam>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="constraint">The constraint to apply to the bindings.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// A series of instances of the service.
++        /// </returns>
++        public static IEnumerable<T> GetAll<T>(this IResolutionRoot root, Func<IBindingMetadata, bool> constraint, params IParameter[] parameters)
++        {
++            return GetResolutionIterator(root, typeof(T), constraint, parameters, true, false).Cast<T>();
++        }
++
++        /// <summary>
++        /// Gets an instance of the specified service.
++        /// </summary>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="service">The service to resolve.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// An instance of the service.
++        /// </returns>
++        public static object Get(this IResolutionRoot root, Type service, params IParameter[] parameters)
++        {
++            return ResolveSingle(root, service, null, parameters, false, true);
++        }
++
++        /// <summary>
++        /// Gets an instance of the specified service by using the first binding with the specified name.
++        /// </summary>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="service">The service to resolve.</param>
++        /// <param name="name">The name of the binding.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// An instance of the service.
++        /// </returns>
++        public static object Get(this IResolutionRoot root, Type service, string name, params IParameter[] parameters)
++        {
++            return ResolveSingle(root, service, b => b.Name == name, parameters, false, true);
++        }
++
++        /// <summary>
++        /// Gets an instance of the specified service by using the first binding that matches the specified constraint.
++        /// </summary>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="service">The service to resolve.</param>
++        /// <param name="constraint">The constraint to apply to the binding.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// An instance of the service.
++        /// </returns>
++        public static object Get(this IResolutionRoot root, Type service, Func<IBindingMetadata, bool> constraint, params IParameter[] parameters)
++        {
++            return ResolveSingle(root, service, constraint, parameters, false, true);
++        }
++
++        /// <summary>
++        /// Tries to get an instance of the specified service.
++        /// </summary>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="service">The service to resolve.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// An instance of the service, or <see langword="null"/> if no implementation was available.
++        /// </returns>
++        public static object TryGet(this IResolutionRoot root, Type service, params IParameter[] parameters)
++        {
++            return TryGet(() => ResolveSingle(root, service, null, parameters, true, true));
++        }
++
++        /// <summary>
++        /// Tries to get an instance of the specified service by using the first binding with the specified name.
++        /// </summary>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="service">The service to resolve.</param>
++        /// <param name="name">The name of the binding.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// An instance of the service, or <see langword="null"/> if no implementation was available.
++        /// </returns>
++        public static object TryGet(this IResolutionRoot root, Type service, string name, params IParameter[] parameters)
++        {
++            return TryGet(() => ResolveSingle(root, service, b => b.Name == name, parameters, true, true));
++        }
++
++        /// <summary>
++        /// Tries to get an instance of the specified service by using the first binding that matches the specified constraint.
++        /// </summary>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="service">The service to resolve.</param>
++        /// <param name="constraint">The constraint to apply to the binding.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// An instance of the service, or <see langword="null"/> if no implementation was available.
++        /// </returns>
++        public static object TryGet(this IResolutionRoot root, Type service, Func<IBindingMetadata, bool> constraint, params IParameter[] parameters)
++        {
++            return TryGet(() => ResolveSingle(root, service, constraint, parameters, true, true));
++        }
++
++        /// <summary>
++        /// Gets all available instances of the specified service.
++        /// </summary>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="service">The service to resolve.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// A series of instances of the service.
++        /// </returns>
++        public static IEnumerable<object> GetAll(this IResolutionRoot root, Type service, params IParameter[] parameters)
++        {
++            return GetResolutionIterator(root, service, null, parameters, true, false);
++        }
++
++        /// <summary>
++        /// Gets all instances of the specified service using bindings registered with the specified name.
++        /// </summary>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="service">The service to resolve.</param>
++        /// <param name="name">The name of the binding.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// A series of instances of the service.
++        /// </returns>
++        public static IEnumerable<object> GetAll(this IResolutionRoot root, Type service, string name, params IParameter[] parameters)
++        {
++            return GetResolutionIterator(root, service, b => b.Name == name, parameters, true, false);
++        }
++
++        /// <summary>
++        /// Gets all instances of the specified service by using the bindings that match the specified constraint.
++        /// </summary>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="service">The service to resolve.</param>
++        /// <param name="constraint">The constraint to apply to the bindings.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// A series of instances of the service.
++        /// </returns>
++        public static IEnumerable<object> GetAll(this IResolutionRoot root, Type service, Func<IBindingMetadata, bool> constraint, params IParameter[] parameters)
++        {
++            return GetResolutionIterator(root, service, constraint, parameters, true, false);
++        }
++
++        /// <summary>
++        /// Evaluates if an instance of the specified service can be resolved.
++        /// </summary>
++        /// <typeparam name="T">The service to resolve.</typeparam>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// <see langword="true"/> if the request can be resolved; otherwise, <see langword="false"/>.
++        /// </returns>
++        public static bool CanResolve<T>(this IResolutionRoot root, params IParameter[] parameters)
++        {
++            return CanResolve(root, typeof(T), null, parameters, false, true);
++        }
++
++        /// <summary>
++        /// Evaluates if  an instance of the specified service by using the first binding with the specified name can be resolved.
++        /// </summary>
++        /// <typeparam name="T">The service to resolve.</typeparam>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="name">The name of the binding.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// <see langword="true"/> if the request can be resolved; otherwise, <see langword="false"/>.
++        /// </returns>
++        public static bool CanResolve<T>(this IResolutionRoot root, string name, params IParameter[] parameters)
++        {
++            return CanResolve(root, typeof(T), b => b.Name == name, parameters, false, true);
++        }
++
++        /// <summary>
++        /// Evaluates if  an instance of the specified service by using the first binding that matches the specified constraint can be resolved.
++        /// </summary>
++        /// <typeparam name="T">The service to resolve.</typeparam>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="constraint">The constraint to apply to the binding.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// <see langword="true"/> if the request can be resolved; otherwise, <see langword="false"/>.
++        /// </returns>
++        public static bool CanResolve<T>(this IResolutionRoot root, Func<IBindingMetadata, bool> constraint, params IParameter[] parameters)
++        {
++            return CanResolve(root, typeof(T), constraint, parameters, false, true);
++        }
++
++        /// <summary>
++        /// Gets an instance of the specified service.
++        /// </summary>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="service">The service to resolve.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// <see langword="true"/> if the request can be resolved; otherwise, <see langword="false"/>.
++        /// </returns>
++        public static bool CanResolve(this IResolutionRoot root, Type service, params IParameter[] parameters)
++        {
++            return CanResolve(root, service, null, parameters, false, true);
++        }
++
++        /// <summary>
++        /// Gets an instance of the specified service by using the first binding with the specified name.
++        /// </summary>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="service">The service to resolve.</param>
++        /// <param name="name">The name of the binding.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// <see langword="true"/> if the request can be resolved; otherwise, <see langword="false"/>.
++        /// </returns>
++        public static bool CanResolve(this IResolutionRoot root, Type service, string name, params IParameter[] parameters)
++        {
++            return CanResolve(root, service, b => b.Name == name, parameters, false, true);
++        }
++
++        /// <summary>
++        /// Gets an instance of the specified service by using the first binding that matches the specified constraint.
++        /// </summary>
++        /// <param name="root">The resolution root.</param>
++        /// <param name="service">The service to resolve.</param>
++        /// <param name="constraint">The constraint to apply to the binding.</param>
++        /// <param name="parameters">The parameters to pass to the request.</param>
++        /// <returns>
++        /// <see langword="true"/> if the request can be resolved; otherwise, <see langword="false"/>.
++        /// </returns>
++        public static bool CanResolve(this IResolutionRoot root, Type service, Func<IBindingMetadata, bool> constraint, params IParameter[] parameters)
++        {
++            return CanResolve(root, service, constraint, parameters, false, true);
++        }
++
++        private static bool CanResolve(IResolutionRoot root, Type service, Func<IBindingMetadata, bool> constraint, IReadOnlyList<IParameter> parameters, bool isOptional, bool isUnique)
++        {
++            Ensure.ArgumentNotNull(root, nameof(root));
++
++            var request = root.CreateRequest(service, constraint, parameters, isOptional, isUnique);
++            return root.CanResolve(request);
++        }
++
++        private static object ResolveSingle(IResolutionRoot root, Type service, Func<IBindingMetadata, bool> constraint, IReadOnlyList<IParameter> parameters, bool isOptional, bool isUnique)
++        {
++            Ensure.ArgumentNotNull(root, nameof(root));
++
++            var request = root.CreateRequest(service, constraint, parameters, isOptional, isUnique);
++            return root.ResolveSingle(request);
++        }
++
++        private static IEnumerable<object> GetResolutionIterator(IResolutionRoot root, Type service, Func<IBindingMetadata, bool> constraint, IReadOnlyList<IParameter> parameters, bool isOptional, bool isUnique)
++        {
++            Ensure.ArgumentNotNull(root, nameof(root));
++
++            var request = root.CreateRequest(service, constraint, parameters, isOptional, isUnique);
++            return root.Resolve(request);
++        }
++
++        private static T TryGet<T>(Func<object> resolver)
++        {
++            try
++            {
++                return (T)resolver();
++            }
++            catch (ActivationException)
++            {
++                return default(T);
++            }
++        }
++
++        private static object TryGet(Func<object> resolver)
++        {
++            try
++            {
++                return resolver();
++            }
++            catch (ActivationException)
++            {
++                return null;
++            }
++        }
++
++        private static T DoTryGetAndThrowOnInvalidBinding<T>(IResolutionRoot root, Func<IBindingMetadata, bool> constraint, IReadOnlyList<IParameter> parameters)
++        {
++            Ensure.ArgumentNotNull(root, nameof(root));
++
++            var request = root.CreateRequest(typeof(T), constraint, parameters, true, true);
++            request.ForceUnique = true;
++            return (T)root.ResolveSingle(request);
++        }
++    }
+ }
+\ No newline at end of file

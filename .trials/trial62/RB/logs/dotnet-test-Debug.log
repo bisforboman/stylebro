@@ -1,0 +1,281 @@
+  Determining projects to restore...
+  Restored /home/user/w62/RB/dotnet/ClassLibraryWithCustomName/ClassLibraryWithCustomName.csproj (in 392 ms).
+  Restored /home/user/w62/RB/dotnet/Rebus/Rebus.csproj (in 400 ms).
+  Restored /home/user/w62/RB/dotnet/Rebus.Tests/Rebus.Tests.csproj (in 398 ms).
+/root/.nuget/packages/system.io.hashing/10.0.6/buildTransitive/netcoreapp2.0/System.IO.Hashing.targets(4,5): warning : System.IO.Hashing 10.0.6 doesn't support net6.0 and has not been tested with it. Consider upgrading your TargetFramework to net8.0 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [/home/user/w62/RB/dotnet/Rebus/Rebus.csproj::TargetFramework=net6.0]
+/root/.nuget/packages/system.io.hashing/10.0.6/buildTransitive/netcoreapp2.0/System.IO.Hashing.targets(4,5): warning : System.IO.Hashing 10.0.6 doesn't support net7.0 and has not been tested with it. Consider upgrading your TargetFramework to net8.0 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [/home/user/w62/RB/dotnet/Rebus/Rebus.csproj::TargetFramework=net7.0]
+  ClassLibraryWithCustomName -> /home/user/w62/RB/dotnet/ClassLibraryWithCustomName/bin/Debug/net8.0/CompanyName.ClassLibraryWithCustomName.dll
+/home/user/w62/RB/dotnet/Rebus/Encryption/RijndaelEncryptor.cs(46,34): warning SYSLIB0022: 'RijndaelManaged' is obsolete: 'The Rijndael and RijndaelManaged types are obsolete. Use Aes instead.' (https://aka.ms/dotnet-warnings/SYSLIB0022) [/home/user/w62/RB/dotnet/Rebus/Rebus.csproj::TargetFramework=net10.0]
+/home/user/w62/RB/dotnet/Rebus/Encryption/RijndaelEncryptor.cs(70,34): warning SYSLIB0022: 'RijndaelManaged' is obsolete: 'The Rijndael and RijndaelManaged types are obsolete. Use Aes instead.' (https://aka.ms/dotnet-warnings/SYSLIB0022) [/home/user/w62/RB/dotnet/Rebus/Rebus.csproj::TargetFramework=net10.0]
+/home/user/w62/RB/dotnet/Rebus/Encryption/FixedRijndaelEncryptionKeyProvider.cs(25,38): warning SYSLIB0022: 'RijndaelManaged' is obsolete: 'The Rijndael and RijndaelManaged types are obsolete. Use Aes instead.' (https://aka.ms/dotnet-warnings/SYSLIB0022) [/home/user/w62/RB/dotnet/Rebus/Rebus.csproj::TargetFramework=net10.0]
+/home/user/w62/RB/dotnet/Rebus/Encryption/FixedRijndaelEncryptionKeyProvider.cs(47,34): warning SYSLIB0022: 'RijndaelManaged' is obsolete: 'The Rijndael and RijndaelManaged types are obsolete. Use Aes instead.' (https://aka.ms/dotnet-warnings/SYSLIB0022) [/home/user/w62/RB/dotnet/Rebus/Rebus.csproj::TargetFramework=net10.0]
+/home/user/w62/RB/dotnet/Rebus/Persistence/FileSystem/FilesystemExclusiveLock.cs(28,17): warning CA1416: This call site is reachable on all platforms. 'FileStream.Lock(long, long)' is unsupported on: 'macOS/OSX'. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1416) [/home/user/w62/RB/dotnet/Rebus/Rebus.csproj::TargetFramework=net10.0]
+/home/user/w62/RB/dotnet/Rebus/Persistence/FileSystem/FilesystemExclusiveLock.cs(78,13): warning CA1416: This call site is reachable on all platforms. 'FileStream.Unlock(long, long)' is unsupported on: 'macOS/OSX'. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1416) [/home/user/w62/RB/dotnet/Rebus/Rebus.csproj::TargetFramework=net10.0]
+  Rebus -> /home/user/w62/RB/dotnet/Rebus/bin/Debug/net10.0/Rebus.dll
+/home/user/w62/RB/dotnet/Rebus.Tests/Synchronous/TestSyncBus.cs(45,9): warning CA1416: This call site is reachable on all platforms. 'Thread.SetApartmentState(ApartmentState)' is only supported on: 'windows'. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1416) [/home/user/w62/RB/dotnet/Rebus.Tests/Rebus.Tests.csproj::TargetFramework=net10.0]
+  Rebus.Tests -> /home/user/w62/RB/dotnet/Rebus.Tests/bin/Debug/net10.0/Rebus.Tests.dll
+Test run for /home/user/w62/RB/dotnet/Rebus.Tests/bin/Debug/net10.0/Rebus.Tests.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+  Skipped YeahItWorks [< 1 ms]
+  Skipped CompareInvocationSpeeds(TaskRun) [< 1 ms]
+  Skipped CompareInvocationSpeeds(ThreadPool) [< 1 ms]
+  Skipped CompareInvocationSpeeds(ThreadPoolUnsafe) [< 1 ms]
+  Failed CheckIdleBehavior [2 m 30 s]
+  Error Message:
+     Expected receive calls during the second period to be more than four times as frequent as during the third period
+Assert.That(secondPeriodMedian.Count, Is.GreaterThanOrEqualTo(4 * thirdPeriodMedian.Count))
+  Expected: greater than or equal to 40
+  But was:  34
+
+  Stack Trace:
+     at Rebus.Tests.Backoff.BackoffBehaviorIntegrationTest.CheckIdleBehavior() in /home/user/w62/RB/dotnet/Rebus.Tests/Backoff/BackoffBehaviorIntegrationTest.cs:line 101
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.BlockUntilCompleted()
+   at NUnit.Framework.Internal.MessagePumpStrategy.NoMessagePumpStrategy.WaitForCompletion(AwaitAdapter awaiter)
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.<>c__DisplayClass1_0.<Execute>b__0()
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)
+
+1)    at Rebus.Tests.Backoff.BackoffBehaviorIntegrationTest.CheckIdleBehavior() in /home/user/w62/RB/dotnet/Rebus.Tests/Backoff/BackoffBehaviorIntegrationTest.cs:line 101
+
+
+  Skipped ReproduceIt [< 1 ms]
+  Failed ItWorks(100,5) [1 s]
+  Error Message:
+     Not all message counts were exactly 0:
+
+    THIS IS MESSAGE 61: 3
+    THIS IS MESSAGE 52: 2
+    THIS IS MESSAGE 27: 3
+    THIS IS MESSAGE 34: 2
+    THIS IS MESSAGE 16: 2
+    THIS IS MESSAGE 94: 3
+    THIS IS MESSAGE 78: 2
+    THIS IS MESSAGE 3: 3
+    THIS IS MESSAGE 23: 3
+    THIS IS MESSAGE 30: 2
+    THIS IS MESSAGE 28: 3
+    THIS IS MESSAGE 97: 3
+    THIS IS MESSAGE 42: 3
+    THIS IS MESSAGE 17: 2
+    THIS IS MESSAGE 95: 2
+    THIS IS MESSAGE 79: 2
+    THIS IS MESSAGE 86: 2
+    THIS IS MESSAGE 33: 2
+    THIS IS MESSAGE 24: 3
+    THIS IS MESSAGE 77: 3
+    THIS IS MESSAGE 31: 3
+    THIS IS MESSAGE 13: 2
+    THIS IS MESSAGE 91: 3
+    THIS IS MESSAGE 75: 2
+    THIS IS MESSAGE 57: 3
+    THIS IS MESSAGE 20: 2
+    THIS IS MESSAGE 0: 3
+    THIS IS MESSAGE 80: 3
+    THIS IS MESSAGE 64: 3
+    THIS IS MESSAGE 55: 3
+    THIS IS MESSAGE 62: 3
+    THIS IS MESSAGE 53: 2
+    THIS IS MESSAGE 92: 2
+    THIS IS MESSAGE 49: 3
+    THIS IS MESSAGE 1: 2
+    THIS IS MESSAGE 81: 2
+    THIS IS MESSAGE 65: 2
+    THIS IS MESSAGE 56: 3
+    THIS IS MESSAGE 72: 3
+    THIS IS MESSAGE 7: 2
+    THIS IS MESSAGE 45: 2
+
+Assert.That(messageCounts.All(c => c.Value == 1), Is.True)
+  Expected: True
+  But was:  False
+
+  Stack Trace:
+     at Rebus.Tests.Integration.TestFileSystemBasedTransportAndCompetingConsumers.ItWorks(Int32 messageCount, Int32 consumers) in /home/user/w62/RB/dotnet/Rebus.Tests/Integration/TestFileSystemBasedTransportAndCompetingConsumers.cs:line 66
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.BlockUntilCompleted()
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.<>c__DisplayClass1_0.<Execute>b__0()
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)
+
+1)    at Rebus.Tests.Integration.TestFileSystemBasedTransportAndCompetingConsumers.ItWorks(Int32 messageCount, Int32 consumers) in /home/user/w62/RB/dotnet/Rebus.Tests/Integration/TestFileSystemBasedTransportAndCompetingConsumers.cs:line 66
+
+
+  Failed ItWorks(1000,5) [2 s]
+  Error Message:
+     Not all message counts were exactly 0:
+
+    THIS IS MESSAGE 16: 3
+    THIS IS MESSAGE 534: 2
+    THIS IS MESSAGE 212: 3
+    THIS IS MESSAGE 712: 2
+    THIS IS MESSAGE 888: 2
+    THIS IS MESSAGE 87: 3
+    THIS IS MESSAGE 588: 4
+    THIS IS MESSAGE 351: 2
+    THIS IS MESSAGE 725: 2
+    THIS IS MESSAGE 369: 2
+    THIS IS MESSAGE 169: 2
+    THIS IS MESSAGE 386: 2
+    THIS IS MESSAGE 769: 2
+    THIS IS MESSAGE 747: 2
+    THIS IS MESSAGE 820: 3
+    THIS IS MESSAGE 320: 2
+    THIS IS MESSAGE 981: 2
+    THIS IS MESSAGE 264: 2
+    THIS IS MESSAGE 842: 2
+    THIS IS MESSAGE 281: 2
+    THIS IS MESSAGE 342: 2
+    THIS IS MESSAGE 442: 2
+    THIS IS MESSAGE 838: 2
+    THIS IS MESSAGE 31: 3
+    THIS IS MESSAGE 199: 2
+    THIS IS MESSAGE 936: 2
+    THIS IS MESSAGE 336: 2
+    THIS IS MESSAGE 636: 2
+    THIS IS MESSAGE 431: 2
+    THIS IS MESSAGE 153: 2
+    THIS IS MESSAGE 168: 2
+    THIS IS MESSAGE 680: 2
+    THIS IS MESSAGE 780: 2
+    THIS IS MESSAGE 866: 3
+    THIS IS MESSAGE 883: 2
+    THIS IS MESSAGE 166: 4
+    THIS IS MESSAGE 298: 3
+    THIS IS MESSAGE 598: 2
+    THIS IS MESSAGE 76: 3
+    THIS IS MESSAGE 857: 2
+    THIS IS MESSAGE 679: 3
+    THIS IS MESSAGE 596: 2
+    THIS IS MESSAGE 757: 2
+    THIS IS MESSAGE 230: 4
+    THIS IS MESSAGE 130: 2
+    THIS IS MESSAGE 630: 2
+    THIS IS MESSAGE 852: 2
+    THIS IS MESSAGE 191: 2
+    THIS IS MESSAGE 533: 2
+    THIS IS MESSAGE 987: 2
+    THIS IS MESSAGE 287: 2
+    THIS IS MESSAGE 187: 2
+    THIS IS MESSAGE 565: 3
+    THIS IS MESSAGE 582: 2
+    THIS IS MESSAGE 360: 2
+    THIS IS MESSAGE 460: 2
+    THIS IS MESSAGE 163: 3
+    THIS IS MESSAGE 563: 2
+    THIS IS MESSAGE 695: 2
+    THIS IS MESSAGE 990: 2
+    THIS IS MESSAGE 832: 2
+    THIS IS MESSAGE 932: 2
+    THIS IS MESSAGE 632: 2
+    THIS IS MESSAGE 293: 2
+    THIS IS MESSAGE 693: 2
+    THIS IS MESSAGE 83: 2
+    THIS IS MESSAGE 471: 2
+    THIS IS MESSAGE 571: 3
+    THIS IS MESSAGE 909: 2
+    THIS IS MESSAGE 309: 4
+    THIS IS MESSAGE 367: 3
+    THIS IS MESSAGE 467: 2
+    THIS IS MESSAGE 304: 3
+    THIS IS MESSAGE 862: 2
+    THIS IS MESSAGE 68: 3
+    THIS IS MESSAGE 697: 2
+    THIS IS MESSAGE 875: 2
+    THIS IS MESSAGE 675: 2
+    THIS IS MESSAGE 475: 2
+    THIS IS MESSAGE 692: 2
+    THIS IS MESSAGE 492: 2
+    THIS IS MESSAGE 592: 3
+    THIS IS MESSAGE 870: 2
+    THIS IS MESSAGE 670: 2
+    THIS IS MESSAGE 806: 3
+    THIS IS MESSAGE 301: 4
+    THIS IS MESSAGE 619: 3
+    THIS IS MESSAGE 8: 2
+    THIS IS MESSAGE 214: 2
+    THIS IS MESSAGE 114: 3
+    THIS IS MESSAGE 672: 3
+    THIS IS MESSAGE 849: 3
+    THIS IS MESSAGE 203: 2
+    THIS IS MESSAGE 703: 3
+    THIS IS MESSAGE 99: 2
+    THIS IS MESSAGE 90: 2
+    THIS IS MESSAGE 511: 2
+    THIS IS MESSAGE 648: 2
+    THIS IS MESSAGE 748: 2
+    THIS IS MESSAGE 229: 3
+    THIS IS MESSAGE 807: 2
+    THIS IS MESSAGE 729: 2
+    THIS IS MESSAGE 207: 3
+    THIS IS MESSAGE 3: 2
+    THIS IS MESSAGE 624: 3
+    THIS IS MESSAGE 202: 2
+    THIS IS MESSAGE 402: 2
+    THIS IS MESSAGE 846: 3
+    THIS IS MESSAGE 215: 2
+    THIS IS MESSAGE 715: 3
+    THIS IS MESSAGE 415: 2
+    THIS IS MESSAGE 359: 2
+    THIS IS MESSAGE 759: 4
+    THIS IS MESSAGE 854: 2
+    THIS IS MESSAGE 654: 3
+    THIS IS MESSAGE 19: 2
+    THIS IS MESSAGE 313: 2
+    THIS IS MESSAGE 413: 2
+    THIS IS MESSAGE 228: 2
+    THIS IS MESSAGE 128: 2
+    THIS IS MESSAGE 728: 2
+    THIS IS MESSAGE 989: 2
+    THIS IS MESSAGE 884: 2
+    THIS IS MESSAGE 784: 2
+    THIS IS MESSAGE 584: 3
+    THIS IS MESSAGE 645: 2
+    THIS IS MESSAGE 226: 2
+    THIS IS MESSAGE 326: 2
+    THIS IS MESSAGE 726: 2
+    THIS IS MESSAGE 121: 2
+    THIS IS MESSAGE 621: 2
+    THIS IS MESSAGE 943: 2
+    THIS IS MESSAGE 639: 3
+
+Assert.That(messageCounts.All(c => c.Value == 1), Is.True)
+  Expected: True
+  But was:  False
+
+  Stack Trace:
+     at Rebus.Tests.Integration.TestFileSystemBasedTransportAndCompetingConsumers.ItWorks(Int32 messageCount, Int32 consumers) in /home/user/w62/RB/dotnet/Rebus.Tests/Integration/TestFileSystemBasedTransportAndCompetingConsumers.cs:line 66
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.BlockUntilCompleted()
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.<>c__DisplayClass1_0.<Execute>b__0()
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)
+
+1)    at Rebus.Tests.Integration.TestFileSystemBasedTransportAndCompetingConsumers.ItWorks(Int32 messageCount, Int32 consumers) in /home/user/w62/RB/dotnet/Rebus.Tests/Integration/TestFileSystemBasedTransportAndCompetingConsumers.cs:line 66
+
+
+  Skipped CheckTiming [< 1 ms]
+  Skipped TakeTime(100000,10,Action) [< 1 ms]
+  Skipped TakeTime(100000,10,Default) [< 1 ms]
+  Skipped TakeTime(100000,10,DefaultNew) [< 1 ms]
+  Skipped DoesNotImmediatelyDeadlettersWhenDeliveryCountHeaderDoesNotExceedMaxRetries [< 1 ms]
+  Failed CanDoItSyncWithoutBlocking [107 ms]
+  Error Message:
+   System.PlatformNotSupportedException : COM Interop is not supported on this platform.
+  Stack Trace:
+     at System.Threading.Thread.SetApartmentStateUnchecked(ApartmentState state, Boolean throwOnError)
+   at System.Threading.Thread.SetApartmentState(ApartmentState state)
+   at Rebus.Tests.Synchronous.TestSyncBus.CanDoItSyncWithoutBlocking() in /home/user/w62/RB/dotnet/Rebus.Tests/Synchronous/TestSyncBus.cs:line 45
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+1)    at System.Threading.Thread.SetApartmentStateUnchecked(ApartmentState state, Boolean throwOnError)
+   at System.Threading.Thread.SetApartmentState(ApartmentState state)
+   at Rebus.Tests.Synchronous.TestSyncBus.CanDoItSyncWithoutBlocking() in /home/user/w62/RB/dotnet/Rebus.Tests/Synchronous/TestSyncBus.cs:line 45
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+
+Failed!  - Failed:     4, Passed:   621, Skipped:     5, Total:   630, Duration: 11 m 5 s - Rebus.Tests.dll (net10.0)

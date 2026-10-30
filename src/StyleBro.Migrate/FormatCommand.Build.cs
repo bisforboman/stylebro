@@ -256,7 +256,7 @@ internal static partial class FormatCommand
                     // compiled (sqlite-net: NETSDK1147). An error in the code is the compiler's, which ran the analyzers there
                     // (Ulid's obsolete calls in its benchmarks, warnings as errors).
                     bothFailed.Add(configuration);
-                    current.Where(StopsCompiling).Select(m => m.Shown).Distinct(StringComparer.Ordinal).Take(5).ToList().ForEach(log);
+                    StoppedLines(current).ForEach(log);
                 }
                 else if (exitCode != 0 && found.Count == 0 && Uncompiled(output, current, Expected(configuration)) is { Count: > 0 } skipped)
                 {
@@ -399,6 +399,13 @@ internal static partial class FormatCommand
     /// Whether a build error came before the compiler ran the analyzers: no place in the code (restore, MSBuild, the
     /// compiler's command line), except the errors the compiler reports when it emits (<see cref="EmitErrors"/>).
     /// </summary>
+    /// <summary>
+    /// The lines of the errors that stopped a build compiling (<see cref="StopsCompiling"/>), at most five, sorted: MSBuild's
+    /// parallel output gave Ninject's two (net462, net6.0) in either order, and two runs' logs differed (trial 62).
+    /// </summary>
+    public static List<string> StoppedLines(IEnumerable<BuildMessage> messages) =>
+        messages.Where(StopsCompiling).Select(m => m.Shown).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).Take(5).ToList();
+
     public static bool StopsCompiling(BuildMessage message) => message.Error && !message.InSource && !EmitErrors.Contains(message.Id);
 
     /// <summary>Runs <paramref name="action"/> with <see cref="HookVariable"/> set to <paramref name="hook"/> (every MSBuild node inherits it).</summary>

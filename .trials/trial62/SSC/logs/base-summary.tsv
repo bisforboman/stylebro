@@ -1,0 +1,6 @@
+build	0	23s	dotnet build serilog-settings-configuration.sln -c Debug
+twae-Debug	0	16s	twae Debug
+test-Debug	0	93s	env CFG=Debug bash -c MSBUILDDISABLENODEREUSE=1 dotnet test serilog-settings-configuration.sln -c $CFG
+twae-Release	0	14s	twae Release
+test-Release	0	95s	env CFG=Release bash -c MSBUILDDISABLENODEREUSE=1 dotnet test serilog-settings-configuration.sln -c $CFG
+DONE

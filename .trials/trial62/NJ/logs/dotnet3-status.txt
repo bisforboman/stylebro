@@ -1,0 +1,9 @@
+ M src/Ninject/Activation/Pipeline.cs
+ M src/Ninject/Infrastructure/Language/ExtensionsForType.cs
+ M src/Ninject/Ninject.csproj
+ M src/Ninject/Planning/Directives/ConstructorInjectionDirective.cs
+ M src/Ninject/Planning/IPlan.cs
+ M src/Ninject/Planning/Strategies/ConstructorReflectionStrategy.cs
+ M src/Ninject/Syntax/ResolutionExtensions.cs
+?? .editorconfig
+?? Directory.Build.props

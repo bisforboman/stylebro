@@ -1365,6 +1365,41 @@ internal static partial class Migration
     }
 
     /// <summary>
+    /// Private fields (as <see cref="CountPrivateFields(SyntaxTree)"/> counts them) whose name, without a leading '_', has two
+    /// words or more: camelCase ('breakTarget') or snake_case ('break_target'). One-word names fit both, and a one-letter
+    /// prefix ('m_count') is the prefix rules' (trial 62: mono.linq.expressions' 11 of 13 were snake_case, and BRO1308 renamed them).
+    /// </summary>
+    internal static (int Camel, int Snake) CountMultiWordPrivateFields(SyntaxTree tree)
+    {
+        int camel = 0;
+        int snake = 0;
+        foreach (var field in tree.GetRoot().DescendantNodes().OfType<FieldDeclarationSyntax>())
+        {
+            var modifiers = field.Modifiers;
+            if (modifiers.Any(m => m.IsKind(SyntaxKind.PublicKeyword) || m.IsKind(SyntaxKind.InternalKeyword) || m.IsKind(SyntaxKind.ProtectedKeyword) || m.IsKind(SyntaxKind.ConstKeyword))
+                || (modifiers.Any(m => m.IsKind(SyntaxKind.StaticKeyword)) && modifiers.Any(m => m.IsKind(SyntaxKind.ReadOnlyKeyword))))
+            {
+                continue;
+            }
+
+            foreach (var variable in field.Declaration.Variables)
+            {
+                var name = variable.Identifier.ValueText.TrimStart('_');
+                if (Regex.IsMatch(name, "^[a-z][a-z0-9]*(_[a-z0-9]+)+$") && name.IndexOf('_') > 1)
+                {
+                    snake++;
+                }
+                else if (Regex.IsMatch(name, "^[a-z][a-z0-9]*[A-Z][A-Za-z0-9]*$"))
+                {
+                    camel++;
+                }
+            }
+        }
+
+        return (camel, snake);
+    }
+
+    /// <summary>
     /// The folders (relative, '/'-separated) with EF Core migrations: files with a [Migration(...)] attribute, a Migration base
     /// class or a ModelSnapshot. 'dotnet ef' writes them; formatting them only makes the next migration's diff noisy (eShop:
     /// 7 files reformatted). Nested folders are covered by their parent. Empty when the root .editorconfig mentions

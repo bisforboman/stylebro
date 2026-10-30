@@ -1,0 +1,50 @@
+  Determining projects to restore...
+/usr/lib/dotnet/sdk/10.0.113/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/w62/NJ/default3/src/Ninject.Benchmarks/Ninject.Benchmarks.csproj::TargetFramework=net6.0]
+  Restored /home/user/w62/NJ/default3/src/Ninject.Tests.TestAssembly/Ninject.Tests.TestAssembly.csproj (in 339 ms).
+  Restored /home/user/w62/NJ/default3/src/Ninject.Tests.TestModule/Ninject.Tests.TestModule.csproj (in 231 ms).
+  Restored /home/user/w62/NJ/default3/src/Ninject.Tests/Ninject.Tests.csproj (in 394 ms).
+  Restored /home/user/w62/NJ/default3/src/Ninject.Benchmarks/Ninject.Benchmarks.csproj (in 394 ms).
+  1 of 5 projects are up-to-date for restore.
+  Ninject -> /home/user/w62/NJ/default3/src/Ninject/bin/Release/net6.0/Ninject.dll
+  Ninject -> /home/user/w62/NJ/default3/src/Ninject/bin/Release/netstandard2.0/Ninject.dll
+  Ninject.Tests.TestAssembly -> /home/user/w62/NJ/default3/src/Ninject.Tests.TestAssembly/bin/Release/netstandard2.0/Ninject.Tests.TestAssembly.dll
+  Ninject.Tests.TestModule -> /home/user/w62/NJ/default3/src/Ninject.Tests.TestModule/bin/Release/netstandard2.0/Ninject.Tests.TestModule.dll
+CSC : warning xUnit1013: Public method 'Dispose' on test class 'DisposableObject' should be marked as a Theory. Reduce the visibility of the method, or add a Theory attribute to the method. (https://xunit.net/xunit.analyzers/rules/xUnit1013) [/home/user/w62/NJ/default3/src/Ninject.Tests/Ninject.Tests.csproj::TargetFramework=net6.0]
+  Ninject.Tests -> /home/user/w62/NJ/default3/src/Ninject.Tests/bin/Release/net6.0/Ninject.Tests.dll
+Test run for /home/user/w62/NJ/default3/src/Ninject.Tests/bin/Release/net6.0/Ninject.Tests.dll (.NETCoreApp,Version=v6.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.67]     Ninject.Tests.Unit.Modules.NinjectModuleTests+WhenOnUnloadIsCalledAfterOnLoad.BindingsShouldCleared [SKIP]
+  Skipped Ninject.Tests.Unit.Modules.NinjectModuleTests+WhenOnUnloadIsCalledAfterOnLoad.BindingsShouldCleared [1 ms]
+[xUnit.net 00:00:01.23]     Ninject.Tests.Integration.StandardKernelTests.WhenTryGetIsCalledForServiceWithMultipleBindingsOfSameWeight.TryGet_ServiceAndNameAndParameters_ResolvesUsingFirstMatchingBindingWhenTypeIsNotSelfBinding [SKIP]
+[xUnit.net 00:00:01.23]     Ninject.Tests.Integration.StandardKernelTests.WhenTryGetIsCalledForServiceWithMultipleBindingsOfSameWeight.TryGet_ServiceAndConstraintAndParameters_ResolvesUsingFirstMatchingBindingWhenTypeIsSelfBinding [SKIP]
+[xUnit.net 00:00:01.23]     Ninject.Tests.Integration.StandardKernelTests.WhenTryGetIsCalledForServiceWithMultipleBindingsOfSameWeight.TryGet_ServiceAndConstraintAndParameters_ResolvesUsingFirstMatchingBindingWhenTypeIsNotSelfBindingAndNotGeneric [SKIP]
+[xUnit.net 00:00:01.23]     Ninject.Tests.Integration.StandardKernelTests.WhenTryGetIsCalledForServiceWithMultipleBindingsOfSameWeight.TryGet_ServiceAndNameAndParameters_ResolvesUsingFirstMatchingBindingWhenTypeIsSelfBinding [SKIP]
+  Skipped Ninject.Tests.Integration.StandardKernelTests.WhenTryGetIsCalledForServiceWithMultipleBindingsOfSameWeight.TryGet_ServiceAndNameAndParameters_ResolvesUsingFirstMatchingBindingWhenTypeIsNotSelfBinding [1 ms]
+  Skipped Ninject.Tests.Integration.StandardKernelTests.WhenTryGetIsCalledForServiceWithMultipleBindingsOfSameWeight.TryGet_ServiceAndConstraintAndParameters_ResolvesUsingFirstMatchingBindingWhenTypeIsSelfBinding [1 ms]
+  Skipped Ninject.Tests.Integration.StandardKernelTests.WhenTryGetIsCalledForServiceWithMultipleBindingsOfSameWeight.TryGet_ServiceAndConstraintAndParameters_ResolvesUsingFirstMatchingBindingWhenTypeIsNotSelfBindingAndNotGeneric [1 ms]
+  Skipped Ninject.Tests.Integration.StandardKernelTests.WhenTryGetIsCalledForServiceWithMultipleBindingsOfSameWeight.TryGet_ServiceAndNameAndParameters_ResolvesUsingFirstMatchingBindingWhenTypeIsSelfBinding [1 ms]
+[xUnit.net 00:00:03.16]     Ninject.Tests.Unit.ModuleLoaderTests.WhenLoadModulesIsCalled.PassesMatchingFilesToAppropriatePlugin [FAIL]
+  Failed Ninject.Tests.Unit.ModuleLoaderTests.WhenLoadModulesIsCalled.PassesMatchingFilesToAppropriatePlugin [14 ms]
+  Error Message:
+   Moq.MockException : 
+Expected invocation on the mock at least once, but was never performed: x => x.LoadModules(It.Is<IEnumerable<string>>(e => e.SequenceEqual<string>(fooFiles)))
+
+Performed invocations:
+
+   Mock<IModuleLoaderPlugin:1> (x):
+
+      IModuleLoaderPlugin.SupportedExtensions
+      IModuleLoaderPlugin.SupportedExtensions
+      IModuleLoaderPlugin.LoadModules(Grouping<string, string>)
+
+  Stack Trace:
+     at Moq.Mock.Verify(Mock mock, LambdaExpression expression, Times times, String failMessage) in C:\projects\moq4\src\Moq\Mock.cs:line 330
+   at Moq.Mock`1.Verify(Expression`1 expression) in C:\projects\moq4\src\Moq\Mock`1.cs:line 713
+   at Ninject.Tests.Unit.ModuleLoaderTests.WhenLoadModulesIsCalled.PassesMatchingFilesToAppropriatePlugin() in /home/user/w62/NJ/default3/src/Ninject.Tests/Unit/ModuleLoaderTests.cs:line 48
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+Failed!  - Failed:     1, Passed:   748, Skipped:     5, Total:   754, Duration: 3 s - Ninject.Tests.dll (net6.0)

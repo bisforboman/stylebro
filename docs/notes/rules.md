@@ -275,7 +275,9 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   casing (Pascal for const/static readonly/non-private, the BRO1303 style for private, camel for protected); an
   all-caps word of 2+ letters counts as a word (`MAX_VALUE` -> `MaxValue`). Skipped: digit_digit (`Int32_0` would
   become `Int320`, found in Newtonsoft.Json), results that are keywords (`s_static`) or empty (`m_`); `t_` fields are
-  usually `[ThreadStatic]` (attributed -> skipped).
+  usually `[ThreadStatic]` (attributed -> skipped). init counts multi-word private field names, camelCase against
+  snake_case (`Migration.CountMultiWordPrivateFields`), and turns BRO1308 off when snake_case wins or the code mixes them
+  (trial 62, mono.linq.expressions: 11 of 13 snake_case, renamed).
 - **BRO1309** (SA1300, not namespaces): types (not interfaces), methods, properties, events (incl. field-like), enum
   members, local functions (`PascalCaseNamingAnalyzer`, syntax node actions). Skips: extern/DllImport/LibraryImport,
   attributed properties/enum members, partial methods, indexers/operators, inherited names (explicit
@@ -427,7 +429,9 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
 - **BRO1505** (SA1516) elements separated by a blank line (`Layout/ElementSeparation.cs`). Elements: usings/externs/
   assembly attributes/members of a file or namespace (file-scoped `namespace X;` counts before its first element),
   type members, accessors (only when either neighbour is multi-line). Exempt like StyleCop: field+field, using+using,
-  extern+extern, attribute list+attribute list. A blank line ANYWHERE before the element's code counts (also below its
+  extern+extern, attribute list+attribute list. With BRO1506 on, the blank lines it removes below the element's
+  comments don't count, and the fix removes them while adding the line above the comments (trial 62, Rebus: usings,
+  `// ReSharper ...`, blank, `namespace` took the host a second run; FixOrderTests case). A blank line ANYWHERE before the element's code counts (also below its
   comment or `#if`); the fix inserts above the element's first line (comment/doc/attribute/directive), diagnostic at
   that line's start (FullSpan.Start). Same positions as StyleCop (28/28); StyleCop's fix misses doc comments and
   mangles two-members-on-one-line.
@@ -504,7 +508,10 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   first version flagged 367 lines in Polly, which enforces SA1004);
   **BRO1120** (SA1120) empty `//`/`/* */` reported at the start/end of a group of consecutive comment lines (a comment
   after code starts a group; `////` isn't empty), the fix removes the whole empty run at that end (StyleCop one per
-  run). **BRO1121** (SA1136, `Readability/EnumValueLines.cs`) one enum value per line; a one-line enum gets BRO1509's
+  run); init counts the groups it checks with text, framed by an empty comment at an end or not
+  (`CommentText.GetGroupFraming`), and turns BRO1120 off when framing wins or the code mixes them (trial 62,
+  mono.linq.expressions: 4 of 11 framed, Mono style). **BRO1121** (SA1136, `Readability/EnumValueLines.cs`) one enum
+  value per line; a one-line enum gets BRO1509's
   expansion, and BRO1509 now puts every enum value on its own line (StyleCop's SA1502 fix leaves `A, B`, which its
   SA1136 then reports). `Layout/DocumentationBlankLines.cs`: **BRO1511** (SA1506) blank lines between docs and element,
   also between two `///` blocks; **BRO1512** (SA1511) blank before do-while's `while`; **BRO1513** (SA1514) blank line

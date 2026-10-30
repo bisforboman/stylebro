@@ -68,33 +68,40 @@ internal static class CommentText
     /// lines in the middle separate paragraphs). The fix removes all empty comments at that end of the group, so one
     /// pass is enough. The group of comments the file starts with, the file header, isn't checked (<see cref="IsFileHeader"/>).
     /// </summary>
-    public static IEnumerable<(SyntaxTrivia Reported, IReadOnlyList<SyntaxTrivia> Removed)> GetEmptyComments(IEnumerable<SyntaxTrivia> trivia, SourceText text)
+    public static IEnumerable<(SyntaxTrivia Reported, IReadOnlyList<SyntaxTrivia> Removed)> GetEmptyComments(IEnumerable<SyntaxTrivia> trivia, SourceText text) =>
+        GetGroups(trivia, text).SelectMany(group => GetGroupFindings(group, text));
+
+    /// <summary>
+    /// One value per comment group BRO1120 checks that has text (not the file header, not the empty comments a pair of
+    /// braces holds): whether an empty comment starts or ends it, what BRO1120 removes. init's convention (owner's decision
+    /// 2026-10-29, trial 62: mono.linq.expressions frames 4 of its 11 comments in code with '//' lines).
+    /// </summary>
+    public static IEnumerable<bool> GetGroupFraming(IEnumerable<SyntaxTrivia> trivia, SourceText text) =>
+        GetGroups(trivia, text)
+            .Where(group => !IsFileHeader(group[0].SpanStart, text) && !MarksEmptyBraces(group) && !group.All(IsEmpty))
+            .Select(group => IsEmpty(group[0]) || IsEmpty(group[group.Count - 1]));
+
+    // Comments on consecutive lines form a group. A comment after code starts a new one (like StyleCop: 'x = 1; //' is the
+    // first line of what follows).
+    private static IEnumerable<List<SyntaxTrivia>> GetGroups(IEnumerable<SyntaxTrivia> trivia, SourceText text)
     {
-        var comments = trivia
-            .Where(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia) || t.IsKind(SyntaxKind.MultiLineCommentTrivia))
-            .ToList();
         var group = new List<SyntaxTrivia>();
-        foreach (var comment in comments)
+        foreach (var comment in trivia.Where(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia) || t.IsKind(SyntaxKind.MultiLineCommentTrivia)))
         {
-            // A comment after code starts a new group (like StyleCop: 'x = 1; //' is the first line of what follows).
             var line = text.Lines.GetLineFromPosition(comment.SpanStart);
             var afterCode = text.ToString(TextSpan.FromBounds(line.Start, comment.SpanStart)).Trim().Length > 0;
             if (group.Count > 0 && (afterCode || line.LineNumber != Line(text, group[group.Count - 1].Span.End) + 1))
             {
-                foreach (var finding in GetGroupFindings(group, text))
-                {
-                    yield return finding;
-                }
-
-                group.Clear();
+                yield return group;
+                group = new List<SyntaxTrivia>();
             }
 
             group.Add(comment);
         }
 
-        foreach (var finding in GetGroupFindings(group, text))
+        if (group.Count > 0)
         {
-            yield return finding;
+            yield return group;
         }
     }
 

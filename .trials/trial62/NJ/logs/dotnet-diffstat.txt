@@ -1,0 +1,8 @@
+ src/Ninject/Activation/Pipeline.cs                 | 214 ++---
+ .../Infrastructure/Language/ExtensionsForType.cs   |  16 +-
+ src/Ninject/Ninject.csproj                         |   2 +-
+ .../Directives/ConstructorInjectionDirective.cs    | 126 +--
+ src/Ninject/Planning/IPlan.cs                      | 162 ++--
+ .../Strategies/ConstructorReflectionStrategy.cs    | 188 ++--
+ src/Ninject/Syntax/ResolutionExtensions.cs         | 980 ++++++++++-----------
+ 7 files changed, 844 insertions(+), 844 deletions(-)

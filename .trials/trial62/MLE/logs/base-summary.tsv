@@ -1,0 +1,6 @@
+build	0	11s	dotnet build Mono.Linq.Expressions.sln -c Debug
+twae-Debug	0	4s	twae Debug
+test-Debug	0	8s	env CFG=Debug bash -c dotnet test Mono.Linq.Expressions.sln -c $CFG -f netcoreapp2.1
+twae-Release	0	4s	twae Release
+test-Release	0	7s	env CFG=Release bash -c dotnet test Mono.Linq.Expressions.sln -c $CFG -f netcoreapp2.1
+DONE

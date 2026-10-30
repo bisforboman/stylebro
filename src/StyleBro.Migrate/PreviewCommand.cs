@@ -424,7 +424,7 @@ internal static class PreviewCommand
             }
 
             keptLines.ForEach(Console.WriteLine);
-            GitChecked(copy, ["diff", "--cached", "--ignore-submodules", "--output=" + patch, baseline, "--", ".", .. leftOut.Select(d => $":(exclude){d}/")]);
+            GitChecked(copy, PatchArguments(patch, baseline, leftOut));
             JsonReport.Set("patch", patch);
             var lines = File.Exists(patch) ? File.ReadLines(patch).Count() : 0;
             Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Full diff: {(Path.GetRelativePath(Environment.CurrentDirectory, patch) is var shown && !shown.StartsWith("..", StringComparison.Ordinal) ? shown : patch)} ({lines:N0} lines)"));
@@ -1252,15 +1252,35 @@ internal static class PreviewCommand
             .Where(path => path.Length > 0 && !path.Any(c => char.IsWhiteSpace(c) || c is '"' or '*' or '?' or '[' or '\\' or '!' or '#'));
 
     /// <summary>
+    /// The 'git diff' that writes the preview's patch: the staged changes against <paramref name="baseline"/>, without the
+    /// folders left out. '--binary' carries files git takes for binary: a UTF-16 Directory.Build.props got "Binary files
+    /// differ", and the patch didn't apply (trial 62, mono.linq.expressions).
+    /// </summary>
+    public static string[] PatchArguments(string patch, string baseline, IEnumerable<string> leftOut) =>
+        ["diff", "--cached", "--binary", "--ignore-submodules", "--output=" + patch, baseline, "--", ".", .. leftOut.Select(d => $":(exclude){d}/")];
+
+    /// <summary>
     /// Rewrites a file (null text: it doesn't exist yet) keeping its UTF-8 byte order mark (File.ReadAllText drops it and
-    /// File.WriteAllText wouldn't write it back: Soulseek.NET's .csproj lost its BOM in the preview) and its line endings
+    /// File.WriteAllText wouldn't write it back: Soulseek.NET's .csproj lost its BOM in the preview), its encoding (a UTF-16
+    /// file read as UTF-8 came back UTF-8 and LF: mono.linq.expressions' Directory.Build.props, trial 62) and its line endings
     /// (<see cref="KeepLineEndings"/>). Every settings and project file the tool edits goes through here.
     /// </summary>
     public static void EditFile(string file, Func<string?, string> edit)
     {
         var bytes = File.Exists(file) ? File.ReadAllBytes(file) : null;
         var bom = bytes is [0xEF, 0xBB, 0xBF, ..];
-        var text = bytes is null ? null : Encoding.UTF8.GetString(bytes, bom ? 3 : 0, bytes.Length - (bom ? 3 : 0));
+        Encoding encoding = new UTF8Encoding(bom);
+        string? text = null;
+        if (bytes is not null)
+        {
+            using var reader = new StreamReader(new MemoryStream(bytes), new UTF8Encoding(false), detectEncodingFromByteOrderMarks: true);
+            text = reader.ReadToEnd();
+            if (reader.CurrentEncoding is not UTF8Encoding)
+            {
+                encoding = reader.CurrentEncoding;
+            }
+        }
+
         var edited = edit(text);
 
         // Never an empty MSBuild file: one with only whitespace breaks every build below it (an untracked src/Directory.Build.props
@@ -1270,7 +1290,7 @@ internal static class PreviewCommand
             return;
         }
 
-        File.WriteAllText(file, KeepLineEndings(text ?? FolderLineEnding(file), edited), new UTF8Encoding(bom));
+        File.WriteAllText(file, KeepLineEndings(text ?? FolderLineEnding(file), edited), encoding);
     }
 
     /// <summary>

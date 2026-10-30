@@ -241,6 +241,17 @@ A few settings work a little differently:
 - **Blank lines below a type's `{`** ([BRO1503](rules/BRO1503.md)) count the `{` of namespaces and types (not blocks in
   members, empty or one-line bodies, or `{ // note`): right above the code inside or with a blank line below. Mostly right
   above: the rule stays on; mostly with one or mixed: it's turned off (cecil puts one below 543 of 720).
+- **Indentation** counts files: most indented lines start with a tab, or with spaces. Mostly tabs: `indent_style = tab`
+  is written, so the lines fixes add are indented with tabs too (mono.linq.expressions has no `.editorconfig` and indents
+  with tabs).
+- **Comments framed by empty `//` lines** ([BRO1120](rules/BRO1120.md)) count the comment groups BRO1120 checks that
+  have text (not the file header or a `//` a pair of braces holds): with an empty `//` at an end (`//` / `// text` / `//`,
+  Mono style) or with text at both ends. Mostly text at both ends: the rule stays on; mostly framed or mixed: it's turned
+  off.
+- **Multi-word private field names** ([BRO1308](rules/BRO1308.md)) count private fields whose name has two words or more:
+  camelCase (`breakTarget`) or snake_case (`break_target`); one-word names fit both, and `m_`-style prefixes are the
+  prefix rules'. Mostly camelCase: the rule stays on; mostly snake_case or mixed: it's turned off (mono.linq.expressions
+  names 11 of its 13 multi-word fields snake_case).
 - **Blank lines below doc comments** ([BRO1511](rules/BRO1511.md)) count doc comments right above their element or with
   a blank line between. Mostly right above: the rule stays on; mostly with one or mixed: it's turned off (MoreLINQ).
 - **Primary-constructor parameters** ([BRO1302](rules/BRO1302.md)) count those named like parameters (`logger`) or like
@@ -296,6 +307,9 @@ A few settings work a little differently:
 | Setting | What's counted | Rule | Key |
 |---|---|---|---|
 | Private field names | `field` or `_field` | [BRO1303](rules/BRO1303.md) | `stylebro_private_field_naming` |
+| Indentation | files indented with tabs or with spaces | the SDK's formatter, the fixes' new lines | `indent_style` |
+| Comments framed by empty `//` | comment groups with an empty `//` at an end or text at both ends | [BRO1120](rules/BRO1120.md) | `dotnet_diagnostic.BRO1120.severity` |
+| Multi-word private field names | camelCase or snake_case (`break_target`) | [BRO1308](rules/BRO1308.md) | `dotnet_diagnostic.BRO1308.severity` |
 | `{` placement | `{` of a multi-line block on its own line or at the end of the line | SDK formatter (IDE0055) | `csharp_new_line_before_open_brace` |
 | `else`/`catch`/`finally` | after `}` on a new line or the same line | SDK formatter (IDE0055) | `csharp_new_line_before_else`, `_catch`, `_finally` |
 | Braces | one-line `if`/`else`/`for`/`foreach`/`while`/`using`/`lock` bodies with or without braces | [BRO1514](rules/BRO1514.md)-[BRO1516](rules/BRO1516.md) | `csharp_prefer_braces` |

@@ -1,0 +1,28 @@
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (163 ids); --all applies every analyzer's and compiler fix.
+Leaving alone: src/CommonServiceLocator.NinjectAdapter/, src/CommonServiceLocator.NinjectAdapter.Tests/, src/Ninject.Benchmarks/, src/Ninject.Tests/, src/Ninject.Tests.TestAssembly/, src/Ninject.Tests.TestModule/, src/RemotingServer/, src/RemotingTestClient/: StyleCop didn't run there, so the migration set nothing up there (the stylebro-migrate block in .editorconfig names them).
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net46, net462, net6.0, netstandard2.0).
+Configurations: runs for Release (Ninject.Tests) too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.
+Checked net6.0, Release (run 1 of 5)
+Checked net46 (run 2 of 5)
+Checked netstandard2.0 (run 3 of 5)
+Checked net6.0 (run 4 of 5)
+Checked net462 (run 5 of 5)
+== net46 (3 project(s), 6 files with findings)
+'dotnet format' had warnings loading the workspace in its net46 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+== net6.0 (3 project(s), 6 files with findings)
+== netstandard2.0 (3 project(s), 6 files with findings)
+Run 1: 6 files changed:
+  src/Ninject/Activation/Pipeline.cs
+  src/Ninject/Infrastructure/Language/ExtensionsForType.cs
+  src/Ninject/Planning/Directives/ConstructorInjectionDirective.cs
+  src/Ninject/Planning/IPlan.cs
+  src/Ninject/Planning/Strategies/ConstructorReflectionStrategy.cs
+  src/Ninject/Syntax/ResolutionExtensions.cs
+Checked net6.0, Release (run 1 of 5)
+Checked netstandard2.0 (run 2 of 5)
+Checked net46 (run 3 of 5)
+Checked net6.0 (run 4 of 5)
+Checked net462 (run 5 of 5)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

@@ -1,0 +1,15 @@
+  Determining projects to restore...
+  Restored /home/user/w62/MLE/default2/Mono.Linq.Expressions.csproj (in 446 ms).
+  Restored /home/user/w62/MLE/default2/dbg/dbg.csproj (in 444 ms).
+  Restored /home/user/w62/MLE/default2/Test/Mono.Linq.Expressions.Tests.csproj (in 511 ms).
+  Mono.Linq.Expressions -> /home/user/w62/MLE/default2/bin/Release/net40/Mono.Linq.Expressions.dll
+  Mono.Linq.Expressions -> /home/user/w62/MLE/default2/bin/Release/netstandard2.0/Mono.Linq.Expressions.dll
+  dbg -> /home/user/w62/MLE/default2/dbg/bin/x86/Release/net40/dbg.dll
+  Mono.Linq.Expressions.Tests -> /home/user/w62/MLE/default2/Test/bin/Release/net40/Mono.Linq.Expressions.Tests.dll
+  Mono.Linq.Expressions.Tests -> /home/user/w62/MLE/default2/Test/bin/Release/netcoreapp2.1/Mono.Linq.Expressions.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:04.10

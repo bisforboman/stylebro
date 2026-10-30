@@ -62,7 +62,8 @@ public sealed class ElementSeparationCodeFixProvider : CodeFixProvider
         var reported = new HashSet<int>(diagnostics.Select(d => d.Location.SourceSpan.Start));
         var changes = new List<TextChange>();
         var autoAccessorLines = Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.AutoAccessorsOnOneLine, cancellationToken) ? options : null;
-        foreach (var (previous, current) in ElementSeparation.GetViolations(root, text, autoAccessorLines))
+        var commentBlankLines = Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.BlankLineAfterComment, cancellationToken) ? options : null;
+        foreach (var (previous, current) in ElementSeparation.GetViolations(root, text, autoAccessorLines, commentBlankLines: commentBlankLines))
         {
             if (!reported.Contains(current.FullSpan.Start))
             {
@@ -79,6 +80,7 @@ public sealed class ElementSeparationCodeFixProvider : CodeFixProvider
             else if (ElementSeparation.GetChange(previous, current, text) is { } change)
             {
                 changes.Add(change);
+                changes.AddRange(ElementSeparation.GetCommentBlankLines(current, text, commentBlankLines).Select(l => new TextChange(l.SpanIncludingLineBreak, string.Empty)));
             }
         }
 

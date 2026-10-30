@@ -191,6 +191,25 @@ public sealed class FormatHostTests : IDisposable
         Assert.Single(Views.WarningsOf([failure], solution, Views.Of(solution, net462, []), Views.FrameworksOf(net462)));
     }
 
+    // Rebus (trial 62): System.IO.Hashing 10.0.6 doesn't support net6.0, and MSBuild reported that under Rebus.Tests (net10.0
+    // only), so the host named its net10.0 run; 'dotnet format' names the net6.0 run, the framework the warning is about.
+    [Fact]
+    public void AFrameworkSupportWarning_GoesToTheRunOfThatFramework()
+    {
+        using var workspace = new AdhocWorkspace();
+        var solution = workspace.CurrentSolution
+            .AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Lib(net6.0)", "Lib", LanguageNames.CSharp, filePath: "/r/Lib/Lib.csproj"))
+            .AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Lib(net10.0)", "Lib", LanguageNames.CSharp, filePath: "/r/Lib/Lib.csproj"))
+            .AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Tests", "Tests", LanguageNames.CSharp, filePath: "/r/Tests/Tests.csproj"));
+        var failure = new WorkspaceDiagnostic(WorkspaceDiagnosticKind.Failure, "Msbuild failed when processing the file '/r/Tests/Tests.csproj' with message: System.IO.Hashing 10.0.6 doesn't support net6.0 and has not been tested with it.");
+        string[] net10 = ["/r/Lib/Lib.csproj|net10.0", "/r/Tests/Tests.csproj|net10.0"];
+        string[] net6 = ["/r/Lib/Lib.csproj|net6.0"];
+
+        Assert.Equal("net6.0", Views.UnsupportedFramework(failure.Message));
+        Assert.Empty(Views.WarningsOf([failure], solution, Views.Of(solution, net10, []), Views.FrameworksOf(net10)));
+        Assert.Single(Views.WarningsOf([failure], solution, Views.Of(solution, net6, []), Views.FrameworksOf(net6)));
+    }
+
     [Fact]
     public void TheEngineOption_IsTakenOut()
     {

@@ -1,0 +1,159 @@
+You can invoke the tool using the following command: bro
+Tool 'stylebro.tool' (version '0.8.0-trial62.4') was successfully installed.
+== package-unsupported-framework : a package that warns about one of a multi-targeted project's frameworks
+  preview                      exit 0 (24 s)
+  init                         exit 0 (4 s)
+  host-format                  exit 0 (20 s)
+  host-check                   exit 0 (1 s)
+  host-check-build             exit 0 (81 s)
+  dotnet-format-format         exit 0 (41 s)
+  dotnet-format-check          exit 0 (1 s)
+  dotnet-format-check-build    exit 0 (57 s)
+  FAIL package-unsupported-framework (250 s)
+    - host named the net10.0 run for the net6.0 warning:
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net6.0).
+Checked net6.0 (run 1 of 2)
+Checked net10.0 (run 2 of 2)
+== net10.0 (2 project(s), 1 file with findings)
+'dotnet format' had warnings loading the workspace in its net10.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+== net6.0 (1 project(s), 1 file with findings)
+Run 1: 1 file changed:
+  src/Lib/Calc.cs
+Checked net6.0 (run 1 of 2)
+Checked net10.0 (run 2 of 2)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+
+    - the engines' load-warning notes name different runs: host 'net10.0', dotnet-format 'net6.0'
+    --- build.txt (last 12 lines)
+      /root/.nuget/packages/system.io.hashing/10.0.6/buildTransitive/netcoreapp2.0/System.IO.Hashing.targets(4,5): warning : System.IO.Hashing 10.0.6 doesn't support net6.0 and has not been tested with it. Consider upgrading your TargetFramework to net8.0 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [/home/user/fx62/w4/package-unsupported-framework/host/src/Lib/Lib.csproj::TargetFramework=net6.0]
+        Lib -> /home/user/fx62/w4/package-unsupported-framework/host/src/Lib/bin/Debug/net6.0/Lib.dll
+        Lib -> /home/user/fx62/w4/package-unsupported-framework/host/src/Lib/bin/Debug/net10.0/Lib.dll
+        Lib.Tests -> /home/user/fx62/w4/package-unsupported-framework/host/tests/Lib.Tests/bin/Debug/net10.0/Lib.Tests.dll
+      
+      Build succeeded.
+      
+      /root/.nuget/packages/system.io.hashing/10.0.6/buildTransitive/netcoreapp2.0/System.IO.Hashing.targets(4,5): warning : System.IO.Hashing 10.0.6 doesn't support net6.0 and has not been tested with it. Consider upgrading your TargetFramework to net8.0 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [/home/user/fx62/w4/package-unsupported-framework/host/src/Lib/Lib.csproj::TargetFramework=net6.0]
+          1 Warning(s)
+          0 Error(s)
+      
+      Time Elapsed 00:00:03.07
+    --- dotnet-format-check-build.txt (last 12 lines)
+      Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+      Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+      Building Fixture.sln in Debug, Debug|x64, Debug|x86, Release, Release|x64, Release|x86 with warnings as errors, and a copy of HEAD to compare...
+      Debug: no findings, no new errors.
+      Debug|x64: no findings, no new errors.
+      Debug|x86: no findings, no new errors.
+      Release: no findings, no new errors.
+      Release|x64: no findings, no new errors.
+      Release|x86: no findings, no new errors.
+      Clean.
+    --- dotnet-format-check.txt (last 12 lines)
+      Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+      Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+      Clean.
+    --- dotnet-format-format.txt (last 12 lines)
+      Multi-targeted: one 'dotnet format' run per target framework (net10.0, net6.0).
+      Checked net6.0 (run 1 of 2)
+      Checked net10.0 (run 2 of 2)
+      == net10.0 (2 project(s), 1 file with findings)
+      == net6.0 (1 project(s), 1 file with findings)
+      'dotnet format' had warnings loading the workspace in its net6.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+      Run 1: 1 file changed:
+        src/Lib/Calc.cs
+      Checked net6.0 (run 1 of 2)
+      Checked net10.0 (run 2 of 2)
+      Run 2: 0 files changed, clean.
+      Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+    --- host-check-build.txt (last 12 lines)
+      Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+      Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+      Building Fixture.sln in Debug, Debug|x64, Debug|x86, Release, Release|x64, Release|x86 with warnings as errors, and a copy of HEAD to compare...
+      Debug: no findings, no new errors.
+      Debug|x64: no findings, no new errors.
+      Debug|x86: no findings, no new errors.
+      Release: no findings, no new errors.
+      Release|x64: no findings, no new errors.
+      Release|x86: no findings, no new errors.
+      Clean.
+    --- host-check.txt (last 12 lines)
+      Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+      Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+      Clean.
+    --- host-format.txt (last 12 lines)
+      Multi-targeted: one 'dotnet format' run per target framework (net10.0, net6.0).
+      Checked net6.0 (run 1 of 2)
+      Checked net10.0 (run 2 of 2)
+      == net10.0 (2 project(s), 1 file with findings)
+      'dotnet format' had warnings loading the workspace in its net10.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+      == net6.0 (1 project(s), 1 file with findings)
+      Run 1: 1 file changed:
+        src/Lib/Calc.cs
+      Checked net6.0 (run 1 of 2)
+      Checked net10.0 (run 2 of 2)
+      Run 2: 0 files changed, clean.
+      Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+    --- init.txt (last 12 lines)
+          csharp_using_directive_placement, dotnet_diagnostic.BRO1001.severity, dotnet_diagnostic.BRO1135.severity,
+          dotnet_diagnostic.BRO1505.severity, dotnet_diagnostic.BRO1306.severity,
+          csharp_space_between_method_declaration_parameter_list_parentheses.
+      
+      1 project targets several frameworks (src/Lib/Lib.csproj).
+      Run 'bro format' instead of 'dotnet format' here: with IDE0055 on, 'dotnet format' crashes on multi-targeted
+      projects (Roslyn can't merge the target frameworks' copies of a file). The command runs it once per target framework.
+      Wrote the built-in rule severities to .editorconfig.
+      Set the preset version in Directory.Build.props (<StyleBroPreset>1.0</StyleBroPreset>): rules of newer releases stay off until you raise it.
+      To report them on build too: <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> in Directory.Build.props.
+      Tip: --agents-md writes a StyleBro section into AGENTS.md for AI coding agents.
+      Next: run 'bro format'. Plain 'dotnet format' also applies every other analyzer's and the compiler's fixes.
+    --- preview.txt (last 12 lines)
+        BRO1001  Members should be ordered                    1 file
+        BRO1106  Use string.Empty for empty strings           1 file
+        IDE0036  Modifier order                               1 file
+      Sample (BRO1001, BRO1106, src/Lib/Calc.cs; IDE0036 changed this file too):
+        -    public string Name = "";
+        +    public static int Twice(int x) { return x * 2; }
+      Sample (IDE0036, src/Lib/Calc.cs; BRO1001, BRO1106 changed this file too):
+        -    static public int Twice(int x) { return x * 2; }
+        +    public string Name = string.Empty;
+      Full diff: .git/stylebro-preview.patch (74 lines)
+      Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+      Done in 23s.
+    --- test.txt (last 12 lines)
+      /root/.nuget/packages/system.io.hashing/10.0.6/buildTransitive/netcoreapp2.0/System.IO.Hashing.targets(4,5): warning : System.IO.Hashing 10.0.6 doesn't support net6.0 and has not been tested with it. Consider upgrading your TargetFramework to net8.0 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [/home/user/fx62/w4/package-unsupported-framework/host/src/Lib/Lib.csproj::TargetFramework=net6.0]
+      Test run for /home/user/fx62/w4/package-unsupported-framework/host/tests/Lib.Tests/bin/Debug/net10.0/Lib.Tests.dll (.NETCoreApp,Version=v10.0)
+      A total of 1 test files matched the specified pattern.
+      
+      Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 12 ms - Lib.Tests.dll (net10.0)
+    --- untouched-build.txt (last 12 lines)
+      /root/.nuget/packages/system.io.hashing/10.0.6/buildTransitive/netcoreapp2.0/System.IO.Hashing.targets(4,5): warning : System.IO.Hashing 10.0.6 doesn't support net6.0 and has not been tested with it. Consider upgrading your TargetFramework to net8.0 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [/home/user/fx62/w4/package-unsupported-framework/untouched/src/Lib/Lib.csproj::TargetFramework=net6.0]
+      
+      Build succeeded.
+      
+      /root/.nuget/packages/system.io.hashing/10.0.6/buildTransitive/netcoreapp2.0/System.IO.Hashing.targets(4,5): warning : System.IO.Hashing 10.0.6 doesn't support net6.0 and has not been tested with it. Consider upgrading your TargetFramework to net8.0 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [/home/user/fx62/w4/package-unsupported-framework/untouched/src/Lib/Lib.csproj::TargetFramework=net6.0]
+          1 Warning(s)
+          0 Error(s)
+      
+      Time Elapsed 00:00:13.62
+| Shape | Result | Time |
+| --- | --- | --- |
+| package-unsupported-framework | FAIL: host named the net10.0 run for the net6.0 warning:
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net6.0).
+Checked net6.0 (run 1 of 2)
+Checked net10.0 (run 2 of 2)
+== net10.0 (2 project(s), 1 file with findings)
+'dotnet format' had warnings loading the workspace in its net10.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+== net6.0 (1 project(s), 1 file with findings)
+Run 1: 1 file changed:
+  src/Lib/Calc.cs
+Checked net6.0 (run 1 of 2)
+Checked net10.0 (run 2 of 2)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+<br>the engines' load-warning notes name different runs: host 'net10.0', dotnet-format 'net6.0' | 250 s |
+Work folder: /home/user/fx62/w4

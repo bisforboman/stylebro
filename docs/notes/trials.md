@@ -1204,3 +1204,48 @@ engines (`.trials/README.md`, "Engine soak").
   25/51; 19/52.
 - Environment: SDK 10.0.113 + 8.0.132; the trial feed in the user NuGet.Config; `-p:NuGetAudit=false`; Respawn's global.json
   (10.0.100, latestFeature) left as is; clones from a local path need the real remote for SourceLink.
+
+## Trial 62 (2026-10-29, not clean: owner "Not clean", tally 0; host soak: clean, the seventh clean soak with the host as the default)
+
+- Repos (three random plus one targeted): ninject/Ninject, rebus-org/Rebus, serilog/serilog-settings-configuration (random,
+  seed 62: draws 73, 22, 8 of 95 entries; 0-75, 78-80 and 82-87 are used, Vogen/PdfPig/DotNetty too large, so they walked to
+  88, 89, 90; `.trials/trial62/logs/picks.md`), jbevain/mono.linq.expressions (targeted at trial 61's BRO1503 convention: a
+  blank line below 65 of 78 type/namespace `{`, Mono style; found with `.trials/trial62/blankbrace.py`; added to the pool).
+  Tested main 9d259f5 (after #319) plus this PR's commits: round 1 on 0.8.0-trial62.1 (`default`/`dotnet`), round 2 on .4
+  (MLE, NJ, SSC: `default2`/`dotnet2`; .2 and .3 runs of MLE in `MLE/logs/round2a`, `round2b`), round 3 on .5 (all four,
+  `default3`/`dotnet3`). Logs: `.trials/trial62/<repo>/logs/`; the scripts are trial 61's.
+- One session, two lanes, resumable; the worker restarted twice (NJ's round 1 old engine, RB's base and old engine rerun).
+  Wall clock: 19:28 start, round 1 19:44-22:02, round 2 21:47-22:49, round 3 22:49-00:15, verdict 00:30.
+- mono.linq.expressions: BRO1503 off (trial 61's fix held). Its Directory.Build.props is UTF-16 with a BOM and CRLF:
+  `PreviewCommand.EditFile` decoded every file as UTF-8 and wrote the preset version back as UTF-8 with LF (the whole file
+  changed); it now keeps a UTF-16/32 file's encoding and line endings, and the preview's patch is written with `--binary`
+  (it said "Binary files differ" and didn't apply). Fixture `utf16-props`. No `.editorconfig` and tabs everywhere: the
+  preset's spaces applied, and BRO1107 indented its new lines with spaces. Owner's decisions: init keeps tabs
+  (`indent_style = tab`, counted per file; fixture `tab-indentation`); init turns BRO1308 off when multi-word private
+  fields are snake_case or mixed (11 of 13 here; the question named BRO1303 by mistake, round 2 showed BRO1308 renames);
+  init turns BRO1120 off when comments in code are framed by empty `//` lines or mixed (4 of 11 here).
+- Rebus: the host's format took a second run (8 files): `usings` / `// ReSharper disable ...` / blank / `namespace`.
+  BRO1506 removes the blank line below the comments, then BRO1505 wants one above them; run first, BRO1505 took the blank
+  line below for the separation, and once one was above, BRO1506 saw the comments as standalone and kept it. BRO1505 now
+  doesn't count the blank lines BRO1506 removes below an element's comments and its fix removes them (FixOrderTests case).
+  The host's load-warning note named the net10.0 run, the old engine's net6.0: System.IO.Hashing 10.0.6 "doesn't support
+  net6.0/net7.0", which MSBuild reported under Rebus.Tests (net10.0 only). Such a failure now goes to the run of the
+  framework it names (`Views.UnsupportedFramework`; fixture `package-unsupported-framework`).
+- Ninject (StyleCop 1.1.118, migrate): the untouched TWAE build fails (xUnit1013 in the tests), so check --build says Not
+  verified (exit 3) on both engines; its two untouched-error lines came in either order (MSBuild's parallel output), now
+  sorted (`FormatCommand.StoppedLines`). 5 CRLF files in an LF repository were converted (migrate's line endings note).
+- Serilog settings: its tests publish test apps and hang with MSBuild node reuse (`MSBUILDDISABLENODEREUSE=1` for the test
+  step). The old engine's note about TestDummies (no net10.0) is the documented loose load.
+- #312: `bro check` after a clean format answered from the record in about a second with the verdict and exit code of the
+  full check after deleting the record (Clean, 0) on all four and both engines; check --build said Clean (MLE, SSC) or Not
+  verified (NJ, RB: the untouched TWAE builds fail) on both engines.
+- Every TWAE build (Debug, Release) failed or passed as untouched (NJ xUnit1013, RB CS1591 in Rebus.Tests.Contracts), and
+  the tests matched the untouched code: MLE 75, NJ 748 + 1 failing untouched, SSC 331/332 per framework, RB 630 with its
+  timing tests (ItWorks(...), CanDoItSyncWithoutBlocking; CheckIdleBehavior failed once in round 1, passed 3 of 3 on rerun).
+- Host soak: no fallback; round 3 trees, exit codes, verdicts, --json and logs identical on all four apart from Serilog's
+  documented loose load; all Compare-Format runs the same. Format (s, host/dotnet-format, r3): Rebus 97/209, Ninject 37/111,
+  Serilog 61/130, MLE 19/86; check --build: 105/137, 70/83, 75/56, 43/66; full check: 34/62, 25/39, 29/22, 12/21. Soak
+  (Compare-Format, check; format): Rebus 110/164; 61/176, Ninject 39/88; 46/113, Serilog 49/122; 38/107, MLE 17/40; 12/55.
+- Environment: SDK 10.0.113 + 8.0.132; the trial feed in the user NuGet.Config; `-p:NuGetAudit=false`; net40 builds need
+  `/usr/lib/mono/4.0-api` (linked to Microsoft.NETFramework.ReferenceAssemblies.net40 1.0.3); Rebus's tests take ~10 minutes
+  per configuration.

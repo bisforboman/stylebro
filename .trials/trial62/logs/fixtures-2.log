@@ -1,0 +1,17 @@
+== Packing 0.0.0-fixture.20261029214321 into /home/user/fx62/w2/feed
+You can invoke the tool using the following command: bro
+Tool 'stylebro.tool' (version '0.0.0-fixture.20261029214321') was successfully installed.
+== utf16-props : a UTF-16 Directory.Build.props with CRLF
+  preview                      exit 0 (14 s)
+  init                         exit 0 (2 s)
+  host-format                  exit 0 (13 s)
+  host-check                   exit 0 (0 s)
+  host-check-build             exit 0 (34 s)
+  dotnet-format-format         exit 0 (18 s)
+  dotnet-format-check          exit 0 (0 s)
+  dotnet-format-check-build    exit 0 (34 s)
+  PASS utf16-props (124 s)
+| Shape | Result | Time |
+| --- | --- | --- |
+| utf16-props | pass | 124 s |
+Work folder: /home/user/fx62/w2

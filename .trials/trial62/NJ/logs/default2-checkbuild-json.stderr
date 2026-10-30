@@ -1,0 +1,19 @@
+Checking StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (163 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Leaving alone: src/CommonServiceLocator.NinjectAdapter/, src/CommonServiceLocator.NinjectAdapter.Tests/, src/Ninject.Benchmarks/, src/Ninject.Tests/, src/Ninject.Tests.TestAssembly/, src/Ninject.Tests.TestModule/, src/RemotingServer/, src/RemotingTestClient/: StyleCop didn't run there, so the migration set nothing up there (the stylebro-migrate block in .editorconfig names them).
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net46, net462, net6.0, netstandard2.0).
+Checked net462 (run 1 of 4)
+Checked netstandard2.0 (run 2 of 4)
+Checked net46 (run 3 of 4)
+Checked net6.0 (run 4 of 4)
+'dotnet format' had warnings loading the workspace in its net46 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Building Ninject.sln in Debug, Release with warnings as errors, and a copy of HEAD to compare...
+Debug: no findings, no new errors (2 errors the untouched code has too, not counted).
+  CSC: xUnit1013: Public method 'Dispose' on test class 'DisposableObject' should be marked as a Theory. Reduce the visibility of the method, or add a Theory attribute to the method. (https://xunit.net/xunit.analyzers/rules/xUnit1013) (net462)
+  CSC: xUnit1013: Public method 'Dispose' on test class 'DisposableObject' should be marked as a Theory. Reduce the visibility of the method, or add a Theory attribute to the method. (https://xunit.net/xunit.analyzers/rules/xUnit1013) (net6.0)
+Release: no findings, no new errors (2 errors the untouched code has too, not counted).
+  CSC: xUnit1013: Public method 'Dispose' on test class 'DisposableObject' should be marked as a Theory. Reduce the visibility of the method, or add a Theory attribute to the method. (https://xunit.net/xunit.analyzers/rules/xUnit1013) (net462)
+  CSC: xUnit1013: Public method 'Dispose' on test class 'DisposableObject' should be marked as a Theory. Reduce the visibility of the method, or add a Theory attribute to the method. (https://xunit.net/xunit.analyzers/rules/xUnit1013) (net6.0)
+Formatting is clean. But:
+Not verified: the Debug, Release builds failed, as the untouched code's do (above), so they compiled nothing past their errors: fix them (a missing workload, a failed restore), then run again.

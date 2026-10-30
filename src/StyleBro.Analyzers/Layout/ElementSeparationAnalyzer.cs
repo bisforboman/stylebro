@@ -27,7 +27,8 @@ public sealed class ElementSeparationAnalyzer : DiagnosticAnalyzer
                 var options = c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Tree);
                 var autoAccessorLines = Severities.IsOn(compilationOptions, c.Tree, DiagnosticIds.AutoAccessorsOnOneLine, c.CancellationToken) ? options : null;
                 var allowAdjacent = ElementSeparation.AllowsAdjacentSingleLineMembers(options);
-                foreach (var (previous, current) in ElementSeparation.GetViolations(c.Tree.GetRoot(c.CancellationToken), text, autoAccessorLines, allowAdjacent))
+                var commentBlankLines = Severities.IsOn(compilationOptions, c.Tree, DiagnosticIds.BlankLineAfterComment, c.CancellationToken) ? options : null;
+                foreach (var (previous, current) in ElementSeparation.GetViolations(c.Tree.GetRoot(c.CancellationToken), text, autoAccessorLines, allowAdjacent, commentBlankLines))
                 {
                     if (ElementSeparation.GetChange(previous, current, text) is not null)
                     {

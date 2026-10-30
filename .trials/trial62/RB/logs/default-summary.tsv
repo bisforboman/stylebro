@@ -1,0 +1,13 @@
+preview	0	127s	bro preview init
+setup	0	9s	bash -c printf "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"StyleBro.Analyzers\" Version=\"${V:-0.8.0-trial62.1}\" PrivateAssets=\"all\" />\n  </ItemGroup>\n</Project>\n" > Directory.Build.props && git add -N Directory.Build.props && git diff --stat && bro init --write
+format	0	115s	bro format
+check	0	0s	bro check
+check-json	0
+check-full	0	38s	bro check
+checkbuild	3	102s	bro check --build
+checkbuild-json	3
+twae-Debug	1	26s	twae Debug
+test-Debug	1	581s	env CFG=Debug bash -c dotnet test Rebus.Tests -c $CFG
+twae-Release	1	13s	twae Release
+test-Release	1	530s	env CFG=Release bash -c dotnet test Rebus.Tests -c $CFG
+DONE

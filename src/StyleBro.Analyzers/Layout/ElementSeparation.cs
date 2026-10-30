@@ -32,16 +32,17 @@ internal static class ElementSeparation
     /// accessors of a property, indexer or event. Like StyleCop, these pairs don't need one: two fields (unless the first
     /// spans several lines); two single-line properties (like StyleCop's unreleased master); two usings, two extern
     /// aliases or two attribute lists; and two accessors that are both on a single line. <paramref name="autoAccessorLines"/>:
-    /// see <see cref="NeedsBlankLine"/>; <paramref name="allowAdjacentSingleLine"/>: <see cref="AllowAdjacentSingleLineMembersKey"/>.
+    /// see <see cref="NeedsBlankLine"/>; <paramref name="allowAdjacentSingleLine"/>: <see cref="AllowAdjacentSingleLineMembersKey"/>;
+    /// <paramref name="commentBlankLines"/>: see <see cref="HasBlankLineBetween"/>.
     /// </summary>
-    public static IEnumerable<(SyntaxNode Previous, SyntaxNode Current)> GetViolations(SyntaxNode root, SourceText text, AnalyzerConfigOptions? autoAccessorLines, bool allowAdjacentSingleLine = false)
+    public static IEnumerable<(SyntaxNode Previous, SyntaxNode Current)> GetViolations(SyntaxNode root, SourceText text, AnalyzerConfigOptions? autoAccessorLines, bool allowAdjacentSingleLine = false, AnalyzerConfigOptions? commentBlankLines = null)
     {
         foreach (var node in root.DescendantNodesAndSelf(n => n is CompilationUnitSyntax or BaseNamespaceDeclarationSyntax or TypeDeclarationSyntax or MemberDeclarationSyntax or AccessorListSyntax))
         {
             var elements = GetElements(node);
             for (var i = 1; i < elements.Count; i++)
             {
-                if (NeedsBlankLine(elements[i - 1], elements[i], text, autoAccessorLines, allowAdjacentSingleLine) && !HasBlankLineBetween(elements[i - 1], elements[i], text))
+                if (NeedsBlankLine(elements[i - 1], elements[i], text, autoAccessorLines, allowAdjacentSingleLine) && !HasBlankLineBetween(elements[i - 1], elements[i], text, commentBlankLines))
                 {
                     yield return (elements[i - 1], elements[i]);
                 }
@@ -122,16 +123,22 @@ internal static class ElementSeparation
         };
     }
 
-    /// <summary>Whether there's a blank line anywhere between the two elements' code (BRO1505; also used by BRO1510's fix).</summary>
-    public static bool HasBlankLineBetween(SyntaxNode previous, SyntaxNode current, SourceText text)
+    /// <summary>
+    /// Whether there's a blank line anywhere between the two elements' code (BRO1505; also used by BRO1510's fix).
+    /// <paramref name="commentBlankLines"/> is the file's options when BRO1506 is on (else null): the blank lines its fix
+    /// removes below the element's comments don't count, so the result doesn't depend on which fix runs first (trial 62,
+    /// Rebus: usings, '// ReSharper disable ...', a blank line, the namespace took a second run).
+    /// </summary>
+    public static bool HasBlankLineBetween(SyntaxNode previous, SyntaxNode current, SourceText text, AnalyzerConfigOptions? commentBlankLines = null)
     {
         // Like StyleCop, a blank line anywhere before the element's code counts, also one between its comment (or
         // '#if') and the code. The fix still adds the line above the comment.
         var from = text.Lines.GetLineFromPosition(GetEnd(previous)).LineNumber + 1;
         var to = text.Lines.GetLineFromPosition(current.SpanStart).LineNumber;
+        var removed = new HashSet<int>(GetCommentBlankLines(current, text, commentBlankLines).Select(l => l.LineNumber));
         for (var number = from; number < to; number++)
         {
-            if (text.ToString(text.Lines[number].Span).Trim().Length == 0)
+            if (text.ToString(text.Lines[number].Span).Trim().Length == 0 && !removed.Contains(number))
             {
                 return true;
             }
@@ -139,6 +146,19 @@ internal static class ElementSeparation
 
         return false;
     }
+
+    /// <summary>
+    /// The blank lines BRO1506's fix removes below the element's comments (<paramref name="commentBlankLines"/>: the file's
+    /// options when BRO1506 is on, else none). BRO1505 doesn't count them, and its fix removes them along with adding the
+    /// line above the comments: once that line is there, BRO1506 takes the comments for standalone and keeps the line below.
+    /// </summary>
+    public static IEnumerable<TextLine> GetCommentBlankLines(SyntaxNode current, SourceText text, AnalyzerConfigOptions? commentBlankLines) =>
+        commentBlankLines is null
+            ? []
+            : current.GetLeadingTrivia()
+                .SelectMany(t => TrailingBlankLines.GetBlankLinesAfterComment(t, text, TrailingBlankLines.RemovesStandalone(commentBlankLines)))
+                .GroupBy(l => l.LineNumber)
+                .Select(g => g.First());
 
     /// <summary>
     /// BRO1601's fix: where a blank line goes below a property it documents, when another property sits right below it

@@ -1,0 +1,13 @@
+preview	0	66s	bro preview migrate
+setup	0	14s	bash -c bro migrate . --write && sed -i "s#<PackageReference Include=\"StyleCop.Analyzers\" Version=\"1.1.118\">#<PackageReference Include=\"StyleBro.Analyzers\" Version=\"${V:-0.8.0-trial62.1}\">#" src/Ninject/Ninject.csproj && git diff --stat
+format	0	54s	bro format
+check	0	0s	bro check
+check-json	0
+check-full	0	38s	bro check
+checkbuild	3	107s	bro check --build
+checkbuild-json	3
+twae-Debug	1	22s	twae Debug
+test-Debug	1	22s	env CFG=Debug bash -c dotnet test Ninject.sln -c $CFG -f net6.0
+twae-Release	1	30s	twae Release
+test-Release	1	29s	env CFG=Release bash -c dotnet test Ninject.sln -c $CFG -f net6.0
+DONE

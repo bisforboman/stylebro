@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 
 namespace StyleBro.Host;
@@ -110,8 +111,19 @@ public static class Views
         bool Names(WorkspaceDiagnostic d, IEnumerable<string> paths) => paths.Any(p => d.Message.Contains(p, StringComparison.OrdinalIgnoreCase));
         return diagnostics.Where(d => d is ProjectDiagnostic project
             ? view.ContainsProject(project.ProjectId)
+            : frameworks.Count > 0 && UnsupportedFramework(d.Message) is { } unsupported
+            ? frameworks.Contains(unsupported, StringComparer.OrdinalIgnoreCase)
             : !Names(d, all) || Names(d, notLoaded) || (!(d.Kind == WorkspaceDiagnosticKind.Failure && Names(d, failed)) && Names(d, own))).ToList();
     }
+
+    /// <summary>
+    /// The framework a package's support warning names ("System.IO.Hashing 10.0.6 doesn't support net6.0 and has not been
+    /// tested with it"), else null. Such a failure belongs to the run of that framework, where a 'dotnet format' run of it
+    /// alone reports it: MSBuild reported Rebus's net6.0 and net7.0 instances under Rebus.Tests, which only the net10.0 run
+    /// has, and the host named that run instead (trial 62).
+    /// </summary>
+    public static string? UnsupportedFramework(string message) =>
+        Regex.Match(message, "doesn't support (?<framework>net[0-9a-z.]*[0-9a-z])", RegexOptions.IgnoreCase) is { Success: true } match ? match.Groups["framework"].Value : null;
 
     /// <summary>The frameworks <paramref name="selections"/> ('path|framework') name.</summary>
     public static HashSet<string> FrameworksOf(IEnumerable<string> selections) =>
