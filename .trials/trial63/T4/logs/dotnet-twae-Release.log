@@ -1,0 +1,21 @@
+  Determining projects to restore...
+  Restored /home/user/w63/T4/dotnet/dotnet-t4/dotnet-t4.csproj (in 470 ms).
+  Restored /home/user/w63/T4/dotnet/TextTransform/TextTransform.csproj (in 467 ms).
+  Restored /home/user/w63/T4/dotnet/Mono.TextTemplating.Roslyn/Mono.TextTemplating.Roslyn.csproj (in 505 ms).
+  Restored /home/user/w63/T4/dotnet/Mono.TextTemplating/Mono.TextTemplating.csproj (in 6 ms).
+  Restored /home/user/w63/T4/dotnet/Mono.TextTemplating.Tests/Mono.TextTemplating.Tests.csproj (in 589 ms).
+  Restored /home/user/w63/T4/dotnet/Mono.TextTemplating.Build.Tests/Mono.TextTemplating.Build.Tests.csproj (in 65 ms).
+  Restored /home/user/w63/T4/dotnet/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj (in 121 ms).
+/home/user/w63/T4/dotnet/Mono.TextTemplating/Mono.TextTemplating/ParsedTemplate.cs(98,14): error CA1859: Change type of variable 'seg' from 'Mono.TextTemplating.ISegment' to 'Mono.TextTemplating.TemplateSegment?' for improved performance (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859) [/home/user/w63/T4/dotnet/Mono.TextTemplating/Mono.TextTemplating.csproj::TargetFramework=net6.0]
+/home/user/w63/T4/dotnet/Mono.TextTemplating/Mono.TextTemplating/ParsedTemplate.cs(98,14): error CA1859: Change type of variable 'seg' from 'Mono.TextTemplating.ISegment' to 'Mono.TextTemplating.TemplateSegment?' for improved performance (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859) [/home/user/w63/T4/dotnet/Mono.TextTemplating/Mono.TextTemplating.csproj::TargetFramework=netstandard2.0]
+/home/user/w63/T4/dotnet/Mono.TextTemplating/Mono.TextTemplating/ParsedTemplate.cs(98,14): error CA1859: Change type of variable 'seg' from 'Mono.TextTemplating.ISegment' to 'Mono.TextTemplating.TemplateSegment?' for improved performance (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859) [/home/user/w63/T4/dotnet/Mono.TextTemplating/Mono.TextTemplating.csproj::TargetFramework=net472]
+
+Build FAILED.
+
+/home/user/w63/T4/dotnet/Mono.TextTemplating/Mono.TextTemplating/ParsedTemplate.cs(98,14): error CA1859: Change type of variable 'seg' from 'Mono.TextTemplating.ISegment' to 'Mono.TextTemplating.TemplateSegment?' for improved performance (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859) [/home/user/w63/T4/dotnet/Mono.TextTemplating/Mono.TextTemplating.csproj::TargetFramework=net6.0]
+/home/user/w63/T4/dotnet/Mono.TextTemplating/Mono.TextTemplating/ParsedTemplate.cs(98,14): error CA1859: Change type of variable 'seg' from 'Mono.TextTemplating.ISegment' to 'Mono.TextTemplating.TemplateSegment?' for improved performance (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859) [/home/user/w63/T4/dotnet/Mono.TextTemplating/Mono.TextTemplating.csproj::TargetFramework=netstandard2.0]
+/home/user/w63/T4/dotnet/Mono.TextTemplating/Mono.TextTemplating/ParsedTemplate.cs(98,14): error CA1859: Change type of variable 'seg' from 'Mono.TextTemplating.ISegment' to 'Mono.TextTemplating.TemplateSegment?' for improved performance (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859) [/home/user/w63/T4/dotnet/Mono.TextTemplating/Mono.TextTemplating.csproj::TargetFramework=net472]
+    0 Warning(s)
+    3 Error(s)
+
+Time Elapsed 00:00:06.66

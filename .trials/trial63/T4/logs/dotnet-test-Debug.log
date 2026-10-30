@@ -1,0 +1,54 @@
+  Determining projects to restore...
+  Restored /home/user/w63/T4/dotnet/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj (in 1.06 sec).
+  Restored /home/user/w63/T4/dotnet/dotnet-t4/dotnet-t4.csproj (in 986 ms).
+  Restored /home/user/w63/T4/dotnet/TextTransform/TextTransform.csproj (in 40 ms).
+  Restored /home/user/w63/T4/dotnet/Mono.TextTemplating/Mono.TextTemplating.csproj (in 28 ms).
+  Restored /home/user/w63/T4/dotnet/Mono.TextTemplating.Build.Tests/Mono.TextTemplating.Build.Tests.csproj (in 1.21 sec).
+  Restored /home/user/w63/T4/dotnet/Mono.TextTemplating.Tests/Mono.TextTemplating.Tests.csproj (in 1.22 sec).
+  Restored /home/user/w63/T4/dotnet/Mono.TextTemplating.Roslyn/Mono.TextTemplating.Roslyn.csproj (in 114 ms).
+/home/user/w63/T4/dotnet/Mono.TextTemplating/Mono.TextTemplating/ParsedTemplate.cs(98,14): warning CA1859: Change type of variable 'seg' from 'Mono.TextTemplating.ISegment' to 'Mono.TextTemplating.TemplateSegment?' for improved performance (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859) [/home/user/w63/T4/dotnet/Mono.TextTemplating/Mono.TextTemplating.csproj::TargetFramework=netstandard2.0]
+/home/user/w63/T4/dotnet/Mono.TextTemplating/Mono.TextTemplating/ParsedTemplate.cs(98,14): warning CA1859: Change type of variable 'seg' from 'Mono.TextTemplating.ISegment' to 'Mono.TextTemplating.TemplateSegment?' for improved performance (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859) [/home/user/w63/T4/dotnet/Mono.TextTemplating/Mono.TextTemplating.csproj::TargetFramework=net6.0]
+  Mono.TextTemplating -> /home/user/w63/T4/dotnet/Mono.TextTemplating/bin/Debug/netstandard2.0/Mono.TextTemplating.dll
+/home/user/w63/T4/dotnet/Mono.TextTemplating/Mono.TextTemplating/ParsedTemplate.cs(98,14): warning CA1859: Change type of variable 'seg' from 'Mono.TextTemplating.ISegment' to 'Mono.TextTemplating.TemplateSegment?' for improved performance (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859) [/home/user/w63/T4/dotnet/Mono.TextTemplating/Mono.TextTemplating.csproj::TargetFramework=net472]
+  Mono.TextTemplating -> /home/user/w63/T4/dotnet/Mono.TextTemplating/bin/Debug/net472/Mono.TextTemplating.dll
+  Mono.TextTemplating -> /home/user/w63/T4/dotnet/Mono.TextTemplating/bin/Debug/net6.0/Mono.TextTemplating.dll
+  Mono.TextTemplating.Build -> /home/user/w63/T4/dotnet/Mono.TextTemplating.Build/bin/Debug/net48/Mono.TextTemplating.Build.dll
+  Mono.TextTemplating.Build -> /home/user/w63/T4/dotnet/Mono.TextTemplating.Build/bin/Debug/net6.0/Mono.TextTemplating.Build.dll
+  Mono.TextTemplating.Roslyn -> /home/user/w63/T4/dotnet/Mono.TextTemplating.Roslyn/bin/Debug/net472/Mono.TextTemplating.Roslyn.dll
+  Mono.TextTemplating.Roslyn -> /home/user/w63/T4/dotnet/Mono.TextTemplating.Roslyn/bin/Debug/netstandard2.0/Mono.TextTemplating.Roslyn.dll
+  Mono.TextTemplating.Roslyn -> /home/user/w63/T4/dotnet/Mono.TextTemplating.Roslyn/bin/Debug/net6.0/Mono.TextTemplating.Roslyn.dll
+  Mono.TextTemplating.Build.Tests -> /home/user/w63/T4/dotnet/Mono.TextTemplating.Build.Tests/bin/Debug/net6.0/Mono.TextTemplating.Build.Tests.dll
+  Mono.TextTemplating.Tests -> /home/user/w63/T4/dotnet/Mono.TextTemplating.Tests/bin/Debug/net7.0/Mono.TextTemplating.Tests.dll
+  Mono.TextTemplating.Tests -> /home/user/w63/T4/dotnet/Mono.TextTemplating.Tests/bin/Debug/net6.0/Mono.TextTemplating.Tests.dll
+Test run for /home/user/w63/T4/dotnet/Mono.TextTemplating.Tests/bin/Debug/net6.0/Mono.TextTemplating.Tests.dll (.NETCoreApp,Version=v6.0)
+Test run for /home/user/w63/T4/dotnet/Mono.TextTemplating.Tests/bin/Debug/net7.0/Mono.TextTemplating.Tests.dll (.NETCoreApp,Version=v7.0)
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+  Mono.TextTemplating.Build.Tests -> /home/user/w63/T4/dotnet/Mono.TextTemplating.Build.Tests/bin/Debug/net7.0/Mono.TextTemplating.Build.Tests.dll
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Test run for /home/user/w63/T4/dotnet/Mono.TextTemplating.Build.Tests/bin/Debug/net6.0/Mono.TextTemplating.Build.Tests.dll (.NETCoreApp,Version=v6.0)
+Test run for /home/user/w63/T4/dotnet/Mono.TextTemplating.Build.Tests/bin/Debug/net7.0/Mono.TextTemplating.Build.Tests.dll (.NETCoreApp,Version=v7.0)
+A total of 1 test files matched the specified pattern.
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     7, Skipped:     0, Total:     7, Duration: 43 s - Mono.TextTemplating.Build.Tests.dll (net7.0)
+
+Passed!  - Failed:     0, Passed:     7, Skipped:     0, Total:     7, Duration: 43 s - Mono.TextTemplating.Build.Tests.dll (net6.0)
+
+Passed!  - Failed:     0, Passed:   114, Skipped:     0, Total:   114, Duration: 46 s - Mono.TextTemplating.Tests.dll (net7.0)
+
+Passed!  - Failed:     0, Passed:   114, Skipped:     0, Total:   114, Duration: 46 s - Mono.TextTemplating.Tests.dll (net6.0)
+  Successfully created package '/home/user/w63/T4/dotnet/packages/Debug/T4.BuildTools.3.1.0-preview-0002-ge128cfc9c8.nupkg'.
+  Successfully created package '/home/user/w63/T4/dotnet/packages/Debug/Mono.TextTemplating.Roslyn.3.1.0-preview-0002-ge128cfc9c8.nupkg'.
+  Successfully created package '/home/user/w63/T4/dotnet/packages/Debug/Mono.TextTemplating.3.1.0-preview-0002-ge128cfc9c8.nupkg'.

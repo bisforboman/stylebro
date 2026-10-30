@@ -1,0 +1,13 @@
+preview	0	62s	bro preview init
+setup	0	5s	bash -c printf "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"StyleBro.Analyzers\" Version=\"${V:-0.8.0-trial63.1}\" PrivateAssets=\"all\" />\n  </ItemGroup>\n</Project>\n" > Directory.Build.props && git add -N Directory.Build.props && python3 /home/user/stylebro/.trials/trial63/addref.py src/Directory.Build.props "<PackageReference Include=\"StyleBro.Analyzers\" Version=\"${V:-0.8.0-trial63.1}\" PrivateAssets=\"all\" />" && git diff --stat && bro init --write
+format	0	58s	bro format
+check	0	1s	bro check
+check-json	0
+check-full	0	30s	bro check
+checkbuild	2	83s	bro check --build
+checkbuild-json	2
+twae-Debug	1	9s	twae Debug
+test-Debug	1	8s	env CFG=Debug bash -c dotnet test NLog.Extensions.Logging.sln -c $CFG -f net8.0 && dotnet test NLog.Extensions.Logging.sln -c $CFG -f net10.0
+twae-Release	1	8s	twae Release
+test-Release	1	12s	env CFG=Release bash -c dotnet test NLog.Extensions.Logging.sln -c $CFG -f net8.0 && dotnet test NLog.Extensions.Logging.sln -c $CFG -f net10.0
+DONE
