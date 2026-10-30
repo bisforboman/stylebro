@@ -289,6 +289,21 @@ internal static partial class FormatCommand
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, Lazy<string>> Evaluations = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
+    /// Drops the per-framework evaluations (<see cref="CompileSettings"/>' and the workload query's: 'project|framework|...')
+    /// made before the restore. Loading the projects evaluates a multi-targeted project's first framework, and the run plan
+    /// reused it: without the restore output a package's Compile items were missing (trial 63, mono/t4: Microsoft.NET.Test.Sdk's
+    /// Program.cs), so that framework looked different from the others and the first format of a clone made a run the later
+    /// ones merge. The projects' own evaluations (the full path alone) stay.
+    /// </summary>
+    internal static void ForgetFrameworkEvaluations(System.Collections.Concurrent.ConcurrentDictionary<string, Lazy<string>> evaluations)
+    {
+        foreach (var key in evaluations.Keys.Where(k => k.Contains('|', StringComparison.Ordinal)).ToList())
+        {
+            evaluations.TryRemove(key, out _);
+        }
+    }
+
+    /// <summary>
     /// Runs the command; with <paramref name="output"/>, everything it and 'dotnet format' print goes there instead of the
     /// console. It runs again until a run changes no file (at most <see cref="MaxRuns"/>), printing the files each run
     /// changed: one 'dotnet format' run doesn't always finish (a fix can make work for another rule). Then it lists the
@@ -5763,6 +5778,7 @@ internal static partial class FormatCommand
 
                 restoreWarning = RestoreWarning(root, restoreOutput);
                 SaveRestoreStamp(root, restored.Select(p => p.AssetsFile), restoreWarning);
+                ForgetFrameworkEvaluations(Evaluations);
             }
             finally
             {

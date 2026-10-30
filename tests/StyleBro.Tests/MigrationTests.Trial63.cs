@@ -57,4 +57,21 @@ public sealed partial class MigrationTests
 
         Assert.Equal(line is null ? [] : [line], lines);
     }
+
+    // mono/t4: the first format of a fresh clone ran net7.0 on its own, later ones merged it with net6.0. Loading the projects
+    // evaluated Mono.TextTemplating.Tests' net6.0 before the restore (no Microsoft.NET.Test.Sdk Program.cs yet), and the run
+    // plan reused that evaluation. After the restore the per-framework evaluations go; the projects' own stay.
+    [Fact]
+    public void ForgetFrameworkEvaluations_DropsThePerFrameworkOnes()
+    {
+        var evaluations = new System.Collections.Concurrent.ConcurrentDictionary<string, Lazy<string>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var key in new[] { "/r/Tests.csproj", "/r/Tests.csproj|net6.0|", "/r/Tests.csproj|net7.0|Release", "/r/App.csproj|net8.0|workloads" })
+        {
+            evaluations[key] = new Lazy<string>(() => key);
+        }
+
+        FormatCommand.ForgetFrameworkEvaluations(evaluations);
+
+        Assert.Equal(["/r/Tests.csproj"], evaluations.Keys);
+    }
 }
