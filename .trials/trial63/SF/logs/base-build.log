@@ -1,0 +1,18 @@
+  Determining projects to restore...
+  Restored /home/user/w63/SF/base/example/Sample/Sample.csproj (in 243 ms).
+  Restored /home/user/w63/SF/base/src/Serilog.Sinks.File/Serilog.Sinks.File.csproj (in 243 ms).
+  Restored /home/user/w63/SF/base/test/Serilog.Sinks.File.Tests/Serilog.Sinks.File.Tests.csproj (in 243 ms).
+  Serilog.Sinks.File -> /home/user/w63/SF/base/src/Serilog.Sinks.File/bin/Debug/net9.0/Serilog.Sinks.File.dll
+  Serilog.Sinks.File -> /home/user/w63/SF/base/src/Serilog.Sinks.File/bin/Debug/net8.0/Serilog.Sinks.File.dll
+  Serilog.Sinks.File -> /home/user/w63/SF/base/src/Serilog.Sinks.File/bin/Debug/net6.0/Serilog.Sinks.File.dll
+  Serilog.Sinks.File -> /home/user/w63/SF/base/src/Serilog.Sinks.File/bin/Debug/netstandard2.0/Serilog.Sinks.File.dll
+  Sample -> /home/user/w63/SF/base/example/Sample/bin/Debug/net48/Sample.exe
+  Sample -> /home/user/w63/SF/base/example/Sample/bin/Debug/net8.0/Sample.dll
+  Serilog.Sinks.File.Tests -> /home/user/w63/SF/base/test/Serilog.Sinks.File.Tests/bin/Debug/net9.0/Serilog.Sinks.File.Tests.dll
+  Serilog.Sinks.File.Tests -> /home/user/w63/SF/base/test/Serilog.Sinks.File.Tests/bin/Debug/net8.0/Serilog.Sinks.File.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.02

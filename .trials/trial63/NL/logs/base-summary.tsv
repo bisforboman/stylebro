@@ -1,0 +1,6 @@
+build	0	21s	dotnet build NLog.Extensions.Logging.sln -c Debug
+twae-Debug	1	17s	twae Debug
+test-Debug	0	44s	env CFG=Debug bash -c dotnet test NLog.Extensions.Logging.sln -c $CFG -f net8.0 && dotnet test NLog.Extensions.Logging.sln -c $CFG -f net10.0
+twae-Release	1	12s	twae Release
+test-Release	0	20s	env CFG=Release bash -c dotnet test NLog.Extensions.Logging.sln -c $CFG -f net8.0 && dotnet test NLog.Extensions.Logging.sln -c $CFG -f net10.0
+DONE

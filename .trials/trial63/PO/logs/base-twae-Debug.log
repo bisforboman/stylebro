@@ -1,0 +1,11 @@
+  Determining projects to restore...
+  Restored /home/user/w63/PO/base/src/Pose/Pose.csproj (in 498 ms).
+  Restored /home/user/w63/PO/base/test/Pose.Tests/Pose.Tests.csproj (in 550 ms).
+  Pose -> /home/user/w63/PO/base/src/Pose/bin/Debug/netstandard2.1/Pose.dll
+  Pose.Tests -> /home/user/w63/PO/base/test/Pose.Tests/bin/Debug/netcoreapp3.1/Pose.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.22
