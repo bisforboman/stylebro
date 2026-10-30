@@ -290,6 +290,11 @@ A few settings work a little differently:
   [BRO1514](rules/BRO1514.md) doesn't brace them (the starter kit: 878 of 1,130 bodies with braces, and BRO1514 braced
   194 one-line jumps). Not when your .editorconfig enforces braces (IDE0011 at warning or error, with
   `csharp_prefer_braces = true` or unset): those jumps are your build's warnings, and BRO1514 braces them.
+- **One-line members next to each other** ([BRO1505](rules/BRO1505.md)): neighbouring members on one line without a
+  block body (`public void Clear() => items.Clear();`, properties, events) that `stylebro_allow_adjacent_single_line_members`
+  would allow to sit together. From 3 such pairs without a blank line between them on, `init` writes the key as `true`,
+  majority or not, so BRO1505 doesn't separate them (mono/t4: about 120 pairs together, 130 blank lines added). These
+  pairs don't count for BRO1505's own severity.
 - **`#region`s inside members** ([BRO1113](rules/BRO1113.md), the starter kit's `#region Arrange` / `Act` / `Assert` in
   its tests): from 3 of them on, the rule is turned off, so `format` doesn't remove them. [BRO1112](rules/BRO1112.md)
   (regions between members) is off in the preset already.
@@ -365,6 +370,7 @@ A few settings work a little differently:
 | Nested `if`s | `if`s nested alone in another `if` that BRO1149 would merge (3 turn the rule off) | [BRO1149](rules/BRO1149.md) | `dotnet_diagnostic.BRO1149.severity` |
 | Namespace braces | files whose block namespace has its `{` where `csharp_new_line_before_open_brace` doesn't put it (`types` covers namespaces): when most do, IDE0055 is off until you decide (the report says how many files would change) | SDK formatter (IDE0055) | `dotnet_diagnostic.IDE0055.severity` |
 | Member separation | neighbouring members that need a blank line, with or without one (without: [BRO1519](rules/BRO1519.md) goes off too, else it adds the blank line after a member's `}`) | [BRO1505](rules/BRO1505.md) | `dotnet_diagnostic.BRO1505.severity` |
+| One-line members together | neighbouring one-line members without a block body, next to each other or after a blank line (3 together allow it) | [BRO1505](rules/BRO1505.md) | `stylebro_allow_adjacent_single_line_members` |
 | Blank line below a type's `{` | the `{` of namespaces and types right above the code inside or with a blank line below | [BRO1503](rules/BRO1503.md) | `dotnet_diagnostic.BRO1503.severity` |
 | Blank line above doc comments | doc comments right below code or after a blank line | [BRO1513](rules/BRO1513.md) | `dotnet_diagnostic.BRO1513.severity` |
 | Blank line below comments | `//` comments right above code or with a blank line below | [BRO1506](rules/BRO1506.md) | `dotnet_diagnostic.BRO1506.severity` |

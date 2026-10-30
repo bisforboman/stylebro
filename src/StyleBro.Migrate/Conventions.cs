@@ -240,6 +240,7 @@ internal static class Conventions
         new(AfterBlockKey, "statements after a block's '}'", "warning", ("warning", "after a blank line"), ("none", "right below the '}'"), Off(DiagnosticIds.BlankLineAfterCloseBrace)) { Unit = "statement" },
         new(NestedIfKey, "nested ifs BRO1149 would merge", "warning", ("warning", "merged ('if (a && b)')"), ("none", "nested"), Off(DiagnosticIds.NestedIf)) { Unit = "nested if", KeepAny = true, Keeps = $"{DiagnosticIds.NestedIf} would merge each" },
         new(SeparationKey, "neighbouring members", "warning", ("warning", "with a blank line between"), ("none", "without one"), Off(DiagnosticIds.ElementsSeparatedByBlankLine)) { Unit = "member pair" },
+        new(AdjacentMembersKey, "neighbouring one-line members", "false", ("false", "after a blank line"), ("true", "next to each other"), null) { Unit = "member pair", KeepAny = true, Keeps = $"without it {DiagnosticIds.ElementsSeparatedByBlankLine} would add a blank line between each" },
         new(CommentFrameKey, "'//' comments in code", "warning", ("warning", "with text at both ends"), ("none", "framed by an empty '//'"), Off(DiagnosticIds.EmptyComment)) { Unit = "comment" },
         new(BraceBlankLineKey, "types' and namespaces' '{'", "warning", ("warning", "right above the code"), ("none", "with a blank line below"), Off(DiagnosticIds.BlankLineAfterOpenBrace)) { Unit = "brace" },
         new(DocBlankLineKey, "doc comments below code", "warning", ("warning", "after a blank line"), ("none", "right below the code"), Off(DiagnosticIds.BlankLineBeforeDocumentation)) { Unit = "doc comment" },
@@ -412,6 +413,13 @@ internal static class Conventions
     /// documented), with one or without (owner's policy, trial 14: Kavita's compact code got blank lines in 392 files).
     /// </summary>
     private const string SeparationKey = "dotnet_diagnostic." + DiagnosticIds.ElementsSeparatedByBlankLine + ".severity";
+
+    /// <summary>
+    /// stylebro_allow_adjacent_single_line_members, judged on neighbouring one-line members it would allow (methods,
+    /// properties, ... without a block body): after a blank line, or next to each other (owner's decision 2026-10-30,
+    /// trial 63: mono/t4 groups such members about 120 times, and BRO1505 added 130 blank lines between them).
+    /// </summary>
+    private const string AdjacentMembersKey = StyleBro.Analyzers.Layout.ElementSeparation.AllowAdjacentSingleLineMembersKey;
 
     /// <summary>
     /// BRO1503's severity, judged on the '{' of namespaces and types: right above the first line inside, or with a blank line
@@ -2263,7 +2271,12 @@ internal static class Conventions
                 {
                     if (StyleBro.Analyzers.Layout.ElementSeparation.NeedsBlankLine(type.Members[i - 1], type.Members[i], text, allowAdjacentSingleLine: adjacent))
                     {
-                        Add(SeparationKey, !StyleBro.Analyzers.Layout.ElementSeparation.HasBlankLineBetween(type.Members[i - 1], type.Members[i], text));
+                        // A pair of one-line members that stylebro_allow_adjacent_single_line_members would allow counts for
+                        // that key, not for BRO1505's severity.
+                        var together = !StyleBro.Analyzers.Layout.ElementSeparation.HasBlankLineBetween(type.Members[i - 1], type.Members[i], text);
+                        Add(
+                            !adjacent && !StyleBro.Analyzers.Layout.ElementSeparation.NeedsBlankLine(type.Members[i - 1], type.Members[i], text, allowAdjacentSingleLine: true) ? AdjacentMembersKey : SeparationKey,
+                            together);
                     }
                 }
             }
