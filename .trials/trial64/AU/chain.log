@@ -3,3 +3,6 @@ base done 07:03
 default start 07:03
 default done 07:34
 dotnet start 07:34
+dotnet done 08:34
+CHAIN-DONE
+soak start 08:35

@@ -5,3 +5,9 @@ check	2	398s	bro check --engine dotnet-format
 check-json	2
 check-full	2	368s	bro check --engine dotnet-format
 checkbuild	2	655s	bro check --build --engine dotnet-format
+checkbuild-json	2
+twae-Debug	1	11s	twae Debug
+test-Debug	1	15s	env CFG=Debug bash -c dotnet test ArchUnitNET.vstest.slnf -c $CFG; r=$?; (cd ArchUnitNET.TUnitTests && dotnet test -c $CFG) || r=1; exit $r
+twae-Release	1	11s	twae Release
+test-Release	1	20s	env CFG=Release bash -c dotnet test ArchUnitNET.vstest.slnf -c $CFG; r=$?; (cd ArchUnitNET.TUnitTests && dotnet test -c $CFG) || r=1; exit $r
+DONE
