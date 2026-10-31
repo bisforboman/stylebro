@@ -84,6 +84,9 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   Shape-changing fixes add BRO1519's blank line themselves (`BlankLineRuns.WantsBlankLineAfter`): BRO1514's wrap
   (closing edit) and BRO1508/BRO1509's expansion (insert after `}`, or inside the gap before a following block's `{`
   with `gapIsReplaced`, else an iterative fix removed it). Parity `blank-line-runs`: 7/5, the 2 hand-offs documented.
+  CSharpier mode (trial 64, ArchUnitNET): BRO1519's own finding skips a `}` followed by a `checked`/`unchecked`
+  statement (CSharpier 1.3.0 removes every blank line above one); `WantsBlankLineAfter` still says yes for the fixes that
+  create a `}`, since CSharpier runs after them and takes the line out (threading the option to its 20 callers wasn't worth it).
 - **BRO1514-BRO1516** (SA1503/SA1519/SA1520, 2026-10-03, `Layout/Braces.cs`, replace IDE0011 per docs/decisions.md):
   which statements and which id like StyleCop (multi-line -> BRO1515, inconsistent if/else chain -> BRO1516, else
   BRO1514; a rule that is off leaves its statements to the next, via `Severities.IsOn`; `using (a) using (b)` allowed).
