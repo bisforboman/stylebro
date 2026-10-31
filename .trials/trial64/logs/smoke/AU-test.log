@@ -1,0 +1,115 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  ArchUnitNET -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET/bin/Debug/netstandard2.0/ArchUnitNET.dll
+  ArchUnitNET -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET/bin/Debug/net462/ArchUnitNET.dll
+  ArchUnitNET.MSTestV2 -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.MSTestV2/bin/Debug/netstandard2.0/ArchUnitNET.MSTestV2.dll
+/root/.nuget/packages/microsoft.testing.platform.msbuild/2.0.1/buildMultiTargeting/Microsoft.Testing.Platform.MSBuild.targets(263,5): error : Testing with VSTest target is no longer supported by Microsoft.Testing.Platform on .NET 10 SDK and later. If you use dotnet test, you should opt-in to the new dotnet test experience. For more information, see https://aka.ms/dotnet-test-mtp-error [/home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.TUnitTests/ArchUnitNET.TUnitTests.csproj]
+  ArchUnitNET.MSTestV2 -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.MSTestV2/bin/Debug/net462/ArchUnitNET.MSTestV2.dll
+  ArchUnitNET.TUnit -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.TUnit/bin/Debug/netstandard2.0/ArchUnitNET.TUnit.dll
+  ArchUnitNET.NUnit -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.NUnit/bin/Debug/netstandard2.0/ArchUnitNET.NUnit.dll
+  ArchUnitNET.xUnitV3 -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.xUnitV3/bin/Debug/net472/ArchUnitNET.xUnitV3.dll
+  ArchUnitNET.xUnitV3 -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.xUnitV3/bin/Debug/netstandard2.0/ArchUnitNET.xUnitV3.dll
+  ArchUnitNET.TUnit -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.TUnit/bin/Debug/net472/ArchUnitNET.TUnit.dll
+  ArchUnitNET.xUnit -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.xUnit/bin/Debug/net462/ArchUnitNET.xUnit.dll
+  ArchUnitNET.NUnit -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.NUnit/bin/Debug/net462/ArchUnitNET.NUnit.dll
+  ArchUnitNET.xUnit -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.xUnit/bin/Debug/netstandard2.0/ArchUnitNET.xUnit.dll
+  ArchUnitNET.MSTestV4 -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.MSTestV4/bin/Debug/netstandard2.0/ArchUnitNET.MSTestV4.dll
+  ArchUnitNET.MSTestV4 -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.MSTestV4/bin/Debug/net462/ArchUnitNET.MSTestV4.dll
+  ExampleTest -> /home/user/cand64/TNG-ArchUnitNET/ExampleTest/bin/Debug/net10.0/ExampleTest.dll
+Test run for /home/user/cand64/TNG-ArchUnitNET/ExampleTest/bin/Debug/net10.0/ExampleTest.dll (.NETCoreApp,Version=v10.0)
+  ArchUnitNET.MSTestV3Tests -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.MSTestV3Tests/bin/Debug/net10.0/ArchUnitNET.MSTestV3Tests.dll
+VSTest version 18.0.2 (x64)
+
+  ArchUnitNET.xUnitTests -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.xUnitTests/bin/Debug/net10.0/ArchUnitNET.xUnitTests.dll
+Test run for /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.MSTestV3Tests/bin/Debug/net10.0/ArchUnitNET.MSTestV3Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.xUnitTests/bin/Debug/net10.0/ArchUnitNET.xUnitTests.dll (.NETCoreApp,Version=v10.0)
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.97]     ExampleTest.ExampleArchUnitTest.ExampleLayerShouldNotAccessForbiddenLayer [SKIP]
+[xUnit.net 00:00:01.05]     ExampleTest.ExampleArchUnitTest.TypoLayerShouldViolateByDefault [SKIP]
+[xUnit.net 00:00:01.06]     ExampleTest.ExampleArchUnitTest.TypesShouldBeInCorrectLayer [SKIP]
+[xUnit.net 00:00:01.06]     ExampleTest.ExampleArchUnitTest.ForbiddenClassesShouldHaveCorrectName [SKIP]
+[xUnit.net 00:00:01.06]     ExampleTest.ExampleArchUnitTest.ExampleClassesShouldNotCallForbiddenMethods [SKIP]
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 1 s - ArchUnitNET.MSTestV3Tests.dll (net10.0)
+  Skipped ExampleTest.ExampleArchUnitTest.ExampleLayerShouldNotAccessForbiddenLayer [1 ms]
+  Skipped ExampleTest.ExampleArchUnitTest.TypoLayerShouldViolateByDefault [1 ms]
+  Skipped ExampleTest.ExampleArchUnitTest.TypesShouldBeInCorrectLayer [1 ms]
+  Skipped ExampleTest.ExampleArchUnitTest.ForbiddenClassesShouldHaveCorrectName [1 ms]
+  Skipped ExampleTest.ExampleArchUnitTest.ExampleClassesShouldNotCallForbiddenMethods [1 ms]
+
+Passed!  - Failed:     0, Passed:    12, Skipped:     5, Total:    17, Duration: 1 s - ExampleTest.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 780 ms - ArchUnitNET.xUnitTests.dll (net10.0)
+  ArchUnitNET.MSTestV2Tests -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.MSTestV2Tests/bin/Debug/net10.0/ArchUnitNET.MSTestV2Tests.dll
+Test run for /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.MSTestV2Tests/bin/Debug/net10.0/ArchUnitNET.MSTestV2Tests.dll (.NETCoreApp,Version=v10.0)
+  TestAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssembly/bin/Debug/net10.0/TestAssembly.dll
+  VisibilityAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/VisibilityAssembly/bin/Debug/net10.0/VisibilityAssembly.dll
+  MethodDependencyAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/MethodDependencyAssembly/bin/Debug/net10.0/MethodDependencyAssembly.dll
+VSTest version 18.0.2 (x64)
+
+  PropertyMemberAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/PropertyMemberAssembly/bin/Debug/net10.0/PropertyMemberAssembly.dll
+  OptimizedAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/OptimizedAssembly/bin/Debug/net10.0/OptimizedAssembly.dll
+  DuplicateFullNameAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/DuplicateFullNameAssembly/bin/Debug/net10.0/DuplicateFullNameAssembly.dll
+Starting test execution, please wait...
+  ArchUnitNET.NUnitTests -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.NUnitTests/bin/Debug/net10.0/ArchUnitNET.NUnitTests.dll
+Test run for /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.NUnitTests/bin/Debug/net10.0/ArchUnitNET.NUnitTests.dll (.NETCoreApp,Version=v10.0)
+  FunctionPointerAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/FunctionPointerAssembly/bin/Debug/net10.0/FunctionPointerAssembly.dll
+A total of 1 test files matched the specified pattern.
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 523 ms - ArchUnitNET.MSTestV2Tests.dll (net10.0)
+  AttributeAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/AttributeAssembly/bin/Debug/net10.0/AttributeAssembly.dll
+  TypeDependencyAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/TypeDependencyAssembly/bin/Debug/net10.0/TypeDependencyAssembly.dll
+  MethodMemberAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/MethodMemberAssembly/bin/Debug/net10.0/MethodMemberAssembly.dll
+  SlicesTestAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/SlicesTestAssembly/bin/Debug/net10.0/SlicesTestAssembly.dll
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 545 ms - ArchUnitNET.NUnitTests.dll (net10.0)
+  OtherDuplicateFullNameAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/OtherDuplicateFullNameAssembly/bin/Debug/net10.0/OtherDuplicateFullNameAssembly.dll
+  TypeAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/TypeAssembly/bin/Debug/net10.0/TypeAssembly.dll
+  ArchUnitNET.MSTestV4Tests -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.MSTestV4Tests/bin/Debug/net10.0/ArchUnitNET.MSTestV4Tests.dll
+Test run for /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.MSTestV4Tests/bin/Debug/net10.0/ArchUnitNET.MSTestV4Tests.dll (.NETCoreApp,Version=v10.0)
+  ClassAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/ClassAssembly/bin/Debug/net10.0/ClassAssembly.dll
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 759 ms - ArchUnitNET.MSTestV4Tests.dll (net10.0)
+  FilteredDirectoryUnavailableTypesAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/FilteredDirectoryUnavailableTypesAssembly/bin/Debug/net10.0/FilteredDirectoryUnavailableTypesAssembly.dll
+  ArchUnitNET.xUnitV3Tests -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.xUnitV3Tests/bin/Debug/net10.0/ArchUnitNET.xUnitV3Tests.dll
+  FilteredDirectoryLoaderTestAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/FilteredDirectoryLoaderTestAssembly/bin/Debug/net10.0/FilteredDirectoryLoaderTestAssembly.dll
+Test run for /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.xUnitV3Tests/bin/Debug/net10.0/ArchUnitNET.xUnitV3Tests.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 347 ms - ArchUnitNET.xUnitV3Tests.dll (net10.0)
+  ArchUnitNETTests -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNETTests/bin/Debug/net10.0/ArchUnitNETTests.dll
+Test run for /home/user/cand64/TNG-ArchUnitNET/ArchUnitNETTests/bin/Debug/net10.0/ArchUnitNETTests.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:16.36]     ArchUnitNETTests.Dependencies.KeepDependenciesInCompilerGeneratedTypesTests.LambdaPrimitiveDependenciesNotLost [SKIP]
+  Skipped ArchUnitNETTests.Dependencies.KeepDependenciesInCompilerGeneratedTypesTests.LambdaPrimitiveDependenciesNotLost [1 ms]
+[xUnit.net 00:00:20.72]     ArchUnitNETTests.Dependencies.StringDependenciesTests.LocalStringDependencyFound [SKIP]
+  Skipped ArchUnitNETTests.Dependencies.StringDependenciesTests.LocalStringDependencyFound [1 ms]
+[xUnit.net 00:00:20.72]     ArchUnitNETTests.Dependencies.StringDependenciesTests.PropertyStringDependencyFound [SKIP]
+[xUnit.net 00:00:20.72]     ArchUnitNETTests.Dependencies.StringDependenciesTests.StringFieldDependencyFound [SKIP]
+  Skipped ArchUnitNETTests.Dependencies.StringDependenciesTests.PropertyStringDependencyFound [1 ms]
+  Skipped ArchUnitNETTests.Dependencies.StringDependenciesTests.StringFieldDependencyFound [1 ms]
+
+Passed!  - Failed:     0, Passed:   778, Skipped:     4, Total:   782, Duration: 29 s - ArchUnitNETTests.dll (net10.0)

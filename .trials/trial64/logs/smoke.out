@@ -1,3 +1,17 @@
 == SA-build: dotnet build /home/user/cand64/serilog-serilog-sinks-async/serilog-sinks-async.sln (06:53:50)
    exit 0 (06:54:05) 0 error lines
 == SA-test: dotnet test /home/user/cand64/serilog-serilog-sinks-async/serilog-sinks-async.sln (06:54:05)
+   exit 0 (06:56:23) 0 error lines
+== SL-build: dotnet build /home/user/cand64/serilog-serilog-extensions-logging/serilog-extensions-logging.sln (06:56:23)
+   exit 0 (06:56:37) 0 error lines
+== SL-test: dotnet test /home/user/cand64/serilog-serilog-extensions-logging/serilog-extensions-logging.sln (06:56:37)
+   exit 1 (06:56:50) 0 error lines
+== SE-build: dotnet build /home/user/cand64/serilog-serilog-expressions/serilog-expressions.sln (06:56:50)
+   exit 0 (06:56:58) 0 error lines
+== SE-test: dotnet test /home/user/cand64/serilog-serilog-expressions/serilog-expressions.sln (06:56:58)
+   exit 0 (06:57:07) 0 error lines
+== AU-build: dotnet build /home/user/cand64/TNG-ArchUnitNET/ArchUnit.sln (06:57:07)
+   exit 0 (06:57:30) 0 error lines
+== AU-test: dotnet test /home/user/cand64/TNG-ArchUnitNET/ArchUnit.sln (06:57:30)
+   exit 1 (06:58:37) 1 error lines
+SMOKE-DONE

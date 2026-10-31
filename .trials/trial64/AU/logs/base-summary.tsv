@@ -1,0 +1,6 @@
+build	0	36s	dotnet build ArchUnit.sln -c Debug
+twae-Debug	0	26s	twae Debug
+test-Debug	0	85s	env CFG=Debug bash -c dotnet test ArchUnitNET.vstest.slnf -c $CFG; r=$?; (cd ArchUnitNET.TUnitTests && dotnet test -c $CFG) || r=1; exit $r
+twae-Release	0	15s	twae Release
+test-Release	1	77s	env CFG=Release bash -c dotnet test ArchUnitNET.vstest.slnf -c $CFG; r=$?; (cd ArchUnitNET.TUnitTests && dotnet test -c $CFG) || r=1; exit $r
+DONE

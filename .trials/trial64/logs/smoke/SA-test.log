@@ -31,3 +31,7 @@ Starting test execution, please wait...
 A total of 1 test files matched the specified pattern.
 Starting test execution, please wait...
 A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    28, Skipped:     0, Total:    28, Duration: 2 m 1 s - Serilog.Sinks.Async.Tests.dll (net8.0)
+
+Passed!  - Failed:     0, Passed:    28, Skipped:     0, Total:    28, Duration: 2 m - Serilog.Sinks.Async.Tests.dll (net6.0)

@@ -16,8 +16,12 @@ namespace StyleBro.Analyzers.Layout;
 /// </summary>
 internal static class BlankLineRuns
 {
-    /// <summary>Every finding in the tree: the rule, the diagnostic's span, and the edit that fixes it.</summary>
-    public static IEnumerable<(string Id, TextSpan Location, TextChange Change)> GetFindings(SyntaxNode root, SourceText text, Func<string, bool> isOn, SwitchSectionBlankLines.Mode switchSections = SwitchSectionBlankLines.Mode.Include, bool removeStandaloneComments = false)
+    /// <summary>
+    /// Every finding in the tree: the rule, the diagnostic's span, and the edit that fixes it. <paramref name="csharpier"/>:
+    /// CSharpier lays the code out (<see cref="CSharpierLayout"/>), which removes every blank line above a
+    /// 'checked'/'unchecked' statement, so BRO1519 leaves that gap alone.
+    /// </summary>
+    public static IEnumerable<(string Id, TextSpan Location, TextChange Change)> GetFindings(SyntaxNode root, SourceText text, Func<string, bool> isOn, SwitchSectionBlankLines.Mode switchSections = SwitchSectionBlankLines.Mode.Include, bool removeStandaloneComments = false, bool csharpier = false)
     {
         // Asked per token: read each rule's severity once per file.
         var known = new Dictionary<string, bool>();
@@ -47,7 +51,7 @@ internal static class BlankLineRuns
                     yield return (DiagnosticIds.BlankLineBeforeCloseBrace, token.Span, before);
                 }
 
-                if (afterOn && MissingBlankLineAfterCloseBrace(token, text, isOn, switchSections) is { } after)
+                if (afterOn && MissingBlankLineAfterCloseBrace(token, text, isOn, switchSections, csharpier) is { } after)
                 {
                     yield return (DiagnosticIds.BlankLineAfterCloseBrace, after.Location, after.Change);
                 }
@@ -305,9 +309,18 @@ internal static class BlankLineRuns
     }
 
     /// <summary>SA1513: no blank line between '}' and the next statement; the fix adds one.</summary>
-    private static (TextSpan Location, TextChange Change)? MissingBlankLineAfterCloseBrace(SyntaxToken brace, SourceText text, Func<string, bool> isOn, SwitchSectionBlankLines.Mode switchSections)
+    private static (TextSpan Location, TextChange Change)? MissingBlankLineAfterCloseBrace(SyntaxToken brace, SourceText text, Func<string, bool> isOn, SwitchSectionBlankLines.Mode switchSections, bool csharpier)
     {
         var next = brace.GetNextToken(includeZeroWidth: true, includeSkipped: true);
+
+        // CSharpier (1.3.0) removes every blank line above a 'checked'/'unchecked' statement, so the two formatters would
+        // undo each other there (trial 64, ArchUnitNET's 'unchecked' block below an 'if' block). Fixes that add the blank
+        // line along with a '}' they create may still add it: CSharpier, which runs after them, takes it out again.
+        if (csharpier && next.Kind() is SyntaxKind.CheckedKeyword or SyntaxKind.UncheckedKeyword && next.Parent is CheckedStatementSyntax)
+        {
+            return null;
+        }
+
         if (!JudgesGapAfter(brace, next, text, isOn, gapIsReplaced: false, switchSections))
         {
             return null;

@@ -1,0 +1,4 @@
+preview	2	188s	bro preview init
+setup	0	24s	bash -c printf "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"StyleBro.Analyzers\" Version=\"${V:-0.8.0-trial64.1}\" PrivateAssets=\"all\" />\n  </ItemGroup>\n</Project>\n" > Directory.Build.props && git add -N Directory.Build.props && git diff --stat && bro init --write
+format	2	179s	bro format
+check	2	174s	bro check

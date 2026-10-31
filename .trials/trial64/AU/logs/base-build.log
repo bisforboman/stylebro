@@ -1,0 +1,78 @@
+  Determining projects to restore...
+  Restored /home/user/w64/AU/base/ArchUnitNET.TUnitTests/ArchUnitNET.TUnitTests.csproj (in 1.09 sec).
+  Restored /home/user/w64/AU/base/ArchUnitNET.xUnitTests/ArchUnitNET.xUnitTests.csproj (in 1.09 sec).
+  Restored /home/user/w64/AU/base/ArchUnitNET.xUnitV3Tests/ArchUnitNET.xUnitV3Tests.csproj (in 1.07 sec).
+  Restored /home/user/w64/AU/base/ArchUnitNET.xUnitV3/ArchUnitNET.xUnitV3.csproj (in 1.12 sec).
+  Restored /home/user/w64/AU/base/ArchUnitNET.MSTestV2Tests/ArchUnitNET.MSTestV2Tests.csproj (in 68 ms).
+  Restored /home/user/w64/AU/base/ArchUnitNET.xUnit/ArchUnitNET.xUnit.csproj (in 80 ms).
+  Restored /home/user/w64/AU/base/ArchUnitNET.MSTestV2/ArchUnitNET.MSTestV2.csproj (in 101 ms).
+  Restored /home/user/w64/AU/base/ExampleTest/ExampleTest.csproj (in 3 ms).
+  Restored /home/user/w64/AU/base/ArchUnitNET/ArchUnitNET.csproj (in 23 ms).
+  Restored /home/user/w64/AU/base/ArchUnitNETTests/ArchUnitNETTests.csproj (in 46 ms).
+  Restored /home/user/w64/AU/base/ArchUnitNET.MSTestV3Tests/ArchUnitNET.MSTestV3Tests.csproj (in 251 ms).
+  Restored /home/user/w64/AU/base/ArchUnitNET.NUnit/ArchUnitNET.NUnit.csproj (in 12 ms).
+  Restored /home/user/w64/AU/base/ArchUnitNET.TUnit/ArchUnitNET.TUnit.csproj (in 88 ms).
+  Restored /home/user/w64/AU/base/TestAssembly/TestAssembly.csproj (in 1 ms).
+  Restored /home/user/w64/AU/base/TestAssemblies/VisibilityAssembly/VisibilityAssembly.csproj (in 2 ms).
+  Restored /home/user/w64/AU/base/ArchUnitNET.NUnitTests/ArchUnitNET.NUnitTests.csproj (in 121 ms).
+  Restored /home/user/w64/AU/base/TestAssemblies/TypeDependencyAssembly/TypeDependencyAssembly.csproj (in 1 ms).
+  Restored /home/user/w64/AU/base/TestAssemblies/TypeAssembly/TypeAssembly.csproj (in 1 ms).
+  Restored /home/user/w64/AU/base/ArchUnitNET.MSTestV4/ArchUnitNET.MSTestV4.csproj (in 38 ms).
+  Restored /home/user/w64/AU/base/TestAssemblies/MethodMemberAssembly/MethodMemberAssembly.csproj (in 2 ms).
+  Restored /home/user/w64/AU/base/TestAssemblies/SlicesTestAssembly/SlicesTestAssembly.csproj (in 1 ms).
+  Restored /home/user/w64/AU/base/TestAssemblies/MethodDependencyAssembly/MethodDependencyAssembly.csproj (in 0.9 ms).
+  Restored /home/user/w64/AU/base/TestAssemblies/FunctionPointerAssembly/FunctionPointerAssembly.csproj (in 2 ms).
+  Restored /home/user/w64/AU/base/TestAssemblies/FilteredDirectoryUnavailableTypesAssembly/FilteredDirectoryUnavailableTypesAssembly.csproj (in 1 ms).
+  Restored /home/user/w64/AU/base/TestAssemblies/DuplicateFullNameAssembly/DuplicateFullNameAssembly.csproj (in 1 ms).
+  Restored /home/user/w64/AU/base/TestAssemblies/AttributeAssembly/AttributeAssembly.csproj (in 2 ms).
+  Restored /home/user/w64/AU/base/TestAssemblies/ClassAssembly/ClassAssembly.csproj (in 2 ms).
+  Restored /home/user/w64/AU/base/TestAssemblies/FilteredDirectoryLoaderTestAssembly/FilteredDirectoryLoaderTestAssembly.csproj (in 4 ms).
+  Restored /home/user/w64/AU/base/TestAssemblies/PropertyMemberAssembly/PropertyMemberAssembly.csproj (in 2 ms).
+  Restored /home/user/w64/AU/base/TestAssemblies/OptimizedAssembly/OptimizedAssembly.csproj (in 294 ms).
+  Restored /home/user/w64/AU/base/TestAssemblies/OtherDuplicateFullNameAssembly/OtherDuplicateFullNameAssembly.csproj (in 296 ms).
+  Restored /home/user/w64/AU/base/ArchUnitNET.MSTestV4Tests/ArchUnitNET.MSTestV4Tests.csproj (in 443 ms).
+  TestAssembly -> /home/user/w64/AU/base/TestAssembly/bin/Debug/net10.0/TestAssembly.dll
+  TypeDependencyAssembly -> /home/user/w64/AU/base/TestAssemblies/TypeDependencyAssembly/bin/Debug/net10.0/TypeDependencyAssembly.dll
+  MethodDependencyAssembly -> /home/user/w64/AU/base/TestAssemblies/MethodDependencyAssembly/bin/Debug/net10.0/MethodDependencyAssembly.dll
+  FilteredDirectoryUnavailableTypesAssembly -> /home/user/w64/AU/base/TestAssemblies/FilteredDirectoryUnavailableTypesAssembly/bin/Debug/net10.0/FilteredDirectoryUnavailableTypesAssembly.dll
+  AttributeAssembly -> /home/user/w64/AU/base/TestAssemblies/AttributeAssembly/bin/Debug/net10.0/AttributeAssembly.dll
+  VisibilityAssembly -> /home/user/w64/AU/base/TestAssemblies/VisibilityAssembly/bin/Debug/net10.0/VisibilityAssembly.dll
+  DuplicateFullNameAssembly -> /home/user/w64/AU/base/TestAssemblies/DuplicateFullNameAssembly/bin/Debug/net10.0/DuplicateFullNameAssembly.dll
+  OtherDuplicateFullNameAssembly -> /home/user/w64/AU/base/TestAssemblies/OtherDuplicateFullNameAssembly/bin/Debug/net10.0/OtherDuplicateFullNameAssembly.dll
+  ArchUnitNET -> /home/user/w64/AU/base/ArchUnitNET/bin/Debug/netstandard2.0/ArchUnitNET.dll
+  ArchUnitNET -> /home/user/w64/AU/base/ArchUnitNET/bin/Debug/net462/ArchUnitNET.dll
+  TypeAssembly -> /home/user/w64/AU/base/TestAssemblies/TypeAssembly/bin/Debug/net10.0/TypeAssembly.dll
+  ArchUnitNET.xUnit -> /home/user/w64/AU/base/ArchUnitNET.xUnit/bin/Debug/net462/ArchUnitNET.xUnit.dll
+  ArchUnitNET.MSTestV2 -> /home/user/w64/AU/base/ArchUnitNET.MSTestV2/bin/Debug/net462/ArchUnitNET.MSTestV2.dll
+  ArchUnitNET.MSTestV4 -> /home/user/w64/AU/base/ArchUnitNET.MSTestV4/bin/Debug/net462/ArchUnitNET.MSTestV4.dll
+  ArchUnitNET.MSTestV2 -> /home/user/w64/AU/base/ArchUnitNET.MSTestV2/bin/Debug/netstandard2.0/ArchUnitNET.MSTestV2.dll
+  ArchUnitNET.xUnit -> /home/user/w64/AU/base/ArchUnitNET.xUnit/bin/Debug/netstandard2.0/ArchUnitNET.xUnit.dll
+  ArchUnitNET.MSTestV4 -> /home/user/w64/AU/base/ArchUnitNET.MSTestV4/bin/Debug/netstandard2.0/ArchUnitNET.MSTestV4.dll
+  ArchUnitNET.NUnit -> /home/user/w64/AU/base/ArchUnitNET.NUnit/bin/Debug/net462/ArchUnitNET.NUnit.dll
+  ArchUnitNET.NUnit -> /home/user/w64/AU/base/ArchUnitNET.NUnit/bin/Debug/netstandard2.0/ArchUnitNET.NUnit.dll
+  ArchUnitNET.TUnit -> /home/user/w64/AU/base/ArchUnitNET.TUnit/bin/Debug/net472/ArchUnitNET.TUnit.dll
+  ArchUnitNET.TUnit -> /home/user/w64/AU/base/ArchUnitNET.TUnit/bin/Debug/netstandard2.0/ArchUnitNET.TUnit.dll
+  ExampleTest -> /home/user/w64/AU/base/ExampleTest/bin/Debug/net10.0/ExampleTest.dll
+  MethodMemberAssembly -> /home/user/w64/AU/base/TestAssemblies/MethodMemberAssembly/bin/Debug/net10.0/MethodMemberAssembly.dll
+  PropertyMemberAssembly -> /home/user/w64/AU/base/TestAssemblies/PropertyMemberAssembly/bin/Debug/net10.0/PropertyMemberAssembly.dll
+  ClassAssembly -> /home/user/w64/AU/base/TestAssemblies/ClassAssembly/bin/Debug/net10.0/ClassAssembly.dll
+  ArchUnitNET.xUnitTests -> /home/user/w64/AU/base/ArchUnitNET.xUnitTests/bin/Debug/net10.0/ArchUnitNET.xUnitTests.dll
+  SlicesTestAssembly -> /home/user/w64/AU/base/TestAssemblies/SlicesTestAssembly/bin/Debug/net10.0/SlicesTestAssembly.dll
+  ArchUnitNET.xUnitV3 -> /home/user/w64/AU/base/ArchUnitNET.xUnitV3/bin/Debug/net472/ArchUnitNET.xUnitV3.dll
+  OptimizedAssembly -> /home/user/w64/AU/base/TestAssemblies/OptimizedAssembly/bin/Debug/net10.0/OptimizedAssembly.dll
+  ArchUnitNET.xUnitV3 -> /home/user/w64/AU/base/ArchUnitNET.xUnitV3/bin/Debug/netstandard2.0/ArchUnitNET.xUnitV3.dll
+  FunctionPointerAssembly -> /home/user/w64/AU/base/TestAssemblies/FunctionPointerAssembly/bin/Debug/net10.0/FunctionPointerAssembly.dll
+  ArchUnitNET.xUnitV3Tests -> /home/user/w64/AU/base/ArchUnitNET.xUnitV3Tests/bin/Debug/net10.0/ArchUnitNET.xUnitV3Tests.dll
+  ArchUnitNET.NUnitTests -> /home/user/w64/AU/base/ArchUnitNET.NUnitTests/bin/Debug/net10.0/ArchUnitNET.NUnitTests.dll
+  ArchUnitNET.MSTestV2Tests -> /home/user/w64/AU/base/ArchUnitNET.MSTestV2Tests/bin/Debug/net10.0/ArchUnitNET.MSTestV2Tests.dll
+  ArchUnitNET.TUnitTests -> /home/user/w64/AU/base/ArchUnitNET.TUnitTests/bin/Debug/net10.0/ArchUnitNET.TUnitTests.dll
+  ArchUnitNET.MSTestV4Tests -> /home/user/w64/AU/base/ArchUnitNET.MSTestV4Tests/bin/Debug/net10.0/ArchUnitNET.MSTestV4Tests.dll
+  ArchUnitNET.MSTestV3Tests -> /home/user/w64/AU/base/ArchUnitNET.MSTestV3Tests/bin/Debug/net10.0/ArchUnitNET.MSTestV3Tests.dll
+  FilteredDirectoryLoaderTestAssembly -> /home/user/w64/AU/base/TestAssemblies/FilteredDirectoryLoaderTestAssembly/bin/Debug/net10.0/FilteredDirectoryLoaderTestAssembly.dll
+  ArchUnitNETTests -> /home/user/w64/AU/base/ArchUnitNETTests/bin/Debug/net10.0/ArchUnitNETTests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:35.97

@@ -24,7 +24,8 @@ public sealed class BlankLineRunsAnalyzer : DiagnosticAnalyzer
             start.RegisterSyntaxTreeAction(c =>
             {
                 var text = c.Tree.GetText(c.CancellationToken);
-                foreach (var (id, span, _) in BlankLineRuns.GetFindings(c.Tree.GetRoot(c.CancellationToken), text, i => Severities.IsOn(options, c.Tree, i, c.CancellationToken), SwitchSectionBlankLines.ReadMode(c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Tree)), TrailingBlankLines.RemovesStandalone(c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Tree))))
+                var config = c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Tree);
+                foreach (var (id, span, _) in BlankLineRuns.GetFindings(c.Tree.GetRoot(c.CancellationToken), text, i => Severities.IsOn(options, c.Tree, i, c.CancellationToken), SwitchSectionBlankLines.ReadMode(config), TrailingBlankLines.RemovesStandalone(config), CSharpierLayout.PrintWidth(config) is not null))
                 {
                     var descriptor = id == DiagnosticIds.MultipleBlankLines ? Descriptors.MultipleBlankLines
                         : id == DiagnosticIds.BlankLineBeforeCloseBrace ? Descriptors.BlankLineBeforeCloseBrace
