@@ -1,0 +1,22 @@
+ .editorconfig                                      | 68 +++++++++++++++++++++-
+ Directory.Build.props                              |  4 ++
+ samples/Sample/Program.cs                          |  2 +-
+ samples/SampleWithExternalScope/Program.cs         |  3 +-
+ samples/SampleWithMelProviders/Program.cs          |  2 +-
+ .../Extensions/Logging/EventIdPropertyCache.cs     | 15 ++---
+ .../Extensions/Logging/LoggerProviderCollection.cs |  5 +-
+ .../Logging/LoggerProviderCollectionSink.cs        |  1 +
+ .../Extensions/Logging/SerilogLogValues.cs         |  3 +-
+ .../Extensions/Logging/SerilogLogger.cs            | 13 +++--
+ .../Extensions/StringExtensions.cs                 |  2 +-
+ .../Properties/AssemblyInfo.cs                     |  2 +-
+ .../LogEventBenchmark.cs                           |  1 +
+ .../DisposeTests.cs                                |  9 +--
+ .../EventIdPropertyCacheTests.cs                   |  1 -
+ .../SerilogLogValuesTests.cs                       |  2 +-
+ .../SerilogLoggerScopeTests.cs                     |  7 +--
+ .../SerilogLoggerTests.cs                          | 22 +++----
+ .../SerilogLoggingBuilderExtensionsTests.cs        |  2 +-
+ .../Support/ExtensionsProvider.cs                  |  3 +-
+ .../Support/LogEventPropertyFactory.cs             |  1 +
+ 21 files changed, 119 insertions(+), 49 deletions(-)

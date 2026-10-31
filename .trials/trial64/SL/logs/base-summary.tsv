@@ -1,0 +1,6 @@
+build	0	26s	dotnet build serilog-extensions-logging.sln -c Debug
+twae-Debug	0	18s	twae Debug
+test-Debug	0	24s	env CFG=Debug bash -c for f in net8.0 net9.0 net10.0; do dotnet test test/Serilog.Extensions.Logging.Tests -c $CFG -f $f || r=1; done; exit ${r:-0}
+twae-Release	0	12s	twae Release
+test-Release	0	23s	env CFG=Release bash -c for f in net8.0 net9.0 net10.0; do dotnet test test/Serilog.Extensions.Logging.Tests -c $CFG -f $f || r=1; done; exit ${r:-0}
+DONE

@@ -3,3 +3,5 @@ setup	0	20s	bash -c printf "<Project>\n  <ItemGroup>\n    <PackageReference Incl
 format	2	552s	bro format --engine dotnet-format
 check	2	398s	bro check --engine dotnet-format
 check-json	2
+check-full	2	368s	bro check --engine dotnet-format
+checkbuild	2	655s	bro check --build --engine dotnet-format
