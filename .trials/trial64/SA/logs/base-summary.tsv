@@ -1,0 +1,6 @@
+build	0	13s	dotnet build serilog-sinks-async.sln -c Debug
+twae-Debug	0	7s	twae Debug
+test-Debug	0	134s	env CFG=Debug bash -c dotnet test test/Serilog.Sinks.Async.Tests -c $CFG
+twae-Release	0	8s	twae Release
+test-Release	0	136s	env CFG=Release bash -c dotnet test test/Serilog.Sinks.Async.Tests -c $CFG
+DONE

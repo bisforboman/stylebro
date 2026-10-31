@@ -1,0 +1,37 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Serilog.Sinks.Async -> /home/user/cand64/serilog-serilog-sinks-async/src/Serilog.Sinks.Async/bin/Debug/net8.0/Serilog.Sinks.Async.dll
+  Serilog.Sinks.Async -> /home/user/cand64/serilog-serilog-sinks-async/src/Serilog.Sinks.Async/bin/Debug/netstandard2.0/Serilog.Sinks.Async.dll
+  Serilog.Sinks.Async -> /home/user/cand64/serilog-serilog-sinks-async/src/Serilog.Sinks.Async/bin/Debug/net6.0/Serilog.Sinks.Async.dll
+  Serilog.Sinks.Async.PerformanceTests -> /home/user/cand64/serilog-serilog-sinks-async/test/Serilog.Sinks.Async.PerformanceTests/bin/Debug/net8.0/Serilog.Sinks.Async.PerformanceTests.dll
+  Serilog.Sinks.Async.Tests -> /home/user/cand64/serilog-serilog-sinks-async/test/Serilog.Sinks.Async.Tests/bin/Debug/net6.0/Serilog.Sinks.Async.Tests.dll
+  Serilog.Sinks.Async.PerformanceTests -> /home/user/cand64/serilog-serilog-sinks-async/test/Serilog.Sinks.Async.PerformanceTests/bin/Debug/net6.0/Serilog.Sinks.Async.PerformanceTests.dll
+  Serilog.Sinks.Async.Tests -> /home/user/cand64/serilog-serilog-sinks-async/test/Serilog.Sinks.Async.Tests/bin/Debug/net8.0/Serilog.Sinks.Async.Tests.dll
+Test run for /home/user/cand64/serilog-serilog-sinks-async/test/Serilog.Sinks.Async.PerformanceTests/bin/Debug/net8.0/Serilog.Sinks.Async.PerformanceTests.dll (.NETCoreApp,Version=v8.0)
+Test run for /home/user/cand64/serilog-serilog-sinks-async/test/Serilog.Sinks.Async.PerformanceTests/bin/Debug/net6.0/Serilog.Sinks.Async.PerformanceTests.dll (.NETCoreApp,Version=v6.0)
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 1 s - Serilog.Sinks.Async.PerformanceTests.dll (net6.0)
+
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 1 s - Serilog.Sinks.Async.PerformanceTests.dll (net8.0)
+Test run for /home/user/cand64/serilog-serilog-sinks-async/test/Serilog.Sinks.Async.Tests/bin/Debug/net8.0/Serilog.Sinks.Async.Tests.dll (.NETCoreApp,Version=v8.0)
+Test run for /home/user/cand64/serilog-serilog-sinks-async/test/Serilog.Sinks.Async.Tests/bin/Debug/net6.0/Serilog.Sinks.Async.Tests.dll (.NETCoreApp,Version=v6.0)
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    28, Skipped:     0, Total:    28, Duration: 2 m 1 s - Serilog.Sinks.Async.Tests.dll (net8.0)
+
+Passed!  - Failed:     0, Passed:    28, Skipped:     0, Total:    28, Duration: 2 m - Serilog.Sinks.Async.Tests.dll (net6.0)

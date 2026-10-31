@@ -1,0 +1,49 @@
+  Determining projects to restore...
+  Restored /home/user/w64/AU/base/TestAssemblies/FilteredDirectoryUnavailableTypesAssembly/FilteredDirectoryUnavailableTypesAssembly.csproj (in 100 ms).
+  Restored /home/user/w64/AU/base/TestAssemblies/FilteredDirectoryLoaderTestAssembly/FilteredDirectoryLoaderTestAssembly.csproj (in 179 ms).
+  30 of 32 projects are up-to-date for restore.
+  MethodDependencyAssembly -> /home/user/w64/AU/base/TestAssemblies/MethodDependencyAssembly/bin/Release/net10.0/MethodDependencyAssembly.dll
+  AttributeAssembly -> /home/user/w64/AU/base/TestAssemblies/AttributeAssembly/bin/Release/net10.0/AttributeAssembly.dll
+  TestAssembly -> /home/user/w64/AU/base/TestAssembly/bin/Release/net10.0/TestAssembly.dll
+  VisibilityAssembly -> /home/user/w64/AU/base/TestAssemblies/VisibilityAssembly/bin/Release/net10.0/VisibilityAssembly.dll
+  ArchUnitNET -> /home/user/w64/AU/base/ArchUnitNET/bin/Release/netstandard2.0/ArchUnitNET.dll
+  FilteredDirectoryUnavailableTypesAssembly -> /home/user/w64/AU/base/TestAssemblies/FilteredDirectoryUnavailableTypesAssembly/bin/Release/net10.0/FilteredDirectoryUnavailableTypesAssembly.dll
+  TypeDependencyAssembly -> /home/user/w64/AU/base/TestAssemblies/TypeDependencyAssembly/bin/Release/net10.0/TypeDependencyAssembly.dll
+  TypeAssembly -> /home/user/w64/AU/base/TestAssemblies/TypeAssembly/bin/Release/net10.0/TypeAssembly.dll
+  DuplicateFullNameAssembly -> /home/user/w64/AU/base/TestAssemblies/DuplicateFullNameAssembly/bin/Release/net10.0/DuplicateFullNameAssembly.dll
+  SlicesTestAssembly -> /home/user/w64/AU/base/TestAssemblies/SlicesTestAssembly/bin/Release/net10.0/SlicesTestAssembly.dll
+  PropertyMemberAssembly -> /home/user/w64/AU/base/TestAssemblies/PropertyMemberAssembly/bin/Release/net10.0/PropertyMemberAssembly.dll
+  ArchUnitNET -> /home/user/w64/AU/base/ArchUnitNET/bin/Release/net462/ArchUnitNET.dll
+  OptimizedAssembly -> /home/user/w64/AU/base/TestAssemblies/OptimizedAssembly/bin/Release/net10.0/OptimizedAssembly.dll
+  FilteredDirectoryLoaderTestAssembly -> /home/user/w64/AU/base/TestAssemblies/FilteredDirectoryLoaderTestAssembly/bin/Release/net10.0/FilteredDirectoryLoaderTestAssembly.dll
+  OtherDuplicateFullNameAssembly -> /home/user/w64/AU/base/TestAssemblies/OtherDuplicateFullNameAssembly/bin/Release/net10.0/OtherDuplicateFullNameAssembly.dll
+  FunctionPointerAssembly -> /home/user/w64/AU/base/TestAssemblies/FunctionPointerAssembly/bin/Release/net10.0/FunctionPointerAssembly.dll
+  ArchUnitNET.xUnit -> /home/user/w64/AU/base/ArchUnitNET.xUnit/bin/Release/netstandard2.0/ArchUnitNET.xUnit.dll
+  ArchUnitNET.xUnitV3 -> /home/user/w64/AU/base/ArchUnitNET.xUnitV3/bin/Release/netstandard2.0/ArchUnitNET.xUnitV3.dll
+  ArchUnitNET.NUnit -> /home/user/w64/AU/base/ArchUnitNET.NUnit/bin/Release/netstandard2.0/ArchUnitNET.NUnit.dll
+  ArchUnitNET.TUnit -> /home/user/w64/AU/base/ArchUnitNET.TUnit/bin/Release/netstandard2.0/ArchUnitNET.TUnit.dll
+  ExampleTest -> /home/user/w64/AU/base/ExampleTest/bin/Release/net10.0/ExampleTest.dll
+  MethodMemberAssembly -> /home/user/w64/AU/base/TestAssemblies/MethodMemberAssembly/bin/Release/net10.0/MethodMemberAssembly.dll
+  ArchUnitNET.NUnitTests -> /home/user/w64/AU/base/ArchUnitNET.NUnitTests/bin/Release/net10.0/ArchUnitNET.NUnitTests.dll
+  ClassAssembly -> /home/user/w64/AU/base/TestAssemblies/ClassAssembly/bin/Release/net10.0/ClassAssembly.dll
+  ArchUnitNET.xUnit -> /home/user/w64/AU/base/ArchUnitNET.xUnit/bin/Release/net462/ArchUnitNET.xUnit.dll
+  ArchUnitNET.xUnitV3Tests -> /home/user/w64/AU/base/ArchUnitNET.xUnitV3Tests/bin/Release/net10.0/ArchUnitNET.xUnitV3Tests.dll
+  ArchUnitNET.xUnitTests -> /home/user/w64/AU/base/ArchUnitNET.xUnitTests/bin/Release/net10.0/ArchUnitNET.xUnitTests.dll
+  ArchUnitNET.xUnitV3 -> /home/user/w64/AU/base/ArchUnitNET.xUnitV3/bin/Release/net472/ArchUnitNET.xUnitV3.dll
+  ArchUnitNET.TUnitTests -> /home/user/w64/AU/base/ArchUnitNET.TUnitTests/bin/Release/net10.0/ArchUnitNET.TUnitTests.dll
+  ArchUnitNET.NUnit -> /home/user/w64/AU/base/ArchUnitNET.NUnit/bin/Release/net462/ArchUnitNET.NUnit.dll
+  ArchUnitNET.MSTestV2 -> /home/user/w64/AU/base/ArchUnitNET.MSTestV2/bin/Release/netstandard2.0/ArchUnitNET.MSTestV2.dll
+  ArchUnitNET.MSTestV3Tests -> /home/user/w64/AU/base/ArchUnitNET.MSTestV3Tests/bin/Release/net10.0/ArchUnitNET.MSTestV3Tests.dll
+  ArchUnitNET.MSTestV2Tests -> /home/user/w64/AU/base/ArchUnitNET.MSTestV2Tests/bin/Release/net10.0/ArchUnitNET.MSTestV2Tests.dll
+  ArchUnitNET.MSTestV2 -> /home/user/w64/AU/base/ArchUnitNET.MSTestV2/bin/Release/net462/ArchUnitNET.MSTestV2.dll
+  ArchUnitNET.TUnit -> /home/user/w64/AU/base/ArchUnitNET.TUnit/bin/Release/net472/ArchUnitNET.TUnit.dll
+  ArchUnitNET.MSTestV4 -> /home/user/w64/AU/base/ArchUnitNET.MSTestV4/bin/Release/netstandard2.0/ArchUnitNET.MSTestV4.dll
+  ArchUnitNET.MSTestV4Tests -> /home/user/w64/AU/base/ArchUnitNET.MSTestV4Tests/bin/Release/net10.0/ArchUnitNET.MSTestV4Tests.dll
+  ArchUnitNETTests -> /home/user/w64/AU/base/ArchUnitNETTests/bin/Release/net10.0/ArchUnitNETTests.dll
+  ArchUnitNET.MSTestV4 -> /home/user/w64/AU/base/ArchUnitNET.MSTestV4/bin/Release/net462/ArchUnitNET.MSTestV4.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:15.35

@@ -1,0 +1,11 @@
+ Directory.Build.props                              |  8 ++++
+ .../Sinks/Async/BackgroundWorkerSink.cs            | 39 +++++++--------
+ .../LatencyBenchmark.cs                            |  9 ++--
+ .../ThroughputBenchmark.cs                         | 55 +++++++++++-----------
+ .../BackgroundWorkerSinkIntegrationSpec.cs         |  6 +--
+ .../BackgroundWorkerSinkSpec.cs                    | 14 +++---
+ .../Support/CollectingFailureListener.cs           |  9 ++--
+ .../Support/DummyMonitor.cs                        |  9 ++--
+ .../Support/MemorySink.cs                          |  6 +--
+ .../Support/NotImplementedSink.cs                  |  2 +-
+ 10 files changed, 86 insertions(+), 71 deletions(-)

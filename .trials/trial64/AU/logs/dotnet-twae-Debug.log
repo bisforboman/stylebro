@@ -1,0 +1,29 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  TestAssembly -> /home/user/w64/AU/dotnet/TestAssembly/bin/Debug/net10.0/TestAssembly.dll
+  FilteredDirectoryUnavailableTypesAssembly -> /home/user/w64/AU/dotnet/TestAssemblies/FilteredDirectoryUnavailableTypesAssembly/bin/Debug/net10.0/FilteredDirectoryUnavailableTypesAssembly.dll
+  AttributeAssembly -> /home/user/w64/AU/dotnet/TestAssemblies/AttributeAssembly/bin/Debug/net10.0/AttributeAssembly.dll
+  DuplicateFullNameAssembly -> /home/user/w64/AU/dotnet/TestAssemblies/DuplicateFullNameAssembly/bin/Debug/net10.0/DuplicateFullNameAssembly.dll
+  TypeAssembly -> /home/user/w64/AU/dotnet/TestAssemblies/TypeAssembly/bin/Debug/net10.0/TypeAssembly.dll
+/home/user/w64/AU/dotnet/ArchUnitNET/Domain/Architecture.cs(86,14): error BRO1519: Add a blank line after the closing brace (https://bisforboman.github.io/stylebro/rules/BRO1519/) [/home/user/w64/AU/dotnet/ArchUnitNET/ArchUnitNET.csproj::TargetFramework=net462]
+/home/user/w64/AU/dotnet/ArchUnitNET/Domain/Architecture.cs(86,14): error BRO1519: Add a blank line after the closing brace (https://bisforboman.github.io/stylebro/rules/BRO1519/) [/home/user/w64/AU/dotnet/ArchUnitNET/ArchUnitNET.csproj::TargetFramework=netstandard2.0]
+  TypeDependencyAssembly -> /home/user/w64/AU/dotnet/TestAssemblies/TypeDependencyAssembly/bin/Debug/net10.0/TypeDependencyAssembly.dll
+  MethodDependencyAssembly -> /home/user/w64/AU/dotnet/TestAssemblies/MethodDependencyAssembly/bin/Debug/net10.0/MethodDependencyAssembly.dll
+  VisibilityAssembly -> /home/user/w64/AU/dotnet/TestAssemblies/VisibilityAssembly/bin/Debug/net10.0/VisibilityAssembly.dll
+  OtherDuplicateFullNameAssembly -> /home/user/w64/AU/dotnet/TestAssemblies/OtherDuplicateFullNameAssembly/bin/Debug/net10.0/OtherDuplicateFullNameAssembly.dll
+  MethodMemberAssembly -> /home/user/w64/AU/dotnet/TestAssemblies/MethodMemberAssembly/bin/Debug/net10.0/MethodMemberAssembly.dll
+  PropertyMemberAssembly -> /home/user/w64/AU/dotnet/TestAssemblies/PropertyMemberAssembly/bin/Debug/net10.0/PropertyMemberAssembly.dll
+  ClassAssembly -> /home/user/w64/AU/dotnet/TestAssemblies/ClassAssembly/bin/Debug/net10.0/ClassAssembly.dll
+  FilteredDirectoryLoaderTestAssembly -> /home/user/w64/AU/dotnet/TestAssemblies/FilteredDirectoryLoaderTestAssembly/bin/Debug/net10.0/FilteredDirectoryLoaderTestAssembly.dll
+  OptimizedAssembly -> /home/user/w64/AU/dotnet/TestAssemblies/OptimizedAssembly/bin/Debug/net10.0/OptimizedAssembly.dll
+  SlicesTestAssembly -> /home/user/w64/AU/dotnet/TestAssemblies/SlicesTestAssembly/bin/Debug/net10.0/SlicesTestAssembly.dll
+  FunctionPointerAssembly -> /home/user/w64/AU/dotnet/TestAssemblies/FunctionPointerAssembly/bin/Debug/net10.0/FunctionPointerAssembly.dll
+
+Build FAILED.
+
+/home/user/w64/AU/dotnet/ArchUnitNET/Domain/Architecture.cs(86,14): error BRO1519: Add a blank line after the closing brace (https://bisforboman.github.io/stylebro/rules/BRO1519/) [/home/user/w64/AU/dotnet/ArchUnitNET/ArchUnitNET.csproj::TargetFramework=net462]
+/home/user/w64/AU/dotnet/ArchUnitNET/Domain/Architecture.cs(86,14): error BRO1519: Add a blank line after the closing brace (https://bisforboman.github.io/stylebro/rules/BRO1519/) [/home/user/w64/AU/dotnet/ArchUnitNET/ArchUnitNET.csproj::TargetFramework=netstandard2.0]
+    0 Warning(s)
+    2 Error(s)
+
+Time Elapsed 00:00:10.93

@@ -1,0 +1,384 @@
+diff --git a/Directory.Build.props b/Directory.Build.props
+new file mode 100644
+index 0000000..b707d61
+--- /dev/null
++++ b/Directory.Build.props
+@@ -0,0 +1,8 @@
++<Project>
++  <PropertyGroup>
++    <StyleBroPreset>1.0</StyleBroPreset>
++  </PropertyGroup>
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial64.2" PrivateAssets="all" />
++  </ItemGroup>
++</Project>
+diff --git a/src/Serilog.Sinks.Async/Sinks/Async/BackgroundWorkerSink.cs b/src/Serilog.Sinks.Async/Sinks/Async/BackgroundWorkerSink.cs
+index f7c16af..e50493c 100644
+--- a/src/Serilog.Sinks.Async/Sinks/Async/BackgroundWorkerSink.cs
++++ b/src/Serilog.Sinks.Async/Sinks/Async/BackgroundWorkerSink.cs
+@@ -29,7 +29,7 @@ sealed class BackgroundWorkerSink : ILogEventSink, IAsyncLogEventSinkInspector,
+     readonly BlockingCollection<LogEvent> _queue;
+     readonly Task _worker;
+     readonly IAsyncLogEventSinkMonitor? _monitor;
+-    
++
+     // By contract, set only during initialization, so updates are not synchronized.
+     ILoggingFailureListener _failureListener = SelfLog.FailureListener;
+ 
+@@ -37,7 +37,8 @@ sealed class BackgroundWorkerSink : ILogEventSink, IAsyncLogEventSinkInspector,
+ 
+     public BackgroundWorkerSink(ILogEventSink wrappedSink, int bufferCapacity, bool blockWhenFull, IAsyncLogEventSinkMonitor? monitor)
+     {
+-        if (bufferCapacity <= 0) throw new ArgumentOutOfRangeException(nameof(bufferCapacity));
++        if (bufferCapacity <= 0)
++            throw new ArgumentOutOfRangeException(nameof(bufferCapacity));
+         _wrappedSink = wrappedSink ?? throw new ArgumentNullException(nameof(wrappedSink));
+         _blockWhenFull = blockWhenFull;
+         _queue = new BlockingCollection<LogEvent>(bufferCapacity);
+@@ -46,6 +47,13 @@ sealed class BackgroundWorkerSink : ILogEventSink, IAsyncLogEventSinkInspector,
+         monitor?.StartMonitoring(this);
+     }
+ 
++    int IAsyncLogEventSinkInspector.BufferSize => _queue.BoundedCapacity;
++
++    int IAsyncLogEventSinkInspector.Count => _queue.Count;
++
++    long IAsyncLogEventSinkInspector.DroppedMessagesCount => _droppedMessages;
++
++    /// <inheritdoc/>
+     public void Emit(LogEvent logEvent)
+     {
+         if (_queue.IsAddingCompleted)
+@@ -60,13 +68,10 @@ sealed class BackgroundWorkerSink : ILogEventSink, IAsyncLogEventSinkInspector,
+             {
+                 _queue.Add(logEvent);
+             }
+-            else
++            else if (!_queue.TryAdd(logEvent))
+             {
+-                if (!_queue.TryAdd(logEvent))
+-                {
+-                    Interlocked.Increment(ref _droppedMessages);
+-                    _failureListener.OnLoggingFailed(this, LoggingFailureKind.Permanent, $"unable to enqueue, capacity {_queue.BoundedCapacity}", [logEvent], null);
+-                }
++                Interlocked.Increment(ref _droppedMessages);
++                _failureListener.OnLoggingFailed(this, LoggingFailureKind.Permanent, $"unable to enqueue, capacity {_queue.BoundedCapacity}", [logEvent], null);
+             }
+         }
+         catch (InvalidOperationException ex)
+@@ -77,6 +82,7 @@ sealed class BackgroundWorkerSink : ILogEventSink, IAsyncLogEventSinkInspector,
+         }
+     }
+ 
++    /// <inheritdoc/>
+     public void Dispose()
+     {
+         // Prevent any more events from being added
+@@ -90,6 +96,12 @@ sealed class BackgroundWorkerSink : ILogEventSink, IAsyncLogEventSinkInspector,
+         _monitor?.StopMonitoring(this);
+     }
+ 
++    /// <inheritdoc/>
++    public void SetFailureListener(ILoggingFailureListener failureListener)
++    {
++        _failureListener = failureListener ?? throw new ArgumentNullException(nameof(failureListener));
++    }
++
+     void Pump()
+     {
+         try
+@@ -111,15 +123,4 @@ sealed class BackgroundWorkerSink : ILogEventSink, IAsyncLogEventSinkInspector,
+             _failureListener.OnLoggingFailed(this, LoggingFailureKind.Final, "fatal error in worker thread", null, fatal);
+         }
+     }
+-
+-    int IAsyncLogEventSinkInspector.BufferSize => _queue.BoundedCapacity;
+-
+-    int IAsyncLogEventSinkInspector.Count => _queue.Count;
+-
+-    long IAsyncLogEventSinkInspector.DroppedMessagesCount => _droppedMessages;
+-    
+-    public void SetFailureListener(ILoggingFailureListener failureListener)
+-    {
+-        _failureListener = failureListener ?? throw new ArgumentNullException(nameof(failureListener));
+-    }
+ }
+\ No newline at end of file
+diff --git a/test/Serilog.Sinks.Async.PerformanceTests/LatencyBenchmark.cs b/test/Serilog.Sinks.Async.PerformanceTests/LatencyBenchmark.cs
+index 45ce8c6..5d8bcf7 100644
+--- a/test/Serilog.Sinks.Async.PerformanceTests/LatencyBenchmark.cs
++++ b/test/Serilog.Sinks.Async.PerformanceTests/LatencyBenchmark.cs
+@@ -12,9 +12,12 @@ namespace Serilog.Sinks.Async.PerformanceTests;
+ public class LatencyBenchmark
+ {
+     readonly LogEvent _evt = new LogEvent(DateTimeOffset.Now, LogEventLevel.Information, null,
+-        new MessageTemplate(new[] {new TextToken("Hello")}), new LogEventProperty[0]);
++        new MessageTemplate(new[] { new TextToken("Hello") }), new LogEventProperty[0]);
+ 
+-    Logger _syncLogger, _asyncLogger, _fileLogger, _asyncFileLogger;
++    Logger _syncLogger;
++    Logger _asyncLogger;
++    Logger _fileLogger;
++    Logger _asyncFileLogger;
+ 
+     static LatencyBenchmark()
+     {
+@@ -24,7 +27,7 @@ public class LatencyBenchmark
+     [GlobalSetup]
+     public void Reset()
+     {
+-        foreach (var logger in new[] { _syncLogger, _asyncLogger, _fileLogger, _asyncFileLogger})
++        foreach (var logger in new[] { _syncLogger, _asyncLogger, _fileLogger, _asyncFileLogger })
+         {
+             logger?.Dispose();
+         }
+diff --git a/test/Serilog.Sinks.Async.PerformanceTests/ThroughputBenchmark.cs b/test/Serilog.Sinks.Async.PerformanceTests/ThroughputBenchmark.cs
+index 4a7e201..c8b71b0 100644
+--- a/test/Serilog.Sinks.Async.PerformanceTests/ThroughputBenchmark.cs
++++ b/test/Serilog.Sinks.Async.PerformanceTests/ThroughputBenchmark.cs
+@@ -11,53 +11,54 @@ public class ThroughputBenchmark
+     const int Count = 10000;
+ 
+     readonly LogEvent _evt = new LogEvent(DateTimeOffset.Now, LogEventLevel.Information, null,
+-        new MessageTemplate(new[] {new TextToken("Hello")}), new LogEventProperty[0]);
++        new MessageTemplate(new[] { new TextToken("Hello") }), new LogEventProperty[0]);
+ 
+     readonly SignallingSink _signal;
+-    Logger _syncLogger, _asyncLogger;
++    Logger _syncLogger;
++    Logger _asyncLogger;
+ 
+     public ThroughputBenchmark()
+     {
+-            _signal = new SignallingSink(Count);
+-        }
++        _signal = new SignallingSink(Count);
++    }
+ 
+     [GlobalSetup]
+     public void Reset()
+     {
+-            _syncLogger?.Dispose();
+-            _asyncLogger?.Dispose();
++        _syncLogger?.Dispose();
++        _asyncLogger?.Dispose();
+ 
+-            _signal.Reset();
++        _signal.Reset();
+ 
+-            _syncLogger = new LoggerConfiguration()
+-                .WriteTo.Sink(_signal)
+-                .CreateLogger();
++        _syncLogger = new LoggerConfiguration()
++            .WriteTo.Sink(_signal)
++            .CreateLogger();
+ 
+-            _asyncLogger = new LoggerConfiguration()
+-                .WriteTo.Async(a => a.Sink(_signal))
+-                .CreateLogger();
+-        }
++        _asyncLogger = new LoggerConfiguration()
++            .WriteTo.Async(a => a.Sink(_signal))
++            .CreateLogger();
++    }
+ 
+     [Benchmark(Baseline = true)]
+     public void Sync()
+     {
+-            for (var i = 0; i < Count; ++i)
+-            {
+-                _syncLogger.Write(_evt);
+-            }
+-
+-            // Will complete immediately, but makes the comparison fairer.
+-            _signal.Wait();
++        for (var i = 0; i < Count; ++i)
++        {
++            _syncLogger.Write(_evt);
+         }
+ 
++        // Will complete immediately, but makes the comparison fairer.
++        _signal.Wait();
++    }
++
+     [Benchmark]
+     public void Async()
+     {
+-            for (var i = 0; i < Count; ++i)
+-            {
+-                _asyncLogger.Write(_evt);
+-            }
+-
+-            _signal.Wait();
++        for (var i = 0; i < Count; ++i)
++        {
++            _asyncLogger.Write(_evt);
+         }
++
++        _signal.Wait();
++    }
+ }
+\ No newline at end of file
+diff --git a/test/Serilog.Sinks.Async.Tests/BackgroundWorkerSinkIntegrationSpec.cs b/test/Serilog.Sinks.Async.Tests/BackgroundWorkerSinkIntegrationSpec.cs
+index ff379f8..a94abbe 100644
+--- a/test/Serilog.Sinks.Async.Tests/BackgroundWorkerSinkIntegrationSpec.cs
++++ b/test/Serilog.Sinks.Async.Tests/BackgroundWorkerSinkIntegrationSpec.cs
+@@ -1,12 +1,12 @@
+ ﻿using System;
+ using System.Collections.Generic;
+ using System.Diagnostics;
++using System.Linq;
+ using System.Threading;
++using Serilog.Core;
+ using Serilog.Events;
+ using Serilog.Sinks.Async.Tests.Support;
+-using Serilog.Core;
+ using Xunit;
+-using System.Linq;
+ 
+ namespace Serilog.Sinks.Async.Tests;
+ 
+@@ -52,7 +52,7 @@ public static class BackgroundWorkerSinkIntegrationSpec
+     {
+         Debug.WriteLine("{0:h:mm:ss tt} Retrieving {1} events", DateTime.Now, count);
+ 
+-        Loop.Retry(() => sink.Events, events => events != null && events.Count >= count, TimeSpan.FromSeconds(1),
++        Loop.Retry(() => sink.Events, events => events is not null && events.Count >= count, TimeSpan.FromSeconds(1),
+             TimeSpan.FromSeconds(30));
+ 
+         return sink.Events.ToList();
+diff --git a/test/Serilog.Sinks.Async.Tests/BackgroundWorkerSinkSpec.cs b/test/Serilog.Sinks.Async.Tests/BackgroundWorkerSinkSpec.cs
+index b42e633..c7dbb88 100644
+--- a/test/Serilog.Sinks.Async.Tests/BackgroundWorkerSinkSpec.cs
++++ b/test/Serilog.Sinks.Async.Tests/BackgroundWorkerSinkSpec.cs
+@@ -87,7 +87,7 @@ public class BackgroundWorkerSinkSpec
+             // while the first event is being propagated
+             var acceptInterval = TimeSpan.FromMilliseconds(500);
+             _innerSink.DelayEmit = acceptInterval;
+-            var tenSecondsWorth = 10_000 / acceptInterval.TotalMilliseconds + 1;
++            var tenSecondsWorth = (10_000 / acceptInterval.TotalMilliseconds) + 1;
+             for (int i = 0; i < tenSecondsWorth; i++)
+             {
+                 var emissionTiming = Stopwatch.StartNew();
+@@ -137,7 +137,7 @@ public class BackgroundWorkerSinkSpec
+             from e in _innerSink.Events
+             where !Object.ReferenceEquals(finalEvent, e)
+             select e;
+-        Assert.InRange(2, 2 * 3 / 2 - 1, propagatedExcludingFinal.Count());
++        Assert.InRange(2, (2 * 3 / 2) - 1, propagatedExcludingFinal.Count());
+         // Final event should have made it through
+         Assert.Contains(_innerSink.Events, x => ReferenceEquals(finalEvent, x));
+         Assert.NotEqual(0, ((IAsyncLogEventSinkInspector)sink).DroppedMessagesCount);
+@@ -223,15 +223,15 @@ public class BackgroundWorkerSinkSpec
+         Assert.Null(monitor.Inspector);
+     }
+ 
+-    BackgroundWorkerSink CreateSinkWithDefaultOptions()
+-    {
+-        return new BackgroundWorkerSink(_logger, 10000, false, null);
+-    }
+-
+     static LogEvent CreateEvent()
+     {
+         return new LogEvent(DateTimeOffset.MaxValue, LogEventLevel.Error, null,
+             new MessageTemplate("amessage", Enumerable.Empty<MessageTemplateToken>()),
+             Enumerable.Empty<LogEventProperty>());
+     }
++
++    BackgroundWorkerSink CreateSinkWithDefaultOptions()
++    {
++        return new BackgroundWorkerSink(_logger, 10000, false, null);
++    }
+ }
+\ No newline at end of file
+diff --git a/test/Serilog.Sinks.Async.Tests/Support/CollectingFailureListener.cs b/test/Serilog.Sinks.Async.Tests/Support/CollectingFailureListener.cs
+index e35cc51..886d950 100644
+--- a/test/Serilog.Sinks.Async.Tests/Support/CollectingFailureListener.cs
++++ b/test/Serilog.Sinks.Async.Tests/Support/CollectingFailureListener.cs
+@@ -6,12 +6,12 @@ using Serilog.Events;
+ 
+ namespace Serilog.Sinks.Async.Tests.Support;
+ 
+-class CollectingFailureListener: ILoggingFailureListener
++class CollectingFailureListener : ILoggingFailureListener
+ {
+     readonly object _sync = new();
+     readonly List<LogEvent> _events = [];
+     readonly List<Exception> _exceptions = [];
+-    
++
+     public IReadOnlyList<LogEvent> Events
+     {
+         get
+@@ -20,6 +20,7 @@ class CollectingFailureListener: ILoggingFailureListener
+                 return _events.ToList();
+         }
+     }
++
+     public IReadOnlyList<Exception> Exceptions
+     {
+         get
+@@ -34,9 +35,9 @@ class CollectingFailureListener: ILoggingFailureListener
+     {
+         lock (_sync)
+         {
+-            if (exception != null)
++            if (exception is not null)
+                 _exceptions.Add(exception);
+-            
++
+             foreach (var logEvent in events ?? [])
+             {
+                 _events.Add(logEvent);
+diff --git a/test/Serilog.Sinks.Async.Tests/Support/DummyMonitor.cs b/test/Serilog.Sinks.Async.Tests/Support/DummyMonitor.cs
+index 6cb4d26..0f9758f 100644
+--- a/test/Serilog.Sinks.Async.Tests/Support/DummyMonitor.cs
++++ b/test/Serilog.Sinks.Async.Tests/Support/DummyMonitor.cs
+@@ -2,12 +2,13 @@
+ 
+ class DummyMonitor : IAsyncLogEventSinkMonitor
+ {
+-    IAsyncLogEventSinkInspector inspector;
+-    public IAsyncLogEventSinkInspector Inspector => inspector;
++    IAsyncLogEventSinkInspector _inspector;
++
++    public IAsyncLogEventSinkInspector Inspector => _inspector;
+ 
+     void IAsyncLogEventSinkMonitor.StartMonitoring(IAsyncLogEventSinkInspector inspector) =>
+-        this.inspector = inspector;
++        _inspector = inspector;
+ 
+     void IAsyncLogEventSinkMonitor.StopMonitoring(IAsyncLogEventSinkInspector inspector) =>
+-        System.Threading.Interlocked.CompareExchange(ref this.inspector, null, inspector);
++        System.Threading.Interlocked.CompareExchange(ref _inspector, null, inspector);
+ }
+\ No newline at end of file
+diff --git a/test/Serilog.Sinks.Async.Tests/Support/MemorySink.cs b/test/Serilog.Sinks.Async.Tests/Support/MemorySink.cs
+index 0d54a03..aedadbf 100644
+--- a/test/Serilog.Sinks.Async.Tests/Support/MemorySink.cs
++++ b/test/Serilog.Sinks.Async.Tests/Support/MemorySink.cs
+@@ -1,8 +1,8 @@
+-﻿using Serilog.Events;
+-using Serilog.Core;
++﻿using System;
+ using System.Collections.Concurrent;
+-using System;
+ using System.Threading.Tasks;
++using Serilog.Core;
++using Serilog.Events;
+ 
+ namespace Serilog.Sinks.Async.Tests.Support;
+ 
+diff --git a/test/Serilog.Sinks.Async.Tests/Support/NotImplementedSink.cs b/test/Serilog.Sinks.Async.Tests/Support/NotImplementedSink.cs
+index e0898c8..40b6020 100644
+--- a/test/Serilog.Sinks.Async.Tests/Support/NotImplementedSink.cs
++++ b/test/Serilog.Sinks.Async.Tests/Support/NotImplementedSink.cs
+@@ -4,7 +4,7 @@ using Serilog.Events;
+ 
+ namespace Serilog.Sinks.Async.Tests.Support;
+ 
+-class NotImplementedSink: ILogEventSink
++class NotImplementedSink : ILogEventSink
+ {
+     public void Emit(LogEvent logEvent)
+     {

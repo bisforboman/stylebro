@@ -1,0 +1,21 @@
+  Determining projects to restore...
+  Restored /home/user/w64/SA/default/test/Serilog.Sinks.Async.Tests/Serilog.Sinks.Async.Tests.csproj (in 491 ms).
+  1 of 2 projects are up-to-date for restore.
+  Serilog.Sinks.Async -> /home/user/w64/SA/default/src/Serilog.Sinks.Async/bin/Release/net8.0/Serilog.Sinks.Async.dll
+  Serilog.Sinks.Async -> /home/user/w64/SA/default/src/Serilog.Sinks.Async/bin/Release/net6.0/Serilog.Sinks.Async.dll
+  Serilog.Sinks.Async.Tests -> /home/user/w64/SA/default/test/Serilog.Sinks.Async.Tests/bin/Release/net6.0/Serilog.Sinks.Async.Tests.dll
+  Serilog.Sinks.Async.Tests -> /home/user/w64/SA/default/test/Serilog.Sinks.Async.Tests/bin/Release/net8.0/Serilog.Sinks.Async.Tests.dll
+Test run for /home/user/w64/SA/default/test/Serilog.Sinks.Async.Tests/bin/Release/net6.0/Serilog.Sinks.Async.Tests.dll (.NETCoreApp,Version=v6.0)
+Test run for /home/user/w64/SA/default/test/Serilog.Sinks.Async.Tests/bin/Release/net8.0/Serilog.Sinks.Async.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    28, Skipped:     0, Total:    28, Duration: 2 m 4 s - Serilog.Sinks.Async.Tests.dll (net6.0)
+
+Passed!  - Failed:     0, Passed:    28, Skipped:     0, Total:    28, Duration: 2 m 4 s - Serilog.Sinks.Async.Tests.dll (net8.0)

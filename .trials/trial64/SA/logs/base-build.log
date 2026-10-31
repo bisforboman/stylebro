@@ -1,0 +1,17 @@
+  Determining projects to restore...
+  Restored /home/user/w64/SA/base/src/Serilog.Sinks.Async/Serilog.Sinks.Async.csproj (in 565 ms).
+  Restored /home/user/w64/SA/base/test/Serilog.Sinks.Async.PerformanceTests/Serilog.Sinks.Async.PerformanceTests.csproj (in 562 ms).
+  Restored /home/user/w64/SA/base/test/Serilog.Sinks.Async.Tests/Serilog.Sinks.Async.Tests.csproj (in 562 ms).
+  Serilog.Sinks.Async -> /home/user/w64/SA/base/src/Serilog.Sinks.Async/bin/Debug/netstandard2.0/Serilog.Sinks.Async.dll
+  Serilog.Sinks.Async -> /home/user/w64/SA/base/src/Serilog.Sinks.Async/bin/Debug/net6.0/Serilog.Sinks.Async.dll
+  Serilog.Sinks.Async -> /home/user/w64/SA/base/src/Serilog.Sinks.Async/bin/Debug/net8.0/Serilog.Sinks.Async.dll
+  Serilog.Sinks.Async.Tests -> /home/user/w64/SA/base/test/Serilog.Sinks.Async.Tests/bin/Debug/net8.0/Serilog.Sinks.Async.Tests.dll
+  Serilog.Sinks.Async.Tests -> /home/user/w64/SA/base/test/Serilog.Sinks.Async.Tests/bin/Debug/net6.0/Serilog.Sinks.Async.Tests.dll
+  Serilog.Sinks.Async.PerformanceTests -> /home/user/w64/SA/base/test/Serilog.Sinks.Async.PerformanceTests/bin/Debug/net8.0/Serilog.Sinks.Async.PerformanceTests.dll
+  Serilog.Sinks.Async.PerformanceTests -> /home/user/w64/SA/base/test/Serilog.Sinks.Async.PerformanceTests/bin/Debug/net6.0/Serilog.Sinks.Async.PerformanceTests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:12.61

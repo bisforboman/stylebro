@@ -1,0 +1,7 @@
+  Determining projects to restore...
+  Restored /home/user/w64/AU/default/TestAssemblies/FilteredDirectoryUnavailableTypesAssembly/FilteredDirectoryUnavailableTypesAssembly.csproj (in 253 ms).
+  Restored /home/user/w64/AU/default/TestAssemblies/FilteredDirectoryLoaderTestAssembly/FilteredDirectoryLoaderTestAssembly.csproj (in 252 ms).
+  28 of 30 projects are up-to-date for restore.
+/home/user/w64/AU/default/ArchUnitNET/Domain/Architecture.cs(86,14): error BRO1519: Add a blank line after the closing brace (https://bisforboman.github.io/stylebro/rules/BRO1519/) [/home/user/w64/AU/default/ArchUnitNET/ArchUnitNET.csproj::TargetFramework=netstandard2.0]
+/home/user/w64/AU/default/ArchUnitNET/Domain/Architecture.cs(86,14): error BRO1519: Add a blank line after the closing brace (https://bisforboman.github.io/stylebro/rules/BRO1519/) [/home/user/w64/AU/default/ArchUnitNET/ArchUnitNET.csproj::TargetFramework=netstandard2.0]
+Get projects properties with MSBuild didn't execute properly with exit code: 1.

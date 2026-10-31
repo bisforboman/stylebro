@@ -1,0 +1,6 @@
+build	0	21s	dotnet build serilog-expressions.sln -c Debug
+twae-Debug	0	15s	twae Debug
+test-Debug	0	17s	env CFG=Debug bash -c dotnet test serilog-expressions.sln -c $CFG
+twae-Release	0	13s	twae Release
+test-Release	0	263s	env CFG=Release bash -c dotnet test serilog-expressions.sln -c $CFG
+DONE

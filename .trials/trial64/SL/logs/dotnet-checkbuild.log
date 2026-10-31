@@ -1,0 +1,14 @@
+Checking StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net462, net48, net9.0, netstandard2.0, netstandard2.1). net8.0: no run of its own, the code compiles the same as for another framework of the same kind (the same '#if' symbols tested, files and settings). net9.0: only the projects whose code compiles differently there.
+Checked netstandard2.0 (run 1 of 6)
+Checked netstandard2.1 (run 2 of 6)
+Checked net48 (run 3 of 6)
+Checked net10.0 (run 4 of 6)
+Checked net9.0 (run 5 of 6)
+Checked net462 (run 6 of 6)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Building serilog-extensions-logging.sln in Debug, Release with warnings as errors, and a copy of HEAD to compare...
+Debug: no findings, no new errors.
+Release: no findings, no new errors.
+Clean.

@@ -1,0 +1,3314 @@
+diff --git a/ArchUnitNET.MSTestV2Tests/RuleEvaluationTests.cs b/ArchUnitNET.MSTestV2Tests/RuleEvaluationTests.cs
+index fc51e734..b44f85ee 100644
+--- a/ArchUnitNET.MSTestV2Tests/RuleEvaluationTests.cs
++++ b/ArchUnitNET.MSTestV2Tests/RuleEvaluationTests.cs
+@@ -79,7 +79,7 @@ namespace ArchUnitNET.MSTestV2Tests
+ 
+         private static string RemoveAssertionText(string exceptionMessage)
+         {
+-            return exceptionMessage.Replace("Assert.Fail failed. ", string.Empty);
++            return exceptionMessage.Replace("Assert.Fail failed. ", "");
+         }
+     }
+ }
+diff --git a/ArchUnitNET.MSTestV3Tests/RuleEvaluationTests.cs b/ArchUnitNET.MSTestV3Tests/RuleEvaluationTests.cs
+index 881a516c..433d6bca 100644
+--- a/ArchUnitNET.MSTestV3Tests/RuleEvaluationTests.cs
++++ b/ArchUnitNET.MSTestV3Tests/RuleEvaluationTests.cs
+@@ -75,7 +75,7 @@ namespace ArchUnitNET.MSTestV3Tests
+ 
+         private static string RemoveAssertionText(string exceptionMessage)
+         {
+-            return exceptionMessage.Replace("Assert.Fail failed. ", string.Empty);
++            return exceptionMessage.Replace("Assert.Fail failed. ", "");
+         }
+     }
+ }
+diff --git a/ArchUnitNET.TUnit/FailedArchRuleException.cs b/ArchUnitNET.TUnit/FailedArchRuleException.cs
+index 5e18b0ee..5e0c63c7 100644
+--- a/ArchUnitNET.TUnit/FailedArchRuleException.cs
++++ b/ArchUnitNET.TUnit/FailedArchRuleException.cs
+@@ -10,7 +10,7 @@ namespace ArchUnitNET.TUnit
+     public class FailedArchRuleException : BaseAssertionException
+     {
+         /// <summary>
+-        ///     Creates a new instance of the <see href="FailedArchRuleException" /> class.
++        ///     Initializes a new instance of the <see cref="FailedArchRuleException"/> class.
+         /// </summary>
+         /// <param name="architecture">The architecture which was tested</param>
+         /// <param name="archRule">The archrule that failed</param>
+@@ -18,7 +18,7 @@ namespace ArchUnitNET.TUnit
+             : this(archRule.Evaluate(architecture)) { }
+ 
+         /// <summary>
+-        ///     Creates a new instance of the <see href="FailedArchRuleException" /> class.
++        ///     Initializes a new instance of the <see cref="FailedArchRuleException"/> class.
+         /// </summary>
+         /// <param name="evaluationResults">The results of the evaluation of the archrule</param>
+         public FailedArchRuleException(IEnumerable<EvaluationResult> evaluationResults)
+diff --git a/ArchUnitNET.xUnit/FailedArchRuleException.cs b/ArchUnitNET.xUnit/FailedArchRuleException.cs
+index 0d763aa9..e0f7368f 100644
+--- a/ArchUnitNET.xUnit/FailedArchRuleException.cs
++++ b/ArchUnitNET.xUnit/FailedArchRuleException.cs
+@@ -10,7 +10,7 @@ namespace ArchUnitNET.xUnit
+     public class FailedArchRuleException : XunitException
+     {
+         /// <summary>
+-        ///     Creates a new instance of the <see href="FailedArchRuleException" /> class.
++        ///     Initializes a new instance of the <see cref="FailedArchRuleException"/> class.
+         /// </summary>
+         /// <param name="architecture">The architecture which was tested</param>
+         /// <param name="archRule">The archrule that failed</param>
+@@ -18,7 +18,7 @@ namespace ArchUnitNET.xUnit
+             : this(archRule.Evaluate(architecture)) { }
+ 
+         /// <summary>
+-        ///     Creates a new instance of the <see href="FailedArchRuleException" /> class.
++        ///     Initializes a new instance of the <see cref="FailedArchRuleException"/> class.
+         /// </summary>
+         /// <param name="evaluationResults">The results of the evaluation of the archrule</param>
+         public FailedArchRuleException(IEnumerable<EvaluationResult> evaluationResults)
+diff --git a/ArchUnitNET.xUnitV3/FailedArchRuleException.cs b/ArchUnitNET.xUnitV3/FailedArchRuleException.cs
+index 0e094d0f..694e42ea 100644
+--- a/ArchUnitNET.xUnitV3/FailedArchRuleException.cs
++++ b/ArchUnitNET.xUnitV3/FailedArchRuleException.cs
+@@ -10,7 +10,7 @@ namespace ArchUnitNET.xUnitV3
+     public class FailedArchRuleException : XunitException
+     {
+         /// <summary>
+-        ///     Creates a new instance of the <see href="FailedArchRuleException" /> class.
++        ///     Initializes a new instance of the <see cref="FailedArchRuleException"/> class.
+         /// </summary>
+         /// <param name="architecture">The architecture which was tested</param>
+         /// <param name="archRule">The archrule that failed</param>
+@@ -18,7 +18,7 @@ namespace ArchUnitNET.xUnitV3
+             : this(archRule.Evaluate(architecture)) { }
+ 
+         /// <summary>
+-        ///     Creates a new instance of the <see href="FailedArchRuleException" /> class.
++        ///     Initializes a new instance of the <see cref="FailedArchRuleException"/> class.
+         /// </summary>
+         /// <param name="evaluationResults">The results of the evaluation of the archrule</param>
+         public FailedArchRuleException(IEnumerable<EvaluationResult> evaluationResults)
+diff --git a/ArchUnitNET/Domain/Extensions/EnumerableExtensions.cs b/ArchUnitNET/Domain/Extensions/EnumerableExtensions.cs
+index baa0eac5..5cdfbe41 100644
+--- a/ArchUnitNET/Domain/Extensions/EnumerableExtensions.cs
++++ b/ArchUnitNET/Domain/Extensions/EnumerableExtensions.cs
+@@ -80,6 +80,7 @@ namespace ArchUnitNET.Domain.Extensions
+             {
+                 return elements.Contains;
+             }
++
+             return new HashSet<T>(elements).Contains;
+         }
+     }
+diff --git a/ArchUnitNET/Domain/Extensions/TypeExtensions.cs b/ArchUnitNET/Domain/Extensions/TypeExtensions.cs
+index cebf8863..e328824d 100644
+--- a/ArchUnitNET/Domain/Extensions/TypeExtensions.cs
++++ b/ArchUnitNET/Domain/Extensions/TypeExtensions.cs
+@@ -402,8 +402,9 @@ namespace ArchUnitNET.Domain.Extensions
+ 
+             var targetGenericArguments = targetType.GetGenericArguments();
+ 
+-            if (!targetGenericArguments.Any()) //always match when no generic arguments are given (like ITest<>)
++            if (!targetGenericArguments.Any())
+             {
++                // always match when no generic arguments are given (like ITest<>)
+                 return true;
+             }
+ 
+diff --git a/ArchUnitNET/Domain/FunctionPointer.cs b/ArchUnitNET/Domain/FunctionPointer.cs
+index 108b476f..edece7e3 100644
+--- a/ArchUnitNET/Domain/FunctionPointer.cs
++++ b/ArchUnitNET/Domain/FunctionPointer.cs
+@@ -46,10 +46,12 @@ namespace ArchUnitNET.Domain
+             {
+                 return false;
+             }
++
+             if (ReferenceEquals(this, other))
+             {
+                 return true;
+             }
++
+             return Equals(_type, other._type)
+                 && Equals(ReturnTypeInstance, other.ReturnTypeInstance)
+                 && ParameterTypeInstances.SequenceEqual(other.ParameterTypeInstances);
+@@ -61,10 +63,12 @@ namespace ArchUnitNET.Domain
+             {
+                 return false;
+             }
++
+             if (ReferenceEquals(this, obj))
+             {
+                 return true;
+             }
++
+             return obj.GetType() == GetType() && Equals((FunctionPointer)obj);
+         }
+ 
+diff --git a/ArchUnitNET/Domain/ObjectProvider.cs b/ArchUnitNET/Domain/ObjectProvider.cs
+index c011287e..664dca08 100644
+--- a/ArchUnitNET/Domain/ObjectProvider.cs
++++ b/ArchUnitNET/Domain/ObjectProvider.cs
+@@ -40,6 +40,7 @@ namespace ArchUnitNET.Fluent
+                 case 1:
+                     return $"{singleDescription} {Description}";
+             }
++
+             return $"{multipleDescription} {Description}";
+         }
+ 
+diff --git a/ArchUnitNET/Domain/PlantUml/Export/DependencyFilters.cs b/ArchUnitNET/Domain/PlantUml/Export/DependencyFilters.cs
+index add3ab4f..f42752d8 100644
+--- a/ArchUnitNET/Domain/PlantUml/Export/DependencyFilters.cs
++++ b/ArchUnitNET/Domain/PlantUml/Export/DependencyFilters.cs
+@@ -26,8 +26,10 @@ namespace ArchUnitNET.Domain.PlantUml.Export
+         {
+             return dependency =>
+                 OriginAndTargetHaveNoParents(dependency)
+-                || !dependency.Target.FullName.StartsWith(dependency.Origin.FullName)
+-                    && !dependency.Origin.FullName.StartsWith(dependency.Target.FullName);
++                || (
++                    !dependency.Target.FullName.StartsWith(dependency.Origin.FullName)
++                    && !dependency.Origin.FullName.StartsWith(dependency.Target.FullName)
++                );
+         }
+ 
+         private static bool OriginAndTargetHaveNoParents(ITypeDependency dependency)
+diff --git a/ArchUnitNET/Domain/PlantUml/Export/PlantUmlClass.cs b/ArchUnitNET/Domain/PlantUml/Export/PlantUmlClass.cs
+index 84db00f5..567e364e 100644
+--- a/ArchUnitNET/Domain/PlantUml/Export/PlantUmlClass.cs
++++ b/ArchUnitNET/Domain/PlantUml/Export/PlantUmlClass.cs
+@@ -8,14 +8,14 @@ namespace ArchUnitNET.Domain.PlantUml.Export
+     {
+         private readonly string _name;
+         private readonly List<string> _fields = new List<string>();
+-        string _hyperlink { get; }
++        private string Hyperlink { get; }
+ 
+         public PlantUmlClass(string name, string hyperlink = null)
+         {
+             PlantUmlNameChecker.AssertNoForbiddenCharacters(name, hyperlink);
+             PlantUmlNameChecker.AssertNotNullOrEmpty(name);
+             _name = name;
+-            _hyperlink = hyperlink;
++            Hyperlink = hyperlink;
+         }
+ 
+         public void AddField(string field)
+@@ -25,7 +25,7 @@ namespace ArchUnitNET.Domain.PlantUml.Export
+ 
+         public string GetPlantUmlString(RenderOptions renderOptions)
+         {
+-            var hyperlinkString = _hyperlink != null ? " [[" + _hyperlink + "]] " : null;
++            var hyperlinkString = Hyperlink != null ? " [[" + Hyperlink + "]] " : null;
+             var result = "class \"" + _name + "\"" + hyperlinkString + " {" + Environment.NewLine;
+ 
+             if (!renderOptions.OmitClassFields)
+diff --git a/ArchUnitNET/Domain/PlantUml/Export/PlantUmlDependency.cs b/ArchUnitNET/Domain/PlantUml/Export/PlantUmlDependency.cs
+index 431b8cee..198d264f 100644
+--- a/ArchUnitNET/Domain/PlantUml/Export/PlantUmlDependency.cs
++++ b/ArchUnitNET/Domain/PlantUml/Export/PlantUmlDependency.cs
+@@ -90,6 +90,7 @@ namespace ArchUnitNET.Domain.PlantUml.Export
+                             + "]"
+                             + Environment.NewLine;
+                     }
++
+                     return "";
+ 
+                 case DependencyType.Circle:
+@@ -110,6 +111,7 @@ namespace ArchUnitNET.Domain.PlantUml.Export
+                     {
+                         return OriginAlias + " ..> " + TargetAlias + Environment.NewLine;
+                     }
++
+                     return "";
+ 
+                 case DependencyType.OneToOneIfSameParentNamespace:
+@@ -152,6 +154,7 @@ namespace ArchUnitNET.Domain.PlantUml.Export
+                             return tmp + " -> [" + TargetAlias + "]" + Environment.NewLine;
+                         }
+                     }
++
+                     return "";
+ 
+                 case DependencyType.NoDependency:
+@@ -165,7 +168,7 @@ namespace ArchUnitNET.Domain.PlantUml.Export
+             ns.Remove(ns.LastIndexOf(".", StringComparison.Ordinal));
+ 
+         private static bool HaveSameParentNamespace(string origin, string target) =>
+-            (GetParentNamespace(origin) == GetParentNamespace(target));
++            GetParentNamespace(origin) == GetParentNamespace(target);
+ 
+         private bool Equals(PlantUmlDependency other)
+         {
+diff --git a/ArchUnitNET/Domain/PlantUml/Export/PlantUmlDiagram.cs b/ArchUnitNET/Domain/PlantUml/Export/PlantUmlDiagram.cs
+index 7d0e0116..2bc02901 100644
+--- a/ArchUnitNET/Domain/PlantUml/Export/PlantUmlDiagram.cs
++++ b/ArchUnitNET/Domain/PlantUml/Export/PlantUmlDiagram.cs
+@@ -40,6 +40,7 @@ namespace ArchUnitNET.Domain.PlantUml.Export
+             {
+                 result.Append(element.GetPlantUmlString(renderOptions));
+             }
++
+             result.AppendLine("@enduml");
+             return result.ToString();
+         }
+diff --git a/ArchUnitNET/Domain/PlantUml/Export/PlantUmlFileBuilder.cs b/ArchUnitNET/Domain/PlantUml/Export/PlantUmlFileBuilder.cs
+index b02092c5..3183e126 100644
+--- a/ArchUnitNET/Domain/PlantUml/Export/PlantUmlFileBuilder.cs
++++ b/ArchUnitNET/Domain/PlantUml/Export/PlantUmlFileBuilder.cs
+@@ -31,6 +31,7 @@ namespace ArchUnitNET.Domain.PlantUml.Export
+             {
+                 renderOptions = new RenderOptions();
+             }
++
+             if (!renderOptions.Overwrite && File.Exists(path))
+             {
+                 throw new FileAlreadyExistsException(
+@@ -141,8 +142,9 @@ namespace ArchUnitNET.Domain.PlantUml.Export
+                 var sliceIsPackage = IsPackage(slice);
+                 var dependencyTargets = SelectDependencies(slice, generationOptions);
+ 
+-                if (slice is Namespace) //This throws errors if namespaces and slices are used in the same diagram, the syntax can't be mixed in PlantUML
++                if (slice is Namespace)
+                 {
++                    // This throws errors if namespaces and slices are used in the same diagram, the syntax can't be mixed in PlantUML
+                     nodes.Add(slice, new PlantUmlNamespace(slice.Description));
+                 }
+                 else if (!sliceIsPackage)
+@@ -152,6 +154,7 @@ namespace ArchUnitNET.Domain.PlantUml.Export
+                     {
+                         slc.UseS4Style();
+                     }
++
+                     nodes.Add(slice, slc);
+                 }
+ 
+@@ -232,6 +235,7 @@ namespace ArchUnitNET.Domain.PlantUml.Export
+                 RemoveDuplicateDependenciesWhenShowingPackages();
+                 ReplaceCirclesWithAppropriateDependencyType();
+             }
++
+             RemoveDuplicatedArrowsIfExist();
+ 
+             _diagram.AddElements(
+@@ -305,8 +309,9 @@ namespace ArchUnitNET.Domain.PlantUml.Export
+                     );
+                 }
+ 
+-                if (slice is Namespace) //This throws errors if namespaces and slices are used in the same diagram, the syntax can't be mixed in PlantUML
++                if (slice is Namespace)
+                 {
++                    // This throws errors if namespaces and slices are used in the same diagram, the syntax can't be mixed in PlantUML
+                     nodes.Add(slice, new PlantUmlNamespace(slice.Description));
+                 }
+                 else if (!sliceIsPackage)
+@@ -376,6 +381,7 @@ namespace ArchUnitNET.Domain.PlantUml.Export
+             {
+                 _diagram.AddElements(tempList.OrderByDescending(element => element.ToString()));
+             }
++
+             _diagram.AddElements(_dependencies);
+ 
+             return this;
+@@ -395,6 +401,7 @@ namespace ArchUnitNET.Domain.PlantUml.Export
+             {
+                 nodes.Remove(entry.Key);
+             }
++
+             return nodes;
+         }
+ 
+@@ -454,6 +461,7 @@ namespace ArchUnitNET.Domain.PlantUml.Export
+             {
+                 return;
+             }
++
+             if (
+                 thatContainsThisString != null
+                 && !_sliceList.Any(slice =>
+@@ -470,14 +478,14 @@ namespace ArchUnitNET.Domain.PlantUml.Export
+ 
+                 if (
+                     thatContainsThisString != null
+-                    && !(_sliceList[i].Description).Contains(thatContainsThisString)
++                    && !_sliceList[i].Description.Contains(thatContainsThisString)
+                 )
+                 {
+                     continue;
+                 }
+ 
+                 dots += _sliceList[i].Description.Count(c => c == '.');
+-                dots -= (_sliceList[i].NameSpace ?? string.Empty).Count(c => c == '.');
++                dots -= (_sliceList[i].NameSpace ?? "").Count(c => c == '.');
+ 
+                 if (dots >= _sliceList[i].CountOfAsteriskInPattern)
+                 {
+@@ -539,6 +547,7 @@ namespace ArchUnitNET.Domain.PlantUml.Export
+                             DependencyType.OneToPackage
+                         );
+                     }
++
+                     continue;
+                 }
+ 
+@@ -556,39 +565,35 @@ namespace ArchUnitNET.Domain.PlantUml.Export
+             for (var i = _dependencies.Count - 1; i >= 0; i--)
+             {
+                 if (
+-                    _dependencies[i].DependencyType == DependencyType.PackageToOne
+-                    || _dependencies[i].DependencyType == DependencyType.PackageToPackage
++                    (
++                        _dependencies[i].DependencyType == DependencyType.PackageToOne
++                        || _dependencies[i].DependencyType == DependencyType.PackageToPackage
++                    )
++                    && _dependencies.Any(dependency =>
++                        _dependencies[i].Target == dependency.Target
++                        && dependency.Origin.Contains(_dependencies[i].Origin)
++                        && dependency.Origin != _dependencies[i].Origin
++                    )
+                 )
+                 {
+-                    if (
+-                        _dependencies.Any(dependency =>
+-                            _dependencies[i].Target == dependency.Target
+-                            && dependency.Origin.Contains(_dependencies[i].Origin)
+-                            && dependency.Origin != _dependencies[i].Origin
+-                        )
+-                    )
+-                    {
+-                        _dependencies.RemoveAt(i);
+-                        continue;
+-                    }
++                    _dependencies.RemoveAt(i);
++                    continue;
+                 }
+ 
+                 if (
+-                    _dependencies[i].DependencyType == DependencyType.OneToPackage
+-                    || _dependencies[i].DependencyType == DependencyType.PackageToPackage
++                    (
++                        _dependencies[i].DependencyType == DependencyType.OneToPackage
++                        || _dependencies[i].DependencyType == DependencyType.PackageToPackage
++                    )
++                    && _dependencies.Any(dependency =>
++                        dependency.Target.Contains(_dependencies[i].Target)
++                        && dependency.Target != _dependencies[i].Target
++                        && dependency.Origin.Contains(_dependencies[i].Origin)
++                    )
+                 )
+                 {
+-                    if (
+-                        _dependencies.Any(dependency =>
+-                            dependency.Target.Contains(_dependencies[i].Target)
+-                            && dependency.Target != _dependencies[i].Target
+-                            && dependency.Origin.Contains(_dependencies[i].Origin)
+-                        )
+-                    )
+-                    {
+-                        _dependencies.RemoveAt(i);
+-                        continue;
+-                    }
++                    _dependencies.RemoveAt(i);
++                    continue;
+                 }
+ 
+                 if (
+diff --git a/ArchUnitNET/Domain/PlantUml/Export/PlantUmlInterface.cs b/ArchUnitNET/Domain/PlantUml/Export/PlantUmlInterface.cs
+index 4bdd571e..c5894883 100644
+--- a/ArchUnitNET/Domain/PlantUml/Export/PlantUmlInterface.cs
++++ b/ArchUnitNET/Domain/PlantUml/Export/PlantUmlInterface.cs
+@@ -5,19 +5,19 @@ namespace ArchUnitNET.Domain.PlantUml.Export
+     public class PlantUmlInterface : IPlantUmlElement
+     {
+         private readonly string _name;
+-        string _hyperlink { get; }
++        private string Hyperlink { get; }
+ 
+         public PlantUmlInterface(string name, string hyperlink = null)
+         {
+             PlantUmlNameChecker.AssertNoForbiddenCharacters(name, hyperlink);
+             PlantUmlNameChecker.AssertNotNullOrEmpty(name);
+             _name = name;
+-            _hyperlink = hyperlink;
++            Hyperlink = hyperlink;
+         }
+ 
+         public string GetPlantUmlString(RenderOptions renderOptions)
+         {
+-            var hyperlinkString = _hyperlink != null ? " [[" + _hyperlink + "]] " : null;
++            var hyperlinkString = Hyperlink != null ? " [[" + Hyperlink + "]] " : null;
+             var result =
+                 "interface \""
+                 + _name
+diff --git a/ArchUnitNET/Domain/PlantUml/Export/PlantUmlNamespace.cs b/ArchUnitNET/Domain/PlantUml/Export/PlantUmlNamespace.cs
+index 9b3382a1..f1f336be 100644
+--- a/ArchUnitNET/Domain/PlantUml/Export/PlantUmlNamespace.cs
++++ b/ArchUnitNET/Domain/PlantUml/Export/PlantUmlNamespace.cs
+@@ -8,14 +8,14 @@ namespace ArchUnitNET.Domain.PlantUml.Export
+     {
+         public string Name { get; }
+         public List<IPlantUmlElement> PlantUmlElements { get; } = new List<IPlantUmlElement>();
+-        string _hyperlink { get; }
++        private string Hyperlink { get; }
+ 
+         public PlantUmlNamespace(string name, string hyperlink = null)
+         {
+             PlantUmlNameChecker.AssertNoForbiddenCharacters(name, hyperlink);
+             PlantUmlNameChecker.AssertNotNullOrEmpty(name);
+             Name = name;
+-            _hyperlink = hyperlink;
++            Hyperlink = hyperlink;
+         }
+ 
+         public void AddElement(IPlantUmlElement plantUmlElement)
+@@ -30,7 +30,7 @@ namespace ArchUnitNET.Domain.PlantUml.Export
+ 
+         public string GetPlantUmlString(RenderOptions renderOptions)
+         {
+-            var hyperlinkString = _hyperlink != null ? " [[" + _hyperlink + "]] " : null;
++            var hyperlinkString = Hyperlink != null ? " [[" + Hyperlink + "]] " : null;
+             var result = "namespace " + Name + hyperlinkString + " {" + Environment.NewLine;
+ 
+             result += PlantUmlElements.Aggregate(
+diff --git a/ArchUnitNET/Domain/PlantUml/Export/PlantUmlSlice.cs b/ArchUnitNET/Domain/PlantUml/Export/PlantUmlSlice.cs
+index 75ab1728..b21f965b 100644
+--- a/ArchUnitNET/Domain/PlantUml/Export/PlantUmlSlice.cs
++++ b/ArchUnitNET/Domain/PlantUml/Export/PlantUmlSlice.cs
+@@ -105,6 +105,7 @@ namespace ArchUnitNET.Domain.PlantUml.Export
+                 {
+                     result.Append(" as " + Alias);
+                 }
++
+                 AppendHyperlink(result);
+                 if (Color != null)
+                 {
+diff --git a/ArchUnitNET/Domain/PlantUml/Import/Alias.cs b/ArchUnitNET/Domain/PlantUml/Import/Alias.cs
+index 5e676f2d..1ba25465 100644
+--- a/ArchUnitNET/Domain/PlantUml/Import/Alias.cs
++++ b/ArchUnitNET/Domain/PlantUml/Import/Alias.cs
+@@ -33,7 +33,7 @@ namespace ArchUnitNET.Domain.PlantUml.Import
+             return hashCode;
+         }
+ 
+-        internal string asString()
++        internal string AsString()
+         {
+             return _value;
+         }
+diff --git a/ArchUnitNET/Domain/PlantUml/Import/ClassDiagramAssociation.cs b/ArchUnitNET/Domain/PlantUml/Import/ClassDiagramAssociation.cs
+index 178994f5..bed784d4 100644
+--- a/ArchUnitNET/Domain/PlantUml/Import/ClassDiagramAssociation.cs
++++ b/ArchUnitNET/Domain/PlantUml/Import/ClassDiagramAssociation.cs
+@@ -19,6 +19,7 @@ namespace ArchUnitNET.Domain.PlantUml.Import
+             {
+                 components.Add(new AssociatedComponent(component));
+             }
++
+             _components = components.ToImmutable();
+         }
+ 
+@@ -38,6 +39,7 @@ namespace ArchUnitNET.Domain.PlantUml.Import
+                             )
+                         );
+                     }
++
+                     visited.Add(stereotype);
+                 }
+             }
+@@ -53,6 +55,7 @@ namespace ArchUnitNET.Domain.PlantUml.Import
+                     result.Add(identifier);
+                 }
+             }
++
+             return result.ToImmutable();
+         }
+ 
+@@ -73,6 +76,7 @@ namespace ArchUnitNET.Domain.PlantUml.Import
+             {
+                 result.Add(stereotype.AsString());
+             }
++
+             return result.ToImmutable();
+         }
+ 
+@@ -111,6 +115,7 @@ namespace ArchUnitNET.Domain.PlantUml.Import
+             {
+                 associatedComponentNames.Add(associatedComponent.ComponentName.AsString());
+             }
++
+             return associatedComponentNames;
+         }
+ 
+@@ -124,6 +129,7 @@ namespace ArchUnitNET.Domain.PlantUml.Import
+                     result.Add(component.AsPlantUmlComponent);
+                 }
+             }
++
+             return result.ToImmutable();
+         }
+ 
+@@ -150,6 +156,7 @@ namespace ArchUnitNET.Domain.PlantUml.Import
+                         return true;
+                     }
+                 }
++
+                 return false;
+             }
+         }
+diff --git a/ArchUnitNET/Domain/PlantUml/Import/PlantUmlComponents.cs b/ArchUnitNET/Domain/PlantUml/Import/PlantUmlComponents.cs
+index 23ca74f0..4762dbe7 100644
+--- a/ArchUnitNET/Domain/PlantUml/Import/PlantUmlComponents.cs
++++ b/ArchUnitNET/Domain/PlantUml/Import/PlantUmlComponents.cs
+@@ -41,6 +41,7 @@ namespace ArchUnitNET.Domain.PlantUml.Import
+             {
+                 result = _componentsByName[componentName];
+             }
++
+             if (result == null)
+             {
+                 throw new IllegalDiagramException(
+@@ -51,6 +52,7 @@ namespace ArchUnitNET.Domain.PlantUml.Import
+                     )
+                 );
+             }
++
+             return result;
+         }
+ 
+diff --git a/ArchUnitNET/Domain/PlantUml/Import/PlantUmlDiagramBuilder.cs b/ArchUnitNET/Domain/PlantUml/Import/PlantUmlDiagramBuilder.cs
+index 7396ca95..3d848c78 100644
+--- a/ArchUnitNET/Domain/PlantUml/Import/PlantUmlDiagramBuilder.cs
++++ b/ArchUnitNET/Domain/PlantUml/Import/PlantUmlDiagramBuilder.cs
+@@ -25,6 +25,7 @@ namespace ArchUnitNET.Domain.PlantUml.Import
+             {
+                 _originToParsedDependency.Add(g.Origin, g.Dependencies.Distinct().ToList());
+             }
++
+             return this;
+         }
+ 
+@@ -34,6 +35,7 @@ namespace ArchUnitNET.Domain.PlantUml.Import
+             {
+                 Finish(component);
+             }
++
+             return new PlantUmlParsedDiagram(_plantUmlComponents);
+         }
+ 
+@@ -55,6 +57,7 @@ namespace ArchUnitNET.Domain.PlantUml.Import
+                     dependencies.Add(new PlantUmlComponentDependency(component, target));
+                 }
+             }
++
+             component.Finish(dependencies.ToImmutable());
+         }
+     }
+diff --git a/ArchUnitNET/Domain/PlantUml/Import/PlantUmlParser.cs b/ArchUnitNET/Domain/PlantUml/Import/PlantUmlParser.cs
+index 90ce7048..e7782153 100644
+--- a/ArchUnitNET/Domain/PlantUml/Import/PlantUmlParser.cs
++++ b/ArchUnitNET/Domain/PlantUml/Import/PlantUmlParser.cs
+@@ -17,19 +17,21 @@ namespace ArchUnitNET.Domain.PlantUml.Import
+ 
+         public PlantUmlParsedDiagram Parse(string filename)
+         {
+-            if (filename is null)
++            if (filename == null)
+             {
+                 throw new ArgumentNullException(nameof(filename));
+             }
++
+             return CreateDiagram(ReadLines(filename));
+         }
+ 
+         public PlantUmlParsedDiagram Parse(Stream stream)
+         {
+-            if (stream is null)
++            if (stream == null)
+             {
+                 throw new ArgumentNullException("stream");
+             }
++
+             return CreateDiagram(ReadLines(stream));
+         }
+ 
+@@ -62,6 +64,7 @@ namespace ArchUnitNET.Domain.PlantUml.Import
+                         lines.Add(line);
+                     }
+                 }
++
+                 return lines;
+             }
+             catch (Exception ex)
+@@ -113,6 +116,7 @@ namespace ArchUnitNET.Domain.PlantUml.Import
+                 );
+                 result.Add(new ParsedDependency(origin.Identifier, target.Identifier));
+             }
++
+             return result;
+         }
+ 
+@@ -176,6 +180,7 @@ namespace ArchUnitNET.Domain.PlantUml.Import
+                     )
+                 );
+             }
++
+             return result;
+         }
+ 
+diff --git a/ArchUnitNET/Domain/PlantUml/Import/PlantUmlPatterns.cs b/ArchUnitNET/Domain/PlantUml/Import/PlantUmlPatterns.cs
+index cca03f89..3b5a375d 100644
+--- a/ArchUnitNET/Domain/PlantUml/Import/PlantUmlPatterns.cs
++++ b/ArchUnitNET/Domain/PlantUml/Import/PlantUmlPatterns.cs
+@@ -64,6 +64,7 @@ namespace ArchUnitNET.Domain.PlantUml.Import
+                 result.AddRange(PlantUmlDependencyMatcher.TryParseFromLeftToRight(line));
+                 result.AddRange(PlantUmlDependencyMatcher.TryParseFromRightToLeft(line));
+             }
++
+             return result;
+         }
+ 
+@@ -76,7 +77,7 @@ namespace ArchUnitNET.Domain.PlantUml.Import
+         {
+             private static readonly string ColorRegex = @"\[[^]]+]"; // for arrows like '--[#green]->'
+             private static readonly string DeppendencyArrowCenterRegex =
+-                @"(left|right|up|down|" + ColorRegex + ")?";
++                "(left|right|up|down|" + ColorRegex + ")?";
+             private static readonly Regex DependencyRightArrowPattern = new Regex(
+                 @"\s-+" + DeppendencyArrowCenterRegex + @"-*>\s"
+             );
+@@ -86,12 +87,12 @@ namespace ArchUnitNET.Domain.PlantUml.Import
+ 
+             public PlantUmlDependencyMatcher(string origin, string target)
+             {
+-                if (origin is null)
++                if (origin == null)
+                 {
+                     throw new ArgumentNullException(nameof(origin));
+                 }
+ 
+-                if (target is null)
++                if (target == null)
+                 {
+                     throw new ArgumentNullException(nameof(target));
+                 }
+@@ -182,6 +183,7 @@ namespace ArchUnitNET.Domain.PlantUml.Import
+                         )
+                     );
+                 }
++
+                 _stereotypeMatch = StereotypePattern.Match(input);
+             }
+ 
+@@ -191,6 +193,7 @@ namespace ArchUnitNET.Domain.PlantUml.Import
+                 {
+                     return _componentMatch.Groups[AliasGroupName].Value;
+                 }
++
+                 return null;
+             }
+ 
+@@ -207,6 +210,7 @@ namespace ArchUnitNET.Domain.PlantUml.Import
+                     result.Add(_stereotypeMatch.Groups[1].Value);
+                     _stereotypeMatch = _stereotypeMatch.NextMatch();
+                 }
++
+                 return result;
+             }
+         }
+diff --git a/ArchUnitNET/Domain/SliceIdentifier.cs b/ArchUnitNET/Domain/SliceIdentifier.cs
+index e84a4a53..e6556195 100644
+--- a/ArchUnitNET/Domain/SliceIdentifier.cs
++++ b/ArchUnitNET/Domain/SliceIdentifier.cs
+@@ -52,8 +52,8 @@ namespace ArchUnitNET.Domain
+                 return false;
+             }
+ 
+-            return Ignored && other.Ignored
+-                || !Ignored && !other.Ignored && Identifier == other.Identifier;
++            return (Ignored && other.Ignored)
++                || (!Ignored && !other.Ignored && Identifier == other.Identifier);
+         }
+ 
+         private bool Equals(SliceIdentifier other)
+diff --git a/ArchUnitNET/Domain/SystemTypeObjectProvider.cs b/ArchUnitNET/Domain/SystemTypeObjectProvider.cs
+index e8d29ab8..f13fbce9 100644
+--- a/ArchUnitNET/Domain/SystemTypeObjectProvider.cs
++++ b/ArchUnitNET/Domain/SystemTypeObjectProvider.cs
+@@ -25,16 +25,15 @@ namespace ArchUnitNET.Fluent
+         {
+             return _types
+                 .Select(architecture.GetITypeOfType)
+-                .Select(
+-                    (type) =>
++                .Select(type =>
++                {
++                    if (!(type is T result))
+                     {
+-                        if (!(type is T result))
+-                        {
+-                            throw new ArgumentException($"Type {type} is not of type {typeof(T)}");
+-                        }
+-                        return result;
++                        throw new ArgumentException($"Type {type} is not of type {typeof(T)}");
+                     }
+-                );
++
++                    return result;
++                });
+         }
+ 
+         public string FormatDescription(
+@@ -50,6 +49,7 @@ namespace ArchUnitNET.Fluent
+                 case 1:
+                     return $"{singleDescription} {Description}";
+             }
++
+             return $"{multipleDescription} {Description}";
+         }
+ 
+diff --git a/ArchUnitNET/Domain/Visibility.cs b/ArchUnitNET/Domain/Visibility.cs
+index ea9d972c..83450d6e 100644
+--- a/ArchUnitNET/Domain/Visibility.cs
++++ b/ArchUnitNET/Domain/Visibility.cs
+@@ -9,7 +9,7 @@ namespace ArchUnitNET.Domain
+         PrivateProtected = 4,
+         Private = 5,
+         NotAccessible =
+-            6 //should only be used for Getters/Setters or as default instead of null
++            6 // should only be used for Getters/Setters or as default instead of null
+         ,
+     }
+ 
+diff --git a/ArchUnitNET/Fluent/ConditionManager.cs b/ArchUnitNET/Fluent/ConditionManager.cs
+index 4acf30bb..a8192c07 100644
+--- a/ArchUnitNET/Fluent/ConditionManager.cs
++++ b/ArchUnitNET/Fluent/ConditionManager.cs
+@@ -176,7 +176,7 @@ namespace ArchUnitNET.Fluent
+             else
+             {
+                 var first = true;
+-                var failDescriptionCache = new List<string>(); //Prevent failDescriptions like "... failed because ... is public and is public"
++                var failDescriptionCache = new List<string>(); // Prevent failDescriptions like "... failed because ... is public and is public"
+                 foreach (
+                     var conditionResult in conditionElementResultsList
+                         .Select(result => result.ConditionResult)
+diff --git a/ArchUnitNET/Fluent/Conditions/ConditionExtensions.cs b/ArchUnitNET/Fluent/Conditions/ConditionExtensions.cs
+index 4c3f2827..76672afa 100644
+--- a/ArchUnitNET/Fluent/Conditions/ConditionExtensions.cs
++++ b/ArchUnitNET/Fluent/Conditions/ConditionExtensions.cs
+@@ -45,6 +45,7 @@ namespace ArchUnitNET.Fluent.Conditions
+                     );
+                     return obj => resultDictionary[obj];
+                 }
++
+                 var resultList = conditionResults.ToList();
+                 return obj => resultList.First(result => result.AnalyzedObject.Equals(obj));
+             }
+@@ -54,8 +55,8 @@ namespace ArchUnitNET.Fluent.Conditions
+         /// Wraps an ICondition as an IOrderedCondition if it is not already one, ensuring that the order of results
+         /// corresponds to the order of input objects.
+         /// </summary>
+-        /// <param name="condition">Condition to be wrapped.</param>
+         /// <typeparam name="TRuleType">Type of objects the condition applies to.</typeparam>
++        /// <param name="condition">Condition to be wrapped.</param>
+         /// <returns>An IOrderedCondition that maintains the order of input objects.</returns>
+         public static IOrderedCondition<TRuleType> AsOrderedCondition<TRuleType>(
+             this ICondition<TRuleType> condition
+@@ -66,6 +67,7 @@ namespace ArchUnitNET.Fluent.Conditions
+             {
+                 return orderedCondition;
+             }
++
+             return new OrderedConditionWrapper<TRuleType>(condition);
+         }
+     }
+diff --git a/ArchUnitNET/Fluent/Freeze/XmlViolationStore.cs b/ArchUnitNET/Fluent/Freeze/XmlViolationStore.cs
+index 6cb5399f..cac968d3 100644
+--- a/ArchUnitNET/Fluent/Freeze/XmlViolationStore.cs
++++ b/ArchUnitNET/Fluent/Freeze/XmlViolationStore.cs
+@@ -38,8 +38,9 @@ namespace ArchUnitNET.Fluent.Freeze
+             var storageDoc = LoadStorage();
+             var storedRule = FindStoredRule(storageDoc, rule);
+ 
+-            if (storedRule == null) //rule not stored
++            if (storedRule == null)
+             {
++                // rule not stored
+                 yield break;
+             }
+ 
+@@ -100,8 +101,9 @@ namespace ArchUnitNET.Fluent.Freeze
+                     ? doc
+                     : new XDocument(new XElement("FrozenRules"));
+             }
+-            catch (Exception) //file not found or invalid xml document
++            catch (Exception)
+             {
++                // file not found or invalid xml document
+                 return new XDocument(new XElement("FrozenRules"));
+             }
+         }
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/IAddObjectCondition.cs b/ArchUnitNET/Fluent/Syntax/Elements/IAddObjectCondition.cs
+index 7ab419ed..bdb43fbe 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/IAddObjectCondition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/IAddObjectCondition.cs
+@@ -97,7 +97,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+         TNextElement BeProtectedInternal();
+         TNextElement BePrivateProtected();
+ 
+-        //Negations
++        // Negations
+ 
+         TNextElement NotExist();
+ 
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/IAddObjectPredicate.cs b/ArchUnitNET/Fluent/Syntax/Elements/IAddObjectPredicate.cs
+index a904e218..848d9d14 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/IAddObjectPredicate.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/IAddObjectPredicate.cs
+@@ -88,7 +88,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+         TNextElement AreProtectedInternal();
+         TNextElement ArePrivateProtected();
+ 
+-        //Negations
++        // Negations
+ 
+         TNextElement AreNot(params ICanBeAnalyzed[] objects);
+         TNextElement AreNot(IEnumerable<ICanBeAnalyzed> objects);
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Members/AddMemberCondition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Members/AddMemberCondition.cs
+index caf1c420..f0df5d86 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Members/AddMemberCondition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Members/AddMemberCondition.cs
+@@ -25,11 +25,11 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Members
+         public TNextElement BeReadOnly() => CreateNextElement(MemberConditionsDefinition<TRuleType>.BeReadOnly());
+         public TNextElement BeImmutable() => CreateNextElement(MemberConditionsDefinition<TRuleType>.BeImmutable());
+ 
+-        //Relation Conditions
++        // Relation Conditions
+ 
+         public ShouldRelateToTypesThat<TNextElement, TRuleType> BeDeclaredInTypesThat() => BeginComplexTypeCondition(MemberConditionsDefinition<TRuleType>.BeDeclaredInTypesThat());
+ 
+-        //Negations
++        // Negations
+ 
+         public TNextElement NotBeDeclaredIn() => NotBeDeclaredIn(new ObjectProvider<IType>());
+         public TNextElement NotBeDeclaredIn(params IType[] types) => NotBeDeclaredIn(new ObjectProvider<IType>(types));
+@@ -42,7 +42,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Members
+         public TNextElement NotBeReadOnly() => CreateNextElement(MemberConditionsDefinition<TRuleType>.NotBeReadOnly());
+         public TNextElement NotBeImmutable() => CreateNextElement(MemberConditionsDefinition<TRuleType>.NotBeImmutable());
+ 
+-        //Relation Condition Negations
++        // Relation Condition Negations
+ 
+         public ShouldRelateToTypesThat<TNextElement, TRuleType> NotBeDeclaredInTypesThat() => BeginComplexTypeCondition(MemberConditionsDefinition<TRuleType>.NotBeDeclaredInTypesThat());
+         // csharpier-ignore-end
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Members/AddMemberPredicate.cs b/ArchUnitNET/Fluent/Syntax/Elements/Members/AddMemberPredicate.cs
+index 28ea7255..a68a2c84 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Members/AddMemberPredicate.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Members/AddMemberPredicate.cs
+@@ -25,7 +25,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Members
+         public TNextElement AreReadOnly() => CreateNextElement(MemberPredicatesDefinition<TRuleType>.AreReadOnly());
+         public TNextElement AreImmutable() => CreateNextElement(MemberPredicatesDefinition<TRuleType>.AreImmutable());
+ 
+-        //Negations
++        // Negations
+ 
+         public TNextElement AreNotDeclaredIn() => AreNotDeclaredIn(new ObjectProvider<IType>());
+         public TNextElement AreNotDeclaredIn(params IType[] types) => AreNotDeclaredIn(new ObjectProvider<IType>(types));
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Members/IAddMemberCondition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Members/IAddMemberCondition.cs
+index ea304bdb..7030defa 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Members/IAddMemberCondition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Members/IAddMemberCondition.cs
+@@ -20,7 +20,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Members
+         TNextElement BeStatic();
+         TNextElement BeImmutable();
+ 
+-        //Negations
++        // Negations
+         TNextElement NotBeDeclaredIn();
+         TNextElement NotBeDeclaredIn(params IType[] types);
+         TNextElement NotBeDeclaredIn(params Type[] types);
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Members/IAddMemberPredicate.cs b/ArchUnitNET/Fluent/Syntax/Elements/Members/IAddMemberPredicate.cs
+index 50a6d76d..5fab25c3 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Members/IAddMemberPredicate.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Members/IAddMemberPredicate.cs
+@@ -18,7 +18,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Members
+         TNextElement AreStatic();
+         TNextElement AreImmutable();
+ 
+-        //Negations
++        // Negations
+ 
+         TNextElement AreNotDeclaredIn();
+         TNextElement AreNotDeclaredIn(params IType[] types);
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Members/MemberConditionsDefinition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Members/MemberConditionsDefinition.cs
+index c1a89a88..c905d762 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Members/MemberConditionsDefinition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Members/MemberConditionsDefinition.cs
+@@ -73,7 +73,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Members
+             );
+         }
+ 
+-        //Relation Conditions
++        // Relation Conditions
+ 
+         public static RelationCondition<TRuleType, IType> BeDeclaredInTypesThat()
+         {
+@@ -84,7 +84,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Members
+             );
+         }
+ 
+-        //Negations
++        // Negations
+ 
+         public static IOrderedCondition<TRuleType> NotBeDeclaredIn(
+             IObjectProvider<IType> objectProvider
+@@ -149,7 +149,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Members
+             );
+         }
+ 
+-        //Relation Condition Negations
++        // Relation Condition Negations
+ 
+         public static RelationCondition<TRuleType, IType> NotBeDeclaredInTypesThat()
+         {
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Members/MemberPredicatesDefinition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Members/MemberPredicatesDefinition.cs
+index 4a0fb95d..0dee4473 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Members/MemberPredicatesDefinition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Members/MemberPredicatesDefinition.cs
+@@ -49,7 +49,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Members
+             );
+         }
+ 
+-        //Negations
++        // Negations
+ 
+         public static IPredicate<T> AreNotDeclaredIn(IObjectProvider<IType> objectProvider)
+         {
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/AddMethodMemberCondition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/AddMethodMemberCondition.cs
+index ace9401a..6b105798 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/AddMethodMemberCondition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/AddMethodMemberCondition.cs
+@@ -41,7 +41,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Members.MethodMembers
+ 
+         public ShouldRelateToMethodMembersThat<TNextElement, MethodMember> BeMethodMembersThat() => BeginComplexMethodMemberCondition(MethodMemberConditionsDefinition.BeMethodMembersThat());
+ 
+-        //Negations
++        // Negations
+ 
+         public TNextElement BeNoConstructor() => CreateNextElement(MethodMemberConditionsDefinition.BeNoConstructor());
+ 
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/AddMethodMemberPredicate.cs b/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/AddMethodMemberPredicate.cs
+index 33a98d8e..68d57135 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/AddMethodMemberPredicate.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/AddMethodMemberPredicate.cs
+@@ -39,7 +39,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Members.MethodMembers
+         public TNextElement HaveReturnType(IEnumerable<IType> types) => HaveReturnType(new ObjectProvider<IType>(types));
+         public TNextElement HaveReturnType(IEnumerable<Type> types) => CreateNextElement(MethodMemberPredicatesDefinition.HaveReturnType(types));
+ 
+-        //Negations
++        // Negations
+ 
+         public TNextElement AreNoConstructors() => CreateNextElement(MethodMemberPredicatesDefinition.AreNoConstructors());
+ 
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/IAddMethodMemberCondition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/IAddMethodMemberCondition.cs
+index 15af4a0a..50bb2d7d 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/IAddMethodMemberCondition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/IAddMethodMemberCondition.cs
+@@ -32,7 +32,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Members.MethodMembers
+         TNextElement HaveReturnType(IEnumerable<IType> types);
+         TNextElement HaveReturnType(IEnumerable<Type> types);
+ 
+-        //Negations
++        // Negations
+ 
+         TNextElement BeNoConstructor();
+         TNextElement NotBeVirtual();
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/IAddMethodMemberPredicate.cs b/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/IAddMethodMemberPredicate.cs
+index dadd9341..b91dd7b0 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/IAddMethodMemberPredicate.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/IAddMethodMemberPredicate.cs
+@@ -32,7 +32,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Members.MethodMembers
+         TNextElement HaveReturnType(IEnumerable<IType> types);
+         TNextElement HaveReturnType(IEnumerable<Type> types);
+ 
+-        //Negations
++        // Negations
+ 
+         TNextElement AreNoConstructors();
+         TNextElement AreNotVirtual();
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/MethodMemberConditionsDefinition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/MethodMemberConditionsDefinition.cs
+index c42adde7..70cce369 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/MethodMemberConditionsDefinition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/MethodMemberConditionsDefinition.cs
+@@ -197,7 +197,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Members.MethodMembers
+             return new OrderedArchitectureCondition<MethodMember>(Condition, description);
+         }
+ 
+-        //Negations
++        // Negations
+ 
+         public static IOrderedCondition<MethodMember> BeNoConstructor()
+         {
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/MethodMemberPredicatesDefinition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/MethodMemberPredicatesDefinition.cs
+index a2d6b309..8c987215 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/MethodMemberPredicatesDefinition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Members/MethodMembers/MethodMemberPredicatesDefinition.cs
+@@ -120,7 +120,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Members.MethodMembers
+             return new ArchitecturePredicate<MethodMember>(Filter, description);
+         }
+ 
+-        //Negations
++        // Negations
+ 
+         public static IPredicate<MethodMember> AreNoConstructors()
+         {
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/AddPropertyMemberCondition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/AddPropertyMemberCondition.cs
+index 5afe47ec..a78c0482 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/AddPropertyMemberCondition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/AddPropertyMemberCondition.cs
+@@ -29,7 +29,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Members.PropertyMembers
+ 
+         public TNextElement BeVirtual() => CreateNextElement(PropertyMemberConditionsDefinition.BeVirtual());
+ 
+-        //Negations
++        // Negations
+ 
+         public TNextElement NotHaveGetter() => CreateNextElement(PropertyMemberConditionsDefinition.NotHaveGetter());
+         public TNextElement NotHavePrivateGetter() => CreateNextElement(PropertyMemberConditionsDefinition.NotHavePrivateGetter());
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/AddPropertyMemberPredicate.cs b/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/AddPropertyMemberPredicate.cs
+index 3fa340a6..809d4ebb 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/AddPropertyMemberPredicate.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/AddPropertyMemberPredicate.cs
+@@ -30,7 +30,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Members.PropertyMembers
+ 
+         public TNextElement AreVirtual() => CreateNextElement(PropertyMemberPredicatesDefinition.AreVirtual());
+ 
+-        //Negations
++        // Negations
+ 
+         public TNextElement HaveNoGetter() => CreateNextElement(PropertyMemberPredicatesDefinition.HaveNoGetter());
+         public TNextElement DoNotHavePrivateGetter() => CreateNextElement(PropertyMemberPredicatesDefinition.DoNotHavePrivateGetter());
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/IAddPropertyMemberCondition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/IAddPropertyMemberCondition.cs
+index f6e89929..41503656 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/IAddPropertyMemberCondition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/IAddPropertyMemberCondition.cs
+@@ -23,7 +23,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Members.PropertyMembers
+         TNextElement HaveInitOnlySetter();
+         TNextElement BeVirtual();
+ 
+-        //Negations
++        // Negations
+ 
+         TNextElement NotHaveGetter();
+         TNextElement NotHavePrivateGetter();
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/IAddPropertyMemberPredicate.cs b/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/IAddPropertyMemberPredicate.cs
+index fb6e76ff..c1d5c12e 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/IAddPropertyMemberPredicate.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/IAddPropertyMemberPredicate.cs
+@@ -23,7 +23,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Members.PropertyMembers
+         TNextElement HaveInitOnlySetter();
+         TNextElement AreVirtual();
+ 
+-        //Negations
++        // Negations
+ 
+         TNextElement HaveNoGetter();
+         TNextElement DoNotHavePrivateGetter();
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/PropertyMemberConditionsDefinition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/PropertyMemberConditionsDefinition.cs
+index 8183da31..99002a58 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/PropertyMemberConditionsDefinition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/PropertyMemberConditionsDefinition.cs
+@@ -91,7 +91,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Members.PropertyMembers
+             );
+         }
+ 
+-        //Negations
++        // Negations
+ 
+         public static IOrderedCondition<PropertyMember> NotHaveGetter()
+         {
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/PropertyMemberPredicatesDefinition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/PropertyMemberPredicatesDefinition.cs
+index 00dbbfd1..cc6bf466 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/PropertyMemberPredicatesDefinition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Members/PropertyMembers/PropertyMemberPredicatesDefinition.cs
+@@ -71,7 +71,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Members.PropertyMembers
+             return new SimplePredicate<PropertyMember>(member => member.IsVirtual, "are virtual");
+         }
+ 
+-        //Negations
++        // Negations
+ 
+         public static IPredicate<PropertyMember> HaveNoGetter()
+         {
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/ObjectConditionsDefinition.cs b/ArchUnitNET/Fluent/Syntax/Elements/ObjectConditionsDefinition.cs
+index d84f0304..d1498a55 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/ObjectConditionsDefinition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/ObjectConditionsDefinition.cs
+@@ -50,6 +50,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+                     }
+                 }
+             }
++
+             var description = objectProvider.FormatDescription("not exist", "be", "be");
+             return new OrderedArchitectureCondition<TRuleType>(Condition, description);
+         }
+@@ -87,6 +88,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+                     }
+                 }
+             }
++
+             var description = objectProvider.FormatDescription(
+                 "call any of no methods (impossible)",
+                 "call",
+@@ -128,6 +130,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+                     }
+                 }
+             }
++
+             var description = objectProvider.FormatDescription(
+                 "depend on any of no types (impossible)",
+                 "depend on",
+@@ -187,6 +190,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+                     }
+                 }
+             }
++
+             var description = objectProvider.FormatDescription(
+                 "have no dependencies",
+                 "only depend on",
+@@ -228,6 +232,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+                     }
+                 }
+             }
++
+             var description = objectProvider.FormatDescription(
+                 "have any of no attributes (impossible)",
+                 "have",
+@@ -268,6 +273,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+                     }
+                 }
+             }
++
+             var description = objectProvider.FormatDescription(
+                 "have no attributes",
+                 "only have",
+@@ -326,6 +332,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+                     }
+                 }
+             }
++
+             var description = argumentValueList.FormatDescription(
+                 "have any attributes",
+                 "have any attributes with argument",
+@@ -390,6 +397,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+                     }
+                 }
+             }
++
+             var description = argumentValueList.FormatDescription(
+                 $"have attribute \"{attributeFullName}\"",
+                 $"have attribute \"{attributeFullName}\" with argument",
+@@ -450,6 +458,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+                     }
+                 }
+             }
++
+             var description = namedArgumentList.FormatDescription(
+                 "have any attributes",
+                 "have any attributes with named argument",
+@@ -517,6 +526,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+                     }
+                 }
+             }
++
+             var description = namedArgumentList.FormatDescription(
+                 $"have attribute \"{attributeFullName}\"",
+                 $"have attribute \"{attributeFullName}\" with named argument",
+@@ -723,7 +733,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+             );
+         }
+ 
+-        //Relation Conditions
++        // Relation Conditions
+ 
+         public static RelationCondition<TRuleType, IType> DependOnAnyTypesThat()
+         {
+@@ -761,7 +771,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+             );
+         }
+ 
+-        //Negations
++        // Negations
+ 
+         public static IOrderedCondition<TRuleType> NotExist()
+         {
+@@ -795,6 +805,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+                     }
+                 }
+             }
++
+             var description = objectProvider.FormatDescription(
+                 "not be any of no objects (always true)",
+                 "not be",
+@@ -833,6 +844,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+                     }
+                 }
+             }
++
+             var description = objectProvider.FormatDescription(
+                 "not call any of no methods (always true)",
+                 "not call",
+@@ -872,6 +884,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+                     }
+                 }
+             }
++
+             var description = objectProvider.FormatDescription(
+                 "not depend on any of no types (always true)",
+                 "not depend on",
+@@ -911,6 +924,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+                     }
+                 }
+             }
++
+             var description = objectProvider.FormatDescription(
+                 "not have any of no attributes (always true)",
+                 "not have",
+@@ -1079,6 +1093,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+                     }
+                 }
+             }
++
+             var description = namedArgumentList.FormatDescription(
+                 "not have any attributes with any of no named arguments (always true)",
+                 "not have any attributes with named argument",
+@@ -1341,7 +1356,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+             );
+         }
+ 
+-        //Relation Condition Negations
++        // Relation Condition Negations
+ 
+         public static RelationCondition<TRuleType, IType> NotDependOnAnyTypesThat()
+         {
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/ObjectPredicatesDefinition.cs b/ArchUnitNET/Fluent/Syntax/Elements/ObjectPredicatesDefinition.cs
+index b8ad052f..f1be679d 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/ObjectPredicatesDefinition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/ObjectPredicatesDefinition.cs
+@@ -138,6 +138,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+                     })
+                 );
+             }
++
+             var description = argumentValueList.FormatDescription(
+                 "have any attributes",
+                 "have any attributes with argument",
+@@ -173,6 +174,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+                         })
+                 );
+             }
++
+             var description = argumentValueList.FormatDescription(
+                 $"have attribute \"{attributeFullName}\"",
+                 $"have attribute \"{attributeFullName}\" with argument",
+@@ -200,6 +202,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+                     })
+                 );
+             }
++
+             var description = namedArgumentList.FormatDescription(
+                 "have any attributes",
+                 "have any attributes with named argument",
+@@ -237,6 +240,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+                         })
+                 );
+             }
++
+             var description = namedArgumentList.FormatDescription(
+                 $"have attribute \"{attributeFullName}\"",
+                 $"have attribute \"{attributeFullName}\" with named argument",
+@@ -402,7 +406,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+             );
+         }
+ 
+-        //Negations
++        // Negations
+ 
+         public static IPredicate<T> AreNot(IObjectProvider<ICanBeAnalyzed> objectProvider)
+         {
+@@ -488,6 +492,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements
+                     }
+                 }
+             }
++
+             var description = argumentValueList.FormatDescription(
+                 "do not have any attributes with any of no arguments (always true)",
+                 "do not have any attributes with argument",
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Types/AddTypeCondition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Types/AddTypeCondition.cs
+index a29ca544..e3ebb69f 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Types/AddTypeCondition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Types/AddTypeCondition.cs
+@@ -64,13 +64,13 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types
+ 
+         public TNextElement BeNested() => CreateNextElement(TypeConditionsDefinition<TRuleType>.BeNested());
+ 
+-        //Relation Conditions
++        // Relation Conditions
+ 
+         public ShouldRelateToTypesThat<TNextElement, TRuleType> BeTypesThat() => BeginComplexTypeCondition(TypeConditionsDefinition<TRuleType>.BeTypesThat());
+         public ShouldRelateToTypesThat<TNextElement, TRuleType> BeAssignableToTypesThat() => BeginComplexTypeCondition(TypeConditionsDefinition<TRuleType>.BeAssignableToTypesThat());
+         public ShouldRelateToInterfacesThat<TNextElement, TRuleType> ImplementAnyInterfacesThat() => BeginComplexInterfaceCondition(TypeConditionsDefinition<TRuleType>.ImplementAnyInterfacesThat());
+ 
+-        //Negations
++        // Negations
+ 
+         public TNextElement NotBe(params Type[] types) => NotBe(new SystemTypeObjectProvider<IType>(types));
+         public TNextElement NotBe(IEnumerable<Type> types) => NotBe(new SystemTypeObjectProvider<IType>(types));
+@@ -123,7 +123,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types
+         public TNextElement AdhereToPlantUmlDiagram(string file) => CreateNextElement(TypeConditionsDefinition<TRuleType>.AdhereToPlantUmlDiagram(file));
+         public TNextElement AdhereToPlantUmlDiagram(Stream stream) => CreateNextElement(TypeConditionsDefinition<TRuleType>.AdhereToPlantUmlDiagram(stream));
+ 
+-        //Relation Condition Negations
++        // Relation Condition Negations
+ 
+         public ShouldRelateToTypesThat<TNextElement, TRuleType> NotBeAssignableToTypesThat() => BeginComplexTypeCondition(TypeConditionsDefinition<TRuleType>.NotBeAssignableToTypesThat());
+         public ShouldRelateToInterfacesThat<TNextElement, TRuleType> NotImplementAnyInterfacesThat() => BeginComplexInterfaceCondition(TypeConditionsDefinition<TRuleType>.NotImplementAnyInterfacesThat());
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Types/AddTypePredicate.cs b/ArchUnitNET/Fluent/Syntax/Elements/Types/AddTypePredicate.cs
+index 63a8ebc9..7af3bd0f 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Types/AddTypePredicate.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Types/AddTypePredicate.cs
+@@ -62,7 +62,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types
+ 
+         public TNextElement AreNested() => CreateNextElement(TypePredicatesDefinition<TRuleType>.AreNested());
+ 
+-        //Negations
++        // Negations
+ 
+         public TNextElement AreNot(params Type[] types) => AreNot(new SystemTypeObjectProvider<IType>(types));
+         public TNextElement AreNot(IEnumerable<Type> types) => AreNot(new SystemTypeObjectProvider<IType>(types));
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/AddAttributeCondition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/AddAttributeCondition.cs
+index faacb61c..7adfacc2 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/AddAttributeCondition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/AddAttributeCondition.cs
+@@ -15,7 +15,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types.Attributes
+         public TNextElement BeSealed() =>
+             CreateNextElement(AttributeConditionsDefinition.BeSealed());
+ 
+-        //Negations
++        // Negations
+ 
+         public TNextElement NotBeAbstract() =>
+             CreateNextElement(AttributeConditionsDefinition.NotBeAbstract());
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/AddAttributePredicate.cs b/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/AddAttributePredicate.cs
+index 979f3cf7..a5291ab5 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/AddAttributePredicate.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/AddAttributePredicate.cs
+@@ -15,7 +15,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types.Attributes
+         public TNextElement AreAbstract() => CreateNextElement(AttributePredicatesDefinition.AreAbstract());
+         public TNextElement AreSealed() => CreateNextElement(AttributePredicatesDefinition.AreSealed());
+ 
+-        //Negations
++        // Negations
+ 
+         public TNextElement AreNotAbstract() => CreateNextElement(AttributePredicatesDefinition.AreNotAbstract());
+         public TNextElement AreNotSealed() => CreateNextElement(AttributePredicatesDefinition.AreNotSealed());
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/AttributeConditionsDefinition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/AttributeConditionsDefinition.cs
+index 854eec9b..786ea8d8 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/AttributeConditionsDefinition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/AttributeConditionsDefinition.cs
+@@ -23,7 +23,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types.Attributes
+             );
+         }
+ 
+-        //Negations
++        // Negations
+ 
+         public static IOrderedCondition<Attribute> NotBeAbstract()
+         {
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/AttributePredicatesDefinition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/AttributePredicatesDefinition.cs
+index b462b1f4..0b13e8a5 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/AttributePredicatesDefinition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/AttributePredicatesDefinition.cs
+@@ -21,7 +21,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types.Attributes
+             );
+         }
+ 
+-        //Negations
++        // Negations
+ 
+         public static IPredicate<Attribute> AreNotAbstract()
+         {
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/IAddAttributeCondition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/IAddAttributeCondition.cs
+index fb059a24..7f621613 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/IAddAttributeCondition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/IAddAttributeCondition.cs
+@@ -9,7 +9,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types.Attributes
+         TNextElement BeAbstract();
+         TNextElement BeSealed();
+ 
+-        //Negations
++        // Negations
+ 
+         TNextElement NotBeAbstract();
+         TNextElement NotBeSealed();
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/IAddAttributePredicate.cs b/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/IAddAttributePredicate.cs
+index 3ca07c1c..d582d4f4 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/IAddAttributePredicate.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Types/Attributes/IAddAttributePredicate.cs
+@@ -9,7 +9,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types.Attributes
+         TNextElement AreAbstract();
+         TNextElement AreSealed();
+ 
+-        //Negations
++        // Negations
+ 
+         TNextElement AreNotAbstract();
+         TNextElement AreNotSealed();
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/AddClassCondition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/AddClassCondition.cs
+index 53455f94..e17e4a48 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/AddClassCondition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/AddClassCondition.cs
+@@ -19,7 +19,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types.Classes
+         public TNextElement BeImmutable() =>
+             CreateNextElement(ClassConditionsDefinition.BeImmutable());
+ 
+-        //Negations
++        // Negations
+ 
+         public TNextElement NotBeAbstract() =>
+             CreateNextElement(ClassConditionsDefinition.NotBeAbstract());
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/AddClassPredicate.cs b/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/AddClassPredicate.cs
+index 92d817b9..c37b1718 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/AddClassPredicate.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/AddClassPredicate.cs
+@@ -17,7 +17,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types.Classes
+         public TNextElement AreRecord() => CreateNextElement(ClassPredicatesDefinition.AreRecord());
+         public TNextElement AreImmutable() => CreateNextElement(ClassPredicatesDefinition.AreImmutable());
+ 
+-        //Negations
++        // Negations
+ 
+         public TNextElement AreNotAbstract() => CreateNextElement(ClassPredicatesDefinition.AreNotAbstract());
+         public TNextElement AreNotSealed() => CreateNextElement(ClassPredicatesDefinition.AreNotSealed());
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/ClassConditionsDefinition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/ClassConditionsDefinition.cs
+index 3bc186b6..677f9b49 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/ClassConditionsDefinition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/ClassConditionsDefinition.cs
+@@ -44,7 +44,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types.Classes
+             );
+         }
+ 
+-        //Negations
++        // Negations
+ 
+         public static IOrderedCondition<Class> NotBeAbstract()
+         {
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/ClassPredicatesDefinition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/ClassPredicatesDefinition.cs
+index 84c7f352..ce2fe1a1 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/ClassPredicatesDefinition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/ClassPredicatesDefinition.cs
+@@ -40,7 +40,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types.Classes
+             );
+         }
+ 
+-        //Negations
++        // Negations
+ 
+         public static IPredicate<Class> AreNotAbstract()
+         {
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/IAddClassCondition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/IAddClassCondition.cs
+index c9d1a2a3..ba4a26be 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/IAddClassCondition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/IAddClassCondition.cs
+@@ -11,7 +11,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types.Classes
+         TNextElement BeRecord();
+         TNextElement BeImmutable();
+ 
+-        //Negations
++        // Negations
+ 
+         TNextElement NotBeAbstract();
+         TNextElement NotBeSealed();
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/IAddClassPredicate.cs b/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/IAddClassPredicate.cs
+index b84cf84c..41ea7c1b 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/IAddClassPredicate.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Types/Classes/IAddClassPredicate.cs
+@@ -11,7 +11,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types.Classes
+         TNextElement AreRecord();
+         TNextElement AreImmutable();
+ 
+-        //Negations
++        // Negations
+ 
+         TNextElement AreNotAbstract();
+         TNextElement AreNotSealed();
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Types/IAddTypeCondition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Types/IAddTypeCondition.cs
+index 4da86aba..ca31101b 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Types/IAddTypeCondition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Types/IAddTypeCondition.cs
+@@ -55,7 +55,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types
+ 
+         TNextElement BeNested();
+ 
+-        //Negations
++        // Negations
+ 
+         TNextElement NotBe(params Type[] types);
+         TNextElement NotBe(IEnumerable<Type> types);
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Types/IAddTypePredicate.cs b/ArchUnitNET/Fluent/Syntax/Elements/Types/IAddTypePredicate.cs
+index fe318839..aa528722 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Types/IAddTypePredicate.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Types/IAddTypePredicate.cs
+@@ -49,7 +49,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types
+         TNextElement HaveMemberWithName(string name);
+         TNextElement AreNested();
+ 
+-        //Negations
++        // Negations
+ 
+         TNextElement AreNot(params Type[] types);
+         TNextElement AreNot(IEnumerable<Type> types);
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Types/TypeConditionsDefinition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Types/TypeConditionsDefinition.cs
+index 2bca2a4b..c1555768 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Types/TypeConditionsDefinition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Types/TypeConditionsDefinition.cs
+@@ -220,7 +220,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types
+                 }
+                 catch (TypeDoesNotExistInArchitecture)
+                 {
+-                    //can't have a dependency
++                    // can't have a dependency
+                     interfaceNotInArchitecture = true;
+                 }
+ 
+@@ -401,16 +401,16 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types
+         public static IOrderedCondition<TRuleType> AdhereToPlantUmlDiagram(Stream stream)
+         {
+             PlantUmlParsedDiagram diagram = new PlantUmlParser().Parse(stream);
+-            return createPlantUmlCondition(diagram);
++            return CreatePlantUmlCondition(diagram);
+         }
+ 
+         public static IOrderedCondition<TRuleType> AdhereToPlantUmlDiagram(string file)
+         {
+             PlantUmlParsedDiagram diagram = new PlantUmlParser().Parse(file);
+-            return createPlantUmlCondition(diagram);
++            return CreatePlantUmlCondition(diagram);
+         }
+ 
+-        private static IOrderedCondition<TRuleType> createPlantUmlCondition(
++        private static IOrderedCondition<TRuleType> CreatePlantUmlCondition(
+             PlantUmlParsedDiagram diagram
+         )
+         {
+@@ -435,7 +435,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types
+                 var pass = true;
+                 var dynamicFailDescription = "does depend on";
+ 
+-                //Prevent failDescriptions like "does depend on X and does depend on X and does depend on Y and does depend on Y
++                // Prevent failDescriptions like "does depend on X and does depend on X and does depend on Y and does depend on Y
+                 var ruleTypeDependencies = ruleType
+                     .GetTypeDependencies()
+                     .GroupBy(p => p.FullName)
+@@ -497,7 +497,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types
+             );
+         }
+ 
+-        //Relation Conditions
++        // Relation Conditions
+ 
+         public static RelationCondition<TRuleType, IType> BeAssignableToTypesThat()
+         {
+@@ -517,7 +517,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types
+             );
+         }
+ 
+-        //Negations
++        // Negations
+ 
+         public static IOrderedCondition<TRuleType> NotBe(IObjectProvider<IType> objectProvider)
+         {
+@@ -641,7 +641,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types
+                 }
+                 catch (TypeDoesNotExistInArchitecture)
+                 {
+-                    //can't have a dependency
++                    // can't have a dependency
+                     interfaceNotInArchitecture = true;
+                 }
+ 
+@@ -849,7 +849,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types
+             );
+         }
+ 
+-        //Relation Condition Negations
++        // Relation Condition Negations
+ 
+         public static RelationCondition<TRuleType, IType> NotBeAssignableToTypesThat()
+         {
+diff --git a/ArchUnitNET/Fluent/Syntax/Elements/Types/TypePredicatesDefinition.cs b/ArchUnitNET/Fluent/Syntax/Elements/Types/TypePredicatesDefinition.cs
+index 0e01a921..ff932db4 100644
+--- a/ArchUnitNET/Fluent/Syntax/Elements/Types/TypePredicatesDefinition.cs
++++ b/ArchUnitNET/Fluent/Syntax/Elements/Types/TypePredicatesDefinition.cs
+@@ -114,7 +114,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types
+                 }
+                 catch (TypeDoesNotExistInArchitecture)
+                 {
+-                    //can't have a dependency
++                    // can't have a dependency
+                     return Enumerable.Empty<T>();
+                 }
+ 
+@@ -137,6 +137,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types
+                     && type.ImplementedInterfaces.Intersect(interfaceList).Any()
+                 );
+             }
++
+             var description = interfaces.FormatDescription(
+                 "implement any of no interfaces (always false)",
+                 "implement",
+@@ -262,7 +263,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types
+             return new SimplePredicate<T>(type => type.IsNested, "are nested");
+         }
+ 
+-        //Negations
++        // Negations
+ 
+         public static IPredicate<T> AreNot(IObjectProvider<IType> objectProvider)
+         {
+@@ -333,7 +334,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types
+                 }
+                 catch (TypeDoesNotExistInArchitecture)
+                 {
+-                    //can't have a dependency
++                    // can't have a dependency
+                     return ruleTypes;
+                 }
+ 
+@@ -356,6 +357,7 @@ namespace ArchUnitNET.Fluent.Syntax.Elements.Types
+                     || !type.ImplementedInterfaces.Intersect(interfaceList).Any()
+                 );
+             }
++
+             var description = interfaces.FormatDescription(
+                 "do not implement any of no interfaces (always true)",
+                 "do not implement",
+diff --git a/ArchUnitNET/Loader/ArchLoader.cs b/ArchUnitNET/Loader/ArchLoader.cs
+index be28272d..76133839 100644
+--- a/ArchUnitNET/Loader/ArchLoader.cs
++++ b/ArchUnitNET/Loader/ArchLoader.cs
+@@ -195,6 +195,7 @@ namespace ArchUnitNET.Loader
+                     new FileLoadInstruction(assembly.Location, null, false, false)
+                 );
+             }
++
+             return this;
+         }
+ 
+@@ -214,6 +215,7 @@ namespace ArchUnitNET.Loader
+                     new FileLoadInstruction(assembly.Location, null, true, recursive)
+                 );
+             }
++
+             return this;
+         }
+ 
+@@ -230,6 +232,7 @@ namespace ArchUnitNET.Loader
+                     new FileLoadInstruction(assembly.Location, nameSpace, false, false)
+                 );
+             }
++
+             return this;
+         }
+ 
+@@ -250,6 +253,7 @@ namespace ArchUnitNET.Loader
+                     new FileLoadInstruction(assembly.Location, null, true, true, filterFunc)
+                 );
+             }
++
+             return this;
+         }
+ 
+@@ -332,7 +336,7 @@ namespace ArchUnitNET.Loader
+                         }
+                         catch (AssemblyResolutionException)
+                         {
+-                            //Failed to resolve assembly, skip it
++                            // Failed to resolve assembly, skip it
+                         }
+                     }
+                 }
+@@ -385,6 +389,7 @@ namespace ArchUnitNET.Loader
+                 )
+                 {
+                     if (filterResult?.TraverseDependencies != false)
++                    {
+                         AddReferencedAssembliesRecursively(
+                             assemblyResolver,
+                             archBuilder,
+@@ -393,11 +398,12 @@ namespace ArchUnitNET.Loader
+                             resolvedModules,
+                             filterFunc
+                         );
++                    }
+                 }
+             }
+             catch (AssemblyResolutionException)
+             {
+-                //Failed to resolve assembly, skip it
++                // Failed to resolve assembly, skip it
+             }
+         }
+     }
+diff --git a/ArchUnitNET/Loader/DomainResolver.cs b/ArchUnitNET/Loader/DomainResolver.cs
+index 5872974d..d489eca4 100644
+--- a/ArchUnitNET/Loader/DomainResolver.cs
++++ b/ArchUnitNET/Loader/DomainResolver.cs
+@@ -127,14 +127,17 @@ namespace ArchUnitNET.Loader
+             {
+                 return GetOrCreateGenericParameterTypeInstanceFromTypeReference(typeReference);
+             }
++
+             if (typeReference.IsArray)
+             {
+                 return GetOrCreateArrayTypeInstanceFromTypeReference(typeReference);
+             }
++
+             if (typeReference.IsGenericInstance)
+             {
+                 return GetOrCreateGenericInstanceTypeInstanceFromTypeReference(typeReference);
+             }
++
+             if (
+                 typeReference.IsByReference
+                 || typeReference.IsPointer
+@@ -147,10 +150,12 @@ namespace ArchUnitNET.Loader
+                     isStub
+                 );
+             }
++
+             if (typeReference is FunctionPointerType functionPointerType)
+             {
+                 return GetOrCreateFunctionPointerTypeInstanceFromTypeReference(functionPointerType);
+             }
++
+             if (typeReference is TypeDefinition typeDefinition)
+             {
+                 return GetOrCreateTypeInstanceFromTypeDefinition(typeDefinition, isStub);
+@@ -176,6 +181,7 @@ namespace ArchUnitNET.Loader
+                 // stub type.
+                 return GetOrCreateUnavailableTypeFromTypeReference(typeReference);
+             }
++
+             return GetOrCreateTypeInstanceFromTypeDefinition(resolvedTypeDefinition, isStub);
+         }
+ 
+@@ -199,6 +205,7 @@ namespace ArchUnitNET.Loader
+             {
+                 return existingTypeInstance;
+             }
++
+             var isCompilerGenerated = genericParameter.IsCompilerGenerated();
+             var variance = genericParameter.GetVariance();
+             var typeConstraints = genericParameter.Constraints.Select(con =>
+@@ -236,6 +243,7 @@ namespace ArchUnitNET.Loader
+             {
+                 return existingTypeInstance;
+             }
++
+             var genericInstance = (GenericInstanceType)typeReference;
+             var genericArguments = genericInstance
+                 .GenericArguments.Select(CreateGenericArgumentFromTypeReference)
+@@ -267,6 +275,7 @@ namespace ArchUnitNET.Loader
+             {
+                 return existingTypeInstance;
+             }
++
+             var result = CreateTypeInstance(
+                 elementTypeInstance.Type,
+                 elementTypeInstance.GenericArguments,
+@@ -318,6 +327,7 @@ namespace ArchUnitNET.Loader
+             {
+                 declaringTypeReference = declaringTypeReference.DeclaringType;
+             }
++
+             var currentNamespace = GetOrCreateNamespace(declaringTypeReference.Namespace);
+             var currentAssembly = GetOrCreateAssembly(
+                 assemblyFullName,
+@@ -468,6 +478,7 @@ namespace ArchUnitNET.Loader
+             {
+                 return existingTypeInstance;
+             }
++
+             var type = new Type(
+                 functionPointerType.FullName,
+                 functionPointerType.Name,
+diff --git a/ArchUnitNET/Loader/MonoCecilAttributeExtensions.cs b/ArchUnitNET/Loader/MonoCecilAttributeExtensions.cs
+index 9b1e41ea..4f565852 100644
+--- a/ArchUnitNET/Loader/MonoCecilAttributeExtensions.cs
++++ b/ArchUnitNET/Loader/MonoCecilAttributeExtensions.cs
+@@ -28,6 +28,7 @@ namespace ArchUnitNET.Loader
+             {
+                 attribute = new Attribute(attributeType.Type, null, null);
+             }
++
+             if (attribute == null)
+             {
+                 throw new ArgumentException(
+@@ -70,8 +71,9 @@ namespace ArchUnitNET.Loader
+             out ITypeInstance<IType> type
+         )
+         {
+-            while (argument.Value is CustomAttributeArgument arg) //if would work too
++            while (argument.Value is CustomAttributeArgument arg)
+             {
++                // if would work too
+                 argument = arg;
+             }
+ 
+diff --git a/ArchUnitNET/Loader/MonoCecilMemberExtensions.cs b/ArchUnitNET/Loader/MonoCecilMemberExtensions.cs
+index 5f420d4c..493f8cc0 100644
+--- a/ArchUnitNET/Loader/MonoCecilMemberExtensions.cs
++++ b/ArchUnitNET/Loader/MonoCecilMemberExtensions.cs
+@@ -25,7 +25,7 @@ namespace ArchUnitNET.Loader
+             OpCodes.Stelem_Any,
+             OpCodes.Ldelema,
+             OpCodes.Stobj,
+-        }; //maybe not complete
++        }; // maybe not complete
+ 
+         internal static string BuildFullName(this MethodReference methodReference)
+         {
+@@ -221,6 +221,7 @@ namespace ArchUnitNET.Loader
+ 
+                             break;
+                         }
++
+                         case FieldReference fieldReference when !seenFieldRefs.Add(fieldReference):
+                             continue;
+                         case FieldReference fieldReference:
+@@ -261,9 +262,15 @@ namespace ArchUnitNET.Loader
+             public bool Equals(FieldReference x, FieldReference y)
+             {
+                 if (x == null && y == null)
++                {
+                     return true;
++                }
++
+                 if (x == null || y == null)
++                {
+                     return false;
++                }
++
+                 return x.FullName == y.FullName;
+             }
+ 
+diff --git a/ArchUnitNET/Loader/Type.cs b/ArchUnitNET/Loader/Type.cs
+index 9206e2ad..c392e097 100644
+--- a/ArchUnitNET/Loader/Type.cs
++++ b/ArchUnitNET/Loader/Type.cs
+@@ -23,7 +23,7 @@ namespace ArchUnitNET.Loader
+             FullName = fullname;
+             Name = name;
+             AssemblyQualifiedName = System.Reflection.Assembly.CreateQualifiedName(
+-                assembly?.FullName ?? string.Empty,
++                assembly?.FullName ?? "",
+                 fullname
+             );
+             Assembly = assembly;
+diff --git a/ArchUnitNET/Loader/TypeProcessor.cs b/ArchUnitNET/Loader/TypeProcessor.cs
+index dceed936..88fd7200 100644
+--- a/ArchUnitNET/Loader/TypeProcessor.cs
++++ b/ArchUnitNET/Loader/TypeProcessor.cs
+@@ -804,7 +804,7 @@ namespace ArchUnitNET.Loader
+ 
+                     if (calledMethodDefinition?.Body == null)
+                     {
+-                        //MethodReference to compiler generated type not resolvable, skip
++                        // MethodReference to compiler generated type not resolvable, skip
+                         continue;
+                     }
+ 
+diff --git a/ArchUnitNETTests/AssemblyTestHelper/AssemblyTestHelper.cs b/ArchUnitNETTests/AssemblyTestHelper/AssemblyTestHelper.cs
+index 9fdfa57e..e18a8772 100644
+--- a/ArchUnitNETTests/AssemblyTestHelper/AssemblyTestHelper.cs
++++ b/ArchUnitNETTests/AssemblyTestHelper/AssemblyTestHelper.cs
+@@ -61,6 +61,7 @@ public abstract class AssemblyTestHelper
+             formatted.AppendLine("Result: " + result.Passed.ToString());
+             formatted.AppendLine("Description: " + result.ToString());
+         }
++
+         formatted.AppendLine("Message: ");
+         formatted.AppendLine(sorted.ToErrorMessage());
+         formatted.AppendLine();
+@@ -96,6 +97,7 @@ public abstract class AssemblyTestHelper
+         {
+             Assert.Fail(output);
+         }
++
+         Record(output);
+     }
+ 
+@@ -115,6 +117,7 @@ public abstract class AssemblyTestHelper
+         {
+             Assert.Fail(output);
+         }
++
+         Record(output);
+     }
+ 
+@@ -126,10 +129,12 @@ public abstract class AssemblyTestHelper
+         {
+             Assert.Fail("AssertOnlyViolations should be used for tests without passing results.");
+         }
++
+         if (results.All(result => result.Passed))
+         {
+             Assert.Fail(output);
+         }
++
+         Record(output);
+     }
+ 
+@@ -146,6 +151,7 @@ public abstract class AssemblyTestHelper
+         {
+             Assert.Fail(output);
+         }
++
+         if (!allowNoResults && HasNoRealResults(results))
+         {
+             Assert.Fail(
+@@ -154,6 +160,7 @@ public abstract class AssemblyTestHelper
+                     + output
+             );
+         }
++
+         Record(output);
+     }
+ 
+diff --git a/ArchUnitNETTests/AssemblyTestHelper/AttributeAssemblyTestHelper.cs b/ArchUnitNETTests/AssemblyTestHelper/AttributeAssemblyTestHelper.cs
+index f4639fb6..fc95c69b 100644
+--- a/ArchUnitNETTests/AssemblyTestHelper/AttributeAssemblyTestHelper.cs
++++ b/ArchUnitNETTests/AssemblyTestHelper/AttributeAssemblyTestHelper.cs
+@@ -17,9 +17,9 @@ public class AttributeAssemblyTestHelper : AssemblyTestHelper
+     public readonly Attribute Attribute2;
+     public readonly System.Type Attribute2SystemType = typeof(Attribute2);
+ 
+-    private readonly Attribute Attribute3;
++    private readonly Attribute _attribute3;
+ 
+-    private readonly Attribute OnceUsedAttribute;
++    private readonly Attribute _onceUsedAttribute;
+ 
+     public readonly Attribute UnusedAttribute;
+     public readonly System.Type UnusedAttributeSystemType = typeof(UnusedAttribute);
+@@ -28,7 +28,7 @@ public class AttributeAssemblyTestHelper : AssemblyTestHelper
+ 
+     public readonly Class ClassWithSingleAttribute;
+ 
+-    private readonly Class ClassWithSingleUniquelyUsedAttribute;
++    private readonly Class _classWithSingleUniquelyUsedAttribute;
+ 
+     public readonly Class ClassWithTwoAttributes;
+ 
+@@ -52,13 +52,13 @@ public class AttributeAssemblyTestHelper : AssemblyTestHelper
+ 
+     public readonly Class ClassWithTwoAttributesWithArguments;
+ 
+-    private readonly Class ClassWithThreeAttributesWithArguments;
++    private readonly Class _classWithThreeAttributesWithArguments;
+ 
+     public readonly Class ClassWithSingleAttributeWithNamedArguments;
+ 
+     public readonly Class ClassWithTwoAttributesWithNamedArguments;
+ 
+-    private readonly Class ClassWithThreeAttributesWithNamedArguments;
++    private readonly Class _classWithThreeAttributesWithNamedArguments;
+ 
+     public readonly Attribute RegularAttribute;
+ 
+@@ -76,12 +76,12 @@ public class AttributeAssemblyTestHelper : AssemblyTestHelper
+     {
+         Attribute1 = Architecture.GetAttributeOfType(typeof(Attribute1));
+         Attribute2 = Architecture.GetAttributeOfType(typeof(Attribute2));
+-        Attribute3 = Architecture.GetAttributeOfType(typeof(Attribute3));
+-        OnceUsedAttribute = Architecture.GetAttributeOfType(typeof(OnceUsedAttribute));
++        _attribute3 = Architecture.GetAttributeOfType(typeof(Attribute3));
++        _onceUsedAttribute = Architecture.GetAttributeOfType(typeof(OnceUsedAttribute));
+         UnusedAttribute = Architecture.GetAttributeOfType(typeof(UnusedAttribute));
+         ClassWithoutAttributes = Architecture.GetClassOfType(typeof(ClassWithoutAttributes));
+         ClassWithSingleAttribute = Architecture.GetClassOfType(typeof(ClassWithSingleAttribute));
+-        ClassWithSingleUniquelyUsedAttribute = Architecture.GetClassOfType(
++        _classWithSingleUniquelyUsedAttribute = Architecture.GetClassOfType(
+             typeof(ClassWithSingleUniquelyUsedAttribute)
+         );
+         ClassWithTwoAttributes = Architecture.GetClassOfType(typeof(ClassWithTwoAttributes));
+@@ -94,7 +94,7 @@ public class AttributeAssemblyTestHelper : AssemblyTestHelper
+         ClassWithTwoAttributesWithArguments = Architecture.GetClassOfType(
+             typeof(ClassWithTwoAttributesWithArguments)
+         );
+-        ClassWithThreeAttributesWithArguments = Architecture.GetClassOfType(
++        _classWithThreeAttributesWithArguments = Architecture.GetClassOfType(
+             typeof(ClassWithThreeAttributesWithArguments)
+         );
+         ClassWithSingleAttributeWithNamedArguments = Architecture.GetClassOfType(
+@@ -103,7 +103,7 @@ public class AttributeAssemblyTestHelper : AssemblyTestHelper
+         ClassWithTwoAttributesWithNamedArguments = Architecture.GetClassOfType(
+             typeof(ClassWithTwoAttributesWithNamedArguments)
+         );
+-        ClassWithThreeAttributesWithNamedArguments = Architecture.GetClassOfType(
++        _classWithThreeAttributesWithNamedArguments = Architecture.GetClassOfType(
+             typeof(ClassWithThreeAttributesWithNamedArguments)
+         );
+         RegularAttribute = Architecture.GetAttributeOfType(typeof(RegularAttribute));
+diff --git a/ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs b/ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs
+index 11903954..013a36de 100644
+--- a/ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs
++++ b/ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs
+@@ -107,9 +107,9 @@ public class TypeAssemblyTestHelper : AssemblyTestHelper
+ 
+     public readonly Class OtherClassWithStaticField;
+ 
+-    private readonly Class ClassWithStaticProperty;
++    private readonly Class _classWithStaticProperty;
+ 
+-    private readonly Class ClassWithStaticMethod;
++    private readonly Class _classWithStaticMethod;
+ 
+     // Method member test classes
+     private readonly Class ClassWithVirtualMethod;
+@@ -120,7 +120,7 @@ public class TypeAssemblyTestHelper : AssemblyTestHelper
+ 
+     private readonly Class ClassWithStringReturnType;
+ 
+-    private readonly Class ClassWithIntReturnType;
++    private readonly Class _classWithIntReturnType;
+ 
+     private readonly Class ClassWithRegularClassReturnType;
+ 
+@@ -213,8 +213,8 @@ public class TypeAssemblyTestHelper : AssemblyTestHelper
+         ClassWithInitOnlyProperty = Architecture.GetClassOfType(typeof(ClassWithInitOnlyProperty));
+         ClassWithGetOnlyProperty = Architecture.GetClassOfType(typeof(ClassWithGetOnlyProperty));
+         OtherClassWithStaticField = Architecture.GetClassOfType(typeof(OtherClassWithStaticField));
+-        ClassWithStaticProperty = Architecture.GetClassOfType(typeof(ClassWithStaticProperty));
+-        ClassWithStaticMethod = Architecture.GetClassOfType(typeof(ClassWithStaticMethod));
++        _classWithStaticProperty = Architecture.GetClassOfType(typeof(ClassWithStaticProperty));
++        _classWithStaticMethod = Architecture.GetClassOfType(typeof(ClassWithStaticMethod));
+ 
+         // Individual members
+         StaticField = ClassWithStaticField.GetFieldMembersWithName("StaticField").First();
+@@ -235,10 +235,10 @@ public class TypeAssemblyTestHelper : AssemblyTestHelper
+         OtherStaticField = OtherClassWithStaticField
+             .GetFieldMembersWithName("OtherStaticField")
+             .First();
+-        StaticProperty = ClassWithStaticProperty
++        StaticProperty = _classWithStaticProperty
+             .GetPropertyMembersWithName("StaticProperty")
+             .First();
+-        StaticMethod = ClassWithStaticMethod.GetMethodMembersWithName("StaticMethod()").First();
++        StaticMethod = _classWithStaticMethod.GetMethodMembersWithName("StaticMethod()").First();
+ 
+         // Method member test classes
+         ClassWithVirtualMethod = Architecture.GetClassOfType(typeof(ClassWithVirtualMethod));
+@@ -247,7 +247,7 @@ public class TypeAssemblyTestHelper : AssemblyTestHelper
+         );
+         ClassWithNonVirtualMethod = Architecture.GetClassOfType(typeof(ClassWithNonVirtualMethod));
+         ClassWithStringReturnType = Architecture.GetClassOfType(typeof(ClassWithStringReturnType));
+-        ClassWithIntReturnType = Architecture.GetClassOfType(typeof(ClassWithIntReturnType));
++        _classWithIntReturnType = Architecture.GetClassOfType(typeof(ClassWithIntReturnType));
+         ClassWithRegularClassReturnType = Architecture.GetClassOfType(
+             typeof(ClassWithRegularClassReturnType)
+         );
+@@ -271,7 +271,7 @@ public class TypeAssemblyTestHelper : AssemblyTestHelper
+         MethodReturningString = ClassWithStringReturnType
+             .GetMethodMembersWithName("MethodReturningString()")
+             .First();
+-        MethodReturningInt = ClassWithIntReturnType
++        MethodReturningInt = _classWithIntReturnType
+             .GetMethodMembersWithName("MethodReturningInt()")
+             .First();
+         ClassWithVirtualMethodConstructor = ClassWithVirtualMethod
+diff --git a/ArchUnitNETTests/AssemblyTestHelper/TypeDependencyAssemblyTestHelper.cs b/ArchUnitNETTests/AssemblyTestHelper/TypeDependencyAssemblyTestHelper.cs
+index 435b3bbf..823bba7f 100644
+--- a/ArchUnitNETTests/AssemblyTestHelper/TypeDependencyAssemblyTestHelper.cs
++++ b/ArchUnitNETTests/AssemblyTestHelper/TypeDependencyAssemblyTestHelper.cs
+@@ -22,9 +22,9 @@ public class TypeDependencyAssemblyTestHelper : AssemblyTestHelper
+     public readonly Class BaseClassWithMember;
+     public readonly Type BaseClassWithMemberSystemType = typeof(BaseClassWithMember);
+ 
+-    private readonly Class ChildClassWithMember;
++    private readonly Class _childClassWithMember;
+ 
+-    private readonly Class OtherChildClassWithMember;
++    private readonly Class _otherChildClassWithMember;
+ 
+     private readonly Class BaseClassWithMultipleDependencies;
+     public readonly Type BaseClassWithMultipleDependenciesSystemType =
+@@ -42,11 +42,11 @@ public class TypeDependencyAssemblyTestHelper : AssemblyTestHelper
+     public readonly Class ClassWithoutDependencies;
+     public readonly Type ClassWithoutDependenciesSystemType = typeof(ClassWithoutDependencies);
+ 
+-    private readonly Class GenericBaseClass;
++    private readonly Class _genericBaseClass;
+ 
+-    private readonly Class ChildClassOfGeneric;
++    private readonly Class _childClassOfGeneric;
+ 
+-    private readonly Class OtherClassWithoutDependencies;
++    private readonly Class _otherClassWithoutDependencies;
+ 
+     public readonly Class ClassWithReferencedTypeDependency;
+ 
+@@ -58,8 +58,8 @@ public class TypeDependencyAssemblyTestHelper : AssemblyTestHelper
+         ChildClass = Architecture.GetClassOfType(typeof(ChildClass));
+         OtherChildClass = Architecture.GetClassOfType(typeof(OtherChildClass));
+         BaseClassWithMember = Architecture.GetClassOfType(typeof(BaseClassWithMember));
+-        ChildClassWithMember = Architecture.GetClassOfType(typeof(ChildClassWithMember));
+-        OtherChildClassWithMember = Architecture.GetClassOfType(typeof(OtherChildClassWithMember));
++        _childClassWithMember = Architecture.GetClassOfType(typeof(ChildClassWithMember));
++        _otherChildClassWithMember = Architecture.GetClassOfType(typeof(OtherChildClassWithMember));
+         BaseClassWithMultipleDependencies = Architecture.GetClassOfType(
+             typeof(BaseClassWithMultipleDependencies)
+         );
+@@ -69,10 +69,10 @@ public class TypeDependencyAssemblyTestHelper : AssemblyTestHelper
+         ClassWithMultipleDependencies = Architecture.GetClassOfType(
+             typeof(ClassWithMultipleDependencies)
+         );
+-        GenericBaseClass = Architecture.GetClassOfType(typeof(GenericBaseClass<>));
+-        ChildClassOfGeneric = Architecture.GetClassOfType(typeof(ChildClassOfGeneric));
++        _genericBaseClass = Architecture.GetClassOfType(typeof(GenericBaseClass<>));
++        _childClassOfGeneric = Architecture.GetClassOfType(typeof(ChildClassOfGeneric));
+         ClassWithoutDependencies = Architecture.GetClassOfType(typeof(ClassWithoutDependencies));
+-        OtherClassWithoutDependencies = Architecture.GetClassOfType(
++        _otherClassWithoutDependencies = Architecture.GetClassOfType(
+             typeof(OtherClassWithoutDependencies)
+         );
+         ClassWithReferencedTypeDependency = Architecture.GetClassOfType(
+diff --git a/ArchUnitNETTests/AssemblyTestHelper/VisibilityAssemblyTestHelper.cs b/ArchUnitNETTests/AssemblyTestHelper/VisibilityAssemblyTestHelper.cs
+index 11dc5798..01bac15b 100644
+--- a/ArchUnitNETTests/AssemblyTestHelper/VisibilityAssemblyTestHelper.cs
++++ b/ArchUnitNETTests/AssemblyTestHelper/VisibilityAssemblyTestHelper.cs
+@@ -24,7 +24,7 @@ public class VisibilityAssemblyTestHelper : AssemblyTestHelper
+ 
+     public readonly Class PublicInnerClass;
+ 
+-    private readonly Class OtherPublicInnerClass;
++    private readonly Class _otherPublicInnerClass;
+ 
+     public readonly Class InternalInnerClass;
+ 
+@@ -54,7 +54,7 @@ public class VisibilityAssemblyTestHelper : AssemblyTestHelper
+         OtherInternalClass = Architecture.Classes.WhereNameIs("OtherInternalClass").First();
+         OuterClass = Architecture.GetClassOfType(typeof(OuterClass));
+         PublicInnerClass = Architecture.GetClassOfType(typeof(OuterClass.PublicInnerClass));
+-        OtherPublicInnerClass = Architecture.GetClassOfType(
++        _otherPublicInnerClass = Architecture.GetClassOfType(
+             typeof(OuterClass.OtherPublicInnerClass)
+         );
+         InternalInnerClass = Architecture.Classes.WhereNameIs("InternalInnerClass").First();
+diff --git a/ArchUnitNETTests/Dependencies/CastDependenciesTest.cs b/ArchUnitNETTests/Dependencies/CastDependenciesTest.cs
+index 0219bcb5..a62d4416 100644
+--- a/ArchUnitNETTests/Dependencies/CastDependenciesTest.cs
++++ b/ArchUnitNETTests/Dependencies/CastDependenciesTest.cs
+@@ -57,7 +57,7 @@ namespace ArchUnitNETTests.Dependencies
+ 
+     internal class ClassWithCastDependency
+     {
+-        private CastClassB target;
++        private CastClassB _target;
+ 
+         public ClassWithCastDependency()
+         {
+@@ -67,7 +67,7 @@ namespace ArchUnitNETTests.Dependencies
+ 
+         public void MethodWithCastDependencies(CastClassA value)
+         {
+-            target = (CastClassB)value;
++            _target = (CastClassB)value;
+         }
+     }
+ 
+diff --git a/ArchUnitNETTests/Dependencies/ExternalDependenciesTests.cs b/ArchUnitNETTests/Dependencies/ExternalDependenciesTests.cs
+index 73a75142..041ac85a 100644
+--- a/ArchUnitNETTests/Dependencies/ExternalDependenciesTests.cs
++++ b/ArchUnitNETTests/Dependencies/ExternalDependenciesTests.cs
+@@ -31,7 +31,7 @@ namespace ArchUnitNETTests.Dependencies
+                 .HaveFullName(typeof(PropertyDependency).FullName)
+                 .Should()
+                 .NotDependOnAny(typeof(Class2));
+-            Assert.False(notDependOnAnyRuleClass.HasNoViolations(Architecture)); //Class2 does not exist in Architecture
++            Assert.False(notDependOnAnyRuleClass.HasNoViolations(Architecture)); // Class2 does not exist in Architecture
+             Assert.False(notDependOnAnyRuleClass.HasNoViolations(ArchitectureExternalDependency));
+         }
+ 
+@@ -43,7 +43,7 @@ namespace ArchUnitNETTests.Dependencies
+                 .HaveFullName(typeof(MethodBodyDependency).FullName)
+                 .Should()
+                 .NotDependOnAny(typeof(Class3));
+-            Assert.False(notDependOnAnyRuleClass.HasNoViolations(Architecture)); //Class3 does not exist in Architecture
++            Assert.False(notDependOnAnyRuleClass.HasNoViolations(Architecture)); // Class3 does not exist in Architecture
+             Assert.False(notDependOnAnyRuleClass.HasNoViolations(ArchitectureBothAssemblies));
+         }
+ 
+@@ -55,7 +55,7 @@ namespace ArchUnitNETTests.Dependencies
+                 .HaveFullName(typeof(MethodArgumentDependency).FullName)
+                 .Should()
+                 .NotDependOnAny(typeof(Class2));
+-            Assert.False(notDependOnAnyRuleClass.HasNoViolations(Architecture)); //Class3 does not exist in Architecture
++            Assert.False(notDependOnAnyRuleClass.HasNoViolations(Architecture)); // Class3 does not exist in Architecture
+         }
+ 
+         [Fact]
+@@ -66,7 +66,7 @@ namespace ArchUnitNETTests.Dependencies
+                 .HaveFullName(typeof(FieldDependency).FullName)
+                 .Should()
+                 .NotDependOnAny(typeof(Class2));
+-            Assert.False(notDependOnAnyRuleClass.HasNoViolations(Architecture)); //Class3 does not exist in Architecture
++            Assert.False(notDependOnAnyRuleClass.HasNoViolations(Architecture)); // Class3 does not exist in Architecture
+         }
+     }
+ 
+diff --git a/ArchUnitNETTests/Dependencies/PlantUmlDependenciesTest.cs b/ArchUnitNETTests/Dependencies/PlantUmlDependenciesTest.cs
+index 1ae156a5..d50baa4a 100644
+--- a/ArchUnitNETTests/Dependencies/PlantUmlDependenciesTest.cs
++++ b/ArchUnitNETTests/Dependencies/PlantUmlDependenciesTest.cs
+@@ -32,6 +32,7 @@ namespace ArchUnitNETTests.Dependencies
+                     .WithStereoTypes("TestAssembly.Diagram.NoDependencies.SomeNamespace.*")
+                     .Write();
+             }
++
+             AssertNoViolation(path, "NoDependencies");
+         }
+ 
+@@ -99,6 +100,7 @@ namespace ArchUnitNETTests.Dependencies
+                     string.Format("No classes were imported from '{0}'", namespc)
+                 );
+             }
++
+             return architecture;
+         }
+     }
+diff --git a/ArchUnitNETTests/Dependencies/PropertyDependencyTests.cs b/ArchUnitNETTests/Dependencies/PropertyDependencyTests.cs
+index 3e0713c3..950cec05 100644
+--- a/ArchUnitNETTests/Dependencies/PropertyDependencyTests.cs
++++ b/ArchUnitNETTests/Dependencies/PropertyDependencyTests.cs
+@@ -95,6 +95,7 @@ namespace ArchUnitNETTests.Dependencies
+             {
+                 Assert.Fail("Class must have Method Call Dependency");
+             }
++
+             Assert.Contains(_dependOnClass, methodCalls.Select(d => d.Target));
+         }
+ 
+@@ -108,6 +109,7 @@ namespace ArchUnitNETTests.Dependencies
+             {
+                 Assert.Fail("Property must have Method Call Dependency");
+             }
++
+             Assert.Contains(_dependOnClass, methodCalls.Select(d => d.Target));
+         }
+ 
+@@ -121,6 +123,7 @@ namespace ArchUnitNETTests.Dependencies
+             {
+                 Assert.Fail("Getter must have Method Call Dependency");
+             }
++
+             Assert.Contains(_dependOnClass, methodCalls.Select(d => d.Target));
+         }
+ 
+diff --git a/ArchUnitNETTests/Dependencies/StringDependenciesTests.cs b/ArchUnitNETTests/Dependencies/StringDependenciesTests.cs
+index 89de5af0..5b19307d 100644
+--- a/ArchUnitNETTests/Dependencies/StringDependenciesTests.cs
++++ b/ArchUnitNETTests/Dependencies/StringDependenciesTests.cs
+@@ -70,7 +70,7 @@ namespace ArchUnitNETTests.Dependencies
+ 
+     internal class ClassWithStringField
+     {
+-        private object Str = "FieldString";
++        private object _str = "FieldString";
+     }
+ 
+     internal class ClassWithLocalString
+diff --git a/ArchUnitNETTests/Domain/AttributeArgumentTests.cs b/ArchUnitNETTests/Domain/AttributeArgumentTests.cs
+index ef4ecc5d..a8a2d342 100644
+--- a/ArchUnitNETTests/Domain/AttributeArgumentTests.cs
++++ b/ArchUnitNETTests/Domain/AttributeArgumentTests.cs
+@@ -78,7 +78,7 @@ namespace ArchUnitNETTests.Domain
+                 .AttributeInstances.First()
+                 .AttributeArguments.Select(arg => arg.Value)
+                 .ToList();
+-            Assert.Contains((uint)10, argumentValues);
++            Assert.Contains(10U, argumentValues);
+             Assert.Contains(true, argumentValues);
+             Assert.Contains("test", argumentValues);
+         }
+@@ -174,6 +174,6 @@ namespace ArchUnitNETTests.Domain
+     )]
+     internal class ClassWithArrayParameterAttribute { }
+ 
+-    [AttributeWithObjectParameter((uint)10, Type2 = true, Type3 = "test")]
++    [AttributeWithObjectParameter(10U, Type2 = true, Type3 = "test")]
+     internal class ClassWithMixedParameterAttribute { }
+ }
+diff --git a/ArchUnitNETTests/Domain/Dependencies/Attributes/AttributeAssertionRepository.cs b/ArchUnitNETTests/Domain/Dependencies/Attributes/AttributeAssertionRepository.cs
+index 53d68c5d..98947c58 100644
+--- a/ArchUnitNETTests/Domain/Dependencies/Attributes/AttributeAssertionRepository.cs
++++ b/ArchUnitNETTests/Domain/Dependencies/Attributes/AttributeAssertionRepository.cs
+@@ -16,7 +16,7 @@ namespace ArchUnitNETTests.Domain.Dependencies.Attributes
+         )
+             where TTargetType : IType
+         {
+-            //Precondition Checks
++            // Precondition Checks
+             if (targetType == null)
+             {
+                 throw new ArgumentNullException(nameof(targetType));
+@@ -32,7 +32,7 @@ namespace ArchUnitNETTests.Domain.Dependencies.Attributes
+                 throw new ArgumentNullException(nameof(actualAttribute));
+             }
+ 
+-            //Assert
++            // Assert
+             Assert.Contains(actualAttribute, targetType.Attributes);
+ 
+             Assert.Equal(expectedAttributeType, actualAttribute);
+@@ -44,7 +44,7 @@ namespace ArchUnitNETTests.Domain.Dependencies.Attributes
+             Attribute actualAttribute
+         )
+         {
+-            //Precondition Checks
++            // Precondition Checks
+             if (targetMember == null)
+             {
+                 throw new ArgumentNullException(nameof(targetMember));
+@@ -60,7 +60,7 @@ namespace ArchUnitNETTests.Domain.Dependencies.Attributes
+                 throw new ArgumentNullException(nameof(actualAttribute));
+             }
+ 
+-            //Assert
++            // Assert
+             Assert.Contains(actualAttribute, targetMember.Attributes);
+ 
+             Assert.Equal(expectedAttributeType, actualAttribute);
+@@ -71,7 +71,7 @@ namespace ArchUnitNETTests.Domain.Dependencies.Attributes
+             Class expectedAttributeClass
+         )
+         {
+-            //Precondition Checks
++            // Precondition Checks
+             if (targetMember == null)
+             {
+                 throw new ArgumentNullException(nameof(targetMember));
+@@ -82,7 +82,7 @@ namespace ArchUnitNETTests.Domain.Dependencies.Attributes
+                 throw new ArgumentNullException(nameof(expectedAttributeClass));
+             }
+ 
+-            //Arrange, Act
++            // Arrange, Act
+             var expectedAttribute = new Attribute(expectedAttributeClass);
+ 
+             var expectedAttributeDependency = new AttributeMemberDependency(
+@@ -90,7 +90,7 @@ namespace ArchUnitNETTests.Domain.Dependencies.Attributes
+                 new AttributeInstance(expectedAttribute)
+             );
+ 
+-            //Assert
++            // Assert
+             Assert.Contains(expectedAttributeDependency, targetMember.Dependencies);
+         }
+ 
+@@ -99,7 +99,7 @@ namespace ArchUnitNETTests.Domain.Dependencies.Attributes
+             Class expectedAttributeClass
+         )
+         {
+-            //Precondition Checks
++            // Precondition Checks
+             if (targetType == null)
+             {
+                 throw new ArgumentNullException(nameof(targetType));
+@@ -110,7 +110,7 @@ namespace ArchUnitNETTests.Domain.Dependencies.Attributes
+                 throw new ArgumentNullException(nameof(expectedAttributeClass));
+             }
+ 
+-            //Arrange, Act
++            // Arrange, Act
+             var expectedAttribute = new Attribute(expectedAttributeClass);
+ 
+             var expectedAttributeDependency = new AttributeTypeDependency(
+@@ -118,7 +118,7 @@ namespace ArchUnitNETTests.Domain.Dependencies.Attributes
+                 new AttributeInstance(expectedAttribute)
+             );
+ 
+-            //Assert
++            // Assert
+             Assert.True(targetType.HasDependency(expectedAttributeDependency));
+         }
+     }
+diff --git a/ArchUnitNETTests/Domain/Dependencies/Attributes/AttributeDependencyTests.cs b/ArchUnitNETTests/Domain/Dependencies/Attributes/AttributeDependencyTests.cs
+index f853b59d..10525698 100644
+--- a/ArchUnitNETTests/Domain/Dependencies/Attributes/AttributeDependencyTests.cs
++++ b/ArchUnitNETTests/Domain/Dependencies/Attributes/AttributeDependencyTests.cs
+@@ -66,10 +66,10 @@ namespace ArchUnitNETTests.Domain.Dependencies.Attributes
+         [Fact]
+         public void ClassAttributeInnerDependencyAssignedToOriginClass()
+         {
+-            //Setup
++            // Setup
+             var expectedClassTargets = new[] { _hello, _helloEvent };
+ 
+-            //Assert
++            // Assert
+             Assert.All(
+                 expectedClassTargets,
+                 targetClass => Assert.True(_originClass.DependsOnType(targetClass.FullName))
+@@ -88,7 +88,7 @@ namespace ArchUnitNETTests.Domain.Dependencies.Attributes
+         [Fact]
+         public void MemberAttributeInnerDependencyAssignedToOriginClass()
+         {
+-            //Setup
++            // Setup
+             var expectedClassTargets = new[]
+             {
+                 _class1,
+@@ -97,7 +97,7 @@ namespace ArchUnitNETTests.Domain.Dependencies.Attributes
+                 _classWithBodyTypeA,
+             };
+ 
+-            //Assert
++            // Assert
+             Assert.All(
+                 expectedClassTargets,
+                 targetClass => Assert.True(_originClass.DependsOnType(targetClass.FullName))
+diff --git a/ArchUnitNETTests/Domain/Dependencies/Members/FieldDependencyTests.cs b/ArchUnitNETTests/Domain/Dependencies/Members/FieldDependencyTests.cs
+index bfe341f2..a23f8d83 100644
+--- a/ArchUnitNETTests/Domain/Dependencies/Members/FieldDependencyTests.cs
++++ b/ArchUnitNETTests/Domain/Dependencies/Members/FieldDependencyTests.cs
+@@ -30,10 +30,10 @@ namespace ArchUnitNETTests.Domain.Dependencies.Members
+         [Fact]
+         public void ClassDependencyForFieldMemberTypesAreCreated()
+         {
+-            //Setup, Act
++            // Setup, Act
+             var expected = new FieldTypeDependency(_fieldAMember);
+ 
+-            //Assert
++            // Assert
+             Assert.True(_classWithFieldA.HasDependency(expected));
+             Assert.Contains(expected, _classWithFieldA.GetFieldTypeDependencies());
+         }
+@@ -41,10 +41,10 @@ namespace ArchUnitNETTests.Domain.Dependencies.Members
+         [Fact]
+         public void FieldDependenciesAddedToClassDependencies()
+         {
+-            //Setup, Act
++            // Setup, Act
+             var fieldMembers = _classWithFieldA.GetFieldMembers();
+ 
+-            //Assert
++            // Assert
+             Assert.All(
+                 fieldMembers,
+                 fieldMember =>
+diff --git a/ArchUnitNETTests/Domain/Dependencies/Members/GetterSetterExamples.cs b/ArchUnitNETTests/Domain/Dependencies/Members/GetterSetterExamples.cs
+index 2ebb1158..726e6b7b 100644
+--- a/ArchUnitNETTests/Domain/Dependencies/Members/GetterSetterExamples.cs
++++ b/ArchUnitNETTests/Domain/Dependencies/Members/GetterSetterExamples.cs
+@@ -34,8 +34,8 @@ namespace ArchUnitNETTests.Domain.Dependencies.Members
+ 
+         public ChildField CustomProperty
+         {
+-            set { _customPropertyBacking = value; }
+             get { return _customPropertyBacking; }
++            set { _customPropertyBacking = value; }
+         }
+ 
+         public ChildField LambdaPair
+diff --git a/ArchUnitNETTests/Domain/Dependencies/Members/GetterSetterMethodDependencyTests.cs b/ArchUnitNETTests/Domain/Dependencies/Members/GetterSetterMethodDependencyTests.cs
+index cc17af20..1d44c072 100644
+--- a/ArchUnitNETTests/Domain/Dependencies/Members/GetterSetterMethodDependencyTests.cs
++++ b/ArchUnitNETTests/Domain/Dependencies/Members/GetterSetterMethodDependencyTests.cs
+@@ -37,6 +37,7 @@ namespace ArchUnitNETTests.Domain.Dependencies.Members
+                     Assert.Contains(dependency, backedProperty.Dependencies);
+                 }
+             }
++
+             Assert.Contains(expectedTarget, backedProperty.Dependencies.Select(t => t.Target));
+         }
+ 
+diff --git a/ArchUnitNETTests/Domain/Dependencies/Members/MethodCallDependencyTests.cs b/ArchUnitNETTests/Domain/Dependencies/Members/MethodCallDependencyTests.cs
+index df49e098..055ceef1 100644
+--- a/ArchUnitNETTests/Domain/Dependencies/Members/MethodCallDependencyTests.cs
++++ b/ArchUnitNETTests/Domain/Dependencies/Members/MethodCallDependencyTests.cs
+@@ -77,10 +77,10 @@ namespace ArchUnitNETTests.Domain.Dependencies.Members
+         [ClassData(typeof(MethodDependencyTestBuild.ConstructorTestData))]
+         public void ConstructorsAddedToClass(Class classWithConstructors)
+         {
+-            //Setup
++            // Setup
+             var constructorMembers = classWithConstructors.GetConstructors();
+ 
+-            //Assert
++            // Assert
+             constructorMembers.ForEach(constructor =>
+             {
+                 Assert.Contains(constructor, classWithConstructors.Constructors);
+diff --git a/ArchUnitNETTests/Domain/Extensions/TypeExtensionTests.cs b/ArchUnitNETTests/Domain/Extensions/TypeExtensionTests.cs
+index a8dd70f4..44c3ee00 100644
+--- a/ArchUnitNETTests/Domain/Extensions/TypeExtensionTests.cs
++++ b/ArchUnitNETTests/Domain/Extensions/TypeExtensionTests.cs
+@@ -266,7 +266,7 @@ namespace ArchUnitNETTests.Domain.Extensions
+             Assert.False(_exampleAttribute.ResidesInNamespace(ParentAttributeNamespace));
+             Assert.True(_exampleAttribute.ResidesInNamespaceMatching(ParentAttributeNamespace));
+             Assert.True(_regexUtilsTests.ResidesInNamespace(ExpectedRegexUtilsTestNamespace));
+-            Assert.False(_exampleAttribute.ResidesInNamespace(string.Empty));
++            Assert.False(_exampleAttribute.ResidesInNamespace(""));
+         }
+ 
+         [Fact]
+@@ -287,7 +287,7 @@ namespace ArchUnitNETTests.Domain.Extensions
+             Assert.False(
+                 _exampleAttribute.ResidesInNamespaceOrBelow(ExpectedAttributeNamespace + ".Sub")
+             );
+-            Assert.False(_exampleAttribute.ResidesInNamespaceOrBelow(string.Empty));
++            Assert.False(_exampleAttribute.ResidesInNamespaceOrBelow(""));
+             Assert.False(_exampleAttribute.ResidesInNamespaceOrBelow(null));
+         }
+ 
+diff --git a/ArchUnitNETTests/Domain/GenericMethodTests.cs b/ArchUnitNETTests/Domain/GenericMethodTests.cs
+index 096f4076..d5d53fa9 100644
+--- a/ArchUnitNETTests/Domain/GenericMethodTests.cs
++++ b/ArchUnitNETTests/Domain/GenericMethodTests.cs
+@@ -42,7 +42,7 @@ namespace ArchUnitNETTests.Domain
+ 
+     internal interface IInterfaceWithGenericMethodsWithSameName
+     {
+-        void Method<T, K>();
++        void Method<T, TK>();
+         void Method<T>();
+     }
+ }
+diff --git a/ArchUnitNETTests/Domain/MemberTests.cs b/ArchUnitNETTests/Domain/MemberTests.cs
+index c2893741..dadd48f8 100644
+--- a/ArchUnitNETTests/Domain/MemberTests.cs
++++ b/ArchUnitNETTests/Domain/MemberTests.cs
+@@ -300,7 +300,7 @@ namespace ArchUnitNETTests.Domain
+         [Fact]
+         public void FieldMemberEquivalencyTests()
+         {
+-            //Setup
++            // Setup
+             if (
+                 !(
+                     _fieldMemberEquivalencyTestData.OriginMember
+@@ -313,7 +313,7 @@ namespace ArchUnitNETTests.Domain
+ 
+             object objectReferenceDuplicate = _fieldMemberEquivalencyTestData.OriginMember;
+ 
+-            //Assert
++            // Assert
+             MemberHasConsistentHashCode(
+                 _fieldMemberEquivalencyTestData.OriginMember,
+                 _fieldMemberEquivalencyTestData.DuplicateMember
+@@ -364,7 +364,7 @@ namespace ArchUnitNETTests.Domain
+         [Fact]
+         public void MethodMemberEquivalencyTests()
+         {
+-            //Setup
++            // Setup
+             if (
+                 !(
+                     _methodMemberEquivalencyTestData.OriginMember
+@@ -377,7 +377,7 @@ namespace ArchUnitNETTests.Domain
+ 
+             object objectReferenceDuplicate = _methodMemberEquivalencyTestData.OriginMember;
+ 
+-            //Assert
++            // Assert
+             MemberHasConsistentHashCode(
+                 _methodMemberEquivalencyTestData.OriginMember,
+                 _methodMemberEquivalencyTestData.DuplicateMember
+@@ -409,7 +409,7 @@ namespace ArchUnitNETTests.Domain
+         [Fact]
+         public void PropertyMemberEquivalencyTests()
+         {
+-            //Setup
++            // Setup
+             if (
+                 !(
+                     _propertyMemberEquivalencyTestData.OriginMember
+@@ -422,7 +422,7 @@ namespace ArchUnitNETTests.Domain
+ 
+             object objectReferenceDuplicate = _propertyMemberEquivalencyTestData.OriginMember;
+ 
+-            //Assert
++            // Assert
+             MemberHasConsistentHashCode(
+                 _propertyMemberEquivalencyTestData.OriginMember,
+                 _propertyMemberEquivalencyTestData.DuplicateMember
+diff --git a/ArchUnitNETTests/Domain/PlantUml/PlantUmlComponentTest.cs b/ArchUnitNETTests/Domain/PlantUml/PlantUmlComponentTest.cs
+index 54948750..1fedfca5 100644
+--- a/ArchUnitNETTests/Domain/PlantUml/PlantUmlComponentTest.cs
++++ b/ArchUnitNETTests/Domain/PlantUml/PlantUmlComponentTest.cs
+@@ -11,12 +11,12 @@ namespace ArchUnitNETTests.Domain.PlantUml
+         {
+             var component1 = new PlantUmlComponent(
+                 new ComponentName("someName"),
+-                new HashSet<Stereotype>() { new Stereotype("someStereoType") },
++                new HashSet<Stereotype> { new Stereotype("someStereoType") },
+                 new Alias("someAlias")
+             );
+             var component2 = new PlantUmlComponent(
+                 new ComponentName("someName"),
+-                new HashSet<Stereotype>() { new Stereotype("someStereoType") },
++                new HashSet<Stereotype> { new Stereotype("someStereoType") },
+                 new Alias("someAlias")
+             );
+ 
+@@ -28,12 +28,12 @@ namespace ArchUnitNETTests.Domain.PlantUml
+         {
+             var component1 = new PlantUmlComponent(
+                 new ComponentName("someName1"),
+-                new HashSet<Stereotype>() { new Stereotype("someStereoType") },
++                new HashSet<Stereotype> { new Stereotype("someStereoType") },
+                 new Alias("someAlias")
+             );
+             var component2 = new PlantUmlComponent(
+                 new ComponentName("someName2"),
+-                new HashSet<Stereotype>() { new Stereotype("someStereoType") },
++                new HashSet<Stereotype> { new Stereotype("someStereoType") },
+                 new Alias("someAlias")
+             );
+ 
+@@ -45,12 +45,12 @@ namespace ArchUnitNETTests.Domain.PlantUml
+         {
+             var component1 = new PlantUmlComponent(
+                 new ComponentName("someName"),
+-                new HashSet<Stereotype>() { new Stereotype("someStereoType") },
++                new HashSet<Stereotype> { new Stereotype("someStereoType") },
+                 new Alias("someAlias")
+             );
+             var component2 = new PlantUmlComponent(
+                 new ComponentName("someName"),
+-                new HashSet<Stereotype>() { new Stereotype("someStereoType") },
++                new HashSet<Stereotype> { new Stereotype("someStereoType") },
+                 new Alias("someAlias")
+             );
+ 
+diff --git a/ArchUnitNETTests/Domain/PlantUml/PlantUmlErrorMessagesCheck.cs b/ArchUnitNETTests/Domain/PlantUml/PlantUmlErrorMessagesCheck.cs
+index a2f6199f..4a2687e5 100644
+--- a/ArchUnitNETTests/Domain/PlantUml/PlantUmlErrorMessagesCheck.cs
++++ b/ArchUnitNETTests/Domain/PlantUml/PlantUmlErrorMessagesCheck.cs
+@@ -32,7 +32,7 @@ namespace ArchUnitNETTests.Domain.PlantUml
+             var testPassed = CheckByPuml(out var rawErrormessage);
+             Assert.False(testPassed);
+ 
+-            //CheckForDuplicates returns false when errormessage contains duplicates or is empty
++            // CheckForDuplicates returns false when errormessage contains duplicates or is empty
+             var containsNoDuplicates = ContainsNoDuplicates(
+                 rawErrormessage,
+                 out var explainErrormessage
+@@ -59,7 +59,7 @@ namespace ArchUnitNETTests.Domain.PlantUml
+                     .AdhereToPlantUmlDiagram(_umlFile);
+                 adhereToPlantUmlDiagram.Check(Architecture);
+             }
+-            //xUnit
++            // xUnit
+             catch (FailedArchRuleException exception)
+             {
+                 errormessage = exception.Message;
+diff --git a/ArchUnitNETTests/Domain/PlantUml/PlantUmlParserTest.cs b/ArchUnitNETTests/Domain/PlantUml/PlantUmlParserTest.cs
+index ecd7ab24..910143cf 100644
+--- a/ArchUnitNETTests/Domain/PlantUml/PlantUmlParserTest.cs
++++ b/ArchUnitNETTests/Domain/PlantUml/PlantUmlParserTest.cs
+@@ -505,17 +505,15 @@ namespace ArchUnitNETTests.Domain.PlantUml
+             PlantUmlParsedDiagram diagram
+         )
+         {
+-            PlantUmlComponent component = diagram
+-                .AllComponents.Where(comp =>
+-                    Equals(comp.ComponentName, new ComponentName(componentName))
+-                )
+-                .First();
++            PlantUmlComponent component = diagram.AllComponents.First(comp =>
++                Equals(comp.ComponentName, new ComponentName(componentName))
++            );
+             return component;
+         }
+ 
+         private PlantUmlComponent GetComponentWithAlias(Alias alias, PlantUmlParsedDiagram diagram)
+         {
+-            return diagram.ComponentsWithAlias.Where(c => alias.Equals(c.Alias)).Single();
++            return diagram.ComponentsWithAlias.Single(c => alias.Equals(c.Alias));
+         }
+ 
+         private PlantUmlParsedDiagram CreateDiagram(string path)
+@@ -538,6 +536,7 @@ namespace ArchUnitNETTests.Domain.PlantUml
+             {
+                 arrowCenters.Add(new string('-', i));
+             }
++
+             for (int i = 2; i <= 10; i++)
+             {
+                 foreach (string infix in new string[] { "left", "right", "up", "down", "[#green]" })
+@@ -545,6 +544,7 @@ namespace ArchUnitNETTests.Domain.PlantUml
+                     arrowCenters.Add(new string('-', i - 1) + infix + "-");
+                 }
+             }
++
+             foreach (string arrowCenter in arrowCenters)
+             {
+                 yield return new object[] { "[SomeOrigin] " + arrowCenter + "> [SomeTarget]" };
+@@ -559,10 +559,10 @@ namespace ArchUnitNETTests.Domain.PlantUml
+     {
+         public IEnumerator<object[]> GetEnumerator()
+         {
+-            Func<TestDiagram, TestDiagram> func1 = (diagram) =>
++            Func<TestDiagram, TestDiagram> func1 = diagram =>
+                 diagram.DependencyFrom("[SomeOrigin]").To("[SomeTarget]");
+             yield return new object[] { func1 };
+-            Func<TestDiagram, TestDiagram> func2 = (diagram) =>
++            Func<TestDiagram, TestDiagram> func2 = diagram =>
+                 diagram.DependencyTo("[SomeTarget]").From("[SomeOrigin]");
+             yield return new object[] { func2 };
+         }
+diff --git a/ArchUnitNETTests/Domain/PlantUml/TestDiagram.cs b/ArchUnitNETTests/Domain/PlantUml/TestDiagram.cs
+index 16693423..e50ce748 100644
+--- a/ArchUnitNETTests/Domain/PlantUml/TestDiagram.cs
++++ b/ArchUnitNETTests/Domain/PlantUml/TestDiagram.cs
+@@ -48,6 +48,7 @@ namespace ArchUnitNETTests.Domain.PlantUml
+             {
+                 line += " as " + creator.Alias;
+             }
++
+             _lines.Add(line);
+             return this;
+         }
+@@ -67,6 +68,7 @@ namespace ArchUnitNETTests.Domain.PlantUml
+                 {
+                     file.WriteLine(line);
+                 }
++
+                 file.WriteLine("@enduml");
+                 file.Flush();
+                 _stream.Seek(0, SeekOrigin.Begin);
+diff --git a/ArchUnitNETTests/Fluent/PlantUml/PlantUmlFluentComponentDiagramTests.cs b/ArchUnitNETTests/Fluent/PlantUml/PlantUmlFluentComponentDiagramTests.cs
+index 033fd568..207d8477 100644
+--- a/ArchUnitNETTests/Fluent/PlantUml/PlantUmlFluentComponentDiagramTests.cs
++++ b/ArchUnitNETTests/Fluent/PlantUml/PlantUmlFluentComponentDiagramTests.cs
+@@ -49,7 +49,7 @@ namespace ArchUnitNETTests.Fluent.PlantUml
+                 .Slices()
+                 .MatchingWithPackages("ArchUnitNET.(*).(*).(*)");
+             const string path = "../../../Fluent/PlantUml/Test.puml";
+-            var g = new GenerationOptions() { C4Style = true, LimitDependencies = true };
++            var g = new GenerationOptions { C4Style = true, LimitDependencies = true };
+             ComponentDiagram()
+                 .WithDependenciesFromSlices(sliceRule1.GetObjects(arch1), g)
+                 .WriteToFile(path);
+diff --git a/ArchUnitNETTests/Fluent/Syntax/DependenciesToOtherAssembliesTests.cs b/ArchUnitNETTests/Fluent/Syntax/DependenciesToOtherAssembliesTests.cs
+index 287cf8e8..d855d291 100644
+--- a/ArchUnitNETTests/Fluent/Syntax/DependenciesToOtherAssembliesTests.cs
++++ b/ArchUnitNETTests/Fluent/Syntax/DependenciesToOtherAssembliesTests.cs
+@@ -134,12 +134,12 @@ namespace ArchUnitNETTests.Fluent.Syntax
+     [AttributeInTestAssembly]
+     public class DependingClass : IInterfaceInTestAssembly
+     {
+-        private ClassInTestAssembly dep;
++        private ClassInTestAssembly _dep;
+ 
+         public DependingClass()
+         {
+-            dep = new ClassInTestAssembly();
+-            dep.MethodInTestAssembly();
++            _dep = new ClassInTestAssembly();
++            _dep.MethodInTestAssembly();
+         }
+     }
+ }
+diff --git a/ArchUnitNETTests/Fluent/Syntax/Elements/ObjectSyntaxElementsTests.cs b/ArchUnitNETTests/Fluent/Syntax/Elements/ObjectSyntaxElementsTests.cs
+index f017f912..a1ce4e1e 100644
+--- a/ArchUnitNETTests/Fluent/Syntax/Elements/ObjectSyntaxElementsTests.cs
++++ b/ArchUnitNETTests/Fluent/Syntax/Elements/ObjectSyntaxElementsTests.cs
+@@ -56,7 +56,7 @@ namespace ArchUnitNETTests.Fluent.Syntax.Elements
+ 
+             // Empty inputs. This is the one place where an empty result set is the point of the assertion,
+             // so it is also the only place that needs allowNoResults.
+-            Types().That().Are([]).Should().BeTypesThat().Are(helper.ChildClass).AssertOnlyViolations(helper, allowNoResults: true);
++            Types().That().Are().Should().BeTypesThat().Are(helper.ChildClass).AssertOnlyViolations(helper, allowNoResults: true);
+ 
+             await helper.AssertSnapshotMatches();
+         }
+@@ -489,7 +489,7 @@ namespace ArchUnitNETTests.Fluent.Syntax.Elements
+             await helper.AssertSnapshotMatches();
+         }
+ 
+-        class CustomCondition : ICondition<IType>
++        private class CustomCondition : ICondition<IType>
+         {
+             public string Description => "follow custom condition";
+ 
+@@ -531,7 +531,7 @@ namespace ArchUnitNETTests.Fluent.Syntax.Elements
+             await helper.AssertSnapshotMatches();
+         }
+ 
+-        class CustomPredicate : IPredicate<IType>
++        private class CustomPredicate : IPredicate<IType>
+         {
+             public string Description => "follow custom predicate";
+ 
+diff --git a/ArchUnitNETTests/Fluent/Syntax/Elements/TypeSyntaxElementsTests.cs b/ArchUnitNETTests/Fluent/Syntax/Elements/TypeSyntaxElementsTests.cs
+index b705218f..519dbe2f 100644
+--- a/ArchUnitNETTests/Fluent/Syntax/Elements/TypeSyntaxElementsTests.cs
++++ b/ArchUnitNETTests/Fluent/Syntax/Elements/TypeSyntaxElementsTests.cs
+@@ -746,16 +746,16 @@ namespace ArchUnitNETTests.Fluent.Syntax.Elements
+ 
+             helper.AddSnapshotSubHeader("Conditions");
+             should.ImplementAnyInterfaces(helper.TestInterface).AssertNoViolations(helper);
+-            should.ImplementAnyInterfaces([helper.TestInterface]).AssertNoViolations(helper);
++            should.ImplementAnyInterfaces(helper.TestInterface).AssertNoViolations(helper);
++            should.ImplementAnyInterfaces(helper.TestInterfaceSystemType).AssertNoViolations(helper);
+             should.ImplementAnyInterfaces(helper.TestInterfaceSystemType).AssertNoViolations(helper);
+-            should.ImplementAnyInterfaces([helper.TestInterfaceSystemType]).AssertNoViolations(helper);
+             should.ImplementAnyInterfaces(Interfaces().That().Are(helper.TestInterface)).AssertNoViolations(helper);
+ 
+             helper.AddSnapshotSubHeader("Predicates");
+             should.Be(Interfaces().That().ImplementAnyInterfaces(helper.TestInterface)).AssertNoViolations(helper);
+-            should.Be(Interfaces().That().ImplementAnyInterfaces([helper.TestInterface])).AssertNoViolations(helper);
++            should.Be(Interfaces().That().ImplementAnyInterfaces(helper.TestInterface)).AssertNoViolations(helper);
++            should.Be(Interfaces().That().ImplementAnyInterfaces(helper.TestInterfaceSystemType)).AssertNoViolations(helper);
+             should.Be(Interfaces().That().ImplementAnyInterfaces(helper.TestInterfaceSystemType)).AssertNoViolations(helper);
+-            should.Be(Interfaces().That().ImplementAnyInterfaces([helper.TestInterfaceSystemType])).AssertNoViolations(helper);
+             should.Be(Interfaces().That().ImplementAnyInterfaces(Interfaces().That().Are(helper.TestInterface))).AssertNoViolations(helper);
+ 
+             helper.AddSnapshotSubHeader("Complex conditions");
+@@ -766,16 +766,16 @@ namespace ArchUnitNETTests.Fluent.Syntax.Elements
+ 
+             helper.AddSnapshotSubHeader("Conditions");
+             should.ImplementAnyInterfaces(helper.OtherTestInterface).AssertOnlyViolations(helper);
+-            should.ImplementAnyInterfaces([helper.OtherTestInterface]).AssertOnlyViolations(helper);
++            should.ImplementAnyInterfaces(helper.OtherTestInterface).AssertOnlyViolations(helper);
++            should.ImplementAnyInterfaces(helper.OtherTestInterfaceSystemType).AssertOnlyViolations(helper);
+             should.ImplementAnyInterfaces(helper.OtherTestInterfaceSystemType).AssertOnlyViolations(helper);
+-            should.ImplementAnyInterfaces([helper.OtherTestInterfaceSystemType]).AssertOnlyViolations(helper);
+             should.ImplementAnyInterfaces(Interfaces().That().Are(helper.OtherTestInterface)).AssertOnlyViolations(helper);
+ 
+             helper.AddSnapshotSubHeader("Predicates");
+             should.Be(Interfaces().That().ImplementAnyInterfaces(helper.OtherTestInterface)).AssertOnlyViolations(helper);
+-            should.Be(Interfaces().That().ImplementAnyInterfaces([helper.OtherTestInterface])).AssertOnlyViolations(helper);
++            should.Be(Interfaces().That().ImplementAnyInterfaces(helper.OtherTestInterface)).AssertOnlyViolations(helper);
++            should.Be(Interfaces().That().ImplementAnyInterfaces(helper.OtherTestInterfaceSystemType)).AssertOnlyViolations(helper);
+             should.Be(Interfaces().That().ImplementAnyInterfaces(helper.OtherTestInterfaceSystemType)).AssertOnlyViolations(helper);
+-            should.Be(Interfaces().That().ImplementAnyInterfaces([helper.OtherTestInterfaceSystemType])).AssertOnlyViolations(helper);
+             should.Be(Interfaces().That().ImplementAnyInterfaces(Interfaces().That().Are(helper.OtherTestInterface))).AssertOnlyViolations(helper);
+ 
+             helper.AddSnapshotSubHeader("Complex conditions");
+@@ -804,23 +804,23 @@ namespace ArchUnitNETTests.Fluent.Syntax.Elements
+ 
+             helper.AddSnapshotSubHeader("Conditions");
+             should.ImplementAnyInterfaces(helper.OtherTestInterface, helper.OtherChildTestInterface).AssertOnlyViolations(helper);
+-            should.ImplementAnyInterfaces([helper.OtherTestInterface, helper.OtherChildTestInterface]).AssertOnlyViolations(helper);
++            should.ImplementAnyInterfaces(helper.OtherTestInterface, helper.OtherChildTestInterface).AssertOnlyViolations(helper);
++            should.ImplementAnyInterfaces(helper.OtherTestInterfaceSystemType, helper.OtherChildTestInterfaceSystemType).AssertOnlyViolations(helper);
+             should.ImplementAnyInterfaces(helper.OtherTestInterfaceSystemType, helper.OtherChildTestInterfaceSystemType).AssertOnlyViolations(helper);
+-            should.ImplementAnyInterfaces([helper.OtherTestInterfaceSystemType, helper.OtherChildTestInterfaceSystemType]).AssertOnlyViolations(helper);
+             should.ImplementAnyInterfaces(Interfaces().That().Are(helper.OtherTestInterface, helper.OtherChildTestInterface)).AssertOnlyViolations(helper);
+ 
+             helper.AddSnapshotSubHeader("Predicates");
+             should.Be(Interfaces().That().ImplementAnyInterfaces(helper.OtherTestInterface, helper.OtherChildTestInterface)).AssertOnlyViolations(helper);
+-            should.Be(Interfaces().That().ImplementAnyInterfaces([helper.OtherTestInterface, helper.OtherChildTestInterface])).AssertOnlyViolations(helper);
++            should.Be(Interfaces().That().ImplementAnyInterfaces(helper.OtherTestInterface, helper.OtherChildTestInterface)).AssertOnlyViolations(helper);
++            should.Be(Interfaces().That().ImplementAnyInterfaces(helper.OtherTestInterfaceSystemType, helper.OtherChildTestInterfaceSystemType)).AssertOnlyViolations(helper);
+             should.Be(Interfaces().That().ImplementAnyInterfaces(helper.OtherTestInterfaceSystemType, helper.OtherChildTestInterfaceSystemType)).AssertOnlyViolations(helper);
+-            should.Be(Interfaces().That().ImplementAnyInterfaces([helper.OtherTestInterfaceSystemType, helper.OtherChildTestInterfaceSystemType])).AssertOnlyViolations(helper);
+             should.Be(Interfaces().That().ImplementAnyInterfaces(Interfaces().That().Are(helper.OtherTestInterface, helper.OtherChildTestInterface))).AssertOnlyViolations(helper);
+ 
+             helper.AddSnapshotSubHeader("Complex conditions");
+             should.ImplementAnyInterfacesThat().Are(helper.OtherTestInterface, helper.OtherChildTestInterface).AssertOnlyViolations(helper);
+-            should.ImplementAnyInterfacesThat().Are([helper.OtherTestInterface, helper.OtherChildTestInterface]).AssertOnlyViolations(helper);
++            should.ImplementAnyInterfacesThat().Are(helper.OtherTestInterface, helper.OtherChildTestInterface).AssertOnlyViolations(helper);
++            should.ImplementAnyInterfacesThat().Are(helper.OtherTestInterfaceSystemType, helper.OtherChildTestInterfaceSystemType).AssertOnlyViolations(helper);
+             should.ImplementAnyInterfacesThat().Are(helper.OtherTestInterfaceSystemType, helper.OtherChildTestInterfaceSystemType).AssertOnlyViolations(helper);
+-            should.ImplementAnyInterfacesThat().Are([helper.OtherTestInterfaceSystemType, helper.OtherChildTestInterfaceSystemType]).AssertOnlyViolations(helper);
+             should.ImplementAnyInterfacesThat().Are(Interfaces().That().Are(helper.OtherTestInterface, helper.OtherChildTestInterface)).AssertOnlyViolations(helper);
+ 
+             helper.AddSnapshotSubHeader("Complex conditions");
+@@ -839,16 +839,16 @@ namespace ArchUnitNETTests.Fluent.Syntax.Elements
+ 
+             helper.AddSnapshotSubHeader("Conditions");
+             should.NotImplementAnyInterfaces(helper.OtherTestInterface).AssertNoViolations(helper);
+-            should.NotImplementAnyInterfaces([helper.OtherTestInterface]).AssertNoViolations(helper);
++            should.NotImplementAnyInterfaces(helper.OtherTestInterface).AssertNoViolations(helper);
++            should.NotImplementAnyInterfaces(helper.OtherTestInterfaceSystemType).AssertNoViolations(helper);
+             should.NotImplementAnyInterfaces(helper.OtherTestInterfaceSystemType).AssertNoViolations(helper);
+-            should.NotImplementAnyInterfaces([helper.OtherTestInterfaceSystemType]).AssertNoViolations(helper);
+             should.NotImplementAnyInterfaces(Interfaces().That().Are(helper.OtherTestInterface)).AssertNoViolations(helper);
+ 
+             helper.AddSnapshotSubHeader("Predicates");
+             should.Be(Interfaces().That().DoNotImplementAnyInterfaces(helper.OtherTestInterface)).AssertNoViolations(helper);
+-            should.Be(Interfaces().That().DoNotImplementAnyInterfaces([helper.OtherTestInterface])).AssertNoViolations(helper);
++            should.Be(Interfaces().That().DoNotImplementAnyInterfaces(helper.OtherTestInterface)).AssertNoViolations(helper);
++            should.Be(Interfaces().That().DoNotImplementAnyInterfaces(helper.OtherTestInterfaceSystemType)).AssertNoViolations(helper);
+             should.Be(Interfaces().That().DoNotImplementAnyInterfaces(helper.OtherTestInterfaceSystemType)).AssertNoViolations(helper);
+-            should.Be(Interfaces().That().DoNotImplementAnyInterfaces([helper.OtherTestInterfaceSystemType])).AssertNoViolations(helper);
+             should.Be(Interfaces().That().DoNotImplementAnyInterfaces(Interfaces().That().Are(helper.OtherTestInterface))).AssertNoViolations(helper);
+ 
+             helper.AddSnapshotSubHeader("Complex conditions");
+@@ -859,16 +859,16 @@ namespace ArchUnitNETTests.Fluent.Syntax.Elements
+ 
+             helper.AddSnapshotSubHeader("Conditions");
+             should.NotImplementAnyInterfaces(helper.TestInterface).AssertOnlyViolations(helper);
+-            should.NotImplementAnyInterfaces([helper.TestInterface]).AssertOnlyViolations(helper);
++            should.NotImplementAnyInterfaces(helper.TestInterface).AssertOnlyViolations(helper);
++            should.NotImplementAnyInterfaces(helper.TestInterfaceSystemType).AssertOnlyViolations(helper);
+             should.NotImplementAnyInterfaces(helper.TestInterfaceSystemType).AssertOnlyViolations(helper);
+-            should.NotImplementAnyInterfaces([helper.TestInterfaceSystemType]).AssertOnlyViolations(helper);
+             should.NotImplementAnyInterfaces(Interfaces().That().Are(helper.TestInterface)).AssertOnlyViolations(helper);
+ 
+             helper.AddSnapshotSubHeader("Predicates");
+             should.Be(Interfaces().That().DoNotImplementAnyInterfaces(helper.TestInterface)).AssertOnlyViolations(helper);
+-            should.Be(Interfaces().That().DoNotImplementAnyInterfaces([helper.TestInterface])).AssertOnlyViolations(helper);
++            should.Be(Interfaces().That().DoNotImplementAnyInterfaces(helper.TestInterface)).AssertOnlyViolations(helper);
++            should.Be(Interfaces().That().DoNotImplementAnyInterfaces(helper.TestInterfaceSystemType)).AssertOnlyViolations(helper);
+             should.Be(Interfaces().That().DoNotImplementAnyInterfaces(helper.TestInterfaceSystemType)).AssertOnlyViolations(helper);
+-            should.Be(Interfaces().That().DoNotImplementAnyInterfaces([helper.TestInterfaceSystemType])).AssertOnlyViolations(helper);
+             should.Be(Interfaces().That().DoNotImplementAnyInterfaces(Interfaces().That().Are(helper.TestInterface))).AssertOnlyViolations(helper);
+ 
+             helper.AddSnapshotSubHeader("Complex conditions");
+@@ -897,16 +897,16 @@ namespace ArchUnitNETTests.Fluent.Syntax.Elements
+ 
+             helper.AddSnapshotSubHeader("Conditions");
+             should.NotImplementAnyInterfaces(helper.TestInterface, helper.OtherTestInterface).AssertOnlyViolations(helper);
+-            should.NotImplementAnyInterfaces([helper.TestInterface, helper.OtherTestInterface]).AssertOnlyViolations(helper);
++            should.NotImplementAnyInterfaces(helper.TestInterface, helper.OtherTestInterface).AssertOnlyViolations(helper);
++            should.NotImplementAnyInterfaces(helper.TestInterfaceSystemType, helper.OtherTestInterfaceSystemType).AssertOnlyViolations(helper);
+             should.NotImplementAnyInterfaces(helper.TestInterfaceSystemType, helper.OtherTestInterfaceSystemType).AssertOnlyViolations(helper);
+-            should.NotImplementAnyInterfaces([helper.TestInterfaceSystemType, helper.OtherTestInterfaceSystemType]).AssertOnlyViolations(helper);
+             should.NotImplementAnyInterfaces(Interfaces().That().Are(helper.TestInterface, helper.OtherTestInterface)).AssertOnlyViolations(helper);
+ 
+             helper.AddSnapshotSubHeader("Predicates");
+             should.Be(Interfaces().That().DoNotImplementAnyInterfaces(helper.TestInterface, helper.OtherTestInterface)).AssertOnlyViolations(helper);
+-            should.Be(Interfaces().That().DoNotImplementAnyInterfaces([helper.TestInterface, helper.OtherTestInterface])).AssertOnlyViolations(helper);
++            should.Be(Interfaces().That().DoNotImplementAnyInterfaces(helper.TestInterface, helper.OtherTestInterface)).AssertOnlyViolations(helper);
++            should.Be(Interfaces().That().DoNotImplementAnyInterfaces(helper.TestInterfaceSystemType, helper.OtherTestInterfaceSystemType)).AssertOnlyViolations(helper);
+             should.Be(Interfaces().That().DoNotImplementAnyInterfaces(helper.TestInterfaceSystemType, helper.OtherTestInterfaceSystemType)).AssertOnlyViolations(helper);
+-            should.Be(Interfaces().That().DoNotImplementAnyInterfaces([helper.TestInterfaceSystemType, helper.OtherTestInterfaceSystemType])).AssertOnlyViolations(helper);
+             should.Be(Interfaces().That().DoNotImplementAnyInterfaces(Interfaces().That().Are(helper.TestInterface, helper.OtherTestInterface))).AssertOnlyViolations(helper);
+ 
+             helper.AddSnapshotSubHeader("Complex conditions");
+@@ -1666,7 +1666,9 @@ namespace ArchUnitNETTests.Fluent.Syntax.Elements
+             finally
+             {
+                 if (File.Exists(path))
++                {
+                     File.Delete(path);
++                }
+             }
+         }
+     }
+diff --git a/ArchUnitNETTests/Loader/ArchLoaderTests.cs b/ArchUnitNETTests/Loader/ArchLoaderTests.cs
+index b8d44ffc..afe22c40 100644
+--- a/ArchUnitNETTests/Loader/ArchLoaderTests.cs
++++ b/ArchUnitNETTests/Loader/ArchLoaderTests.cs
+@@ -277,7 +277,9 @@ namespace ArchUnitNETTests.Loader
+             FilterFunc filterFunc = assembly =>
+             {
+                 if (assembly.Name.Name == "ArchUnitNet")
++                {
+                     return FilterResult.LoadAndStop;
++                }
+ 
+                 return FilterResult.SkipAndContinue;
+             };
+@@ -311,7 +313,7 @@ namespace ArchUnitNETTests.Loader
+             // and that the unavailable types contain the correct assembly they come from.
+             var currentAssemblyPath = AppDomain.CurrentDomain.BaseDirectory[
+                 ..AppDomain.CurrentDomain.BaseDirectory.IndexOf(
+-                    @"ArchUnitNETTests",
++                    "ArchUnitNETTests",
+                     StringComparison.InvariantCulture
+                 )
+             ];
+diff --git a/ArchUnitNETTests/Loader/NamespaceTests.cs b/ArchUnitNETTests/Loader/NamespaceTests.cs
+index a5c56c42..88642025 100644
+--- a/ArchUnitNETTests/Loader/NamespaceTests.cs
++++ b/ArchUnitNETTests/Loader/NamespaceTests.cs
+@@ -13,7 +13,7 @@ namespace ArchUnitNETTests.Loader
+                     ns.FullName != ""
+                 )
+             );
+-            //this currently fails with StaticTestArchitectures.FullArchUnitNETArchitectureWithDependencies because of some weird Interop, Guard, Consts,... types
++            // this currently fails with StaticTestArchitectures.FullArchUnitNETArchitectureWithDependencies because of some weird Interop, Guard, Consts,... types
+         }
+ 
+         [Fact]
+diff --git a/ArchUnitNETTests/Loader/TypeTests.cs b/ArchUnitNETTests/Loader/TypeTests.cs
+index a7d7f43b..fa35686e 100644
+--- a/ArchUnitNETTests/Loader/TypeTests.cs
++++ b/ArchUnitNETTests/Loader/TypeTests.cs
+@@ -103,12 +103,12 @@ namespace ArchUnitNETTests.Loader
+         [Fact]
+         public void AccessAttributes()
+         {
+-            //Setup, Act
++            // Setup, Act
+             var attribute = new Attribute(_expectedAttributeClass);
+             var instance = new AttributeInstance(attribute);
+             _type.AttributeInstances.Add(instance);
+ 
+-            //Assert
++            // Assert
+             Assert.Contains(attribute, _type.Attributes);
+         }
+ 
+diff --git a/ArchUnitNETTests/Loader/UnresolvableAssemblyTests.cs b/ArchUnitNETTests/Loader/UnresolvableAssemblyTests.cs
+index 82d761f0..0c3c3763 100644
+--- a/ArchUnitNETTests/Loader/UnresolvableAssemblyTests.cs
++++ b/ArchUnitNETTests/Loader/UnresolvableAssemblyTests.cs
+@@ -19,7 +19,7 @@ namespace ArchUnitNETTests.Loader
+         private static string RepoRoot =>
+             AppDomain.CurrentDomain.BaseDirectory[
+                 ..AppDomain.CurrentDomain.BaseDirectory.IndexOf(
+-                    @"ArchUnitNETTests",
++                    "ArchUnitNETTests",
+                     StringComparison.InvariantCulture
+                 )
+             ];
+diff --git a/Directory.Build.props b/Directory.Build.props
+new file mode 100644
+index 00000000..bb3479a4
+--- /dev/null
++++ b/Directory.Build.props
+@@ -0,0 +1,8 @@
++<Project>
++  <PropertyGroup>
++    <StyleBroPreset>1.0</StyleBroPreset>
++  </PropertyGroup>
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial64.1" PrivateAssets="all" />
++  </ItemGroup>
++</Project>
+diff --git a/ExampleTest/ExampleArchUnitTest.cs b/ExampleTest/ExampleArchUnitTest.cs
+index f3c48405..6cd32a0a 100644
+--- a/ExampleTest/ExampleArchUnitTest.cs
++++ b/ExampleTest/ExampleArchUnitTest.cs
+@@ -19,8 +19,8 @@ namespace ExampleTest
+ 
+         // replace <ExampleClass> and <ForbiddenClass> with classes from the assemblies you want to test
+ 
+-        //declare variables you'll use throughout your tests up here
+-        //use As() to give them a custom description
++        // declare variables you'll use throughout your tests up here
++        // use As() to give them a custom description
+         private readonly IObjectProvider<IType> ExampleLayer = Types()
+             .That()
+             .ResideInAssembly("ExampleAssembly")
+@@ -46,11 +46,11 @@ namespace ExampleTest
+             .ResideInNamespace("TypoNamespace")
+             .As("Non-existing Typo Layer");
+ 
+-        //write some tests
++        // write some tests
+         [Fact(Skip = "This is just a syntax example, it does not actually work")]
+         public void TypesShouldBeInCorrectLayer()
+         {
+-            //you can use the fluent API to write your own rules
++            // you can use the fluent API to write your own rules
+             IArchRule exampleClassesShouldBeInExampleLayer = Classes()
+                 .That()
+                 .Are(ExampleClasses)
+@@ -62,11 +62,11 @@ namespace ExampleTest
+                 .Should()
+                 .Be(ForbiddenLayer);
+ 
+-            //check if your architecture fulfils your rules
++            // check if your architecture fulfils your rules
+             exampleClassesShouldBeInExampleLayer.Check(Architecture);
+             forbiddenInterfacesShouldBeInForbiddenLayer.Check(Architecture);
+ 
+-            //you can also combine your rules
++            // you can also combine your rules
+             IArchRule combinedArchRule = exampleClassesShouldBeInExampleLayer.And(
+                 forbiddenInterfacesShouldBeInForbiddenLayer
+             );
+@@ -76,7 +76,7 @@ namespace ExampleTest
+         [Fact(Skip = "This is just a syntax example, it does not actually work")]
+         public void ExampleLayerShouldNotAccessForbiddenLayer()
+         {
+-            //you can give your rules a custom reason, which is displayed when it fails (together with the types that failed the rule)
++            // you can give your rules a custom reason, which is displayed when it fails (together with the types that failed the rule)
+             IArchRule exampleLayerShouldNotAccessForbiddenLayer = Types()
+                 .That()
+                 .Are(ExampleLayer)
+diff --git a/ExampleTest/PlantUml/Addresses/Address.cs b/ExampleTest/PlantUml/Addresses/Address.cs
+index 4e06529d..533e0c35 100644
+--- a/ExampleTest/PlantUml/Addresses/Address.cs
++++ b/ExampleTest/PlantUml/Addresses/Address.cs
+@@ -8,7 +8,7 @@ namespace ExampleTest.PlantUml.Addresses
+     public class Address
+     {
+ #pragma warning disable CS0169
+-        private ProductCatalog productCatalog;
++        private ProductCatalog _productCatalog;
+ #pragma warning restore CS0169
+     }
+ }
+diff --git a/ExampleTest/PlantUml/Catalog/ProductCatalog.cs b/ExampleTest/PlantUml/Catalog/ProductCatalog.cs
+index 52b1bf8e..dd228240 100644
+--- a/ExampleTest/PlantUml/Catalog/ProductCatalog.cs
++++ b/ExampleTest/PlantUml/Catalog/ProductCatalog.cs
+@@ -17,6 +17,7 @@ namespace ExampleTest.PlantUml.Catalog
+             {
+                 product.Register();
+             }
++
+             order.AddProducts(_allProducts);
+         }
+     }
+diff --git a/ExampleTest/PlantUml/Importer/ProductImport.cs b/ExampleTest/PlantUml/Importer/ProductImport.cs
+index 68324ae5..0b021c2f 100644
+--- a/ExampleTest/PlantUml/Importer/ProductImport.cs
++++ b/ExampleTest/PlantUml/Importer/ProductImport.cs
+@@ -22,7 +22,7 @@ namespace ExampleTest.PlantUml.Importer
+             }
+         }
+ 
+-        ProductCatalog Parse(byte[] xml)
++        private ProductCatalog Parse(byte[] xml)
+         {
+             return new ProductCatalog();
+         }
+diff --git a/ExampleTest/WebsiteDocumentationTest.cs b/ExampleTest/WebsiteDocumentationTest.cs
+index c98a974f..7ef14fbd 100644
+--- a/ExampleTest/WebsiteDocumentationTest.cs
++++ b/ExampleTest/WebsiteDocumentationTest.cs
+@@ -27,7 +27,7 @@ namespace ExampleTest
+                 .Should()
+                 .NotDependOnAny(Types().That().ResideInNamespace("Controller"));
+             Assert.False(rule.HasNoViolations(Architecture));
+-            //rule.Check(Architecture);
++            // rule.Check(Architecture);
+         }
+ 
+         [Fact]
+@@ -39,7 +39,7 @@ namespace ExampleTest
+                 .Should()
+                 .NotDependOnAny(Classes().That().AreAssignableTo(typeof(ICanvas)));
+             Assert.False(rule.HasNoViolations(Architecture));
+-            //rule.Check(Architecture);
++            // rule.Check(Architecture);
+         }
+ 
+         [Fact]
+@@ -51,7 +51,7 @@ namespace ExampleTest
+                 .Should()
+                 .HaveNameContaining("Car");
+             Assert.False(rule.HasNoViolations(Architecture));
+-            //rule.Check(Architecture);
++            // rule.Check(Architecture);
+         }
+ 
+         [Fact]
+@@ -63,7 +63,7 @@ namespace ExampleTest
+                 .Should()
+                 .ResideInNamespace(typeof(ICanvas).Namespace);
+             Assert.False(rule.HasNoViolations(Architecture));
+-            //rule.Check(Architecture);
++            // rule.Check(Architecture);
+         }
+ 
+         [Fact]
+@@ -75,7 +75,7 @@ namespace ExampleTest
+                 .Should()
+                 .NotDependOnAny(Classes().That().AreAssignableTo(typeof(ICanvas)));
+             Assert.False(rule.HasNoViolations(Architecture));
+-            //rule.Check(Architecture);
++            // rule.Check(Architecture);
+         }
+ 
+         [Fact]
+@@ -83,7 +83,7 @@ namespace ExampleTest
+         {
+             IArchRule rule = Slices().Matching("Module.(*)").Should().BeFreeOfCycles();
+             Assert.False(rule.HasNoViolations(Architecture));
+-            //rule.Check(Architecture);
++            // rule.Check(Architecture);
+         }
+     }
+ }
+diff --git a/TestAssemblies/AttributeAssembly/AttributeAssembly.cs b/TestAssemblies/AttributeAssembly/AttributeAssembly.cs
+index 7244cb21..e18917aa 100644
+--- a/TestAssemblies/AttributeAssembly/AttributeAssembly.cs
++++ b/TestAssemblies/AttributeAssembly/AttributeAssembly.cs
+@@ -71,13 +71,13 @@ public class ClassWithTwoAttributes { }
+ [Attribute3]
+ public class ClassWithThreeAttributes { }
+ 
+-public class TypeArgument1 { };
++public class TypeArgument1 { }
+ 
+-public class TypeArgument2 { };
++public class TypeArgument2 { }
+ 
+-public class TypeArgument3 { };
++public class TypeArgument3 { }
+ 
+-public class UnusedTypeArgument { };
++public class UnusedTypeArgument { }
+ 
+ [Attribute1("Argument1", 1, typeof(TypeArgument1))]
+ public class ClassWithSingleAttributeWithArguments { }
+diff --git a/TestAssemblies/TypeDependencyAssembly/TypeDependency.cs b/TestAssemblies/TypeDependencyAssembly/TypeDependency.cs
+index 6ed3e445..3ad5f977 100644
+--- a/TestAssemblies/TypeDependencyAssembly/TypeDependency.cs
++++ b/TestAssemblies/TypeDependencyAssembly/TypeDependency.cs
+@@ -46,11 +46,11 @@ public class OtherClassWithoutDependencies { }
+ 
+ public class ClassWithReferencedTypeDependency
+ {
+-    List<string> _referencedTypeDependency = [];
++    private List<string> _referencedTypeDependency = [];
+ }
+ 
+ // https://github.com/TNG/ArchUnitNET/issues/351
+-class Issue351
++internal class Issue351
+ {
+     public void OuterFunc()
+     {
+diff --git a/TestAssembly/Diagram/NoDependencies/Independent/AnotherIndependenClass.cs b/TestAssembly/Diagram/NoDependencies/Independent/AnotherIndependenClass.cs
+index f49f8e1b..cc7f6029 100644
+--- a/TestAssembly/Diagram/NoDependencies/Independent/AnotherIndependenClass.cs
++++ b/TestAssembly/Diagram/NoDependencies/Independent/AnotherIndependenClass.cs
+@@ -4,5 +4,5 @@ using System.Text;
+ 
+ namespace TestAssembly.Diagram.NoDependencies.Independent
+ {
+-    class AnotherIndependenClass { }
++    internal class AnotherIndependenClass { }
+ }
+diff --git a/TestAssembly/Diagram/SimpleDependency/Target/SomeTargetClass.cs b/TestAssembly/Diagram/SimpleDependency/Target/SomeTargetClass.cs
+index 211ab514..07cff598 100644
+--- a/TestAssembly/Diagram/SimpleDependency/Target/SomeTargetClass.cs
++++ b/TestAssembly/Diagram/SimpleDependency/Target/SomeTargetClass.cs
+@@ -4,5 +4,5 @@ using System.Text;
+ 
+ namespace TestAssembly.Diagram.SimpleDependency.Target
+ {
+-    class SomeTargetClass { }
++    internal class SomeTargetClass { }
+ }
+diff --git a/TestAssembly/PlantUml/Addresses/Address.cs b/TestAssembly/PlantUml/Addresses/Address.cs
+index 94c4b50b..0c3a136d 100644
+--- a/TestAssembly/PlantUml/Addresses/Address.cs
++++ b/TestAssembly/PlantUml/Addresses/Address.cs
+@@ -5,7 +5,7 @@ namespace TestAssembly.PlantUml.Addresses
+     public class Address
+     {
+ #pragma warning disable CS0169
+-        private ProductCatalog productCatalog;
++        private ProductCatalog _productCatalog;
+ #pragma warning restore CS0169
+     }
+ }

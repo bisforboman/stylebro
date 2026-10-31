@@ -1,0 +1,78 @@
+  Determining projects to restore...
+  Restored /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.NUnit/ArchUnitNET.NUnit.csproj (in 2.4 sec).
+  Restored /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.NUnitTests/ArchUnitNET.NUnitTests.csproj (in 3.2 sec).
+  Restored /home/user/cand64/TNG-ArchUnitNET/TestAssembly/TestAssembly.csproj (in 3 ms).
+  Restored /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/MethodMemberAssembly/MethodMemberAssembly.csproj (in 2 ms).
+  Restored /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/MethodDependencyAssembly/MethodDependencyAssembly.csproj (in 2 ms).
+  Restored /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/FunctionPointerAssembly/FunctionPointerAssembly.csproj (in 2 ms).
+  Restored /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/FilteredDirectoryUnavailableTypesAssembly/FilteredDirectoryUnavailableTypesAssembly.csproj (in 2 ms).
+  Restored /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.MSTestV4/ArchUnitNET.MSTestV4.csproj (in 239 ms).
+  Restored /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/DuplicateFullNameAssembly/DuplicateFullNameAssembly.csproj (in 2 ms).
+  Restored /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/ClassAssembly/ClassAssembly.csproj (in 1 ms).
+  Restored /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/AttributeAssembly/AttributeAssembly.csproj (in 1 ms).
+  Restored /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/FilteredDirectoryLoaderTestAssembly/FilteredDirectoryLoaderTestAssembly.csproj (in 225 ms).
+  Restored /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/VisibilityAssembly/VisibilityAssembly.csproj (in 2 ms).
+  Restored /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/TypeDependencyAssembly/TypeDependencyAssembly.csproj (in 2 ms).
+  Restored /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/TypeAssembly/TypeAssembly.csproj (in 1 ms).
+  Restored /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/SlicesTestAssembly/SlicesTestAssembly.csproj (in 2 ms).
+  Restored /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/PropertyMemberAssembly/PropertyMemberAssembly.csproj (in 2 ms).
+  Restored /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/OtherDuplicateFullNameAssembly/OtherDuplicateFullNameAssembly.csproj (in 1 ms).
+  Restored /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/OptimizedAssembly/OptimizedAssembly.csproj (in 1 ms).
+  Restored /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.MSTestV4Tests/ArchUnitNET.MSTestV4Tests.csproj (in 3.78 sec).
+  Restored /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET/ArchUnitNET.csproj (in 8 ms).
+  Restored /home/user/cand64/TNG-ArchUnitNET/ExampleTest/ExampleTest.csproj (in 465 ms).
+  Restored /home/user/cand64/TNG-ArchUnitNET/ArchUnitNETTests/ArchUnitNETTests.csproj (in 2.58 sec).
+  Restored /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.xUnitTests/ArchUnitNET.xUnitTests.csproj (in 4 ms).
+  Restored /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.xUnitV3Tests/ArchUnitNET.xUnitV3Tests.csproj (in 2.63 sec).
+  Restored /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.TUnit/ArchUnitNET.TUnit.csproj (in 6.64 sec).
+  Restored /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.xUnitV3/ArchUnitNET.xUnitV3.csproj (in 2.75 sec).
+  Restored /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.xUnit/ArchUnitNET.xUnit.csproj (in 307 ms).
+  Restored /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.MSTestV2Tests/ArchUnitNET.MSTestV2Tests.csproj (in 804 ms).
+  Restored /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.MSTestV2/ArchUnitNET.MSTestV2.csproj (in 859 ms).
+  Restored /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.MSTestV3Tests/ArchUnitNET.MSTestV3Tests.csproj (in 2.31 sec).
+  Restored /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.TUnitTests/ArchUnitNET.TUnitTests.csproj (in 2.9 sec).
+  ArchUnitNET -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET/bin/Debug/netstandard2.0/ArchUnitNET.dll
+  TypeDependencyAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/TypeDependencyAssembly/bin/Debug/net10.0/TypeDependencyAssembly.dll
+  TestAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssembly/bin/Debug/net10.0/TestAssembly.dll
+  MethodDependencyAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/MethodDependencyAssembly/bin/Debug/net10.0/MethodDependencyAssembly.dll
+  OtherDuplicateFullNameAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/OtherDuplicateFullNameAssembly/bin/Debug/net10.0/OtherDuplicateFullNameAssembly.dll
+  FilteredDirectoryUnavailableTypesAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/FilteredDirectoryUnavailableTypesAssembly/bin/Debug/net10.0/FilteredDirectoryUnavailableTypesAssembly.dll
+  ArchUnitNET -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET/bin/Debug/net462/ArchUnitNET.dll
+  TypeAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/TypeAssembly/bin/Debug/net10.0/TypeAssembly.dll
+  ArchUnitNET.xUnit -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.xUnit/bin/Debug/net462/ArchUnitNET.xUnit.dll
+  AttributeAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/AttributeAssembly/bin/Debug/net10.0/AttributeAssembly.dll
+  ArchUnitNET.TUnit -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.TUnit/bin/Debug/net472/ArchUnitNET.TUnit.dll
+  ArchUnitNET.xUnitV3 -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.xUnitV3/bin/Debug/net472/ArchUnitNET.xUnitV3.dll
+  VisibilityAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/VisibilityAssembly/bin/Debug/net10.0/VisibilityAssembly.dll
+  ArchUnitNET.MSTestV2 -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.MSTestV2/bin/Debug/net462/ArchUnitNET.MSTestV2.dll
+  ArchUnitNET.MSTestV4 -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.MSTestV4/bin/Debug/net462/ArchUnitNET.MSTestV4.dll
+  ArchUnitNET.MSTestV4 -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.MSTestV4/bin/Debug/netstandard2.0/ArchUnitNET.MSTestV4.dll
+  DuplicateFullNameAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/DuplicateFullNameAssembly/bin/Debug/net10.0/DuplicateFullNameAssembly.dll
+  ArchUnitNET.xUnitV3 -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.xUnitV3/bin/Debug/netstandard2.0/ArchUnitNET.xUnitV3.dll
+  ArchUnitNET.NUnit -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.NUnit/bin/Debug/net462/ArchUnitNET.NUnit.dll
+  MethodMemberAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/MethodMemberAssembly/bin/Debug/net10.0/MethodMemberAssembly.dll
+  PropertyMemberAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/PropertyMemberAssembly/bin/Debug/net10.0/PropertyMemberAssembly.dll
+  ClassAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/ClassAssembly/bin/Debug/net10.0/ClassAssembly.dll
+  FilteredDirectoryLoaderTestAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/FilteredDirectoryLoaderTestAssembly/bin/Debug/net10.0/FilteredDirectoryLoaderTestAssembly.dll
+  ArchUnitNET.xUnitV3Tests -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.xUnitV3Tests/bin/Debug/net10.0/ArchUnitNET.xUnitV3Tests.dll
+  OptimizedAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/OptimizedAssembly/bin/Debug/net10.0/OptimizedAssembly.dll
+  SlicesTestAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/SlicesTestAssembly/bin/Debug/net10.0/SlicesTestAssembly.dll
+  ArchUnitNET.TUnit -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.TUnit/bin/Debug/netstandard2.0/ArchUnitNET.TUnit.dll
+  ArchUnitNET.MSTestV2 -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.MSTestV2/bin/Debug/netstandard2.0/ArchUnitNET.MSTestV2.dll
+  ArchUnitNET.NUnit -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.NUnit/bin/Debug/netstandard2.0/ArchUnitNET.NUnit.dll
+  ArchUnitNET.xUnit -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.xUnit/bin/Debug/netstandard2.0/ArchUnitNET.xUnit.dll
+  FunctionPointerAssembly -> /home/user/cand64/TNG-ArchUnitNET/TestAssemblies/FunctionPointerAssembly/bin/Debug/net10.0/FunctionPointerAssembly.dll
+  ArchUnitNET.TUnitTests -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.TUnitTests/bin/Debug/net10.0/ArchUnitNET.TUnitTests.dll
+  ExampleTest -> /home/user/cand64/TNG-ArchUnitNET/ExampleTest/bin/Debug/net10.0/ExampleTest.dll
+  ArchUnitNET.MSTestV4Tests -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.MSTestV4Tests/bin/Debug/net10.0/ArchUnitNET.MSTestV4Tests.dll
+  ArchUnitNET.NUnitTests -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.NUnitTests/bin/Debug/net10.0/ArchUnitNET.NUnitTests.dll
+  ArchUnitNET.MSTestV2Tests -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.MSTestV2Tests/bin/Debug/net10.0/ArchUnitNET.MSTestV2Tests.dll
+  ArchUnitNET.MSTestV3Tests -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.MSTestV3Tests/bin/Debug/net10.0/ArchUnitNET.MSTestV3Tests.dll
+  ArchUnitNET.xUnitTests -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNET.xUnitTests/bin/Debug/net10.0/ArchUnitNET.xUnitTests.dll
+  ArchUnitNETTests -> /home/user/cand64/TNG-ArchUnitNET/ArchUnitNETTests/bin/Debug/net10.0/ArchUnitNETTests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:22.39

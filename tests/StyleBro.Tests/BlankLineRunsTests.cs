@@ -356,4 +356,68 @@ public class BlankLineRunsTests
         }
         """,
         "dotnet_diagnostic.BRO1506.severity = warning");
+
+    // Trial 64, ArchUnitNET: CSharpier removes every blank line above a 'checked'/'unchecked' statement, so with CSharpier
+    // laying the code out BRO1519 leaves that gap alone (the two formatters undid each other); without it, it's reported.
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public Task CheckedStatementBelowABlock_IsLeftToCSharpier(bool csharpier) => VerifyFixAsync(
+        $$"""
+        public class C
+        {
+            public int M(bool b, object o)
+            {
+                if (b)
+                {
+                    return 0;
+                }{{(csharpier ? string.Empty : "{|BRO1519:")}}
+        {{(csharpier ? string.Empty : "|}")}}        unchecked
+                {
+                    return o.GetHashCode() * 397;
+                }
+            }
+
+            public int N(int a)
+            {
+                for (var i = 0; i < a; i++)
+                {
+                    a--;
+                }{{(csharpier ? string.Empty : "{|BRO1519:")}}
+        {{(csharpier ? string.Empty : "|}")}}        checked
+                {
+                    return a * 3;
+                }
+            }
+        }
+        """,
+        $$"""
+        public class C
+        {
+            public int M(bool b, object o)
+            {
+                if (b)
+                {
+                    return 0;
+                }
+        {{(csharpier ? string.Empty : "\n")}}        unchecked
+                {
+                    return o.GetHashCode() * 397;
+                }
+            }
+
+            public int N(int a)
+            {
+                for (var i = 0; i < a; i++)
+                {
+                    a--;
+                }
+        {{(csharpier ? string.Empty : "\n")}}        checked
+                {
+                    return a * 3;
+                }
+            }
+        }
+        """,
+        csharpier ? "stylebro_layout_by = csharpier\n" : null);
 }

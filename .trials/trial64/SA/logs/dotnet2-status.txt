@@ -1,0 +1,11 @@
+ A Directory.Build.props
+ M src/Serilog.Sinks.Async/Sinks/Async/BackgroundWorkerSink.cs
+ M test/Serilog.Sinks.Async.PerformanceTests/LatencyBenchmark.cs
+ M test/Serilog.Sinks.Async.PerformanceTests/ThroughputBenchmark.cs
+ M test/Serilog.Sinks.Async.Tests/BackgroundWorkerSinkIntegrationSpec.cs
+ M test/Serilog.Sinks.Async.Tests/BackgroundWorkerSinkSpec.cs
+ M test/Serilog.Sinks.Async.Tests/Support/CollectingFailureListener.cs
+ M test/Serilog.Sinks.Async.Tests/Support/DummyMonitor.cs
+ M test/Serilog.Sinks.Async.Tests/Support/MemorySink.cs
+ M test/Serilog.Sinks.Async.Tests/Support/NotImplementedSink.cs
+?? .editorconfig

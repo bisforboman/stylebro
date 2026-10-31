@@ -1,0 +1,157 @@
+  Determining projects to restore...
+  Restored /home/user/w64/AU/dotnet2/TestAssemblies/FilteredDirectoryLoaderTestAssembly/FilteredDirectoryLoaderTestAssembly.csproj (in 204 ms).
+  Restored /home/user/w64/AU/dotnet2/TestAssemblies/FilteredDirectoryUnavailableTypesAssembly/FilteredDirectoryUnavailableTypesAssembly.csproj (in 197 ms).
+  28 of 30 projects are up-to-date for restore.
+  ArchUnitNET -> /home/user/w64/AU/dotnet2/ArchUnitNET/bin/Release/netstandard2.0/ArchUnitNET.dll
+  ArchUnitNET.xUnit -> /home/user/w64/AU/dotnet2/ArchUnitNET.xUnit/bin/Release/netstandard2.0/ArchUnitNET.xUnit.dll
+  ExampleTest -> /home/user/w64/AU/dotnet2/ExampleTest/bin/Release/net10.0/ExampleTest.dll
+Test run for /home/user/w64/AU/dotnet2/ExampleTest/bin/Release/net10.0/ExampleTest.dll (.NETCoreApp,Version=v10.0)
+  TestAssembly -> /home/user/w64/AU/dotnet2/TestAssembly/bin/Release/net10.0/TestAssembly.dll
+VSTest version 18.0.2 (x64)
+
+  TypeDependencyAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/TypeDependencyAssembly/bin/Release/net10.0/TypeDependencyAssembly.dll
+Starting test execution, please wait...
+  OtherDuplicateFullNameAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/OtherDuplicateFullNameAssembly/bin/Release/net10.0/OtherDuplicateFullNameAssembly.dll
+A total of 1 test files matched the specified pattern.
+  TypeAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/TypeAssembly/bin/Release/net10.0/TypeAssembly.dll
+  AttributeAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/AttributeAssembly/bin/Release/net10.0/AttributeAssembly.dll
+  DuplicateFullNameAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/DuplicateFullNameAssembly/bin/Release/net10.0/DuplicateFullNameAssembly.dll
+  MethodDependencyAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/MethodDependencyAssembly/bin/Release/net10.0/MethodDependencyAssembly.dll
+  VisibilityAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/VisibilityAssembly/bin/Release/net10.0/VisibilityAssembly.dll
+  ClassAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/ClassAssembly/bin/Release/net10.0/ClassAssembly.dll
+  OptimizedAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/OptimizedAssembly/bin/Release/net10.0/OptimizedAssembly.dll
+  FunctionPointerAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/FunctionPointerAssembly/bin/Release/net10.0/FunctionPointerAssembly.dll
+[xUnit.net 00:00:00.49]     ExampleTest.ExampleArchUnitTest.ExampleLayerShouldNotAccessForbiddenLayer [SKIP]
+[xUnit.net 00:00:00.53]     ExampleTest.ExampleArchUnitTest.TypoLayerShouldViolateByDefault [SKIP]
+[xUnit.net 00:00:00.54]     ExampleTest.ExampleArchUnitTest.TypesShouldBeInCorrectLayer [SKIP]
+[xUnit.net 00:00:00.54]     ExampleTest.ExampleArchUnitTest.ForbiddenClassesShouldHaveCorrectName [SKIP]
+[xUnit.net 00:00:00.54]     ExampleTest.ExampleArchUnitTest.ExampleClassesShouldNotCallForbiddenMethods [SKIP]
+  Skipped ExampleTest.ExampleArchUnitTest.ExampleLayerShouldNotAccessForbiddenLayer [1 ms]
+  Skipped ExampleTest.ExampleArchUnitTest.TypoLayerShouldViolateByDefault [1 ms]
+  Skipped ExampleTest.ExampleArchUnitTest.TypesShouldBeInCorrectLayer [1 ms]
+  Skipped ExampleTest.ExampleArchUnitTest.ForbiddenClassesShouldHaveCorrectName [1 ms]
+  Skipped ExampleTest.ExampleArchUnitTest.ExampleClassesShouldNotCallForbiddenMethods [1 ms]
+
+Passed!  - Failed:     0, Passed:    12, Skipped:     5, Total:    17, Duration: 619 ms - ExampleTest.dll (net10.0)
+  ArchUnitNET.NUnit -> /home/user/w64/AU/dotnet2/ArchUnitNET.NUnit/bin/Release/netstandard2.0/ArchUnitNET.NUnit.dll
+  ArchUnitNET.MSTestV2 -> /home/user/w64/AU/dotnet2/ArchUnitNET.MSTestV2/bin/Release/netstandard2.0/ArchUnitNET.MSTestV2.dll
+  ArchUnitNET.MSTestV4 -> /home/user/w64/AU/dotnet2/ArchUnitNET.MSTestV4/bin/Release/netstandard2.0/ArchUnitNET.MSTestV4.dll
+  ArchUnitNET.xUnitV3 -> /home/user/w64/AU/dotnet2/ArchUnitNET.xUnitV3/bin/Release/netstandard2.0/ArchUnitNET.xUnitV3.dll
+  MethodMemberAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/MethodMemberAssembly/bin/Release/net10.0/MethodMemberAssembly.dll
+  PropertyMemberAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/PropertyMemberAssembly/bin/Release/net10.0/PropertyMemberAssembly.dll
+  ArchUnitNET.xUnitV3Tests -> /home/user/w64/AU/dotnet2/ArchUnitNET.xUnitV3Tests/bin/Release/net10.0/ArchUnitNET.xUnitV3Tests.dll
+Test run for /home/user/w64/AU/dotnet2/ArchUnitNET.xUnitV3Tests/bin/Release/net10.0/ArchUnitNET.xUnitV3Tests.dll (.NETCoreApp,Version=v10.0)
+  ArchUnitNET.NUnitTests -> /home/user/w64/AU/dotnet2/ArchUnitNET.NUnitTests/bin/Release/net10.0/ArchUnitNET.NUnitTests.dll
+Test run for /home/user/w64/AU/dotnet2/ArchUnitNET.NUnitTests/bin/Release/net10.0/ArchUnitNET.NUnitTests.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+  SlicesTestAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/SlicesTestAssembly/bin/Release/net10.0/SlicesTestAssembly.dll
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 351 ms - ArchUnitNET.NUnitTests.dll (net10.0)
+  ArchUnitNET.xUnitTests -> /home/user/w64/AU/dotnet2/ArchUnitNET.xUnitTests/bin/Release/net10.0/ArchUnitNET.xUnitTests.dll
+Test run for /home/user/w64/AU/dotnet2/ArchUnitNET.xUnitTests/bin/Release/net10.0/ArchUnitNET.xUnitTests.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 846 ms - ArchUnitNET.xUnitV3Tests.dll (net10.0)
+  ArchUnitNET.MSTestV2Tests -> /home/user/w64/AU/dotnet2/ArchUnitNET.MSTestV2Tests/bin/Release/net10.0/ArchUnitNET.MSTestV2Tests.dll
+Test run for /home/user/w64/AU/dotnet2/ArchUnitNET.MSTestV2Tests/bin/Release/net10.0/ArchUnitNET.MSTestV2Tests.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+  ArchUnitNET.MSTestV3Tests -> /home/user/w64/AU/dotnet2/ArchUnitNET.MSTestV3Tests/bin/Release/net10.0/ArchUnitNET.MSTestV3Tests.dll
+Test run for /home/user/w64/AU/dotnet2/ArchUnitNET.MSTestV3Tests/bin/Release/net10.0/ArchUnitNET.MSTestV3Tests.dll (.NETCoreApp,Version=v10.0)
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 659 ms - ArchUnitNET.xUnitTests.dll (net10.0)
+  FilteredDirectoryUnavailableTypesAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/FilteredDirectoryUnavailableTypesAssembly/bin/Release/net10.0/FilteredDirectoryUnavailableTypesAssembly.dll
+  ArchUnitNET.MSTestV4Tests -> /home/user/w64/AU/dotnet2/ArchUnitNET.MSTestV4Tests/bin/Release/net10.0/ArchUnitNET.MSTestV4Tests.dll
+Test run for /home/user/w64/AU/dotnet2/ArchUnitNET.MSTestV4Tests/bin/Release/net10.0/ArchUnitNET.MSTestV4Tests.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 822 ms - ArchUnitNET.MSTestV2Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 672 ms - ArchUnitNET.MSTestV3Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 452 ms - ArchUnitNET.MSTestV4Tests.dll (net10.0)
+  FilteredDirectoryLoaderTestAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/FilteredDirectoryLoaderTestAssembly/bin/Release/net10.0/FilteredDirectoryLoaderTestAssembly.dll
+  ArchUnitNETTests -> /home/user/w64/AU/dotnet2/ArchUnitNETTests/bin/Release/net10.0/ArchUnitNETTests.dll
+Test run for /home/user/w64/AU/dotnet2/ArchUnitNETTests/bin/Release/net10.0/ArchUnitNETTests.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:13.26]     ArchUnitNETTests.Dependencies.StringDependenciesTests.LocalStringDependencyFound [SKIP]
+[xUnit.net 00:00:13.26]     ArchUnitNETTests.Dependencies.StringDependenciesTests.PropertyStringDependencyFound [SKIP]
+[xUnit.net 00:00:13.26]     ArchUnitNETTests.Dependencies.StringDependenciesTests.StringFieldDependencyFound [SKIP]
+  Skipped ArchUnitNETTests.Dependencies.StringDependenciesTests.LocalStringDependencyFound [1 ms]
+  Skipped ArchUnitNETTests.Dependencies.StringDependenciesTests.PropertyStringDependencyFound [1 ms]
+  Skipped ArchUnitNETTests.Dependencies.StringDependenciesTests.StringFieldDependencyFound [1 ms]
+[xUnit.net 00:00:16.04]     ArchUnitNETTests.Fluent.Syntax.Elements.MethodMemberSyntaxElementsTests.NotHaveDependencyInMethodBodyToTest [FAIL]
+  Failed ArchUnitNETTests.Fluent.Syntax.Elements.MethodMemberSyntaxElementsTests.NotHaveDependencyInMethodBodyToTest [28 ms]
+  Error Message:
+   Query: Method members that are "System.Void MethodMemberNamespace.OtherCallingClass::MethodCallingCalledMethod()" should not have dependencies in method body to "MethodMemberNamespace.MethodDependencyClass"
+Result: True
+Description: System.Void MethodMemberNamespace.OtherCallingClass::MethodCallingCalledMethod() passed
+Message: 
+All Evaluations passed
+
+
+  Stack Trace:
+     at ArchUnitNETTests.AssemblyTestHelper.AssemblyTestHelper.AssertOnlyViolations(IArchRule rule, Boolean allowNoResults) in /home/user/w64/AU/dotnet2/ArchUnitNETTests/AssemblyTestHelper/AssemblyTestHelper.cs:line 152
+   at ArchUnitNETTests.AssemblyTestHelper.AssemblyTestHelper.AssertOnlyViolations(IArchRule rule) in /home/user/w64/AU/dotnet2/ArchUnitNETTests/AssemblyTestHelper/AssemblyTestHelper.cs:line 143
+   at ArchUnitNETTests.AssemblyTestHelper.AssemblyTestHelperExtensions.AssertOnlyViolations(IArchRule archRule, AssemblyTestHelper testHelper) in /home/user/w64/AU/dotnet2/ArchUnitNETTests/AssemblyTestHelper/AssemblyTestHelperExtensions.cs:line 27
+   at ArchUnitNETTests.Fluent.Syntax.Elements.MethodMemberSyntaxElementsTests.NotHaveDependencyInMethodBodyToTest() in /home/user/w64/AU/dotnet2/ArchUnitNETTests/Fluent/Syntax/Elements/MethodMemberSyntaxElementsTests.cs:line 411
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:16.22]     ArchUnitNETTests.Fluent.Syntax.Elements.MethodMemberSyntaxElementsTests.HaveDependencyInMethodBodyToTest [FAIL]
+  Failed ArchUnitNETTests.Fluent.Syntax.Elements.MethodMemberSyntaxElementsTests.HaveDependencyInMethodBodyToTest [4 ms]
+  Error Message:
+   Query: Method members that are "System.Void MethodMemberNamespace.OtherCallingClass::MethodCallingCalledMethod()" should have dependencies in method body to "MethodMemberNamespace.MethodDependencyClass"
+Result: False
+Description: System.Void MethodMemberNamespace.OtherCallingClass::MethodCallingCalledMethod() does not have dependencies in method body to "MethodMemberNamespace.MethodDependencyClass"
+Message: 
+"Method members that are "System.Void MethodMemberNamespace.OtherCallingClass::MethodCallingCalledMethod()" should have dependencies in method body to "MethodMemberNamespace.MethodDependencyClass"" failed:
+	System.Void MethodMemberNamespace.OtherCallingClass::MethodCallingCalledMethod() does not have dependencies in method body to "MethodMemberNamespace.MethodDependencyClass"
+
+
+
+
+  Stack Trace:
+     at ArchUnitNETTests.AssemblyTestHelper.AssemblyTestHelper.AssertNoViolations(IArchRule rule) in /home/user/w64/AU/dotnet2/ArchUnitNETTests/AssemblyTestHelper/AssemblyTestHelper.cs:line 98
+   at ArchUnitNETTests.AssemblyTestHelper.AssemblyTestHelperExtensions.AssertNoViolations(IArchRule archRule, AssemblyTestHelper testHelper) in /home/user/w64/AU/dotnet2/ArchUnitNETTests/AssemblyTestHelper/AssemblyTestHelperExtensions.cs:line 12
+   at ArchUnitNETTests.Fluent.Syntax.Elements.MethodMemberSyntaxElementsTests.HaveDependencyInMethodBodyToTest() in /home/user/w64/AU/dotnet2/ArchUnitNETTests/Fluent/Syntax/Elements/MethodMemberSyntaxElementsTests.cs:line 311
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:16.66]     ArchUnitNETTests.Dependencies.TypeOfDependenciesTests.TypeOfDependencyTest [SKIP]
+  Skipped ArchUnitNETTests.Dependencies.TypeOfDependenciesTests.TypeOfDependencyTest [1 ms]
+[xUnit.net 00:00:17.43]     ArchUnitNETTests.Dependencies.KeepDependenciesInCompilerGeneratedTypesTests.LambdaPrimitiveDependenciesNotLost [SKIP]
+[xUnit.net 00:00:17.43]     ArchUnitNETTests.Dependencies.KeepDependenciesInCompilerGeneratedTypesTests.LambdaTypeDependenciesNotLost [SKIP]
+  Skipped ArchUnitNETTests.Dependencies.KeepDependenciesInCompilerGeneratedTypesTests.LambdaPrimitiveDependenciesNotLost [1 ms]
+  Skipped ArchUnitNETTests.Dependencies.KeepDependenciesInCompilerGeneratedTypesTests.LambdaTypeDependenciesNotLost [1 ms]
+[xUnit.net 00:00:17.77]     ArchUnitNETTests.Dependencies.CastDependenciesTest.CastTest [SKIP]
+  Skipped ArchUnitNETTests.Dependencies.CastDependenciesTest.CastTest [1 ms]
+
+Failed!  - Failed:     2, Passed:   773, Skipped:     7, Total:   782, Duration: 25 s - ArchUnitNETTests.dll (net10.0)
+Running tests from /home/user/w64/AU/dotnet2/ArchUnitNET.TUnitTests/bin/Release/net10.0/ArchUnitNET.TUnitTests.dll (net10.0|x64)
+/home/user/w64/AU/dotnet2/ArchUnitNET.TUnitTests/bin/Release/net10.0/ArchUnitNET.TUnitTests.dll (net10.0|x64) passed (769ms)
+
+Test run summary: Passed!
+  total: 2
+  failed: 0
+  succeeded: 2
+  skipped: 0
+  duration: 1s 121ms

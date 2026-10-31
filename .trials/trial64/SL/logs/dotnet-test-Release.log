@@ -1,0 +1,33 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Serilog.Extensions.Logging -> /home/user/w64/SL/dotnet/src/Serilog.Extensions.Logging/bin/Release/net8.0/Serilog.Extensions.Logging.dll
+  Serilog.Extensions.Logging.Tests -> /home/user/w64/SL/dotnet/test/Serilog.Extensions.Logging.Tests/bin/Release/net8.0/Serilog.Extensions.Logging.Tests.dll
+Test run for /home/user/w64/SL/dotnet/test/Serilog.Extensions.Logging.Tests/bin/Release/net8.0/Serilog.Extensions.Logging.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    94, Skipped:     0, Total:    94, Duration: 185 ms - Serilog.Extensions.Logging.Tests.dll (net8.0)
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Serilog.Extensions.Logging -> /home/user/w64/SL/dotnet/src/Serilog.Extensions.Logging/bin/Release/net9.0/Serilog.Extensions.Logging.dll
+  Serilog.Extensions.Logging.Tests -> /home/user/w64/SL/dotnet/test/Serilog.Extensions.Logging.Tests/bin/Release/net9.0/Serilog.Extensions.Logging.Tests.dll
+Test run for /home/user/w64/SL/dotnet/test/Serilog.Extensions.Logging.Tests/bin/Release/net9.0/Serilog.Extensions.Logging.Tests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    94, Skipped:     0, Total:    94, Duration: 164 ms - Serilog.Extensions.Logging.Tests.dll (net9.0)
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Serilog.Extensions.Logging -> /home/user/w64/SL/dotnet/src/Serilog.Extensions.Logging/bin/Release/net10.0/Serilog.Extensions.Logging.dll
+  Serilog.Extensions.Logging.Tests -> /home/user/w64/SL/dotnet/test/Serilog.Extensions.Logging.Tests/bin/Release/net10.0/Serilog.Extensions.Logging.Tests.dll
+Test run for /home/user/w64/SL/dotnet/test/Serilog.Extensions.Logging.Tests/bin/Release/net10.0/Serilog.Extensions.Logging.Tests.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    94, Skipped:     0, Total:    94, Duration: 166 ms - Serilog.Extensions.Logging.Tests.dll (net10.0)

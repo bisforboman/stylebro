@@ -1,0 +1,1630 @@
+diff --git a/Directory.Build.props b/Directory.Build.props
+index c114992..77cbb5f 100644
+--- a/Directory.Build.props
++++ b/Directory.Build.props
+@@ -3,6 +3,7 @@
+    a property value is project-specific, please record it in the CSPROJ file instead. -->
+   <Import Project="$(MSBuildThisFileDirectory)Directory.Version.props" />
+   <PropertyGroup>
++    <StyleBroPreset>1.0</StyleBroPreset>
+     <LangVersion>latest</LangVersion>
+     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+     <!-- The condition is required to support BenchmarkDotNet -->
+@@ -22,4 +23,7 @@
+     <Reference Include="System.Core" />
+     <Reference Include="Microsoft.CSharp" />
+   </ItemGroup>
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial64.1" PrivateAssets="all" />
++  </ItemGroup>
+ </Project>
+diff --git a/src/Serilog.Expressions/Expressions/Ast/IndexerWildcard.cs b/src/Serilog.Expressions/Expressions/Ast/IndexerWildcard.cs
+index e2c286e..2ddfead 100644
+--- a/src/Serilog.Expressions/Expressions/Ast/IndexerWildcard.cs
++++ b/src/Serilog.Expressions/Expressions/Ast/IndexerWildcard.cs
+@@ -17,4 +17,9 @@ namespace Serilog.Expressions.Ast;
+ /// <summary>
+ /// Describes the wildcard in a <see cref="IndexerWildcardExpression"/>.
+ /// </summary>
+-enum IndexerWildcard { Undefined, Any, All }
+\ No newline at end of file
++enum IndexerWildcard
++{
++    Undefined,
++    Any,
++    All
++}
+\ No newline at end of file
+diff --git a/src/Serilog.Expressions/Expressions/Compilation/Linq/EventIdHash.cs b/src/Serilog.Expressions/Expressions/Compilation/Linq/EventIdHash.cs
+index f0ab061..3475684 100644
+--- a/src/Serilog.Expressions/Expressions/Compilation/Linq/EventIdHash.cs
++++ b/src/Serilog.Expressions/Expressions/Compilation/Linq/EventIdHash.cs
+@@ -43,6 +43,7 @@ public static class EventIdHash
+                 hash += hash << 10;
+                 hash ^= hash >> 6;
+             }
++
+             hash += hash << 3;
+             hash ^= hash >> 11;
+             hash += hash << 15;
+diff --git a/src/Serilog.Expressions/Expressions/Compilation/Linq/ExpressionConstantMapper.cs b/src/Serilog.Expressions/Expressions/Compilation/Linq/ExpressionConstantMapper.cs
+index 5bc9b92..82719e7 100644
+--- a/src/Serilog.Expressions/Expressions/Compilation/Linq/ExpressionConstantMapper.cs
++++ b/src/Serilog.Expressions/Expressions/Compilation/Linq/ExpressionConstantMapper.cs
+@@ -30,7 +30,9 @@ class ExpressionConstantMapper : ExpressionVisitor
+     {
+         if (node.Value is ScalarValue { Value: {} sv } &&
+             _mapping.TryGetValue(sv, out var substitute))
++        {
+             return substitute;
++        }
+ 
+         return base.VisitConstant(node);
+     }
+diff --git a/src/Serilog.Expressions/Expressions/Compilation/Linq/Intrinsics.cs b/src/Serilog.Expressions/Expressions/Compilation/Linq/Intrinsics.cs
+index e62a615..eb3ae7a 100644
+--- a/src/Serilog.Expressions/Expressions/Compilation/Linq/Intrinsics.cs
++++ b/src/Serilog.Expressions/Expressions/Compilation/Linq/Intrinsics.cs
+@@ -46,8 +46,10 @@ static class Intrinsics
+         LogEventPropertyValue? content)
+     {
+         if (content is SequenceValue sequence)
++        {
+             foreach (var element in sequence.Elements)
+                 elements.Add(element);
++        }
+ 
+         return elements;
+     }
+@@ -88,8 +90,10 @@ static class Intrinsics
+         if (content is StructureValue structure)
+         {
+             foreach (var property in structure.Properties)
++            {
+                 if (property != null)
+                     properties.Add(property);
++            }
+         }
+ 
+         return properties;
+@@ -115,6 +119,7 @@ static class Intrinsics
+             if (property.Value != Tombstone)
+                 result.Add(property.Name, new LogEventProperty(property.Name, property.Value));
+         }
++
+         return new StructureValue(result.Values.Cast<LogEventProperty>().ToList());
+     }
+ 
+diff --git a/src/Serilog.Expressions/Expressions/Compilation/Linq/LinqExpressionCompiler.cs b/src/Serilog.Expressions/Expressions/Compilation/Linq/LinqExpressionCompiler.cs
+index 43e2b98..71645fb 100644
+--- a/src/Serilog.Expressions/Expressions/Compilation/Linq/LinqExpressionCompiler.cs
++++ b/src/Serilog.Expressions/Expressions/Compilation/Linq/LinqExpressionCompiler.cs
+@@ -24,11 +24,11 @@ using Serilog.Templates.Compilation;
+ using Serilog.Templates.Themes;
+ using ConstantExpression = Serilog.Expressions.Ast.ConstantExpression;
+ using Expression = Serilog.Expressions.Ast.Expression;
+-using ParameterExpression = System.Linq.Expressions.ParameterExpression;
+-using LX = System.Linq.Expressions.Expression;
+ using ExpressionBody = System.Linq.Expressions.Expression;
+-// ReSharper disable UseIndexFromEndExpression
++using LX = System.Linq.Expressions.Expression;
++using ParameterExpression = System.Linq.Expressions.ParameterExpression;
+ 
++// ReSharper disable UseIndexFromEndExpression
+ namespace Serilog.Expressions.Compilation.Linq;
+ 
+ class LinqExpressionCompiler : SerilogExpressionTransformer<ExpressionBody>
+@@ -83,7 +83,8 @@ class LinqExpressionCompiler : SerilogExpressionTransformer<ExpressionBody>
+         _formatProvider = formatProvider;
+     }
+ 
+-    public static Evaluatable Compile(Expression expression, IFormatProvider? formatProvider,
++    public static Evaluatable Compile(Expression expression,
++        IFormatProvider? formatProvider,
+         NameResolver nameResolver)
+     {
+         if (expression == null) throw new ArgumentNullException(nameof(expression));
+@@ -146,18 +147,30 @@ class LinqExpressionCompiler : SerilogExpressionTransformer<ExpressionBody>
+                     : LX.Constant(null, typeof(LogEventPropertyValue)));
+             }
+             else if (pi.ParameterType == typeof(StringComparison))
++            {
+                 boundParameters.Add(LX.Constant(call.IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal));
++            }
+             else if (pi.ParameterType == typeof(IFormatProvider))
++            {
+                 boundParameters.Add(LX.Constant(_formatProvider, typeof(IFormatProvider)));
++            }
+             else if (pi.ParameterType == typeof(LogEvent))
++            {
+                 boundParameters.Add(LX.Property(Context, EvaluationContextLogEventProperty));
++            }
+             else if (_nameResolver.TryBindFunctionParameter(pi, out var binding))
++            {
+                 boundParameters.Add(LX.Constant(binding, pi.ParameterType));
++            }
+             else if (optional)
++            {
+                 boundParameters.Add(LX.Constant(
+                     pi.GetCustomAttribute<DefaultParameterValueAttribute>()?.Value, pi.ParameterType));
++            }
+             else
++            {
+                 throw new ArgumentException($"The method `{m.Name}` implementing function `{call.OperatorName}` has argument `{pi.Name}` which could not be bound.");
++            }
+         }
+ 
+         return LX.Call(m, boundParameters);
+@@ -192,7 +205,8 @@ class LinqExpressionCompiler : SerilogExpressionTransformer<ExpressionBody>
+                 typeof(ScalarValue).GetConstructor([typeof(object)])!,
+                 LX.Convert(apply(
+                     LX.Call(CoerceToScalarBooleanMethod, lhs),
+-                    LX.Call(CoerceToScalarBooleanMethod, rhs)), typeof(object))),
++                    LX.Call(CoerceToScalarBooleanMethod, rhs)),
++                    typeof(object))),
+             typeof(LogEventPropertyValue));
+     }
+ 
+@@ -201,6 +215,7 @@ class LinqExpressionCompiler : SerilogExpressionTransformer<ExpressionBody>
+         var receiver = Transform(spx.Receiver);
+         return LX.Call(TryGetStructurePropertyValueMethod, LX.Constant(StringComparison.Ordinal), receiver, LX.Constant(spx.MemberName, typeof(string)));
+     }
++
+     protected override ExpressionBody Transform(ConstantExpression cx)
+     {
+         return LX.Constant(cx.Constant);
+@@ -303,7 +318,9 @@ class LinqExpressionCompiler : SerilogExpressionTransformer<ExpressionBody>
+         {
+             var element = ax.Elements[i];
+             if (element is ItemElement item)
++            {
+                 collected = LX.Call(ExtendSequenceValueWithItemMethod, collected, Transform(item.Value));
++            }
+             else
+             {
+                 var spread = (SpreadElement) element;
+diff --git a/src/Serilog.Expressions/Expressions/Compilation/Linq/ParameterReplacementVisitor.cs b/src/Serilog.Expressions/Expressions/Compilation/Linq/ParameterReplacementVisitor.cs
+index c4e6f3d..7384cbc 100644
+--- a/src/Serilog.Expressions/Expressions/Compilation/Linq/ParameterReplacementVisitor.cs
++++ b/src/Serilog.Expressions/Expressions/Compilation/Linq/ParameterReplacementVisitor.cs
+@@ -18,7 +18,8 @@ namespace Serilog.Expressions.Compilation.Linq;
+ 
+ class ParameterReplacementVisitor : ExpressionVisitor
+ {
+-    readonly ParameterExpression[] _from, _to;
++    readonly ParameterExpression[] _from;
++    readonly ParameterExpression[] _to;
+ 
+     public static Expression ReplaceParameters(LambdaExpression lambda, params ParameterExpression[] newParameters)
+     {
+@@ -41,6 +42,7 @@ class ParameterReplacementVisitor : ExpressionVisitor
+         {
+             if (node == _from[i]) return _to[i];
+         }
++
+         return node;
+     }
+ }
+\ No newline at end of file
+diff --git a/src/Serilog.Expressions/Expressions/Compilation/Properties/PropertiesObjectAccessorTransformer.cs b/src/Serilog.Expressions/Expressions/Compilation/Properties/PropertiesObjectAccessorTransformer.cs
+index cb5d37d..2583ebb 100644
+--- a/src/Serilog.Expressions/Expressions/Compilation/Properties/PropertiesObjectAccessorTransformer.cs
++++ b/src/Serilog.Expressions/Expressions/Compilation/Properties/PropertiesObjectAccessorTransformer.cs
+@@ -36,7 +36,9 @@ class PropertiesObjectAccessorTransformer : IdentityTransformer
+     {
+         if (!Pattern.IsAmbientProperty(ix.Receiver, BuiltInProperty.Properties, true) ||
+             !Pattern.IsStringConstant(ix.Index, out var name))
++        {
+             return base.Transform(ix);
++        }
+ 
+         return new AmbientNameExpression(name, false);
+     }
+diff --git a/src/Serilog.Expressions/Expressions/Compilation/Text/LikeSyntaxTransformer.cs b/src/Serilog.Expressions/Expressions/Compilation/Text/LikeSyntaxTransformer.cs
+index 4206d88..c3b9740 100644
+--- a/src/Serilog.Expressions/Expressions/Compilation/Text/LikeSyntaxTransformer.cs
++++ b/src/Serilog.Expressions/Expressions/Compilation/Text/LikeSyntaxTransformer.cs
+@@ -38,10 +38,12 @@ class LikeSyntaxTransformer: IdentityTransformer
+             return TryCompileLikeExpression(call.IgnoreCase, call.Operands[0], call.Operands[1]);
+ 
+         if (Operators.SameOperator(call.OperatorName, Operators.IntermediateOpNotLike))
++        {
+             return new CallExpression(
+                 false,
+                 Operators.RuntimeOpStrictNot,
+                 TryCompileLikeExpression(call.IgnoreCase, call.Operands[0], call.Operands[1]));
++        }
+ 
+         return base.Transform(call);
+     }
+@@ -108,7 +110,9 @@ class LikeSyntaxTransformer: IdentityTransformer
+                 }
+             }
+             else
++            {
+                 regex += Regex.Escape(ch.ToString());
++            }
+         }
+ 
+         return begin + regex + end;
+diff --git a/src/Serilog.Expressions/Expressions/Compilation/Text/TextMatchingTransformer.cs b/src/Serilog.Expressions/Expressions/Compilation/Text/TextMatchingTransformer.cs
+index 7392e1b..7117cd3 100644
+--- a/src/Serilog.Expressions/Expressions/Compilation/Text/TextMatchingTransformer.cs
++++ b/src/Serilog.Expressions/Expressions/Compilation/Text/TextMatchingTransformer.cs
+@@ -38,11 +38,13 @@ class TextMatchingTransformer: IdentityTransformer
+             return TryCompileIndexOfMatch(call.IgnoreCase, call.Operands[0], call.Operands[1]);
+ 
+         if (Operators.SameOperator(call.OperatorName, Operators.OpIsMatch))
++        {
+             return new CallExpression(
+                 false,
+                 Operators.RuntimeOpNotEqual,
+                 TryCompileIndexOfMatch(call.IgnoreCase, call.Operands[0], call.Operands[1]),
+                 new ConstantExpression(new ScalarValue(-1)));
++        }
+ 
+         return base.Transform(call);
+     }
+diff --git a/src/Serilog.Expressions/Expressions/Compilation/Variadics/VariadicCallRewriter.cs b/src/Serilog.Expressions/Expressions/Compilation/Variadics/VariadicCallRewriter.cs
+index 46bd03b..9bc3b11 100644
+--- a/src/Serilog.Expressions/Expressions/Compilation/Variadics/VariadicCallRewriter.cs
++++ b/src/Serilog.Expressions/Expressions/Compilation/Variadics/VariadicCallRewriter.cs
+@@ -39,7 +39,9 @@ class VariadicCallRewriter : IdentityTransformer
+             if (call.Operands.Length > 2)
+             {
+                 var first = Transform(call.Operands.First());
+-                return new CallExpression(call.IgnoreCase, call.OperatorName, first,
++                return new CallExpression(call.IgnoreCase,
++                    call.OperatorName,
++                    first,
+                     Transform(new CallExpression(call.IgnoreCase, call.OperatorName, call.Operands.Skip(1).ToArray())));
+             }
+         }
+diff --git a/src/Serilog.Expressions/Expressions/Helpers.cs b/src/Serilog.Expressions/Expressions/Helpers.cs
+index 93dfde1..0546af1 100644
+--- a/src/Serilog.Expressions/Expressions/Helpers.cs
++++ b/src/Serilog.Expressions/Expressions/Helpers.cs
+@@ -31,7 +31,7 @@ namespace Serilog.Expressions
+         /// https://github.com/dotnet/runtime/issues/22198
+         /// https://stackoverflow.com/questions/444798/case-insensitive-containsstring/444818#444818
+         /// </summary>
+-        /// <param name="this">input string</param>
++        /// <param name="this">input string.</param>
+         /// <param name="value">The string to seek.</param>
+         /// <param name="comparisonType">Specifies the rule to use in the comparison.</param>
+         /// <returns></returns>
+diff --git a/src/Serilog.Expressions/Expressions/LoggingFilterSwitch.cs b/src/Serilog.Expressions/Expressions/LoggingFilterSwitch.cs
+index 3fa0f7b..817c857 100644
+--- a/src/Serilog.Expressions/Expressions/LoggingFilterSwitch.cs
++++ b/src/Serilog.Expressions/Expressions/LoggingFilterSwitch.cs
+@@ -56,6 +56,7 @@ public class LoggingFilterSwitch : ILogEventFilter
+             var filter = _filter;
+             return filter?.Item1;
+         }
++
+         set
+         {
+             if (value == null)
+diff --git a/src/Serilog.Expressions/Expressions/NameResolver.cs b/src/Serilog.Expressions/Expressions/NameResolver.cs
+index b087496..a24ec49 100644
+--- a/src/Serilog.Expressions/Expressions/NameResolver.cs
++++ b/src/Serilog.Expressions/Expressions/NameResolver.cs
+@@ -56,12 +56,12 @@ public abstract class NameResolver
+     /// <summary>
+     /// Map an unrecognized built-in property name to a recognised one.
+     /// </summary>
+-    /// <remarks>Intended predominantly to support migration from <em>Serilog.Filters.Expressions</em>.</remarks>
+     /// <param name="alias">The unrecognized name, for example, <code>"Message"</code>; the <code>@</code> prefix is
+     /// not included.</param>
+     /// <param name="target">If the name could be resolved, the target property name, without any prefix; for
+     /// example, <code>"m"</code>.</param>
+     /// <returns>True if the alias was mapped to a built-in property; otherwise, false.</returns>
++    /// <remarks>Intended predominantly to support migration from <em>Serilog.Filters.Expressions</em>.</remarks>
+     public virtual bool TryResolveBuiltInPropertyName(string alias, [NotNullWhen(true)] out string? target)
+     {
+         target = null;
+diff --git a/src/Serilog.Expressions/Expressions/Parsing/ExpressionParser.cs b/src/Serilog.Expressions/Expressions/Parsing/ExpressionParser.cs
+index dcbe4d5..34a0573 100644
+--- a/src/Serilog.Expressions/Expressions/Parsing/ExpressionParser.cs
++++ b/src/Serilog.Expressions/Expressions/Parsing/ExpressionParser.cs
+@@ -30,7 +30,8 @@ class ExpressionParser
+     }
+ 
+     public bool TryParse(string filterExpression,
+-        [MaybeNullWhen(false)] out Expression root, [MaybeNullWhen(true)] out string error)
++        [MaybeNullWhen(false)] out Expression root,
++        [MaybeNullWhen(true)] out string error)
+     {
+         if (filterExpression == null) throw new ArgumentNullException(nameof(filterExpression));
+ 
+diff --git a/src/Serilog.Expressions/Expressions/Parsing/ExpressionTextParsers.cs b/src/Serilog.Expressions/Expressions/Parsing/ExpressionTextParsers.cs
+index 4968909..a815335 100644
+--- a/src/Serilog.Expressions/Expressions/Parsing/ExpressionTextParsers.cs
++++ b/src/Serilog.Expressions/Expressions/Parsing/ExpressionTextParsers.cs
+@@ -29,7 +29,7 @@ static class ExpressionTextParsers
+ 
+     public static readonly TextParser<string> HexInteger =
+         Span.EqualTo("0x")
+-            .IgnoreThen(Character.Digit.Or(Character.Matching(ch => ch is >= 'a' and <= 'f' or >= 'A' and <= 'F', "a-f"))
++            .IgnoreThen(Character.Digit.Or(Character.Matching(ch => ch is (>= 'a' and <= 'f') or (>= 'A' and <= 'F'), "a-f"))
+                 .Named("hex digit")
+                 .AtLeastOnce())
+             .Select(chars => new string(chars));
+diff --git a/src/Serilog.Expressions/Expressions/Parsing/ExpressionTokenizer.cs b/src/Serilog.Expressions/Expressions/Parsing/ExpressionTokenizer.cs
+index 2ac71dd..88f79eb 100644
+--- a/src/Serilog.Expressions/Expressions/Parsing/ExpressionTokenizer.cs
++++ b/src/Serilog.Expressions/Expressions/Parsing/ExpressionTokenizer.cs
+@@ -187,7 +187,7 @@ class ExpressionTokenizer : Tokenizer<ExpressionToken>
+     {
+         return !next.HasValue ||
+                char.IsWhiteSpace(next.Value) ||
+-               next.Value < _singleCharOps.Length && _singleCharOps[next.Value] != ExpressionToken.None;
++               (next.Value < _singleCharOps.Length && _singleCharOps[next.Value] != ExpressionToken.None);
+     }
+ 
+     bool TryGetKeyword(TextSpan span, out ExpressionToken keyword)
+diff --git a/src/Serilog.Expressions/Expressions/Runtime/RuntimeOperators.cs b/src/Serilog.Expressions/Expressions/Runtime/RuntimeOperators.cs
+index 6a9347a..f9be781 100644
+--- a/src/Serilog.Expressions/Expressions/Runtime/RuntimeOperators.cs
++++ b/src/Serilog.Expressions/Expressions/Runtime/RuntimeOperators.cs
+@@ -25,8 +25,8 @@ namespace Serilog.Expressions.Runtime;
+ 
+ static class RuntimeOperators
+ {
+-    static readonly LogEventPropertyValue ConstantTrue = new ScalarValue(true),
+-        ConstantFalse = new ScalarValue(false);
++    static readonly LogEventPropertyValue ConstantTrue = new ScalarValue(true);
++    static readonly LogEventPropertyValue ConstantFalse = new ScalarValue(false);
+ 
+     internal static LogEventPropertyValue ScalarBoolean(bool value)
+     {
+@@ -42,7 +42,9 @@ static class RuntimeOperators
+     {
+         if (Coerce.Numeric(left, out var l) &&
+             Coerce.Numeric(right, out var r))
++        {
+             return new ScalarValue(l + r);
++        }
+ 
+         return default;
+     }
+@@ -51,7 +53,9 @@ static class RuntimeOperators
+     {
+         if (Coerce.Numeric(left, out var l) &&
+             Coerce.Numeric(right, out var r))
++        {
+             return new ScalarValue(l - r);
++        }
+ 
+         return default;
+     }
+@@ -60,7 +64,9 @@ static class RuntimeOperators
+     {
+         if (Coerce.Numeric(left, out var l) &&
+             Coerce.Numeric(right, out var r))
++        {
+             return new ScalarValue(l * r);
++        }
+ 
+         return default;
+     }
+@@ -70,7 +76,9 @@ static class RuntimeOperators
+         if (Coerce.Numeric(left, out var l) &&
+             Coerce.Numeric(right, out var r) &&
+             r != 0)
++        {
+             return new ScalarValue(l / r);
++        }
+ 
+         return default;
+     }
+@@ -80,7 +88,9 @@ static class RuntimeOperators
+         if (Coerce.Numeric(left, out var l) &&
+             Coerce.Numeric(right, out var r) &&
+             r != 0)
++        {
+             return new ScalarValue(l % r);
++        }
+ 
+         return default;
+     }
+@@ -89,7 +99,9 @@ static class RuntimeOperators
+     {
+         if (Coerce.Numeric(left, out var l) &&
+             Coerce.Numeric(right, out var r))
++        {
+             return new ScalarValue(Math.Pow((double)l, (double)r));
++        }
+ 
+         return default;
+     }
+@@ -110,7 +122,9 @@ static class RuntimeOperators
+     {
+         if (Coerce.Numeric(left, out var l) &&
+             Coerce.Numeric(right, out var r))
++        {
+             return ScalarBoolean(l <= r);
++        }
+ 
+         return default;
+     }
+@@ -119,7 +133,9 @@ static class RuntimeOperators
+     {
+         if (Coerce.Numeric(left, out var l) &&
+             Coerce.Numeric(right, out var r))
++        {
+             return ScalarBoolean(l < r);
++        }
+ 
+         return default;
+     }
+@@ -128,7 +144,9 @@ static class RuntimeOperators
+     {
+         if (Coerce.Numeric(left, out var l) &&
+             Coerce.Numeric(right, out var r))
++        {
+             return ScalarBoolean(l > r);
++        }
+ 
+         return default;
+     }
+@@ -137,7 +155,9 @@ static class RuntimeOperators
+     {
+         if (Coerce.Numeric(left, out var l) &&
+             Coerce.Numeric(right, out var r))
++        {
+             return ScalarBoolean(l >= r);
++        }
+ 
+         return default;
+     }
+@@ -159,15 +179,21 @@ static class RuntimeOperators
+ 
+         if (Coerce.Numeric(left, out var l) &&
+             Coerce.Numeric(right, out var r))
++        {
+             return l == r;
++        }
+ 
+         if (Coerce.String(left, out var ls) &&
+             Coerce.String(right, out var rs))
++        {
+             return ls.Equals(rs, sc);
++        }
+ 
+         if (left is ScalarValue sl &&
+             right is ScalarValue sr)
++        {
+             return sl.Value?.Equals(sr.Value) ?? sr.Value == null;
++        }
+ 
+         if (left is SequenceValue ql &&
+             right is SequenceValue qr)
+@@ -207,6 +233,7 @@ static class RuntimeOperators
+             for (var i = 0; i < arr.Elements.Count; ++i)
+             {
+                 var element = arr.Elements[i];
++
+                 // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+                 if (element != null && UnboxedEqualHelper(sc, element, item))
+                     return ConstantTrue;
+@@ -252,7 +279,7 @@ static class RuntimeOperators
+ 
+     public static LogEventPropertyValue? _Internal_Not(LogEventPropertyValue? value)
+     {
+-        if (value is null)
++        if (value == null)
+             return ConstantTrue;
+ 
+         return Coerce.Boolean(value, out var b) ?
+@@ -271,7 +298,9 @@ static class RuntimeOperators
+     {
+         if (!Coerce.String(haystack, out var ctx) ||
+             !Coerce.String(needle, out var ptx))
++        {
+             return null;
++        }
+ 
+         return ScalarBoolean(ctx.Contains(ptx, sc));
+     }
+@@ -280,7 +309,9 @@ static class RuntimeOperators
+     {
+         if (!Coerce.String(haystack, out var ctx) ||
+             !Coerce.String(needle, out var ptx))
++        {
+             return null;
++        }
+ 
+         return new ScalarValue(ctx.IndexOf(ptx, sc));
+     }
+@@ -289,7 +320,9 @@ static class RuntimeOperators
+     {
+         if (!Coerce.String(haystack, out var ctx) ||
+             !Coerce.String(needle, out var ptx))
++        {
+             return null;
++        }
+ 
+         return new ScalarValue(ctx.LastIndexOf(ptx, sc));
+     }
+@@ -309,7 +342,9 @@ static class RuntimeOperators
+     {
+         if (!Coerce.String(haystack, out var ctx) ||
+             !Coerce.String(needle, out var ptx))
++        {
+             return null;
++        }
+ 
+         return ScalarBoolean(ctx.StartsWith(ptx, sc));
+     }
+@@ -318,7 +353,9 @@ static class RuntimeOperators
+     {
+         if (!Coerce.String(haystack, out var ctx) ||
+             !Coerce.String(needle, out var ptx))
++        {
+             return null;
++        }
+ 
+         return ScalarBoolean(ctx.EndsWith(ptx, sc));
+     }
+@@ -456,7 +493,9 @@ static class RuntimeOperators
+     {
+         if (!Coerce.String(value, out var str) ||
+             !Coerce.Numeric(startIndex, out var si))
++        {
+             return null;
++        }
+ 
+         if (si < 0 || si >= str.Length || (int)si != si)
+             return null;
+diff --git a/src/Serilog.Expressions/ParserConstruction/Combinators.cs b/src/Serilog.Expressions/ParserConstruction/Combinators.cs
+index 6126915..d4d0e9a 100644
+--- a/src/Serilog.Expressions/ParserConstruction/Combinators.cs
++++ b/src/Serilog.Expressions/ParserConstruction/Combinators.cs
+@@ -29,11 +29,11 @@ static class Combinators
+     /// Apply the text parser <paramref name="valueParser"/> to the span represented by the parsed token.
+     /// </summary>
+     /// <typeparam name="TKind">The kind of the tokens being parsed.</typeparam>
+-    /// <typeparam name="U">The type of the resulting value.</typeparam>
++    /// <typeparam name="TU">The type of the resulting value.</typeparam>
+     /// <param name="parser">The parser.</param>
+     /// <param name="valueParser">A text parser to apply.</param>
+     /// <returns>A parser that returns the result of parsing the token value.</returns>
+-    public static TokenListParser<TKind, U> Apply<TKind, U>(this TokenListParser<TKind, Token<TKind>> parser, TextParser<U> valueParser)
++    public static TokenListParser<TKind, TU> Apply<TKind, TU>(this TokenListParser<TKind, Token<TKind>> parser, TextParser<TU> valueParser)
+     {
+         if (parser == null) throw new ArgumentNullException(nameof(parser));
+         if (valueParser == null) throw new ArgumentNullException(nameof(valueParser));
+@@ -43,7 +43,7 @@ static class Combinators
+         {
+             var rt = parser(input);
+             if (!rt.HasValue)
+-                return TokenListParserResult.CastEmpty<TKind, Token<TKind>, U>(rt);
++                return TokenListParserResult.CastEmpty<TKind, Token<TKind>, TU>(rt);
+ 
+             var uResult = valueParserAtEnd(rt.Value.Span);
+             if (uResult.HasValue)
+@@ -120,11 +120,11 @@ static class Combinators
+     /// </summary>
+     /// <typeparam name="TKind">The kind of the tokens being parsed.</typeparam>
+     /// <typeparam name="T">The type of value being parsed.</typeparam>
+-    /// <typeparam name="U">The type of the resulting value.</typeparam>
++    /// <typeparam name="TU">The type of the resulting value.</typeparam>
+     /// <param name="parser">The parser.</param>
+     /// <param name="delimiter">The parser that matches the delimiters.</param>
+     /// <returns>The resulting parser.</returns>
+-    public static TokenListParser<TKind, T[]> AtLeastOnceDelimitedBy<TKind, T, U>(this TokenListParser<TKind, T> parser, TokenListParser<TKind, U> delimiter)
++    public static TokenListParser<TKind, T[]> AtLeastOnceDelimitedBy<TKind, T, TU>(this TokenListParser<TKind, T> parser, TokenListParser<TKind, TU> delimiter)
+     {
+         if (parser == null) throw new ArgumentNullException(nameof(parser));
+         if (delimiter == null) throw new ArgumentNullException(nameof(delimiter));
+@@ -137,11 +137,11 @@ static class Combinators
+     /// </summary>
+     /// <typeparam name="TKind">The kind of the tokens being parsed.</typeparam>
+     /// <typeparam name="T">The type of value being parsed.</typeparam>
+-    /// <typeparam name="U">The type of the resulting value.</typeparam>
++    /// <typeparam name="TU">The type of the resulting value.</typeparam>
+     /// <param name="first">The first parser.</param>
+     /// <param name="second">The second parser.</param>
+     /// <returns>The resulting parser.</returns>
+-    public static TokenListParser<TKind, U> IgnoreThen<TKind, T, U>(this TokenListParser<TKind, T> first, TokenListParser<TKind, U> second)
++    public static TokenListParser<TKind, TU> IgnoreThen<TKind, T, TU>(this TokenListParser<TKind, T> first, TokenListParser<TKind, TU> second)
+     {
+         if (first == null) throw new ArgumentNullException(nameof(first));
+         if (second == null) throw new ArgumentNullException(nameof(second));
+@@ -150,7 +150,7 @@ static class Combinators
+         {
+             var rt = first(input);
+             if (!rt.HasValue)
+-                return TokenListParserResult.CastEmpty<TKind, T, U>(rt);
++                return TokenListParserResult.CastEmpty<TKind, T, TU>(rt);
+ 
+             var ru = second(rt.Remainder);
+             if (!ru.HasValue)
+@@ -164,11 +164,11 @@ static class Combinators
+     /// Construct a parser that matches <paramref name="first"/>, discards the resulting value, then returns the result of <paramref name="second"/>.
+     /// </summary>
+     /// <typeparam name="T">The type of value being parsed.</typeparam>
+-    /// <typeparam name="U">The type of the resulting value.</typeparam>
++    /// <typeparam name="TU">The type of the resulting value.</typeparam>
+     /// <param name="first">The first parser.</param>
+     /// <param name="second">The second parser.</param>
+     /// <returns>The resulting parser.</returns>
+-    public static TextParser<U> IgnoreThen<T, U>(this TextParser<T> first, TextParser<U> second)
++    public static TextParser<TU> IgnoreThen<T, TU>(this TextParser<T> first, TextParser<TU> second)
+     {
+         if (first == null) throw new ArgumentNullException(nameof(first));
+         if (second == null) throw new ArgumentNullException(nameof(second));
+@@ -177,7 +177,7 @@ static class Combinators
+         {
+             var rt = first(input);
+             if (!rt.HasValue)
+-                return Result.CastEmpty<T, U>(rt);
++                return Result.CastEmpty<T, TU>(rt);
+ 
+             var ru = second(rt.Remainder);
+             if (!ru.HasValue)
+@@ -260,16 +260,16 @@ static class Combinators
+     /// </summary>
+     /// <typeparam name="TKind">The kind of the tokens being parsed.</typeparam>
+     /// <typeparam name="T">The type of value being parsed.</typeparam>
+-    /// <typeparam name="U">The type of the resulting value.</typeparam>
++    /// <typeparam name="TU">The type of the resulting value.</typeparam>
+     /// <param name="parser">The parser.</param>
+     /// <param name="delimiter">The parser that matches the delimiters.</param>
+     /// <param name="end">A parser to match a final trailing delimiter, if required. Specifying
+     /// this can improve error reporting for some lists.</param>
+     /// <returns>The resulting parser.</returns>
+-    public static TokenListParser<TKind, T[]> ManyDelimitedBy<TKind, T, U>(
++    public static TokenListParser<TKind, T[]> ManyDelimitedBy<TKind, T, TU>(
+         this TokenListParser<TKind, T> parser,
+-        TokenListParser<TKind, U> delimiter,
+-        TokenListParser<TKind, U>? end = null)
++        TokenListParser<TKind, TU> delimiter,
++        TokenListParser<TKind, TU>? end = null)
+     {
+         if (parser == null) throw new ArgumentNullException(nameof(parser));
+         if (delimiter == null) throw new ArgumentNullException(nameof(delimiter));
+@@ -277,10 +277,12 @@ static class Combinators
+         // ReSharper disable once ConvertClosureToMethodGroup
+ 
+         if (end != null)
++        {
+             return parser
+                 .AtLeastOnceDelimitedBy(delimiter)
+                 .Then(p => end.Value(p))
+                 .Or(end.Value(Array.Empty<T>()));
++        }
+ 
+         return parser
+             .Then(first => delimiter.IgnoreThen(parser).Many().Select(rest => (T[])[first, ..rest]))
+@@ -339,7 +341,7 @@ static class Combinators
+     /// <typeparam name="TKind">The kind of the tokens being parsed.</typeparam>
+     /// <typeparam name="T">The type of value being parsed.</typeparam>
+     /// <param name="parser">The parser.</param>
+-    /// <param name="defaultValue">The default value</param>
++    /// <param name="defaultValue">The default value.</param>
+     /// <returns>The resulting parser.</returns>
+     public static TokenListParser<TKind, T> OptionalOrDefault<TKind, T>(this TokenListParser<TKind, T> parser, T defaultValue = default!)
+     {
+@@ -380,7 +382,7 @@ static class Combinators
+         return input =>
+         {
+             var first = lhs(input);
+-            if (first.HasValue || !first.Backtrack && first.IsPartial(input))
++            if (first.HasValue || (!first.Backtrack && first.IsPartial(input)))
+                 return first;
+ 
+             var second = rhs(input);
+@@ -407,7 +409,7 @@ static class Combinators
+         return input =>
+         {
+             var first = lhs(input);
+-            if (first.HasValue || !first.Backtrack && first.IsPartial(input))
++            if (first.HasValue || (!first.Backtrack && first.IsPartial(input)))
+                 return first;
+ 
+             var second = rhs(input);
+@@ -423,11 +425,11 @@ static class Combinators
+     /// </summary>
+     /// <typeparam name="TKind">The kind of the tokens being parsed.</typeparam>
+     /// <typeparam name="T">The type of value being parsed.</typeparam>
+-    /// <typeparam name="U">The type of the resulting value.</typeparam>
++    /// <typeparam name="TU">The type of the resulting value.</typeparam>
+     /// <param name="parser">The parser.</param>
+     /// <param name="selector">A mapping from the first result to the second.</param>
+     /// <returns>The resulting parser.</returns>
+-    public static TokenListParser<TKind, U> Select<TKind, T, U>(this TokenListParser<TKind, T> parser, Func<T, U> selector)
++    public static TokenListParser<TKind, TU> Select<TKind, T, TU>(this TokenListParser<TKind, T> parser, Func<T, TU> selector)
+     {
+         if (parser == null) throw new ArgumentNullException(nameof(parser));
+         if (selector == null) throw new ArgumentNullException(nameof(selector));
+@@ -436,7 +438,7 @@ static class Combinators
+         {
+             var rt = parser(input);
+             if (!rt.HasValue)
+-                return TokenListParserResult.CastEmpty<TKind, T, U>(rt);
++                return TokenListParserResult.CastEmpty<TKind, T, TU>(rt);
+ 
+             var u = selector(rt.Value);
+ 
+@@ -448,11 +450,11 @@ static class Combinators
+     /// Construct a parser that takes the result of <paramref name="parser"/> and converts it value using <paramref name="selector"/>.
+     /// </summary>
+     /// <typeparam name="T">The type of value being parsed.</typeparam>
+-    /// <typeparam name="U">The type of the resulting value.</typeparam>
++    /// <typeparam name="TU">The type of the resulting value.</typeparam>
+     /// <param name="parser">The parser.</param>
+     /// <param name="selector">A mapping from the first result to the second.</param>
+     /// <returns>The resulting parser.</returns>
+-    public static TextParser<U> Select<T, U>(this TextParser<T> parser, Func<T, U> selector)
++    public static TextParser<TU> Select<T, TU>(this TextParser<T> parser, Func<T, TU> selector)
+     {
+         if (parser == null) throw new ArgumentNullException(nameof(parser));
+         if (selector == null) throw new ArgumentNullException(nameof(selector));
+@@ -461,7 +463,7 @@ static class Combinators
+         {
+             var rt = parser(input);
+             if (!rt.HasValue)
+-                return Result.CastEmpty<T, U>(rt);
++                return Result.CastEmpty<T, TU>(rt);
+ 
+             var u = selector(rt.Value);
+ 
+@@ -470,19 +472,19 @@ static class Combinators
+     }
+ 
+     /// <summary>
+-    /// Construct a parser that takes the result of <paramref name="parser"/> and casts it to <typeparamref name="U"/>.
++    /// Construct a parser that takes the result of <paramref name="parser"/> and casts it to <typeparamref name="TU"/>.
+     /// </summary>
+     /// <typeparam name="TKind">The kind of the tokens being parsed.</typeparam>
+     /// <typeparam name="T">The type of value being parsed.</typeparam>
+-    /// <typeparam name="U">The type of the resulting value.</typeparam>
++    /// <typeparam name="TU">The type of the resulting value.</typeparam>
+     /// <param name="parser">The parser.</param>
+     /// <returns>The resulting parser.</returns>
+-    public static TokenListParser<TKind, U> Cast<TKind, T, U>(this TokenListParser<TKind, T> parser)
+-        where T: U
++    public static TokenListParser<TKind, TU> Cast<TKind, T, TU>(this TokenListParser<TKind, T> parser)
++        where T: TU
+     {
+         if (parser == null) throw new ArgumentNullException(nameof(parser));
+ 
+-        return parser.Select(rt => (U)rt);
++        return parser.Select(rt => (TU)rt);
+     }
+ 
+     /// <summary>
+@@ -490,16 +492,16 @@ static class Combinators
+     /// </summary>
+     /// <typeparam name="TKind">The kind of the tokens being parsed.</typeparam>
+     /// <typeparam name="T">The type of value being parsed.</typeparam>
+-    /// <typeparam name="U">The type of the resulting value.</typeparam>
+-    /// <typeparam name="V"></typeparam>
++    /// <typeparam name="TU">The type of the resulting value.</typeparam>
++    /// <typeparam name="TV"></typeparam>
+     /// <param name="parser">The parser.</param>
+     /// <param name="selector">A mapping from the first result to the second parser.</param>
+     /// <param name="projector">Function mapping the results of the first two parsers onto the final result.</param>
+     /// <returns>The resulting parser.</returns>
+-    public static TokenListParser<TKind, V> SelectMany<TKind, T, U, V>(
++    public static TokenListParser<TKind, TV> SelectMany<TKind, T, TU, TV>(
+         this TokenListParser<TKind, T> parser,
+-        Func<T, TokenListParser<TKind, U>> selector,
+-        Func<T, U, V> projector)
++        Func<T, TokenListParser<TKind, TU>> selector,
++        Func<T, TU, TV> projector)
+     {
+         if (parser == null) throw new ArgumentNullException(nameof(parser));
+         if (selector == null) throw new ArgumentNullException(nameof(selector));
+@@ -513,11 +515,11 @@ static class Combinators
+     /// </summary>
+     /// <typeparam name="TKind">The kind of the tokens being parsed.</typeparam>
+     /// <typeparam name="T">The type of value being parsed.</typeparam>
+-    /// <typeparam name="U">The type of the resulting value.</typeparam>
++    /// <typeparam name="TU">The type of the resulting value.</typeparam>
+     /// <param name="first">The first parser.</param>
+     /// <param name="second">The second parser.</param>
+     /// <returns>The resulting parser.</returns>
+-    public static TokenListParser<TKind, U> Then<TKind, T, U>(this TokenListParser<TKind, T> first, Func<T, TokenListParser<TKind, U>> second)
++    public static TokenListParser<TKind, TU> Then<TKind, T, TU>(this TokenListParser<TKind, T> first, Func<T, TokenListParser<TKind, TU>> second)
+     {
+         if (first == null) throw new ArgumentNullException(nameof(first));
+         if (second == null) throw new ArgumentNullException(nameof(second));
+@@ -526,7 +528,7 @@ static class Combinators
+         {
+             var rt = first(input);
+             if (!rt.HasValue)
+-                return TokenListParserResult.CastEmpty<TKind, T, U>(rt);
++                return TokenListParserResult.CastEmpty<TKind, T, TU>(rt);
+ 
+             var ru = second(rt.Value)(rt.Remainder);
+             if (!ru.HasValue)
+@@ -540,11 +542,11 @@ static class Combinators
+     /// Construct a parser that applies <paramref name="first"/>, provides the value to <paramref name="second"/> and returns the result.
+     /// </summary>
+     /// <typeparam name="T">The type of value being parsed.</typeparam>
+-    /// <typeparam name="U">The type of the resulting value.</typeparam>
++    /// <typeparam name="TU">The type of the resulting value.</typeparam>
+     /// <param name="first">The first parser.</param>
+     /// <param name="second">The second parser.</param>
+     /// <returns>The resulting parser.</returns>
+-    public static TextParser<U> Then<T, U>(this TextParser<T> first, Func<T, TextParser<U>> second)
++    public static TextParser<TU> Then<T, TU>(this TextParser<T> first, Func<T, TextParser<TU>> second)
+     {
+         if (first == null) throw new ArgumentNullException(nameof(first));
+         if (second == null) throw new ArgumentNullException(nameof(second));
+@@ -553,7 +555,7 @@ static class Combinators
+         {
+             var rt = first(input);
+             if (!rt.HasValue)
+-                return Result.CastEmpty<T, U>(rt);
++                return Result.CastEmpty<T, TU>(rt);
+ 
+             var ru = second(rt.Value)(rt.Remainder);
+             if (!ru.HasValue)
+@@ -613,26 +615,26 @@ static class Combinators
+     /// </summary>
+     /// <typeparam name="TKind">The kind of the tokens being parsed.</typeparam>
+     /// <typeparam name="T">The type of value being parsed.</typeparam>
+-    /// <typeparam name="U">The type of the resulting value.</typeparam>
++    /// <typeparam name="TU">The type of the resulting value.</typeparam>
+     /// <param name="parser">The parser.</param>
+     /// <param name="value">The value to return.</param>
+     /// <returns>The resulting parser.</returns>
+-    public static TokenListParser<TKind, U> Value<TKind, T, U>(this TokenListParser<TKind, T> parser, U value)
++    public static TokenListParser<TKind, TU> Value<TKind, T, TU>(this TokenListParser<TKind, T> parser, TU value)
+     {
+         if (parser == null) throw new ArgumentNullException(nameof(parser));
+ 
+-        return parser.IgnoreThen(Parse.Return<TKind, U>(value));
++        return parser.IgnoreThen(Parse.Return<TKind, TU>(value));
+     }
+ 
+     /// <summary>
+     /// Construct a parser that applies the first, and returns <paramref name="value"/>.
+     /// </summary>
+     /// <typeparam name="T">The type of value being parsed.</typeparam>
+-    /// <typeparam name="U">The type of the resulting value.</typeparam>
++    /// <typeparam name="TU">The type of the resulting value.</typeparam>
+     /// <param name="parser">The parser.</param>
+     /// <param name="value">The value to return.</param>
+     /// <returns>The resulting parser.</returns>
+-    public static TextParser<U> Value<T, U>(this TextParser<T> parser, U value)
++    public static TextParser<TU> Value<T, TU>(this TextParser<T> parser, TU value)
+     {
+         if (parser == null) throw new ArgumentNullException(nameof(parser));
+ 
+diff --git a/src/Serilog.Expressions/ParserConstruction/Display/Presentation.cs b/src/Serilog.Expressions/ParserConstruction/Display/Presentation.cs
+index d550fba..876ea06 100644
+--- a/src/Serilog.Expressions/ParserConstruction/Display/Presentation.cs
++++ b/src/Serilog.Expressions/ParserConstruction/Display/Presentation.cs
+@@ -74,11 +74,12 @@ static class Presentation
+ 
+         return $"{FormatKind(kind!)} {clipped}";
+     }
++
+     public static string FormatLiteral(char literal)
+     {
+         switch (literal)
+         {
+-            //Unicode Category: Space Separators
++            // Unicode Category: Space Separators
+             case '\x00A0': return "U+00A0 no-break space";
+             case '\x1680': return "U+1680 ogham space mark";
+             case '\x2000': return "U+2000 en quad";
+@@ -96,14 +97,14 @@ static class Presentation
+             case '\x205F': return "U+205F medium mathematical space";
+             case '\x3000': return "U+3000 ideographic space";
+ 
+-            //Line Separator
++            // Line Separator
+             case '\x2028': return "U+2028 line separator";
+ 
+-            //Paragraph Separator
++            // Paragraph Separator
+             case '\x2029': return "U+2029 paragraph separator";
+ 
+-            //Unicode C0 Control Codes (ASCII equivalent)
+-            case '\x0000': return "NUL"; //\0
++            // Unicode C0 Control Codes (ASCII equivalent)
++            case '\x0000': return "NUL"; // \0
+             case '\x0001': return "U+0001 start of heading";
+             case '\x0002': return "U+0002 start of text";
+             case '\x0003': return "U+0003 end of text";
+@@ -112,11 +113,11 @@ static class Presentation
+             case '\x0006': return "U+0006 acknowledge";
+             case '\x0007': return "U+0007 bell";
+             case '\x0008': return "U+0008 backspace";
+-            case '\x0009': return "tab"; //\t
+-            case '\x000A': return "line feed"; //\n
++            case '\x0009': return "tab"; // \t
++            case '\x000A': return "line feed"; // \n
+             case '\x000B': return "U+000B vertical tab";
+             case '\x000C': return "U+000C form feed";
+-            case '\x000D': return "carriage return"; //\r
++            case '\x000D': return "carriage return"; // \r
+             case '\x000E': return "U+000E shift in";
+             case '\x000F': return "U+000F shift out";
+             case '\x0010': return "U+0010 data link escape";
+@@ -137,7 +138,6 @@ static class Presentation
+             case '\x001E': return "U+001E record separator";
+             case '\x001F': return "U+001F unit separator";
+             case '\x007F': return "U+007F delete";
+-
+             default: return "`" + literal + "`";
+         }
+     }
+diff --git a/src/Serilog.Expressions/ParserConstruction/Display/TokenAttribute.cs b/src/Serilog.Expressions/ParserConstruction/Display/TokenAttribute.cs
+index 9b5b562..03a4ea5 100644
+--- a/src/Serilog.Expressions/ParserConstruction/Display/TokenAttribute.cs
++++ b/src/Serilog.Expressions/ParserConstruction/Display/TokenAttribute.cs
+@@ -12,8 +12,6 @@
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
+ 
+-
+-
+ // ReSharper disable UnusedAutoPropertyAccessor.Global, ClassNeverInstantiated.Global
+ 
+ namespace Serilog.ParserConstruction.Display;
+diff --git a/src/Serilog.Expressions/ParserConstruction/Model/Result.cs b/src/Serilog.Expressions/ParserConstruction/Model/Result.cs
+index 490fed8..59ced7c 100644
+--- a/src/Serilog.Expressions/ParserConstruction/Model/Result.cs
++++ b/src/Serilog.Expressions/ParserConstruction/Model/Result.cs
+@@ -61,10 +61,10 @@ static class Result
+     /// Convert an empty result of one type into another.
+     /// </summary>
+     /// <typeparam name="T">The source type.</typeparam>
+-    /// <typeparam name="U">The target type.</typeparam>
++    /// <typeparam name="TU">The target type.</typeparam>
+     /// <param name="result">The value to convert.</param>
+-    /// <returns>A result of type <typeparamref name="U"/> carrying the same information as <paramref name="result"/>.</returns>
+-    public static Result<U> CastEmpty<T, U>(Result<T> result)
++    /// <returns>A result of type <typeparamref name="TU"/> carrying the same information as <paramref name="result"/>.</returns>
++    public static Result<TU> CastEmpty<T, TU>(Result<T> result)
+     {
+         return new(result.Remainder, result.ErrorMessage, result.Expectations, result.Backtrack);
+     }
+diff --git a/src/Serilog.Expressions/ParserConstruction/Model/TextSpan.cs b/src/Serilog.Expressions/ParserConstruction/Model/TextSpan.cs
+index 68888d6..9cf1293 100644
+--- a/src/Serilog.Expressions/ParserConstruction/Model/TextSpan.cs
++++ b/src/Serilog.Expressions/ParserConstruction/Model/TextSpan.cs
+@@ -220,6 +220,7 @@ readonly struct TextSpan : IEquatable<TextSpan>
+             if (char.ToUpperInvariant(Source![Position.Absolute + i]) != char.ToUpperInvariant(otherValue[i]))
+                 return false;
+         }
++
+         return true;
+     }
+ }
+\ No newline at end of file
+diff --git a/src/Serilog.Expressions/ParserConstruction/Model/TokenListParserResult.cs b/src/Serilog.Expressions/ParserConstruction/Model/TokenListParserResult.cs
+index 4fedc28..65404b3 100644
+--- a/src/Serilog.Expressions/ParserConstruction/Model/TokenListParserResult.cs
++++ b/src/Serilog.Expressions/ParserConstruction/Model/TokenListParserResult.cs
+@@ -76,10 +76,10 @@ static class TokenListParserResult
+     /// </summary>
+     /// <typeparam name="TKind">The kind of token.</typeparam>
+     /// <typeparam name="T">The source type.</typeparam>
+-    /// <typeparam name="U">The destination type.</typeparam>
++    /// <typeparam name="TU">The destination type.</typeparam>
+     /// <param name="result">The result to convert.</param>
+     /// <returns>The converted result.</returns>
+-    public static TokenListParserResult<TKind,U> CastEmpty<TKind, T, U>(TokenListParserResult<TKind, T> result)
++    public static TokenListParserResult<TKind,TU> CastEmpty<TKind, T, TU>(TokenListParserResult<TKind, T> result)
+     {
+         return new(result.Remainder, result.SubTokenErrorPosition, result.ErrorMessage, result.Expectations, result.Backtrack);
+     }
+@@ -87,8 +87,8 @@ static class TokenListParserResult
+     /// <summary>
+     /// Combine two empty results.
+     /// </summary>
+-    /// <typeparam name="T">The source type.</typeparam>
+     /// <typeparam name="TKind">The kind of token.</typeparam>
++    /// <typeparam name="T">The source type.</typeparam>
+     /// <param name="first">The first value to combine.</param>
+     /// <param name="second">The second value to combine.</param>
+     /// <returns>A result of type <typeparamref name="T"/> carrying information from both results.</returns>
+@@ -99,7 +99,9 @@ static class TokenListParserResult
+ 
+         var expectations = first.Expectations;
+         if (expectations == null)
++        {
+             expectations = second.Expectations;
++        }
+         else if (second.Expectations != null)
+         {
+             expectations = new string[first.Expectations!.Length + second.Expectations.Length];
+diff --git a/src/Serilog.Expressions/ParserConstruction/Model/TokenListParserResult`2.cs b/src/Serilog.Expressions/ParserConstruction/Model/TokenListParserResult`2.cs
+index 03471b3..3b6c267 100644
+--- a/src/Serilog.Expressions/ParserConstruction/Model/TokenListParserResult`2.cs
++++ b/src/Serilog.Expressions/ParserConstruction/Model/TokenListParserResult`2.cs
+@@ -20,8 +20,8 @@ namespace Serilog.ParserConstruction.Model;
+ /// <summary>
+ /// The result of parsing from a token list.
+ /// </summary>
+-/// <typeparam name="T">The type of the value being parsed.</typeparam>
+ /// <typeparam name="TKind">The kind of token being parsed.</typeparam>
++/// <typeparam name="T">The type of the value being parsed.</typeparam>
+ struct TokenListParserResult<TKind, T>
+ {
+     readonly T _value;
+diff --git a/src/Serilog.Expressions/ParserConstruction/Model/TokenList`1.cs b/src/Serilog.Expressions/ParserConstruction/Model/TokenList`1.cs
+index 3ea6868..bd73f16 100644
+--- a/src/Serilog.Expressions/ParserConstruction/Model/TokenList`1.cs
++++ b/src/Serilog.Expressions/ParserConstruction/Model/TokenList`1.cs
+@@ -17,7 +17,7 @@ using System.Collections;
+ namespace Serilog.ParserConstruction.Model;
+ 
+ /// <summary>
+-/// A list of <see cref="Token{TKind}"/>
++/// A list of <see cref="Token{TKind}"/>.
+ /// </summary>
+ /// <typeparam name="TKind">The kind of tokens held in the list.</typeparam>
+ readonly struct TokenList<TKind> : IEquatable<TokenList<TKind>>, IEnumerable<Token<TKind>>
+diff --git a/src/Serilog.Expressions/ParserConstruction/Parse.cs b/src/Serilog.Expressions/ParserConstruction/Parse.cs
+index bf4b196..a57709d 100644
+--- a/src/Serilog.Expressions/ParserConstruction/Parse.cs
++++ b/src/Serilog.Expressions/ParserConstruction/Parse.cs
+@@ -26,9 +26,9 @@ static class Parse
+     /// <summary>
+     /// Parse a sequence of similar operands connected by left-associative operators.
+     /// </summary>
++    /// <typeparam name="TKind">The kind of token being parsed.</typeparam>
+     /// <typeparam name="T">The type being parsed.</typeparam>
+     /// <typeparam name="TOperator">The type of the operator.</typeparam>
+-    /// <typeparam name="TKind">The kind of token being parsed.</typeparam>
+     /// <param name="operator">A parser matching operators.</param>
+     /// <param name="operand">A parser matching operands.</param>
+     /// <param name="apply">A function combining an operator and two operands into the result.</param>
+@@ -47,9 +47,9 @@ static class Parse
+     /// and will succeed if the given parser fails. In any case, it won't
+     /// consume any input. It's like a negative look-ahead in a regular expression.
+     /// </summary>
+-    /// <typeparam name="T">The result type of the given parser.</typeparam>
+     /// <typeparam name="TKind">The kind of token being parsed.</typeparam>
+-    /// <param name="parser">The parser to wrap</param>
++    /// <typeparam name="T">The result type of the given parser.</typeparam>
++    /// <param name="parser">The parser to wrap.</param>
+     /// <returns>A parser that is the negation of the given parser.</returns>
+     public static TokenListParser<TKind, Unit> Not<TKind, T>(TokenListParser<TKind, T> parser)
+     {
+@@ -83,9 +83,9 @@ static class Parse
+     /// <summary>
+     /// Lazily construct a parser, so that circular dependencies are possible.
+     /// </summary>
+-    /// <param name="reference">A function creating the parser, when required.</param>
+-    /// <typeparam name="T">The type of value being parsed.</typeparam>
+     /// <typeparam name="TKind">The kind of token being parsed.</typeparam>
++    /// <typeparam name="T">The type of value being parsed.</typeparam>
++    /// <param name="reference">A function creating the parser, when required.</param>
+     /// <returns>A parser that lazily evaluates <paramref name="reference"/>.</returns>
+     /// <exception cref="ArgumentNullException"><paramref name="reference"/> is null.</exception>
+     public static TokenListParser<TKind, T> Ref<TKind, T>(Func<TokenListParser<TKind, T>> reference)
+@@ -105,8 +105,8 @@ static class Parse
+     /// <summary>
+     /// Construct a parser with a fixed value.
+     /// </summary>
+-    /// <param name="value">The value returned by the parser.</param>
+     /// <typeparam name="T">The type of <paramref name="value"/>.</typeparam>
++    /// <param name="value">The value returned by the parser.</param>
+     /// <returns>The parser.</returns>
+     public static TextParser<T> Return<T>(T value)
+     {
+@@ -116,9 +116,9 @@ static class Parse
+     /// <summary>
+     /// Construct a parser with a fixed value.
+     /// </summary>
+-    /// <param name="value">The value returned by the parser.</param>
+-    /// <typeparam name="T">The type of <paramref name="value"/>.</typeparam>
+     /// <typeparam name="TKind">The kind of token being parsed.</typeparam>
++    /// <typeparam name="T">The type of <paramref name="value"/>.</typeparam>
++    /// <param name="value">The value returned by the parser.</param>
+     /// <returns>The parser.</returns>
+     public static TokenListParser<TKind, T> Return<TKind, T>(T value)
+     {
+diff --git a/src/Serilog.Expressions/ParserConstruction/ParserExtensions.cs b/src/Serilog.Expressions/ParserConstruction/ParserExtensions.cs
+index e1ec977..1e25c38 100644
+--- a/src/Serilog.Expressions/ParserConstruction/ParserExtensions.cs
++++ b/src/Serilog.Expressions/ParserConstruction/ParserExtensions.cs
+@@ -28,7 +28,7 @@ static class ParserExtensions
+     /// <typeparam name="T">The type of the result.</typeparam>
+     /// <param name="parser">The parser.</param>
+     /// <param name="input">The input.</param>
+-    /// <returns>The result of the parser</returns>
++    /// <returns>The result of the parser.</returns>
+     /// <exception cref="ArgumentNullException">The parser or input is null.</exception>
+     public static TokenListParserResult<TKind, T> TryParse<TKind, T>(this TokenListParser<TKind, T> parser, TokenList<TKind> input)
+     {
+diff --git a/src/Serilog.Expressions/ParserConstruction/Parsers/Character.cs b/src/Serilog.Expressions/ParserConstruction/Parsers/Character.cs
+index 06b5aee..6528764 100644
+--- a/src/Serilog.Expressions/ParserConstruction/Parsers/Character.cs
++++ b/src/Serilog.Expressions/ParserConstruction/Parsers/Character.cs
+@@ -77,6 +77,7 @@ static class Character
+     {
+         return Except(parsed => parsed == ch, Presentation.FormatLiteral(ch));
+     }
++
+     /// <summary>
+     /// Parse a digit.
+     /// </summary>
+diff --git a/src/Serilog.Expressions/ParserConstruction/Parsers/Numerics.cs b/src/Serilog.Expressions/ParserConstruction/Parsers/Numerics.cs
+index 7dd6ef9..a1a53a5 100644
+--- a/src/Serilog.Expressions/ParserConstruction/Parsers/Numerics.cs
++++ b/src/Serilog.Expressions/ParserConstruction/Parsers/Numerics.cs
+@@ -20,8 +20,8 @@ namespace Serilog.ParserConstruction.Parsers;
+ /// <summary>
+ /// Parsers for numeric patterns.
+ /// </summary>
+-//* Fairly large amount of duplication/repetition here, due to the lack
+-//* of generics over numbers in C#.
++// * Fairly large amount of duplication/repetition here, due to the lack
++// * of generics over numbers in C#.
+ static class Numerics
+ {
+     static readonly string[] ExpectedDigit = ["digit"];
+@@ -38,10 +38,10 @@ static class Numerics
+             return Result.Empty<uint>(input, ExpectedDigit);
+ 
+         TextSpan remainder;
+-        var val = 0u;
++        var val = 0U;
+         do
+         {
+-            val = 10 * val + (uint)(next.Value - '0');
++            val = (10 * val) + (uint)(next.Value - '0');
+             remainder = next.Remainder;
+             next = remainder.ConsumeChar();
+         } while (next.HasValue && CharInfo.IsLatinDigit(next.Value));
+diff --git a/src/Serilog.Expressions/ParserConstruction/Parsers/Span.cs b/src/Serilog.Expressions/ParserConstruction/Parsers/Span.cs
+index 3c05892..84342c6 100644
+--- a/src/Serilog.Expressions/ParserConstruction/Parsers/Span.cs
++++ b/src/Serilog.Expressions/ParserConstruction/Parsers/Span.cs
+@@ -35,6 +35,7 @@ static class Span
+         return input =>
+         {
+             var remainder = input;
++
+             // ReSharper disable once ForCanBeConvertedToForeach
+             for (var i = 0; i < text.Length; ++i)
+             {
+@@ -46,8 +47,10 @@ static class Span
+ 
+                     return Result.Empty<TextSpan>(ch.Location, [Presentation.FormatLiteral(text[i])]);
+                 }
++
+                 remainder = ch.Remainder;
+             }
++
+             return Result.Value(input.Until(remainder), input, remainder);
+         };
+     }
+diff --git a/src/Serilog.Expressions/ParserConstruction/Parsers/Token.cs b/src/Serilog.Expressions/ParserConstruction/Parsers/Token.cs
+index bf76640..43f827e 100644
+--- a/src/Serilog.Expressions/ParserConstruction/Parsers/Token.cs
++++ b/src/Serilog.Expressions/ParserConstruction/Parsers/Token.cs
+@@ -60,6 +60,7 @@ static class Token
+             var index = i;
+             result = result.Then(arr => token.Select(t => { arr[index] = t; return arr; }));
+         }
++
+         return result;
+     }
+ }
+\ No newline at end of file
+diff --git a/src/Serilog.Expressions/ParserConstruction/TokenListParser`2.cs b/src/Serilog.Expressions/ParserConstruction/TokenListParser`2.cs
+index ae7493f..22b7f08 100644
+--- a/src/Serilog.Expressions/ParserConstruction/TokenListParser`2.cs
++++ b/src/Serilog.Expressions/ParserConstruction/TokenListParser`2.cs
+@@ -19,8 +19,8 @@ namespace Serilog.ParserConstruction;
+ /// <summary>
+ /// A parser that consumes elements from a list of tokens.
+ /// </summary>
+-/// <typeparam name="T">The type of values produced by the parser.</typeparam>
+ /// <typeparam name="TKind">The type of tokens being parsed.</typeparam>
++/// <typeparam name="T">The type of values produced by the parser.</typeparam>
+ /// <param name="input">The list of tokens to parse.</param>
+ /// <returns>A result with a parsed value, or an empty result indicating error.</returns>
+ delegate TokenListParserResult<TKind, T> TokenListParser<TKind, T>(TokenList<TKind> input);
+\ No newline at end of file
+diff --git a/src/Serilog.Expressions/ParserConstruction/Tokenizer`1.cs b/src/Serilog.Expressions/ParserConstruction/Tokenizer`1.cs
+index d41f187..eef399a 100644
+--- a/src/Serilog.Expressions/ParserConstruction/Tokenizer`1.cs
++++ b/src/Serilog.Expressions/ParserConstruction/Tokenizer`1.cs
+@@ -88,6 +88,7 @@ abstract class Tokenizer<TKind>
+         {
+             next = next.Remainder.ConsumeChar();
+         }
++
+         return next;
+     }
+ }
+\ No newline at end of file
+diff --git a/src/Serilog.Expressions/Templates/Compilation/CompiledExceptionToken.cs b/src/Serilog.Expressions/Templates/Compilation/CompiledExceptionToken.cs
+index b20687c..8041033 100644
+--- a/src/Serilog.Expressions/Templates/Compilation/CompiledExceptionToken.cs
++++ b/src/Serilog.Expressions/Templates/Compilation/CompiledExceptionToken.cs
+@@ -21,7 +21,8 @@ class CompiledExceptionToken : CompiledTemplate
+ {
+     const string StackFrameLinePrefix = "   ";
+ 
+-    readonly Style _text, _secondaryText;
++    readonly Style _text;
++    readonly Style _secondaryText;
+ 
+     public CompiledExceptionToken(TemplateTheme theme)
+     {
+@@ -33,7 +34,7 @@ class CompiledExceptionToken : CompiledTemplate
+     {
+         // Padding and alignment are not applied by this renderer.
+ 
+-        if (ctx.LogEvent.Exception is null)
++        if (ctx.LogEvent.Exception == null)
+             return;
+ 
+         StringReader lines;
+diff --git a/src/Serilog.Expressions/Templates/Compilation/CompiledFormattedExpression.cs b/src/Serilog.Expressions/Templates/Compilation/CompiledFormattedExpression.cs
+index 65a7a8e..99b9f3d 100644
+--- a/src/Serilog.Expressions/Templates/Compilation/CompiledFormattedExpression.cs
++++ b/src/Serilog.Expressions/Templates/Compilation/CompiledFormattedExpression.cs
+@@ -63,7 +63,7 @@ class CompiledFormattedExpression : CompiledTemplate
+ 
+         if (value is ScalarValue scalar)
+         {
+-            if (scalar.Value is null)
++            if (scalar.Value == null)
+                 return; // Null is empty
+ 
+             using var style = _secondaryText.Set(output, ref invisibleCharacterCount);
+diff --git a/src/Serilog.Expressions/Templates/Compilation/CompiledMessageToken.cs b/src/Serilog.Expressions/Templates/Compilation/CompiledMessageToken.cs
+index 40c394f..9569e13 100644
+--- a/src/Serilog.Expressions/Templates/Compilation/CompiledMessageToken.cs
++++ b/src/Serilog.Expressions/Templates/Compilation/CompiledMessageToken.cs
+@@ -24,7 +24,13 @@ class CompiledMessageToken : CompiledTemplate
+ {
+     readonly IFormatProvider? _formatProvider;
+     readonly Alignment? _alignment;
+-    readonly Style _text, _invalid, _null, _bool, _string, _num, _scalar;
++    readonly Style _text;
++    readonly Style _invalid;
++    readonly Style _null;
++    readonly Style _bool;
++    readonly Style _string;
++    readonly Style _num;
++    readonly Style _scalar;
+     readonly ThemedJsonValueFormatter _jsonFormatter;
+ 
+     public CompiledMessageToken(IFormatProvider? formatProvider, Alignment? alignment, TemplateTheme theme)
+@@ -92,7 +98,7 @@ class CompiledMessageToken : CompiledTemplate
+             return;
+         }
+ 
+-        if (pt.Alignment is null)
++        if (pt.Alignment == null)
+         {
+             EvaluatePropertyUnaligned(value, output, pt.Format, ref invisibleCharacterCount);
+             return;
+diff --git a/src/Serilog.Expressions/Templates/Compilation/CompiledTimestampToken.cs b/src/Serilog.Expressions/Templates/Compilation/CompiledTimestampToken.cs
+index c43e78e..ae9b578 100644
+--- a/src/Serilog.Expressions/Templates/Compilation/CompiledTimestampToken.cs
++++ b/src/Serilog.Expressions/Templates/Compilation/CompiledTimestampToken.cs
+@@ -65,6 +65,5 @@ class CompiledTimestampToken : CompiledTemplate
+         }
+ #endif
+         output.Write(value.ToString(_format, formatProvider));
+-        
+     }
+ }
+\ No newline at end of file
+diff --git a/src/Serilog.Expressions/Templates/Compilation/TemplateCompiler.cs b/src/Serilog.Expressions/Templates/Compilation/TemplateCompiler.cs
+index f755be1..63f7faa 100644
+--- a/src/Serilog.Expressions/Templates/Compilation/TemplateCompiler.cs
++++ b/src/Serilog.Expressions/Templates/Compilation/TemplateCompiler.cs
+@@ -24,7 +24,8 @@ namespace Serilog.Templates.Compilation;
+ static class TemplateCompiler
+ {
+     public static CompiledTemplate Compile(Template template,
+-        IFormatProvider? formatProvider, NameResolver nameResolver,
++        IFormatProvider? formatProvider,
++        NameResolver nameResolver,
+         TemplateTheme theme,
+         EncodedTemplateFactory encoder)
+     {
+diff --git a/src/Serilog.Expressions/Templates/ExpressionTemplate.cs b/src/Serilog.Expressions/Templates/ExpressionTemplate.cs
+index e817ed3..d90ced1 100644
+--- a/src/Serilog.Expressions/Templates/ExpressionTemplate.cs
++++ b/src/Serilog.Expressions/Templates/ExpressionTemplate.cs
+@@ -53,14 +53,14 @@ public class ExpressionTemplate : ITextFormatter
+     /// <param name="template">The template text.</param>
+     /// <param name="formatProvider">Optionally, an <see cref="IFormatProvider"/> to use when formatting
+     /// embedded values.</param>
+-    /// <param name="theme">Optionally, an ANSI theme to apply to the template output.</param>
+-    /// <param name="result">The parsed template, if successful.</param>
+-    /// <param name="error">A description of the error, if unsuccessful.</param>
+     /// <param name="nameResolver">Optionally, a <see cref="NameResolver"/>
+     /// with which to resolve function names that appear in the template.</param>
++    /// <param name="theme">Optionally, an ANSI theme to apply to the template output.</param>
+     /// <param name="applyThemeWhenOutputIsRedirected">Apply <paramref name="theme"/> even when
+     /// <see cref="System.Console.IsOutputRedirected"/> or <see cref="Console.IsErrorRedirected"/> returns <c>true</c>.</param>
+     /// <param name="encoder">Optionally, an encoder to apply to output substituted into template holes.</param>
++    /// <param name="result">The parsed template, if successful.</param>
++    /// <param name="error">A description of the error, if unsuccessful.</param>
+     /// <returns><c langword="true">true</c> if the template was well-formed.</returns>
+     public static bool TryParse(
+         string template,
+@@ -138,7 +138,7 @@ public class ExpressionTemplate : ITextFormatter
+     static TemplateTheme SelectTheme(TemplateTheme? supplied, bool applyThemeWhenOutputIsRedirected)
+     {
+         if (supplied == null ||
+-            (Console.IsOutputRedirected || Console.IsErrorRedirected) && !applyThemeWhenOutputIsRedirected)
++            ((Console.IsOutputRedirected || Console.IsErrorRedirected) && !applyThemeWhenOutputIsRedirected))
+         {
+             return TemplateTheme.None;
+         }
+diff --git a/src/Serilog.Expressions/Templates/Parsing/TemplateTokenParsers.cs b/src/Serilog.Expressions/Templates/Parsing/TemplateTokenParsers.cs
+index 6cb384c..c9f672d 100644
+--- a/src/Serilog.Expressions/Templates/Parsing/TemplateTokenParsers.cs
++++ b/src/Serilog.Expressions/Templates/Parsing/TemplateTokenParsers.cs
+@@ -14,10 +14,10 @@
+ 
+ using Serilog.Expressions.Ast;
+ using Serilog.Expressions.Parsing;
+-using Serilog.Parsing;
+ using Serilog.ParserConstruction;
+ using Serilog.ParserConstruction.Model;
+ using Serilog.ParserConstruction.Parsers;
++using Serilog.Parsing;
+ using Serilog.Templates.Ast;
+ using static Serilog.Expressions.Parsing.ExpressionToken;
+ 
+@@ -57,12 +57,15 @@ class TemplateTokenParsers
+             params ExpressionToken[] signifiers)
+         {
+             var open = Token.EqualTo(LBraceHash)
+-                .IgnoreThen(Token.Sequence(signifiers)).Try();
++                .IgnoreThen(Token.Sequence(signifiers))
++                .Try();
+ 
+             if (hasArgument)
++            {
+                 return open
+                     .IgnoreThen(ExpressionTokenParsers.Expr.Cast<ExpressionToken, Expression, Expression?>())
+                     .Then(v => Token.EqualTo(RBrace).Value(v));
++            }
+ 
+             return open.IgnoreThen(Token.EqualTo(RBrace)).Value((Expression?) null);
+         }
+@@ -92,7 +95,8 @@ class TemplateTokenParsers
+ 
+         var eachDirective =
+             Token.EqualTo(LBraceHash)
+-                .IgnoreThen(Token.EqualTo(Each)).Try()
++                .IgnoreThen(Token.EqualTo(Each))
++                .Try()
+                 .IgnoreThen(Token.EqualTo(Identifier)
+                     .Select(i => i.ToStringValue())
+                     .AtLeastOnceDelimitedBy(Token.EqualTo(Comma)))
+diff --git a/src/Serilog.Expressions/Templates/Parsing/TemplateTokenizer.cs b/src/Serilog.Expressions/Templates/Parsing/TemplateTokenizer.cs
+index d3e39f3..740beef 100644
+--- a/src/Serilog.Expressions/Templates/Parsing/TemplateTokenizer.cs
++++ b/src/Serilog.Expressions/Templates/Parsing/TemplateTokenizer.cs
+@@ -148,6 +148,7 @@ class TemplateTokenizer : Tokenizer<ExpressionToken>
+             {
+                 yield break;
+             }
++
+             // The default tokenization of `,` alignment (comma, [minus], number) is fine, only
+             // formats require special handling.
+             else if (token.Value == ExpressionToken.Colon)
+@@ -162,6 +163,7 @@ class TemplateTokenizer : Tokenizer<ExpressionToken>
+                         yield return Result.Value(ExpressionToken.RBrace, next.Location, next.Remainder);
+                         yield break;
+                     }
++
+                     next = next.Remainder.ConsumeChar();
+                 }
+ 
+diff --git a/src/Serilog.Expressions/Templates/Themes/TemplateTheme.cs b/src/Serilog.Expressions/Templates/Themes/TemplateTheme.cs
+index 8090e03..234bb3d 100644
+--- a/src/Serilog.Expressions/Templates/Themes/TemplateTheme.cs
++++ b/src/Serilog.Expressions/Templates/Themes/TemplateTheme.cs
+@@ -51,7 +51,7 @@ public class TemplateTheme
+     /// <exception cref="ArgumentNullException">When <paramref name="ansiStyles"/> is <code>null</code></exception>
+     public TemplateTheme(IReadOnlyDictionary<TemplateThemeStyle, string> ansiStyles)
+     {
+-        if (ansiStyles is null) throw new ArgumentNullException(nameof(ansiStyles));
++        if (ansiStyles == null) throw new ArgumentNullException(nameof(ansiStyles));
+         _styles = ansiStyles.ToDictionary(kv => kv.Key, kv => new Style(kv.Value));
+     }
+ 
+@@ -65,7 +65,7 @@ public class TemplateTheme
+     public TemplateTheme(TemplateTheme baseTheme, IReadOnlyDictionary<TemplateThemeStyle, string> ansiStyles)
+     {
+         if (baseTheme == null) throw new ArgumentNullException(nameof(baseTheme));
+-        if (ansiStyles is null) throw new ArgumentNullException(nameof(ansiStyles));
++        if (ansiStyles == null) throw new ArgumentNullException(nameof(ansiStyles));
+         _styles = new(baseTheme._styles);
+         foreach (var kv in ansiStyles)
+             _styles[kv.Key] = new(kv.Value);
+diff --git a/src/Serilog.Expressions/Templates/Themes/ThemedJsonValueFormatter.cs b/src/Serilog.Expressions/Templates/Themes/ThemedJsonValueFormatter.cs
+index 6ccb843..8bf22e0 100644
+--- a/src/Serilog.Expressions/Templates/Themes/ThemedJsonValueFormatter.cs
++++ b/src/Serilog.Expressions/Templates/Themes/ThemedJsonValueFormatter.cs
+@@ -25,7 +25,13 @@ class ThemedJsonValueFormatter : LogEventPropertyValueVisitor<TextWriter, int>
+ {
+     const string TypeTagPropertyName = "$type";
+ 
+-    readonly Style _null, _bool, _num, _string, _scalar, _tertiary, _name;
++    readonly Style _null;
++    readonly Style _bool;
++    readonly Style _num;
++    readonly Style _string;
++    readonly Style _scalar;
++    readonly Style _tertiary;
++    readonly Style _name;
+ 
+     public ThemedJsonValueFormatter(TemplateTheme theme)
+     {
+@@ -72,7 +78,6 @@ class ThemedJsonValueFormatter : LogEventPropertyValueVisitor<TextWriter, int>
+             state.Write(']');
+ 
+         return count;
+-
+     }
+ 
+     protected override int VisitStructureValue(TextWriter state, StructureValue structure)
+@@ -201,6 +206,7 @@ class ThemedJsonValueFormatter : LogEventPropertyValueVisitor<TextWriter, int>
+                     else
+                         output.Write(d.ToString("R", CultureInfo.InvariantCulture));
+                 }
++
+                 return count;
+             }
+ 
+@@ -213,6 +219,7 @@ class ThemedJsonValueFormatter : LogEventPropertyValueVisitor<TextWriter, int>
+                     else
+                         output.Write(f.ToString("R", CultureInfo.InvariantCulture));
+                 }
++
+                 return count;
+             }
+ 
+@@ -239,6 +246,7 @@ class ThemedJsonValueFormatter : LogEventPropertyValueVisitor<TextWriter, int>
+                     output.Write(((IFormattable)value).ToString("O", CultureInfo.InvariantCulture));
+                     output.Write('"');
+                 }
++
+                 return count;
+             }
+         }
+diff --git a/test/Serilog.Expressions.PerformanceTests/ComparisonBenchmark.cs b/test/Serilog.Expressions.PerformanceTests/ComparisonBenchmark.cs
+index 5b73a79..766b96c 100644
+--- a/test/Serilog.Expressions.PerformanceTests/ComparisonBenchmark.cs
++++ b/test/Serilog.Expressions.PerformanceTests/ComparisonBenchmark.cs
+@@ -10,7 +10,9 @@ namespace Serilog.Expressions.PerformanceTests;
+ /// </summary>
+ public class ComparisonBenchmark
+ {
+-    readonly Func<LogEvent, bool> _trivialFilter, _handwrittenFilter, _expressionFilter;
++    readonly Func<LogEvent, bool> _trivialFilter;
++    readonly Func<LogEvent, bool> _handwrittenFilter;
++    readonly Func<LogEvent, bool> _expressionFilter;
+     readonly LogEvent _event = Some.InformationEvent("{A}", 3);
+ 
+     public ComparisonBenchmark()
+diff --git a/test/Serilog.Expressions.Tests/ExpressionCompilerTests.cs b/test/Serilog.Expressions.Tests/ExpressionCompilerTests.cs
+index b8d84e4..901d787 100644
+--- a/test/Serilog.Expressions.Tests/ExpressionCompilerTests.cs
++++ b/test/Serilog.Expressions.Tests/ExpressionCompilerTests.cs
+@@ -107,7 +107,6 @@ public class ExpressionCompilerTests
+             Some.InformationEvent("Checking out {@Cart}", new { Total = 5 }));
+     }
+ 
+-
+     [Fact]
+     public void SequenceLengthCanBeDetermined()
+     {
+diff --git a/test/Serilog.Expressions.Tests/ExpressionEvaluationTests.cs b/test/Serilog.Expressions.Tests/ExpressionEvaluationTests.cs
+index 6a95839..ef5e25b 100644
+--- a/test/Serilog.Expressions.Tests/ExpressionEvaluationTests.cs
++++ b/test/Serilog.Expressions.Tests/ExpressionEvaluationTests.cs
+@@ -39,9 +39,9 @@ public class ExpressionEvaluationTests
+         var actual = SerilogExpression.Compile(expr, formatProvider: frFr, testHelpers)(evt);
+         var expected = SerilogExpression.Compile(result, nameResolver: testHelpers)(evt);
+ 
+-        if (expected is null)
++        if (expected == null)
+         {
+-            Assert.True(actual is null, $"Expected value: undefined{Environment.NewLine}Actual value: {Display(actual)}");
++            Assert.True(actual == null, $"Expected value: undefined{Environment.NewLine}Actual value: {Display(actual)}");
+         }
+         else
+         {
+diff --git a/test/Serilog.Expressions.Tests/ExpressionValidationTests.cs b/test/Serilog.Expressions.Tests/ExpressionValidationTests.cs
+index b7948dc..a07514b 100644
+--- a/test/Serilog.Expressions.Tests/ExpressionValidationTests.cs
++++ b/test/Serilog.Expressions.Tests/ExpressionValidationTests.cs
+@@ -137,7 +137,7 @@ public class ExpressionValidationTests
+     public void RegexTimeoutIsRespected()
+     {
+         // This regex should compile fine - timeout only matters at runtime
+-        var expression = @"IsMatch(Text, '(a+)+b')";
++        var expression = "IsMatch(Text, '(a+)+b')";
+         
+         var result = SerilogExpression.TryCompile(expression, out var compiled, out var error);
+         
+diff --git a/test/Serilog.Expressions.Tests/Expressions/NameResolverTests.cs b/test/Serilog.Expressions.Tests/Expressions/NameResolverTests.cs
+index 3a005fb..514d951 100644
+--- a/test/Serilog.Expressions.Tests/Expressions/NameResolverTests.cs
++++ b/test/Serilog.Expressions.Tests/Expressions/NameResolverTests.cs
+@@ -38,8 +38,8 @@ public class NameResolverTests
+             _word = word;
+         }
+ 
+-        public override bool TryResolveFunctionName(string name, [MaybeNullWhen(false)] out MethodInfo implementation)
+-            => _inner.TryResolveFunctionName(name, out implementation);
++        public override bool TryResolveFunctionName(string name, [MaybeNullWhen(false)] out MethodInfo implementation) =>
++            _inner.TryResolveFunctionName(name, out implementation);
+ 
+         public override bool TryBindFunctionParameter(ParameterInfo parameter, [MaybeNullWhen(false)] out object boundValue)
+         {
+diff --git a/test/Serilog.Expressions.Tests/FormatParityTests.cs b/test/Serilog.Expressions.Tests/FormatParityTests.cs
+index d0b6aba..a975a94 100644
+--- a/test/Serilog.Expressions.Tests/FormatParityTests.cs
++++ b/test/Serilog.Expressions.Tests/FormatParityTests.cs
+@@ -84,6 +84,7 @@ public class FormatParityTests
+         var propertiesByName = stp.Properties.ToDictionary(p => p.Name, p => p.Value);
+ 
+         var renderings = new List<LogEventProperty>();
++
+         // ReSharper disable once PossibleMultipleEnumeration
+         foreach (var propertyFormats in tokensWithFormat)
+         {
+@@ -108,19 +109,23 @@ public class FormatParityTests
+         return new StructureValue(renderings);
+     }
+ 
+-    readonly ITextFormatter
+-        _clef = new CompactJsonFormatter(),
+-        _renderedClef = new RenderedCompactJsonFormatter(),
+-        _classic = new JsonFormatter(),
+-        _clefExpression = new ExpressionTemplate(
++    readonly ITextFormatter _clef = new CompactJsonFormatter();
++    readonly ITextFormatter _renderedClef = new RenderedCompactJsonFormatter();
++    readonly ITextFormatter _classic = new JsonFormatter();
++    readonly ITextFormatter _clefExpression = new ExpressionTemplate(
+             "{ {@t: UtcDateTime(@t), @mt, @r, @l: if @l = 'Information' then undefined() else @l, @x, ..ClefEscape(@p)} }" + Environment.NewLine,
+-            null, new StaticMemberNameResolver(typeof(FormatParityTests))),
+-        _renderedClefExpression = new ExpressionTemplate(
++            null,
++            new StaticMemberNameResolver(typeof(FormatParityTests)));
++
++    readonly ITextFormatter _renderedClefExpression = new ExpressionTemplate(
+             "{ {@t: UtcDateTime(@t), @m: ClassicRender(@mt, @p), @i: ToString(@i, 'x8'), @l: if @l = 'Information' then undefined() else @l, @x, ..ClefEscape(@p)} }" + Environment.NewLine,
+-            null, new StaticMemberNameResolver(typeof(FormatParityTests))),
+-        _classicExpression = new ExpressionTemplate(
++            null,
++            new StaticMemberNameResolver(typeof(FormatParityTests)));
++
++    readonly ITextFormatter _classicExpression = new ExpressionTemplate(
+             "{ {Timestamp: @t, Level: @l, MessageTemplate: @mt, Exception: @x, Properties: if IsDefined(@p[?]) then @p else undefined(), Renderings: ClassicRenderings(@mt, @p)} }" + Environment.NewLine,
+-            null, new StaticMemberNameResolver(typeof(FormatParityTests)));
++            null,
++            new StaticMemberNameResolver(typeof(FormatParityTests)));
+ 
+     static string Render(
+         ITextFormatter formatter,
+diff --git a/test/Serilog.Expressions.Tests/Support/Some.cs b/test/Serilog.Expressions.Tests/Support/Some.cs
+index 6d73a71..9059c3e 100644
+--- a/test/Serilog.Expressions.Tests/Support/Some.cs
++++ b/test/Serilog.Expressions.Tests/Support/Some.cs
+@@ -36,6 +36,7 @@ static class Some
+         {
+             throw new XunitException("Template could not be bound.");
+         }
++
+         return new(timestamp, level, null, template, properties);
+     }
+ 

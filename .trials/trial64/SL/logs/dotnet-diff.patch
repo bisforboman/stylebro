@@ -1,0 +1,544 @@
+diff --git a/.editorconfig b/.editorconfig
+index 112f424..5ab2084 100644
+--- a/.editorconfig
++++ b/.editorconfig
+@@ -20,4 +20,70 @@ end_of_line = crlf
+ # C# formatting settings - Namespace options
+ csharp_style_namespace_declarations = file_scoped:suggestion
+ 
+-csharp_style_prefer_switch_expression = true:suggestion
+\ No newline at end of file
++csharp_style_prefer_switch_expression = true:suggestion
++
++# BEGIN stylebro-migrate (stylebro-migrate init: built-in .NET rules for StyleBro's preset; edits inside are replaced)
++[*.cs]
++# Built-in .NET rules that cover StyleCop rules, at the preset's severities. Their options (brace placement, modifier
++# order, ...) come from StyleBro's preset. The severities have to be here: 'dotnet format' ignores rule severities in a
++# package's global config. Add <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> to report them on build too.
++
++# Braces (SA1503, SA1519, SA1520) are StyleBro's BRO1514-BRO1516: IDE0011's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0011.severity = none
++# Access modifiers (SA1400, SA1205) are StyleBro's BRO1404/BRO1007: IDE0040's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0040.severity = none
++# Modifier order: access modifier first, then static (SA1206, SA1207)
++dotnet_diagnostic.IDE0036.severity = warning
++# 'int' instead of 'Int32' (SA1121)
++dotnet_diagnostic.IDE0049.severity = warning
++# Unnecessary parentheses (SA1119) are StyleBro's BRO1405: IDE0047's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0047.severity = none
++# Parentheses that show precedence (SA1407, SA1408) are StyleBro's BRO1406/BRO1407: IDE0048's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0048.severity = none
++# Using placement (SA1200) is StyleBro's BRO1008: IDE0065's fix can change what names bind to (CS0104, CS0118)
++dotnet_diagnostic.IDE0065.severity = none
++# Blank lines (SA1507, SA1508, SA1513) are StyleBro's BRO1517-BRO1519: the SDK's fixes break multi-targeted projects
++dotnet_diagnostic.IDE2000.severity = none
++dotnet_diagnostic.IDE2002.severity = none
++dotnet_diagnostic.IDE2003.severity = none
++# 'this.' qualification isn't required (SA1101 is off in the preset)
++dotnet_diagnostic.IDE0009.severity = none
++
++# Conventions in this repository's code (stylebro-migrate init counted them; delete a line to have it counted again)
++# init: private fields: named '_field' in 41 of 41 places in your code
++stylebro_private_field_naming = _camelCase
++# init: one-line if/else/loop/using/lock bodies: your code mixes both forms (36 with braces, 33 without braces), so both are allowed. To choose with braces: change the next line to csharp_prefer_braces = true.
++csharp_prefer_braces = when_multiline
++# init: one-line jumps ('if (x) return;'): allowed, because your code has some (9 of 11 places on the 'if' line without braces; any 3 keep them allowed: without it BRO1514 would add braces to each)
++stylebro_allow_single_line_jump_statements = true
++# init: operators where a line wraps: your code mixes both forms (6 at the start of the line, 9 at the end of the line), so BRO1520 is off. To choose one: set dotnet_style_operator_placement_when_wrapping and remove the next line.
++dotnet_diagnostic.BRO1520.severity = none
++# init: multi-line initializers: your code mixes both forms (3 with a trailing comma, 3 without a trailing comma), so BRO1401 is off. To choose one: set stylebro_trailing_comma and remove the next line.
++dotnet_diagnostic.BRO1401.severity = none
++# init: null checks: '== null' in 29 of 30 places in your code
++stylebro_null_check_style = equality_operator
++# init: split lists: your code mixes both forms (7 first item on the next line, 1 first item after '('), so BRO1107 is off. To choose one: set stylebro_split_list_first_item and remove the next line.
++dotnet_diagnostic.BRO1107.severity = none
++# init: statements on their 'if'/loop/'case' line: allowed, because your code has some (11 of 33 places on their owner's line; any 3 keep them allowed: csharp_preserve_single_line_statements = false would move each to a line of its own)
++csharp_preserve_single_line_statements = true
++# init: overrides/interface implementations: your code mixes both forms (1 with a doc comment, 7 without a doc comment), so BRO1601 is off. To choose one: set dotnet_diagnostic.BRO1601.severity and remove the next line.
++dotnet_diagnostic.BRO1601.severity = none
++# init: types' members: your code mixes both forms (13 in BRO1001's order, 12 in another order), so BRO1001 is off. To choose one: set dotnet_diagnostic.BRO1001.severity and remove the next line.
++dotnet_diagnostic.BRO1001.severity = none
++# init: split lists' items: your code mixes both forms (7 one per line, 11 grouped on lines), so BRO1108 is off. To choose one: set dotnet_diagnostic.BRO1108.severity and remove the next line.
++dotnet_diagnostic.BRO1108.severity = none
++# init: private-by-default members: without 'private' in 67 of 71 members in your code
++dotnet_style_require_accessibility_modifiers = omit_if_default
++# init: internal-by-default types: 10 of 11 in your code are without an access modifier, so BRO1404 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1404.severity = none
++# init: adjacent locals of one type: your code mixes both forms (3 declared one by one, 1 declared together ('int a, b;')), so BRO1142 is off. To choose one: set dotnet_diagnostic.BRO1142.severity and remove the next line.
++dotnet_diagnostic.BRO1142.severity = none
++# init: adjacent fields of one type: your code mixes both forms (5 declared one by one, 2 declared together ('int a, b;')), so BRO1114 is off. To choose one: set dotnet_diagnostic.BRO1114.severity and remove the next line.
++dotnet_diagnostic.BRO1114.severity = none
++# init: tuple element names: '(int count, ...)' in 5 of 5 elements in your code
++stylebro_tuple_element_name_casing = camelCase
++# init: using directives: sorted, but with System first and without (24 of 29 files sorted, 2 of 4 with System first), so they aren't sorted ('dotnet format' sorts them whenever dotnet_sort_system_directives_first is set). To sort them: add dotnet_sort_system_directives_first = true
++# Line endings: your .editorconfig says end_of_line = lf, but git checks out 33 C# files with each machine's ending (a .gitattributes 'text' attribute without 'eol', or core.autocrlf), so Windows checkouts don't match it. Until that's settled, formatting and IDE0055 leave each file's endings as checked out. To settle it: '*.cs text eol=lf' in .gitattributes (then 'git add --renormalize .'), or remove end_of_line from .editorconfig; then run bro again.
++end_of_line = unset
++dotnet_diagnostic.IDE0055.severity = suggestion
++# END stylebro-migrate
+diff --git a/Directory.Build.props b/Directory.Build.props
+index c114992..77cbb5f 100644
+--- a/Directory.Build.props
++++ b/Directory.Build.props
+@@ -3,6 +3,7 @@
+    a property value is project-specific, please record it in the CSPROJ file instead. -->
+   <Import Project="$(MSBuildThisFileDirectory)Directory.Version.props" />
+   <PropertyGroup>
++    <StyleBroPreset>1.0</StyleBroPreset>
+     <LangVersion>latest</LangVersion>
+     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+     <!-- The condition is required to support BenchmarkDotNet -->
+@@ -22,4 +23,7 @@
+     <Reference Include="System.Core" />
+     <Reference Include="Microsoft.CSharp" />
+   </ItemGroup>
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial64.1" PrivateAssets="all" />
++  </ItemGroup>
+ </Project>
+diff --git a/samples/Sample/Program.cs b/samples/Sample/Program.cs
+index b369510..f0bfa32 100644
+--- a/samples/Sample/Program.cs
++++ b/samples/Sample/Program.cs
+@@ -26,6 +26,7 @@ catch (Exception ex)
+ {
+     logger.LogCritical(ex, "Unexpected critical error starting application");
+     logger.Log(LogLevel.Critical, 0, "Unexpected critical error", ex, null!);
++
+     // This write should not log anything
+     logger.Log<object>(LogLevel.Critical, 0, null!, null, null!);
+     logger.LogError(ex, "Unexpected error");
+@@ -47,4 +48,3 @@ logger.LogInformation("Stopping");
+ logger.LogInformation("{Result,-10:l}{StartTime,15:l}{EndTime,15:l}{Duration,15:l}", "RESULT", "START TIME", "END TIME", "DURATION(ms)");
+ logger.LogInformation("{Result,-10:l}{StartTime,15:l}{EndTime,15:l}{Duration,15:l}", "------", "----- ----", "--- ----", "------------");
+ logger.LogInformation("{Result,-10:l}{StartTime,15:mm:s tt}{EndTime,15:mm:s tt}{Duration,15}", "SUCCESS", startTime, endTime, (endTime - startTime).TotalMilliseconds);
+-
+diff --git a/samples/SampleWithExternalScope/Program.cs b/samples/SampleWithExternalScope/Program.cs
+index 2b0aad7..6b4e35b 100644
+--- a/samples/SampleWithExternalScope/Program.cs
++++ b/samples/SampleWithExternalScope/Program.cs
+@@ -1,4 +1,4 @@
+-﻿using System.Diagnostics;
++using System.Diagnostics;
+ using Microsoft.Extensions.DependencyInjection;
+ using Microsoft.Extensions.Logging;
+ using Serilog;
+@@ -52,4 +52,3 @@ using var scope = logger.BeginScope(new
+ });
+ 
+ logger.LogInformation("Hello world!");
+-
+diff --git a/samples/SampleWithMelProviders/Program.cs b/samples/SampleWithMelProviders/Program.cs
+index c8b88b1..8af6947 100644
+--- a/samples/SampleWithMelProviders/Program.cs
++++ b/samples/SampleWithMelProviders/Program.cs
+@@ -45,6 +45,7 @@ catch (Exception ex)
+ {
+     logger.LogCritical(ex, "Unexpected critical error starting application");
+     logger.Log(LogLevel.Critical, 0, "Unexpected critical error", ex, null!);
++
+     // This write should not log anything
+     logger.Log<object>(LogLevel.Critical, 0, null!, null, null!);
+     logger.LogError(ex, "Unexpected error");
+@@ -66,4 +67,3 @@ logger.LogInformation("Stopping");
+ logger.LogInformation("{Result,-10:l}{StartTime,15:l}{EndTime,15:l}{Duration,15:l}", "RESULT", "START TIME", "END TIME", "DURATION(ms)");
+ logger.LogInformation("{Result,-10:l}{StartTime,15:l}{EndTime,15:l}{Duration,15:l}", "------", "----- ----", "--- ----", "------------");
+ logger.LogInformation("{Result,-10:l}{StartTime,15:mm:s tt}{EndTime,15:mm:s tt}{Duration,15}", "SUCCESS", startTime, endTime, (endTime - startTime).TotalMilliseconds);
+-
+diff --git a/src/Serilog.Extensions.Logging/Extensions/Logging/EventIdPropertyCache.cs b/src/Serilog.Extensions.Logging/Extensions/Logging/EventIdPropertyCache.cs
+index 60d7efe..fd49e23 100644
+--- a/src/Serilog.Extensions.Logging/Extensions/Logging/EventIdPropertyCache.cs
++++ b/src/Serilog.Extensions.Logging/Extensions/Logging/EventIdPropertyCache.cs
+@@ -12,11 +12,11 @@
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
+ 
+-namespace Serilog.Extensions.Logging;
+-
+ using System.Collections.Concurrent;
+ using Microsoft.Extensions.Logging;
+-using Events;
++using Serilog.Events;
++
++namespace Serilog.Extensions.Logging;
+ 
+ sealed class EventIdPropertyCache
+ {
+@@ -43,13 +43,10 @@ sealed class EventIdPropertyCache
+                 propertyValue = CreatePropertyValue(in eventKey);
+             }
+         }
+-        else
++        else if (!_propertyCache.TryGetValue(eventKey, out propertyValue))
+         {
+-            if (!_propertyCache.TryGetValue(eventKey, out propertyValue))
+-            {
+-                // GetOrAdd is moved to a separate method to prevent closure allocation
+-                propertyValue = GetOrAddCore(in eventKey);
+-            }
++            // GetOrAdd is moved to a separate method to prevent closure allocation
++            propertyValue = GetOrAddCore(in eventKey);
+         }
+ 
+         return propertyValue;
+diff --git a/src/Serilog.Extensions.Logging/Extensions/Logging/LoggerProviderCollection.cs b/src/Serilog.Extensions.Logging/Extensions/Logging/LoggerProviderCollection.cs
+index 8799d7b..59ab398 100644
+--- a/src/Serilog.Extensions.Logging/Extensions/Logging/LoggerProviderCollection.cs
++++ b/src/Serilog.Extensions.Logging/Extensions/Logging/LoggerProviderCollection.cs
+@@ -1,4 +1,4 @@
+-﻿// Copyright 2019 Serilog Contributors
++// Copyright 2019 Serilog Contributors
+ //
+ // Licensed under the Apache License, Version 2.0 (the "License");
+ // you may not use this file except in compliance with the License.
+@@ -12,7 +12,6 @@
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
+ 
+-
+ using Microsoft.Extensions.Logging;
+ 
+ namespace Serilog.Extensions.Logging;
+@@ -37,7 +36,7 @@ public sealed class LoggerProviderCollection : IDisposable
+         do
+         {
+             existing = _providers;
+-            added = [..existing, provider];
++            added = [.. existing, provider];
+         }
+ #pragma warning disable 420 // ref to a volatile field
+         while (Interlocked.CompareExchange(ref _providers, added, existing) != existing);
+diff --git a/src/Serilog.Extensions.Logging/Extensions/Logging/LoggerProviderCollectionSink.cs b/src/Serilog.Extensions.Logging/Extensions/Logging/LoggerProviderCollectionSink.cs
+index 5609905..4aa272c 100644
+--- a/src/Serilog.Extensions.Logging/Extensions/Logging/LoggerProviderCollectionSink.cs
++++ b/src/Serilog.Extensions.Logging/Extensions/Logging/LoggerProviderCollectionSink.cs
+@@ -38,6 +38,7 @@ sealed class LoggerProviderCollectionSink : ILogEventSink, IDisposable
+         {
+             categoryName = sourceContext;
+         }
++
+         if (logEvent.Properties.TryGetValue("EventId", out var eventIdPropertyValue) && eventIdPropertyValue is StructureValue structuredEventId)
+         {
+             string? name = null;
+diff --git a/src/Serilog.Extensions.Logging/Extensions/Logging/SerilogLogValues.cs b/src/Serilog.Extensions.Logging/Extensions/Logging/SerilogLogValues.cs
+index 287608b..387abf6 100644
+--- a/src/Serilog.Extensions.Logging/Extensions/Logging/SerilogLogValues.cs
++++ b/src/Serilog.Extensions.Logging/Extensions/Logging/SerilogLogValues.cs
+@@ -1,4 +1,4 @@
+-﻿// Copyright 2019 Serilog Contributors
++// Copyright 2019 Serilog Contributors
+ //
+ // Licensed under the Apache License, Version 2.0 (the "License");
+ // you may not use this file except in compliance with the License.
+@@ -41,6 +41,7 @@ readonly struct SerilogLogValues : IReadOnlyList<KeyValuePair<string, object?>>
+             _values[i] = new KeyValuePair<string, object?>(p.Key, (p.Value is ScalarValue sv) ? sv.Value : p.Value);
+             ++i;
+         }
++
+         _values[i] = new KeyValuePair<string, object?>("{OriginalFormat}", _messageTemplate.Text);
+     }
+ 
+diff --git a/src/Serilog.Extensions.Logging/Extensions/Logging/SerilogLogger.cs b/src/Serilog.Extensions.Logging/Extensions/Logging/SerilogLogger.cs
+index d3d8bcc..296b3d9 100644
+--- a/src/Serilog.Extensions.Logging/Extensions/Logging/SerilogLogger.cs
++++ b/src/Serilog.Extensions.Logging/Extensions/Logging/SerilogLogger.cs
+@@ -53,7 +53,8 @@ sealed class SerilogLogger : FrameworkLogger
+         return logLevel != LogLevel.None && _logger.IsEnabled(LevelConvert.ToSerilogLevel(logLevel));
+     }
+ 
+-    public IDisposable BeginScope<TState>(TState state) where TState : notnull
++    public IDisposable BeginScope<TState>(TState state)
++        where TState : notnull
+     {
+         return _provider.BeginScope(state);
+     }
+@@ -64,6 +65,7 @@ sealed class SerilogLogger : FrameworkLogger
+         {
+             return;
+         }
++
+         var level = LevelConvert.ToSerilogLevel(logLevel);
+         if (!_logger.IsEnabled(level))
+         {
+@@ -121,6 +123,7 @@ sealed class SerilogLogger : FrameworkLogger
+ 
+             var stateType = state.GetType();
+             var stateTypeInfo = stateType.GetTypeInfo();
++
+             // Imperfect, but at least eliminates `1 names
+             if (messageTemplate == null && !stateTypeInfo.IsGenericType)
+             {
+@@ -138,6 +141,7 @@ sealed class SerilogLogger : FrameworkLogger
+                 propertyName = "State";
+                 messageTemplate = "{State:l}";
+             }
++
+             // `formatter` was originally accepted as nullable, so despite the new annotation, this check should still
+             // be made.
+             else if (formatter != null!)
+@@ -146,11 +150,8 @@ sealed class SerilogLogger : FrameworkLogger
+                 messageTemplate = "{Message:l}";
+             }
+ 
+-            if (propertyName != null)
+-            {
+-                if (_logger.BindProperty(propertyName, AsLoggableValue(state, formatter!), false, out var property))
+-                    properties[property.Name] = property.Value;
+-            }
++            if (propertyName != null && _logger.BindProperty(propertyName, AsLoggableValue(state, formatter!), false, out var property))
++                properties[property.Name] = property.Value;
+         }
+ 
+         // The overridden `!=` operator on this type ignores `Name`.
+diff --git a/src/Serilog.Extensions.Logging/Extensions/StringExtensions.cs b/src/Serilog.Extensions.Logging/Extensions/StringExtensions.cs
+index ac772fd..ee2ee1a 100644
+--- a/src/Serilog.Extensions.Logging/Extensions/StringExtensions.cs
++++ b/src/Serilog.Extensions.Logging/Extensions/StringExtensions.cs
+@@ -1,4 +1,4 @@
+-﻿#if !NET6_0_OR_GREATER && !NETSTANDARD2_1_OR_GREATER
++#if !NET6_0_OR_GREATER && !NETSTANDARD2_1_OR_GREATER
+ using System.Runtime.CompilerServices;
+ 
+ namespace Serilog.Extensions;
+diff --git a/src/Serilog.Extensions.Logging/Properties/AssemblyInfo.cs b/src/Serilog.Extensions.Logging/Properties/AssemblyInfo.cs
+index 468e64f..7892706 100644
+--- a/src/Serilog.Extensions.Logging/Properties/AssemblyInfo.cs
++++ b/src/Serilog.Extensions.Logging/Properties/AssemblyInfo.cs
+@@ -1,4 +1,4 @@
+-﻿global using System;
++global using System;
+ global using System.Collections.Generic;
+ global using System.Linq;
+ global using System.Threading;
+diff --git a/test/Serilog.Extensions.Logging.Benchmarks/LogEventBenchmark.cs b/test/Serilog.Extensions.Logging.Benchmarks/LogEventBenchmark.cs
+index f08738a..623b063 100644
+--- a/test/Serilog.Extensions.Logging.Benchmarks/LogEventBenchmark.cs
++++ b/test/Serilog.Extensions.Logging.Benchmarks/LogEventBenchmark.cs
+@@ -29,6 +29,7 @@ public class LogEventBenchmark
+     {
+         public string? Name { get; set; }
+         public int Age { get; set; }
++
+         public override string ToString() => "Fixed text";
+     }
+ 
+diff --git a/test/Serilog.Extensions.Logging.Tests/DisposeTests.cs b/test/Serilog.Extensions.Logging.Tests/DisposeTests.cs
+index 0e7448e..cb7ac43 100644
+--- a/test/Serilog.Extensions.Logging.Tests/DisposeTests.cs
++++ b/test/Serilog.Extensions.Logging.Tests/DisposeTests.cs
+@@ -1,4 +1,4 @@
+-﻿using Microsoft.Extensions.DependencyInjection;
++using Microsoft.Extensions.DependencyInjection;
+ using Microsoft.Extensions.Logging;
+ using Serilog.Core;
+ using Serilog.Events;
+@@ -39,9 +39,9 @@ public class DisposeTests
+     [Fact]
+     public async Task DisposesProviderAsyncWhenDisposeIsTrue()
+     {
+-      var services = new ServiceCollection()
+-            .AddLogging(builder => builder.AddSerilog(logger: _serilogLogger, dispose: true))
+-            .BuildServiceProvider();
++        var services = new ServiceCollection()
++              .AddLogging(builder => builder.AddSerilog(logger: _serilogLogger, dispose: true))
++              .BuildServiceProvider();
+ 
+         // Get a logger so that we ensure SerilogLoggerProvider is created
+         var logger = services.GetRequiredService<ILogger<DisposeTests>>();
+@@ -59,6 +59,7 @@ public class DisposeTests
+         public bool DisposeCalled { get; private set; }
+ 
+         public void Dispose() => DisposeCalled = true;
++
+         public ValueTask DisposeAsync()
+         {
+             DisposeAsyncCalled = true;
+diff --git a/test/Serilog.Extensions.Logging.Tests/EventIdPropertyCacheTests.cs b/test/Serilog.Extensions.Logging.Tests/EventIdPropertyCacheTests.cs
+index 3cb7bd1..ce7b801 100644
+--- a/test/Serilog.Extensions.Logging.Tests/EventIdPropertyCacheTests.cs
++++ b/test/Serilog.Extensions.Logging.Tests/EventIdPropertyCacheTests.cs
+@@ -79,7 +79,6 @@ public class EventIdPropertyCacheTests
+         Assert.NotSame(propertyValue1, propertyValue2);
+     }
+ 
+-
+     [Fact]
+     public void WhenLimitIsNotOverSameEventsHaveSameReferences()
+     {
+diff --git a/test/Serilog.Extensions.Logging.Tests/SerilogLogValuesTests.cs b/test/Serilog.Extensions.Logging.Tests/SerilogLogValuesTests.cs
+index a1f3025..e50a9c5 100644
+--- a/test/Serilog.Extensions.Logging.Tests/SerilogLogValuesTests.cs
++++ b/test/Serilog.Extensions.Logging.Tests/SerilogLogValuesTests.cs
+@@ -1,4 +1,4 @@
+-﻿using Serilog.Events;
++using Serilog.Events;
+ using Serilog.Parsing;
+ using Xunit;
+ 
+diff --git a/test/Serilog.Extensions.Logging.Tests/SerilogLoggerScopeTests.cs b/test/Serilog.Extensions.Logging.Tests/SerilogLoggerScopeTests.cs
+index 1a212c2..e6bf23c 100644
+--- a/test/Serilog.Extensions.Logging.Tests/SerilogLoggerScopeTests.cs
++++ b/test/Serilog.Extensions.Logging.Tests/SerilogLoggerScopeTests.cs
+@@ -7,6 +7,7 @@ using Serilog.Extensions.Logging.Tests.Support;
+ using Xunit;
+ 
+ namespace Serilog.Extensions.Logging.Tests;
++
+ public class SerilogLoggerScopeTests
+ {
+     static (SerilogLoggerProvider, LogEventPropertyFactory, LogEvent) SetUp()
+@@ -29,10 +30,9 @@ public class SerilogLoggerScopeTests
+         const string propertyName = "Foo";
+         const string expectedValue = "Bar";
+ 
+-        var(loggerProvider, logEventPropertyFactory, logEvent) = SetUp();
+-
++        var (loggerProvider, logEventPropertyFactory, logEvent) = SetUp();
+ 
+-        var state = new Dictionary<string, object?>() { { propertyName, expectedValue } };
++        var state = new Dictionary<string, object?> { { propertyName, expectedValue } };
+ 
+         var loggerScope = new SerilogLoggerScope(loggerProvider, state);
+ 
+@@ -56,7 +56,6 @@ public class SerilogLoggerScopeTests
+ 
+         var (loggerProvider, logEventPropertyFactory, logEvent) = SetUp();
+ 
+-
+         var state = new KeyValuePair<string, object?>[] { new KeyValuePair<string, object?>(propertyName, expectedValue) };
+ 
+         var loggerScope = new SerilogLoggerScope(loggerProvider, state);
+diff --git a/test/Serilog.Extensions.Logging.Tests/SerilogLoggerTests.cs b/test/Serilog.Extensions.Logging.Tests/SerilogLoggerTests.cs
+index bbbfb14..1970b22 100644
+--- a/test/Serilog.Extensions.Logging.Tests/SerilogLoggerTests.cs
++++ b/test/Serilog.Extensions.Logging.Tests/SerilogLoggerTests.cs
+@@ -10,8 +10,8 @@ using Serilog.Debugging;
+ using Serilog.Extensions.Logging.Tests.Support;
+ using Xunit;
+ using Serilog.Core;
+-// ReSharper disable AccessToDisposedClosure
+ 
++// ReSharper disable AccessToDisposedClosure
+ namespace Serilog.Extensions.Logging.Tests;
+ 
+ public class SerilogLoggerTest
+@@ -31,7 +31,7 @@ public class SerilogLoggerTest
+         var provider = new SerilogLoggerProvider(serilogLogger);
+         var logger = (SerilogLogger)provider.CreateLogger(Name);
+ 
+-        if (externalScopeProvider is not null)
++        if (externalScopeProvider != null)
+         {
+             provider.SetScopeProvider(externalScopeProvider);
+         }
+@@ -71,7 +71,6 @@ public class SerilogLoggerTest
+         Assert.Equal(LogEventLevel.Fatal, sink.Writes[5].Level);
+     }
+ 
+-
+     [Theory]
+     [InlineData(LogLevel.Trace, true)]
+     [InlineData(LogLevel.Debug, true)]
+@@ -195,7 +194,7 @@ public class SerilogLoggerTest
+     {
+         var (logger, sink) = SetUp(LogLevel.Trace);
+ 
+-        using (logger.BeginScope("{$values}", new [] { 1, 2, 3, 4 }))
++        using (logger.BeginScope("{$values}", new[] { 1, 2, 3, 4 }))
+         {
+             logger.Log(LogLevel.Information, 0, TestMessage, null!, null!);
+         }
+@@ -291,8 +290,8 @@ public class SerilogLoggerTest
+ 
+         Assert.Single(sink.Writes);
+ 
+-        var eventId = (StructureValue) sink.Writes[0].Properties["EventId"];
+-        var id = (ScalarValue) eventId.Properties.Single(p => p.Name == "Id").Value;
++        var eventId = (StructureValue)sink.Writes[0].Properties["EventId"];
++        var id = (ScalarValue)eventId.Properties.Single(p => p.Name == "Id").Value;
+         Assert.Equal(42, id.Value);
+     }
+ 
+@@ -300,6 +299,7 @@ public class SerilogLoggerTest
+     public void WhenDisposeIsFalseProvidedLoggerIsNotDisposed()
+     {
+         var logger = new DisposeTrackingLogger();
++
+         // ReSharper disable once RedundantArgumentDefaultValue
+         var provider = new SerilogLoggerProvider(logger, false);
+         provider.Dispose();
+@@ -340,7 +340,7 @@ public class SerilogLoggerTest
+     {
+         var (logger, sink) = SetUp(LogLevel.Trace);
+ 
+-        using (logger.BeginScope(new Dictionary<string, object> {{ "@Person", new Person { FirstName = "John", LastName = "Smith" }}}))
++        using (logger.BeginScope(new Dictionary<string, object> { { "@Person", new Person { FirstName = "John", LastName = "Smith" } } }))
+         {
+             logger.Log(LogLevel.Information, 0, TestMessage, null!, null!);
+         }
+@@ -374,7 +374,7 @@ public class SerilogLoggerTest
+     {
+         var (logger, sink) = SetUp(LogLevel.Trace);
+ 
+-        using (logger.BeginScope(new Dictionary<string, object> { { "FirstName", "John"}}))
++        using (logger.BeginScope(new Dictionary<string, object> { { "FirstName", "John" } }))
+         {
+             logger.Log(LogLevel.Information, 0, TestMessage, null!, null!);
+         }
+@@ -410,7 +410,7 @@ public class SerilogLoggerTest
+         var externalScopeProvider = new FakeExternalScopeProvider();
+         var (logger, sink) = SetUp(LogLevel.Trace, externalScopeProvider);
+ 
+-        externalScopeProvider.Push(new Dictionary<string, int>()
++        externalScopeProvider.Push(new Dictionary<string, int>
+         {
+             { "FirstKey", 1 },
+             { "SecondKey", 2 }
+@@ -425,10 +425,10 @@ public class SerilogLoggerTest
+         Assert.True(sink.Writes[0].Properties.TryGetValue(SerilogLoggerProvider.ScopePropertyName, out var scopeValue));
+         var sequence = Assert.IsType<SequenceValue>(scopeValue);
+ 
+-        var objectScope = (ScalarValue) sequence.Elements.Single(e => e is ScalarValue);
++        var objectScope = (ScalarValue)sequence.Elements.Single(e => e is ScalarValue);
+         Assert.Equal(scopeObject.ToString(), (string?)objectScope.Value);
+ 
+-        var dictionaryScope = (DictionaryValue) sequence.Elements.Single(e => e is DictionaryValue);
++        var dictionaryScope = (DictionaryValue)sequence.Elements.Single(e => e is DictionaryValue);
+         Assert.Equal(1, ((ScalarValue)dictionaryScope.Elements.Single(pair => pair.Key.Value!.Equals("FirstKey")).Value).Value);
+         Assert.Equal(2, ((ScalarValue)dictionaryScope.Elements.Single(pair => pair.Key.Value!.Equals("SecondKey")).Value).Value);
+     }
+diff --git a/test/Serilog.Extensions.Logging.Tests/SerilogLoggingBuilderExtensionsTests.cs b/test/Serilog.Extensions.Logging.Tests/SerilogLoggingBuilderExtensionsTests.cs
+index f727a65..8d5b907 100644
+--- a/test/Serilog.Extensions.Logging.Tests/SerilogLoggingBuilderExtensionsTests.cs
++++ b/test/Serilog.Extensions.Logging.Tests/SerilogLoggingBuilderExtensionsTests.cs
+@@ -1,4 +1,4 @@
+-﻿using Microsoft.Extensions.DependencyInjection;
++using Microsoft.Extensions.DependencyInjection;
+ using Microsoft.Extensions.Logging;
+ using Serilog.Extensions.Logging.Tests.Support;
+ using Xunit;
+diff --git a/test/Serilog.Extensions.Logging.Tests/Support/ExtensionsProvider.cs b/test/Serilog.Extensions.Logging.Tests/Support/ExtensionsProvider.cs
+index a27d0bd..ba54b82 100644
+--- a/test/Serilog.Extensions.Logging.Tests/Support/ExtensionsProvider.cs
++++ b/test/Serilog.Extensions.Logging.Tests/Support/ExtensionsProvider.cs
+@@ -21,7 +21,8 @@ sealed class ExtensionsProvider : ILoggerProvider, Microsoft.Extensions.Logging.
+         return this;
+     }
+ 
+-    public IDisposable BeginScope<TState>(TState state) where TState: notnull
++    public IDisposable BeginScope<TState>(TState state)
++        where TState : notnull
+     {
+         return this;
+     }
+diff --git a/test/Serilog.Extensions.Logging.Tests/Support/LogEventPropertyFactory.cs b/test/Serilog.Extensions.Logging.Tests/Support/LogEventPropertyFactory.cs
+index 12d34af..a84c504 100644
+--- a/test/Serilog.Extensions.Logging.Tests/Support/LogEventPropertyFactory.cs
++++ b/test/Serilog.Extensions.Logging.Tests/Support/LogEventPropertyFactory.cs
+@@ -5,6 +5,7 @@ using Serilog.Core;
+ using Serilog.Events;
+ 
+ namespace Serilog.Extensions.Logging.Tests.Support;
++
+ internal class LogEventPropertyFactory : ILogEventPropertyFactory
+ {
+     public LogEventProperty CreateProperty(string name, object? value, bool destructureObjects = false)

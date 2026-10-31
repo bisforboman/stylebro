@@ -1,0 +1,6 @@
+{
+  "area": "Hardening",
+  "item": "Fast check after notes the verdict doesn't count",
+  "notes": "Trial 64 (docs/decisions/2026-10-31-notes-the-verdict-doesnt-count-and-the-fast-check.md, owner: backlog): format's record is marked checked (VerifyFromRecord answers 'bro check') only when every gap is a held-back SDK note (FormatCommand: checkedClean = ... && gaps.All(IsHeldBackGap)). Other notes the verdict doesn't count, like 'Not checked: xunit.analyzers' rules (no Fix All)', turn the fast path off: ArchUnitNET's check took 82 s instead of ~1 s, verdict the same. To do: let those notes into the record too (they depend on the analyzer packages, so check the state key covers them), say them again from the record as verify does, and test it.",
+  "status": "Planned"
+}

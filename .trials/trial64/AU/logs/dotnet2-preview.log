@@ -1,0 +1,161 @@
+Previewing 'bro init --write' and 'bro format' on a copy; nothing in /home/user/w64/AU/dotnet2 changes.
+Copying the repository to /tmp/stylebro-preview-IVIX4R/dotnet2... 0s
+Conventions in the code (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  off      CSharpier (.config/dotnet-tools.json) -> IDE0055 and 32 layout rules are off: BRO1105, BRO1107, BRO1108, BRO1109, BRO1110, BRO1111, BRO1116, BRO1117, BRO1118, BRO1119, BRO1121, BRO1127, BRO1128, BRO1129, BRO1130, BRO1501, BRO1502, BRO1503, BRO1504, BRO1505, BRO1508, BRO1509, BRO1510, BRO1512, BRO1517, BRO1518, BRO1520, BRO1521, BRO1522, BRO1523, BRO1524, BRO1527; IDE0036 too (CSharpier orders modifiers itself)
+  kept     private fields: 396 of 401 named '_field' -> _camelCase
+  default  indentation: 526 of 526 indented with spaces -> space
+  default  multi-word private fields: 312 of 312 camelCase ('breakTarget') -> warning
+  set      '{' of multi-line blocks: 4481 of 4481 on its own line -> CSharpier formats it
+  set      else/catch/finally after '}': 110 of 110 on a new line -> CSharpier formats it
+  default  one-line if/else/loop/using/lock bodies: 477 of 481 with braces -> true
+  default  one-line jumps ('if (x) return;'): 330 in braces -> false
+  set      operators where a line wraps: 538 of 538 at the start of the line -> CSharpier formats it
+  set      '=>' where a line wraps: 130 of 130 at the end of the line -> CSharpier formats it
+  set      '=' where a line wraps: 204 of 204 at the end of the line -> CSharpier formats it
+  default  multi-line initializers: 66 of 66 with a trailing comma -> include
+  kept     empty strings: 108 of 114 "" -> literal
+  kept     null checks: 258 of 262 '== null' -> equality_operator
+  default  one-line <summary> texts: 50 of 50 on three lines -> multi_line
+  too few  default values: 1 place -> default stays (false)
+  set      ')' of split lists: 2004 of 2004 on its own line -> CSharpier formats it
+  set      split lists: 1213 of 1213 first item on the next line -> CSharpier formats it
+  set      ': base(...)'/': this(...)': 166 of 166 on its own line -> CSharpier formats it
+  set      'where' constraints: 104 of 104 on their own line -> CSharpier formats it
+  default  'new T { ... }' with an initializer: 529 of 536 without '()' -> omit
+  off      switch sections: 9 after a blank line, 26 without a blank line -> BRO1526 is off
+  default  files' using directives: 460 of 460 outside the namespace -> outside_namespace
+  set      statements on their 'if'/loop/'case' line: 57 on a line of their own -> CSharpier formats it
+  off      types' members: 265 in BRO1001's order, 95 in another order -> BRO1001 is off
+  kept     overloads BRO1001 could split: 47 of 51 next to each other -> true
+  default  lambda-first calls: 7 of 7 one argument per line -> false
+  set      split lists' items: 1213 of 1213 one per line -> CSharpier formats it
+  default  private-by-default members: 919 of 927 with 'private' -> for_non_interface_members
+  default  internal-by-default types: 121 of 124 with 'internal' -> warning
+  set      'case X:' blocks: 2 of 2 at the label's level -> CSharpier formats it
+  off      property summaries: 9 of 10 in their own words -> BRO1604 is off
+  default  adjacent locals of one type: 23 of 23 declared one by one -> warning
+  default  declarations with 2+ attributes: 38 of 38 one per list ('[A]' '[B]') -> warning
+  default  adjacent fields of one type: 366 of 366 declared one by one -> warning
+  default  private static fields: 132 of 132 without a prefix -> warning
+  default  built-in type names: 261 of 262 only keywords ('int') -> warning
+  kept     empty blocks ('{ }'): 224 of 224 on one line -> true
+  set      block-bodied properties/methods: 20 of 20 on several lines -> CSharpier formats it
+  set      statement blocks ('if (x) { y(); }'): 506 of 506 on several lines -> CSharpier formats it
+  set      accessor bodies: 1 of 1 laid out alike -> CSharpier formats it
+  set      auto-property accessors ('{ get; set; }'): 337 of 337 on one line -> CSharpier formats it
+  kept     C# files' line endings: 544 of 544 LF -> lf
+  default  statements after a block's '}': 474 of 572 after a blank line -> warning
+  too few  nested ifs BRO1149 would merge: 2 nested ifs -> default stays (warning)
+  set      neighbouring members: 2596 of 2673 with a blank line between -> CSharpier formats it
+  kept     neighbouring one-line members: 880 of 1129 next to each other -> true (3 are enough)
+  default  '//' comments in code: 407 of 407 with text at both ends -> warning
+  set      types' and namespaces' '{': 1222 of 1222 right above the code -> CSharpier formats it
+  default  doc comments below code: 75 of 75 after a blank line -> warning
+  default  '//' comments above code: 267 of 267 right above the code -> warning
+  set      '//' comments below code: 237 of 253 after a blank line -> CSharpier formats it
+  off      doc comment texts: 144 ending with a period, 60 without a period -> BRO1603 is off
+  default  doc element order (typeparam, param): 30 of 31 in BRO1619's order -> warning
+  off      keywords in doc comments: 7 of 7 '<c>null</c>' -> BRO1618 is off
+  default  non-private fields: 286 of 305 PascalCase or as your naming rule says -> warning
+  default  doc comments above their element: 123 of 123 right above it -> warning
+  off      tuple element names: 25 '(int Count, ...)', 14 '(int count, ...)' -> BRO1311 is off
+  set      using directives: 336 of 336 files sorted, 216 of 216 with System first -> CSharpier sorts them
+  default  private constants/static readonly fields: 139 of 139 PascalCase -> PascalCase
+  set      spacing (csharp_space_*): CSharpier formats it
+Summary:
+  Kept your style for 31 settings: wrote stylebro_private_field_naming, stylebro_empty_string_style,
+    stylebro_null_check_style, stylebro_keep_overloads_together, stylebro_allow_empty_single_line_blocks, end_of_line,
+    stylebro_allow_adjacent_single_line_members; 24 were already StyleBro's default.
+  Turned 4 rules off because your code mixes both forms: BRO1526 (switch sections), BRO1001 (types' members),
+    BRO1603 (doc comment texts), BRO1311 (tuple element names).
+  Turned 2 rules off because your code doesn't do what they enforce: BRO1604 (property summaries: 9 of 10 in their own
+    words), BRO1618 (keywords in doc comments: 7 of 7 '<c>null</c>').
+  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
+  2 settings had fewer than 3 places to tell, StyleBro's defaults stay: csharp_prefer_simple_default_expression,
+    dotnet_diagnostic.BRO1149.severity.
+Settings: 92 lines in .editorconfig; 9 lines in Directory.Build.props (StyleBro.Analyzers)
+  StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial64.2 to Directory.Build.props for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).
+Format run 1... 6m 28s
+CSharpier on 117 files... 4s
+Format run 2... 2m 6s
+Format: 117 files, 348 reported changes, clean after 1 run
+  BRO1002  Single-line comments should begin wit...    60 files
+  BRO1519  Closing brace should be followed by b...    28 files
+  BRO1303  Private field names should be camelCase      9 files
+  BRO1404  Access modifier should be declared           8 files
+  BRO1106  Use string.Empty for empty strings           5 files
+  BRO1309  Element names should begin with an up...     5 files
+  BRO1132  Block statements should not contain e...     4 files
+  BRO1138  A string literal should be a plain st...     3 files
+  BRO1514  Braces should not be omitted                 3 files
+  BRO1606  Constructor summary documentation sho...     3 files
+  ... and 14 more rules
+Sample (BRO1002, ArchUnitNET/Domain/Visibility.cs):
+  -            6 //should only be used for Getters/Setters or as default instead of null
+  +            6 // should only be used for Getters/Setters or as default instead of null
+Sample (BRO1519, ArchUnitNET/Domain/Extensions/EnumerableExtensions.cs):
+  (adds a blank line)
+Sample (BRO1303, ArchUnitNETTests/AssemblyTestHelper/AttributeAssemblyTestHelper.cs):
+  -    private readonly Attribute Attribute3;
+  +    private readonly Attribute _attribute3;
+Clean: 53 findings kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them (https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose).
+  ArchUnitNETTests/AssemblyTestHelper/MethodMemberAssemblyTestHelper.cs(20,28): BRO1303 Rename 'ClassWithVirtualMethod' to '_classWithVirtualMethod'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/MethodMemberSyntaxElementsTests.NotBeVirtualTest.verified.txt(23)).
+  ArchUnitNETTests/AssemblyTestHelper/MethodMemberAssemblyTestHelper.cs(21,28): BRO1303 Rename 'OtherClassWithVirtualMethod' to '_otherClassWithVirtualMethod'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/MethodMemberSyntaxElementsTests.BeMethodMembersThatTest.verified.txt(13)).
+  ArchUnitNETTests/AssemblyTestHelper/MethodMemberAssemblyTestHelper.cs(22,28): BRO1303 Rename 'ClassWithNonVirtualMethod' to '_classWithNonVirtualMethod'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/MethodMemberSyntaxElementsTests.NotBeVirtualTest.verified.txt(5)).
+  ArchUnitNETTests/AssemblyTestHelper/MethodMemberAssemblyTestHelper.cs(23,28): BRO1303 Rename 'ClassWithStringReturnType' to '_classWithStringReturnType'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/MethodMemberSyntaxElementsTests.NotBeVirtualTest.verified.txt(47)).
+  ArchUnitNETTests/AssemblyTestHelper/MethodMemberAssemblyTestHelper.cs(24,28): BRO1303 Rename 'ClassWithRegularClassReturnType' to '_classWithRegularClassReturnType'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/MethodMemberSyntaxElementsTests.BeMethodMembersThatTest.verified.txt(13)).
+  ArchUnitNETTests/AssemblyTestHelper/MethodMemberAssemblyTestHelper.cs(25,28): BRO1303 Rename 'ClassWithOtherRegularClassReturnType' to '_classWithOtherRegularClassReturnType'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/MethodMemberSyntaxElementsTests.BeMethodMembersThatTest.verified.txt(13)).
+  ArchUnitNETTests/AssemblyTestHelper/MethodMemberAssemblyTestHelper.cs(26,28): BRO1303 Rename 'ClassWithGenericReturnType' to '_classWithGenericReturnType'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/MethodMemberSyntaxElementsTests.BeMethodMembersThatTest.verified.txt(13)).
+  ArchUnitNETTests/AssemblyTestHelper/MethodMemberAssemblyTestHelper.cs(39,28): BRO1303 Rename 'ClassWithAmbiguousReturnType' to '_classWithAmbiguousReturnType'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/MethodMemberSyntaxElementsTests.HaveReturnTypeWithAmbiguousReturnTypeTest.verified.txt(3)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(14,28): BRO1303 Rename 'ClassWithWritableProperty' to '_classWithWritableProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.NotHaveSetterTest.verified.txt(23)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(15,28): BRO1303 Rename 'OtherClassWithWritableProperty' to '_otherClassWithWritableProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.NotHaveProtectedInternalSetterTest.verified.txt(49)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(16,28): BRO1303 Rename 'ClassWithInitOnlyProperty' to '_classWithInitOnlyProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/MemberSyntaxElementsTests.NotBeReadOnlyTest.verified.txt(45)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(17,28): BRO1303 Rename 'OtherClassWithInitOnlyProperty' to '_otherClassWithInitOnlyProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.HaveInitOnlySetterTest.verified.txt(49)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(18,28): BRO1303 Rename 'ClassWithGetOnlyProperty' to '_classWithGetOnlyProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.NotHaveSetterTest.verified.txt(5)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(19,28): BRO1303 Rename 'OtherClassWithGetOnlyProperty' to '_otherClassWithGetOnlyProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.NotHaveSetterTest.verified.txt(49)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(20,28): BRO1303 Rename 'ClassWithVirtualProperty' to '_classWithVirtualProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.NotBeVirtualTest.verified.txt(23)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(21,28): BRO1303 Rename 'OtherClassWithVirtualProperty' to '_otherClassWithVirtualProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.BeVirtualTest.verified.txt(49)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(22,28): BRO1303 Rename 'ClassWithNonVirtualProperty' to '_classWithNonVirtualProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.NotBeVirtualTest.verified.txt(5)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(23,28): BRO1303 Rename 'ClassWithWriteOnlyProperty' to '_classWithWriteOnlyProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.NotHaveGetterTest.verified.txt(5)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(24,28): BRO1303 Rename 'OtherClassWithWriteOnlyProperty' to '_otherClassWithWriteOnlyProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.NotHaveGetterTest.verified.txt(49)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(25,28): BRO1303 Rename 'ClassWithPrivateGetterProperty' to '_classWithPrivateGetterProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.HavePrivateGetterTest.verified.txt(5)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(26,28): BRO1303 Rename 'OtherClassWithPrivateGetterProperty' to '_otherClassWithPrivateGetterProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.HavePrivateGetterTest.verified.txt(49)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(27,28): BRO1303 Rename 'ClassWithProtectedGetterProperty' to '_classWithProtectedGetterProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.NotHaveProtectedGetterTest.verified.txt(23)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(28,28): BRO1303 Rename 'OtherClassWithProtectedGetterProperty' to '_otherClassWithProtectedGetterProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.HaveProtectedGetterTest.verified.txt(49)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(29,28): BRO1303 Rename 'ClassWithInternalGetterProperty' to '_classWithInternalGetterProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.HaveInternalGetterTest.verified.txt(5)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(30,28): BRO1303 Rename 'OtherClassWithInternalGetterProperty' to '_otherClassWithInternalGetterProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.HaveInternalGetterTest.verified.txt(49)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(31,28): BRO1303 Rename 'ClassWithProtectedInternalGetterProperty' to '_classWithProtectedInternalGetterProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.HaveProtectedInternalGetterTest.verified.txt(5)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(32,28): BRO1303 Rename 'OtherClassWithProtectedInternalGetterProperty' to '_otherClassWithProtectedInternalGetterProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.HaveProtectedInternalGetterTest.verified.txt(49)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(33,28): BRO1303 Rename 'ClassWithPrivateProtectedGetterProperty' to '_classWithPrivateProtectedGetterProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.HavePrivateProtectedGetterTest.verified.txt(5)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(34,28): BRO1303 Rename 'OtherClassWithPrivateProtectedGetterProperty' to '_otherClassWithPrivateProtectedGetterProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.HavePrivateProtectedGetterTest.verified.txt(49)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(35,28): BRO1303 Rename 'ClassWithPrivateSetterProperty' to '_classWithPrivateSetterProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.NotHavePublicSetterTest.verified.txt(5)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(36,28): BRO1303 Rename 'OtherClassWithPrivateSetterProperty' to '_otherClassWithPrivateSetterProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.HavePrivateSetterTest.verified.txt(49)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(37,28): BRO1303 Rename 'ClassWithProtectedSetterProperty' to '_classWithProtectedSetterProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.HaveProtectedSetterTest.verified.txt(5)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(38,28): BRO1303 Rename 'OtherClassWithProtectedSetterProperty' to '_otherClassWithProtectedSetterProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.HaveProtectedSetterTest.verified.txt(49)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(39,28): BRO1303 Rename 'ClassWithInternalSetterProperty' to '_classWithInternalSetterProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.NotHaveInternalSetterTest.verified.txt(23)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(40,28): BRO1303 Rename 'OtherClassWithInternalSetterProperty' to '_otherClassWithInternalSetterProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.HaveInternalSetterTest.verified.txt(49)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(41,28): BRO1303 Rename 'ClassWithProtectedInternalSetterProperty' to '_classWithProtectedInternalSetterProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.NotHaveProtectedInternalSetterTest.verified.txt(23)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(42,28): BRO1303 Rename 'OtherClassWithProtectedInternalSetterProperty' to '_otherClassWithProtectedInternalSetterProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.HaveProtectedInternalSetterTest.verified.txt(49)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(43,28): BRO1303 Rename 'ClassWithPrivateProtectedSetterProperty' to '_classWithPrivateProtectedSetterProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.HavePrivateProtectedSetterTest.verified.txt(5)).
+  ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs(44,28): BRO1303 Rename 'OtherClassWithPrivateProtectedSetterProperty' to '_otherClassWithPrivateProtectedSetterProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.HavePrivateProtectedSetterTest.verified.txt(49)).
+  ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs(100,28): BRO1303 Rename 'ClassWithWritableProperty' to '_classWithWritableProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.NotHaveSetterTest.verified.txt(23)).
+  ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs(102,28): BRO1303 Rename 'OtherClassWithWritableProperty' to '_otherClassWithWritableProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.NotHaveProtectedInternalSetterTest.verified.txt(49)).
+  ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs(104,28): BRO1303 Rename 'ClassWithInitOnlyProperty' to '_classWithInitOnlyProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/MemberSyntaxElementsTests.NotBeReadOnlyTest.verified.txt(45)).
+  ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs(106,28): BRO1303 Rename 'ClassWithGetOnlyProperty' to '_classWithGetOnlyProperty'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/PropertyMemberSyntaxElementsTests.NotHaveSetterTest.verified.txt(5)).
+  ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs(115,28): BRO1303 Rename 'ClassWithVirtualMethod' to '_classWithVirtualMethod'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/MethodMemberSyntaxElementsTests.NotBeVirtualTest.verified.txt(23)).
+  ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs(117,28): BRO1303 Rename 'OtherClassWithVirtualMethod' to '_otherClassWithVirtualMethod'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/MethodMemberSyntaxElementsTests.BeMethodMembersThatTest.verified.txt(13)).
+  ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs(119,28): BRO1303 Rename 'ClassWithNonVirtualMethod' to '_classWithNonVirtualMethod'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/MethodMemberSyntaxElementsTests.NotBeVirtualTest.verified.txt(5)).
+  ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs(121,28): BRO1303 Rename 'ClassWithStringReturnType' to '_classWithStringReturnType'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/MethodMemberSyntaxElementsTests.NotBeVirtualTest.verified.txt(47)).
+  ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs(125,28): BRO1303 Rename 'ClassWithRegularClassReturnType' to '_classWithRegularClassReturnType'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/MethodMemberSyntaxElementsTests.BeMethodMembersThatTest.verified.txt(13)).
+  ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs(127,28): BRO1303 Rename 'ClassWithOtherRegularClassReturnType' to '_classWithOtherRegularClassReturnType'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/MethodMemberSyntaxElementsTests.BeMethodMembersThatTest.verified.txt(13)).
+  ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs(131,28): BRO1303 Rename 'ClassWithGenericReturnType' to '_classWithGenericReturnType'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/MethodMemberSyntaxElementsTests.BeMethodMembersThatTest.verified.txt(13)).
+  ArchUnitNETTests/AssemblyTestHelper/TypeDependencyAssemblyTestHelper.cs(20,28): BRO1303 Rename 'OtherChildClass' to '_otherChildClass'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/ObjectSyntaxElementsTests.NotBeTest.verified.txt(9)).
+  ArchUnitNETTests/AssemblyTestHelper/TypeDependencyAssemblyTestHelper.cs(29,28): BRO1303 Rename 'BaseClassWithMultipleDependencies' to '_baseClassWithMultipleDependencies'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/ObjectSyntaxElementsTests.DependOnAnyTest.verified.txt(377)).
+  ArchUnitNETTests/AssemblyTestHelper/VisibilityAssemblyTestHelper.cs(23,28): BRO1303 Rename 'OuterClass' to '_outerClass'. Kept: the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests (first: ArchUnitNETTests/Fluent/Syntax/Elements/Snapshots/ObjectSyntaxElementsTests.BeProtectedTest.verified.txt(3)).
+Baseline (in the patch): stylebro.baseline: added 53 kept findings, so the build and 'format --verify-no-changes' skip them (new violations still fail; delete an entry to see it again) (https://bisforboman.github.io/stylebro/baseline/).
+Full diff: .git/stylebro-preview.patch (3,474 lines)
+Not checked: xunit.analyzers' rules: xunit.analyzers 1.27.0's fixes have no Fix All, so 'dotnet format' can't apply or check them (a note: the build still reports their warnings; the verdict doesn't count them)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 8m 57s.

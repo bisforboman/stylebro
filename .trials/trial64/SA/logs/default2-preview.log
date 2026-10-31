@@ -1,0 +1,108 @@
+Previewing 'bro init --write' and 'bro format' on a copy; nothing in /home/user/w64/SA/default2 changes.
+Copying the repository to /tmp/stylebro-preview-CWBOfD/default2... 0s
+Conventions in the code (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
+  kept     private fields: 27 of 28 named '_field' -> _camelCase
+  default  indentation: 19 of 19 indented with spaces -> space
+  default  multi-word private fields: 14 of 14 camelCase ('breakTarget') -> warning
+  default  '{' of multi-line blocks: 128 of 128 on its own line -> all
+  default  else/catch/finally after '}': 6 of 6 on a new line -> true
+  both     one-line if/else/loop/using/lock bodies: 12 with braces, 8 without braces -> both allowed
+  too few  one-line jumps ('if (x) return;'): 2 places -> default stays (false)
+  off      operators where a line wraps: 4 at the start of the line, 5 at the end of the line -> BRO1520 is off
+  too few  '=>' where a line wraps: 2 places -> default stays (end_of_line)
+  too few  '=' where a line wraps: 1 place -> default stays (end_of_line)
+  kept     multi-line initializers: 3 of 3 without a trailing comma -> omit
+  too few  null checks: 2 places -> default stays (pattern_matching)
+  default  one-line <summary> texts: 11 of 11 on three lines -> multi_line
+  default  ')' of split lists: 13 of 13 after the last item -> last_item
+  off      split lists: 2 first item on the next line, 2 first item after '(' -> BRO1107 is off
+  default  ': base(...)'/': this(...)': 4 of 4 on its own line -> own_line
+  default  'new T { ... }' with an initializer: 4 of 4 without '()' -> omit
+  default  files' using directives: 15 of 15 outside the namespace -> outside_namespace
+  too few  mixed arithmetic ('a + b * c'): 2 places -> default stays (always_for_clarity)
+  mixed    statements on their 'if'/loop/'case' line: 7 on a line of their own, 1 on their owner's line -> default stays (false)
+  too few  overrides/interface implementations: 1 place -> default stays (warning)
+  default  types' members: 10 of 12 in BRO1001's order -> warning
+  too few  lambda-first calls: 1 call -> default stays (false)
+  off      split lists' items: 10 of 12 grouped on lines -> BRO1108 is off
+  kept     private-by-default members: 30 of 30 without 'private' -> omit_if_default
+  off      internal-by-default types: 5 of 5 without an access modifier -> BRO1404 is off
+  off      property summaries: 3 of 3 in their own words -> BRO1604 is off
+  too few  adjacent fields of one type: 2 places -> default stays (warning)
+  default  built-in type names: 10 of 11 only keywords ('int') -> warning
+  default  empty blocks ('{ }'): 6 of 6 on two lines -> false
+  too few  block-bodied properties/methods: 2 members -> default stays (warning)
+  default  statement blocks ('if (x) { y(); }'): 16 of 16 on several lines -> warning
+  default  auto-property accessors ('{ get; set; }'): 10 of 10 on one line -> warning
+  kept     C# files' line endings: 19 of 19 LF -> lf
+  default  statements after a block's '}': 10 of 10 after a blank line -> warning
+  default  neighbouring members: 59 of 61 with a blank line between -> warning
+  default  neighbouring one-line members: 3 after a blank line -> false
+  default  '//' comments in code: 24 of 24 with text at both ends -> warning
+  default  types' and namespaces' '{': 24 of 24 right above the code -> warning
+  default  doc comments below code: 10 of 10 after a blank line -> warning
+  default  '//' comments above code: 24 of 24 right above the code -> warning
+  off      '//' comments below code: 11 after a blank line, 9 right below the code -> BRO1504 is off
+  off      doc comment texts: 20 ending with a period, 14 without a period -> BRO1603 is off
+  default  doc element order: 3 of 3 in BRO1619's order -> warning
+  default  doc comments above their element: 15 of 15 right above it -> warning
+  default  using directives: 14 of 16 files sorted, 9 of 9 with System first -> sorted, System first
+  too few  private constants/static readonly fields: 1 field -> default stays (PascalCase)
+  default  spacing, control-flow keywords: 34 of 34 'if (x)' -> 'if (x)'
+  default  spacing, control-flow parentheses: 34 of 34 'if (x)' -> 'if (x)'
+  default  spacing, parenthesized expressions: 6 of 6 '(a + b)' -> '(a + b)'
+  default  spacing, cast parentheses: 5 of 5 '(int)x' -> '(int)x'
+  default  spacing, casts: 5 of 5 '(int)x' -> '(int)x'
+  default  spacing, call arguments: 180 of 180 'F(x)' -> 'F(x)'
+  default  spacing, declared parameters: 20 of 20 'void F(int x)' -> 'void F(int x)'
+Summary:
+  Kept your style for 35 settings: wrote stylebro_private_field_naming, stylebro_trailing_comma,
+    dotnet_style_require_accessibility_modifiers, end_of_line; 31 were already StyleBro's default.
+  Allowed both forms for 1 setting because your code mixes them: csharp_prefer_braces = when_multiline (one-line
+    if/else/loop/using/lock bodies).
+  Turned 4 rules off because your code mixes both forms: BRO1520 (operators where a line wraps), BRO1107 (split lists),
+    BRO1504 ('//' comments below code), BRO1603 (doc comment texts).
+  Turned 3 rules off because your code doesn't do what they enforce: BRO1108 (split lists' items: 10 of 12 grouped on
+    lines), BRO1404 (internal-by-default types: 5 of 5 without an access modifier),
+    BRO1604 (property summaries: 3 of 3 in their own words).
+  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
+  10 settings had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_allow_single_line_jump_statements,
+    stylebro_arrow_placement_when_wrapping, stylebro_equals_placement_when_wrapping, stylebro_null_check_style,
+    dotnet_style_parentheses_in_arithmetic_binary_operators, dotnet_diagnostic.BRO1601.severity,
+    stylebro_allow_leading_multiline_lambda, dotnet_diagnostic.BRO1114.severity, dotnet_diagnostic.BRO1509.severity,
+    stylebro_private_static_field_naming.
+Settings: 59 lines in .editorconfig; 9 lines in Directory.Build.props (StyleBro.Analyzers)
+  StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.8.0-trial64.2 to Directory.Build.props for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).
+Format run 1... 17s
+Format run 2... 1s
+Format: 9 files, 22 reported changes, clean after 1 run
+  IDE0055  Whitespace and formatting                    5 files
+  BRO1001  Members should be ordered                    2 files
+  BRO1114  Do not combine fields                        2 files
+  BRO1133  Check for null in one form                   2 files
+  BRO1505  Elements should be separated by a bla...     2 files
+  IMPORTS                                               2 files
+  BRO1139  Write 'else if' on one line                  1 file
+  BRO1303  Private field names should be camelCase      1 file
+  BRO1406  Arithmetic expressions should declare...     1 file
+  BRO1601  Overrides and implementations should ...     1 file
+Sample (IDE0055, test/Serilog.Sinks.Async.Tests/Support/NotImplementedSink.cs):
+  -class NotImplementedSink: ILogEventSink
+  +class NotImplementedSink : ILogEventSink
+Sample (BRO1001, test/Serilog.Sinks.Async.Tests/BackgroundWorkerSinkSpec.cs; BRO1406 changed this file too):
+  -    BackgroundWorkerSink CreateSinkWithDefaultOptions()
+  -    {
+  -        return new BackgroundWorkerSink(_logger, 10000, false, null);
+  -    }
+  -
+Sample (BRO1114, test/Serilog.Sinks.Async.PerformanceTests/LatencyBenchmark.cs; IDE0055 changed this file too):
+  -    Logger _syncLogger, _asyncLogger, _fileLogger, _asyncFileLogger;
+  +    Logger _syncLogger;
+  +    Logger _asyncLogger;
+  +    Logger _fileLogger;
+  +    Logger _asyncFileLogger;
+Full diff: .git/stylebro-preview.patch (450 lines)
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+Done in 22s.
