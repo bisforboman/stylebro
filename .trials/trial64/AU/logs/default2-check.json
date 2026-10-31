@@ -1,0 +1,506 @@
+{
+  "schemaVersion": 1,
+  "command": "format",
+  "previewOf": null,
+  "path": "/home/user/w64/AU/default2",
+  "write": false,
+  "settings": [],
+  "conventions": [],
+  "sonar": null,
+  "agentsMd": null,
+  "runs": [
+    {
+      "run": 1,
+      "filesChanged": [],
+      "changesPerRule": {}
+    }
+  ],
+  "changesPerRule": {},
+  "filesPerRule": null,
+  "keptFindings": [
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/MethodMemberAssemblyTestHelper.cs",
+      "line": 20,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithVirtualMethod' to '_classWithVirtualMethod'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/MethodMemberAssemblyTestHelper.cs",
+      "line": 21,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'OtherClassWithVirtualMethod' to '_otherClassWithVirtualMethod'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/MethodMemberAssemblyTestHelper.cs",
+      "line": 22,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithNonVirtualMethod' to '_classWithNonVirtualMethod'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/MethodMemberAssemblyTestHelper.cs",
+      "line": 23,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithStringReturnType' to '_classWithStringReturnType'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/MethodMemberAssemblyTestHelper.cs",
+      "line": 24,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithRegularClassReturnType' to '_classWithRegularClassReturnType'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/MethodMemberAssemblyTestHelper.cs",
+      "line": 25,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithOtherRegularClassReturnType' to '_classWithOtherRegularClassReturnType'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/MethodMemberAssemblyTestHelper.cs",
+      "line": 26,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithGenericReturnType' to '_classWithGenericReturnType'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/MethodMemberAssemblyTestHelper.cs",
+      "line": 39,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithAmbiguousReturnType' to '_classWithAmbiguousReturnType'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 14,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithWritableProperty' to '_classWithWritableProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 15,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'OtherClassWithWritableProperty' to '_otherClassWithWritableProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 16,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithInitOnlyProperty' to '_classWithInitOnlyProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 17,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'OtherClassWithInitOnlyProperty' to '_otherClassWithInitOnlyProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 18,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithGetOnlyProperty' to '_classWithGetOnlyProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 19,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'OtherClassWithGetOnlyProperty' to '_otherClassWithGetOnlyProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 20,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithVirtualProperty' to '_classWithVirtualProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 21,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'OtherClassWithVirtualProperty' to '_otherClassWithVirtualProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 22,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithNonVirtualProperty' to '_classWithNonVirtualProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 23,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithWriteOnlyProperty' to '_classWithWriteOnlyProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 24,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'OtherClassWithWriteOnlyProperty' to '_otherClassWithWriteOnlyProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 25,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithPrivateGetterProperty' to '_classWithPrivateGetterProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 26,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'OtherClassWithPrivateGetterProperty' to '_otherClassWithPrivateGetterProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 27,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithProtectedGetterProperty' to '_classWithProtectedGetterProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 28,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'OtherClassWithProtectedGetterProperty' to '_otherClassWithProtectedGetterProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 29,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithInternalGetterProperty' to '_classWithInternalGetterProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 30,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'OtherClassWithInternalGetterProperty' to '_otherClassWithInternalGetterProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 31,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithProtectedInternalGetterProperty' to '_classWithProtectedInternalGetterProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 32,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'OtherClassWithProtectedInternalGetterProperty' to '_otherClassWithProtectedInternalGetterProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 33,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithPrivateProtectedGetterProperty' to '_classWithPrivateProtectedGetterProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 34,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'OtherClassWithPrivateProtectedGetterProperty' to '_otherClassWithPrivateProtectedGetterProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 35,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithPrivateSetterProperty' to '_classWithPrivateSetterProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 36,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'OtherClassWithPrivateSetterProperty' to '_otherClassWithPrivateSetterProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 37,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithProtectedSetterProperty' to '_classWithProtectedSetterProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 38,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'OtherClassWithProtectedSetterProperty' to '_otherClassWithProtectedSetterProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 39,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithInternalSetterProperty' to '_classWithInternalSetterProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 40,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'OtherClassWithInternalSetterProperty' to '_otherClassWithInternalSetterProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 41,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithProtectedInternalSetterProperty' to '_classWithProtectedInternalSetterProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 42,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'OtherClassWithProtectedInternalSetterProperty' to '_otherClassWithProtectedInternalSetterProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 43,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithPrivateProtectedSetterProperty' to '_classWithPrivateProtectedSetterProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/PropertyMemberAssemblyTestHelper.cs",
+      "line": 44,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'OtherClassWithPrivateProtectedSetterProperty' to '_otherClassWithPrivateProtectedSetterProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs",
+      "line": 100,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithWritableProperty' to '_classWithWritableProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs",
+      "line": 102,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'OtherClassWithWritableProperty' to '_otherClassWithWritableProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs",
+      "line": 104,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithInitOnlyProperty' to '_classWithInitOnlyProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs",
+      "line": 106,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithGetOnlyProperty' to '_classWithGetOnlyProperty'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs",
+      "line": 115,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithVirtualMethod' to '_classWithVirtualMethod'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs",
+      "line": 117,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'OtherClassWithVirtualMethod' to '_otherClassWithVirtualMethod'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs",
+      "line": 119,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithNonVirtualMethod' to '_classWithNonVirtualMethod'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs",
+      "line": 121,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithStringReturnType' to '_classWithStringReturnType'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs",
+      "line": 125,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithRegularClassReturnType' to '_classWithRegularClassReturnType'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs",
+      "line": 127,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithOtherRegularClassReturnType' to '_classWithOtherRegularClassReturnType'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/TypeAssemblyTestHelper.cs",
+      "line": 131,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'ClassWithGenericReturnType' to '_classWithGenericReturnType'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/TypeDependencyAssemblyTestHelper.cs",
+      "line": 20,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'OtherChildClass' to '_otherChildClass'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/TypeDependencyAssemblyTestHelper.cs",
+      "line": 29,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'BaseClassWithMultipleDependencies' to '_baseClassWithMultipleDependencies'"
+    },
+    {
+      "path": "ArchUnitNETTests/AssemblyTestHelper/VisibilityAssemblyTestHelper.cs",
+      "line": 23,
+      "column": 28,
+      "rule": "BRO1303",
+      "reason": "NameInSnapshotFile",
+      "reasonText": "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+      "message": "Rename 'OuterClass' to '_outerClass'"
+    }
+  ],
+  "patch": null,
+  "clean": true,
+  "exitCode": 0,
+  "notChecked": [
+    "xunit.analyzers' rules: xunit.analyzers 1.27.0's fixes have no Fix All, so 'dotnet format' can't apply or check them (a note: the build still reports their warnings; the verdict doesn't count them)",
+    "IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)"
+  ]
+}
