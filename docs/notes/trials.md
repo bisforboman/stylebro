@@ -1289,3 +1289,43 @@ engines (`.trials/README.md`, "Engine soak").
 - Environment: SDK 10.0.113 + 8.0.132; the trial feed in the user NuGet.Config; `-p:NuGetAudit=false`; t4's
   Nerdbank.GitVersioning needs the full history (the trial clones from a full local clone); `pkill -f`/`pgrep -f` with a
   pattern from the same command line killed the calling shell twice (use a bracketed pattern like `[I]nvoke-Mutations`).
+
+## Trial 64 (2026-10-31, not clean: owner "Not clean", tally 0; host soak: clean, the ninth clean soak with the host as the default)
+
+- Repos (three random plus one targeted): serilog/serilog-expressions, serilog/serilog-extensions-logging,
+  serilog/serilog-sinks-async (random, seed 64: draws 60, 15, 80 of 104 entries walked down to 98, 99, 100; 92 PolySharp still
+  needs SDK 11, 93 Statiq.Framework is too large; `.trials/trial64/logs/picks.md`), TNG/ArchUnitNET (targeted at trial 63's
+  fixes: 880 of 1129 member pairs one-line neighbours, netstandard2.0;net462/net472 libraries; none of the scanned candidates
+  had a using alias with a nullable type argument, `.trials/trial64/shape.py`; added to the pool). Tested main 7a1e23a (after
+  #321) plus this PR's commits: round 1 on 0.8.0-trial64.1 (`default`/`dotnet`), round 2 on .2 (all four, `default2`/`dotnet2`).
+  Logs: `.trials/trial64/<repo>/logs/`; the scripts are trial 63's.
+- One session, two lanes; no worker restart during the runs (one after them). Wall clock: 06:50 start, round 1 06:59-09:34,
+  round 2 08:37-11:57, verdict ~12:10.
+- ArchUnitNET (CSharpier 1.3.0 as a local tool, init wrote `stylebro_layout_by = csharpier`): BRO1519 wanted a blank line
+  between an `if` block's `}` and an `unchecked { }` block, and CSharpier removes every blank line above a
+  `checked`/`unchecked` statement, whatever comes before it. Format said so (Not clean, CSharpier puts back what BRO1519
+  changes), check and check --build said Not clean, and the library's own TreatWarningsAsErrors build failed on that finding.
+  With CSharpier laying the code out, BRO1519's own finding now skips that gap (`BlankLineRunsTests`); fixes that create a
+  `}` may still add the line, and CSharpier, which runs after them, takes it out. init allowed the one-line neighbours, and
+  the fresh clone's first format planned the same 5 framework runs as the second (trial 63's fixes held). 53 BRO1303 renames
+  kept (names in snapshot files) and baselined; 2 tests fail untouched in Release only.
+- The serilog repositories: clean on both engines in both rounds. Their benchmark projects are test projects that run real
+  BenchmarkDotNet benchmarks under `dotnet test` in Release (serilog-extensions-logging, serilog-sinks-async: left out of the
+  test runs; serilog-expressions' takes ~4 minutes, the same untouched and after).
+- #312: on SE, SL and SA `bro check` after a clean format answered from the record with the verdict and exit code of the full
+  check after deleting the record (Clean, 0) on both engines; on ArchUnitNET the xunit.analyzers "Not checked" note keeps the
+  record from being marked checked, so check runs everything (82 s vs ~1 s, same verdict; owner: backlog,
+  `scripts/backlog/work/077-fast-check-with-notes.json`). check --build said Clean on all four in round 2.
+- Every TWAE build (Debug, Release) passed as untouched in round 2 (round 1: ArchUnitNET failed on BRO1519 only), and the tests
+  matched: SE 463, SL 94 per framework (net8.0/9.0/10.0), SA 28 per framework, ArchUnitNET 778 + 4 skipped plus the adapters'.
+- Host soak: no fallback; both rounds' trees, exit codes, verdicts, --json and logs identical, every Compare-Format run Same.
+  ArchUnitNET's compiler-output finding lines (`path(l,c): error BRO1303`) came in another order: they follow the parallel
+  build, so `norm.py` compares them unordered like the indented ones. Format (s, host/dotnet-format, r2): AU 122/450,
+  SL 58/151, SE 58/140, SA 20/56; check --build: 379/493, 73/86, 92/119, 41/37; full check: 129/243, 31/32, 23/29, 14/14.
+  Soak (Compare-Format, check; format): AU 178/352; 130/388, SL 63/167; 35/105, SE 60/134; 65/139, SA 25/60; 19/53.
+- My mistake, not a finding: a `bro format` I ran in ArchUnitNET's round 2 clone while the trial's TWAE build restored it
+  loaded the projects without the package's build targets, and BRO1601 added 34 `<inheritdoc/>` lines in a project that
+  doesn't generate documentation. That host run's logs are in `AU/logs/contaminated/`, and it ran again on a fresh clone
+  (the numbers above). Never run anything in a clone a run is using.
+- Environment: SDK 10.0.114 + 8.0.133; the trial feed in the user NuGet.Config; ArchUnitNET's two global.json pins lowered,
+  its TUnit tests run from their folder (Microsoft.Testing.Platform mode); `-p:NuGetAudit=false`.
