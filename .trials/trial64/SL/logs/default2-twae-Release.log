@@ -1,0 +1,24 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Serilog.Extensions.Logging -> /home/user/w64/SL/default2/src/Serilog.Extensions.Logging/bin/Release/net10.0/Serilog.Extensions.Logging.dll
+  Serilog.Extensions.Logging -> /home/user/w64/SL/default2/src/Serilog.Extensions.Logging/bin/Release/net462/Serilog.Extensions.Logging.dll
+  Sample -> /home/user/w64/SL/default2/samples/Sample/bin/Release/net10.0/Sample.dll
+  SampleWithExternalScope -> /home/user/w64/SL/default2/samples/SampleWithExternalScope/bin/Release/net10.0/SampleWithExternalScope.dll
+  Serilog.Extensions.Logging -> /home/user/w64/SL/default2/src/Serilog.Extensions.Logging/bin/Release/net8.0/Serilog.Extensions.Logging.dll
+  Serilog.Extensions.Logging -> /home/user/w64/SL/default2/src/Serilog.Extensions.Logging/bin/Release/net9.0/Serilog.Extensions.Logging.dll
+  Serilog.Extensions.Logging.Benchmarks -> /home/user/w64/SL/default2/test/Serilog.Extensions.Logging.Benchmarks/bin/Release/net10.0/Serilog.Extensions.Logging.Benchmarks.dll
+  Serilog.Extensions.Logging.Tests -> /home/user/w64/SL/default2/test/Serilog.Extensions.Logging.Tests/bin/Release/net9.0/Serilog.Extensions.Logging.Tests.dll
+  Serilog.Extensions.Logging.Tests -> /home/user/w64/SL/default2/test/Serilog.Extensions.Logging.Tests/bin/Release/net10.0/Serilog.Extensions.Logging.Tests.dll
+  Serilog.Extensions.Logging.Benchmarks -> /home/user/w64/SL/default2/test/Serilog.Extensions.Logging.Benchmarks/bin/Release/net9.0/Serilog.Extensions.Logging.Benchmarks.dll
+  Serilog.Extensions.Logging -> /home/user/w64/SL/default2/src/Serilog.Extensions.Logging/bin/Release/netstandard2.0/Serilog.Extensions.Logging.dll
+  SampleWithMelProviders -> /home/user/w64/SL/default2/samples/SampleWithMelProviders/bin/Release/net9.0/SampleWithMelProviders.dll
+  Serilog.Extensions.Logging -> /home/user/w64/SL/default2/src/Serilog.Extensions.Logging/bin/Release/netstandard2.1/Serilog.Extensions.Logging.dll
+  Serilog.Extensions.Logging.Tests -> /home/user/w64/SL/default2/test/Serilog.Extensions.Logging.Tests/bin/Release/net8.0/Serilog.Extensions.Logging.Tests.dll
+  Serilog.Extensions.Logging.Benchmarks -> /home/user/w64/SL/default2/test/Serilog.Extensions.Logging.Benchmarks/bin/Release/net8.0/Serilog.Extensions.Logging.Benchmarks.dll
+  Serilog.Extensions.Logging.Tests -> /home/user/w64/SL/default2/test/Serilog.Extensions.Logging.Tests/bin/Release/net48/Serilog.Extensions.Logging.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:07.87

@@ -5,3 +5,9 @@ check	0	1s	bro check --engine dotnet-format
 check-json	0
 check-full	0	29s	bro check --engine dotnet-format
 checkbuild	0	119s	bro check --build --engine dotnet-format
+checkbuild-json	0
+twae-Debug	0	16s	twae Debug
+test-Debug	0	18s	env CFG=Debug bash -c dotnet test serilog-expressions.sln -c $CFG
+twae-Release	0	13s	twae Release
+test-Release	0	256s	env CFG=Release bash -c dotnet test serilog-expressions.sln -c $CFG
+DONE

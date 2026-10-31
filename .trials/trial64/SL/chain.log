@@ -8,3 +8,9 @@ CHAIN-DONE
 soak start 08:28
 soak done rc=0 08:37
 soak-compare done 08:37
+default2 start 09:08
+default2 done 09:14
+dotnet2 start 09:14
+dotnet2 done 09:24
+CHAIN-DONE
+soak start 09:24
