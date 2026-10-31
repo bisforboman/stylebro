@@ -1,0 +1,22 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Serilog.Expressions -> /home/user/w64/SE/default2/src/Serilog.Expressions/bin/Release/net6.0/Serilog.Expressions.dll
+  Serilog.Expressions -> /home/user/w64/SE/default2/src/Serilog.Expressions/bin/Release/net9.0/Serilog.Expressions.dll
+  Serilog.Expressions -> /home/user/w64/SE/default2/src/Serilog.Expressions/bin/Release/net8.0/Serilog.Expressions.dll
+  Serilog.Expressions -> /home/user/w64/SE/default2/src/Serilog.Expressions/bin/Release/netstandard2.0/Serilog.Expressions.dll
+  Serilog.Expressions.Tests -> /home/user/w64/SE/default2/test/Serilog.Expressions.Tests/bin/Release/net9.0/Serilog.Expressions.Tests.dll
+  Serilog.Expressions.PerformanceTests -> /home/user/w64/SE/default2/test/Serilog.Expressions.PerformanceTests/bin/Release/net9.0/Serilog.Expressions.PerformanceTests.dll
+Test run for /home/user/w64/SE/default2/test/Serilog.Expressions.Tests/bin/Release/net9.0/Serilog.Expressions.Tests.dll (.NETCoreApp,Version=v9.0)
+Test run for /home/user/w64/SE/default2/test/Serilog.Expressions.PerformanceTests/bin/Release/net9.0/Serilog.Expressions.PerformanceTests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:   463, Skipped:     0, Total:   463, Duration: 2 s - Serilog.Expressions.Tests.dll (net9.0)
+
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 3 m 10 s - Serilog.Expressions.PerformanceTests.dll (net9.0)

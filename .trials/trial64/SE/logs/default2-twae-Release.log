@@ -1,0 +1,15 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Serilog.Expressions -> /home/user/w64/SE/default2/src/Serilog.Expressions/bin/Release/net9.0/Serilog.Expressions.dll
+  Serilog.Expressions -> /home/user/w64/SE/default2/src/Serilog.Expressions/bin/Release/net6.0/Serilog.Expressions.dll
+  Serilog.Expressions -> /home/user/w64/SE/default2/src/Serilog.Expressions/bin/Release/net8.0/Serilog.Expressions.dll
+  Serilog.Expressions -> /home/user/w64/SE/default2/src/Serilog.Expressions/bin/Release/netstandard2.0/Serilog.Expressions.dll
+  Sample -> /home/user/w64/SE/default2/example/Sample/bin/Release/net9.0/Sample.dll
+  Serilog.Expressions.PerformanceTests -> /home/user/w64/SE/default2/test/Serilog.Expressions.PerformanceTests/bin/Release/net9.0/Serilog.Expressions.PerformanceTests.dll
+  Serilog.Expressions.Tests -> /home/user/w64/SE/default2/test/Serilog.Expressions.Tests/bin/Release/net9.0/Serilog.Expressions.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:09.38

@@ -33,3 +33,5 @@ Or undo this operation with:
 Turn off this advice by setting config variable advice.detachedHead to false
 
 == soak-src: dotnet-format check
+== soak-src: host check
+== soak-src: dotnet-format format

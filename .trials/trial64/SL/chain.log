@@ -6,3 +6,5 @@ dotnet start 08:16
 dotnet done 08:28
 CHAIN-DONE
 soak start 08:28
+soak done rc=0 08:37
+soak-compare done 08:37
