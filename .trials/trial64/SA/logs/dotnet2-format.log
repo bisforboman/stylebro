@@ -1,0 +1,24 @@
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net6.0, net8.0, netstandard2.0). net8.0: only the projects whose code compiles differently there.
+Checked netstandard2.0 (run 1 of 3)
+Checked net8.0 (run 2 of 3)
+Checked net6.0 (run 3 of 3)
+== net6.0 (3 project(s), 9 files with findings)
+== net8.0 (1 project(s), 2 files with findings)
+== netstandard2.0 (1 project(s), 1 file with findings)
+Run 1: 9 files changed:
+  src/Serilog.Sinks.Async/Sinks/Async/BackgroundWorkerSink.cs
+  test/Serilog.Sinks.Async.PerformanceTests/LatencyBenchmark.cs
+  test/Serilog.Sinks.Async.PerformanceTests/ThroughputBenchmark.cs
+  test/Serilog.Sinks.Async.Tests/BackgroundWorkerSinkIntegrationSpec.cs
+  test/Serilog.Sinks.Async.Tests/BackgroundWorkerSinkSpec.cs
+  test/Serilog.Sinks.Async.Tests/Support/CollectingFailureListener.cs
+  test/Serilog.Sinks.Async.Tests/Support/DummyMonitor.cs
+  test/Serilog.Sinks.Async.Tests/Support/MemorySink.cs
+  test/Serilog.Sinks.Async.Tests/Support/NotImplementedSink.cs
+Checked netstandard2.0 (run 1 of 3)
+Checked net8.0 (run 2 of 3)
+Checked net6.0 (run 3 of 3)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
