@@ -1,0 +1,47 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  TestAssembly -> /home/user/w64/AU/dotnet2/TestAssembly/bin/Debug/net10.0/TestAssembly.dll
+  TypeDependencyAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/TypeDependencyAssembly/bin/Debug/net10.0/TypeDependencyAssembly.dll
+  AttributeAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/AttributeAssembly/bin/Debug/net10.0/AttributeAssembly.dll
+  VisibilityAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/VisibilityAssembly/bin/Debug/net10.0/VisibilityAssembly.dll
+  FilteredDirectoryUnavailableTypesAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/FilteredDirectoryUnavailableTypesAssembly/bin/Debug/net10.0/FilteredDirectoryUnavailableTypesAssembly.dll
+  ArchUnitNET -> /home/user/w64/AU/dotnet2/ArchUnitNET/bin/Debug/net462/ArchUnitNET.dll
+  ArchUnitNET -> /home/user/w64/AU/dotnet2/ArchUnitNET/bin/Debug/netstandard2.0/ArchUnitNET.dll
+  MethodMemberAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/MethodMemberAssembly/bin/Debug/net10.0/MethodMemberAssembly.dll
+  MethodDependencyAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/MethodDependencyAssembly/bin/Debug/net10.0/MethodDependencyAssembly.dll
+  OptimizedAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/OptimizedAssembly/bin/Debug/net10.0/OptimizedAssembly.dll
+  DuplicateFullNameAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/DuplicateFullNameAssembly/bin/Debug/net10.0/DuplicateFullNameAssembly.dll
+  OtherDuplicateFullNameAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/OtherDuplicateFullNameAssembly/bin/Debug/net10.0/OtherDuplicateFullNameAssembly.dll
+  FilteredDirectoryLoaderTestAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/FilteredDirectoryLoaderTestAssembly/bin/Debug/net10.0/FilteredDirectoryLoaderTestAssembly.dll
+  TypeAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/TypeAssembly/bin/Debug/net10.0/TypeAssembly.dll
+  PropertyMemberAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/PropertyMemberAssembly/bin/Debug/net10.0/PropertyMemberAssembly.dll
+  ArchUnitNET.xUnit -> /home/user/w64/AU/dotnet2/ArchUnitNET.xUnit/bin/Debug/net462/ArchUnitNET.xUnit.dll
+  ArchUnitNET.NUnit -> /home/user/w64/AU/dotnet2/ArchUnitNET.NUnit/bin/Debug/netstandard2.0/ArchUnitNET.NUnit.dll
+  ArchUnitNET.xUnit -> /home/user/w64/AU/dotnet2/ArchUnitNET.xUnit/bin/Debug/netstandard2.0/ArchUnitNET.xUnit.dll
+  ArchUnitNET.MSTestV4 -> /home/user/w64/AU/dotnet2/ArchUnitNET.MSTestV4/bin/Debug/netstandard2.0/ArchUnitNET.MSTestV4.dll
+  ArchUnitNET.MSTestV2 -> /home/user/w64/AU/dotnet2/ArchUnitNET.MSTestV2/bin/Debug/netstandard2.0/ArchUnitNET.MSTestV2.dll
+  FunctionPointerAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/FunctionPointerAssembly/bin/Debug/net10.0/FunctionPointerAssembly.dll
+  ExampleTest -> /home/user/w64/AU/dotnet2/ExampleTest/bin/Debug/net10.0/ExampleTest.dll
+  ArchUnitNET.xUnitV3 -> /home/user/w64/AU/dotnet2/ArchUnitNET.xUnitV3/bin/Debug/netstandard2.0/ArchUnitNET.xUnitV3.dll
+  ArchUnitNET.NUnit -> /home/user/w64/AU/dotnet2/ArchUnitNET.NUnit/bin/Debug/net462/ArchUnitNET.NUnit.dll
+  ArchUnitNET.xUnitV3 -> /home/user/w64/AU/dotnet2/ArchUnitNET.xUnitV3/bin/Debug/net472/ArchUnitNET.xUnitV3.dll
+  ArchUnitNET.MSTestV4Tests -> /home/user/w64/AU/dotnet2/ArchUnitNET.MSTestV4Tests/bin/Debug/net10.0/ArchUnitNET.MSTestV4Tests.dll
+  ArchUnitNET.MSTestV2 -> /home/user/w64/AU/dotnet2/ArchUnitNET.MSTestV2/bin/Debug/net462/ArchUnitNET.MSTestV2.dll
+  ClassAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/ClassAssembly/bin/Debug/net10.0/ClassAssembly.dll
+  SlicesTestAssembly -> /home/user/w64/AU/dotnet2/TestAssemblies/SlicesTestAssembly/bin/Debug/net10.0/SlicesTestAssembly.dll
+  ArchUnitNET.xUnitV3Tests -> /home/user/w64/AU/dotnet2/ArchUnitNET.xUnitV3Tests/bin/Debug/net10.0/ArchUnitNET.xUnitV3Tests.dll
+  ArchUnitNET.xUnitTests -> /home/user/w64/AU/dotnet2/ArchUnitNET.xUnitTests/bin/Debug/net10.0/ArchUnitNET.xUnitTests.dll
+  ArchUnitNET.MSTestV2Tests -> /home/user/w64/AU/dotnet2/ArchUnitNET.MSTestV2Tests/bin/Debug/net10.0/ArchUnitNET.MSTestV2Tests.dll
+  ArchUnitNET.MSTestV3Tests -> /home/user/w64/AU/dotnet2/ArchUnitNET.MSTestV3Tests/bin/Debug/net10.0/ArchUnitNET.MSTestV3Tests.dll
+  ArchUnitNET.TUnit -> /home/user/w64/AU/dotnet2/ArchUnitNET.TUnit/bin/Debug/netstandard2.0/ArchUnitNET.TUnit.dll
+  ArchUnitNET.TUnitTests -> /home/user/w64/AU/dotnet2/ArchUnitNET.TUnitTests/bin/Debug/net10.0/ArchUnitNET.TUnitTests.dll
+  ArchUnitNET.TUnit -> /home/user/w64/AU/dotnet2/ArchUnitNET.TUnit/bin/Debug/net472/ArchUnitNET.TUnit.dll
+  ArchUnitNET.MSTestV4 -> /home/user/w64/AU/dotnet2/ArchUnitNET.MSTestV4/bin/Debug/net462/ArchUnitNET.MSTestV4.dll
+  ArchUnitNETTests -> /home/user/w64/AU/dotnet2/ArchUnitNETTests/bin/Debug/net10.0/ArchUnitNETTests.dll
+  ArchUnitNET.NUnitTests -> /home/user/w64/AU/dotnet2/ArchUnitNET.NUnitTests/bin/Debug/net10.0/ArchUnitNET.NUnitTests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:15.73
