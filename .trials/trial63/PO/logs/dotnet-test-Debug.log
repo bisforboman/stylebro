@@ -1,0 +1,211 @@
+  Determining projects to restore...
+  Restored /home/user/w63/PO/dotnet/src/Pose/Pose.csproj (in 380 ms).
+  Restored /home/user/w63/PO/dotnet/test/Pose.Tests/Pose.Tests.csproj (in 398 ms).
+  Pose -> /home/user/w63/PO/dotnet/src/Pose/bin/Debug/netstandard2.1/Pose.dll
+  Pose.Tests -> /home/user/w63/PO/dotnet/test/Pose.Tests/bin/Debug/netcoreapp3.1/Pose.Tests.dll
+Test run for /home/user/w63/PO/dotnet/test/Pose.Tests/bin/Debug/netcoreapp3.1/Pose.Tests.dll (.NETCoreApp,Version=v3.1)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+  Failed TestGetShimDelegateTarget [40 ms]
+  Error Message:
+   Test method Pose.Tests.StubHelperTests.TestGetShimDelegateTarget threw exception: 
+System.NullReferenceException: Object reference not set to an instance of an object.
+  Stack Trace:
+      at Pose.Extensions.ILGeneratorExtensions.GetILBytes(ILGenerator ilGenerator) in /home/user/w63/PO/dotnet/src/Pose/Extensions/ILGeneratorExtensions.cs:line 11
+   at Pose.IL.MethodRewriter.Rewrite() in /home/user/w63/PO/dotnet/src/Pose/IL/MethodRewriter.cs:line 164
+   at Pose.PoseContext.Isolate(Action entryPoint, Shim[] shims) in /home/user/w63/PO/dotnet/src/Pose/PoseContext.cs:line 28
+   at Pose.Tests.StubHelperTests.TestGetShimDelegateTarget() in /home/user/w63/PO/dotnet/test/Pose.Tests/Helpers/StubHelperTests.cs:line 32
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Standard Output Messages:
+ 
+ 
+ Debug Trace:
+ 
+ Void <TestGetShimDelegateTarget>b__1_2()
+ IL_0000: nop
+ IL_0001: ret
+
+
+  Failed TestGetShimReplacementMethod [1 ms]
+  Error Message:
+   Test method Pose.Tests.StubHelperTests.TestGetShimReplacementMethod threw exception: 
+System.NullReferenceException: Object reference not set to an instance of an object.
+  Stack Trace:
+      at Pose.Extensions.ILGeneratorExtensions.GetILBytes(ILGenerator ilGenerator) in /home/user/w63/PO/dotnet/src/Pose/Extensions/ILGeneratorExtensions.cs:line 11
+   at Pose.IL.MethodRewriter.Rewrite() in /home/user/w63/PO/dotnet/src/Pose/IL/MethodRewriter.cs:line 164
+   at Pose.PoseContext.Isolate(Action entryPoint, Shim[] shims) in /home/user/w63/PO/dotnet/src/Pose/PoseContext.cs:line 28
+   at Pose.Tests.StubHelperTests.TestGetShimReplacementMethod() in /home/user/w63/PO/dotnet/test/Pose.Tests/Helpers/StubHelperTests.cs:line 43
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Standard Output Messages:
+ 
+ 
+ Debug Trace:
+ 
+ Void <TestGetShimReplacementMethod>b__2_2()
+ IL_0000: nop
+ IL_0001: ret
+
+
+  Failed TestGetIndexOfMatchingShim [1 ms]
+  Error Message:
+   Test method Pose.Tests.StubHelperTests.TestGetIndexOfMatchingShim threw exception: 
+System.NullReferenceException: Object reference not set to an instance of an object.
+  Stack Trace:
+      at Pose.Extensions.ILGeneratorExtensions.GetILBytes(ILGenerator ilGenerator) in /home/user/w63/PO/dotnet/src/Pose/Extensions/ILGeneratorExtensions.cs:line 11
+   at Pose.IL.MethodRewriter.Rewrite() in /home/user/w63/PO/dotnet/src/Pose/IL/MethodRewriter.cs:line 164
+   at Pose.PoseContext.Isolate(Action entryPoint, Shim[] shims) in /home/user/w63/PO/dotnet/src/Pose/PoseContext.cs:line 28
+   at Pose.Tests.StubHelperTests.TestGetIndexOfMatchingShim() in /home/user/w63/PO/dotnet/test/Pose.Tests/Helpers/StubHelperTests.cs:line 59
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Standard Output Messages:
+ 
+ 
+ Debug Trace:
+ 
+ Void <TestGetIndexOfMatchingShim>b__3_5()
+ IL_0000: nop
+ IL_0001: ret
+
+
+  Failed TestStaticMethodRewrite [10 ms]
+  Error Message:
+   Test method Pose.Tests.MethodRewriterTests.TestStaticMethodRewrite threw exception: 
+System.NullReferenceException: Object reference not set to an instance of an object.
+  Stack Trace:
+      at Pose.Extensions.ILGeneratorExtensions.GetILBytes(ILGenerator ilGenerator) in /home/user/w63/PO/dotnet/src/Pose/Extensions/ILGeneratorExtensions.cs:line 11
+   at Pose.IL.MethodRewriter.Rewrite() in /home/user/w63/PO/dotnet/src/Pose/IL/MethodRewriter.cs:line 164
+   at Pose.Tests.MethodRewriterTests.TestStaticMethodRewrite() in /home/user/w63/PO/dotnet/test/Pose.Tests/IL/MethodRewriterTests.cs:line 20
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Standard Output Messages:
+ 
+ 
+ Debug Trace:
+ 
+ System.DateTime get_Now()
+ IL_0000: call System.DateTime get_UtcNow()
+ IL_0005: stloc.0
+ IL_0006: ldloc.0
+ IL_0007: ldloca.s System.Boolean (2)
+ IL_0009: call System.TimeSpan GetDateTimeNowUtcOffsetFromUtc(System.DateTime, Boolean ByRef)
+ IL_000e: stloc.s System.TimeSpan (4)
+ IL_0010: ldloca.s System.TimeSpan (4)
+ IL_0012: call Int64 get_Ticks()
+ IL_0017: stloc.1
+ IL_0018: ldloca.s System.DateTime (0)
+ IL_001a: call Int64 get_Ticks()
+ IL_001f: ldloc.1
+ IL_0020: add
+ IL_0021: stloc.3
+ IL_0022: ldloc.3
+ IL_0023: ldc.i8 3155378975999999999
+ IL_002c: bgt.un.s IL_0053
+ IL_002e: ldloc.2
+ IL_002f: brtrue.s IL_0042
+ IL_0031: ldloc.3
+ IL_0032: ldc.i8 -9223372036854775808
+ IL_003b: or
+ IL_003c: newobj Void .ctor(UInt64)
+ IL_0041: ret
+ IL_0042: ldloc.3
+ IL_0043: ldc.i8 -4611686018427387904
+ IL_004c: or
+ IL_004d: newobj Void .ctor(UInt64)
+ IL_0052: ret
+ IL_0053: ldloc.3
+ IL_0054: ldc.i4.0
+ IL_0055: conv.i8
+ IL_0056: blt.s IL_0063
+ IL_0058: ldc.i8 -6067993060854775809
+ IL_0061: br.s IL_006c
+ IL_0063: ldc.i8 -9223372036854775808
+ IL_006c: newobj Void .ctor(UInt64)
+ IL_0071: ret
+
+
+  Failed TestInstanceMethodRewrite [1 ms]
+  Error Message:
+   Test method Pose.Tests.MethodRewriterTests.TestInstanceMethodRewrite threw exception: 
+System.NullReferenceException: Object reference not set to an instance of an object.
+  Stack Trace:
+      at Pose.Extensions.ILGeneratorExtensions.GetILBytes(ILGenerator ilGenerator) in /home/user/w63/PO/dotnet/src/Pose/Extensions/ILGeneratorExtensions.cs:line 11
+   at Pose.IL.MethodRewriter.Rewrite() in /home/user/w63/PO/dotnet/src/Pose/IL/MethodRewriter.cs:line 164
+   at Pose.Tests.MethodRewriterTests.TestInstanceMethodRewrite() in /home/user/w63/PO/dotnet/test/Pose.Tests/IL/MethodRewriterTests.cs:line 33
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Standard Output Messages:
+ 
+ 
+ Debug Trace:
+ 
+ Void Add(System.String)
+ IL_0000: ldarg.0
+ IL_0001: ldarg.0
+ IL_0002: ldfld Int32 _version
+ IL_0007: ldc.i4.1
+ IL_0008: add
+ IL_0009: stfld Int32 _version
+ IL_000e: ldarg.0
+ IL_000f: ldfld System.String[] _items
+ IL_0014: stloc.0
+ IL_0015: ldarg.0
+ IL_0016: ldfld Int32 _size
+ IL_001b: stloc.1
+ IL_001c: ldloc.1
+ IL_001d: ldloc.0
+ IL_001e: ldlen
+ IL_001f: conv.i4
+ IL_0020: bge.un.s IL_0034
+ IL_0022: ldarg.0
+ IL_0023: ldloc.1
+ IL_0024: ldc.i4.1
+ IL_0025: add
+ IL_0026: stfld Int32 _size
+ IL_002b: ldloc.0
+ IL_002c: ldloc.1
+ IL_002d: ldarg.1
+ IL_002e: stelem System.String
+ IL_0033: ret
+ IL_0034: ldarg.0
+ IL_0035: ldarg.1
+ IL_0036: call Void AddWithResize(System.String)
+ IL_003b: ret
+
+
+  Failed TestConstructorRewrite [1 ms]
+  Error Message:
+   Test method Pose.Tests.MethodRewriterTests.TestConstructorRewrite threw exception: 
+System.NullReferenceException: Object reference not set to an instance of an object.
+  Stack Trace:
+      at Pose.Extensions.ILGeneratorExtensions.GetILBytes(ILGenerator ilGenerator) in /home/user/w63/PO/dotnet/src/Pose/Extensions/ILGeneratorExtensions.cs:line 11
+   at Pose.IL.MethodRewriter.Rewrite() in /home/user/w63/PO/dotnet/src/Pose/IL/MethodRewriter.cs:line 164
+   at Pose.Tests.MethodRewriterTests.TestConstructorRewrite() in /home/user/w63/PO/dotnet/test/Pose.Tests/IL/MethodRewriterTests.cs:line 48
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Standard Output Messages:
+ 
+ 
+ Debug Trace:
+ 
+ Void .ctor()
+ IL_0000: ldarg.0
+ IL_0001: call Void .ctor()
+ IL_0006: ldarg.0
+ IL_0007: ldsfld System.String[] s_emptyArray
+ IL_000c: stfld System.String[] _items
+ IL_0011: ret
+
+
+  Skipped TestReplacePropertySetterAction
+
+Failed!  - Failed:     6, Passed:    20, Skipped:     1, Total:    27, Duration: 173 ms - Pose.Tests.dll (netcoreapp3.1)

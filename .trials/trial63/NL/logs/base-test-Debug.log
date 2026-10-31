@@ -1,0 +1,62 @@
+  Determining projects to restore...
+  Restored /home/user/w63/NL/base/examples/NetCore2/ConsoleExample/ConsoleExample.csproj (in 686 ms).
+  Restored /home/user/w63/NL/base/examples/NetCore2/HostingExample/HostingExample.csproj (in 732 ms).
+  Restored /home/user/w63/NL/base/examples/NetCore2/ConsoleExampleJsonConfig/ConsoleExampleJsonConfig.csproj (in 13 ms).
+  Restored /home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/NLog.Extensions.Logging.Tests.csproj (in 916 ms).
+  Restored /home/user/w63/NL/base/test/NLog.Extensions.Hosting.Tests/NLog.Extensions.Hosting.Tests.csproj (in 975 ms).
+  Restored /home/user/w63/NL/base/src/NLog.Extensions.Hosting/NLog.Extensions.Hosting.csproj (in 457 ms).
+  Restored /home/user/w63/NL/base/src/NLog.Extensions.Logging/NLog.Extensions.Logging.csproj (in 502 ms).
+  NLog.Extensions.Logging -> /home/user/w63/NL/base/src/NLog.Extensions.Logging/bin/Debug/net8.0/NLog.Extensions.Logging.dll
+  NLog.Extensions.Hosting -> /home/user/w63/NL/base/src/NLog.Extensions.Hosting/bin/Debug/net8.0/NLog.Extensions.Hosting.dll
+/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/CustomBeginScopeTest.cs(17,43): warning xUnit1031: Test methods should not use blocking task operations, as they can cause deadlocks. Use an async test method and await instead. (https://xunit.net/xunit.analyzers/rules/xUnit1031) [/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/NLog.Extensions.Logging.Tests.csproj::TargetFramework=net8.0]
+/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/CustomBeginScopeTest.cs(27,43): warning xUnit1031: Test methods should not use blocking task operations, as they can cause deadlocks. Use an async test method and await instead. (https://xunit.net/xunit.analyzers/rules/xUnit1031) [/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/NLog.Extensions.Logging.Tests.csproj::TargetFramework=net8.0]
+/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/CustomBeginScopeTest.cs(48,53): warning xUnit1031: Test methods should not use blocking task operations, as they can cause deadlocks. Use an async test method and await instead. (https://xunit.net/xunit.analyzers/rules/xUnit1031) [/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/NLog.Extensions.Logging.Tests.csproj::TargetFramework=net8.0]
+/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/CustomBeginScopeTest.cs(37,46): warning xUnit1031: Test methods should not use blocking task operations, as they can cause deadlocks. Use an async test method and await instead. (https://xunit.net/xunit.analyzers/rules/xUnit1031) [/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/NLog.Extensions.Logging.Tests.csproj::TargetFramework=net8.0]
+/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/CustomBeginScopeTest.cs(68,47): warning xUnit1031: Test methods should not use blocking task operations, as they can cause deadlocks. Use an async test method and await instead. (https://xunit.net/xunit.analyzers/rules/xUnit1031) [/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/NLog.Extensions.Logging.Tests.csproj::TargetFramework=net8.0]
+/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/CustomBeginScopeTest.cs(58,45): warning xUnit1031: Test methods should not use blocking task operations, as they can cause deadlocks. Use an async test method and await instead. (https://xunit.net/xunit.analyzers/rules/xUnit1031) [/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/NLog.Extensions.Logging.Tests.csproj::TargetFramework=net8.0]
+/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/LoggerTests.cs(225,85): warning CA2017: Number of parameters supplied in the logging message template do not match the number of named placeholders (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2017) [/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/NLog.Extensions.Logging.Tests.csproj::TargetFramework=net8.0]
+/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/LoggerTests.cs(233,85): warning CA2017: Number of parameters supplied in the logging message template do not match the number of named placeholders (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2017) [/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/NLog.Extensions.Logging.Tests.csproj::TargetFramework=net8.0]
+  NLog.Extensions.Logging.Tests -> /home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/bin/Debug/net8.0/NLog.Extensions.Logging.Tests.dll
+Test run for /home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/bin/Debug/net8.0/NLog.Extensions.Logging.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+  NLog.Extensions.Hosting.Tests -> /home/user/w63/NL/base/test/NLog.Extensions.Hosting.Tests/bin/Debug/net8.0/NLog.Extensions.Hosting.Tests.dll
+Test run for /home/user/w63/NL/base/test/NLog.Extensions.Hosting.Tests/bin/Debug/net8.0/NLog.Extensions.Hosting.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:   143, Skipped:     0, Total:   143, Duration: 1 s - NLog.Extensions.Logging.Tests.dll (net8.0)
+
+Passed!  - Failed:     0, Passed:    34, Skipped:     0, Total:    34, Duration: 965 ms - NLog.Extensions.Hosting.Tests.dll (net8.0)
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  NLog.Extensions.Logging -> /home/user/w63/NL/base/src/NLog.Extensions.Logging/bin/Debug/net10.0/NLog.Extensions.Logging.dll
+/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/CustomBeginScopeTest.cs(17,43): warning xUnit1031: Test methods should not use blocking task operations, as they can cause deadlocks. Use an async test method and await instead. (https://xunit.net/xunit.analyzers/rules/xUnit1031) [/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/NLog.Extensions.Logging.Tests.csproj::TargetFramework=net10.0]
+/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/CustomBeginScopeTest.cs(27,43): warning xUnit1031: Test methods should not use blocking task operations, as they can cause deadlocks. Use an async test method and await instead. (https://xunit.net/xunit.analyzers/rules/xUnit1031) [/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/NLog.Extensions.Logging.Tests.csproj::TargetFramework=net10.0]
+/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/CustomBeginScopeTest.cs(48,53): warning xUnit1031: Test methods should not use blocking task operations, as they can cause deadlocks. Use an async test method and await instead. (https://xunit.net/xunit.analyzers/rules/xUnit1031) [/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/NLog.Extensions.Logging.Tests.csproj::TargetFramework=net10.0]
+/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/CustomBeginScopeTest.cs(37,46): warning xUnit1031: Test methods should not use blocking task operations, as they can cause deadlocks. Use an async test method and await instead. (https://xunit.net/xunit.analyzers/rules/xUnit1031) [/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/NLog.Extensions.Logging.Tests.csproj::TargetFramework=net10.0]
+/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/CustomBeginScopeTest.cs(58,45): warning xUnit1031: Test methods should not use blocking task operations, as they can cause deadlocks. Use an async test method and await instead. (https://xunit.net/xunit.analyzers/rules/xUnit1031) [/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/NLog.Extensions.Logging.Tests.csproj::TargetFramework=net10.0]
+/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/CustomBeginScopeTest.cs(68,47): warning xUnit1031: Test methods should not use blocking task operations, as they can cause deadlocks. Use an async test method and await instead. (https://xunit.net/xunit.analyzers/rules/xUnit1031) [/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/NLog.Extensions.Logging.Tests.csproj::TargetFramework=net10.0]
+/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/LoggerTests.cs(225,85): warning CA2017: Number of parameters supplied in the logging message template do not match the number of named placeholders (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2017) [/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/NLog.Extensions.Logging.Tests.csproj::TargetFramework=net10.0]
+/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/LoggerTests.cs(233,85): warning CA2017: Number of parameters supplied in the logging message template do not match the number of named placeholders (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2017) [/home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/NLog.Extensions.Logging.Tests.csproj::TargetFramework=net10.0]
+  NLog.Extensions.Logging.Tests -> /home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/bin/Debug/net10.0/NLog.Extensions.Logging.Tests.dll
+Test run for /home/user/w63/NL/base/test/NLog.Extensions.Logging.Tests/bin/Debug/net10.0/NLog.Extensions.Logging.Tests.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+  NLog.Extensions.Hosting -> /home/user/w63/NL/base/src/NLog.Extensions.Hosting/bin/Debug/net10.0/NLog.Extensions.Hosting.dll
+A total of 1 test files matched the specified pattern.
+  NLog.Extensions.Hosting.Tests -> /home/user/w63/NL/base/test/NLog.Extensions.Hosting.Tests/bin/Debug/net10.0/NLog.Extensions.Hosting.Tests.dll
+Test run for /home/user/w63/NL/base/test/NLog.Extensions.Hosting.Tests/bin/Debug/net10.0/NLog.Extensions.Hosting.Tests.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:   143, Skipped:     0, Total:   143, Duration: 2 s - NLog.Extensions.Logging.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:    34, Skipped:     0, Total:    34, Duration: 1 s - NLog.Extensions.Hosting.Tests.dll (net10.0)

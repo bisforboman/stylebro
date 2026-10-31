@@ -1,0 +1,21 @@
+Fixing StyleBro's rules and the built-in rules init and migrate turn on (141 ids); --all applies every analyzer's and compiler fix.
+Configurations: runs for Release (Pose) too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.
+Checked Release (run 1 of 2)
+Checked default configuration (run 2 of 2)
+== default configuration (2 project(s), 17 files with findings)
+== Release (1 project(s), 13 files with findings)
+Run 1: 17 files changed:
+  src/Pose/Delegates/ActionRef.cs
+  src/Pose/Delegates/FuncRef.cs
+  src/Pose/Exceptions/InvalidShimSignatureException.cs
+  src/Pose/Extensions/DictionaryExtensions.cs
+  src/Pose/Helpers/ShimHelper.cs
+  src/Pose/Helpers/StubHelper.cs
+  src/Pose/IL/DebugHelpers/BrowsableDynamicMethod.cs
+  src/Pose/IL/DebugHelpers/DynamicMethodBody.cs
+  src/Pose/IL/DebugHelpers/DynamicModule.cs
+  src/Pose/IL/MethodRewriter.cs
+  ... and 7 more
+Checked Release (run 1 of 2)
+Checked default configuration (run 2 of 2)
+Run 2: 0 files changed, clean.

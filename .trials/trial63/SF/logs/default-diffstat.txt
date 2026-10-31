@@ -1,0 +1,23 @@
+ .editorconfig                                      |  73 +++++++
+ Directory.Build.props                              |   4 +
+ .../FileLoggerConfigurationExtensions.cs           | 211 +++++++++++++++------
+ .../Sinks/File/FileLifecycleHooks.cs               |   6 +-
+ src/Serilog.Sinks.File/Sinks/File/FileSink.cs      |  17 +-
+ .../Sinks/File/RollingFileSink.cs                  |  30 ++-
+ .../Sinks/File/RollingLogFile.cs                   |   1 -
+ .../Sinks/File/SharedFileSink.OSMutex.cs           |  17 +-
+ .../Sinks/File/WriteCountingStream.cs              |   1 +
+ test/Serilog.Sinks.File.Tests/FileSinkTests.cs     |   6 +-
+ .../RollingFileSinkTests.cs                        |  11 +-
+ .../Support/ArchiveOldLogsHook.cs                  |   1 +
+ .../Support/CaptureFilePathHook.cs                 |   2 +-
+ .../Support/CapturingLoggingFailureListener.cs     |   2 +-
+ .../Support/CollectingSink.cs                      |  10 +-
+ .../Support/DisposeTrackingSink.cs                 |   2 +-
+ .../Support/FailOpeningHook.cs                     |   6 +-
+ test/Serilog.Sinks.File.Tests/Support/GZipHooks.cs |   2 +-
+ test/Serilog.Sinks.File.Tests/Support/Some.cs      |   9 +-
+ .../Serilog.Sinks.File.Tests/Support/TempFolder.cs |   2 +-
+ .../Support/TruncateFileHook.cs                    |   2 +-
+ .../TemplatedPathRollerTests.cs                    |   1 -
+ 22 files changed, 298 insertions(+), 118 deletions(-)

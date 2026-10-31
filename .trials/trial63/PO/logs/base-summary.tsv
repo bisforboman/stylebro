@@ -1,0 +1,6 @@
+build	0	5s	dotnet build Pose.sln -c Debug
+twae-Debug	0	3s	twae Debug
+test-Debug	1	9s	env CFG=Debug bash -c dotnet test Pose.sln -c $CFG
+twae-Release	0	3s	twae Release
+test-Release	0	4s	env CFG=Release bash -c dotnet test Pose.sln -c $CFG
+DONE

@@ -1,0 +1,13 @@
+preview	0	27s	bro preview init
+setup	0	4s	bash -c python3 /home/user/stylebro/.trials/trial63/addref.py Directory.Build.props "<PackageReference Include=\"StyleBro.Analyzers\" Version=\"${V:-0.8.0-trial63.1}\" PrivateAssets=\"all\" />" && git diff --stat && bro init --write
+format	0	25s	bro format
+check	0	0s	bro check
+check-json	0
+check-full	0	17s	bro check
+checkbuild	0	42s	bro check --build
+checkbuild-json	0
+twae-Debug	0	4s	twae Debug
+test-Debug	0	8s	env CFG=Debug bash -c dotnet test serilog-sinks-file.sln -c $CFG
+twae-Release	0	5s	twae Release
+test-Release	0	9s	env CFG=Release bash -c dotnet test serilog-sinks-file.sln -c $CFG
+DONE

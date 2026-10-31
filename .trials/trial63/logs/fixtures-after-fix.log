@@ -1,0 +1,17 @@
+== Packing 0.0.0-fixture.20261030223251 into /home/user/fx63-a2/feed
+You can invoke the tool using the following command: bro
+Tool 'stylebro.tool' (version '0.0.0-fixture.20261030223251') was successfully installed.
+== first-run-framework-merge : a multi-targeted test project on a fresh clone (no restore output yet)
+  preview                      exit 0 (14 s)
+  init                         exit 0 (2 s)
+  host-format                  exit 0 (13 s)
+  host-check                   exit 0 (1 s)
+  host-check-build             exit 0 (46 s)
+  dotnet-format-format         exit 0 (19 s)
+  dotnet-format-check          exit 0 (0 s)
+  dotnet-format-check-build    exit 0 (45 s)
+  PASS first-run-framework-merge (150 s)
+| Shape | Result | Time |
+| --- | --- | --- |
+| first-run-framework-merge | pass | 150 s |
+Work folder: /home/user/fx63-a2

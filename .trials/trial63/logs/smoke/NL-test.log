@@ -1,0 +1,26 @@
+  Determining projects to restore...
+  Restored /home/user/cand63/nlog-NLog.Extensions.Logging/examples/NetCore2/ConsoleExample/ConsoleExample.csproj (in 617 ms).
+  Restored /home/user/cand63/nlog-NLog.Extensions.Logging/src/NLog.Extensions.Hosting/NLog.Extensions.Hosting.csproj (in 636 ms).
+  Restored /home/user/cand63/nlog-NLog.Extensions.Logging/examples/NetCore2/HostingExample/HostingExample.csproj (in 619 ms).
+  Restored /home/user/cand63/nlog-NLog.Extensions.Logging/test/NLog.Extensions.Logging.Tests/NLog.Extensions.Logging.Tests.csproj (in 660 ms).
+  Restored /home/user/cand63/nlog-NLog.Extensions.Logging/examples/NetCore2/ConsoleExampleJsonConfig/ConsoleExampleJsonConfig.csproj (in 7 ms).
+  Restored /home/user/cand63/nlog-NLog.Extensions.Logging/src/NLog.Extensions.Logging/NLog.Extensions.Logging.csproj (in 20 ms).
+  Restored /home/user/cand63/nlog-NLog.Extensions.Logging/test/NLog.Extensions.Hosting.Tests/NLog.Extensions.Hosting.Tests.csproj (in 53 ms).
+  NLog.Extensions.Logging -> /home/user/cand63/nlog-NLog.Extensions.Logging/src/NLog.Extensions.Logging/bin/Debug/net8.0/NLog.Extensions.Logging.dll
+  NLog.Extensions.Logging.Tests -> /home/user/cand63/nlog-NLog.Extensions.Logging/test/NLog.Extensions.Logging.Tests/bin/Debug/net8.0/NLog.Extensions.Logging.Tests.dll
+Test run for /home/user/cand63/nlog-NLog.Extensions.Logging/test/NLog.Extensions.Logging.Tests/bin/Debug/net8.0/NLog.Extensions.Logging.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+  NLog.Extensions.Hosting -> /home/user/cand63/nlog-NLog.Extensions.Logging/src/NLog.Extensions.Hosting/bin/Debug/net8.0/NLog.Extensions.Hosting.dll
+  NLog.Extensions.Hosting.Tests -> /home/user/cand63/nlog-NLog.Extensions.Logging/test/NLog.Extensions.Hosting.Tests/bin/Debug/net8.0/NLog.Extensions.Hosting.Tests.dll
+Test run for /home/user/cand63/nlog-NLog.Extensions.Logging/test/NLog.Extensions.Hosting.Tests/bin/Debug/net8.0/NLog.Extensions.Hosting.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:   143, Skipped:     0, Total:   143, Duration: 1 s - NLog.Extensions.Logging.Tests.dll (net8.0)
+
+Passed!  - Failed:     0, Passed:    34, Skipped:     0, Total:    34, Duration: 341 ms - NLog.Extensions.Hosting.Tests.dll (net8.0)

@@ -179,4 +179,40 @@ public class QualifiedUsingsTests
             }
         }
         """);
+
+    /// <summary>NLog.Extensions.Logging (trial 63): qualifying dropped the '?' of 'object?', and the build failed (CS8619).</summary>
+    [Fact]
+    public Task NullableReferenceTypeArguments_KeepTheirQuestionMark() => Verify.VerifyFixAsync(
+        """
+        #nullable enable
+        using System;
+        using System.Collections.Generic;
+
+        namespace Probe.Logging
+        {
+            using Fine = System.Collections.Generic.List<string?>;
+            {|BRO1126:using Extractors = System.Collections.Concurrent.ConcurrentDictionary<Type, Func<object, KeyValuePair<string, object?>>>;|}
+            {|BRO1126:using Lists = List<List<System.Text.StringBuilder>?>;|}
+
+            class C
+            {
+            }
+        }
+        """,
+        """
+        #nullable enable
+        using System;
+        using System.Collections.Generic;
+
+        namespace Probe.Logging
+        {
+            using Fine = System.Collections.Generic.List<string?>;
+            using Extractors = System.Collections.Concurrent.ConcurrentDictionary<System.Type, System.Func<object, System.Collections.Generic.KeyValuePair<string, object?>>>;
+            using Lists = System.Collections.Generic.List<System.Collections.Generic.List<System.Text.StringBuilder>?>;
+
+            class C
+            {
+            }
+        }
+        """);
 }

@@ -1,0 +1,10 @@
+  Determining projects to restore...
+  Restored /home/user/w63/NL/dotnet/examples/NetCore2/ConsoleExample/ConsoleExample.csproj (in 596 ms).
+  Restored /home/user/w63/NL/dotnet/examples/NetCore2/ConsoleExampleJsonConfig/ConsoleExampleJsonConfig.csproj (in 585 ms).
+  Restored /home/user/w63/NL/dotnet/test/NLog.Extensions.Logging.Tests/NLog.Extensions.Logging.Tests.csproj (in 716 ms).
+  Restored /home/user/w63/NL/dotnet/examples/NetCore2/HostingExample/HostingExample.csproj (in 105 ms).
+  Restored /home/user/w63/NL/dotnet/test/NLog.Extensions.Hosting.Tests/NLog.Extensions.Hosting.Tests.csproj (in 238 ms).
+  Restored /home/user/w63/NL/dotnet/src/NLog.Extensions.Hosting/NLog.Extensions.Hosting.csproj (in 986 ms).
+  Restored /home/user/w63/NL/dotnet/src/NLog.Extensions.Logging/NLog.Extensions.Logging.csproj (in 312 ms).
+/home/user/w63/NL/dotnet/src/NLog.Extensions.Logging/Logging/NLogBeginScopeParser.cs(245,63): error CS8624: Argument of type 'Func<object, KeyValuePair<string, object?>>' cannot be used as an output of type 'Func<object, KeyValuePair<string, object>>' for parameter 'value' in 'bool ConcurrentDictionary<Type, Func<object, KeyValuePair<string, object>>>.TryGetValue(Type key, out Func<object, KeyValuePair<string, object>> value)' due to differences in the nullability of reference types. [/home/user/w63/NL/dotnet/src/NLog.Extensions.Logging/NLog.Extensions.Logging.csproj::TargetFramework=net8.0]
+/home/user/w63/NL/dotnet/src/NLog.Extensions.Logging/Logging/NLogBeginScopeParser.cs(258,56): error CS8619: Nullability of reference types in value of type 'Func<object, KeyValuePair<string, object?>>' doesn't match target type 'Func<object, KeyValuePair<string, object>>'. [/home/user/w63/NL/dotnet/src/NLog.Extensions.Logging/NLog.Extensions.Logging.csproj::TargetFramework=net8.0]

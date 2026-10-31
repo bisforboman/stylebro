@@ -1,0 +1,17 @@
+== SF-build: dotnet build /home/user/cand63/serilog-serilog-sinks-file/serilog-sinks-file.sln (21:22:34)
+   exit 0 (21:23:04) 0 error lines
+== SF-test: dotnet test /home/user/cand63/serilog-serilog-sinks-file/serilog-sinks-file.sln (21:23:04)
+   exit 0 (21:23:19) 0 error lines
+== PO-build: dotnet build /home/user/cand63/tonerdo-pose/Pose.sln (21:23:19)
+   exit 0 (21:23:27) 0 error lines
+== PO-test: dotnet test /home/user/cand63/tonerdo-pose/Pose.sln (21:23:27)
+   exit 1 (21:23:30) 0 error lines
+== NL-build: dotnet build /home/user/cand63/nlog-NLog.Extensions.Logging/NLog.Extensions.Logging.sln (21:23:30)
+   exit 0 (21:23:48) 0 error lines
+== NL-test: dotnet test /home/user/cand63/nlog-NLog.Extensions.Logging/NLog.Extensions.Logging.sln -f net8.0 (21:23:48)
+   exit 0 (21:23:55) 0 error lines
+== T4-build: dotnet build /home/user/cand63/mono-t4/Mono.TextTemplating.sln (21:23:55)
+   exit 0 (21:24:12) 0 error lines
+== T4-test: dotnet test /home/user/cand63/mono-t4/Mono.TextTemplating.sln (21:24:12)
+   exit 0 (21:25:10) 0 error lines
+SMOKE-DONE

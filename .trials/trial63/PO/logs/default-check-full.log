@@ -1,0 +1,5 @@
+Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+Configurations: runs for Release (Pose) too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.
+Checked Release (run 1 of 2)
+Checked default configuration (run 2 of 2)
+Clean.

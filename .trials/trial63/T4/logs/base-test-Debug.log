@@ -1,0 +1,58 @@
+  Determining projects to restore...
+  Restored /home/user/w63/T4/base/TextTransform/TextTransform.csproj (in 1.24 sec).
+  Restored /home/user/w63/T4/base/Mono.TextTemplating.Roslyn/Mono.TextTemplating.Roslyn.csproj (in 1.3 sec).
+  Restored /home/user/w63/T4/base/dotnet-t4/dotnet-t4.csproj (in 1.24 sec).
+  Restored /home/user/w63/T4/base/Mono.TextTemplating/Mono.TextTemplating.csproj (in 9 ms).
+  Restored /home/user/w63/T4/base/Mono.TextTemplating.Build.Tests/Mono.TextTemplating.Build.Tests.csproj (in 140 ms).
+  Restored /home/user/w63/T4/base/Mono.TextTemplating.Tests/Mono.TextTemplating.Tests.csproj (in 1.5 sec).
+  Restored /home/user/w63/T4/base/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj (in 192 ms).
+/home/user/w63/T4/base/Mono.TextTemplating/Mono.TextTemplating/TemplatingEngine.CodeGeneration.cs(205,8): warning CA2263: Prefer the generic overload 'Mono.TextTemplating.CodeDomBuilder.TypeReference.Default<T>()' instead of 'Mono.TextTemplating.CodeDomBuilder.TypeReference.Default(System.Type)' (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2263) [/home/user/w63/T4/base/Mono.TextTemplating/Mono.TextTemplating.csproj::TargetFramework=net6.0]
+/home/user/w63/T4/base/Mono.TextTemplating/Mono.TextTemplating/ParsedTemplate.cs(98,14): warning CA1859: Change type of variable 'seg' from 'Mono.TextTemplating.ISegment' to 'Mono.TextTemplating.TemplateSegment?' for improved performance (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859) [/home/user/w63/T4/base/Mono.TextTemplating/Mono.TextTemplating.csproj::TargetFramework=net6.0]
+/home/user/w63/T4/base/Mono.TextTemplating/Mono.TextTemplating/DirectoryHelper.cs(51,51): warning CA2263: Prefer the generic overload 'System.Reflection.MethodInfo.CreateDelegate<T>()' instead of 'System.Reflection.MethodInfo.CreateDelegate(System.Type)' (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2263) [/home/user/w63/T4/base/Mono.TextTemplating/Mono.TextTemplating.csproj::TargetFramework=net6.0]
+  Mono.TextTemplating -> /home/user/w63/T4/base/Mono.TextTemplating/bin/Debug/net6.0/Mono.TextTemplating.dll
+/home/user/w63/T4/base/Mono.TextTemplating/Mono.TextTemplating/TemplatingEngine.CodeGeneration.cs(205,8): warning CA2263: Prefer the generic overload 'Mono.TextTemplating.CodeDomBuilder.TypeReference.Default<T>()' instead of 'Mono.TextTemplating.CodeDomBuilder.TypeReference.Default(System.Type)' (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2263) [/home/user/w63/T4/base/Mono.TextTemplating/Mono.TextTemplating.csproj::TargetFramework=net472]
+/home/user/w63/T4/base/Mono.TextTemplating/Mono.TextTemplating/ParsedTemplate.cs(98,14): warning CA1859: Change type of variable 'seg' from 'Mono.TextTemplating.ISegment' to 'Mono.TextTemplating.TemplateSegment?' for improved performance (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859) [/home/user/w63/T4/base/Mono.TextTemplating/Mono.TextTemplating.csproj::TargetFramework=net472]
+  Mono.TextTemplating -> /home/user/w63/T4/base/Mono.TextTemplating/bin/Debug/net472/Mono.TextTemplating.dll
+/home/user/w63/T4/base/Mono.TextTemplating/Mono.TextTemplating/TemplatingEngine.CodeGeneration.cs(205,8): warning CA2263: Prefer the generic overload 'Mono.TextTemplating.CodeDomBuilder.TypeReference.Default<T>()' instead of 'Mono.TextTemplating.CodeDomBuilder.TypeReference.Default(System.Type)' (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2263) [/home/user/w63/T4/base/Mono.TextTemplating/Mono.TextTemplating.csproj::TargetFramework=netstandard2.0]
+/home/user/w63/T4/base/Mono.TextTemplating/Mono.TextTemplating/ParsedTemplate.cs(98,14): warning CA1859: Change type of variable 'seg' from 'Mono.TextTemplating.ISegment' to 'Mono.TextTemplating.TemplateSegment?' for improved performance (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859) [/home/user/w63/T4/base/Mono.TextTemplating/Mono.TextTemplating.csproj::TargetFramework=netstandard2.0]
+  Mono.TextTemplating -> /home/user/w63/T4/base/Mono.TextTemplating/bin/Debug/netstandard2.0/Mono.TextTemplating.dll
+  Mono.TextTemplating.Build -> /home/user/w63/T4/base/Mono.TextTemplating.Build/bin/Debug/net48/Mono.TextTemplating.Build.dll
+  Mono.TextTemplating.Build -> /home/user/w63/T4/base/Mono.TextTemplating.Build/bin/Debug/net6.0/Mono.TextTemplating.Build.dll
+  Mono.TextTemplating.Roslyn -> /home/user/w63/T4/base/Mono.TextTemplating.Roslyn/bin/Debug/netstandard2.0/Mono.TextTemplating.Roslyn.dll
+  Mono.TextTemplating.Roslyn -> /home/user/w63/T4/base/Mono.TextTemplating.Roslyn/bin/Debug/net6.0/Mono.TextTemplating.Roslyn.dll
+  Mono.TextTemplating.Roslyn -> /home/user/w63/T4/base/Mono.TextTemplating.Roslyn/bin/Debug/net472/Mono.TextTemplating.Roslyn.dll
+  Mono.TextTemplating.Build.Tests -> /home/user/w63/T4/base/Mono.TextTemplating.Build.Tests/bin/Debug/net6.0/Mono.TextTemplating.Build.Tests.dll
+  Mono.TextTemplating.Build.Tests -> /home/user/w63/T4/base/Mono.TextTemplating.Build.Tests/bin/Debug/net7.0/Mono.TextTemplating.Build.Tests.dll
+Test run for /home/user/w63/T4/base/Mono.TextTemplating.Build.Tests/bin/Debug/net7.0/Mono.TextTemplating.Build.Tests.dll (.NETCoreApp,Version=v7.0)
+Test run for /home/user/w63/T4/base/Mono.TextTemplating.Build.Tests/bin/Debug/net6.0/Mono.TextTemplating.Build.Tests.dll (.NETCoreApp,Version=v6.0)
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+  Mono.TextTemplating.Tests -> /home/user/w63/T4/base/Mono.TextTemplating.Tests/bin/Debug/net6.0/Mono.TextTemplating.Tests.dll
+Starting test execution, please wait...
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+  Successfully created package '/home/user/w63/T4/base/packages/Debug/Mono.TextTemplating.Roslyn.3.1.0-preview-0002-ge128cfc9c8.nupkg'.
+  Mono.TextTemplating.Tests -> /home/user/w63/T4/base/Mono.TextTemplating.Tests/bin/Debug/net7.0/Mono.TextTemplating.Tests.dll
+Test run for /home/user/w63/T4/base/Mono.TextTemplating.Tests/bin/Debug/net7.0/Mono.TextTemplating.Tests.dll (.NETCoreApp,Version=v7.0)
+Test run for /home/user/w63/T4/base/Mono.TextTemplating.Tests/bin/Debug/net6.0/Mono.TextTemplating.Tests.dll (.NETCoreApp,Version=v6.0)
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     7, Skipped:     0, Total:     7, Duration: 35 s - Mono.TextTemplating.Build.Tests.dll (net7.0)
+  Successfully created package '/home/user/w63/T4/base/packages/Debug/Mono.TextTemplating.3.1.0-preview-0002-ge128cfc9c8.nupkg'.
+
+Passed!  - Failed:     0, Passed:     7, Skipped:     0, Total:     7, Duration: 38 s - Mono.TextTemplating.Build.Tests.dll (net6.0)
+
+Passed!  - Failed:     0, Passed:   114, Skipped:     0, Total:   114, Duration: 36 s - Mono.TextTemplating.Tests.dll (net7.0)
+
+Passed!  - Failed:     0, Passed:   114, Skipped:     0, Total:   114, Duration: 37 s - Mono.TextTemplating.Tests.dll (net6.0)
+  Successfully created package '/home/user/w63/T4/base/packages/Debug/T4.BuildTools.3.1.0-preview-0002-ge128cfc9c8.nupkg'.

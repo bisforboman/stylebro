@@ -1,0 +1,6 @@
+build	0	3s	dotnet build serilog-sinks-file.sln -c Debug
+twae-Debug	0	3s	twae Debug
+test-Debug	0	7s	env CFG=Debug bash -c dotnet test serilog-sinks-file.sln -c $CFG
+twae-Release	0	4s	twae Release
+test-Release	0	7s	env CFG=Release bash -c dotnet test serilog-sinks-file.sln -c $CFG
+DONE

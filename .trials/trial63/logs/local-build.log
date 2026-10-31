@@ -1,0 +1,22 @@
+  Determining projects to restore...
+  Restored /home/user/stylebro/samples/Messy/Messy.csproj (in 441 ms).
+  Restored /home/user/stylebro/src/StyleBro.Package/StyleBro.Package.csproj (in 3.43 sec).
+  Restored /home/user/stylebro/src/StyleBro.Migrate/StyleBro.Migrate.csproj (in 1.31 sec).
+  Restored /home/user/stylebro/src/StyleBro.CodeFixes/StyleBro.CodeFixes.csproj (in 4.83 sec).
+  Restored /home/user/stylebro/src/StyleBro.Analyzers/StyleBro.Analyzers.csproj (in 24 ms).
+  Restored /home/user/stylebro/src/StyleBro.FormatHost/StyleBro.FormatHost.csproj (in 4.84 sec).
+  1 of 7 projects are up-to-date for restore.
+  StyleBro.FormatHost -> /home/user/stylebro/src/StyleBro.FormatHost/bin/Debug/net8.0/StyleBro.FormatHost.dll
+  StyleBro.Analyzers -> /home/user/stylebro/src/StyleBro.Analyzers/bin/Debug/netstandard2.0/StyleBro.Analyzers.dll
+  StyleBro.CodeFixes -> /home/user/stylebro/src/StyleBro.CodeFixes/bin/Debug/netstandard2.0/StyleBro.CodeFixes.dll
+  StyleBro.Package -> /home/user/stylebro/src/StyleBro.Package/bin/Debug/netstandard2.0/StyleBro.Package.dll
+  StyleBro.Migrate -> /home/user/stylebro/src/StyleBro.Migrate/bin/Debug/net8.0/StyleBro.Migrate.dll
+  Messy -> /home/user/stylebro/samples/Messy/bin/Debug/net10.0/Messy.dll
+  StyleBro.Tests -> /home/user/stylebro/tests/StyleBro.Tests/bin/Debug/net10.0/StyleBro.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:35.15
+build rc=0

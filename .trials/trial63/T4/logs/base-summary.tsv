@@ -1,0 +1,6 @@
+build	0	21s	dotnet build Mono.TextTemplating.sln -c Debug
+twae-Debug	1	12s	twae Debug
+test-Debug	0	67s	env CFG=Debug bash -c dotnet test Mono.TextTemplating.sln -c $CFG
+twae-Release	1	7s	twae Release
+test-Release	0	47s	env CFG=Release bash -c dotnet test Mono.TextTemplating.sln -c $CFG
+DONE

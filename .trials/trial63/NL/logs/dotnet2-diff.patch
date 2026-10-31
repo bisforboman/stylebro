@@ -1,0 +1,1471 @@
+diff --git a/.editorconfig b/.editorconfig
+index 36f9632..662fb8c 100644
+--- a/.editorconfig
++++ b/.editorconfig
+@@ -14,4 +14,71 @@ trim_trailing_whitespace = true
+ 
+ # .NET formatting rules
+ [*.{cs,vb}]
+-dotnet_sort_system_directives_first = true
+\ No newline at end of file
++dotnet_sort_system_directives_first = true
++
++# BEGIN stylebro-migrate (stylebro-migrate init: built-in .NET rules for StyleBro's preset; edits inside are replaced)
++[*.cs]
++# Built-in .NET rules that cover StyleCop rules, at the preset's severities. Their options (brace placement, modifier
++# order, ...) come from StyleBro's preset. The severities have to be here: 'dotnet format' ignores rule severities in a
++# package's global config. Add <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> to report them on build too.
++
++# Braces (SA1503, SA1519, SA1520) are StyleBro's BRO1514-BRO1516: IDE0011's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0011.severity = none
++# Access modifiers (SA1400, SA1205) are StyleBro's BRO1404/BRO1007: IDE0040's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0040.severity = none
++# Modifier order: access modifier first, then static (SA1206, SA1207)
++dotnet_diagnostic.IDE0036.severity = warning
++# 'int' instead of 'Int32' (SA1121)
++dotnet_diagnostic.IDE0049.severity = warning
++# Unnecessary parentheses (SA1119) are StyleBro's BRO1405: IDE0047's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0047.severity = none
++# Parentheses that show precedence (SA1407, SA1408) are StyleBro's BRO1406/BRO1407: IDE0048's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0048.severity = none
++# Using placement (SA1200) is StyleBro's BRO1008: IDE0065's fix can change what names bind to (CS0104, CS0118)
++dotnet_diagnostic.IDE0065.severity = none
++# Blank lines (SA1507, SA1508, SA1513) are StyleBro's BRO1517-BRO1519: the SDK's fixes break multi-targeted projects
++dotnet_diagnostic.IDE2000.severity = none
++dotnet_diagnostic.IDE2002.severity = none
++dotnet_diagnostic.IDE2003.severity = none
++# 'this.' qualification isn't required (SA1101 is off in the preset)
++dotnet_diagnostic.IDE0009.severity = none
++
++# Conventions in this repository's code (stylebro-migrate init counted them; delete a line to have it counted again)
++# init: private fields: named '_field' in 63 of 66 places in your code
++stylebro_private_field_naming = _camelCase
++# init: one-line if/else/loop/using/lock bodies: your code mixes both forms (120 with braces, 152 without braces), so both are allowed. To choose with braces: change the next line to csharp_prefer_braces = true.
++csharp_prefer_braces = when_multiline
++# init: operators where a line wraps: your code mixes both forms (2 at the start of the line, 2 at the end of the line), so BRO1520 is off. To choose one: set dotnet_style_operator_placement_when_wrapping and remove the next line.
++dotnet_diagnostic.BRO1520.severity = none
++# init: multi-line initializers: your code mixes both forms (9 with a trailing comma, 4 without a trailing comma), so BRO1401 is off. To choose one: set stylebro_trailing_comma and remove the next line.
++dotnet_diagnostic.BRO1401.severity = none
++# init: null checks: your code mixes both forms (44 'is null', 39 '== null'), so BRO1133 is off. To choose one: set stylebro_null_check_style and remove the next line.
++dotnet_diagnostic.BRO1133.severity = none
++# init: ')' of split lists: your code mixes both forms (7 after the last item, 1 on its own line), so BRO1110 is off. To choose one: set stylebro_closing_parenthesis_placement and remove the next line.
++dotnet_diagnostic.BRO1110.severity = none
++# init: 'where' constraints: your code mixes both forms (2 on their own line, 2 on the declaration's line), so BRO1111 is off. To choose one: set stylebro_constraint_placement and remove the next line.
++dotnet_diagnostic.BRO1111.severity = none
++# init: 'new T { ... }' with an initializer: your code mixes both forms (46 without '()', 35 with '()'), so BRO1141 is off. To choose one: set stylebro_object_creation_parentheses and remove the next line.
++dotnet_diagnostic.BRO1141.severity = none
++# init: switch sections: without a blank line in 18 of 19 places in your code
++stylebro_blank_line_between_switch_sections = omit
++# init: statements on their 'if'/loop/'case' line: allowed, because your code has some (3 of 183 places on their owner's line; any 3 keep them allowed: csharp_preserve_single_line_statements = false would move each to a line of its own)
++csharp_preserve_single_line_statements = true
++# init: overrides/interface implementations: your code mixes both forms (18 with a doc comment, 12 without a doc comment), so BRO1601 is off. To choose one: set dotnet_diagnostic.BRO1601.severity and remove the next line.
++dotnet_diagnostic.BRO1601.severity = none
++# init: types' members: your code mixes both forms (21 in BRO1001's order, 21 in another order), so BRO1001 is off. To choose one: set dotnet_diagnostic.BRO1001.severity and remove the next line.
++dotnet_diagnostic.BRO1001.severity = none
++# init: overloads BRO1001 could split: next to each other in 3 of 3 places in your code
++stylebro_keep_overloads_together = true
++# init: split lists' items: your code mixes both forms (4 one per line, 3 grouped on lines), so BRO1108 is off. To choose one: set dotnet_diagnostic.BRO1108.severity and remove the next line.
++dotnet_diagnostic.BRO1108.severity = none
++# init: property summaries: 28 of 34 in your code are in their own words, so BRO1604 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1604.severity = none
++# init: doc comment texts: 153 of 192 in your code are without a period, so BRO1603 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1603.severity = none
++# init: keywords in doc comments: your code mixes both forms (12 '<see langword="null"/>', 6 '<c>null</c>'), so BRO1618 is off. To choose one: set dotnet_diagnostic.BRO1618.severity and remove the next line.
++dotnet_diagnostic.BRO1618.severity = none
++# Line endings: your .editorconfig says end_of_line = crlf, but git checks out 53 C# files with each machine's ending (a .gitattributes 'text' attribute without 'eol', or core.autocrlf), so Linux and macOS checkouts don't match it. Until that's settled, formatting and IDE0055 leave each file's endings as checked out. To settle it: '*.cs text eol=crlf' in .gitattributes (then 'git add --renormalize .'), or remove end_of_line from .editorconfig; then run bro again.
++end_of_line = unset
++dotnet_diagnostic.IDE0055.severity = suggestion
++# END stylebro-migrate
+diff --git a/Directory.Build.props b/Directory.Build.props
+new file mode 100644
+index 0000000..62d5148
+--- /dev/null
++++ b/Directory.Build.props
+@@ -0,0 +1,8 @@
++<Project>
++  <PropertyGroup>
++    <StyleBroPreset>1.0</StyleBroPreset>
++  </PropertyGroup>
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial63.3" PrivateAssets="all" />
++  </ItemGroup>
++</Project>
+diff --git a/examples/NetCore2/ConsoleExample/Program.cs b/examples/NetCore2/ConsoleExample/Program.cs
+index 9e4c442..b3c6384 100644
+--- a/examples/NetCore2/ConsoleExample/Program.cs
++++ b/examples/NetCore2/ConsoleExample/Program.cs
+@@ -17,7 +17,8 @@ private static void Main()
+                     // Setup NLog for logging
+                     loggingBuilder.ClearProviders();
+                     loggingBuilder.AddNLog();
+-                }).BuildServiceProvider();
++                })
++                .BuildServiceProvider();
+ 
+             var runner = servicesProvider.GetRequiredService<Runner>();
+             runner.DoAction("Action1");
+diff --git a/examples/NetCore2/ConsoleExampleJsonConfig/Program.cs b/examples/NetCore2/ConsoleExampleJsonConfig/Program.cs
+index 2ce8cd6..aa6227f 100644
+--- a/examples/NetCore2/ConsoleExampleJsonConfig/Program.cs
++++ b/examples/NetCore2/ConsoleExampleJsonConfig/Program.cs
+@@ -30,7 +30,8 @@ private static void Main()
+                         // Setup NLog for logging
+                         loggingBuilder.ClearProviders();
+                         loggingBuilder.AddNLog(config);
+-                    }).BuildServiceProvider();
++                    })
++                    .BuildServiceProvider();
+ 
+                 var runner = servicesProvider.GetRequiredService<Runner>();
+                 runner.DoAction("Action1");
+@@ -70,4 +71,4 @@ public void DoAction(string name)
+             _logger.LogCritical(24, "Doing hard work! {Action}", name);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Directory.Build.props b/src/Directory.Build.props
+index e981cae..c00c985 100644
+--- a/src/Directory.Build.props
++++ b/src/Directory.Build.props
+@@ -1,5 +1,6 @@
+ <Project>
+ 	<PropertyGroup>
++		<StyleBroPreset>1.0</StyleBroPreset>
+ 		<VersionPrefix>6.2.2</VersionPrefix>
+ 		<AssemblyVersion>6.0.0.0</AssemblyVersion>
+ 		<FileVersion>$(VersionPrefix).0</FileVersion>
+@@ -15,4 +16,7 @@
+ 		<WarningsAsErrors>$(WarningsAsErrors);NU1900;NU1901;NU1902;NU1903;NU1904</WarningsAsErrors>
+ 	</PropertyGroup>
+ 
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial63.3" PrivateAssets="all" />
++  </ItemGroup>
+ </Project>
+diff --git a/src/NLog.Extensions.Hosting/Extensions/ConfigureExtensions.cs b/src/NLog.Extensions.Hosting/Extensions/ConfigureExtensions.cs
+index 6e526c9..82050c2 100644
+--- a/src/NLog.Extensions.Hosting/Extensions/ConfigureExtensions.cs
++++ b/src/NLog.Extensions.Hosting/Extensions/ConfigureExtensions.cs
+@@ -198,4 +198,4 @@ private static bool IsLoggingConfigurationLoaded(LoggingConfiguration cfg)
+             return cfg?.LoggingRules?.Count > 0 && cfg?.AllTargets?.Count > 0;
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/NLog.Extensions.Hosting/LayoutRenderers/HostAppNameLayoutRenderer.cs b/src/NLog.Extensions.Hosting/LayoutRenderers/HostAppNameLayoutRenderer.cs
+index 4f6ba4e..1c441d7 100644
+--- a/src/NLog.Extensions.Hosting/LayoutRenderers/HostAppNameLayoutRenderer.cs
++++ b/src/NLog.Extensions.Hosting/LayoutRenderers/HostAppNameLayoutRenderer.cs
+@@ -21,6 +21,7 @@ public class HostAppNameLayoutRenderer : LayoutRenderer
+         /// </summary>
+         /// <returns>IHostEnvironment or <c>null</c></returns>
+         internal IHostEnvironment? HostEnvironment => _hostEnvironment ?? (_hostEnvironment = ResolveHostEnvironment());
++
+         private IHostEnvironment? _hostEnvironment;
+         private string? _hostAppName;
+         private static string? _currentProcessName;
+diff --git a/src/NLog.Extensions.Hosting/LayoutRenderers/HostEnvironmentLayoutRenderer.cs b/src/NLog.Extensions.Hosting/LayoutRenderers/HostEnvironmentLayoutRenderer.cs
+index 948189e..f965434 100644
+--- a/src/NLog.Extensions.Hosting/LayoutRenderers/HostEnvironmentLayoutRenderer.cs
++++ b/src/NLog.Extensions.Hosting/LayoutRenderers/HostEnvironmentLayoutRenderer.cs
+@@ -22,6 +22,7 @@ public class HostEnvironmentLayoutRenderer : LayoutRenderer
+         /// </summary>
+         /// <returns>IHostEnvironment or <c>null</c></returns>
+         internal IHostEnvironment? HostEnvironment => _hostEnvironment ?? (_hostEnvironment = ResolveHostEnvironment());
++
+         private IHostEnvironment? _hostEnvironment;
+         private string? _environmentName;
+ 
+@@ -48,10 +49,12 @@ protected override void Append(StringBuilder builder, LogEventInfo logEvent)
+             {
+                 environmentName = null;
+             }
++
+             if (string.IsNullOrEmpty(environmentName))
+             {
+                 environmentName = GetDotnetHostEnvironment("ASPNETCORE_ENVIRONMENT") ?? GetDotnetHostEnvironment("DOTNET_ENVIRONMENT");
+             }
++
+             return string.IsNullOrEmpty(environmentName) ? null : environmentName;
+         }
+ 
+diff --git a/src/NLog.Extensions.Hosting/LayoutRenderers/HostRootDirLayoutRenderer.cs b/src/NLog.Extensions.Hosting/LayoutRenderers/HostRootDirLayoutRenderer.cs
+index 6c4b0ea..952e547 100644
+--- a/src/NLog.Extensions.Hosting/LayoutRenderers/HostRootDirLayoutRenderer.cs
++++ b/src/NLog.Extensions.Hosting/LayoutRenderers/HostRootDirLayoutRenderer.cs
+@@ -23,6 +23,7 @@ public class HostRootDirLayoutRenderer : LayoutRenderer
+         /// </summary>
+         /// <returns>IHostEnvironment or <c>null</c></returns>
+         internal IHostEnvironment? HostEnvironment => _hostEnvironment ?? (_hostEnvironment = ResolveHostEnvironment());
++
+         private IHostEnvironment? _hostEnvironment;
+         private string? _contentRootPath;
+         private static string? _currentAppPath;
+@@ -50,10 +51,12 @@ protected override void Append(StringBuilder builder, LogEventInfo logEvent)
+             {
+                 contentRootPath = null;
+             }
++
+             if (string.IsNullOrEmpty(contentRootPath))
+             {
+                 contentRootPath = GetDotnetHostEnvironment("ASPNETCORE_CONTENTROOT") ?? GetDotnetHostEnvironment("DOTNET_CONTENTROOT");
+             }
++
+             return TrimEndDirectorySeparator(contentRootPath);
+         }
+ 
+@@ -78,6 +81,7 @@ protected override void Append(StringBuilder builder, LogEventInfo logEvent)
+                 {
+                     currentBasePath = currentAppPath; // Avoid using Windows-System32 as current directory
+                 }
++
+                 return _currentAppPath = TrimEndDirectorySeparator(currentBasePath);
+             }
+             catch
+@@ -119,4 +123,4 @@ protected override void CloseLayoutRenderer()
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/NLog.Extensions.Hosting/Properties/AssemblyInfo.cs b/src/NLog.Extensions.Hosting/Properties/AssemblyInfo.cs
+index 7a0e8b2..9855d6a 100644
+--- a/src/NLog.Extensions.Hosting/Properties/AssemblyInfo.cs
++++ b/src/NLog.Extensions.Hosting/Properties/AssemblyInfo.cs
+@@ -3,4 +3,4 @@
+ 
+ [assembly: ComVisible(false)]
+ 
+-[assembly: InternalsVisibleTo("NLog.Extensions.Hosting.Tests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100772391E63C104728ADCF18E2390474262559FA7F34A4215848F43288CDE875DCC92A06222E9BE0592B211FF74ADBB5D21A7AAB5522B540B1735F2F03279221056FEDBE7E534073DABEE9DB48F8ECEBCF1DC98A95576E45CBEFF5FE7C4842859451AB2DAE7A8370F1B2F7A529D2CA210E3E844D973523D73D193DF6C17F1314A6")]
+\ No newline at end of file
++[assembly: InternalsVisibleTo("NLog.Extensions.Hosting.Tests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100772391E63C104728ADCF18E2390474262559FA7F34A4215848F43288CDE875DCC92A06222E9BE0592B211FF74ADBB5D21A7AAB5522B540B1735F2F03279221056FEDBE7E534073DABEE9DB48F8ECEBCF1DC98A95576E45CBEFF5FE7C4842859451AB2DAE7A8370F1B2F7A529D2CA210E3E844D973523D73D193DF6C17F1314A6")]
+diff --git a/src/NLog.Extensions.Logging/Config/NLogLoggingConfiguration.cs b/src/NLog.Extensions.Logging/Config/NLogLoggingConfiguration.cs
+index b28d07b..48f4f65 100644
+--- a/src/NLog.Extensions.Logging/Config/NLogLoggingConfiguration.cs
++++ b/src/NLog.Extensions.Logging/Config/NLogLoggingConfiguration.cs
+@@ -141,8 +141,10 @@ private sealed class LoggingConfigurationElement : ILoggingConfigurationElement
+             private const string DefaultWrapper = "Default-wrapper";
+             private const string TargetDefaultWrapper = "TargetDefaultWrapper";
+             private readonly IConfigurationSection _configurationSection;
++
+             private IConfigurationSection? TargetDefaultParametersSection { get; set; }
+             private IConfigurationSection? TargetDefaultWrapperSection { get; set; }
++
+             private readonly string? _nameOverride;
+             private readonly bool _topElement;
+ 
+@@ -482,7 +484,7 @@ private sealed class AutoReloadConfigChangeMonitor : IDisposable
+             public AutoReloadConfigChangeMonitor(IConfigurationSection configSection, NLogLoggingConfiguration nlogConfig)
+             {
+                 _nlogConfig = nlogConfig;
+-                _registerChangeCallback = configSection.GetReloadToken().RegisterChangeCallback((s) => ReloadConfigurationSection(s as IConfigurationSection), configSection);
++                _registerChangeCallback = configSection.GetReloadToken().RegisterChangeCallback(s => ReloadConfigurationSection(s as IConfigurationSection), configSection);
+             }
+ 
+             private void ReloadConfigurationSection(IConfigurationSection? configSection)
+diff --git a/src/NLog.Extensions.Logging/Config/SetupBuilderExtensions.cs b/src/NLog.Extensions.Logging/Config/SetupBuilderExtensions.cs
+index 8ef2b54..594e03b 100644
+--- a/src/NLog.Extensions.Logging/Config/SetupBuilderExtensions.cs
++++ b/src/NLog.Extensions.Logging/Config/SetupBuilderExtensions.cs
+@@ -26,6 +26,7 @@ public static ISetupBuilder LoadConfigurationFromSection(this ISetupBuilder setu
+                     Common.InternalLogger.Debug("Skip loading NLogLoggingConfiguration from empty config section: {0}", configSection);
+                 }
+             }
++
+             return setupBuilder;
+         }
+     }
+diff --git a/src/NLog.Extensions.Logging/Extensions/ConfigureExtensions.cs b/src/NLog.Extensions.Logging/Extensions/ConfigureExtensions.cs
+index b3142cc..b19d69d 100644
+--- a/src/NLog.Extensions.Logging/Extensions/ConfigureExtensions.cs
++++ b/src/NLog.Extensions.Logging/Extensions/ConfigureExtensions.cs
+@@ -87,6 +87,7 @@ public static ILoggingBuilder AddNLog(this ILoggingBuilder builder, LoggingConfi
+             {
+                 var logFactory = configuration?.LogFactory ?? LogManager.LogFactory;
+                 var provider = CreateNLogLoggerProvider(serviceProvider, config, options, logFactory);
++
+                 // Delay initialization of targets until we have loaded config-settings
+                 logFactory.Configuration = configuration;
+                 return provider;
+@@ -106,6 +107,7 @@ public static ILoggingBuilder AddNLog(this ILoggingBuilder builder, string confi
+             AddNLogLoggerProvider(builder, null, NLogProviderOptions.Default, (serviceProvider, config, options) =>
+             {
+                 var provider = CreateNLogLoggerProvider(serviceProvider, config, options);
++
+                 // Delay initialization of targets until we have loaded config-settings
+                 provider.LogFactory.Setup().LoadConfigurationFromFile(configFileRelativePath);
+                 return provider;
+@@ -242,6 +244,7 @@ public static NLogProviderOptions Configure(this NLogProviderOptions? options, I
+                     }
+                 }
+             }
++
+             return options;
+         }
+ 
+diff --git a/src/NLog.Extensions.Logging/Internal/Guard.cs b/src/NLog.Extensions.Logging/Internal/Guard.cs
+index d9ba2de..24ef659 100644
+--- a/src/NLog.Extensions.Logging/Internal/Guard.cs
++++ b/src/NLog.Extensions.Logging/Internal/Guard.cs
+@@ -35,7 +35,7 @@
+ namespace System.Runtime.CompilerServices
+ {
+     [AttributeUsage(AttributeTargets.Parameter)]
+-    sealed class CallerArgumentExpressionAttribute : Attribute
++    internal sealed class CallerArgumentExpressionAttribute : Attribute
+     {
+         public CallerArgumentExpressionAttribute(string param)
+         {
+@@ -51,6 +51,7 @@ namespace NLog.Extensions.Logging
+ {
+     using System;
+     using System.Runtime.CompilerServices;
++
+     internal static class Guard
+     {
+         internal static T ThrowIfNull<T>(
+@@ -66,4 +67,4 @@ internal static class Guard
+             return arg;
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/NLog.Extensions.Logging/Internal/RegisterNLogLoggingProvider.cs b/src/NLog.Extensions.Logging/Internal/RegisterNLogLoggingProvider.cs
+index dea4629..ef11021 100644
+--- a/src/NLog.Extensions.Logging/Internal/RegisterNLogLoggingProvider.cs
++++ b/src/NLog.Extensions.Logging/Internal/RegisterNLogLoggingProvider.cs
+@@ -20,7 +20,7 @@ internal static void TryAddNLogLoggingProvider(this IServiceCollection services,
+                 NLogLoggerProvider? singleInstance = null;   // Ensure that registration of ILoggerFactory and ILoggerProvider shares the same single instance
+                 sharedFactory = (provider, cfg, opt) => singleInstance ?? (singleInstance = factory(provider, cfg, opt));
+ 
+-                addLogging?.Invoke(services, (builder) => builder?.ClearProviders());  // Cleanup the existing LoggerFactory, before replacing it with NLogLoggerFactory
++                addLogging?.Invoke(services, builder => builder?.ClearProviders());  // Cleanup the existing LoggerFactory, before replacing it with NLogLoggerFactory
+                 services.Replace(ServiceDescriptor.Singleton<ILoggerFactory, NLogLoggerFactory>(serviceProvider => new NLogLoggerFactory(sharedFactory(serviceProvider, hostConfiguration, options))));
+             }
+ 
+@@ -29,7 +29,7 @@ internal static void TryAddNLogLoggingProvider(this IServiceCollection services,
+             if (options.RemoveLoggerFactoryFilter)
+             {
+                 // Will forward all messages to NLog if not specifically overridden by user
+-                addLogging?.Invoke(services, (builder) => builder?.AddFilter<NLogLoggerProvider>(null, Microsoft.Extensions.Logging.LogLevel.Trace));
++                addLogging?.Invoke(services, builder => builder?.AddFilter<NLogLoggerProvider>(null, Microsoft.Extensions.Logging.LogLevel.Trace));
+             }
+         }
+ 
+diff --git a/src/NLog.Extensions.Logging/LayoutRenderers/ConfigSettingLayoutRenderer.cs b/src/NLog.Extensions.Logging/LayoutRenderers/ConfigSettingLayoutRenderer.cs
+index 4d33844..f39bfd1 100644
+--- a/src/NLog.Extensions.Logging/LayoutRenderers/ConfigSettingLayoutRenderer.cs
++++ b/src/NLog.Extensions.Logging/LayoutRenderers/ConfigSettingLayoutRenderer.cs
+@@ -40,9 +40,9 @@ public class ConfigSettingLayoutRenderer : LayoutRenderer
+         /// </summary>
+         public static IConfiguration? DefaultConfiguration { get; set; }
+ 
+-        ///<summary>
++        /// <summary>
+         /// Item in the setting container
+-        ///</summary>
++        /// </summary>
+         [DefaultParameter]
+         public string Item
+         {
+@@ -53,6 +53,7 @@ public string Item
+                 _itemLookup = value?.Replace("\\.", "::").Replace(".", ":").Replace("::", ".") ?? string.Empty;
+             }
+         }
++
+         private string _item = string.Empty;
+         private string _itemLookup = string.Empty;
+ 
+@@ -62,9 +63,9 @@ public string Item
+         [Obsolete("Replaced by Item-property")]
+         public string Name { get => Item; set => Item = value; }
+ 
+-        ///<summary>
++        /// <summary>
+         /// The default value to render if the setting value is null.
+-        ///</summary>
++        /// </summary>
+         public string Default { get; set; } = string.Empty;
+ 
+         /// <inheritdoc/>
+diff --git a/src/NLog.Extensions.Logging/LayoutRenderers/MicrosoftConsoleLayoutRenderer.cs b/src/NLog.Extensions.Logging/LayoutRenderers/MicrosoftConsoleLayoutRenderer.cs
+index 496c3af..b3b5056 100644
+--- a/src/NLog.Extensions.Logging/LayoutRenderers/MicrosoftConsoleLayoutRenderer.cs
++++ b/src/NLog.Extensions.Logging/LayoutRenderers/MicrosoftConsoleLayoutRenderer.cs
+@@ -11,7 +11,7 @@ namespace NLog.Extensions.Logging
+     /// <seealso href="https://github.com/NLog/NLog/wiki/MicrosoftConsoleLayout">Documentation on NLog Wiki</seealso>
+     [LayoutRenderer("MicrosoftConsoleLayout")]
+     [ThreadAgnostic]
+-    class MicrosoftConsoleLayoutRenderer : LayoutRenderer
++    internal class MicrosoftConsoleLayoutRenderer : LayoutRenderer
+     {
+ #if NETFRAMEWORK
+         private static readonly string[] EventIdMapper = Enumerable.Range(0, 512).Select(id => id.ToString(System.Globalization.CultureInfo.InvariantCulture)).ToArray();
+@@ -29,6 +29,7 @@ public string TimestampFormat
+                 _timestampFormatString = string.IsNullOrEmpty(value) ? string.Empty : $"{{0:{value}}}";
+             }
+         }
++
+         private string _timestampFormat = string.Empty;
+         private string _timestampFormatString = string.Empty;
+ 
+diff --git a/src/NLog.Extensions.Logging/Layouts/MicrosoftConsoleJsonLayout.cs b/src/NLog.Extensions.Logging/Layouts/MicrosoftConsoleJsonLayout.cs
+index 094368f..98940c1 100644
+--- a/src/NLog.Extensions.Logging/Layouts/MicrosoftConsoleJsonLayout.cs
++++ b/src/NLog.Extensions.Logging/Layouts/MicrosoftConsoleJsonLayout.cs
+@@ -118,6 +118,7 @@ public bool IncludeActivityIds
+                 var index = LookupNamedAttributeIndex("Timestamp");
+                 return index >= 0 ? ((Attributes[index].Layout as SimpleLayout)?.LayoutRenderers?.OfType<DateLayoutRenderer>().FirstOrDefault())?.Format : null;
+             }
++
+             set
+             {
+                 var index = LookupNamedAttributeIndex("Timestamp");
+@@ -170,6 +171,7 @@ private int LookupNamedAttributeIndex(string attributeName)
+                     return i;
+                 }
+             }
++
+             return -1;
+         }
+ 
+diff --git a/src/NLog.Extensions.Logging/Logging/EventIdCaptureType.cs b/src/NLog.Extensions.Logging/Logging/EventIdCaptureType.cs
+index 57381c0..a5c7213 100644
+--- a/src/NLog.Extensions.Logging/Logging/EventIdCaptureType.cs
++++ b/src/NLog.Extensions.Logging/Logging/EventIdCaptureType.cs
+@@ -12,26 +12,32 @@ public enum EventIdCaptureType
+         /// Skip capture
+         /// </summary>
+         None = 0,
++
+         /// <summary>
+         /// Capture integer <see cref="Microsoft.Extensions.Logging.EventId.Id"/> as "EventId"-property
+         /// </summary>
+         EventId = 1,
++
+         /// <summary>
+         /// Capture string <see cref="Microsoft.Extensions.Logging.EventId.Name"/> as "EventName"-property
+         /// </summary>
+         EventName = 2,
++
+         /// <summary>
+         /// Capture struct <see cref="Microsoft.Extensions.Logging.EventId"/> as "EventId"-property (with boxing)
+         /// </summary>
+         EventIdStruct = 4,
++
+         /// <summary>
+         /// Capture integer <see cref="Microsoft.Extensions.Logging.EventId.Id"/> as "EventId_Id"-property (Legacy)
+         /// </summary>
+         EventId_Id = 8,
++
+         /// <summary>
+         /// Capture string <see cref="Microsoft.Extensions.Logging.EventId.Name"/> as "EventId_Name"-property (Legacy)
+         /// </summary>
+         EventId_Name = 16,
++
+         /// <summary>
+         /// Captures legacy properties (EventId-struct + EventId_Id + EventId_Name)
+         /// </summary>
+diff --git a/src/NLog.Extensions.Logging/Logging/NLogBeginScopeParser.cs b/src/NLog.Extensions.Logging/Logging/NLogBeginScopeParser.cs
+index 84d623c..6f5fc97 100644
+--- a/src/NLog.Extensions.Logging/Logging/NLogBeginScopeParser.cs
++++ b/src/NLog.Extensions.Logging/Logging/NLogBeginScopeParser.cs
+@@ -8,7 +8,7 @@
+ 
+ namespace NLog.Extensions.Logging
+ {
+-    using ExtractorDictionary = ConcurrentDictionary<Type, Func<object, KeyValuePair<string, object?>>>;
++    using ExtractorDictionary = System.Collections.Concurrent.ConcurrentDictionary<System.Type, System.Func<object, System.Collections.Generic.KeyValuePair<string, object?>>>;
+ 
+     /// <summary>
+     /// Converts Microsoft Extension Logging BeginScope into NLog ScopeContext
+@@ -96,22 +96,21 @@ public IDisposable ParseBeginScope<T>(T state)
+                     {
+                         continue;
+                     }
++
+                     propertyList.Add(property);
+                 }
++
+                 return propertyList;
+             }
+         }
+ 
+         private IReadOnlyList<KeyValuePair<string, object?>> IncludeActivityIdsProperties(IReadOnlyList<KeyValuePair<string, object?>> scopePropertyList)
+         {
+-            if (_options.IncludeActivityIdsWithBeginScope && "RequestId".Equals(scopePropertyList[0].Key))
++            if (_options.IncludeActivityIdsWithBeginScope && "RequestId".Equals(scopePropertyList[0].Key) && scopePropertyList.Count > 1 && "RequestPath".Equals(scopePropertyList[1].Key))
+             {
+-                if (scopePropertyList.Count > 1 && "RequestPath".Equals(scopePropertyList[1].Key))
+-                {
+-                    var activty = System.Diagnostics.Activity.Current;
+-                    if (activty != null)
+-                        return new ScopePropertiesWithActivityIds(scopePropertyList, activty);
+-                }
++                var activty = System.Diagnostics.Activity.Current;
++                if (activty != null)
++                    return new ScopePropertiesWithActivityIds(scopePropertyList, activty);
+             }
+ 
+             return scopePropertyList;
+@@ -235,7 +234,7 @@ public static IDisposable CaptureScopeProperty<TState>(TState scopeProperty, Ext
+ #if NETSTANDARD2_1_OR_GREATER || NET || NET471_OR_GREATER
+             if (propertyValue is System.Runtime.CompilerServices.ITuple && ((System.Runtime.CompilerServices.ITuple)propertyValue).Length == 2 && ((System.Runtime.CompilerServices.ITuple)propertyValue)[0] is string)
+             {
+-                keyValueExtractor = static (obj) => new KeyValuePair<string, object?>(
++                keyValueExtractor = static obj => new KeyValuePair<string, object?>(
+                     ((System.Runtime.CompilerServices.ITuple)obj)[0]?.ToString() ?? string.Empty,
+                     ((System.Runtime.CompilerServices.ITuple)obj)[1]);
+                 return true;
+@@ -355,6 +354,7 @@ private static bool TryBuildExtractor(Type propertyType, out Func<object, KeyVal
+                 var itemType = propertyType.GetTypeInfo();
+                 return BuildKeyValueExtractor(propertyType, itemType);
+             }
++
+             return null;
+ #else
+             var itemType = propertyType.GetTypeInfo();
+@@ -370,7 +370,7 @@ private static bool TryBuildExtractor(Type propertyType, out Func<object, KeyVal
+             var propertyValueAccessObj = Expression.Convert(propertyValueAccess, typeof(object));
+             var propertyValueLambda = Expression.Lambda<Func<object, object?>>(propertyValueAccessObj, keyValuePairObjParam).Compile();
+ 
+-            return (obj) =>
++            return obj =>
+             {
+                 return new KeyValuePair<string, object?>(
+                     propertyKeyLambda.Invoke(obj)?.ToString() ?? string.Empty,
+diff --git a/src/NLog.Extensions.Logging/Logging/NLogLogger.cs b/src/NLog.Extensions.Logging/Logging/NLogLogger.cs
+index eff4f7b..08acc36 100644
+--- a/src/NLog.Extensions.Logging/Logging/NLogLogger.cs
++++ b/src/NLog.Extensions.Logging/Logging/NLogLogger.cs
+@@ -14,6 +14,7 @@ internal class NLogLogger : Microsoft.Extensions.Logging.ILogger
+         private readonly Logger _logger;
+         private readonly NLogProviderOptions _options;
+         private readonly NLogBeginScopeParser _beginScopeParser;
++
+         internal string LoggerName => _logger?.Name ?? string.Empty;
+ 
+         internal static readonly string OriginalFormatPropertyName = string.Intern("{OriginalFormat}"); // string.Intern enables the ReferenceEquals fast-path in string.Equals
+@@ -51,7 +52,7 @@ public void Log<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, EventId
+         }
+ 
+ #if NETSTANDARD2_1_OR_GREATER || NET
+-        LogEventInfo? GetMessageParametersWithoutBoxing<TState>(LogLevel nLogLogLevel, in EventId eventId, in TState state, Exception? exception, Func<TState, Exception?, string> formatter)
++        private LogEventInfo? GetMessageParametersWithoutBoxing<TState>(LogLevel nLogLogLevel, in EventId eventId, in TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+         {
+             if (state is IReadOnlyList<KeyValuePair<string, object?>>)
+             {
+@@ -75,6 +76,7 @@ public void Log<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, EventId
+                                 var formattedMessage = formatter(state, exception);
+                                 return CreateLogEventWithoutParameters(nLogLogLevel, formattedMessage, eventId, captureEventId);
+                             }
++
+                             break;
+                         case 2:
+                             parameterCount = 2;
+@@ -97,9 +99,11 @@ public void Log<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, EventId
+                                         else if (eventIdParameterCount != 0)
+                                             return new LogEventInfo(nLogLogLevel, _logger.Name, formattedMessage, originalMessage ?? formattedMessage, [arg1, eventIdArg1]);
+                                     }
++
+                                     return new LogEventInfo(nLogLogLevel, _logger.Name, formattedMessage, originalMessage ?? formattedMessage, [arg1]);
+                                 }
+                             }
++
+                             break;
+                         case 3:
+                             parameterCount = 3;
+@@ -123,11 +127,12 @@ public void Log<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, EventId
+                                         else if (eventIdParameterCount != 0)
+                                             return new LogEventInfo(nLogLogLevel, _logger.Name, formattedMessage, originalMessage ?? formattedMessage, [arg1, arg2, eventIdArg1]);
+                                     }
++
+                                     return new LogEventInfo(nLogLogLevel, _logger.Name, formattedMessage, originalMessage ?? formattedMessage, [arg1, arg2]);
+                                 }
+                             }
+-                            break;
+ 
++                            break;
+                         case 4:
+                             parameterCount = 4;
+                             if (_options.FastCaptureMessageTemplates && OriginalFormatPropertyName.Equals(((IReadOnlyList<KeyValuePair<string, object?>>)state)[3].Key))
+@@ -151,9 +156,11 @@ public void Log<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, EventId
+                                         else if (eventIdParameterCount != 0)
+                                             return new LogEventInfo(nLogLogLevel, _logger.Name, formattedMessage, originalMessage ?? formattedMessage, [arg1, arg2, arg3, eventIdArg1]);
+                                     }
++
+                                     return new LogEventInfo(nLogLogLevel, _logger.Name, formattedMessage, originalMessage ?? formattedMessage, [arg1, arg2, arg3]);
+                                 }
+                             }
++
+                             break;
+                     }
+                 }
+@@ -177,6 +184,7 @@ private LogEventInfo CreateLogEventWithoutParameters(LogLevel nLogLogLevel, stri
+                 else if (eventIdParameterCount != 0)
+                     return new LogEventInfo(nLogLogLevel, _logger.Name, formattedMessage, formattedMessage, [eventIdArg1]);
+             }
++
+             return new LogEventInfo(nLogLogLevel, _logger.Name, formattedMessage);
+         }
+ #endif
+@@ -299,6 +307,7 @@ private LogEventInfo CaptureMessageTemplate(LogLevel nLogLogLevel, string messag
+                     logEvent.Parameters = parameters;
+                 }
+             }
++
+             return logEvent;
+         }
+ 
+@@ -335,6 +344,7 @@ private LogEventInfo CaputureBasicLogEvent(LogLevel nLogLogLevel, string formatt
+                     parameters[parameterIndex++] = parameter.Value;
+                 }
+             }
++
+             return originalMessage;
+         }
+ 
+@@ -448,6 +458,7 @@ private static bool AllParameterCorrectlyPositionalMapped(NLogMessageParameterLi
+                         if (i + j < messageParameterCount)
+                             paramsArray[j] = messageParameters[i + j].Value;
+                     }
++
+                     i += maxIndex;
+                 }
+                 else
+@@ -529,7 +540,7 @@ private void CaptureEventIdProperties(LogEventInfo logEvent, in EventId eventId)
+         }
+ 
+ #if NETSTANDARD2_1_OR_GREATER || NET
+-        int GetEventIdMessageParameters(in EventId eventId, out MessageTemplateParameter arg1, out MessageTemplateParameter arg2)
++        private int GetEventIdMessageParameters(in EventId eventId, out MessageTemplateParameter arg1, out MessageTemplateParameter arg2)
+         {
+             var captureEventId = _options.CaptureEventId;
+             if ((captureEventId & EventIdCaptureType.EventId) != 0)
+@@ -540,6 +551,7 @@ int GetEventIdMessageParameters(in EventId eventId, out MessageTemplateParameter
+                     arg2 = new MessageTemplateParameter(nameof(EventIdCaptureType.EventName), eventId.Name, null, CaptureType.Normal);
+                     return 2;
+                 }
++
+                 arg2 = default;
+                 return 1;
+             }
+diff --git a/src/NLog.Extensions.Logging/Logging/NLogLoggerFactory.cs b/src/NLog.Extensions.Logging/Logging/NLogLoggerFactory.cs
+index d8932cb..9910b44 100644
+--- a/src/NLog.Extensions.Logging/Logging/NLogLoggerFactory.cs
++++ b/src/NLog.Extensions.Logging/Logging/NLogLoggerFactory.cs
+@@ -72,6 +72,7 @@ public Microsoft.Extensions.Logging.ILogger CreateLogger(string categoryName)
+                     }
+                 }
+             }
++
+             return logger;
+         }
+ 
+diff --git a/src/NLog.Extensions.Logging/Logging/NLogLoggerProvider.cs b/src/NLog.Extensions.Logging/Logging/NLogLoggerProvider.cs
+index 3e2212b..e1ae46e 100644
+--- a/src/NLog.Extensions.Logging/Logging/NLogLoggerProvider.cs
++++ b/src/NLog.Extensions.Logging/Logging/NLogLoggerProvider.cs
+@@ -105,10 +105,9 @@ public async System.Threading.Tasks.ValueTask DisposeAsync()
+             {
+                 await LogFactory.FlushAsync(System.Threading.CancellationToken.None).ConfigureAwait(false);
+             }
++
+             GC.SuppressFinalize(this);
+         }
+ #endif
+     }
+ }
+-
+-
+diff --git a/src/NLog.Extensions.Logging/Logging/NLogMessageParameterList.cs b/src/NLog.Extensions.Logging/Logging/NLogMessageParameterList.cs
+index 8c9116d..4462f52 100644
+--- a/src/NLog.Extensions.Logging/Logging/NLogMessageParameterList.cs
++++ b/src/NLog.Extensions.Logging/Logging/NLogMessageParameterList.cs
+@@ -81,6 +81,7 @@ public bool HasMessageTemplateSyntax(bool parseMessageTemplates)
+             {
+                 return messageProperties[_originalMessageIndex].Value as string;
+             }
++
+             return null;
+         }
+ 
+diff --git a/src/NLog.Extensions.Logging/Logging/NLogProviderOptions.cs b/src/NLog.Extensions.Logging/Logging/NLogProviderOptions.cs
+index c69e327..fa38b31 100644
+--- a/src/NLog.Extensions.Logging/Logging/NLogProviderOptions.cs
++++ b/src/NLog.Extensions.Logging/Logging/NLogProviderOptions.cs
+@@ -115,7 +115,9 @@ public class NLogProviderOptions
+         /// <remarks>Default: <see langword="true"/></remarks>
+         public bool RegisterServiceProvider { get; set; } = true;
+ 
+-        /// <summary>Initializes a new instance NLogProviderOptions with default values.</summary>
++        /// <summary>
++        /// Initializes a new instance NLogProviderOptions with default values.
++        /// </summary>
+         public NLogProviderOptions()
+         {
+         }
+diff --git a/src/NLog.Extensions.Logging/Properties/AssemblyInfo.cs b/src/NLog.Extensions.Logging/Properties/AssemblyInfo.cs
+index 7fc34c7..38f7856 100644
+--- a/src/NLog.Extensions.Logging/Properties/AssemblyInfo.cs
++++ b/src/NLog.Extensions.Logging/Properties/AssemblyInfo.cs
+@@ -3,4 +3,4 @@
+ 
+ [assembly: ComVisible(false)]
+ 
+-[assembly: InternalsVisibleTo("NLog.Extensions.Logging.Tests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100772391E63C104728ADCF18E2390474262559FA7F34A4215848F43288CDE875DCC92A06222E9BE0592B211FF74ADBB5D21A7AAB5522B540B1735F2F03279221056FEDBE7E534073DABEE9DB48F8ECEBCF1DC98A95576E45CBEFF5FE7C4842859451AB2DAE7A8370F1B2F7A529D2CA210E3E844D973523D73D193DF6C17F1314A6")]
+\ No newline at end of file
++[assembly: InternalsVisibleTo("NLog.Extensions.Logging.Tests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100772391E63C104728ADCF18E2390474262559FA7F34A4215848F43288CDE875DCC92A06222E9BE0592B211FF74ADBB5D21A7AAB5522B540B1735F2F03279221056FEDBE7E534073DABEE9DB48F8ECEBCF1DC98A95576E45CBEFF5FE7C4842859451AB2DAE7A8370F1B2F7A529D2CA210E3E844D973523D73D193DF6C17F1314A6")]
+diff --git a/src/NLog.Extensions.Logging/Targets/MicrosoftILoggerTarget.cs b/src/NLog.Extensions.Logging/Targets/MicrosoftILoggerTarget.cs
+index 12707ee..2d4eb2b 100644
+--- a/src/NLog.Extensions.Logging/Targets/MicrosoftILoggerTarget.cs
++++ b/src/NLog.Extensions.Logging/Targets/MicrosoftILoggerTarget.cs
+@@ -146,6 +146,7 @@ private Microsoft.Extensions.Logging.ILogger CreateFromLoggerFactory(LogEventInf
+ 
+                 _loggers.TryAdd(loggerName, logger);                // Local caching of Loggers to reduce chance of congestions and deadlock
+             }
++
+             return logger;
+         }
+ 
+@@ -165,10 +166,12 @@ private struct LogState : IReadOnlyList<KeyValuePair<string, object?>>, IEquatab
+                     {
+                         return property;
+                     }
++
+                     if (_contextProperties != null && TryGetContextProperty(_contextProperties, ref index, out var contextProperty))
+                     {
+                         return contextProperty;
+                     }
++
+                     if (index != 0)
+                         throw new ArgumentOutOfRangeException(nameof(index));
+                     return CreateOriginalFormatProperty();
+@@ -190,6 +193,7 @@ public LogState(LogEventInfo logEvent, string layoutMessage, IDictionary<string,
+                 {
+                     allProperties = _logEvent.Properties.Select(p => CreateLogEventProperty(p)).Concat(allProperties);
+                 }
++
+                 return allProperties.GetEnumerator();
+             }
+ 
+diff --git a/test/NLog.Extensions.Hosting.Tests/ExtensionMethodTests.cs b/test/NLog.Extensions.Hosting.Tests/ExtensionMethodTests.cs
+index a614ca8..f6e8b65 100644
+--- a/test/NLog.Extensions.Hosting.Tests/ExtensionMethodTests.cs
++++ b/test/NLog.Extensions.Hosting.Tests/ExtensionMethodTests.cs
+@@ -38,7 +38,7 @@ public void UseNLog_withOptionsParam_WorksWithNLog()
+         public void UseNLog_ShouldLogToNLog()
+         {
+             var nlogTarget = new Targets.MemoryTarget() { Name = "Output" };
+-            var builder = new HostBuilder().UseNLog(null, (serviceProvider) =>
++            var builder = new HostBuilder().UseNLog(null, serviceProvider =>
+             {
+                 var nLogFactory = new LogFactory().Setup().LoadConfiguration(c => c.ForLogger().WriteTo(nlogTarget)).LogFactory;
+                 return nLogFactory;
+@@ -149,7 +149,8 @@ public void UseNLog_LoadConfigurationFromSection()
+ 
+             Assert.Single(logged);
+             Assert.Equal("logger1|error1|Memory", logged[0]);
+-            //Reset
++
++            // Reset
+             LogManager.Configuration = null;
+         }
+ 
+@@ -277,7 +278,8 @@ public void IHostApplicationBuilder_UseNLog_LoadConfigurationFromSection()
+ 
+             Assert.Single(logged);
+             Assert.Equal("logger1|error1|Memory", logged[0]);
+-            //Reset
++
++            // Reset
+             LogManager.Configuration = null;
+         }
+ 
+@@ -286,7 +288,7 @@ public void IHostApplicationBuilder_UseNLog_ShouldLogToNLog()
+         {
+             var nlogTarget = new Targets.MemoryTarget() { Name = "Output" };
+             var builder = new HostApplicationBuilder();
+-            builder.UseNLog(null, (ServiceProvider) =>
++            builder.UseNLog(null, serviceProvider =>
+             {
+                 var nLogFactory = new LogFactory().Setup().LoadConfiguration(c => c.ForLogger().WriteTo(nlogTarget)).LogFactory;
+                 return nLogFactory;
+diff --git a/test/NLog.Extensions.Hosting.Tests/HostAppNameLayoutRendererTests.cs b/test/NLog.Extensions.Hosting.Tests/HostAppNameLayoutRendererTests.cs
+index 4b553f5..6a64c66 100644
+--- a/test/NLog.Extensions.Hosting.Tests/HostAppNameLayoutRendererTests.cs
++++ b/test/NLog.Extensions.Hosting.Tests/HostAppNameLayoutRendererTests.cs
+@@ -48,4 +48,4 @@ public void FallsBackToProcessNameWhenHostEnvironmentThrows()
+             Assert.Equal(processName, result);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/test/NLog.Extensions.Hosting.Tests/HostEnvironmentLayoutRendererTests.cs b/test/NLog.Extensions.Hosting.Tests/HostEnvironmentLayoutRendererTests.cs
+index 5fb0bc7..7b40fd5 100644
+--- a/test/NLog.Extensions.Hosting.Tests/HostEnvironmentLayoutRendererTests.cs
++++ b/test/NLog.Extensions.Hosting.Tests/HostEnvironmentLayoutRendererTests.cs
+@@ -93,4 +93,4 @@ public void PreservesWhitespaceHostEnvironmentName()
+             Assert.Equal(" ", result);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/test/NLog.Extensions.Hosting.Tests/HostLayoutRendererTestHelper.cs b/test/NLog.Extensions.Hosting.Tests/HostLayoutRendererTestHelper.cs
+index b741dff..05c2c9c 100644
+--- a/test/NLog.Extensions.Hosting.Tests/HostLayoutRendererTestHelper.cs
++++ b/test/NLog.Extensions.Hosting.Tests/HostLayoutRendererTestHelper.cs
+@@ -89,4 +89,4 @@ public void Dispose()
+                 Environment.SetEnvironmentVariable(variable.Key, variable.Value);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/test/NLog.Extensions.Hosting.Tests/HostRootDirLayoutRendererTests.cs b/test/NLog.Extensions.Hosting.Tests/HostRootDirLayoutRendererTests.cs
+index 999bd1a..bf4a3a3 100644
+--- a/test/NLog.Extensions.Hosting.Tests/HostRootDirLayoutRendererTests.cs
++++ b/test/NLog.Extensions.Hosting.Tests/HostRootDirLayoutRendererTests.cs
+@@ -84,4 +84,4 @@ public void FallsBackToCurrentApplicationDirectoryWhenContentRootsAreMissing()
+             Assert.NotEmpty(result);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/test/NLog.Extensions.Hosting.Tests/SetupExtensionsBuilderExtensionsTests.cs b/test/NLog.Extensions.Hosting.Tests/SetupExtensionsBuilderExtensionsTests.cs
+index 4a90dfd..240e56c 100644
+--- a/test/NLog.Extensions.Hosting.Tests/SetupExtensionsBuilderExtensionsTests.cs
++++ b/test/NLog.Extensions.Hosting.Tests/SetupExtensionsBuilderExtensionsTests.cs
+@@ -1,7 +1,7 @@
+ using System.Linq;
+-using NLog.Layouts;
+ using NLog.Extensions.Hosting;
+ using NLog.Extensions.Logging;
++using NLog.Layouts;
+ using Xunit;
+ 
+ namespace NLog.Extensions.Hosting.Tests
+@@ -28,4 +28,4 @@ public void WriteToJsonTargets_ConfiguresJsonLayoutsAndScopes()
+             Assert.False(Assert.IsType<MicrosoftConsoleJsonLayout>(consoleTarget.Layout).IncludeScopes);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/test/NLog.Extensions.Logging.Tests/ApiTests.cs b/test/NLog.Extensions.Logging.Tests/ApiTests.cs
+index 060c956..a86754a 100644
+--- a/test/NLog.Extensions.Logging.Tests/ApiTests.cs
++++ b/test/NLog.Extensions.Logging.Tests/ApiTests.cs
+@@ -15,19 +15,19 @@
+     /// </summary>
+     public class ApiTests
+     {
+-        private readonly Type[] allTypes;
+-        private readonly Assembly nlogExtensionAssembly = typeof(NLogLoggerFactory).Assembly;
+-        private readonly Dictionary<Type, int> typeUsageCount = new Dictionary<Type, int>();
++        private readonly Type[] _allTypes;
++        private readonly Assembly _nlogExtensionAssembly = typeof(NLogLoggerFactory).Assembly;
++        private readonly Dictionary<Type, int> _typeUsageCount = new Dictionary<Type, int>();
+ 
+         public ApiTests()
+         {
+-            allTypes = nlogExtensionAssembly.GetTypes();
++            _allTypes = _nlogExtensionAssembly.GetTypes();
+         }
+ 
+         [Fact]
+         public void PublicEnumsTest()
+         {
+-            foreach (Type type in allTypes)
++            foreach (Type type in _allTypes)
+             {
+                 if (!type.IsPublic)
+                 {
+@@ -36,13 +36,13 @@ public void PublicEnumsTest()
+ 
+                 if (type.IsEnum || type.IsInterface)
+                 {
+-                    typeUsageCount[type] = 0;
++                    _typeUsageCount[type] = 0;
+                 }
+             }
+ 
+-            typeUsageCount[typeof(IInstallable)] = 1;
++            _typeUsageCount[typeof(IInstallable)] = 1;
+ 
+-            foreach (Type type in allTypes)
++            foreach (Type type in _allTypes)
+             {
+                 if (type.IsGenericTypeDefinition)
+                 {
+@@ -87,7 +87,7 @@ public void PublicEnumsTest()
+             var unusedTypes = new List<Type>();
+             StringBuilder sb = new StringBuilder();
+ 
+-            foreach (var kvp in typeUsageCount)
++            foreach (var kvp in _typeUsageCount)
+             {
+                 if (kvp.Value == 0)
+                 {
+@@ -114,24 +114,25 @@ private void IncrementUsageCount(Type type)
+                 {
+                     IncrementUsageCount(parm);
+                 }
++
+                 return;
+             }
+ 
+-            if (type.Assembly != nlogExtensionAssembly)
++            if (type.Assembly != _nlogExtensionAssembly)
+             {
+                 return;
+             }
+ 
+-            if (typeUsageCount.ContainsKey(type))
++            if (_typeUsageCount.ContainsKey(type))
+             {
+-                typeUsageCount[type]++;
++                _typeUsageCount[type]++;
+             }
+         }
+ 
+         [Fact]
+         public void TypesInInternalNamespaceShouldBeInternalTest()
+         {
+-            var notInternalTypes = allTypes
++            var notInternalTypes = _allTypes
+                 .Where(t => t.Namespace != null && t.Namespace.Contains(".Internal"))
+                 .Where(t => !t.IsNested && (t.IsVisible || t.IsPublic))
+                 .Select(t => t.FullName)
+@@ -143,7 +144,7 @@ public void TypesInInternalNamespaceShouldBeInternalTest()
+         [Fact]
+         public void AppDomainFixedOutput_Attribute_EnsureThreadAgnostic()
+         {
+-            foreach (Type type in allTypes)
++            foreach (Type type in _allTypes)
+             {
+                 var appDomainFixedOutputAttribute = type.GetCustomAttribute<AppDomainFixedOutputAttribute>();
+                 if (appDomainFixedOutputAttribute != null)
+@@ -157,7 +158,7 @@ public void AppDomainFixedOutput_Attribute_EnsureThreadAgnostic()
+         [Fact]
+         public void WrapperLayoutRenderer_EnsureThreadAgnostic()
+         {
+-            foreach (Type type in allTypes)
++            foreach (Type type in _allTypes)
+             {
+                 if (typeof(NLog.LayoutRenderers.Wrappers.WrapperLayoutRendererBase).IsAssignableFrom(type))
+                 {
+@@ -174,7 +175,7 @@ public void SingleDefaultConfigOption()
+         {
+             string prevDefaultPropertyName = null;
+ 
+-            foreach (Type type in allTypes)
++            foreach (Type type in _allTypes)
+             {
+                 prevDefaultPropertyName = null;
+ 
+@@ -201,7 +202,7 @@ public void ValidateLayoutRendererTypeAlias()
+             {
+                 "MicrosoftConsoleLayoutRenderer",
+             };
+-            foreach (Type type in allTypes)
++            foreach (Type type in _allTypes)
+             {
+                 if (type.IsSubclassOf(typeof(LayoutRenderer)))
+                 {
+@@ -216,7 +217,7 @@ public void ValidateLayoutRendererTypeAlias()
+ 
+                         if (!oldFaultyClassNames.Contains(type.Name))
+                         {
+-                            var typeAlias = layoutRendererAttributes[0].Name.Replace("-", "");
++                            var typeAlias = layoutRendererAttributes[0].Name.Replace("-", string.Empty);
+                             Assert.Equal(typeAlias + "LayoutRenderer", type.Name, StringComparer.OrdinalIgnoreCase);
+                         }
+                     }
+@@ -235,7 +236,7 @@ public void ValidateConfigurationItemFactory()
+ 
+             var missingTypes = new List<string>();
+ 
+-            foreach (Type type in allTypes)
++            foreach (Type type in _allTypes)
+             {
+                 if (!type.IsPublic || !type.IsClass || type.IsAbstract)
+                     continue;
+diff --git a/test/NLog.Extensions.Logging.Tests/ConfigSettingLayoutRendererTests.cs b/test/NLog.Extensions.Logging.Tests/ConfigSettingLayoutRendererTests.cs
+index 25caccd..edddf74 100644
+--- a/test/NLog.Extensions.Logging.Tests/ConfigSettingLayoutRendererTests.cs
++++ b/test/NLog.Extensions.Logging.Tests/ConfigSettingLayoutRendererTests.cs
+@@ -47,7 +47,7 @@ public void ConfigSettingConfigEscapeLookup()
+             var result = layoutRenderer.Render(LogEventInfo.CreateNullEvent());
+             Assert.Equal("Test", result);
+ 
+-            var layoutRenderer2 = new ConfigSettingLayoutRenderer { Item = @"Logging.Microsoft..Logging" };
++            var layoutRenderer2 = new ConfigSettingLayoutRenderer { Item = "Logging.Microsoft..Logging" };
+             var result2 = layoutRenderer2.Render(LogEventInfo.CreateNullEvent());
+             Assert.Equal("Test", result2);
+         }
+diff --git a/test/NLog.Extensions.Logging.Tests/CustomBeginScopeTest.cs b/test/NLog.Extensions.Logging.Tests/CustomBeginScopeTest.cs
+index efdb172..d5f4f81 100644
+--- a/test/NLog.Extensions.Logging.Tests/CustomBeginScopeTest.cs
++++ b/test/NLog.Extensions.Logging.Tests/CustomBeginScopeTest.cs
+@@ -37,6 +37,7 @@ public void TestNonSerializableSayHi()
+             var scopeString = runner.SayHi().Result;
+             Assert.Single(target.Logs);
+             Assert.Equal("Hi Earth. Welcome Earth People", target.Logs[0]);
++
+             // Assert.Equal("Earth People", scopeString); <-- Bug https://github.com/aspnet/Logging/issues/893
+         }
+ 
+@@ -152,6 +153,7 @@ public ActionLogScope(string world)
+                     {
+                         return new KeyValuePair<string, object>("World", _world);
+                     }
++
+                     throw new IndexOutOfRangeException(nameof(index));
+                 }
+             }
+diff --git a/test/NLog.Extensions.Logging.Tests/CustomLoggerCallSiteTest.cs b/test/NLog.Extensions.Logging.Tests/CustomLoggerCallSiteTest.cs
+index 0d551bb..9602854 100644
+--- a/test/NLog.Extensions.Logging.Tests/CustomLoggerCallSiteTest.cs
++++ b/test/NLog.Extensions.Logging.Tests/CustomLoggerCallSiteTest.cs
+@@ -23,7 +23,7 @@ public void TestCallSiteSayHello()
+ 
+         private CustomLoggerCallSiteTestRunner GetRunner(NLogProviderOptions options = null, Target target = null)
+         {
+-            return SetupServiceProvider(options, target, configureServices: (s) => s.AddTransient<CustomLoggerCallSiteTestRunner>().AddSingleton(typeof(ILogger<>), typeof(SameAssemblyLogger<>))).GetRequiredService<CustomLoggerCallSiteTestRunner>();
++            return SetupServiceProvider(options, target, configureServices: s => s.AddTransient<CustomLoggerCallSiteTestRunner>().AddSingleton(typeof(ILogger<>), typeof(SameAssemblyLogger<>))).GetRequiredService<CustomLoggerCallSiteTestRunner>();
+         }
+ 
+         public sealed class SameAssemblyLogger<T> : ILogger<T>
+diff --git a/test/NLog.Extensions.Logging.Tests/CustomLoggerPropertyTest.cs b/test/NLog.Extensions.Logging.Tests/CustomLoggerPropertyTest.cs
+index 82f88e4..cdad8cc 100644
+--- a/test/NLog.Extensions.Logging.Tests/CustomLoggerPropertyTest.cs
++++ b/test/NLog.Extensions.Logging.Tests/CustomLoggerPropertyTest.cs
+@@ -30,7 +30,7 @@ public void TestExtraMessageTemplatePropertySayHigh5()
+             runner.SayHigh5();
+ 
+             Assert.Single(runner.GetTarget().Logs);
+-            Assert.Equal(@"Hi 5|ActivityId=42", runner.GetTarget().Logs[0]);
++            Assert.Equal("Hi 5|ActivityId=42", runner.GetTarget().Logs[0]);
+         }
+ 
+         [Fact]
+@@ -42,13 +42,13 @@ public void TestExtraMessagePropertySayHi()
+             runner.SayHigh5();
+ 
+             Assert.Single(runner.GetTarget().Logs);
+-            Assert.Equal(@"Hi 5|ActivityId=42, 0=5", runner.GetTarget().Logs[0]);
++            Assert.Equal("Hi 5|ActivityId=42, 0=5", runner.GetTarget().Logs[0]);
+         }
+ 
+         private CustomLoggerPropertyTestRunner GetRunner(NLogProviderOptions options = null)
+         {
+             var target = new Targets.MemoryTarget { Layout = "${message}|${all-event-properties}" };
+-            return SetupServiceProvider(options, target, configureServices: (s) => s.AddTransient<CustomLoggerPropertyTestRunner>().AddSingleton(typeof(ILogger<>), typeof(SameAssemblyLogger<>))).GetRequiredService<CustomLoggerPropertyTestRunner>();
++            return SetupServiceProvider(options, target, configureServices: s => s.AddTransient<CustomLoggerPropertyTestRunner>().AddSingleton(typeof(ILogger<>), typeof(SameAssemblyLogger<>))).GetRequiredService<CustomLoggerPropertyTestRunner>();
+         }
+ 
+         public sealed class SameAssemblyLogger<T> : ILogger<T>
+@@ -103,7 +103,7 @@ public void SayHigh5()
+             }
+         }
+ 
+-        sealed class MyLogEvent<TState> : IReadOnlyList<KeyValuePair<string, object>>
++        private sealed class MyLogEvent<TState> : IReadOnlyList<KeyValuePair<string, object>>
+         {
+             private readonly List<KeyValuePair<string, object>> _properties = new List<KeyValuePair<string, object>>();
+             private readonly Func<TState, Exception, string> _originalFormattter;
+diff --git a/test/NLog.Extensions.Logging.Tests/Extensions/ConfigureExtensionsTests.cs b/test/NLog.Extensions.Logging.Tests/Extensions/ConfigureExtensionsTests.cs
+index 1890294..05687ed 100644
+--- a/test/NLog.Extensions.Logging.Tests/Extensions/ConfigureExtensionsTests.cs
++++ b/test/NLog.Extensions.Logging.Tests/Extensions/ConfigureExtensionsTests.cs
+@@ -17,7 +17,7 @@ public void AddNLog_LoggerFactory_IncludeActivityIdsWithBeginScope()
+         {
+             // Arrange
+             var loggerFactory = LoggerFactory.Create(builder => builder.AddNLog(new NLogProviderOptions { IncludeActivityIdsWithBeginScope = true }));
+-            var config = CreateConfigWithMemoryTarget(out var memoryTarget, $"${{scopeproperty:ParentId}} - ${{message}}");
++            var config = CreateConfigWithMemoryTarget(out var memoryTarget, "${scopeproperty:ParentId} - ${message}");
+ 
+             // Act
+             LogManager.Configuration = config;
+@@ -85,7 +85,7 @@ public void AddNLog_LogFactoryBuilder_LogInfo_ShouldLogToNLog()
+ 
+             // Act
+             MemoryTarget memoryTarget = null;
+-            builder.AddNLog(ServiceProvider => CreateConfigWithMemoryTarget(out memoryTarget, logFactory: new NLog.LogFactory()).LogFactory);
++            builder.AddNLog(serviceProvider => CreateConfigWithMemoryTarget(out memoryTarget, logFactory: new NLog.LogFactory()).LogFactory);
+             var provider = GetLoggerProvider(builder);
+             var logger = provider.CreateLogger("logger1");
+ 
+@@ -135,7 +135,7 @@ public void AddNLog_ServiceCollection_ShouldLog()
+ 
+             // Act
+             var nlogTarget = new Targets.MemoryTarget() { Name = "Output" };
+-            collection.AddNLog(new NLogProviderOptions(), (ServiceProvider) =>
++            collection.AddNLog(new NLogProviderOptions(), serviceProvider =>
+             {
+                 var nLogFactory = new LogFactory().Setup().LoadConfiguration(c => c.ForLogger().WriteTo(nlogTarget)).LogFactory;
+                 return nLogFactory;
+diff --git a/test/NLog.Extensions.Logging.Tests/LoggerTests.cs b/test/NLog.Extensions.Logging.Tests/LoggerTests.cs
+index f4879ac..0a65342 100644
+--- a/test/NLog.Extensions.Logging.Tests/LoggerTests.cs
++++ b/test/NLog.Extensions.Logging.Tests/LoggerTests.cs
+@@ -409,7 +409,7 @@ public void TestPositionalParseMessageTemplates()
+ 
+         private Runner GetRunner()
+         {
+-            return base.GetRunner<Runner>();
++            return GetRunner<Runner>();
+         }
+ 
+         public sealed class Runner
+diff --git a/test/NLog.Extensions.Logging.Tests/Logging/NLogMessageParameterListTests.cs b/test/NLog.Extensions.Logging.Tests/Logging/NLogMessageParameterListTests.cs
+index 9894e66..9c31f3c 100644
+--- a/test/NLog.Extensions.Logging.Tests/Logging/NLogMessageParameterListTests.cs
++++ b/test/NLog.Extensions.Logging.Tests/Logging/NLogMessageParameterListTests.cs
+@@ -63,7 +63,7 @@ public void GetEnumerator_StateUnderTest_ExpectedBehavior()
+         public void Add_ThrowsNotSupported()
+         {
+             // Arrange
+-            MessageTemplateParameter item = new MessageTemplateParameter();
++            MessageTemplateParameter item = default(MessageTemplateParameter);
+ 
+             // Act & Assert
+             Assert.Throws<NotSupportedException>(() => _messageParameterList.Add(item));
+@@ -82,18 +82,17 @@ public void Clear_ThrowsNotSupported()
+         public void Contains_ThrowsNotSupported()
+         {
+             // Arrange
+-            MessageTemplateParameter item = new MessageTemplateParameter();
++            MessageTemplateParameter item = default(MessageTemplateParameter);
+ 
+             // Act & Assert
+             Assert.Throws<NotSupportedException>(() => _messageParameterList.Contains(item));
+         }
+ 
+-
+         [Fact]
+         public void IndexOf_ThrowsNotSupported()
+         {
+             // Arrange
+-            MessageTemplateParameter item = new MessageTemplateParameter();
++            MessageTemplateParameter item = default(MessageTemplateParameter);
+ 
+             // Act & Assert
+             Assert.Throws<NotSupportedException>(() => _messageParameterList.IndexOf(item));
+@@ -104,7 +103,7 @@ public void Insert_ThrowsNotSupported()
+         {
+             // Arrange
+             int index = 0;
+-            MessageTemplateParameter item = new MessageTemplateParameter();
++            MessageTemplateParameter item = default(MessageTemplateParameter);
+ 
+             // Act & Assert
+             Assert.Throws<NotSupportedException>(() => _messageParameterList.Insert(index, item));
+@@ -114,7 +113,7 @@ public void Insert_ThrowsNotSupported()
+         public void Remove_ThrowsNotSupported()
+         {
+             // Arrange
+-            MessageTemplateParameter item = new MessageTemplateParameter();
++            MessageTemplateParameter item = default(MessageTemplateParameter);
+ 
+             // Act & Assert
+             Assert.Throws<NotSupportedException>(() => _messageParameterList.Remove(item));
+diff --git a/test/NLog.Extensions.Logging.Tests/MicrosoftConsoleLayoutRendererTest.cs b/test/NLog.Extensions.Logging.Tests/MicrosoftConsoleLayoutRendererTest.cs
+index 0c65dbb..e4d17c1 100644
+--- a/test/NLog.Extensions.Logging.Tests/MicrosoftConsoleLayoutRendererTest.cs
++++ b/test/NLog.Extensions.Logging.Tests/MicrosoftConsoleLayoutRendererTest.cs
+@@ -33,7 +33,6 @@ public void MicrosoftConsoleLayoutRenderer_OutOfMapperBoundsEventId()
+             Assert.Equal($"fail: MyLogger[{eventId}]{Environment.NewLine}      Alert 500{Environment.NewLine}{exception}", result);
+         }
+ 
+-
+         [Fact]
+         public void MicrosoftConsoleLayoutRenderer_TimestampFormat()
+         {
+diff --git a/test/NLog.Extensions.Logging.Tests/MicrosoftILoggerTargetTests.cs b/test/NLog.Extensions.Logging.Tests/MicrosoftILoggerTargetTests.cs
+index 2a994bb..5f1d550 100644
+--- a/test/NLog.Extensions.Logging.Tests/MicrosoftILoggerTargetTests.cs
++++ b/test/NLog.Extensions.Logging.Tests/MicrosoftILoggerTargetTests.cs
+@@ -111,7 +111,6 @@ public void ContextPropertiesILoggerTest()
+             Assert.Equal("Hello {Planet}", mock.LastLogProperties[2].Value);
+         }
+ 
+-
+         [Fact]
+         public void LogWithEventIdTest()
+         {
+@@ -249,7 +248,7 @@ private static (Logger, LoggerFactoryMock) CreateLoggerFactoryMock(out Microsoft
+             return (logger, loggerFactoryMock);
+         }
+ 
+-        sealed class LoggerFactoryMock : Microsoft.Extensions.Logging.ILoggerFactory
++        private sealed class LoggerFactoryMock : Microsoft.Extensions.Logging.ILoggerFactory
+         {
+             public readonly Dictionary<string, LoggerMock> Loggers = new Dictionary<string, LoggerMock>();
+ 
+@@ -265,6 +264,7 @@ public Microsoft.Extensions.Logging.ILogger CreateLogger(string categoryName)
+                     logger = new LoggerMock(categoryName);
+                     Loggers[categoryName] = logger;
+                 }
++
+                 return logger;
+             }
+ 
+@@ -274,7 +274,7 @@ public void Dispose()
+             }
+         }
+ 
+-        sealed class LoggerMock : Microsoft.Extensions.Logging.ILogger
++        private sealed class LoggerMock : Microsoft.Extensions.Logging.ILogger
+         {
+             public readonly string CategoryName;
+             public Microsoft.Extensions.Logging.LogLevel LastLogLevel;
+@@ -307,6 +307,7 @@ public bool IsEnabled(Microsoft.Extensions.Logging.LogLevel logLevel)
+                     case Microsoft.Extensions.Logging.LogLevel.Debug:
+                         return false;
+                 }
++
+                 return true;
+             }
+ 
+@@ -316,7 +317,7 @@ public void Log<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, EventId
+                 LastLogEventId = eventId;
+                 LastLogMessage = formatter(state, exception);
+                 LastLogException = exception;
+-                var propertiesList = (state as IReadOnlyList<KeyValuePair<string, object>>);
++                var propertiesList = state as IReadOnlyList<KeyValuePair<string, object>>;
+                 LastLogProperties = propertiesList?.ToList();
+                 for (int i = 0; i < propertiesList?.Count; ++i)
+                 {
+diff --git a/test/NLog.Extensions.Logging.Tests/NLogLoggingConfigurationTests.cs b/test/NLog.Extensions.Logging.Tests/NLogLoggingConfigurationTests.cs
+index dc274dc..c2f0945 100644
+--- a/test/NLog.Extensions.Logging.Tests/NLogLoggingConfigurationTests.cs
++++ b/test/NLog.Extensions.Logging.Tests/NLogLoggingConfigurationTests.cs
+@@ -12,8 +12,8 @@ namespace NLog.Extensions.Logging.Tests
+ {
+     public class NLogLoggingConfigurationTests
+     {
+-        const string DefaultSectionName = "NLog";
+-        const string CustomSectionName = "MyCustomSection";
++        private const string DefaultSectionName = "NLog";
++        private const string CustomSectionName = "MyCustomSection";
+ 
+         public NLogLoggingConfigurationTests()
+         {
+@@ -32,8 +32,8 @@ public void LoadSimpleConfig()
+             Assert.Single(logConfig.LoggingRules);
+             Assert.Equal(2, logConfig.LoggingRules[0].Targets.Count);
+             Assert.Equal(2, logConfig.AllTargets.Count);
+-            Assert.Single(logConfig.AllTargets, (t) => t is FileTarget);
+-            Assert.Single(logConfig.AllTargets, (t) => t is ConsoleTarget);
++            Assert.Single(logConfig.AllTargets, t => t is FileTarget);
++            Assert.Single(logConfig.AllTargets, t => t is ConsoleTarget);
+             Assert.Equal("hello.txt", (logConfig.FindTargetByName("file") as FileTarget)?.FileName.Render(LogEventInfo.CreateNullEvent()));
+         }
+ 
+@@ -99,8 +99,8 @@ public void LoadSimpleConfigWithCustomKey()
+             Assert.Single(logConfig.LoggingRules);
+             Assert.Equal(2, logConfig.LoggingRules[0].Targets.Count);
+             Assert.Equal(2, logConfig.AllTargets.Count);
+-            Assert.Single(logConfig.AllTargets, (t) => t is FileTarget);
+-            Assert.Single(logConfig.AllTargets, (t) => t is ConsoleTarget);
++            Assert.Single(logConfig.AllTargets, t => t is FileTarget);
++            Assert.Single(logConfig.AllTargets, t => t is ConsoleTarget);
+             Assert.Equal("hello.txt", (logConfig.FindTargetByName("file") as FileTarget)?.FileName.Render(LogEventInfo.CreateNullEvent()));
+         }
+ 
+@@ -116,8 +116,8 @@ public void LoadSimpleConfigAndTrimSpace()
+             Assert.Single(logConfig.LoggingRules);
+             Assert.Equal(2, logConfig.LoggingRules[0].Targets.Count);
+             Assert.Equal(2, logConfig.AllTargets.Count);
+-            Assert.Single(logConfig.AllTargets, (t) => t is FileTarget);
+-            Assert.Single(logConfig.AllTargets, (t) => t is ConsoleTarget);
++            Assert.Single(logConfig.AllTargets, t => t is FileTarget);
++            Assert.Single(logConfig.AllTargets, t => t is ConsoleTarget);
+             Assert.Equal("hello.txt", (logConfig.FindTargetByName("file") as FileTarget)?.FileName.Render(LogEventInfo.CreateNullEvent()));
+         }
+ 
+@@ -134,9 +134,9 @@ public void LoadWrapperConfig()
+             Assert.Single(logConfig.LoggingRules);
+             Assert.Equal(2, logConfig.LoggingRules[0].Targets.Count);
+             Assert.Equal(3, logConfig.AllTargets.Count);
+-            Assert.Single(logConfig.AllTargets, (t) => t is AsyncTargetWrapper);
+-            Assert.Single(logConfig.AllTargets, (t) => t is FileTarget);
+-            Assert.Single(logConfig.AllTargets, (t) => t is ConsoleTarget);
++            Assert.Single(logConfig.AllTargets, t => t is AsyncTargetWrapper);
++            Assert.Single(logConfig.AllTargets, t => t is FileTarget);
++            Assert.Single(logConfig.AllTargets, t => t is ConsoleTarget);
+             Assert.Equal("hello.txt", (logConfig.FindTargetByName("wrappedFile") as FileTarget)?.FileName.Render(LogEventInfo.CreateNullEvent()));
+         }
+ 
+@@ -153,9 +153,9 @@ public void LoadWrapperConfigExplicitName()
+             Assert.Single(logConfig.LoggingRules);
+             Assert.Equal(2, logConfig.LoggingRules[0].Targets.Count);
+             Assert.Equal(3, logConfig.AllTargets.Count);
+-            Assert.Single(logConfig.AllTargets, (t) => t is AsyncTargetWrapper);
+-            Assert.Single(logConfig.AllTargets, (t) => t is MemoryTarget);
+-            Assert.Single(logConfig.AllTargets, (t) => t is ConsoleTarget);
++            Assert.Single(logConfig.AllTargets, t => t is AsyncTargetWrapper);
++            Assert.Single(logConfig.AllTargets, t => t is MemoryTarget);
++            Assert.Single(logConfig.AllTargets, t => t is ConsoleTarget);
+             Assert.NotNull(logConfig.FindTargetByName("wrappedMem") as MemoryTarget);
+         }
+ 
+@@ -170,8 +170,8 @@ public void LoadWrapperConfigWithoutName()
+ 
+             Assert.Single(logConfig.LoggingRules);
+             Assert.Equal(2, logConfig.LoggingRules[0].Targets.Count);
+-            Assert.Single(logConfig.AllTargets, (t) => t is ConsoleTarget);
+-            Assert.Single(logConfig.AllTargets, (t) => t is AsyncTargetWrapper);
++            Assert.Single(logConfig.AllTargets, t => t is ConsoleTarget);
++            Assert.Single(logConfig.AllTargets, t => t is AsyncTargetWrapper);
+             Assert.True(logConfig.FindTargetByName<AsyncTargetWrapper>("file")?.WrappedTarget is MemoryTarget);
+         }
+ 
+@@ -188,8 +188,8 @@ public void LoadVariablesConfig()
+             Assert.Single(logConfig.LoggingRules);
+             Assert.Equal(2, logConfig.LoggingRules[0].Targets.Count);
+             Assert.Equal(2, logConfig.AllTargets.Count);
+-            Assert.Single(logConfig.AllTargets, (t) => t is FileTarget);
+-            Assert.Single(logConfig.AllTargets, (t) => t is ConsoleTarget);
++            Assert.Single(logConfig.AllTargets, t => t is FileTarget);
++            Assert.Single(logConfig.AllTargets, t => t is ConsoleTarget);
+             Assert.Equal("hello.txt", (logConfig.FindTargetByName("file") as FileTarget)?.FileName.Render(LogEventInfo.CreateNullEvent()));
+         }
+ 
+@@ -208,8 +208,8 @@ public void LoadVariablesDependentConfig()
+             Assert.Single(logConfig.LoggingRules);
+             Assert.Equal(2, logConfig.LoggingRules[0].Targets.Count);
+             Assert.Equal(2, logConfig.AllTargets.Count);
+-            Assert.Single(logConfig.AllTargets, (t) => t is FileTarget);
+-            Assert.Single(logConfig.AllTargets, (t) => t is ConsoleTarget);
++            Assert.Single(logConfig.AllTargets, t => t is FileTarget);
++            Assert.Single(logConfig.AllTargets, t => t is ConsoleTarget);
+             Assert.Equal("hello/world.txt", (logConfig.FindTargetByName("file") as FileTarget)?.FileName.Render(LogEventInfo.CreateNullEvent()));
+         }
+ 
+@@ -233,8 +233,8 @@ public void LoadVariableJsonLayoutConfig()
+             Assert.Single(logConfig.Variables);
+             Assert.Equal(2, logConfig.LoggingRules[0].Targets.Count);
+             Assert.Equal(2, logConfig.AllTargets.Count);
+-            Assert.Single(logConfig.AllTargets, (t) => t is FileTarget);
+-            Assert.Single(logConfig.AllTargets, (t) => t is ConsoleTarget);
++            Assert.Single(logConfig.AllTargets, t => t is FileTarget);
++            Assert.Single(logConfig.AllTargets, t => t is ConsoleTarget);
+             Assert.Equal(2, logConfig.AllTargets.Count(t => (t as TargetWithLayout)?.Layout is NLog.Layouts.JsonLayout));
+         }
+ 
+@@ -258,8 +258,8 @@ public void LoadVariableDependentJsonLayoutConfig()
+             Assert.Equal(3, logConfig.Variables.Count);
+             Assert.Equal(2, logConfig.LoggingRules[0].Targets.Count);
+             Assert.Equal(2, logConfig.AllTargets.Count);
+-            Assert.Single(logConfig.AllTargets, (t) => t is FileTarget);
+-            Assert.Single(logConfig.AllTargets, (t) => t is ConsoleTarget);
++            Assert.Single(logConfig.AllTargets, t => t is FileTarget);
++            Assert.Single(logConfig.AllTargets, t => t is ConsoleTarget);
+             Assert.Equal(2, logConfig.AllTargets.Count(t => (t as TargetWithLayout)?.Layout is NLog.Layouts.JsonLayout));
+         }
+ 
+@@ -276,9 +276,9 @@ public void LoadDefaultWrapperConfig()
+ 
+             Assert.Single(logConfig.LoggingRules);
+             Assert.Equal(2, logConfig.LoggingRules[0].Targets.Count);
+-            Assert.Equal(2, (logConfig.AllTargets.Count(t => t is AsyncTargetWrapper asyncTarget && asyncTarget.BatchSize == 1)));
+-            Assert.Single(logConfig.AllTargets, (t) => t is AsyncTargetWrapper asyncTarget && asyncTarget.WrappedTarget is FileTarget);
+-            Assert.Single(logConfig.AllTargets, (t) => t is AsyncTargetWrapper asyncTarget && asyncTarget.WrappedTarget is ConsoleTarget);
++            Assert.Equal(2, logConfig.AllTargets.Count(t => t is AsyncTargetWrapper asyncTarget && asyncTarget.BatchSize == 1));
++            Assert.Single(logConfig.AllTargets, t => t is AsyncTargetWrapper asyncTarget && asyncTarget.WrappedTarget is FileTarget);
++            Assert.Single(logConfig.AllTargets, t => t is AsyncTargetWrapper asyncTarget && asyncTarget.WrappedTarget is ConsoleTarget);
+             Assert.Equal("hello.txt", ((logConfig.FindTargetByName("file") as AsyncTargetWrapper)?.WrappedTarget as FileTarget)?.FileName.Render(LogEventInfo.CreateNullEvent()));
+         }
+ 
+@@ -295,9 +295,9 @@ public void LoadTargetDefaultWrapperConfig()
+ 
+             Assert.Single(logConfig.LoggingRules);
+             Assert.Equal(2, logConfig.LoggingRules[0].Targets.Count);
+-            Assert.Equal(2, (logConfig.AllTargets.Count(t => t is AsyncTargetWrapper asyncTarget && asyncTarget.BatchSize == 1)));
+-            Assert.Single(logConfig.AllTargets, (t) => t is AsyncTargetWrapper asyncTarget && asyncTarget.WrappedTarget is FileTarget);
+-            Assert.Single(logConfig.AllTargets, (t) => t is AsyncTargetWrapper asyncTarget && asyncTarget.WrappedTarget is ConsoleTarget);
++            Assert.Equal(2, logConfig.AllTargets.Count(t => t is AsyncTargetWrapper asyncTarget && asyncTarget.BatchSize == 1));
++            Assert.Single(logConfig.AllTargets, t => t is AsyncTargetWrapper asyncTarget && asyncTarget.WrappedTarget is FileTarget);
++            Assert.Single(logConfig.AllTargets, t => t is AsyncTargetWrapper asyncTarget && asyncTarget.WrappedTarget is ConsoleTarget);
+             Assert.Equal("hello.txt", ((logConfig.FindTargetByName("file") as AsyncTargetWrapper)?.WrappedTarget as FileTarget)?.FileName.Render(LogEventInfo.CreateNullEvent()));
+         }
+ 
+@@ -314,8 +314,8 @@ public void LoadDefaultTargetParametersConfig()
+             Assert.Single(logConfig.LoggingRules);
+             Assert.Equal(2, logConfig.LoggingRules[0].Targets.Count);
+             Assert.Equal(2, logConfig.AllTargets.Count);
+-            Assert.Single(logConfig.AllTargets, (t) => t is FileTarget);
+-            Assert.Single(logConfig.AllTargets, (t) => t is ConsoleTarget);
++            Assert.Single(logConfig.AllTargets, t => t is FileTarget);
++            Assert.Single(logConfig.AllTargets, t => t is ConsoleTarget);
+             Assert.Equal("hello.txt", (logConfig.FindTargetByName("file") as FileTarget)?.FileName?.Render(LogEventInfo.CreateNullEvent()));
+             Assert.True((logConfig.FindTargetByName("console") as ConsoleTarget)?.DetectConsoleAvailable);
+         }
+@@ -333,8 +333,8 @@ public void LoadTargetDefaultParametersConfig()
+             Assert.Single(logConfig.LoggingRules);
+             Assert.Equal(2, logConfig.LoggingRules[0].Targets.Count);
+             Assert.Equal(2, logConfig.AllTargets.Count);
+-            Assert.Single(logConfig.AllTargets, (t) => t is FileTarget);
+-            Assert.Single(logConfig.AllTargets, (t) => t is ConsoleTarget);
++            Assert.Single(logConfig.AllTargets, t => t is FileTarget);
++            Assert.Single(logConfig.AllTargets, t => t is ConsoleTarget);
+             Assert.Equal("hello.txt", (logConfig.FindTargetByName("file") as FileTarget)?.FileName?.Render(LogEventInfo.CreateNullEvent()));
+             Assert.True((logConfig.FindTargetByName("console") as ConsoleTarget)?.DetectConsoleAvailable);
+         }
+@@ -358,8 +358,8 @@ public void LoadDefaultTargetParametersJsonLayoutConfig()
+             Assert.Single(logConfig.LoggingRules);
+             Assert.Equal(2, logConfig.LoggingRules[0].Targets.Count);
+             Assert.Equal(2, logConfig.AllTargets.Count);
+-            Assert.Single(logConfig.AllTargets, (t) => t is FileTarget);
+-            Assert.Single(logConfig.AllTargets, (t) => t is ConsoleTarget);
++            Assert.Single(logConfig.AllTargets, t => t is FileTarget);
++            Assert.Single(logConfig.AllTargets, t => t is ConsoleTarget);
+             Assert.Equal("hello.txt", (logConfig.FindTargetByName("file") as FileTarget)?.FileName.Render(LogEventInfo.CreateNullEvent()));
+             Assert.Equal(3, ((logConfig.FindTargetByName("file") as FileTarget)?.Layout as NLog.Layouts.JsonLayout)?.Attributes?.Count);
+         }
+@@ -401,7 +401,7 @@ public void ReloadLogFactoryConfigurationWithoutLeak()
+             Assert.False(newConfig.TryGetTarget(out _));
+         }
+ 
+-        static WeakReference<NLogLoggingConfiguration> CreateConfiguration(LogFactory logFactory, IConfigurationRoot config)
++        private static WeakReference<NLogLoggingConfiguration> CreateConfiguration(LogFactory logFactory, IConfigurationRoot config)
+         {
+             var nlogConfig = new NLogLoggingConfiguration(config.GetSection("NLog"), logFactory);
+             logFactory.Configuration = nlogConfig;
+diff --git a/test/NLog.Extensions.Logging.Tests/NLogMessageParameterListTests.cs b/test/NLog.Extensions.Logging.Tests/NLogMessageParameterListTests.cs
+index 3fbdbd1..f99725b 100644
+--- a/test/NLog.Extensions.Logging.Tests/NLogMessageParameterListTests.cs
++++ b/test/NLog.Extensions.Logging.Tests/NLogMessageParameterListTests.cs
+@@ -11,7 +11,7 @@ public void CreateNLogMessageParameterListWithEmptyKey()
+         {
+             var items = new List<KeyValuePair<string, object>>
+             {
+-                new KeyValuePair<string, object>("", 1),
++                new KeyValuePair<string, object>(string.Empty, 1),
+                 new KeyValuePair<string, object>("a", 2),
+                 new KeyValuePair<string, object>("b", 3),
+                 new KeyValuePair<string, object>("{OriginalFormat}", "{0}{1}{2}"),
+diff --git a/test/NLog.Extensions.Logging.Tests/NLogTestBase.cs b/test/NLog.Extensions.Logging.Tests/NLogTestBase.cs
+index aa71907..b7b01c6 100644
+--- a/test/NLog.Extensions.Logging.Tests/NLogTestBase.cs
++++ b/test/NLog.Extensions.Logging.Tests/NLogTestBase.cs
+@@ -48,7 +48,7 @@ protected IServiceProvider SetupServiceProvider(NLogProviderOptions options = nu
+         protected T GetRunner<T>(NLogProviderOptions options = null, Targets.Target target = null) where T : class
+         {
+             // Start program
+-            return SetupServiceProvider(options, target, configureServices: (s) => s.AddTransient<T>()).GetRequiredService<T>();
++            return SetupServiceProvider(options, target, configureServices: s => s.AddTransient<T>()).GetRequiredService<T>();
+         }
+     }
+ }

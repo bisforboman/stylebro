@@ -75,6 +75,13 @@ internal static class QualifiedUsings
     /// </summary>
     private static string Expected(TypeSyntax syntax, ISymbol symbol, bool top, SemanticModel model, CancellationToken cancellationToken)
     {
+        // A nullable reference type argument keeps its '?': the symbol's display drops it (NLog.Extensions.Logging, trial 63:
+        // 'object?' became 'object' and the build failed with CS8619).
+        if (syntax is NullableTypeSyntax nullable && symbol is ITypeSymbol { IsValueType: false })
+        {
+            return Expected(nullable.ElementType, symbol, top, model, cancellationToken) + "?";
+        }
+
         var last = syntax is QualifiedNameSyntax qualified ? qualified.Right : syntax;
         var type = symbol as INamedTypeSymbol;
         var arguments = type is null ? ImmutableArray<ITypeSymbol>.Empty : (type.TupleUnderlyingType ?? type).TypeArguments;
@@ -144,6 +151,11 @@ internal static class QualifiedUsings
 
             case IdentifierNameSyntax identifier:
                 builder.Append(identifier.Identifier.Text);
+                break;
+
+            case NullableTypeSyntax nullable:
+                Append(builder, nullable.ElementType);
+                builder.Append('?');
                 break;
 
             default:

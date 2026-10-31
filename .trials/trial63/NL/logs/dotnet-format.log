@@ -1,0 +1,40 @@
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+Indentation kept: src/NLog.Extensions.Logging/LayoutRenderers/MicrosoftConsoleLayoutRenderer.cs:77: '#if' decides whether these lines are an if/else (or loop) body, inside a block, or (a '#region' line) compiled at all, so each framework or configuration would indent them its own way. Their indentation is left as it is.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net462, net6.0, net8.0, netstandard2.0, netstandard2.1). net8.0, netstandard2.1: only the projects whose code compiles differently there.
+Shared files: these projects compile the same files with other '#if' symbols or settings, so each group gets a run of its own (loaded together, 'dotnet format' crashes: https://github.com/dotnet/roslyn/issues/86001): NLog.Extensions.Logging | NLog.Extensions.Hosting.
+Checked netstandard2.1 (run 1 of 7)
+Checked net462 (run 2 of 7)
+Checked net8.0 (run 3 of 7)
+Checked net10.0, part 1 of 2 (run 4 of 7)
+Checked netstandard2.0 (run 5 of 7)
+Checked net6.0 (run 6 of 7)
+Checked net10.0, part 2 of 2 (run 7 of 7)
+== net10.0, part 1 of 2 (4 project(s), 32 files with findings)
+== net10.0, part 2 of 2 (3 project(s), 13 files with findings)
+== net462 (4 project(s), 41 files with findings)
+== net6.0 (2 project(s), 22 files with findings)
+== net8.0 (2 project(s), 19 files with findings)
+== netstandard2.0 (2 project(s), 22 files with findings)
+== netstandard2.1 (1 project(s), 17 files with findings)
+Run 1: 43 files changed:
+  examples/NetCore2/ConsoleExample/Program.cs
+  examples/NetCore2/ConsoleExampleJsonConfig/Program.cs
+  src/NLog.Extensions.Hosting/Extensions/ConfigureExtensions.cs
+  src/NLog.Extensions.Hosting/LayoutRenderers/HostAppNameLayoutRenderer.cs
+  src/NLog.Extensions.Hosting/LayoutRenderers/HostEnvironmentLayoutRenderer.cs
+  src/NLog.Extensions.Hosting/LayoutRenderers/HostRootDirLayoutRenderer.cs
+  src/NLog.Extensions.Hosting/Properties/AssemblyInfo.cs
+  src/NLog.Extensions.Logging/Config/NLogLoggingConfiguration.cs
+  src/NLog.Extensions.Logging/Config/SetupBuilderExtensions.cs
+  src/NLog.Extensions.Logging/Extensions/ConfigureExtensions.cs
+  ... and 33 more
+Checked netstandard2.1 (run 1 of 7)
+Checked net462 (run 2 of 7)
+Checked net8.0 (run 3 of 7)
+Checked net10.0, part 1 of 2 (run 4 of 7)
+Checked net6.0 (run 5 of 7)
+Checked netstandard2.0 (run 6 of 7)
+Checked net10.0, part 2 of 2 (run 7 of 7)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)

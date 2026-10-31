@@ -1,0 +1,110 @@
+  Determining projects to restore...
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-2f33-pr97-265q [/home/user/cand63/mono-t4/Mono.TextTemplating.sln]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build.Tests/Mono.TextTemplating.Build.Tests.csproj : warning NU1903: Package 'System.Text.Json' 7.0.3 has a known high severity vulnerability, https://github.com/advisories/GHSA-hh2w-p6rv-4g7w [/home/user/cand63/mono-t4/Mono.TextTemplating.sln]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-2x83-8g95-xh59 [/home/user/cand63/mono-t4/Mono.TextTemplating.sln]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-4qm4-8hg2-g2xm [/home/user/cand63/mono-t4/Mono.TextTemplating.sln]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-cj9g-3mj2-g8vv [/home/user/cand63/mono-t4/Mono.TextTemplating.sln]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-cxmj-83gh-fp49 [/home/user/cand63/mono-t4/Mono.TextTemplating.sln]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1903: Package 'MessagePack' 2.5.129 has a known high severity vulnerability, https://github.com/advisories/GHSA-hv8m-jj95-wg3x [/home/user/cand63/mono-t4/Mono.TextTemplating.sln]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-q2h6-ghwm-5qm8 [/home/user/cand63/mono-t4/Mono.TextTemplating.sln]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-qhmf-xw27-6rqr [/home/user/cand63/mono-t4/Mono.TextTemplating.sln]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-qhrr-8q5h-9q3h [/home/user/cand63/mono-t4/Mono.TextTemplating.sln]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-v72x-2h86-7f8m [/home/user/cand63/mono-t4/Mono.TextTemplating.sln]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1903: Package 'MessagePack' 2.5.129 has a known high severity vulnerability, https://github.com/advisories/GHSA-vh6j-jc39-fggf [/home/user/cand63/mono-t4/Mono.TextTemplating.sln]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-w567-gjr2-hm5j [/home/user/cand63/mono-t4/Mono.TextTemplating.sln]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-wfr3-xj75-pfwh [/home/user/cand63/mono-t4/Mono.TextTemplating.sln]
+  All projects are up-to-date for restore.
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build.Tests/Mono.TextTemplating.Build.Tests.csproj : warning NU1903: Package 'System.Text.Json' 7.0.3 has a known high severity vulnerability, https://github.com/advisories/GHSA-hh2w-p6rv-4g7w [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-2f33-pr97-265q [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-2x83-8g95-xh59 [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-4qm4-8hg2-g2xm [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-cj9g-3mj2-g8vv [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-cxmj-83gh-fp49 [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1903: Package 'MessagePack' 2.5.129 has a known high severity vulnerability, https://github.com/advisories/GHSA-hv8m-jj95-wg3x [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-q2h6-ghwm-5qm8 [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-qhmf-xw27-6rqr [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-qhrr-8q5h-9q3h [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-v72x-2h86-7f8m [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1903: Package 'MessagePack' 2.5.129 has a known high severity vulnerability, https://github.com/advisories/GHSA-vh6j-jc39-fggf [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-w567-gjr2-hm5j [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-wfr3-xj75-pfwh [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-2f33-pr97-265q [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-2x83-8g95-xh59 [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-4qm4-8hg2-g2xm [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-cj9g-3mj2-g8vv [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-cxmj-83gh-fp49 [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1903: Package 'MessagePack' 2.5.129 has a known high severity vulnerability, https://github.com/advisories/GHSA-hv8m-jj95-wg3x [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-q2h6-ghwm-5qm8 [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-qhmf-xw27-6rqr [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-qhrr-8q5h-9q3h [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-v72x-2h86-7f8m [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1903: Package 'MessagePack' 2.5.129 has a known high severity vulnerability, https://github.com/advisories/GHSA-vh6j-jc39-fggf [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-w567-gjr2-hm5j [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-wfr3-xj75-pfwh [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build.Tests/Mono.TextTemplating.Build.Tests.csproj : warning NU1903: Package 'System.Text.Json' 7.0.3 has a known high severity vulnerability, https://github.com/advisories/GHSA-hh2w-p6rv-4g7w [TargetFramework=net7.0]
+  Mono.TextTemplating -> /home/user/cand63/mono-t4/Mono.TextTemplating/bin/Debug/net472/Mono.TextTemplating.dll
+  Mono.TextTemplating -> /home/user/cand63/mono-t4/Mono.TextTemplating/bin/Debug/netstandard2.0/Mono.TextTemplating.dll
+  Mono.TextTemplating -> /home/user/cand63/mono-t4/Mono.TextTemplating/bin/Debug/net6.0/Mono.TextTemplating.dll
+  Mono.TextTemplating.Roslyn -> /home/user/cand63/mono-t4/Mono.TextTemplating.Roslyn/bin/Debug/net472/Mono.TextTemplating.Roslyn.dll
+  Mono.TextTemplating.Roslyn -> /home/user/cand63/mono-t4/Mono.TextTemplating.Roslyn/bin/Debug/netstandard2.0/Mono.TextTemplating.Roslyn.dll
+  Mono.TextTemplating.Roslyn -> /home/user/cand63/mono-t4/Mono.TextTemplating.Roslyn/bin/Debug/net6.0/Mono.TextTemplating.Roslyn.dll
+  Mono.TextTemplating.Build -> /home/user/cand63/mono-t4/Mono.TextTemplating.Build/bin/Debug/net48/Mono.TextTemplating.Build.dll
+  Mono.TextTemplating.Build -> /home/user/cand63/mono-t4/Mono.TextTemplating.Build/bin/Debug/net6.0/Mono.TextTemplating.Build.dll
+  Mono.TextTemplating.Build.Tests -> /home/user/cand63/mono-t4/Mono.TextTemplating.Build.Tests/bin/Debug/net7.0/Mono.TextTemplating.Build.Tests.dll
+  Mono.TextTemplating.Build.Tests -> /home/user/cand63/mono-t4/Mono.TextTemplating.Build.Tests/bin/Debug/net6.0/Mono.TextTemplating.Build.Tests.dll
+  Mono.TextTemplating.Tests -> /home/user/cand63/mono-t4/Mono.TextTemplating.Tests/bin/Debug/net7.0/Mono.TextTemplating.Tests.dll
+Test run for /home/user/cand63/mono-t4/Mono.TextTemplating.Build.Tests/bin/Debug/net6.0/Mono.TextTemplating.Build.Tests.dll (.NETCoreApp,Version=v6.0)
+Test run for /home/user/cand63/mono-t4/Mono.TextTemplating.Build.Tests/bin/Debug/net7.0/Mono.TextTemplating.Build.Tests.dll (.NETCoreApp,Version=v7.0)
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     7, Skipped:     0, Total:     7, Duration: 24 s - Mono.TextTemplating.Build.Tests.dll (net7.0)
+
+Passed!  - Failed:     0, Passed:     7, Skipped:     0, Total:     7, Duration: 24 s - Mono.TextTemplating.Build.Tests.dll (net6.0)
+  Mono.TextTemplating.Tests -> /home/user/cand63/mono-t4/Mono.TextTemplating.Tests/bin/Debug/net6.0/Mono.TextTemplating.Tests.dll
+Test run for /home/user/cand63/mono-t4/Mono.TextTemplating.Tests/bin/Debug/net7.0/Mono.TextTemplating.Tests.dll (.NETCoreApp,Version=v7.0)
+Test run for /home/user/cand63/mono-t4/Mono.TextTemplating.Tests/bin/Debug/net6.0/Mono.TextTemplating.Tests.dll (.NETCoreApp,Version=v6.0)
+VSTest version 18.0.2 (x64)
+
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:   114, Skipped:     0, Total:   114, Duration: 19 s - Mono.TextTemplating.Tests.dll (net6.0)
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-2f33-pr97-265q [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-2x83-8g95-xh59 [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-4qm4-8hg2-g2xm [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-cj9g-3mj2-g8vv [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-cxmj-83gh-fp49 [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1903: Package 'MessagePack' 2.5.129 has a known high severity vulnerability, https://github.com/advisories/GHSA-hv8m-jj95-wg3x [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-q2h6-ghwm-5qm8 [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-qhmf-xw27-6rqr [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-qhrr-8q5h-9q3h [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-v72x-2h86-7f8m [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1903: Package 'MessagePack' 2.5.129 has a known high severity vulnerability, https://github.com/advisories/GHSA-vh6j-jc39-fggf [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-w567-gjr2-hm5j [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-wfr3-xj75-pfwh [TargetFramework=net48]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-2f33-pr97-265q [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-2x83-8g95-xh59 [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-4qm4-8hg2-g2xm [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-cj9g-3mj2-g8vv [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-cxmj-83gh-fp49 [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1903: Package 'MessagePack' 2.5.129 has a known high severity vulnerability, https://github.com/advisories/GHSA-hv8m-jj95-wg3x [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-q2h6-ghwm-5qm8 [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-qhmf-xw27-6rqr [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-qhrr-8q5h-9q3h [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-v72x-2h86-7f8m [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1903: Package 'MessagePack' 2.5.129 has a known high severity vulnerability, https://github.com/advisories/GHSA-vh6j-jc39-fggf [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-w567-gjr2-hm5j [TargetFramework=net6.0]
+/home/user/cand63/mono-t4/Mono.TextTemplating.Build/Mono.TextTemplating.Build.csproj : warning NU1902: Package 'MessagePack' 2.5.129 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-wfr3-xj75-pfwh [TargetFramework=net6.0]
+
+Passed!  - Failed:     0, Passed:   114, Skipped:     0, Total:   114, Duration: 20 s - Mono.TextTemplating.Tests.dll (net7.0)

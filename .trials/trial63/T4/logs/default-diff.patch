@@ -1,0 +1,3283 @@
+diff --git a/.editorconfig b/.editorconfig
+index b2ce22c..5885d72 100644
+--- a/.editorconfig
++++ b/.editorconfig
+@@ -84,4 +84,84 @@ dotnet_diagnostic.CA1510.severity = none
+ 
+ # hack: suppress analyzers on the imported file Options.cs
+ [Options.cs]
+-generated_code = true
+\ No newline at end of file
++generated_code = true
++
++# BEGIN stylebro-migrate (stylebro-migrate init: built-in .NET rules for StyleBro's preset; edits inside are replaced)
++[*.cs]
++# Built-in .NET rules that cover StyleCop rules, at the preset's severities. Their options (brace placement, modifier
++# order, ...) come from StyleBro's preset. The severities have to be here: 'dotnet format' ignores rule severities in a
++# package's global config. Add <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> to report them on build too.
++
++# Braces (SA1503, SA1519, SA1520) are StyleBro's BRO1514-BRO1516: IDE0011's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0011.severity = none
++# Access modifiers (SA1400, SA1205) are StyleBro's BRO1404/BRO1007: IDE0040's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0040.severity = none
++# Modifier order: access modifier first, then static (SA1206, SA1207)
++dotnet_diagnostic.IDE0036.severity = warning
++# 'int' instead of 'Int32' (SA1121)
++dotnet_diagnostic.IDE0049.severity = warning
++# Unnecessary parentheses (SA1119) are StyleBro's BRO1405: IDE0047's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0047.severity = none
++# Parentheses that show precedence (SA1407, SA1408) are StyleBro's BRO1406/BRO1407: IDE0048's fix breaks multi-targeted projects
++dotnet_diagnostic.IDE0048.severity = none
++# Using placement (SA1200) is StyleBro's BRO1008: IDE0065's fix can change what names bind to (CS0104, CS0118)
++dotnet_diagnostic.IDE0065.severity = none
++# Blank lines (SA1507, SA1508, SA1513) are StyleBro's BRO1517-BRO1519: the SDK's fixes break multi-targeted projects
++dotnet_diagnostic.IDE2000.severity = none
++dotnet_diagnostic.IDE2002.severity = none
++dotnet_diagnostic.IDE2003.severity = none
++# 'this.' qualification isn't required (SA1101 is off in the preset)
++dotnet_diagnostic.IDE0009.severity = none
++
++# Conventions in this repository's code (stylebro-migrate init counted them; delete a line to have it counted again)
++# init: one-line if/else/loop/using/lock bodies: your code mixes both forms (294 with braces, 265 without braces), so both are allowed. To choose with braces: change the next line to csharp_prefer_braces = true.
++csharp_prefer_braces = when_multiline
++# init: one-line jumps ('if (x) return;'): allowed, because your code has some (4 of 104 places on the 'if' line without braces; any 3 keep them allowed: without it BRO1514 would add braces to each)
++stylebro_allow_single_line_jump_statements = true
++# init: operators where a line wraps: your code mixes both forms (39 at the start of the line, 40 at the end of the line), so BRO1520 is off. To choose one: set dotnet_style_operator_placement_when_wrapping and remove the next line.
++dotnet_diagnostic.BRO1520.severity = none
++# init: '=>' where a line wraps: at the start of the line in 79 of 83 places in your code
++stylebro_arrow_placement_when_wrapping = beginning_of_line
++# init: multi-line initializers: your code mixes both forms (32 with a trailing comma, 46 without a trailing comma), so BRO1401 is off. To choose one: set stylebro_trailing_comma and remove the next line.
++dotnet_diagnostic.BRO1401.severity = none
++# init: empty strings: "" in 64 of 70 places in your code
++stylebro_empty_string_style = literal
++# init: null checks: '== null' in 229 of 253 places in your code
++stylebro_null_check_style = equality_operator
++# init: ')' of split lists: your code mixes both forms (93 after the last item, 65 on its own line), so BRO1110 is off. To choose one: set stylebro_closing_parenthesis_placement and remove the next line.
++dotnet_diagnostic.BRO1110.severity = none
++# init: split lists: your code mixes both forms (86 first item on the next line, 29 first item after '('), so BRO1107 is off. To choose one: set stylebro_split_list_first_item and remove the next line.
++dotnet_diagnostic.BRO1107.severity = none
++# init: ': base(...)'/': this(...)': your code mixes both forms (27 on its own line, 10 on the constructor's line), so BRO1105 is off. To choose one: set stylebro_constructor_initializer_placement and remove the next line.
++dotnet_diagnostic.BRO1105.severity = none
++# init: 'where' constraints: on the declaration's line in 28 of 30 places in your code
++stylebro_constraint_placement = same_line
++# init: switch sections: your code mixes both forms (11 after a blank line, 23 without a blank line), so BRO1526 is off. To choose one: set stylebro_blank_line_between_switch_sections and remove the next line.
++dotnet_diagnostic.BRO1526.severity = none
++# init: statements on their 'if'/loop/'case' line: allowed, because your code has some (13 of 395 places on their owner's line; any 3 keep them allowed: csharp_preserve_single_line_statements = false would move each to a line of its own)
++csharp_preserve_single_line_statements = true
++# init: types' members: your code mixes both forms (39 in BRO1001's order, 50 in another order), so BRO1001 is off. To choose one: set dotnet_diagnostic.BRO1001.severity and remove the next line.
++dotnet_diagnostic.BRO1001.severity = none
++# init: partial type parts: your code mixes both forms (2 with an access modifier, 5 without one ('partial class X')), so BRO1007 is off. To choose one: set dotnet_diagnostic.BRO1007.severity and remove the next line.
++dotnet_diagnostic.BRO1007.severity = none
++# init: internal-by-default types: 65 of 65 in your code are without an access modifier, so BRO1404 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1404.severity = none
++# init: property summaries: 5 of 5 in your code are in their own words, so BRO1604 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1604.severity = none
++# init: empty blocks ('{ }'): your code mixes both forms (31 on two lines, 13 on one line), so both are allowed. To choose on two lines: change the next line to stylebro_allow_empty_single_line_blocks = false.
++stylebro_allow_empty_single_line_blocks = true
++# init: block-bodied properties/methods: your code mixes both forms (27 on several lines, 18 on one line), so BRO1509 is off. To choose one: set dotnet_diagnostic.BRO1509.severity and remove the next line.
++dotnet_diagnostic.BRO1509.severity = none
++# init: C# files' line endings: LF in 94 of 94 files in your code
++end_of_line = lf
++# init: statements after a block's '}': your code mixes both forms (252 after a blank line, 152 right below the '}'), so BRO1519 is off. To choose one: set dotnet_diagnostic.BRO1519.severity and remove the next line.
++dotnet_diagnostic.BRO1519.severity = none
++# init: nested ifs BRO1149 would merge: kept, because your code has some (4 nested ifs; any 3 keep them: BRO1149 would merge each), so BRO1149 is off. To turn it on: remove the next line.
++dotnet_diagnostic.BRO1149.severity = none
++# init: non-private fields: your code mixes both forms (4 PascalCase or as your naming rule says, 5 named otherwise), so BRO1306 is off. To choose one: set dotnet_diagnostic.BRO1306.severity and remove the next line.
++dotnet_diagnostic.BRO1306.severity = none
++# init: tuple element names: '(int count, ...)' in 27 of 27 elements in your code
++stylebro_tuple_element_name_casing = camelCase
++# init: spacing: your code mixes casts (17 '(int)x', 8 '(int) x'); IDE0055 can't be limited to one spacing option, so it is off: 'format' skips the whitespace pass. To have it format: set the spacing keys (csharp_space_*) and remove the next line.
++dotnet_diagnostic.IDE0055.severity = none
++# END stylebro-migrate
+diff --git a/Directory.Build.props b/Directory.Build.props
+index 33b96ee..d703915 100644
+--- a/Directory.Build.props
++++ b/Directory.Build.props
+@@ -1,5 +1,6 @@
+ <Project>
+   <PropertyGroup>
++    <StyleBroPreset>1.0</StyleBroPreset>
+     <PackageProjectUrl>https://github.com/mono/t4</PackageProjectUrl>
+     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+     <Authors>Mikayla Hutchinson</Authors>
+@@ -35,4 +36,7 @@
+       <Key>$(T4PublicKey)</Key>
+     </InternalsVisibleTo>
+   </ItemDefinitionGroup>
++  <ItemGroup>
++    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-trial63.1" PrivateAssets="all" />
++  </ItemGroup>
+ </Project>
+diff --git a/Mono.TextTemplating.Build.Tests/MSBuildTestContext.cs b/Mono.TextTemplating.Build.Tests/MSBuildTestContext.cs
+index a804144..643c200 100644
+--- a/Mono.TextTemplating.Build.Tests/MSBuildTestContext.cs
++++ b/Mono.TextTemplating.Build.Tests/MSBuildTestContext.cs
+@@ -24,7 +24,7 @@ public MSBuildTestContext ([CallerMemberName] string testName = null, bool creat
+ 		{
+ 			OutputDir = TestDataPath.CreateOutputDir (testName);
+ 
+-			//reference this so xunit shadow copies it and we don't lock it
++			// reference this so xunit shadow copies it and we don't lock it
+ 			string buildTasksPath = typeof (TextTransform).Assembly.Location;
+ 
+ 			var globalProps = new Dictionary<string, string> {
+@@ -98,7 +98,7 @@ public void Restore ()
+ 		}
+ 
+ 		/// <summary>
+-		/// Asserts that the build is successful and there are no errors or warnings
++		/// Asserts that the build is successful and there are no errors or warnings.
+ 		/// </summary>
+ 		public ProjectInstance Build (string target)
+ 		{
+@@ -222,7 +222,9 @@ public static TestDataPath GetPathProperty (this ProjectInstance instance, strin
+ 		}
+ 
+ 		public static TestDataPath GetIntermediateDir (this ProjectInstance instance) => instance.GetPathProperty ("IntermediateOutputPath");
++
+ 		public static TestDataPath GetTargetDir (this ProjectInstance instance) => instance.GetPathProperty ("TargetDir");
++
+ 		public static TestDataPath GetTargetPath (this ProjectInstance instance) => instance.GetPathProperty ("TargetPath");
+ 
+ 		public static TestDataPath GetTargetDirFile (this ProjectInstance instance, params string[] paths)
+diff --git a/Mono.TextTemplating.Build.Tests/MSBuildTestHelpers.cs b/Mono.TextTemplating.Build.Tests/MSBuildTestHelpers.cs
+index ffb76b8..2b4323c 100644
+--- a/Mono.TextTemplating.Build.Tests/MSBuildTestHelpers.cs
++++ b/Mono.TextTemplating.Build.Tests/MSBuildTestHelpers.cs
+@@ -38,8 +38,8 @@ public static void RegisterMSBuildAssemblies ()
+ 
+ 			var msbuildInPath = FindInPath ("msbuild");
+ 			if (msbuildInPath != null) {
+-				//attempt to read the msbuild.dll location from the launch script
+-				//FIXME: handle quoting in the script
++				// attempt to read the msbuild.dll location from the launch script
++				// FIXME: handle quoting in the script
+ 				Console.WriteLine ("Found msbuild script in PATH: {0}", msbuildInPath);
+ #pragma warning disable CA1861 // Avoid constant arrays as arguments
+ 				var tokens = File.ReadAllText (msbuildInPath).Split (new [] { ' ', '\t', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+diff --git a/Mono.TextTemplating.Build/MSBuildTemplateSession.cs b/Mono.TextTemplating.Build/MSBuildTemplateSession.cs
+index 91c6ec8..4729a46 100644
+--- a/Mono.TextTemplating.Build/MSBuildTemplateSession.cs
++++ b/Mono.TextTemplating.Build/MSBuildTemplateSession.cs
+@@ -30,17 +30,29 @@ public MSBuildTemplateSession (MSBuildTemplateGenerator toolTemplateGenerator)
+ 		public ICollection<object> Values => session.Values;
+ 		public int Count => session.Count;
+ 		public bool IsReadOnly => false;
++
+ 		public void Add (string key, object value) => session.Add (key, value);
++
+ 		public void Add (KeyValuePair<string, object> item) => session.Add (item.Key, item.Value);
++
+ 		public void Clear () => session.Clear ();
++
+ 		public bool Contains (KeyValuePair<string, object> item) => session.TryGetValue (item.Key, out object v) && item.Value == v;
++
+ 		public bool ContainsKey (string key) => session.ContainsKey (key);
++
+ 		public bool Remove (string key) => session.Remove (key);
++
+ 		public bool Remove (KeyValuePair<string, object> item) => Contains(item) && session.Remove (item.Key);
++
+ 		public bool Equals (ITextTemplatingSession other) => other != null && Id == other.Id;
++
+ 		public bool Equals (Guid other) => Id.Equals (other);
++
+ 		public IEnumerator<KeyValuePair<string, object>> GetEnumerator () => session.GetEnumerator ();
++
+ 		public bool TryGetValue (string key, out object value) => session.TryGetValue (key, out value);
++
+ 		IEnumerator IEnumerable.GetEnumerator () => session.GetEnumerator ();
+ 
+ 		public void CopyTo (KeyValuePair<string, object> [] array, int arrayIndex)
+@@ -54,6 +66,5 @@ public void GetObjectData (SerializationInfo info, StreamingContext context)
+ 		{
+ 			throw new NotSupportedException ();
+ 		}
+-
+ 	}
+ }
+diff --git a/Mono.TextTemplating.Build/TemplateBuildState.cs b/Mono.TextTemplating.Build/TemplateBuildState.cs
+index 6a2a1ab..4d8eb79 100644
+--- a/Mono.TextTemplating.Build/TemplateBuildState.cs
++++ b/Mono.TextTemplating.Build/TemplateBuildState.cs
+@@ -45,7 +45,8 @@ public class TemplateBuildState
+ 		internal (List<TransformTemplate> transforms, List<PreprocessedTemplate> preprocessed) GetStaleAndNewTemplates (
+ 			TemplateBuildState previousBuildState, bool preprocessOnly, Func<string, DateTime?> getFileWriteTime, TaskLoggingHelper logger)
+ 		{
+-			bool regenTransform, regenPreprocessed;
++			bool regenTransform;
++			bool regenPreprocessed;
+ 
+ 			if (previousBuildState == null) {
+ 				regenTransform = regenPreprocessed = true;
+@@ -58,22 +59,20 @@ public class TemplateBuildState
+ 				// if not transforming, re-use all transform values so they get cached appropriately
+ 				TransformTemplates = previousBuildState?.TransformTemplates;
+ 				staleOrNewTransforms = null;
++			} else if (regenTransform || TransformTemplates == null || previousBuildState.TransformTemplates == null) {
++				staleOrNewTransforms = TransformTemplates;
+ 			} else {
+-				if (regenTransform || TransformTemplates == null || previousBuildState.TransformTemplates == null) {
+-					staleOrNewTransforms = TransformTemplates;
+-				} else {
+-					staleOrNewTransforms = new List<TransformTemplate> ();
+-					var previousTransforms = previousBuildState.TransformTemplates.ToDictionary (t => t.InputFile);
+-
+-					foreach (var t in TransformTemplates) {
+-						if (previousTransforms.TryGetValue (t.InputFile, out var pt) && !pt.IsStale (getFileWriteTime, logger)) {
+-							// if it's up to date, use the values from the previous run
+-							t.Dependencies = pt.Dependencies;
+-							t.OutputFile = pt.OutputFile;
+-							logger.LogMessageFromResources (MessageImportance.Low, nameof(Messages.SkippingTransformUpToDate), t.InputFile, t.OutputFile);
+-						} else {
+-							staleOrNewTransforms.Add (t);
+-						}
++				staleOrNewTransforms = new List<TransformTemplate> ();
++				var previousTransforms = previousBuildState.TransformTemplates.ToDictionary (t => t.InputFile);
++
++				foreach (var t in TransformTemplates) {
++					if (previousTransforms.TryGetValue (t.InputFile, out var pt) && !pt.IsStale (getFileWriteTime, logger)) {
++						// if it's up to date, use the values from the previous run
++						t.Dependencies = pt.Dependencies;
++						t.OutputFile = pt.OutputFile;
++						logger.LogMessageFromResources (MessageImportance.Low, nameof(Messages.SkippingTransformUpToDate), t.InputFile, t.OutputFile);
++					} else {
++						staleOrNewTransforms.Add (t);
+ 					}
+ 				}
+ 			}
+@@ -298,6 +297,7 @@ public bool IsStale (Func<string, DateTime?> getFileWriteTime, TaskLoggingHelper
+ 		struct HashCode
+ 		{
+ 			public static int Combine<T1, T2, T3> (T1 value1, T2 value2, T3 value3) => (value1?.GetHashCode () ?? 0) ^ (value2?.GetHashCode () ?? 0) ^ (value3?.GetHashCode () ?? 0);
++
+ 			public static int Combine<T1, T2, T3, T4> (T1 value1, T2 value2, T3 value3, T4 value4) => Combine (value1, value2, value3) ^ (value4?.GetHashCode () ?? 0);
+ 		}
+ #endif
+diff --git a/Mono.TextTemplating.Build/TextTransform.cs b/Mono.TextTemplating.Build/TextTransform.cs
+index 79a4e02..0551351 100644
+--- a/Mono.TextTemplating.Build/TextTransform.cs
++++ b/Mono.TextTemplating.Build/TextTransform.cs
+@@ -62,7 +62,6 @@ public override bool Execute ()
+ 				.WithCompression (MessagePackCompression.Lz4BlockArray)
+ 				.WithSecurity (MessagePackSecurity.TrustedData);
+ 
+-
+ 			TemplateBuildState previousBuildState = null;
+ 			if (TransformOutOfDateOnly) {
+ 				previousBuildState = LoadBuildState (buildStateFilename, msgPackOptions);
+@@ -102,10 +101,10 @@ public override bool Execute ()
+ 					string inputFile = ppt.ItemSpec;
+ 					string outputFile;
+ 					if (UseLegacyPreprocessingMode) {
+-						//TODO: OutputFilePath, OutputFileName
++						// TODO: OutputFilePath, OutputFileName
+ 						outputFile = Path.ChangeExtension (inputFile, ".cs");
+ 					} else {
+-						//FIXME: this could cause collisions. generate a path based on relative path and link metadata
++						// FIXME: this could cause collisions. generate a path based on relative path and link metadata
+ 						outputFile = Path.Combine (IntermediateDirectory, Path.ChangeExtension (inputFile, ".cs"));
+ 					}
+ 					buildState.PreprocessTemplates.Add (new TemplateBuildState.PreprocessedTemplate {
+@@ -118,9 +117,9 @@ public override bool Execute ()
+ 			if (TransformTemplates != null) {
+ 				buildState.TransformTemplates = new List<TemplateBuildState.TransformTemplate> ();
+ 				foreach (var tt in TransformTemplates) {
+-					//TODO: OutputFilePath, OutputFileName
+-					//var outputFilePathMetadata = tt.TryGetMetadata("OutputFilePath");
+-					//var outputFileNameMetadata = tt.TryGetMetadata("OutputFileName");
++					// TODO: OutputFilePath, OutputFileName
++					// var outputFilePathMetadata = tt.TryGetMetadata("OutputFilePath");
++					// var outputFileNameMetadata = tt.TryGetMetadata("OutputFileName");
+ 					string inputFile = tt.ItemSpec;
+ 					string outputFile = Path.ChangeExtension (inputFile, ".txt");
+ 					buildState.TransformTemplates.Add (new TemplateBuildState.TransformTemplate {
+@@ -148,15 +147,15 @@ public override bool Execute ()
+ 				}
+ 			}
+ 
+-			//TODO
+-			//RequiredAssemblies
+-			//settings.Debug
+-			//settings.Log
+-			//metadata to override output name, class name and namespace
++			// TODO
++			// RequiredAssemblies
++			// settings.Debug
++			// settings.Log
++			// metadata to override output name, class name and namespace
+ 
+ 			SaveBuildState (buildState, buildStateFilename, msgPackOptions);
+ 
+-			//var stateJson = MessagePackSerializer.ConvertToJson (File.ReadAllBytes (buildStateFilename), msgPackOptions);
++			// var stateJson = MessagePackSerializer.ConvertToJson (File.ReadAllBytes (buildStateFilename), msgPackOptions);
+ 
+ 			return success;
+ 		}
+@@ -185,7 +184,9 @@ bool AddParameters (TemplateBuildState buildState)
+ 
+ 			foreach (var par in ParameterValues) {
+ 				string paramName = par.ItemSpec;
+-				string processorName, directiveName, paramVal;
++				string processorName;
++				string directiveName;
++				string paramVal;
+ 
+ 				if (TemplateGenerator.TryParseParameter (paramName, out processorName, out directiveName, out string parsedName, out paramVal)) {
+ 					paramName = parsedName;
+@@ -204,7 +205,7 @@ bool AddParameters (TemplateBuildState buildState)
+ 					directiveName = directiveMetadata;
+ 				}
+ 
+-				if(paramVal is null) {
++				if(paramVal == null) {
+ 					Log.LogWarningFromResources (nameof(Messages.ArgumentNoValue), par);
+ 					success = false;
+ 					continue;
+@@ -232,9 +233,9 @@ bool AddDirectiveProcessors (TemplateBuildState buildState)
+ 			bool hasErrors = false;
+ 
+ 			foreach (var dirItem in DirectiveProcessors) {
+-
+ 				var name = dirItem.ItemSpec;
+-				string className = null, assembly = null;
++				string className = null;
++				string assembly = null;
+ 
+ 				if (name.IndexOf('!') > -1) {
+ 					var split = name.Split ('!');
+@@ -242,7 +243,8 @@ bool AddDirectiveProcessors (TemplateBuildState buildState)
+ 						Log.LogErrorFromResources (nameof(Messages.DirectiveProcessorDoesNotHaveThreeValues), name);
+ 						return false;
+ 					}
+-					//empty values for these are fine; they may get set through metadata
++
++					// empty values for these are fine; they may get set through metadata
+ 					name = split[0];
+ 					className = split[1];
+ 					assembly = split[2];
+@@ -300,6 +302,7 @@ TemplateBuildState LoadBuildState (string filePath, MessagePackSerializerOptions
+ 			catch (Exception ex) {
+ 				// show a meaningful error message without internal details
+ 				Log.LogWarningFromResources (nameof (Messages.BuildStateLoadFailed));
++
+ 				// log a stack trace so it can be reported
+ 				Log.LogMessageFromResources (MessageImportance.Normal, nameof(Messages.InternalException), ex);
+ 			}
+@@ -316,6 +319,7 @@ void SaveBuildState (TemplateBuildState buildState, string filePath, MessagePack
+ 			catch (Exception ex) {
+ 				// show a meaningful error message without internal details
+ 				Log.LogWarningFromResources (nameof (Messages.BuildStateSaveFailed));
++
+ 				// log a stack trace so it can be reported
+ 				Log.LogMessageFromResources (MessageImportance.Normal, nameof(Messages.InternalException), ex);
+ 				try {
+diff --git a/Mono.TextTemplating.Build/TextTransformProcessor.cs b/Mono.TextTemplating.Build/TextTransformProcessor.cs
+index 3854cd2..16a6fde 100644
+--- a/Mono.TextTemplating.Build/TextTransformProcessor.cs
++++ b/Mono.TextTemplating.Build/TextTransformProcessor.cs
+@@ -34,7 +34,7 @@ public static bool Process (TaskLoggingHelper taskLog, TemplateBuildState previo
+ 				var parameterMap = buildState.Parameters?.ToDictionary (p => p.Name, p => p.Value);
+ 
+ 				foreach (var transform in transforms) {
+-					yield return (transform.InputFile, (generator) => {
++					yield return (transform.InputFile, generator => {
+ 						string inputFile = transform.InputFile;
+ 						string outputFile = Path.ChangeExtension (inputFile, ".txt");
+ 						var pt = LoadTemplate (generator, inputFile, out var inputContent);
+@@ -63,7 +63,7 @@ public static bool Process (TaskLoggingHelper taskLog, TemplateBuildState previo
+ 						WriteOutput (generator, outputFile, outputContent, settings.Encoding);
+ 					}
+ 					);
+-				};
++				}
+ 			}
+ 
+ 			IEnumerable<(string templateFile, Action<MSBuildTemplateGenerator> generate)> GetPreprocessedActions ()
+@@ -73,8 +73,7 @@ public static bool Process (TaskLoggingHelper taskLog, TemplateBuildState previo
+ 				}
+ 
+ 				foreach (var preprocess in preprocessed) {
+-					yield return (preprocess.InputFile, (generator) => {
+-
++					yield return (preprocess.InputFile, generator => {
+ 						string inputFile = preprocess.InputFile;
+ 
+ 						var pt = LoadTemplate (generator, inputFile, out var inputContent);
+@@ -94,8 +93,8 @@ public static bool Process (TaskLoggingHelper taskLog, TemplateBuildState previo
+ 							return;
+ 						}
+ 
+-						//FIXME: escaping
+-						//FIXME: namespace name based on relative path and link metadata
++						// FIXME: escaping
++						// FIXME: namespace name based on relative path and link metadata
+ 						string preprocessClassName = Path.GetFileNameWithoutExtension (inputFile);
+ 						settings.Name = preprocessClassName;
+ 
+@@ -130,7 +129,7 @@ public static bool Process (TaskLoggingHelper taskLog, TemplateBuildState previo
+ 					generator.Reset ();
+ 					return generator;
+ 				},
+-				(generator) => { }
++				generator => { }
+ 			);
+ 
+ 			bool hasErrors = false;
+@@ -223,6 +222,7 @@ sealed class WriteTimeCache
+ 				}
+ 				return value;
+ 			}
++
+ 			readonly Dictionary<string, DateTime?> writeTimeCache = new ();
+ 		}
+ 
+@@ -251,7 +251,10 @@ static void AddCoercedSessionParameters (MSBuildTemplateGenerator generator, Par
+ 
+ 						pt.Errors.Add (
+ 							new CompilerError (
+-								null, 0, 0, null,
++								null,
++								0,
++								0,
++								null,
+ 								$"Could not convert property '{p.Key}'='{p.Value}' to parameter type '{typeName}'"
+ 							)
+ 						);
+diff --git a/Mono.TextTemplating.Roslyn/RoslynCodeCompilerException.cs b/Mono.TextTemplating.Roslyn/RoslynCodeCompilerException.cs
+index e06c2d1..a3167ed 100644
+--- a/Mono.TextTemplating.Roslyn/RoslynCodeCompilerException.cs
++++ b/Mono.TextTemplating.Roslyn/RoslynCodeCompilerException.cs
+@@ -8,7 +8,9 @@ namespace Mono.TextTemplating
+ 	sealed class RoslynCodeCompilerException : Exception
+ 	{
+ 		public RoslynCodeCompilerException () { }
++
+ 		public RoslynCodeCompilerException (string message) : base (message) { }
++
+ 		public RoslynCodeCompilerException (string message, Exception inner) : base (message, inner) { }
+ 	}
+ }
+\ No newline at end of file
+diff --git a/Mono.TextTemplating.Tests/AssemblyLoadTests.cs b/Mono.TextTemplating.Tests/AssemblyLoadTests.cs
+index 86fca58..5383d7f 100644
+--- a/Mono.TextTemplating.Tests/AssemblyLoadTests.cs
++++ b/Mono.TextTemplating.Tests/AssemblyLoadTests.cs
+@@ -12,6 +12,7 @@ namespace Mono.TextTemplating.Tests;
+ public abstract class AssemblyLoadTests<T> : StatefulTest<T>
+ {
+ 	protected virtual TemplateGenerator CreateGenerator ([CallerMemberName] string testName = null) => new ();
++
+ 	protected virtual void CleanupGenerator (TemplateGenerator generator) { }
+ 
+ 	[Fact]
+diff --git a/Mono.TextTemplating.Tests/DummyHost.cs b/Mono.TextTemplating.Tests/DummyHost.cs
+index 6256dc1..9bd0de1 100644
+--- a/Mono.TextTemplating.Tests/DummyHost.cs
++++ b/Mono.TextTemplating.Tests/DummyHost.cs
+@@ -25,13 +25,12 @@
+ // THE SOFTWARE.
+ 
+ using System;
+-using System.Collections.Generic;
+ using System.CodeDom.Compiler;
++using System.Collections.Generic;
+ using Microsoft.VisualStudio.TextTemplating;
+ 
+ namespace Mono.TextTemplating.Tests
+ {
+-
+ 	public class DummyHost : ITextTemplatingEngineHost
+ 	{
+ 		public Dictionary<string, string> Locations { get; } = new ();
+diff --git a/Mono.TextTemplating.Tests/EngineTests.cs b/Mono.TextTemplating.Tests/EngineTests.cs
+index 03ab43f..e639c71 100644
+--- a/Mono.TextTemplating.Tests/EngineTests.cs
++++ b/Mono.TextTemplating.Tests/EngineTests.cs
+@@ -53,9 +53,12 @@ public class EngineTests
+ 		[Theory]
+ 		[MemberData (nameof (ParameterParsingCases))]
+ 		public void ParameterParsing (
+-			string parameter, bool valid,
+-			string expectedProcessor, string expectedDirective,
+-			string expectedName, string expectedValue)
++			string parameter,
++			bool valid,
++			string expectedProcessor,
++			string expectedDirective,
++			string expectedName,
++			string expectedValue)
+ 		{
+ 			var success = TemplateGenerator.TryParseParameter (parameter, out var processor, out var directive, out var name, out var value);
+ 
+diff --git a/Mono.TextTemplating.Tests/GenerateIndentedClassCodeTests.cs b/Mono.TextTemplating.Tests/GenerateIndentedClassCodeTests.cs
+index 1300616..ea02a1b 100644
+--- a/Mono.TextTemplating.Tests/GenerateIndentedClassCodeTests.cs
++++ b/Mono.TextTemplating.Tests/GenerateIndentedClassCodeTests.cs
+@@ -27,9 +27,8 @@
+ using System.CodeDom;
+ using System.CodeDom.Compiler;
+ using System.IO;
+-using Xunit;
+-
+ using Mono.TextTemplating.CodeDomBuilder;
++using Xunit;
+ 
+ namespace Mono.TextTemplating.Tests
+ {
+diff --git a/Mono.TextTemplating.Tests/GenerationTests.cs b/Mono.TextTemplating.Tests/GenerationTests.cs
+index ab06d9a..0fd6fc8 100644
+--- a/Mono.TextTemplating.Tests/GenerationTests.cs
++++ b/Mono.TextTemplating.Tests/GenerationTests.cs
+@@ -41,39 +41,39 @@ public class GenerationTests
+ 		[Fact]
+ 		public void Generate ()
+ 		{
+-			string Input = ParsingTests.ParseSample1.NormalizeNewlines ();
+-			string Output = OutputSample1.NormalizeEscapedNewlines ();
+-			GenerateOutput (Input, Output, "\n");
++			string input = ParsingTests.ParseSample1.NormalizeNewlines ();
++			string output = OutputSample1.NormalizeEscapedNewlines ();
++			GenerateOutput (input, output, "\n");
+ 		}
+ 
+ 		[Fact]
+ 		public void GenerateMacNewlines ()
+ 		{
+-			string MacInput = ParsingTests.ParseSample1.NormalizeNewlines ("\r");
+-			string MacOutput = OutputSample1.NormalizeEscapedNewlines ("\\r");
+-			GenerateOutput (MacInput, MacOutput, "\r");
++			string macInput = ParsingTests.ParseSample1.NormalizeNewlines ("\r");
++			string macOutput = OutputSample1.NormalizeEscapedNewlines ("\\r");
++			GenerateOutput (macInput, macOutput, "\r");
+ 		}
+ 
+ 		[Fact]
+ 		public void GenerateWindowsNewlines ()
+ 		{
+-			string WinInput = ParsingTests.ParseSample1.NormalizeNewlines ("\r\n");
+-			string WinOutput = OutputSample1.NormalizeEscapedNewlines ("\\r\\n");
+-			GenerateOutput (WinInput, WinOutput, "\r\n");
++			string winInput = ParsingTests.ParseSample1.NormalizeNewlines ("\r\n");
++			string winOutput = OutputSample1.NormalizeEscapedNewlines ("\\r\\n");
++			GenerateOutput (winInput, winOutput, "\r\n");
+ 		}
+ 
+ 		[Fact]
+ 		public void DefaultLanguage ()
+ 		{
+ 			var host = new DummyHost ();
+-			string template = @"<#= DateTime.Now #>";
++			string template = "<#= DateTime.Now #>";
+ 			var pt = ParsedTemplate.FromTextInternal (template, host);
+ 			Assert.Empty (host.Errors);
+ 			TemplateSettings settings = TemplatingEngine.GetSettings (host, pt);
+ 			Assert.Equal ("C#", settings.Language);
+ 		}
+ 
+-		//NOTE: we set the newline property on the code generator so that the whole files has matching newlines,
++		// NOTE: we set the newline property on the code generator so that the whole files has matching newlines,
+ 		// in order to match the newlines in the verbatim code blocks
+ 		static void GenerateOutput (string input, string expectedOutput, string newline)
+ 		{
+@@ -112,7 +112,7 @@ static string GenerateCode (DummyHost host, string content, string name, string
+ 			}
+ 
+ 			var opts = new CodeGeneratorOptions ();
+-			using var writer = new StringWriter () { NewLine = generatorNewline };
++			using var writer = new StringWriter { NewLine = generatorNewline };
+ 			settings.Provider.GenerateCodeFromCompileUnit (ccu, writer, opts);
+ 			return writer.ToString ();
+ 		}
+diff --git a/Mono.TextTemplating.Tests/GlobalSuppressions.cs b/Mono.TextTemplating.Tests/GlobalSuppressions.cs
+index 278ed3c..a3c0a68 100644
+--- a/Mono.TextTemplating.Tests/GlobalSuppressions.cs
++++ b/Mono.TextTemplating.Tests/GlobalSuppressions.cs
+@@ -3,5 +3,6 @@
+ 
+ using System.Diagnostics.CodeAnalysis;
+ 
+-[assembly: SuppressMessage ("Design", "CA1034:Nested types should not be visible",
++[assembly: SuppressMessage ("Design",
++	"CA1034:Nested types should not be visible",
+ 	Justification = "Many nested classes are test specific but need to be accessible from template code")]
+diff --git a/Mono.TextTemplating.Tests/LoadedAssembliesSnapshot.cs b/Mono.TextTemplating.Tests/LoadedAssembliesSnapshot.cs
+index 3635843..7c2ed7f 100644
+--- a/Mono.TextTemplating.Tests/LoadedAssembliesSnapshot.cs
++++ b/Mono.TextTemplating.Tests/LoadedAssembliesSnapshot.cs
+@@ -21,6 +21,7 @@ public abstract class Snapshot
+ 	public static SnapshotSet<string> LoadedAssemblies (AppDomain context = null) => new (() => GetNames ((context ?? AppDomain.CurrentDomain).GetAssemblies ()));
+ #elif NETCOREAPP3_0_OR_GREATER
+ 	public static SnapshotSet<string> LoadedAssemblies (AssemblyLoadContext context = null) => new (() => GetNames ((context ?? AssemblyLoadContext.Default).Assemblies));
++
+ 	public static SnapshotSet<AssemblyLoadContext> AssemblyLoadContexts () => new (() => AssemblyLoadContext.All);
+ #endif
+ 
+@@ -33,6 +34,7 @@ static IEnumerable<string> GetNames (IEnumerable<Assembly> assemblies)
+ 		return names.Where (a => !a.StartsWith ("Microsoft.VisualStudio.Debugger", StringComparison.Ordinal));
+ 	}
+ }
++
+ public class SnapshotSet<TItem> : Snapshot
+ {
+ 	readonly Func<IEnumerable<TItem>> getCurrent;
+@@ -64,7 +66,9 @@ public override void AssertUnchanged ()
+ public class AggregateSnapshot : Snapshot
+ {
+ 	readonly Snapshot[] snapshots;
++
+ 	public AggregateSnapshot (params Snapshot[] snapshots) => this.snapshots = snapshots;
++
+ 	public override void AssertUnchanged ()
+ 	{
+ 		foreach (var snapshot in snapshots) {
+@@ -81,5 +85,6 @@ public class StatefulTests { }
+ public abstract class StatefulTest<T>
+ {
+ 	protected abstract T GetInitialState ();
++
+ 	protected abstract void VerifyFinalState (T state);
+ }
+\ No newline at end of file
+diff --git a/Mono.TextTemplating.Tests/ParsingTests.cs b/Mono.TextTemplating.Tests/ParsingTests.cs
+index 6e346ec..77aac1b 100644
+--- a/Mono.TextTemplating.Tests/ParsingTests.cs
++++ b/Mono.TextTemplating.Tests/ParsingTests.cs
+@@ -55,7 +55,7 @@ public void TokenTest ()
+ 			string tf = "test.input";
+ 			var tk = new Tokeniser (tf, ParseSample1.NormalizeNewlines ());
+ 
+-			//line 1
++			// line 1
+ 			Assert.True (tk.Advance ());
+ 			Assert.Equal (new Location (tf, 1, 1), tk.Location);
+ 			Assert.Equal (State.Content, tk.State);
+@@ -81,13 +81,13 @@ public void TokenTest ()
+ 			Assert.True (tk.Advance ());
+ 			Assert.Equal (State.Directive, tk.State);
+ 
+-			//line 2, 3
++			// line 2, 3
+ 			Assert.True (tk.Advance ());
+ 			Assert.Equal (new Location (tf, 2, 1), tk.Location);
+ 			Assert.Equal (State.Content, tk.State);
+ 			Assert.Equal ("Line One\nLine Two\n", tk.Value);
+ 
+-			//line 4, 5, 6
++			// line 4, 5, 6
+ 			Assert.True (tk.Advance ());
+ 			Assert.Equal (new Location (tf, 4, 1), tk.TagStartLocation);
+ 			Assert.Equal (new Location (tf, 4, 3), tk.Location);
+@@ -95,7 +95,7 @@ public void TokenTest ()
+ 			Assert.Equal (State.Block, tk.State);
+ 			Assert.Equal ("\nvar foo = 5;\n", tk.Value);
+ 
+-			//line 7
++			// line 7
+ 			Assert.True (tk.Advance ());
+ 			Assert.Equal (new Location (tf, 7, 1), tk.Location);
+ 			Assert.Equal (State.Content, tk.State);
+@@ -107,13 +107,13 @@ public void TokenTest ()
+ 			Assert.Equal (State.Expression, tk.State);
+ 			Assert.Equal (" bar ", tk.Value);
+ 
+-			//line 8
++			// line 8
+ 			Assert.True (tk.Advance ());
+ 			Assert.Equal (new Location (tf, 7, 22), tk.Location);
+ 			Assert.Equal (State.Content, tk.State);
+ 			Assert.Equal ("\nLine Four\n", tk.Value);
+ 
+-			//line 9, 10, 11
++			// line 9, 10, 11
+ 			Assert.True (tk.Advance ());
+ 			Assert.Equal (new Location (tf, 9, 1), tk.TagStartLocation);
+ 			Assert.Equal (new Location (tf, 9, 4), tk.Location);
+@@ -121,13 +121,13 @@ public void TokenTest ()
+ 			Assert.Equal (State.Helper, tk.State);
+ 			Assert.Equal (" \nvar s = \"baz \\\\#>\";\n", tk.Value);
+ 
+-			//line 12
++			// line 12
+ 			Assert.True (tk.Advance ());
+ 			Assert.Equal (new Location (tf, 12, 1), tk.Location);
+ 			Assert.Equal (State.Content, tk.State);
+ 			Assert.Equal ("", tk.Value);
+ 
+-			//EOF
++			// EOF
+ 			Assert.False (tk.Advance ());
+ 			Assert.Equal (new Location (tf, 12, 1), tk.Location);
+ 			Assert.Equal (State.EOF, tk.State);
+diff --git a/Mono.TextTemplating.Tests/Platform.cs b/Mono.TextTemplating.Tests/Platform.cs
+index fc4bc52..2383c29 100644
+--- a/Mono.TextTemplating.Tests/Platform.cs
++++ b/Mono.TextTemplating.Tests/Platform.cs
+@@ -25,18 +25,18 @@
+ // THE SOFTWARE.
+ 
+ using System;
+-using System.Runtime.InteropServices;
+ using System.IO;
++using System.Runtime.InteropServices;
+ 
+-//from MonoDevelop.Core.Platform
++// from MonoDevelop.Core.Platform
+ namespace Mono.TextTemplating.Tests
+ {
+ 	static class Platform
+ 	{
+-		public readonly static bool IsWindows;
+-		public readonly static bool IsMac;
+-		public readonly static bool IsLinux;
+-		public readonly static bool IsMono;
++		public static readonly bool IsWindows;
++		public static readonly bool IsMac;
++		public static readonly bool IsLinux;
++		public static readonly bool IsMono;
+ 
+ 		public static Version OSVersion { get; private set; }
+ 
+@@ -51,18 +51,19 @@ static Platform ()
+ 
+ 		public static void Initialize ()
+ 		{
+-			//no-op, triggers static ctor
++			// no-op, triggers static ctor
+ 		}
+ 
+ 		[DllImport ("libc")]
+ 		static extern int uname (IntPtr buf);
+ 
+-		//From Managed.Windows.Forms/XplatUI
++		// From Managed.Windows.Forms/XplatUI
+ 		static bool IsRunningOnMac ()
+ 		{
+ 			IntPtr buf = IntPtr.Zero;
+ 			try {
+ 				buf = Marshal.AllocHGlobal (8192);
++
+ 				// This is a hacktastic way of getting sysname from uname ()
+ 				if (uname (buf) == 0) {
+ 					string os = Marshal.PtrToStringAnsi (buf);
+diff --git a/Mono.TextTemplating.Tests/TemplateEnginePreprocessTemplateTests.cs b/Mono.TextTemplating.Tests/TemplateEnginePreprocessTemplateTests.cs
+index 805eb0f..5b04705 100644
+--- a/Mono.TextTemplating.Tests/TemplateEnginePreprocessTemplateTests.cs
++++ b/Mono.TextTemplating.Tests/TemplateEnginePreprocessTemplateTests.cs
+@@ -48,11 +48,11 @@ public void PreprocessSimple ()
+ 		[Fact]
+ 		public void ControlBlockAfterIncludedTemplateWithClassFeatureBlock ()
+ 		{
+-			string input = InputTemplate_ControlBlockAfterIncludedTemplateWithClassFeatureBlock.NormalizeNewlines ();
++			string input = InputTemplateControlBlockAfterIncludedTemplateWithClassFeatureBlock.NormalizeNewlines ();
+ 			DummyHost host = CreateDummyHostForControlBlockAfterIncludedTemplateWithClassFeatureBlockTest ();
+ 			host.HostOptions.Add ("UseRelativeLinePragmas", true);
+ 
+-			string expectedOutput = TemplatingEngineHelper.CleanCodeDom (Output_ControlBlockAfterIncludedTemplateWithClassFeatureBlock.NormalizeNewlines (), "\n");
++			string expectedOutput = TemplatingEngineHelper.CleanCodeDom (OutputControlBlockAfterIncludedTemplateWithClassFeatureBlock.NormalizeNewlines (), "\n");
+ 			string output = Preprocess (input, host);
+ 
+ 			Assert.Equal (expectedOutput, output);
+@@ -61,9 +61,9 @@ public void ControlBlockAfterIncludedTemplateWithClassFeatureBlock ()
+ 		[Fact]
+ 		public void CaptureEncodingAndExtension ()
+ 		{
+-			string input = InputTemplate_CaptureEncodingAndExtension.NormalizeNewlines ();
++			string input = InputTemplateCaptureEncodingAndExtension.NormalizeNewlines ();
+ 			string output = Preprocess (input);
+-			string expectedOutput = TemplatingEngineHelper.CleanCodeDom (Output_CaptureEncodingAndExtension.NormalizeNewlines (), "\n");
++			string expectedOutput = TemplatingEngineHelper.CleanCodeDom (OutputCaptureEncodingAndExtension.NormalizeNewlines (), "\n");
+ 
+ 			Assert.Equal (expectedOutput, output);
+ 		}
+@@ -108,7 +108,7 @@ static DummyHost CreateDummyHostForControlBlockAfterIncludedTemplateWithClassFea
+ 
+ 			string includeTemplateResolvedFileName = @"Some\Resolved\Path\IncludedFile.tt";
+ 			host.Locations.Add (includeTemplateRequestedFileName, includeTemplateResolvedFileName);
+-			host.Contents.Add (includeTemplateResolvedFileName, IncludedTemplate_ControlBlockAfterIncludedTemplate.NormalizeNewlines ());
++			host.Contents.Add (includeTemplateResolvedFileName, IncludedTemplateControlBlockAfterIncludedTemplate.NormalizeNewlines ());
+ 
+ 			return host;
+ 		}
+@@ -117,7 +117,7 @@ static DummyHost CreateDummyHostForControlBlockAfterIncludedTemplateWithClassFea
+ 
+ 		#region Input templates
+ 
+-		const string InputTemplate_ControlBlockAfterIncludedTemplateWithClassFeatureBlock =
++		const string InputTemplateControlBlockAfterIncludedTemplateWithClassFeatureBlock =
+ @"
+ <#@ template debug=""false"" language=""C#"" #>
+ <#@ output extension="".cs"" #>
+@@ -138,7 +138,7 @@ void TemplateMethod()
+ #>
+ ";
+ 
+-		const string IncludedTemplate_ControlBlockAfterIncludedTemplate =
++		const string IncludedTemplateControlBlockAfterIncludedTemplate =
+ @"
+ <#@ template debug=""false"" language=""C#"" #>
+ <#@ output extension="".cs"" #>
+@@ -155,7 +155,7 @@ void IncludedMethod()
+ #>
+ ";
+ 
+-		const string InputTemplate_CaptureEncodingAndExtension =
++		const string InputTemplateCaptureEncodingAndExtension =
+ 			@"
+ <#@ template debug=""false"" language=""C#"" inherits=""Foo"" hostspecific=""trueFromBase"" #>
+ <#@ output extension="".cs"" encoding=""utf-8"" #>
+@@ -339,7 +339,7 @@ public class ToStringInstanceHelper {
+ }
+ ";
+ 
+-		const string Output_ControlBlockAfterIncludedTemplateWithClassFeatureBlock =
++		const string OutputControlBlockAfterIncludedTemplateWithClassFeatureBlock =
+ @"
+ namespace Templating {
+     
+@@ -604,7 +604,7 @@ public class ToStringInstanceHelper {
+ }
+ ";
+ 
+-		const string Output_CaptureEncodingAndExtension =
++		const string OutputCaptureEncodingAndExtension =
+ 
+ 		@"namespace Templating {
+     
+diff --git a/Mono.TextTemplating.Tests/TemplatingEngineHelper.cs b/Mono.TextTemplating.Tests/TemplatingEngineHelper.cs
+index 049e90b..8decead 100644
+--- a/Mono.TextTemplating.Tests/TemplatingEngineHelper.cs
++++ b/Mono.TextTemplating.Tests/TemplatingEngineHelper.cs
+@@ -44,7 +44,6 @@ public static string CleanCodeDom (string input, string newLine)
+ 
+ 			string line;
+ 			while ((line = reader.ReadLine ()) != null) {
+-
+ 				if (stripHeader) {
+ 					if (line.StartsWith ("//", StringComparison.Ordinal) || string.IsNullOrWhiteSpace (line))
+ 						continue;
+diff --git a/Mono.TextTemplating.Tests/TestDataPath.cs b/Mono.TextTemplating.Tests/TestDataPath.cs
+index 971e33c..e622fef 100644
+--- a/Mono.TextTemplating.Tests/TestDataPath.cs
++++ b/Mono.TextTemplating.Tests/TestDataPath.cs
+@@ -29,22 +29,30 @@ public static TestDataPath GetTestCase ([CallerMemberName] string testName = nul
+ 		=> TestCasesRoot.Combine (testName ?? throw new ArgumentNullException (nameof (testName)));
+ 
+ 	readonly string path;
++
+ 	public TestDataPath (string path) => this.path = TrimEndingDirectorySeparator (path);
+ 
+ 	public TestDataPath Combine (string path) => new (Path.Combine (this.path, path));
++
+ 	public TestDataPath Combine (string path1, string path2) => new (Path.Combine (path, path1, path2));
++
+ 	public TestDataPath Combine (string path1, string path2, string path3) => new (Path.Combine (path, path1, path2, path3));
++
+ 	public TestDataPath Combine (params string[] paths) => new (Path.Combine (path, Path.Combine (paths)));
+ 
+ 	public TestDataPath this[string path] => Combine (path);
++
+ 	public TestDataPath this[string path1, string path2] => Combine (path1, path2);
++
+ 	public TestDataPath this[string path1, string path2, string path3] => Combine (path1, path2, path3);
++
+ 	public TestDataPath this[params string[] paths] => Combine (paths);
+ 
+ 	public static implicit operator string (TestDataPath path) => path.path;
+ 
+ #if NETCOREAPP2_0_OR_GREATER
+ 	public Task<string> ReadAllTextAsync () => File.ReadAllTextAsync (path);
++
+ 	public async Task<string> ReadAllTextNormalizedAsync () => (await ReadAllTextAsync ().ConfigureAwait (false)).NormalizeNewlines ();
+ #else
+ 	public Task<string> ReadAllTextAsync () => Task.FromResult (ReadAllText ());
+@@ -52,6 +60,7 @@ public static TestDataPath GetTestCase ([CallerMemberName] string testName = nul
+ #endif
+ 
+ 	public string ReadAllText () => File.ReadAllText (path);
++
+ 	public string ReadAllTextNormalized () => File.ReadAllText (path).NormalizeNewlines ();
+ 
+ 	public TestDataPath AssertFileExists (bool exists = true)
+@@ -75,7 +84,7 @@ public TestDataPath AssertDirectoryExists (bool exists = true)
+ 	}
+ 
+ 	/// <summary>
+-	/// Assert that the file exists and starts with the given value
++	/// Assert that the file exists and starts with the given value.
+ 	/// </summary>
+ 	public TestDataPath AssertTextStartsWith (string value, StringComparison comparison = StringComparison.Ordinal)
+ 	{
+diff --git a/Mono.TextTemplating.Tests/TextTemplatingSessionTests.cs b/Mono.TextTemplating.Tests/TextTemplatingSessionTests.cs
+index ce8a45c..786de75 100644
+--- a/Mono.TextTemplating.Tests/TextTemplatingSessionTests.cs
++++ b/Mono.TextTemplating.Tests/TextTemplatingSessionTests.cs
+@@ -123,7 +123,6 @@ public async Task TestCustomBaseClassWithSpecificHostType ()
+ 			Assert.Equal ("34", result.content);
+ 		}
+ 
+-
+ 		[Fact]
+ 		public async Task HostSpecificNonStringParameter ()
+ 		{
+@@ -174,4 +173,3 @@ public async Task HostSpecificStringParameterWithSpecificHostType ()
+ 		}
+ 	}
+ }
+-
+diff --git a/Mono.TextTemplating.Tests/TrackingSynchronizationContext.cs b/Mono.TextTemplating.Tests/TrackingSynchronizationContext.cs
+index 64cb50b..4a46b9f 100644
+--- a/Mono.TextTemplating.Tests/TrackingSynchronizationContext.cs
++++ b/Mono.TextTemplating.Tests/TrackingSynchronizationContext.cs
+@@ -27,7 +27,7 @@ public override void Post (SendOrPostCallback d, object state)
+ 	{
+ 		Interlocked.Increment (ref callCount);
+ 
+-		if (inner is not null) {
++		if (inner != null) {
+ 			inner.Post (d, state);
+ 		} else {
+ 			d (state);
+@@ -38,7 +38,7 @@ public override void Send (SendOrPostCallback d, object state)
+ 	{
+ 		Interlocked.Increment (ref callCount);
+ 
+-		if (inner is not null) {
++		if (inner != null) {
+ 			inner.Send (d, state);
+ 		} else {
+ 			d (state);
+diff --git a/Mono.TextTemplating.Tests/WriteTimeTracker.cs b/Mono.TextTemplating.Tests/WriteTimeTracker.cs
+index ae93ff4..6add78a 100644
+--- a/Mono.TextTemplating.Tests/WriteTimeTracker.cs
++++ b/Mono.TextTemplating.Tests/WriteTimeTracker.cs
+@@ -12,8 +12,11 @@ sealed class WriteTimeTracker
+ {
+ 	readonly TestDataPath file;
+ 	DateTime lastWriteTime;
++
+ 	public WriteTimeTracker (TestDataPath file) => lastWriteTime = (this.file = file).GetLastWriteTime ();
++
+ 	public void AssertChanged () => lastWriteTime = file.AssertWriteTimeNewerThan (lastWriteTime);
++
+ 	public void AssertSame () => file.AssertWriteTimeEquals (lastWriteTime);
+ 
+ 	public DateTime WaitUntilLaterNow () => LaterNowThan (lastWriteTime);
+diff --git a/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/DirectiveProcessor.cs b/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/DirectiveProcessor.cs
+index 2bda22a..fc6602a 100644
+--- a/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/DirectiveProcessor.cs
++++ b/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/DirectiveProcessor.cs
+@@ -25,9 +25,9 @@
+ // THE SOFTWARE.
+ 
+ using System;
+-using System.Collections.Generic;
+-using System.CodeDom.Compiler;
+ using System.CodeDom;
++using System.CodeDom.Compiler;
++using System.Collections.Generic;
+ 
+ namespace Microsoft.VisualStudio.TextTemplating
+ {
+@@ -53,12 +53,19 @@ public virtual void StartProcessingRun (CodeDomProvider languageProvider, string
+ 		}
+ 		
+ 		public abstract void FinishProcessingRun ();
++
+ 		public abstract string GetClassCodeForProcessingRun ();
++
+ 		public abstract string[] GetImportsForProcessingRun ();
++
+ 		public abstract string GetPostInitializationCodeForProcessingRun ();
++
+ 		public abstract string GetPreInitializationCodeForProcessingRun ();
++
+ 		public abstract string[] GetReferencesForProcessingRun ();
++
+ 		public abstract bool IsDirectiveSupported (string directiveName);
++
+ 		public abstract void ProcessDirective (string directiveName, IDictionary<string, string> arguments);
+ 
+ 		public virtual CodeAttributeDeclarationCollection GetTemplateClassCustomAttributes ()
+diff --git a/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/DirectiveProcessorException.cs b/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/DirectiveProcessorException.cs
+index 44bba1e..6337a10 100644
+--- a/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/DirectiveProcessorException.cs
++++ b/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/DirectiveProcessorException.cs
+@@ -29,11 +29,9 @@
+ 
+ namespace Microsoft.VisualStudio.TextTemplating
+ {
+-	
+ 	[Serializable]
+ 	public class DirectiveProcessorException : Exception
+ 	{
+-		
+ 		public DirectiveProcessorException ()
+ 		{
+ 		}
+diff --git a/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/EncodingHelper.cs b/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/EncodingHelper.cs
+index 89a6a46..2766a17 100644
+--- a/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/EncodingHelper.cs
++++ b/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/EncodingHelper.cs
+@@ -38,4 +38,3 @@ public static Encoding GetEncoding (string filePath)
+ 		}
+ 	}
+ }
+-
+diff --git a/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/Engine.cs b/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/Engine.cs
+index fd78b49..b65a336 100644
+--- a/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/Engine.cs
++++ b/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/Engine.cs
+@@ -39,8 +39,12 @@ public string ProcessTemplate (string content, ITextTemplatingEngineHost host)
+ 			return engine.ProcessTemplate (content, host);
+ 		}
+ 		
+-		public string PreprocessTemplate (string content, ITextTemplatingEngineHost host, string className, 
+-			string classNamespace, out string language, out string[] references)
++		public string PreprocessTemplate (string content,
++			ITextTemplatingEngineHost host,
++			string className, 
++			string classNamespace,
++			out string language,
++			out string[] references)
+ 		{
+ 			return engine.PreprocessTemplate (content, host, className, classNamespace, out language, out references);
+ 		}
+diff --git a/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/Interfaces.cs b/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/Interfaces.cs
+index 465d8a1..7ed3f2d 100644
+--- a/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/Interfaces.cs
++++ b/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/Interfaces.cs
+@@ -37,6 +37,7 @@ namespace Microsoft.VisualStudio.TextTemplating
+ 	public interface IRecognizeHostSpecific
+ 	{
+ 		void SetProcessingRunIsHostSpecific (bool hostSpecific);
++
+ 		bool RequiresProcessingRunIsHostSpecific { get; }
+ 	}
+ 
+@@ -44,14 +45,21 @@ public interface IRecognizeHostSpecific
+ 	public interface ITextTemplatingEngine
+ 	{
+ 		string ProcessTemplate (string content, ITextTemplatingEngineHost host);
+-		string PreprocessTemplate (string content, ITextTemplatingEngineHost host, string className,
+-			string classNamespace, out string language, out string [] references);
++
++		string PreprocessTemplate (string content,
++			ITextTemplatingEngineHost host,
++			string className,
++			string classNamespace,
++			out string language,
++			out string [] references);
+ 	}
+ 
+ 	public interface ITextTemplatingEngineHost
+ 	{
+ 		object GetHostOption (string optionName);
++
+ 		bool LoadIncludeText (string requestFileName, out string content, out string location);
++
+ 		void LogErrors (CompilerErrorCollection errors);
+ 
+ #if !FEATURE_APPDOMAINS
+@@ -61,11 +69,17 @@ public interface ITextTemplatingEngineHost
+ 		AppDomain ProvideTemplatingAppDomain (string content);
+ 
+ 		string ResolveAssemblyReference (string assemblyReference);
++
+ 		Type ResolveDirectiveProcessor (string processorName);
++
+ 		string ResolveParameterValue (string directiveId, string processorName, string parameterName);
++
+ 		string ResolvePath (string path);
++
+ 		void SetFileExtension (string extension);
++
+ 		void SetOutputEncoding (Encoding encoding, bool fromOutputDirective);
++
+ 		IList<string> StandardAssemblyReferences { get; }
+ 		IList<string> StandardImports { get; }
+ 		string TemplateFile { get; }
+@@ -84,6 +98,7 @@ public interface ITextTemplatingSession :
+ 	public interface ITextTemplatingSessionHost	
+ 	{
+ 		ITextTemplatingSession CreateSession ();
++
+ 		ITextTemplatingSession Session { get; set; }
+ 	}
+ 
+@@ -93,16 +108,27 @@ public interface IDirectiveProcessor
+ 		bool RequiresProcessingRunIsHostSpecific { get; }
+ 
+ 		void FinishProcessingRun ();
++
+ 		string GetClassCodeForProcessingRun ();
++
+ 		string[] GetImportsForProcessingRun ();
++
+ 		string GetPostInitializationCodeForProcessingRun ();
++
+ 		string GetPreInitializationCodeForProcessingRun ();
++
+ 		string[] GetReferencesForProcessingRun ();
+-		CodeAttributeDeclarationCollection GetTemplateClassCustomAttributes ();  //TODO
++
++		CodeAttributeDeclarationCollection GetTemplateClassCustomAttributes ();  // TODO
++
+ 		void Initialize (ITextTemplatingEngineHost host);
++
+ 		bool IsDirectiveSupported (string directiveName);
++
+ 		void ProcessDirective (string directiveName, IDictionary<string, string> arguments);
++
+ 		void SetProcessingRunIsHostSpecific (bool hostSpecific);
++
+ 		void StartProcessingRun (CodeDomProvider languageProvider, string templateContents, CompilerErrorCollection errors);
+ 	}
+ }
+diff --git a/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/ParameterDirectiveProcessor.cs b/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/ParameterDirectiveProcessor.cs
+index 403ec76..0f6aabe 100644
+--- a/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/ParameterDirectiveProcessor.cs
++++ b/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/ParameterDirectiveProcessor.cs
+@@ -55,7 +55,7 @@ public override void FinishProcessingRun ()
+ 		{
+ 			var statement = Statement.If (
+ 				Expression.This.Property ("Errors").Property ("HasErrors").IsEqualValue (Expression.False),
+-				Then: postStatements.ToArray ()
++				then: postStatements.ToArray ()
+ 			);
+ 			
+ 			postStatements.Clear ();
+@@ -155,10 +155,10 @@ public override void ProcessDirective (string directiveName, IDictionary<string,
+ 				postStatements.Add (acquiredVariable);
+ 			}
+ 
+-			//checks the local called "data" can be cast and assigned to the field, and if successful, sets acquiredVariable to true
++			// checks the local called "data" can be cast and assigned to the field, and if successful, sets acquiredVariable to true
+ 			var checkCastThenAssignVal = Statement.If (
+ 				Expression.TypeOf (type).InvokeMethod ("IsAssignableFrom", data.InvokeMethod ("GetType")),
+-				Then: hasAcquiredCheck ?
++				then: hasAcquiredCheck ?
+ 					new CodeStatement[] {
+ 						Statement.Assign (fieldRef, Expression.Cast (type, data)),
+ 						Statement.Assign (acquiredVariableRef, Expression.True)
+@@ -171,9 +171,9 @@ public override void ProcessDirective (string directiveName, IDictionary<string,
+ 						Expression.Primitive ($"The type '{typeName}' of the parameter '{name}' did not match the type passed to the template")))
+ 				});
+ 
+-			//tries to gets the value from the session
++			// tries to gets the value from the session
+ 			postStatements.Add (Statement.If (session.IsNotNull ().And (session.InvokeMethod ("ContainsKey", namePrimitive)),
+-				Then: new CodeStatement[] {
++				then: new CodeStatement[] {
+ 					Statement.DeclareVariable<object> (data.VariableName, session.Index (namePrimitive), out _),
+ 					checkCastThenAssignVal
+ 				}));
+@@ -185,10 +185,11 @@ public override void ProcessDirective (string directiveName, IDictionary<string,
+ 					} :
+ 					new CodeStatement[] {
+ 						Declare.Variable<TypeConverter> ("dataTypeConverter",
+-							TypeReference.Default<TypeDescriptor> ().InvokeMethod ("GetConverter", Expression.TypeOf (type)), out var converter),
++							TypeReference.Default<TypeDescriptor> ().InvokeMethod ("GetConverter", Expression.TypeOf (type)),
++							out var converter),
+ 						Statement.If (
+ 							converter.IsNotNull ().And (converter.InvokeMethod ("CanConvertFrom", Expression.TypeOf<string> ())),
+-							Then: new[] {
++							then: new[] {
+ 								Statement.Assign (fieldRef, Expression.Cast (type, converter.InvokeMethod ("ConvertFromString", data))),
+ 							},
+ 							Else: new[] {
+@@ -202,12 +203,13 @@ public override void ProcessDirective (string directiveName, IDictionary<string,
+ 				var host = Expression.This.Property ("Host");
+ 				postStatements.Add (
+ 					Statement.If (acquiredVariableRef.IsFalse ().And (host.IsNotNull ()),
+-					Then: new CodeStatement[] {
++					then: new CodeStatement[] {
+ 						// if the host uses SpecificHostType, this may only be accessible via the interface
+ 						Statement.DeclareVariable<string> (data.VariableName,
+-							host.Cast<ITextTemplatingEngineHost> ().InvokeMethod ("ResolveParameterValue", Expression.Null, Expression.Null,  namePrimitive), out _),
++							host.Cast<ITextTemplatingEngineHost> ().InvokeMethod ("ResolveParameterValue", Expression.Null, Expression.Null,  namePrimitive),
++							out _),
+ 						Statement.If (data.IsNotNull (),
+-							Then: convertAndAssign)
++							then: convertAndAssign)
+ 					}));
+ 			}
+ 
+@@ -216,10 +218,10 @@ public override void ProcessDirective (string directiveName, IDictionary<string,
+ 				var callContextType = TypeReference.Default ("System.Runtime.Remoting.Messaging.CallContext");
+ 				postStatements.Add (
+ 					Statement.If (acquiredVariableRef.IsFalse (),
+-					Then: new CodeStatement[] {
++					then: new CodeStatement[] {
+ 						Declare.Variable<object> (data.VariableName, callContextType.InvokeMethod ("LogicalGetData", namePrimitive), out _),
+ 						Statement.If (data.IsNotNull (),
+-							Then: checkCastThenAssignVal)
++							then: checkCastThenAssignVal)
+ 					}));
+ 			}
+ 		}
+@@ -238,4 +240,3 @@ void IRecognizeHostSpecific.SetProcessingRunIsHostSpecific (bool hostSpecific)
+ 		CodeGenerationOptions CodeGenerationOptions { get; set; }
+ 	}
+ }
+-
+diff --git a/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/RequiresProvidesDirectiveProcessor.cs b/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/RequiresProvidesDirectiveProcessor.cs
+index 7c4cde3..0874024 100644
+--- a/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/RequiresProvidesDirectiveProcessor.cs
++++ b/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/RequiresProvidesDirectiveProcessor.cs
+@@ -25,8 +25,8 @@
+ // THE SOFTWARE.
+ 
+ using System;
+-using System.Collections.Generic;
+ using System.CodeDom.Compiler;
++using System.Collections.Generic;
+ using System.Text;
+ 
+ namespace Microsoft.VisualStudio.TextTemplating
+@@ -51,17 +51,31 @@ public override void Initialize (ITextTemplatingEngineHost host)
+ 		}
+ 		
+ 		protected abstract void InitializeProvidesDictionary (string directiveName, IDictionary<string, string> providesDictionary);
++
+ 		protected abstract void InitializeRequiresDictionary (string directiveName, IDictionary<string, string> requiresDictionary);
++
+ 		protected abstract string FriendlyName { get; }
+ 		
+-		protected abstract void GeneratePostInitializationCode (string directiveName, StringBuilder codeBuffer, CodeDomProvider languageProvider, 
+-			IDictionary<string, string> requiresArguments, IDictionary<string, string> providesArguments);
+-		protected abstract void GeneratePreInitializationCode (string directiveName, StringBuilder codeBuffer, CodeDomProvider languageProvider,
+-			IDictionary<string, string> requiresArguments, IDictionary<string, string> providesArguments);
+-		protected abstract void GenerateTransformCode (string directiveName, StringBuilder codeBuffer, CodeDomProvider languageProvider,
+-			IDictionary<string, string> requiresArguments, IDictionary<string, string> providesArguments);
+-		
+-		protected virtual void PostProcessArguments (string directiveName, IDictionary<string, string> requiresArguments,
++		protected abstract void GeneratePostInitializationCode (string directiveName,
++			StringBuilder codeBuffer,
++			CodeDomProvider languageProvider, 
++			IDictionary<string, string> requiresArguments,
++			IDictionary<string, string> providesArguments);
++
++		protected abstract void GeneratePreInitializationCode (string directiveName,
++			StringBuilder codeBuffer,
++			CodeDomProvider languageProvider,
++			IDictionary<string, string> requiresArguments,
++			IDictionary<string, string> providesArguments);
++
++		protected abstract void GenerateTransformCode (string directiveName,
++			StringBuilder codeBuffer,
++			CodeDomProvider languageProvider,
++			IDictionary<string, string> requiresArguments,
++			IDictionary<string, string> providesArguments);
++		
++		protected virtual void PostProcessArguments (string directiveName,
++			IDictionary<string, string> requiresArguments,
+ 			IDictionary<string, string> providesArguments)
+ 		{
+ 		}
+@@ -119,7 +133,7 @@ void AssertNotProcessing ()
+ 				throw new InvalidOperationException ();
+ 		}
+ 		
+-		//FIXME: handle escaping
++		// FIXME: handle escaping
+ 		static IEnumerable<KeyValuePair<string,string>> ParseArgs (string args)
+ 		{
+ 			var pairs = args.Split (';');
+@@ -179,8 +193,10 @@ public override void ProcessDirective (string directiveName, IDictionary<string,
+ 			GenerateTransformCode (directiveName, codeBuffer, languageProvider, requiresDictionary, providesDictionary);
+ 		}
+ 		
+-		protected virtual string ProvideUniqueId (string directiveName, IDictionary<string, string> arguments,
+-			IDictionary<string, string> requiresArguments, IDictionary<string, string> providesArguments)
++		protected virtual string ProvideUniqueId (string directiveName,
++			IDictionary<string, string> arguments,
++			IDictionary<string, string> requiresArguments,
++			IDictionary<string, string> providesArguments)
+ 		{
+ 			return directiveName;
+ 		}
+diff --git a/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/TextTemplatingSession.cs b/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/TextTemplatingSession.cs
+index 94426cb..919febc 100644
+--- a/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/TextTemplatingSession.cs
++++ b/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/TextTemplatingSession.cs
+@@ -24,8 +24,8 @@
+ // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ // THE SOFTWARE.
+ using System;
+-using System.Collections.Generic;
+ using System.Collections;
++using System.Collections.Generic;
+ using System.Runtime.Serialization;
+ 
+ namespace Microsoft.VisualStudio.TextTemplating
+@@ -48,9 +48,7 @@ public TextTemplatingSession (Guid id)
+ 			this.Id = id;
+ 		}
+ 		
+-		public Guid Id {
+-			get; private set;
+-		}
++		public Guid Id { get; private set; }
+ 		
+ 		public override int GetHashCode ()
+ 		{
+@@ -75,9 +73,8 @@ public bool Equals (ITextTemplatingSession other)
+ 
+ 		void ISerializable.GetObjectData (SerializationInfo info, StreamingContext context)
+ 		{
+-			base.GetObjectData (info, context);
++			GetObjectData (info, context);
+ 			info.AddValue ("Id", Id);
+ 		}
+ 	}
+ }
+-
+diff --git a/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/TextTransformation.cs b/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/TextTransformation.cs
+index de1f0ba..7ee2106 100644
+--- a/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/TextTransformation.cs
++++ b/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/TextTransformation.cs
+@@ -35,7 +35,7 @@ namespace Microsoft.VisualStudio.TextTemplating
+ 	public abstract class TextTransformation : IDisposable
+ 	{
+ 		Stack<int> indents;
+-		string currentIndent = string.Empty;
++		string currentIndent = "";
+ 		CompilerErrorCollection errors;
+ 		StringBuilder builder;
+ 		bool endsWithNewline;
+@@ -104,7 +104,7 @@ public void PushIndent (string indent)
+ 		
+ 		public void ClearIndent ()
+ 		{
+-			currentIndent = string.Empty;
++			currentIndent = "";
+ 			Indents.Clear ();
+ 		}
+ 		
+@@ -122,6 +122,7 @@ public void ClearIndent ()
+ 					builder = new StringBuilder ();
+ 				return builder;
+ 			}
++
+ 			set {
+ 				builder = value;
+ 			}
+@@ -147,8 +148,8 @@ public void Write (string textToAppend)
+ 				return;
+ 			}
+ 			
+-			//insert CurrentIndent after every newline (\n, \r, \r\n)
+-			//but if there's one at the end of the string, ignore it, it'll be handled next time thanks to endsWithNewline
++			// insert CurrentIndent after every newline (\n, \r, \r\n)
++			// but if there's one at the end of the string, ignore it, it'll be handled next time thanks to endsWithNewline
+ 			int lastNewline = 0;
+ 			for (int i = 0; i < textToAppend.Length - 1; i++) {
+ 				char c = textToAppend[i];
+diff --git a/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/ToStringHelper.cs b/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/ToStringHelper.cs
+index 7480ed8..b18b514 100644
+--- a/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/ToStringHelper.cs
++++ b/Mono.TextTemplating/Microsoft.VisualStudio.TextTemplating/ToStringHelper.cs
+@@ -51,7 +51,7 @@ public static string ToStringWithCulture (object objectToConvert)
+ 			if (objectToConvert is string str)
+ 				return str;
+ 			
+-			//TODO: implement a cache of types and DynamicMethods
++			// TODO: implement a cache of types and DynamicMethods
+ 			MethodInfo mi = objectToConvert.GetType ().GetMethod ("ToString", new Type[] { typeof (IFormatProvider) });
+ 			if (mi != null)
+ 				return (string) mi.Invoke (objectToConvert, formatProviderAsParameterArray);
+diff --git a/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/AssemblyResolver.cs b/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/AssemblyResolver.cs
+index ff8ce58..35e3f3b 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/AssemblyResolver.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/AssemblyResolver.cs
+@@ -7,7 +7,7 @@
+ 
+ namespace Mono.TextTemplating.CodeCompilation
+ {
+-	//attempt to resolve refs into the runtime dir if the host didn't already do so
++	// attempt to resolve refs into the runtime dir if the host didn't already do so
+ 	static class AssemblyResolver
+ 	{
+ 		public static IEnumerable<string> GetResolvedReferences (RuntimeInfo runtime, List<string> references)
+@@ -44,7 +44,8 @@ public static IEnumerable<string> GetResolvedReferences (RuntimeInfo runtime, Li
+ 							yield return resolved;
+ 						}
+ 					}
+-					//because we're referencing the impl not the ref asms, we end up having to ref internals
++
++					// because we're referencing the impl not the ref asms, we end up having to ref internals
+ 					var corlib = "System.Private.CoreLib.dll";
+ 					var resolvedCorlib = Path.Combine (runtime.RuntimeDir, corlib);
+ 					if (File.Exists (resolvedCorlib)) {
+@@ -68,7 +69,7 @@ public static IEnumerable<string> GetResolvedReferences (RuntimeInfo runtime, Li
+ 					}
+ 				}
+ 
+-				//also reference all the facades as MSBuild does this too
++				// also reference all the facades as MSBuild does this too
+ 				foreach (var asm in Net472FacadeNames.Value) {
+ 					var asmPath = Path.Combine (runtime.RuntimeFacadesDir, asm);
+ 					if (File.Exists (asmPath)) {
+diff --git a/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/CSharpLangVersionHelper.cs b/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/CSharpLangVersionHelper.cs
+index 4235e06..4cef6cf 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/CSharpLangVersionHelper.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/CSharpLangVersionHelper.cs
+@@ -14,14 +14,14 @@ namespace Mono.TextTemplating.CodeCompilation;
+ 
+ static class CSharpLangVersionHelper
+ {
+-	public static bool HasLangVersionArg (string args) =>
+-		!string.IsNullOrEmpty(args)
++	public static bool HasLangVersionArg (string args)
++		=> !string.IsNullOrEmpty(args)
+ 			&& (args.IndexOf ("langversion", StringComparison.OrdinalIgnoreCase) > -1)
+ 			&& ProcessArgumentBuilder.TryParse (args, out var parsedArgs)
+ 			&& parsedArgs.Any (IsLangVersionArg);
+ 
+-	public static bool IsLangVersionArg (string arg) =>
+-		(arg[0] == '-' || arg[0] == '/')
++	public static bool IsLangVersionArg (string arg)
++		=> (arg[0] == '-' || arg[0] == '/')
+ 		&& arg.IndexOf ("langversion", StringComparison.OrdinalIgnoreCase) == 1;
+ 
+ 	public static string? GetLangVersionArg (CodeCompilerArguments arguments, RuntimeInfo runtime)
+@@ -45,7 +45,7 @@ static class CSharpLangVersionHelper
+ 		return $"-langversion:{ToString (runtime.RuntimeLangVersion)}";
+ 	}
+ 
+-	//https://docs.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-version-history
++	// https://docs.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-version-history
+ 	public static CSharpLangVersion FromNetCoreSdkVersion (SemVersion sdkVersion)
+ 		=> sdkVersion switch {
+ 			// disable .NET 9.0 -> C# 13 mapping for now, as csc in early .NET 9.0 previews
+diff --git a/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/CompiledAssemblyData.cs b/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/CompiledAssemblyData.cs
+index a18665a..995f7fc 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/CompiledAssemblyData.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/CompiledAssemblyData.cs
+@@ -39,6 +39,7 @@ public Assembly LoadInAssemblyLoadContext (AssemblyLoadContext loadContext)
+ 			}
+ 		}
+ #endif
++
+ 		public Assembly LoadInCurrentAppDomain ()
+ 		{
+ 			if (DebugSymbols != null) {
+diff --git a/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/CscCodeCompiler.cs b/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/CscCodeCompiler.cs
+index 4e58b51..1084107 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/CscCodeCompiler.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/CscCodeCompiler.cs
+@@ -46,7 +46,7 @@ class CscCodeCompiler : CodeCompiler
+ 		public CscCodeCompiler (RuntimeInfo runtime)
+ 		{
+ 			this.runtime = runtime;
+-			if (runtime.CscPath is null) {
++			if (runtime.CscPath == null) {
+ 				throw new TemplatingEngineException ("Cannot find C# compiler");
+ 			}
+ 		}
+@@ -57,7 +57,7 @@ static StreamWriter CreateTempTextFile (string extension, out string path)
+ 				var tempDir = Path.GetTempPath ();
+ 				Directory.CreateDirectory (tempDir);
+ 
+-				//this is how msbuild does it...
++				// this is how msbuild does it...
+ 				path = Path.Combine (tempDir, $"tmp{Guid.NewGuid ():N}{extension}")!;
+ 				if (!File.Exists (path)) {
+ 					return File.CreateText (path);
+@@ -71,9 +71,9 @@ static StreamWriter CreateTempTextFile (string extension, out string path)
+ 		/// <summary>
+ 		/// Compiles the file.
+ 		/// </summary>
+-		/// <returns>The file.</returns>
+ 		/// <param name="arguments">Arguments.</param>
+ 		/// <param name="token">Token.</param>
++		/// <returns>The file.</returns>
+ 		public override async Task<CodeCompilerResult> CompileFile (CodeCompilerArguments arguments, TextWriter log, CancellationToken token)
+ 		{
+ 			string? rspPath;
+@@ -117,7 +117,7 @@ public override async Task<CodeCompilerResult> CompileFile (CodeCompilerArgument
+ 					rsp.WriteLine (langVersionArg);
+ 				}
+ 
+-				//in older versions of csc, these must come last
++				// in older versions of csc, these must come last
+ 				foreach (var file in arguments.SourceFiles) {
+ 					rsp.Write ("\"");
+ 					rsp.Write (file);
+@@ -145,7 +145,8 @@ public override async Task<CodeCompilerResult> CompileFile (CodeCompilerArgument
+ 			var stdout = new StringWriter ();
+ 			var stderr = new StringWriter ();
+ 
+-			TextWriter outWriter = stderr, errWriter = stderr;
++			TextWriter outWriter = stderr;
++			TextWriter errWriter = stderr;
+ 			if (log != null) {
+ 				outWriter = new SplitOutputWriter (log, outWriter);
+ 				errWriter = new SplitOutputWriter (log, errWriter);
+@@ -186,7 +187,7 @@ void ConsumeOutput (string s)
+ 			};
+ 		}
+ 
+-		//we know that ProcessUtils.StartProcess only uses WriteLine and Write(string)
++		// we know that ProcessUtils.StartProcess only uses WriteLine and Write(string)
+ 		class SplitOutputWriter : TextWriter
+ 		{
+ 			readonly TextWriter a;
+diff --git a/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/MSBuildErrorParser.cs b/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/MSBuildErrorParser.cs
+index 0b6fc25..89fefdb 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/MSBuildErrorParser.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/MSBuildErrorParser.cs
+@@ -42,9 +42,9 @@ class CodeCompilerError
+ 		public string Message { get; set; }
+ 	}
+ 
+-	//originally from mono/mcs/class/Microsoft.Build.Utilities/Microsoft.Build.Utilities/MSBuildErrorParser.cs
+-	//with many edits via monodevelop/main/src/core/MonoDevelop.Core/MonoDevelop.Projects/MSBuildErrorParser.cs
+-	//see MonoDevelop repo for unit tests
++	// originally from mono/mcs/class/Microsoft.Build.Utilities/Microsoft.Build.Utilities/MSBuildErrorParser.cs
++	// with many edits via monodevelop/main/src/core/MonoDevelop.Core/MonoDevelop.Projects/MSBuildErrorParser.cs
++	// see MonoDevelop repo for unit tests
+ 	static class MSBuildErrorParser
+ 	{
+ 		// Parses single-line error message in the standard MSBuild error format:
+@@ -59,10 +59,10 @@ static class MSBuildErrorParser
+ 		//  subcategory: arbitrary text, may contain whitepsace
+ 		//  code: error code, no whietspace or punctuation
+ 		//  message: arbitrary text, no restrictions
+-		//
+ 		public static CodeCompilerError TryParseLine (string line)
+ 		{
+-			int originEnd, originStart = 0;
++			int originEnd;
++			int originStart = 0;
+ 			var result = new CodeCompilerError ();
+ 
+ 			MoveNextNonSpace (line, ref originStart);
+@@ -70,8 +70,8 @@ public static CodeCompilerError TryParseLine (string line)
+ 			if (originStart >= line.Length)
+ 				return null;
+ 
+-			//find the origin section
+-			//the filename may include a colon for Windows drive e.g. C:\foo, so ignore colon in first 2 chars
++			// find the origin section
++			// the filename may include a colon for Windows drive e.g. C:\foo, so ignore colon in first 2 chars
+ 			if (line [originStart] != ':') {
+ 				if (originStart + 2 >= line.Length)
+ 					return null;
+@@ -89,11 +89,11 @@ public static CodeCompilerError TryParseLine (string line)
+ 
+ 			MovePrevNonSpace (line, ref originEnd);
+ 
+-			//if there is no origin section, then we can't parse the message
++			// if there is no origin section, then we can't parse the message
+ 			if (originEnd < 0 || originEnd < originStart)
+ 				return null;
+ 
+-			//find the category section, if there is one
++			// find the category section, if there is one
+ 			MoveNextNonSpace (line, ref categoryStart);
+ 
+ 			int categoryEnd = line.IndexOf (':', categoryStart) - 1;
+@@ -105,19 +105,19 @@ public static CodeCompilerError TryParseLine (string line)
+ 					categoryEnd = -1;
+ 			}
+ 
+-			//if there is a category section and it parses
++			// if there is a category section and it parses
+ 			if (categoryEnd > 0 && ParseCategory (line, categoryStart, categoryEnd, result)) {
+-				//then parse the origin section
++				// then parse the origin section
+ 				if (originEnd > originStart && !ParseOrigin (line, originStart, originEnd, result))
+ 					return null;
+ 			} else {
+-				//there is no origin, parse the origin section as if it were the category
++				// there is no origin, parse the origin section as if it were the category
+ 				if (!ParseCategory (line, originStart, originEnd, result))
+ 					return null;
+ 				messageStart = categoryStart;
+ 			}
+ 
+-			//read the remaining message
++			// read the remaining message
+ 			MoveNextNonSpace (line, ref messageStart);
+ 			int messageEnd = line.Length - 1;
+ 			MovePrevNonSpace (line, ref messageEnd, messageStart);
+@@ -139,7 +139,7 @@ static bool ParseOrigin (string line, int start, int end, CodeCompilerError resu
+ 				return true;
+ 			}
+ 
+-			//scan back for matching (, assuming at least one char between them
++			// scan back for matching (, assuming at least one char between them
+ 			int posStart = line.LastIndexOf ('(', end - 2, end - start - 1);
+ 			if (posStart < 0)
+ 				return false;
+@@ -152,7 +152,7 @@ static bool ParseOrigin (string line, int start, int end, CodeCompilerError resu
+ 			end = posStart - 1;
+ 			MovePrevNonSpace (line, ref end, start);
+ 
+-			//if there's an origin, capture it
++			// if there's an origin, capture it
+ 			if (end >= start) {
+ 				result.Origin = line.Substring (start, end - start + 1);
+ 			}
+@@ -186,10 +186,12 @@ static bool ParseLineColVal (string str, out int val)
+ 		// Unexpected patterns of commas/dashes abort parsing, discarding all values.
+ 		// Any other characters abort parsing and the (...) gets treated as pert of the filename.
+ 		// Overflows are silently treated as zeroes.
+-		//
+ 		static bool ParsePosition (string str, int start, int end, CodeCompilerError result)
+ 		{
+-			int line, col = 0, endLine = 0, endCol = 0;
++			int line;
++			int col = 0;
++			int endLine = 0;
++			int endCol = 0;
+ 
+ 			var a = str.Substring (start, end - start).Split (',');
+ 
+diff --git a/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/ProcessArgumentBuilder.cs b/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/ProcessArgumentBuilder.cs
+index b13e75e..f3bf646 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/ProcessArgumentBuilder.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/ProcessArgumentBuilder.cs
+@@ -26,8 +26,8 @@
+ // THE SOFTWARE.
+ 
+ using System;
+-using System.Text;
+ using System.Collections.Generic;
++using System.Text;
+ 
+ namespace Mono.TextTemplating.CodeCompilation
+ {
+@@ -45,7 +45,6 @@ class ProcessArgumentBuilder
+ 
+ 		public ProcessArgumentBuilder ()
+ 		{
+-
+ 		}
+ 
+ 		public ProcessArgumentBuilder (string processPath)
+@@ -72,7 +71,9 @@ public void Add (params string[] args)
+ 				Add (a);
+ 		}
+ 
+-		/// <summary>Adds an argument, quoting and escaping as necessary.</summary>
++		/// <summary>
++		/// Adds an argument, quoting and escaping as necessary.
++		/// </summary>
+ 		/// <remarks>The .NET process class does not support escaped 
+ 		/// arguments, only quoted arguments with escaped quotes.</remarks>
+ 		public void AddQuoted (string argument)
+@@ -96,7 +97,9 @@ public void AddQuoted (params string[] args)
+ 				AddQuoted (a);
+ 		}
+ 
+-		/// <summary>Quotes a string, escaping if necessary.</summary>
++		/// <summary>
++		/// Quotes a string, escaping if necessary.
++		/// </summary>
+ 		/// <remarks>The .NET process class does not support escaped 
+ 		/// arguments, only quoted arguments with escaped quotes.</remarks>
+ 		public static string Quote (string s)
+@@ -126,7 +129,8 @@ static void AppendEscaped (StringBuilder sb, string escapeChars, string s)
+ 		static string GetArgument (StringBuilder builder, string buf, int startIndex, out int endIndex, out Exception ex)
+ 		{
+ 			bool escaped = false;
+-			char qchar, c = '\0';
++			char qchar;
++			char c = '\0';
+ 			int i = startIndex;
+ 
+ 			builder.Clear ();
+diff --git a/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/ProcessUtils.cs b/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/ProcessUtils.cs
+index b02f15f..58fc04d 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/ProcessUtils.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/ProcessUtils.cs
+@@ -26,8 +26,8 @@
+ // THE SOFTWARE.
+ 
+ using System;
+-using System.IO;
+ using System.Diagnostics;
++using System.IO;
+ using System.Threading;
+ using System.Threading.Tasks;
+ 
+diff --git a/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/RuntimeInfo.cs b/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/RuntimeInfo.cs
+index 3a00fac..1eddc78 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/RuntimeInfo.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/RuntimeInfo.cs
+@@ -117,7 +117,7 @@ static RuntimeInfo GetMonoRuntime ()
+ 				refAssembliesDir: null,
+ 				runtimeFacadesDir: Path.Combine (runtimeDir, "Facades"),
+ 				cscPath: csc,
+-				//if mono has csc at all, we know it at least supports 6.0
++				// if mono has csc at all, we know it at least supports 6.0
+ 				cscMaxLangVersion: CSharpLangVersion.v6_0,
+ 				runtimeLangVersion: CSharpLangVersion.v5_0
+ 			);
+@@ -186,15 +186,13 @@ static RuntimeInfo GetDotNetCoreSdk ()
+ 			var maxCSharpVersion = CSharpLangVersionHelper.FromNetCoreSdkVersion (sdkVersion);
+ 
+ 			// it's ok if this is null, we may be running on an older SDK that didn't support packs
+-			//in which case we fall back to resolving from the runtime dir
++			// in which case we fall back to resolving from the runtime dir
+ 			var refAssembliesDir = FindHighestVersionedDirectory (
+ 				Path.Combine (dotnetRoot, "packs", "Microsoft.NETCore.App.Ref"),
+ 				d => File.Exists (Path.Combine (d, $"net{hostVersion.Major}.{hostVersion.Minor}", "System.Runtime.dll")),
+ 				out _
+ 			);
+ 
+-
+-
+ 			return new RuntimeInfo (
+ 				RuntimeKind.NetCore,
+ 				runtimeDir: runtimeDir,
+diff --git a/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/SemVersion.cs b/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/SemVersion.cs
+index 35e8e3c..b045f2e 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/SemVersion.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating.CodeCompilation/SemVersion.cs
+@@ -35,7 +35,6 @@ public struct SemVersion : IComparable, IComparable<SemVersion>, IEquatable<SemV
+ 			RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase
+ 		);
+ 
+-
+ 		public int Major { get; }
+ 		public int Minor { get; }
+ 		public int Patch { get; }
+@@ -120,8 +119,6 @@ public static bool TryParse (string version, out SemVersion semVersion)
+ 			return true;
+ 		}
+ 
+-		
+-
+ 		public bool Equals (SemVersion other)
+ 		{
+ 			return Major == other.Major
+@@ -188,10 +185,15 @@ public override int GetHashCode ()
+ 		public override string ToString () => VersionString;
+ 
+ 		public static bool operator > (SemVersion left, SemVersion right) => left.CompareTo (right) == 1;
++
+ 		public static bool operator < (SemVersion left, SemVersion right) => left.CompareTo (right) == -1;
++
+ 		public static bool operator >= (SemVersion left, SemVersion right) => left.CompareTo (right) >= 0;
++
+ 		public static bool operator <= (SemVersion left, SemVersion right) => left.CompareTo (right) <= 0;
++
+ 		public static bool operator == (SemVersion left, SemVersion right) => left.Equals (right);
++
+ 		public static bool operator != (SemVersion left, SemVersion right) => !(left == right);
+ 	}
+ }
+\ No newline at end of file
+diff --git a/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/CodeMemberExtensions.cs b/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/CodeMemberExtensions.cs
+index e226728..ac4ba4b 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/CodeMemberExtensions.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/CodeMemberExtensions.cs
+@@ -7,8 +7,7 @@ namespace Mono.TextTemplating.CodeDomBuilder;
+ 
+ static class CodeMemberExtensions
+ {
+-	public static T WithMemberAttributesReplaced<T> (this T member, MemberAttributes attributes)
+-		where T : CodeTypeMember
++	public static T WithMemberAttributesReplaced<T> (this T member, MemberAttributes attributes) where T : CodeTypeMember
+ 	{
+ 		member.Attributes = attributes;
+ 		return member;
+@@ -31,20 +30,27 @@ public static T WithMemberAttributesReplaced<T> (this T member, MemberAttributes
+ 	// mirrored in CodeTypeExtensions with a version makes them either do what would be expected, or throw an
+ 	// exception if they're not valid.
+ 	public static T AsPrivate<T> (this T member) where T : CodeTypeMember => member.WithVisibility (MemberAttributes.Private);
++
+ 	public static T AsPublic<T> (this T member) where T : CodeTypeMember => member.WithVisibility (MemberAttributes.Public);
++
+ 	public static T AsProtected<T> (this T member) where T : CodeTypeMember => member.WithVisibility (MemberAttributes.Family);
++
+ 	public static T AsInternal<T> (this T member) where T : CodeTypeMember => member.WithVisibility (MemberAttributes.Assembly);
++
+ 	public static T AsInternalProtected<T> (this T member) where T : CodeTypeMember => member.WithVisibility (MemberAttributes.FamilyOrAssembly);
+ 
+ 	public static T AsVirtual<T> (this T member) where T : CodeTypeMember => member.WithMemberAttributesRemoved (MemberAttributes.Final);
++
+ 	public static T AsAbstract<T> (this T member) where T : CodeTypeMember => member.WithMemberAttributesRemoved (MemberAttributes.Abstract);
++
+ 	public static T AsSealed<T> (this T member) where T : CodeTypeMember => member.WithMemberAttributesAdded (MemberAttributes.Final);
++
+ 	public static T AsNew<T> (this T member) where T : CodeTypeMember => member.WithMemberAttributesAdded (MemberAttributes.New);
++
+ 	public static T AsOverride<T> (this T member) where T : CodeTypeMember => member.WithMemberAttributesAdded (MemberAttributes.Override);
+ 	// END SYNCED SECTION
+ 
+-	public static T AddTo<T> (this T member, CodeTypeDeclaration type)
+-		where T : CodeTypeMember
++	public static T AddTo<T> (this T member, CodeTypeDeclaration type) where T : CodeTypeMember
+ 		=> type.AddMember (member);
+ 
+ 	public static CodeAttributeDeclaration AddAttribute<T> (this T member, CodeAttributeDeclaration attribute) where T : CodeTypeMember
+diff --git a/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/CodeMemberPropertyExtensions.cs b/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/CodeMemberPropertyExtensions.cs
+index 9d14b08..91ca97c 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/CodeMemberPropertyExtensions.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/CodeMemberPropertyExtensions.cs
+@@ -52,11 +52,11 @@ public static CodeMemberProperty WithGetLazyInitialize (this CodeMemberProperty
+ 
+ 	public static CodeMemberProperty WithGetLazyInitialize (this CodeMemberProperty property, CodeFieldReferenceExpression fieldRef, CodeExpression init)
+ 		=> property.WithGet (
+-			Statement.If (fieldRef.IsNull (), Then: fieldRef.Assign (init)),
++			Statement.If (fieldRef.IsNull (), then: fieldRef.Assign (init)),
+ 			Statement.Return (fieldRef));
+ 
+ 	public static CodeMemberProperty WithSetIgnoresNull (this CodeMemberProperty property, CodeFieldReferenceExpression fieldRef)
+ 		=> property.WithSet (
+ 			Statement.If (Expression.PropertySetValue.IsNotNull (),
+-				Then: fieldRef.Assign (Expression.PropertySetValue)));
++				then: fieldRef.Assign (Expression.PropertySetValue)));
+ }
+diff --git a/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/CodeTypeExtensions.cs b/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/CodeTypeExtensions.cs
+index 8e7d137..1f245c6 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/CodeTypeExtensions.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/CodeTypeExtensions.cs
+@@ -34,28 +34,39 @@ public static CodeTypeDeclaration WithVisibility (this CodeTypeDeclaration type,
+ 	// So this makes them either do what would be expected, or throw an exception if they're not valid.
+ 	// The ones that are not valid are also marked as Obsolete so they can be comple time checked.
+ 	const string NotValidOnType = "This CodeMemberExtensions extension method is not valid on CodeTypeDeclaration";
++
+ 	static CodeTypeDeclaration ThrowNotValid () => throw new InvalidOperationException (NotValidOnType);
+ 
+ 	[Obsolete(NotValidOnType)]
+ 	public static CodeTypeDeclaration AsPrivate (this CodeTypeDeclaration type) => ThrowNotValid ();
++
+ 	public static CodeTypeDeclaration AsPublic (this CodeTypeDeclaration type) => type.WithVisibility(TypeAttributes.Public);
++
+ 	[Obsolete (NotValidOnType)]
+ 	public static CodeTypeDeclaration AsProtected (this CodeTypeDeclaration type) => ThrowNotValid ();
++
+ 	public static CodeTypeDeclaration AsInternal (this CodeTypeDeclaration type) => type.WithVisibility (TypeAttributes.NotPublic);
++
+ 	[Obsolete (NotValidOnType)]
+ 	public static CodeTypeDeclaration AsInternalProtected (this CodeTypeDeclaration type) => ThrowNotValid ();
+ 
+ 	[Obsolete (NotValidOnType)]
+ 	public static CodeTypeDeclaration AsVirtual (this CodeTypeDeclaration type) => ThrowNotValid ();
++
+ 	public static CodeTypeDeclaration AsAbstract (this CodeTypeDeclaration type) => type.WithTypeAttributesAdded (TypeAttributes.Abstract);
++
+ 	public static CodeTypeDeclaration AsSealed (this CodeTypeDeclaration type) => type.WithTypeAttributesAdded (TypeAttributes.Sealed);
++
+ 	public static CodeTypeDeclaration AsNew (this CodeTypeDeclaration member) => member.AsNew<CodeTypeDeclaration> ();
++
+ 	[Obsolete (NotValidOnType)]
+ 	public static CodeTypeDeclaration AsOverride (this CodeTypeDeclaration type) => ThrowNotValid ();
+ 	// END SYNCED SECTION
+ 
+ 	public static CodeTypeDeclaration AsNestedPublic (this CodeTypeDeclaration type) => type.WithVisibility (TypeAttributes.NestedPublic);
++
+ 	public static CodeTypeDeclaration AsNestedProtected (this CodeTypeDeclaration type) => type.WithVisibility (TypeAttributes.NestedFamily);
++
+ 	public static CodeTypeDeclaration AsNestedProtectedInternal (this CodeTypeDeclaration type) => type.WithVisibility (TypeAttributes.NestedFamORAssem);
+ 
+ 	public static CodeTypeDeclaration AsPartial (this CodeTypeDeclaration type)
+@@ -104,6 +115,7 @@ public static CodeMemberMethod AddMethod (this CodeTypeDeclaration type, string
+ 		type.Members.Add (member);
+ 		return member;
+ 	}
++
+ 	public static CodeSnippetTypeMember AddSnippetMember (this CodeTypeDeclaration type, string value, CodeLinePragma location = null)
+ 		=> type.AddMember (IndentHelpers.CreateSnippetMember (value, location));
+ 
+diff --git a/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/Declare.cs b/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/Declare.cs
+index d1f209a..0c01592 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/Declare.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/Declare.cs
+@@ -14,7 +14,9 @@ static class Declare
+ 	const MemberAttributes DefaultFieldAttributes = MemberAttributes.Private;
+ 	const MemberAttributes DefaultMethodAttributes = MemberAttributes.Public | MemberAttributes.Final;
+ 	const MemberAttributes DefaultEventAttributes = MemberAttributes.Public | MemberAttributes.Final;
++
+ 	public static CodeNamespace Namespace () => new ();
++
+ 	public static CodeNamespace Namespace (string namespaceName) => new (namespaceName);
+ 
+ 	public static CodeTypeDeclaration Class (string typeName)
+@@ -24,28 +26,36 @@ public static CodeMemberMethod Method (string methodName)
+ 		=> new () { Name = methodName, Attributes = DefaultMethodAttributes };
+ 
+ 	public static CodeMemberProperty Property<T> (string propertyName) => Property (propertyName, TypeReference<T>.Global);
++
+ 	public static CodeMemberProperty Property (string propertyName, CodeTypeReference propertyType)
+ 		=> new () { Name = propertyName, Attributes = DefaultPropertyAttributes, Type = propertyType };
+ 
+ 	public static CodeMemberField Field<T> (string fieldName) => Field (fieldName, TypeReference<T>.Global);
++
+ 	public static CodeMemberField Field (string fieldName, CodeTypeReference fieldType)
+ 		=> new () { Name = fieldName, Type = fieldType, Attributes = DefaultFieldAttributes };
+ 
+ 	public static CodeMemberEvent Event (string eventName, CodeTypeReference eventType)
+ 		=> new () { Name = eventName, Type = eventType, Attributes = DefaultEventAttributes };
++
+ 	public static CodeMemberEvent Event<T> (string eventName)
+ 		=> Event (eventName, TypeReference<T>.Global);
+ 
+ 	public static CodeParameterDeclarationExpression Parameter (string parameterName, CodeTypeReference parameterType) => new (parameterType, parameterName);
++
+ 	public static CodeParameterDeclarationExpression Parameter<T> (string parameterName) => new (TypeReference<T>.Global, parameterName);
+ 
+ 	public static CodeAttributeDeclaration Attribute (CodeTypeReference attributeType) => new (attributeType);
++
+ 	public static CodeAttributeDeclaration Attribute<T> () => new (TypeReference<T>.Global);
++
+ 	public static CodeAttributeDeclaration Attribute (CodeTypeReference attributeType, params CodeAttributeArgument[] arguments) => new (attributeType, arguments);
++
+ 	public static CodeAttributeDeclaration Attribute<T> (params CodeAttributeArgument[] arguments) => new (TypeReference<T>.Global, arguments);
+ 
+ 	public static CodeVariableDeclarationStatement Variable<T> (string variableName, CodeExpression initExpression, out CodeVariableReferenceExpression variableReference)
+ 		=> Statement.DeclareVariable<T> (variableName, initExpression, out variableReference);
++
+ 	public static CodeVariableDeclarationStatement Variable (string variableName, CodeTypeReference variableType, CodeExpression initExpression, out CodeVariableReferenceExpression variableReference)
+ 		=> Statement.DeclareVariable (variableType, variableName, initExpression, out variableReference);
+ }
+diff --git a/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/Expression.cs b/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/Expression.cs
+index 5f30ccf..ac1fe85 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/Expression.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/Expression.cs
+@@ -24,18 +24,27 @@ static class Expression
+ 	public static CodeFieldReferenceExpression StringEmpty { get; } = TypeReference.String.Field ("Empty");
+ 
+ 	public static CodePrimitiveExpression NameOf (this CodeArgumentReferenceExpression argument) => new (argument.ParameterName);
++
+ 	public static CodePrimitiveExpression Primitive (object value) => new (value);
++
+ 	public static CodeVariableReferenceExpression Variable (string variableName) => new (variableName);
++
+ 	public static CodeObjectCreateExpression New (this CodeTypeReference createType, params CodeExpression[] arguments) => new (createType, arguments);
++
+ 	public static CodeObjectCreateExpression New<T> (params CodeExpression[] arguments) => new (TypeReference<T>.Global, arguments);
++
+ 	public static CodeMethodInvokeExpression Invoke (this CodeMethodReferenceExpression method, params CodeExpression[] arguments) => new (method, arguments);
++
+ 	public static CodeBinaryOperatorExpression Operate (this CodeExpression leftExpr, CodeBinaryOperatorType opType, CodeExpression rightExpr) => new (leftExpr, opType, rightExpr);
++
+ 	public static CodeIndexerExpression Index (this CodeExpression target, params CodeExpression[] indices) => new (target, indices);
+ 
+ 	public static CodeTypeReferenceExpression Type<T> () => new (TypeReference<T>.Global);
+ 
+ 	public static CodeTypeOfExpression TypeOf (CodeTypeReference type) => new (type);
++
+ 	public static CodeTypeOfExpression TypeOf<T> () => new (TypeReference<T>.Global);
++
+ 	public static CodeTypeOfExpression TypeOf<T> (CodeTypeReference type) => new (type);
+ 
+ 	public static CodeCastExpression Cast<T> (this CodeExpression expression) => new (TypeReference<T>.Global, expression);
+@@ -44,8 +53,11 @@ static class Expression
+ 	public static CodeCastExpression Cast (CodeTypeReference type, CodeExpression expression) => new (type, expression);
+ 
+ 	public static CodeArrayCreateExpression Array (CodeTypeReference type, int size) => new (type, size);
++
+ 	public static CodeArrayCreateExpression Array (CodeTypeReference type, params CodeExpression[] initializers) => new (type, initializers);
++
+ 	public static CodeArrayCreateExpression Array<T> (int size) => new (TypeReference<T>.Global, size);
++
+ 	public static CodeArrayCreateExpression Array<T> (params CodeExpression[] initializers) => new (TypeReference<T>.Global, initializers);
+ 
+ 	internal static CodeSnippetExpression Snippet (string expressionText) => new (expressionText);
+diff --git a/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/ExpressionExtensions.cs b/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/ExpressionExtensions.cs
+index 5f666db..4ec47b7 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/ExpressionExtensions.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/ExpressionExtensions.cs
+@@ -10,42 +10,63 @@ static class ExpressionExtensions
+ 	public static CodeTypeReferenceExpression AsExpression (this CodeTypeReference typeReference) => new (typeReference);
+ 
+ 	public static CodeFieldReferenceExpression AsReference (this CodeMemberField field, CodeExpression target) => new (target, field.Name);
++
+ 	public static CodePropertyReferenceExpression AsReference (this CodeMemberProperty property, CodeExpression target) => new (target, property.Name);
++
+ 	public static CodeMethodReferenceExpression AsReference (this CodeMemberMethod method, CodeExpression target) => new (target, method.Name);
+ 
+ 	public static CodeFieldReferenceExpression OnThis (this CodeMemberField field) => field.AsReference (Expression.This);
++
+ 	public static CodePropertyReferenceExpression OnThis (this CodeMemberProperty property) => property.AsReference (Expression.This);
++
+ 	public static CodeMethodReferenceExpression OnThis (this CodeMemberMethod method) => method.AsReference (Expression.This);
++
+ 	public static CodeArgumentReferenceExpression OnThis (this CodeParameterDeclarationExpression parameter) => new (parameter.Name);
+ 
+ 	public static CodeFieldReferenceExpression Field (this CodeExpression target, string fieldName) => new (target, fieldName);
++
+ 	public static CodeFieldReferenceExpression Field (this CodeExpression target, CodeMemberField field) => Field (target, field.Name);
++
+ 	public static CodeFieldReferenceExpression Field (this CodeTypeReference type, string fieldName) => new (type.AsExpression (), fieldName);
+ 
+ 	public static CodeAssignStatement SetField (this CodeExpression target, string fieldName, CodeExpression value) => target.Field (fieldName).Assign (value);
++
+ 	public static CodeAssignStatement SetField (this CodeTypeReference type, string fieldName, CodeExpression value) => type.Field (fieldName).Assign (value);
+ 
+ 	public static CodePropertyReferenceExpression Property (this CodeExpression target, string propertyName) => new (target, propertyName);
++
+ 	public static CodePropertyReferenceExpression Property (this CodeExpression target, CodeMemberProperty property) => Property (target, property.Name);
++
+ 	public static CodePropertyReferenceExpression Property (this CodeTypeReference type, string propertyName) => new (type.AsExpression (), propertyName);
+ 
+ 	public static CodeAssignStatement SetProperty (this CodeExpression target, string propertyName, CodeExpression value) => target.Property (propertyName).Assign (value);
++
+ 	public static CodeAssignStatement SetProperty (this CodeTypeReference type, string propertyName, CodeExpression value) => type.Property (propertyName).Assign (value);
+ 
+ 	public static CodeMethodReferenceExpression Method (this CodeExpression target, string methodName) => new (target, methodName);
++
+ 	public static CodeMethodReferenceExpression Method (this CodeExpression target, CodeMemberMethod method) => Method (target, method.Name);
++
+ 	public static CodeMethodReferenceExpression Method (this CodeTypeReference type, string methodName) => new (type.AsExpression (), methodName);
+ 
+ 	public static CodeMethodInvokeExpression InvokeMethod (this CodeExpression target, string methodName, params CodeExpression[] arguments) => new (target, methodName, arguments);
++
+ 	public static CodeMethodInvokeExpression InvokeMethod (this CodeTypeReference target, string methodName, params CodeExpression[] arguments) => new (target.AsExpression (), methodName, arguments);
+ 
+ 	public static CodeBinaryOperatorExpression IsNotNull (this CodeExpression reference) => new (reference, CodeBinaryOperatorType.IdentityInequality, Expression.Null);
++
+ 	public static CodeBinaryOperatorExpression IsEqual (this CodeExpression reference, CodeExpression value) => new (reference, CodeBinaryOperatorType.IdentityEquality, value);
++
+ 	public static CodeBinaryOperatorExpression IsEqualValue (this CodeExpression reference, CodeExpression value) => new (reference, CodeBinaryOperatorType.ValueEquality, value);
++
+ 	public static CodeBinaryOperatorExpression IsNull (this CodeExpression reference) => reference.IsEqual (Expression.Null);
++
+ 	public static CodeBinaryOperatorExpression IsFalse (this CodeExpression valueExpression) => valueExpression.IsEqualValue (Expression.False);
++
+ 	public static CodeBinaryOperatorExpression And (this CodeExpression leftExpr, CodeExpression rightExpr) => new (leftExpr, CodeBinaryOperatorType.BooleanAnd, rightExpr);
++
+ 	public static CodeBinaryOperatorExpression Subtract (this CodeExpression leftExpr, CodeExpression rightExpr) => new (leftExpr, CodeBinaryOperatorType.Subtract, rightExpr);
++
+ 	public static CodeBinaryOperatorExpression Add (this CodeExpression leftExpr, CodeExpression rightExpr) => new (leftExpr, CodeBinaryOperatorType.Add, rightExpr);
+ 
+ 	public static CodeExpressionStatement AsStatement (this CodeExpression expression) => new (expression);
+diff --git a/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/IndentHelpers.cs b/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/IndentHelpers.cs
+index d71fb25..e59571c 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/IndentHelpers.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/IndentHelpers.cs
+@@ -29,7 +29,7 @@ public static string GenerateIndentedClassCode (this CodeDomProvider provider, I
+ 
+ 	public static CodeSnippetTypeMember CreateSnippetMember (string value, CodeLinePragma location = null)
+ 	{
+-		//HACK: workaround for code generator not indenting first line of member snippet when inserting into class
++		// HACK: workaround for code generator not indenting first line of member snippet when inserting into class
+ 		const string indent = "\n        ";
+ 		if (!char.IsWhiteSpace (value[0]))
+ 			value = indent + value;
+@@ -110,11 +110,13 @@ public static void GenerateCodeFromMembers (this CodeDomProvider provider, CodeG
+ 		}
+ 	}
+ 
+-	//HACK: older versions of Mono don't implement GenerateCodeFromMember
++	// HACK: older versions of Mono don't implement GenerateCodeFromMember
+ 	// We have a workaround via reflection. First attempt to reflect the members we need to work around it.
+ 	// If they don't exist, we should be running on a version where it's fixed.
+ 	static readonly bool useMonoHack = InitializeMonoHack ();
+-	static MethodInfo cgFieldGen, cgPropGen, cgMethGen;
++	static MethodInfo cgFieldGen;
++	static MethodInfo cgPropGen;
++	static MethodInfo cgMethGen;
+ 	static Action<CodeGenerator, StringWriter, CodeGeneratorOptions> initializeCodeGenerator;
+ 
+ 	static bool InitializeMonoHack ()
+diff --git a/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/Statement.cs b/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/Statement.cs
+index f4c0d86..5c23352 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/Statement.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/Statement.cs
+@@ -9,8 +9,9 @@ namespace Mono.TextTemplating.CodeDomBuilder;
+ 
+ static class Statement
+ {
+-	public static CodeConditionStatement If (CodeExpression condition, params CodeStatement[] Then) => new (condition, Then);
+-	public static CodeConditionStatement If (CodeExpression condition, CodeStatement[] Then, CodeStatement[] Else) => new (condition, Then, Else);
++	public static CodeConditionStatement If (CodeExpression condition, params CodeStatement[] then) => new (condition, then);
++
++	public static CodeConditionStatement If (CodeExpression condition, CodeStatement[] then, CodeStatement[] Else) => new (condition, then, Else);
+ 
+ 	public static CodeMethodReturnStatement Return (this CodeExpression returnExpression) => new (returnExpression);
+ 
+@@ -32,11 +33,11 @@ public static CodeStatement Throw<T> (params CodeExpression[] exceptionArgs)
+ 
+ 	public static CodeStatement ThrowIfNull (this CodeArgumentReferenceExpression argument)
+ 		=> If (argument.IsNull (),
+-			Then: Throw<ArgumentNullException> (CBExpression.Primitive (argument.ParameterName)));
++			then: Throw<ArgumentNullException> (CBExpression.Primitive (argument.ParameterName)));
+ 
+ 	public static CodeStatement ThrowIfNull (this CodeArgumentReferenceExpression argument, string message)
+ 		=> If (argument.IsNull (),
+-			Then: Throw<ArgumentNullException> (CBExpression.Primitive (argument.ParameterName), CBExpression.Primitive (message)));
++			then: Throw<ArgumentNullException> (CBExpression.Primitive (argument.ParameterName), CBExpression.Primitive (message)));
+ 
+ 	public static CodeSnippetStatement Snippet (string statementText) => new (statementText);
+ }
+diff --git a/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/TypeReference.cs b/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/TypeReference.cs
+index 5de4571..32f7052 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/TypeReference.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating.CodeDomBuilder/TypeReference.cs
+@@ -14,11 +14,15 @@ static class TypeReference
+ 	public static CodeTypeReference ParamArrayAttribute => TypeReference<System.ParamArrayAttribute>.Global;
+ 
+ 	public static CodeTypeReference Global<T> () => new (typeof (T), CodeTypeReferenceOptions.GlobalReference);
++
+ 	public static CodeTypeReference Global (System.Type type) => new (type, CodeTypeReferenceOptions.GlobalReference);
++
+ 	public static CodeTypeReference Global (string type) => new (type, CodeTypeReferenceOptions.GlobalReference);
+ 
+ 	public static CodeTypeReference Default<T> () => new (typeof (T));
++
+ 	public static CodeTypeReference Default (System.Type type) => new (type);
++
+ 	public static CodeTypeReference Default (string type) => new (type);
+ }
+ 
+diff --git a/Mono.TextTemplating/Mono.TextTemplating/CodeGenerationOptions.cs b/Mono.TextTemplating/Mono.TextTemplating/CodeGenerationOptions.cs
+index a29f592..3627126 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating/CodeGenerationOptions.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating/CodeGenerationOptions.cs
+@@ -10,7 +10,7 @@ namespace Mono.TextTemplating;
+ class CodeGenerationOptions
+ {
+ 	/// <summary>
+-	/// Whether to use System.Runtime.Remoting.Messaging.CallContext
++	/// Whether to use System.Runtime.Remoting.Messaging.CallContext.
+ 	/// </summary>
+ 	public bool UseRemotingCallContext { get; set; }
+ }
+diff --git a/Mono.TextTemplating/Mono.TextTemplating/CompiledTemplate.TemplateAssemblyContext.cs b/Mono.TextTemplating/Mono.TextTemplating/CompiledTemplate.TemplateAssemblyContext.cs
+index 177d37f..e7c53c8 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating/CompiledTemplate.TemplateAssemblyContext.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating/CompiledTemplate.TemplateAssemblyContext.cs
+@@ -18,11 +18,12 @@ partial class CompiledTemplate
+ 	abstract class TemplateAssemblyContext : IDisposable
+ 	{
+ 		public abstract Assembly LoadAssemblyFile (string assemblyPath);
++
+ 		public abstract Assembly LoadInMemoryAssembly (CompiledAssemblyData assemblyData);
++
+ 		public virtual void Dispose () { }
+ 
+ 		[SuppressMessage ("Performance", "CA1859:Use concrete types when possible for improved performance", Justification = "Conditionally compiled version of this returns multiple concrete types")]
+-
+ 		public static TemplateAssemblyContext Create (ITextTemplatingEngineHost host, string[] referenceAssemblyFiles)
+ 		{
+ #if FEATURE_ASSEMBLY_LOAD_CONTEXT
+@@ -38,9 +39,12 @@ public static TemplateAssemblyContext Create (ITextTemplatingEngineHost host, st
+ 	sealed class AssemblyLoadContextTemplateAssemblyContext : TemplateAssemblyContext
+ 	{
+ 		readonly TemplateAssemblyLoadContext templateContext;
++
+ 		public AssemblyLoadContextTemplateAssemblyContext (ITextTemplatingEngineHost host, string[] referenceAssemblyFiles)
+ 			=> templateContext = new (referenceAssemblyFiles, host);
++
+ 		public override Assembly LoadAssemblyFile (string assemblyPath) => templateContext.LoadFromAssemblyPath (assemblyPath);
++
+ 		public override Assembly LoadInMemoryAssembly (CompiledAssemblyData assemblyData) => assemblyData.LoadInAssemblyLoadContext (templateContext);
+ 	}
+ #endif
+@@ -48,10 +52,14 @@ public AssemblyLoadContextTemplateAssemblyContext (ITextTemplatingEngineHost hos
+ 	sealed class CurrentAppDomainTemplateAssemblyContext : TemplateAssemblyContext
+ 	{
+ 		readonly CurrentDomainAssemblyResolver assemblyResolver;
++
+ 		public CurrentAppDomainTemplateAssemblyContext (ITextTemplatingEngineHost host, string[] referenceAssemblyFiles)
+ 			=> assemblyResolver = new (referenceAssemblyFiles, host.ResolveAssemblyReference);
++
+ 		public override Assembly LoadAssemblyFile (string assemblyPath) => Assembly.LoadFile (assemblyPath);
++
+ 		public override Assembly LoadInMemoryAssembly (CompiledAssemblyData assemblyData) => assemblyData.LoadInCurrentAppDomain ();
++
+ 		public override void Dispose ()
+ 		{
+ 			base.Dispose ();
+diff --git a/Mono.TextTemplating/Mono.TextTemplating/CompiledTemplate.TemplateExecutor.cs b/Mono.TextTemplating/Mono.TextTemplating/CompiledTemplate.TemplateExecutor.cs
+index 3a40b77..28e290b 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating/CompiledTemplate.TemplateExecutor.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating/CompiledTemplate.TemplateExecutor.cs
+@@ -21,7 +21,7 @@ public string CreateAndProcess (ITextTemplatingEngineHost host, CompiledAssembly
+ 		{
+ 			using var context = TemplateAssemblyContext.Create (host, referencedAssemblyFiles);
+ 
+-			Assembly assembly = templateAssemblyData is not null
++			Assembly assembly = templateAssemblyData != null
+ 				? context.LoadInMemoryAssembly (templateAssemblyData)
+ 				: context.LoadAssemblyFile (templateAssemblyFile);
+ 
+@@ -32,7 +32,7 @@ public string CreateAndProcess (ITextTemplatingEngineHost host, CompiledAssembly
+ 			Type transformType = assembly.GetType (fullName);
+ 			object textTransformation = Activator.CreateInstance (transformType);
+ 
+-			//set the host property if it exists
++			// set the host property if it exists
+ 			Type hostType = null;
+ 			if (host is TemplateGenerator gen) {
+ 				hostType = gen.SpecificHostType;
+@@ -42,7 +42,7 @@ public string CreateAndProcess (ITextTemplatingEngineHost host, CompiledAssembly
+ 				hostProp.SetValue (textTransformation, host, null);
+ 
+ 			if (host is ITextTemplatingSessionHost sessionHost) {
+-				//FIXME: should we create a session if it's null?
++				// FIXME: should we create a session if it's null?
+ 				var sessionProp = transformType.GetProperty ("Session", typeof (IDictionary<string, object>));
+ 				sessionProp.SetValue (textTransformation, sessionHost.Session, null);
+ 			}
+@@ -58,7 +58,7 @@ public string CreateAndProcess (ITextTemplatingEngineHost host, CompiledAssembly
+ 			var errors = (CompilerErrorCollection)errorProp.GetValue (textTransformation, null);
+ 			errors.Clear ();
+ 
+-			//set the culture
++			// set the culture
+ 			if (culture != null)
+ 				ToStringHelper.FormatProvider = culture;
+ 			else
+@@ -73,13 +73,15 @@ public string CreateAndProcess (ITextTemplatingEngineHost host, CompiledAssembly
+ 				errorMethod.Invoke (textTransformation, new object[] { "Error running transform: no method Initialize()" });
+ 			} else if (transformMethod == null) {
+ 				errorMethod.Invoke (textTransformation, new object[] { "Error running transform: no method TransformText()" });
+-			} else try {
+-					initMethod.Invoke (textTransformation, null);
+-					output = (string)transformMethod.Invoke (textTransformation, null);
+-				}
+-				catch (Exception ex) {
+-					errorMethod.Invoke (textTransformation, new object[] { "Error running transform: " + ex });
+-				}
++			} else {
++				try {
++						initMethod.Invoke (textTransformation, null);
++						output = (string)transformMethod.Invoke (textTransformation, null);
++					}
++					catch (Exception ex) {
++						errorMethod.Invoke (textTransformation, new object[] { "Error running transform: " + ex });
++					}
++			}
+ 
+ 			host.LogErrors (errors);
+ 
+diff --git a/Mono.TextTemplating/Mono.TextTemplating/CompiledTemplate.cs b/Mono.TextTemplating/Mono.TextTemplating/CompiledTemplate.cs
+index 97ba0f8..e3ab75e 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating/CompiledTemplate.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating/CompiledTemplate.cs
+@@ -74,6 +74,7 @@ internal CompiledTemplate (ITextTemplatingEngineHost host, CompiledAssemblyData
+ 
+ #if FEATURE_APPDOMAINS
+ 		string templateContentForAppDomain;
++
+ 		internal void SetTemplateContentForAppDomain (string content)
+ 		{
+ 			templateContentForAppDomain = content;
+diff --git a/Mono.TextTemplating/Mono.TextTemplating/CurrentDomainAssemblyResolver.cs b/Mono.TextTemplating/Mono.TextTemplating/CurrentDomainAssemblyResolver.cs
+index 85c958d..acadef6 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating/CurrentDomainAssemblyResolver.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating/CurrentDomainAssemblyResolver.cs
+@@ -4,6 +4,7 @@
+ using System;
+ using System.IO;
+ using System.Reflection;
++
+ namespace Mono.TextTemplating
+ {
+ 	class CurrentDomainAssemblyResolver : IDisposable
+diff --git a/Mono.TextTemplating/Mono.TextTemplating/DirectoryHelper.cs b/Mono.TextTemplating/Mono.TextTemplating/DirectoryHelper.cs
+index d3113d9..5cc2b81 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating/DirectoryHelper.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating/DirectoryHelper.cs
+@@ -29,7 +29,7 @@ public static DirectoryInfo Create (string? prefix = default)
+ }
+ #else
+ 	{
+-		if (ClassLibsImpl is not null) {
++		if (ClassLibsImpl != null) {
+ 			return ClassLibsImpl (prefix);
+ 		}
+ 
+@@ -64,12 +64,12 @@ static unsafe string CreateTempSubdirectoryCoreUnix (string? prefix)
+ 		// that'll result in a unique directory name.
+ 		string tempPath = Path.GetTempPath ();
+ 		int tempPathByteCount = Encoding.UTF8.GetByteCount (tempPath);
+-		int prefixByteCount = prefix is not null ? Encoding.UTF8.GetByteCount (prefix) : 0;
++		int prefixByteCount = prefix != null ? Encoding.UTF8.GetByteCount (prefix) : 0;
+ 		int totalByteCount = tempPathByteCount + prefixByteCount + 6 + 1;
+ 
+ 		byte[] path = new byte[totalByteCount];
+ 		int pos = Encoding.UTF8.GetBytes (tempPath, 0, tempPath.Length, path, 0);
+-		if (prefix is not null) {
++		if (prefix != null) {
+ 			pos += Encoding.UTF8.GetBytes (prefix, 0, prefix.Length, path, pos);
+ 		}
+ 		for(int i = 0; i < 6; i++) {
+@@ -90,7 +90,7 @@ static unsafe string CreateTempSubdirectoryCoreUnix (string? prefix)
+ 	}
+ 
+ 	[DllImport ("libc", SetLastError = true, EntryPoint = "mkdtemp")]
+-	static unsafe extern byte* libc_mkdtemp (byte* path);
++	static extern unsafe byte* libc_mkdtemp (byte* path);
+ 
+ 	static void Unix_ThrowIOExceptionForLastError ()
+ 	{
+@@ -172,7 +172,7 @@ internal static class Kernel32
+ 	{
+ 		[DllImport ("kernel32.dll", EntryPoint = "CreateDirectoryW", SetLastError = true, CharSet = CharSet.Unicode)]
+ 		[return: MarshalAs (UnmanagedType.Bool)]
+-		static unsafe extern bool CreateDirectoryPrivate (
++		static extern unsafe bool CreateDirectoryPrivate (
+ 			string path,
+ 			SECURITY_ATTRIBUTES* lpSecurityAttributes);
+ 
+@@ -191,7 +191,7 @@ internal struct SECURITY_ATTRIBUTES
+ 			internal BOOL bInheritHandle;
+ 		}
+ 
+-		internal enum BOOL : int
++		internal enum BOOL
+ 		{
+ 			FALSE = 0,
+ 			TRUE = 1,
+diff --git a/Mono.TextTemplating/Mono.TextTemplating/FileUtil.cs b/Mono.TextTemplating/Mono.TextTemplating/FileUtil.cs
+index e31a57b..364d032 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating/FileUtil.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating/FileUtil.cs
+@@ -30,8 +30,8 @@ namespace Mono.TextTemplating
+ {
+ 	static class FileUtil
+ 	{
+-		//from MonoDevelop.Core.FileService, copied here so Mono.TextTemplating can be used w/o MD dependency
+-		public unsafe static string AbsoluteToRelativePath (string baseDirectoryPath, string absPath)
++		// from MonoDevelop.Core.FileService, copied here so Mono.TextTemplating can be used w/o MD dependency
++		public static unsafe string AbsoluteToRelativePath (string baseDirectoryPath, string absPath)
+ 		{
+ 			if (!Path.IsPathRooted (absPath) || string.IsNullOrEmpty (baseDirectoryPath))
+ 				return absPath;
+@@ -46,6 +46,7 @@ public unsafe static string AbsoluteToRelativePath (string baseDirectoryPath, st
+ 				char* lastStartB = bEnd;
+ 
+ 				int indx = 0;
++
+ 				// search common base path
+ 				var a = aPtr;
+ 				var b = bPtr;
+@@ -89,7 +90,7 @@ public unsafe static string AbsoluteToRelativePath (string baseDirectoryPath, st
+ 						goUpCount++;
+ 					lastStartB++;
+ 				}
+-				var size = goUpCount * 2 + goUpCount + aEnd - lastStartA;
++				var size = (goUpCount * 2) + goUpCount + aEnd - lastStartA;
+ 				var result = new char [size];
+ 				fixed (char* rPtr = result) {
+ 					// go paths up
+@@ -99,6 +100,7 @@ public unsafe static string AbsoluteToRelativePath (string baseDirectoryPath, st
+ 						*(r++) = '.';
+ 						*(r++) = Path.DirectorySeparatorChar;
+ 					}
++
+ 					// copy the remaining absulute path
+ 					while (lastStartA < aEnd)
+ 						*(r++) = *(lastStartA++);
+@@ -116,9 +118,9 @@ static string GetFullPath (string path)
+ 		{
+ 			if (path == null)
+ 				throw new ArgumentNullException (nameof (path));
+-			if (!isWindows || path.Contains ('*'))
++			if (!isWindows || path.Contains ('*')) {
+ 				return Path.GetFullPath (path);
+-			else {
++			} else {
+ 				// On Windows, GetFullPath doesn't work if the path contains wildcards.
+ 				path = path.Replace ("*", wildcardMarker);
+ 				path = Path.GetFullPath (path);
+diff --git a/Mono.TextTemplating/Mono.TextTemplating/HostOptions.cs b/Mono.TextTemplating/Mono.TextTemplating/HostOptions.cs
+index ee43096..8bfbbce 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating/HostOptions.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating/HostOptions.cs
+@@ -8,8 +8,8 @@ static class HostOptionExtensions
+ {
+ 	const string DisableAlcOptionName = "DisableAssemblyLoadContext";
+ 
+-	static bool IsOptionTrue (this ITextTemplatingEngineHost host, string optionName) =>
+-		host.GetHostOption(optionName) is string optionVal
++	static bool IsOptionTrue (this ITextTemplatingEngineHost host, string optionName)
++		=> host.GetHostOption(optionName) is string optionVal
+ 			&& (optionVal == "1" || optionVal.Equals("true", StringComparison.OrdinalIgnoreCase));
+ 
+ 	public static bool IsAssemblyLoadContextDisabled (this ITextTemplatingEngineHost host) => host.IsOptionTrue (DisableAlcOptionName);
+diff --git a/Mono.TextTemplating/Mono.TextTemplating/ParsedTemplate.cs b/Mono.TextTemplating/Mono.TextTemplating/ParsedTemplate.cs
+index c602fea..c7f14d3 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating/ParsedTemplate.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating/ParsedTemplate.cs
+@@ -126,8 +126,9 @@ void Parse (ITextTemplatingEngineHost host, HashSet<string> includedFiles, Token
+ 								};
+ 								if (!parseIncludes || !string.Equals (directive.Name, "include", StringComparison.OrdinalIgnoreCase))
+ 									RawSegments.Add (directive);
+-							} else
++							} else {
+ 								attName = tokeniser.Value;
++							}
+ 							break;
+ 						case State.DirectiveValue:
+ 							if (attName != null && directive != null)
+@@ -183,7 +184,7 @@ void Import (ITextTemplatingEngineHost host, HashSet<string> includedFiles, Dire
+ 				}
+ 			}
+ 
+-			//try to resolve path relative to the file that included it
++			// try to resolve path relative to the file that included it
+ 			if (relativeToDirectory != null && !Path.IsPathRooted (fileName)) {
+ 				string possible = Path.Combine (relativeToDirectory, fileName);
+ 				if (File.Exists (possible)) {
+@@ -217,9 +218,9 @@ void LogError (string message, Location location, bool isWarning)
+ 			if (location.FileName != null) {
+ 				err.Line = location.Line;
+ 				err.Column = location.Column;
+-				err.FileName = location.FileName ?? string.Empty;
++				err.FileName = location.FileName ?? "";
+ 			} else {
+-				err.FileName = rootFileName ?? string.Empty;
++				err.FileName = rootFileName ?? "";
+ 			}
+ 			err.IsWarning = isWarning;
+ 			Errors.Add (err);
+diff --git a/Mono.TextTemplating/Mono.TextTemplating/RecyclableAppDomain.cs b/Mono.TextTemplating/Mono.TextTemplating/RecyclableAppDomain.cs
+index cfb7b62..f3ce6c1 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating/RecyclableAppDomain.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating/RecyclableAppDomain.cs
+@@ -35,7 +35,7 @@ namespace Mono.TextTemplating
+ 	[Obsolete ("This was never fully implemented and is outside the scope of this library")]
+ 	public class TemplatingAppDomainRecycler
+ 	{
+-		//const int DEFAULT_TIMEOUT_MS = 2 * 60 * 1000;
++		// const int DEFAULT_TIMEOUT_MS = 2 * 60 * 1000;
+ 		const int DEFAULT_MAX_USES = 20;
+ 		
+ 		readonly string name;
+@@ -60,8 +60,8 @@ public Handle GetHandle ()
+ 		
+ 		internal class RecyclableAppDomain
+ 		{
+-			//TODO: implement timeout based recycling
+-			//DateTime lastUsed;
++			// TODO: implement timeout based recycling
++			// DateTime lastUsed;
+ 			
+ 			AppDomain domain;
+             DomainAssemblyLoader assemblyMap;
+@@ -71,8 +71,8 @@ internal class RecyclableAppDomain
+ 			
+ 			public RecyclableAppDomain (string name)
+ 			{
+-				var info = new AppDomainSetup () {
+-					//appbase needs to allow loading this assembly, for remoting
++				var info = new AppDomainSetup {
++					// appbase needs to allow loading this assembly, for remoting
+ 					ApplicationBase = System.IO.Path.GetDirectoryName (typeof (TemplatingAppDomainRecycler).Assembly.Location),
+ 					DisallowBindingRedirects = false,
+ 					DisallowCodeDownload = true,
+@@ -123,15 +123,17 @@ public void ReleaseHandle ()
+ 					liveHandles--;
+ 					lh = liveHandles;
+ 				}
+-				//We must unload domain every time after using it for generation
+-				//Otherwise we could not load new version of the project-generated 
+-				//assemblies into it. So remove checking for unusedHandles == 0
++
++				// We must unload domain every time after using it for generation
++				// Otherwise we could not load new version of the project-generated 
++				// assemblies into it. So remove checking for unusedHandles == 0
+ 				if (lh == 0) {
+ 					UnloadDomain ();
+ 				}
+ 			}
+ 
+-			[System.Diagnostics.CodeAnalysis.SuppressMessage ("Usage", "CA1816:Dispose methods should call SuppressFinalize",
++			[System.Diagnostics.CodeAnalysis.SuppressMessage ("Usage",
++				"CA1816:Dispose methods should call SuppressFinalize",
+ 				Justification = "This isn't a dispose pattern, it's a diagnostic for handle leaks")]
+ 			void UnloadDomain ()
+ 			{
+@@ -209,7 +211,7 @@ public void Add (string name, string location)
+                 map[name] = location;
+             }
+ 
+-			//keep this alive as long as the app domain is alive
++			// keep this alive as long as the app domain is alive
+ 			public override object InitializeLifetimeService ()
+ 			{
+ 				return null;
+diff --git a/Mono.TextTemplating/Mono.TextTemplating/StringUtil.cs b/Mono.TextTemplating/Mono.TextTemplating/StringUtil.cs
+index 5fc332d..0aa5a9a 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating/StringUtil.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating/StringUtil.cs
+@@ -10,9 +10,11 @@ static class StringUtil
+ 		// required for CA2249
+ 		public static bool Contains (this string str, char c) => str.IndexOf (c) > -1;
+ #endif
++
+ 		public static bool IsNullOrWhiteSpace (this string value) => string.IsNullOrWhiteSpace (value);
++
+ 		public static bool IsNullOrEmpty (this string value) => string.IsNullOrEmpty (value);
+ 
+-		public static string NullIfEmpty (this string value) => (value is null || value.Length == 0)? null : value;
++		public static string NullIfEmpty (this string value) => (value == null || value.Length == 0)? null : value;
+ 	}
+ }
+diff --git a/Mono.TextTemplating/Mono.TextTemplating/TemplateAssemblyLoadContext.cs b/Mono.TextTemplating/Mono.TextTemplating/TemplateAssemblyLoadContext.cs
+index a524bc5..09720d3 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating/TemplateAssemblyLoadContext.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating/TemplateAssemblyLoadContext.cs
+@@ -86,7 +86,7 @@ protected override Assembly Load (AssemblyName assemblyName)
+ 			// Technically this loops makes the explicit checks above redundant but it's better
+ 			// to be absolutely clear about what we're doing and why.
+ 			var fromParent = hostAssemblyLoadContext.Assemblies.FirstOrDefault (a => a.GetName ().Name == assemblyName.Name);
+-			if (fromParent is not null) {
++			if (fromParent != null) {
+ 				return fromParent;
+ 			}
+ 
+@@ -106,7 +106,7 @@ Assembly ResolveAssembly (AssemblyLoadContext context, AssemblyName assemblyName
+ 
+ 			for (int i = 0; i < templateAssemblyFiles.Length; i++) {
+ 				var asmFile = templateAssemblyFiles[i];
+-				if (asmFile is null) {
++				if (asmFile == null) {
+ 					continue;
+ 				}
+ 				if (MemoryExtensions.Equals (assemblyName.Name, Path.GetFileNameWithoutExtension (asmFile.AsSpan()), StringComparison.OrdinalIgnoreCase)) {
+diff --git a/Mono.TextTemplating/Mono.TextTemplating/TemplateGenerator.cs b/Mono.TextTemplating/Mono.TextTemplating/TemplateGenerator.cs
+index 9cd4839..2333f6e 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating/TemplateGenerator.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating/TemplateGenerator.cs
+@@ -25,14 +25,14 @@
+ // THE SOFTWARE.
+ 
+ using System;
+-using System.Collections.Generic;
+ using System.CodeDom.Compiler;
++using System.Collections.Generic;
+ using System.IO;
+ using System.Reflection;
+ using System.Text;
+-using Microsoft.VisualStudio.TextTemplating;
+ using System.Threading;
+ using System.Threading.Tasks;
++using Microsoft.VisualStudio.TextTemplating;
+ 
+ namespace Mono.TextTemplating
+ {
+@@ -57,13 +57,13 @@ public class TemplateGenerator :
+ 			{ "System.Xml.Linq", typeof(System.Xml.Linq.XDocument).Assembly.Location }
+ 		};
+ 
+-		//re-usable
++		// re-usable
+ 		TemplatingEngine engine;
+ 
+-		//per-run variables
++		// per-run variables
+ 		Encoding encoding;
+ 
+-		//host properties for consumers to access
++		// host properties for consumers to access
+ 		public CompilerErrorCollection Errors { get; } = new CompilerErrorCollection ();
+ 		public List<string> Refs { get; } = new List<string> ();
+ 		public List<string> Imports { get; } = new List<string> ();
+@@ -107,7 +107,7 @@ void InitializeForRun (string inputFileName = null, string outputFileName = null
+ 			Errors.Clear ();
+ 			this.encoding = encoding ?? Utf8.BomlessEncoding;
+ 
+-			if (outputFileName is null && inputFileName is not null) {
++			if (outputFileName == null && inputFileName != null) {
+ 				outputFileName = Path.ChangeExtension (inputFileName, ".txt");
+ 			}
+ 
+@@ -174,8 +174,13 @@ public async Task<(string fileName, string content, bool success)> ProcessTempla
+ 			return (OutputFile, outputContent, !Errors.HasErrors);
+ 		}
+ 
+-		public bool PreprocessTemplate (string inputFile, string className, string classNamespace,
+-			string outputFile, Encoding encoding, out string language, out string[] references)
++		public bool PreprocessTemplate (string inputFile,
++			string className,
++			string classNamespace,
++			string outputFile,
++			Encoding encoding,
++			out string language,
++			out string[] references)
+ 		{
+ 			language = null;
+ 			references = null;
+@@ -207,8 +212,13 @@ public async Task<(string fileName, string content, bool success)> ProcessTempla
+ 			return !Errors.HasErrors;
+ 		}
+ 
+-		public bool PreprocessTemplate (string inputFileName, string className, string classNamespace, string inputContent,
+-			out string language, out string[] references, out string outputContent)
++		public bool PreprocessTemplate (string inputFileName,
++			string className,
++			string classNamespace,
++			string inputContent,
++			out string language,
++			out string[] references,
++			out string outputContent)
+ 		{
+ 			InitializeForRun (null, inputFileName);
+ 
+@@ -295,7 +305,7 @@ protected virtual string ResolveAssemblyReference (string assemblyReference)
+ 			}
+ 
+ 			var assemblyName = new AssemblyName(assemblyReference);
+-			if (assemblyName.Version != null)//Load via GAC and return full path
++			if (assemblyName.Version != null)// Load via GAC and return full path
+ 				return Assembly.Load (assemblyName).Location;
+ 
+ 			if (KnownAssemblies.TryGetValue (assemblyReference, out string mappedAssemblyReference)) {
+@@ -372,8 +382,8 @@ public void AddParameter (string processorName, string directiveName, string par
+ 		/// <summary>
+ 		/// Parses a parameter and adds it.
+ 		/// </summary>
+-		/// <returns>Whether the parameter was parsed successfully.</returns>
+ 		/// <param name="unparsedParameter">Parameter in name=value or processor!directive!name!value format.</param>
++		/// <returns>Whether the parameter was parsed successfully.</returns>
+ 		public bool TryAddParameter (string unparsedParameter)
+ 		{
+ 			if (TryParseParameter (unparsedParameter, out string processor, out string directive, out string name, out string value)) {
+@@ -392,20 +402,20 @@ internal static bool TryParseParameter (string parameter, out string processor,
+ 			if (end < 0)
+ 				return false;
+ 
+-			//simple format n=v
++			// simple format n=v
+ 			if (parameter [end] == '=') {
+ 				name = parameter.Substring (start, end);
+ 				value = parameter.Substring (end + 1);
+ 				return !string.IsNullOrEmpty (name);
+ 			}
+ 
+-			//official format, p!d!n!v
++			// official format, p!d!n!v
+ 			processor = parameter.Substring (start, end);
+ 
+ 			start = end + 1;
+ 			end = parameter.IndexOf ('!', start);
+ 			if (end < 0) {
+-				//unlike official version, we allow you to omit processor/directive
++				// unlike official version, we allow you to omit processor/directive
+ 				name = processor;
+ 				value = parameter.Substring (start);
+ 				processor = "";
+@@ -414,11 +424,10 @@ internal static bool TryParseParameter (string parameter, out string processor,
+ 
+ 			directive = parameter.Substring (start, end - start);
+ 
+-
+ 			start = end + 1;
+ 			end = parameter.IndexOf ('!', start);
+ 			if (end < 0) {
+-				//we also allow you just omit the processor
++				// we also allow you just omit the processor
+ 				name = directive;
+ 				directive = processor;
+ 				value = parameter.Substring (start);
+@@ -493,7 +502,7 @@ string ITextTemplatingEngineHost.ResolvePath (string path)
+ 
+ 		void ITextTemplatingEngineHost.SetFileExtension (string extension)
+ 		{
+-			if (OutputFile is not null) {
++			if (OutputFile != null) {
+ 				extension = extension.TrimStart ('.');
+ 				if (Path.HasExtension (OutputFile)) {
+ 					OutputFile = Path.ChangeExtension (OutputFile, extension);
+@@ -533,10 +542,10 @@ void ITextTemplatingEngineHost.SetOutputEncoding (Encoding encoding, bool fromOu
+ 		/// </summary>
+ 		protected virtual ITextTemplatingSession CreateSession () => new TextTemplatingSession ();
+ 
+-
+ 		// Implement the session host interface for the template to use but hide the
+ 		// API so we can expose a better one
+ 		ITextTemplatingSession ITextTemplatingSessionHost.Session { get => session; set => session = value; }
++
+ 		ITextTemplatingSession ITextTemplatingSessionHost.CreateSession () => session = CreateSession ();
+ 
+ 		public void ClearSession () => session = null;
+@@ -557,7 +566,9 @@ public ParameterKey (string processorName, string directiveName, string paramete
+ 				}
+ 			}
+ 
+-			readonly string processorName, directiveName, parameterName;
++			readonly string processorName;
++			readonly string directiveName;
++			readonly string parameterName;
+ 			readonly int hashCode;
+ 
+ 			public override bool Equals (object obj) => obj is ParameterKey other && Equals (other);
+diff --git a/Mono.TextTemplating/Mono.TextTemplating/TemplateSettings.cs b/Mono.TextTemplating/Mono.TextTemplating/TemplateSettings.cs
+index 7e69276..b6c4434 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating/TemplateSettings.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating/TemplateSettings.cs
+@@ -25,10 +25,10 @@
+ // THE SOFTWARE.
+ 
+ using System;
+-using System.Text;
+ using System.Collections.Generic;
+-using Microsoft.VisualStudio.TextTemplating;
+ using System.IO;
++using System.Text;
++using Microsoft.VisualStudio.TextTemplating;
+ 
+ namespace Mono.TextTemplating
+ {
+@@ -66,6 +66,7 @@ public TemplateSettings ()
+ 		public bool NoLinePragmas { get; set; }
+ 		public bool InternalVisibility { get; set; }
+ 		public Type HostType { get; set; }
++
+ 		public string GetFullName () => string.IsNullOrEmpty (Namespace) ? Name : Namespace + "." + Name;
+ 
+ 		internal CodeGenerationOptions CodeGenerationOptions { get; } = new CodeGenerationOptions ();
+diff --git a/Mono.TextTemplating/Mono.TextTemplating/TemplatingEngine.CodeDomHelpers.cs b/Mono.TextTemplating/Mono.TextTemplating/TemplatingEngine.CodeDomHelpers.cs
+index 36ccbd4..7b9d04a 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating/TemplatingEngine.CodeDomHelpers.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating/TemplatingEngine.CodeDomHelpers.cs
+@@ -33,7 +33,6 @@ public static string GenerateIndentedClassCode (CodeDomProvider provider, IEnume
+ 		public static string IndentSnippetText (CodeDomProvider provider, string text, string indent)
+ 			=> IndentHelpers.IndentSnippetText (provider, text, indent);
+ 
+-
+ 		[Obsolete ("Should not have been public")]
+ 		public static string IndentSnippetText (string text, string indent)
+ 			=> IndentHelpers.IndentSnippetText (text, indent);
+diff --git a/Mono.TextTemplating/Mono.TextTemplating/TemplatingEngine.CodeGeneration.cs b/Mono.TextTemplating/Mono.TextTemplating/TemplatingEngine.CodeGeneration.cs
+index 72c7949..7c3a38f 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating/TemplatingEngine.CodeGeneration.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating/TemplatingEngine.CodeGeneration.cs
+@@ -22,7 +22,7 @@ public static CodeCompileUnit GenerateCompileUnit (ITextTemplatingEngineHost hos
+ 		{
+ 			ProcessDirectives (content, settings, pt.Errors);
+ 
+-			//prep the compile unit
++			// prep the compile unit
+ 			var ccu = new CodeCompileUnit ();
+ 			var namespac = ccu.AddNamespace (settings.Namespace.NullIfEmpty ());
+ 
+@@ -36,13 +36,13 @@ public static CodeCompileUnit GenerateCompileUnit (ITextTemplatingEngineHost hos
+ 				.Inherits (baseInfo.Reference)
+ 				.WithVisibility (settings.InternalVisibility? TypeAttributes.NotPublic : TypeAttributes.Public);
+ 
+-			if (baseInfo.Declaration is not null) {
++			if (baseInfo.Declaration != null) {
+ 				namespac.AddType (baseInfo.Declaration);
+ 			}
+ 
+ 			GenerateTransformMethod (type, settings, pt, host.TemplateFile, baseInfo.HasVirtualTransformMethod);
+ 
+-			//class code and attributes from processors
++			// class code and attributes from processors
+ 			foreach (var processor in settings.DirectiveProcessors.Values) {
+ 				if (processor.GetClassCodeForProcessingRun ().NullIfEmpty() is string classCode) {
+ 					type.AddSnippetMember (classCode);
+@@ -50,7 +50,7 @@ public static CodeCompileUnit GenerateCompileUnit (ITextTemplatingEngineHost hos
+ 				processor.GetTemplateClassCustomAttributes ()?.AddTo (type);
+ 			}
+ 
+-			//generate the Host property if needed
++			// generate the Host property if needed
+ 			if (settings.HostSpecific && !settings.HostPropertyOnBase) {
+ 				GenerateHostProperty (type, settings.HostType);
+ 			}
+@@ -60,7 +60,6 @@ public static CodeCompileUnit GenerateCompileUnit (ITextTemplatingEngineHost hos
+ 			return ccu;
+ 		}
+ 
+-
+ 		static void GenerateTransformMethod (CodeTypeDeclaration templateType, TemplateSettings settings, ParsedTemplate pt, string templateFile, bool isOverride)
+ 		{
+ 			string pragmasRelativeToDirectory = null;
+@@ -69,7 +68,7 @@ static void GenerateTransformMethod (CodeTypeDeclaration templateType, TemplateS
+ 				if (!string.IsNullOrEmpty (settings.RelativeLinePragmasBaseDirectory)) {
+ 					pragmasRelativeToDirectory = Path.GetFullPath (settings.RelativeLinePragmasBaseDirectory);
+ 				}
+-				if (pragmasRelativeToDirectory is null && templateFile is not null) {
++				if (pragmasRelativeToDirectory == null && templateFile != null) {
+ 					pragmasRelativeToDirectory = Path.GetDirectoryName (Path.GetFullPath (templateFile));
+ 				}
+ 			}
+@@ -86,12 +85,12 @@ static void GenerateTransformMethod (CodeTypeDeclaration templateType, TemplateS
+ 				? Expression.This.Property ("ToStringHelper")
+ 				: TypeReference.Global (typeof (ToStringHelper)).AsExpression ();
+ 
+-			//method references that will need to be used multiple times
++			// method references that will need to be used multiple times
+ 			var writeMeth = Expression.This.Method ("Write");
+ 			var toStringMeth = toStringHelper.Method ("ToStringWithCulture");
+ 			bool helperMode = false;
+ 
+-			//build the code from the segments
++			// build the code from the segments
+ 			foreach (TemplateSegment seg in pt.Content) {
+ 				CodeStatement st = null;
+ 				CodeLinePragma location = null;
+@@ -100,7 +99,7 @@ static void GenerateTransformMethod (CodeTypeDeclaration templateType, TemplateS
+ 					if (!string.IsNullOrEmpty (filename)) {
+ 						if (!settings.RelativeLinePragmas) {
+ 							filename = Path.GetFileName (filename);
+-						} else if (pragmasRelativeToDirectory is not null) {
++						} else if (pragmasRelativeToDirectory != null) {
+ 							filename = Path.GetFullPath (filename);
+ 							filename = FileUtil.AbsoluteToRelativePath (pragmasRelativeToDirectory, filename);
+ 						}
+@@ -110,7 +109,7 @@ static void GenerateTransformMethod (CodeTypeDeclaration templateType, TemplateS
+ 				switch (seg.Type) {
+ 				case SegmentType.Block:
+ 					if (helperMode)
+-						//TODO: are blocks permitted after helpers?
++						// TODO: are blocks permitted after helpers?
+ 						pt.LogError ("Blocks are not permitted after helpers", seg.TagStartLocation);
+ 					st = Statement.Snippet (seg.Text);
+ 					break;
+@@ -130,8 +129,8 @@ static void GenerateTransformMethod (CodeTypeDeclaration templateType, TemplateS
+ 				}
+ 				if (st != null) {
+ 					if (helperMode) {
+-						//convert the statement into a snippet member and attach it to the top level type
+-						//TODO: is there a way to do this for languages that use indentation for blocks, e.g. python?
++						// convert the statement into a snippet member and attach it to the top level type
++						// TODO: is there a way to do this for languages that use indentation for blocks, e.g. python?
+ 						using (var writer = new StringWriter ()) {
+ 							settings.Provider.GenerateCodeFromStatement (st, writer, null);
+ 							var text = writer.ToString ();
+@@ -189,7 +188,7 @@ static void GenerateInitializationMethod (CodeTypeDeclaration type, TemplateSett
+ 				initializeMeth.AsOverride ();
+ 			}
+ 
+-			//if preprocessed, pass the extension and encoding to the host
++			// if preprocessed, pass the extension and encoding to the host
+ 			if (settings.IsPreprocessed && settings.HostSpecific) {
+ 				var hostProp = Expression.This.Property ("Host");
+ 				var statements = new List<CodeStatement> ();
+@@ -210,12 +209,12 @@ static void GenerateInitializationMethod (CodeTypeDeclaration type, TemplateSett
+ 				if (statements.Count > 0) {
+ 					initializeMeth.WithStatements (
+ 						Statement.If (hostProp.IsNotNull (),
+-							Then: statements.ToArray ())
++							then: statements.ToArray ())
+ 					);
+ 				}
+ 			}
+ 
+-			//pre-init code from processors
++			// pre-init code from processors
+ 			foreach (var processor in settings.DirectiveProcessors.Values) {
+ 				string code = processor.GetPreInitializationCodeForProcessingRun ();
+ 				if (code != null)
+@@ -226,7 +225,7 @@ static void GenerateInitializationMethod (CodeTypeDeclaration type, TemplateSett
+ 				initializeMeth.WithStatements (Expression.Base.InvokeMethod ("Initialize"));
+ 			}
+ 
+-			//post-init code from processors
++			// post-init code from processors
+ 			foreach (var processor in settings.DirectiveProcessors.Values) {
+ 				string code = processor.GetPostInitializationCodeForProcessingRun ();
+ 				if (code != null)
+diff --git a/Mono.TextTemplating/Mono.TextTemplating/TemplatingEngine.TemplateBaseTypeInfo.cs b/Mono.TextTemplating/Mono.TextTemplating/TemplatingEngine.TemplateBaseTypeInfo.cs
+index 8e276fc..e5be033 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating/TemplatingEngine.TemplateBaseTypeInfo.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating/TemplatingEngine.TemplateBaseTypeInfo.cs
+@@ -118,11 +118,12 @@ static void AddIndentHelpers (CodeTypeDeclaration type)
+ 			type.AddMethod ("PopIndent").Returns<string> ()
+ 				.WithStatements (
+ 					Statement.If (indents.Property ("Count").IsEqualValue (zero),
+-						Then: Expression.StringEmpty.Return ()),
++						then: Expression.StringEmpty.Return ()),
+ 					Statement.DeclareVariable<int> ("lastPos",
+ 						currentIndent.Property ("Length").Subtract (indents.InvokeMethod ("Pop")),
+ 						out var lastPosRef),
+-					Statement.DeclareVariable (TypeReference.String, "last",
++					Statement.DeclareVariable (TypeReference.String,
++						"last",
+ 						currentIndent.InvokeMethod ("Substring", lastPosRef),
+ 						out var lastRef),
+ 					currentIndent.Assign (currentIndent.InvokeMethod ("Substring", zero, lastPosRef)),
+@@ -196,12 +197,12 @@ static void AddToStringHelper (CodeTypeDeclaration type, CodeDomProvider provide
+ 					Declare.Variable<Type> ("type", objectToConvert.InvokeMethod ("GetType"), out var objType),
+ 					Declare.Variable<Type> ("iConvertibleType", Expression.TypeOf<IConvertible> (), out var iConvertibleType),
+ 					Statement.If (iConvertibleType.InvokeMethod ("IsAssignableFrom", objType),
+-						Then: Statement.Return (objectToConvert.Cast<IConvertible> ().InvokeMethod ("ToString", formatProvider))),
++						then: Statement.Return (objectToConvert.Cast<IConvertible> ().InvokeMethod ("ToString", formatProvider))),
+ 					Declare.Variable<System.Reflection.MethodInfo> ("methInfo",
+ 						objType.InvokeMethod ("GetMethod", Expression.Primitive ("ToString"), Expression.Array<Type> (iConvertibleType)),
+ 						out var methInfoLocalRef),
+ 					Statement.If (methInfoLocalRef.IsNotNull (),
+-						Then: Statement.Return (Expression.Cast<string> (
++						then: Statement.Return (Expression.Cast<string> (
+ 							methInfoLocalRef.InvokeMethod ("Invoke", objectToConvert, Expression.Array<object> (formatProvider))))),
+ 					Statement.Return (objectToConvert.InvokeMethod ("ToString"))
+ 				);
+diff --git a/Mono.TextTemplating/Mono.TextTemplating/TemplatingEngine.cs b/Mono.TextTemplating/Mono.TextTemplating/TemplatingEngine.cs
+index 7a00f75..af594e1 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating/TemplatingEngine.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating/TemplatingEngine.cs
+@@ -91,8 +91,12 @@ public async Task<string> ProcessTemplateAsync (ParsedTemplate pt, string conten
+ 			}
+ 		}
+ 
+-		public string PreprocessTemplate (string content, ITextTemplatingEngineHost host, string className,
+-			string classNamespace, out string language, out string [] references)
++		public string PreprocessTemplate (string content,
++			ITextTemplatingEngineHost host,
++			string className,
++			string classNamespace,
++			out string language,
++			out string [] references)
+ 		{
+ 			if (content == null)
+ 				throw new ArgumentNullException (nameof (content));
+@@ -120,8 +124,14 @@ public string PreprocessTemplate (ParsedTemplate pt, string content, TemplateSet
+ 		}
+ 
+ 		[Obsolete("Use TemplateGenerator")]
+-		public string PreprocessTemplate (ParsedTemplate pt, string content, ITextTemplatingEngineHost host, string className,
+-			string classNamespace, out string language, out string [] references, TemplateSettings settings = null)
++		public string PreprocessTemplate (ParsedTemplate pt,
++			string content,
++			ITextTemplatingEngineHost host,
++			string className,
++			string classNamespace,
++			out string language,
++			out string [] references,
++			TemplateSettings settings = null)
+ 		{
+ 			if (content == null)
+ 				throw new ArgumentNullException (nameof (content));
+@@ -137,16 +147,22 @@ public string PreprocessTemplate (ParsedTemplate pt, string content, TemplateSet
+ 
+ 		public static string PreprocessTemplate (ParsedTemplate pt, string content, TemplateSettings settings, ITextTemplatingEngineHost host, out string[] references)
+ 		{
+-			if (pt is null) throw new ArgumentNullException (nameof (pt));
++			if (pt == null) throw new ArgumentNullException (nameof (pt));
+ 			if (string.IsNullOrEmpty (content)) throw new ArgumentException ($"'{nameof (content)}' cannot be null or empty.", nameof (content));
+-			if (settings is null) throw new ArgumentNullException (nameof (settings));
+-			if (host is null) throw new ArgumentNullException (nameof (host));
++			if (settings == null) throw new ArgumentNullException (nameof (settings));
++			if (host == null) throw new ArgumentNullException (nameof (host));
+ 
+ 			return PreprocessTemplateInternal (pt, content, settings, host, out references);
+ 		}
+ 
+-		static string PreprocessTemplateInternal (ParsedTemplate pt, string content, ITextTemplatingEngineHost host, string className,
+-			string classNamespace, out string language, out string[] references, TemplateSettings settings = null)
++		static string PreprocessTemplateInternal (ParsedTemplate pt,
++			string content,
++			ITextTemplatingEngineHost host,
++			string className,
++			string classNamespace,
++			out string language,
++			out string[] references,
++			TemplateSettings settings = null)
+ 		{
+ 			settings ??= GetSettings (host, pt);
+ 			language = settings.Language;
+@@ -252,7 +268,6 @@ public async Task<CompiledTemplate> CompileTemplateAsync (string content, ITextT
+ 			CancellationToken token
+ 			)
+ 		{
+-
+ 			settings ??= GetSettings (host, pt);
+ 			if (pt.Errors.HasErrors) {
+ 				host.LogErrors (pt.Errors);
+@@ -263,7 +278,7 @@ CancellationToken token
+ 				host.SetFileExtension (settings.Extension);
+ 			}
+ 			if (settings.Encoding != null) {
+-				//FIXME: when is this called with false?
++				// FIXME: when is this called with false?
+ 				host.SetOutputEncoding (settings.Encoding, true);
+ 			}
+ 
+@@ -352,6 +367,7 @@ async Task<(CompilerResults, CompiledAssemblyData)> CompileCode (IEnumerable<str
+ 
+ 				if (args.Debug) {
+ 					var symbolsPath = Path.ChangeExtension (args.OutputPath, ".pdb");
++
+ 					// if the symbols are embedded the symbols file doesn't exist
+ 					if (File.Exists(symbolsPath)) {
+ 						r.TempFiles.AddFile (symbolsPath, true);
+@@ -366,6 +382,7 @@ async Task<(CompilerResults, CompiledAssemblyData)> CompileCode (IEnumerable<str
+ 
+ 			if (!args.Debug && !r.Errors.HasErrors) {
+ 				r.TempFiles.Delete ();
++
+ 				// we can delete our temporary file after our temporary folder is deleted.
+ 				Directory.Delete (tempFolder);
+ 			}
+@@ -501,15 +518,16 @@ public static TemplateSettings GetSettings (ITextTemplatingEngineHost host, Pars
+ 				settings.Assemblies.Add (settings.HostType.Assembly.Location);
+ 			}
+ 
+-			//initialize the custom processors
++			// initialize the custom processors
+ 			foreach (var kv in settings.DirectiveProcessors) {
+ 				kv.Value.Initialize (host);
+ 
+ 				IRecognizeHostSpecific hs;
+ 				if (settings.HostSpecific || (
+ 				        !((IDirectiveProcessor)kv.Value).RequiresProcessingRunIsHostSpecific &&
+-				        ((hs = kv.Value as IRecognizeHostSpecific) == null || !hs.RequiresProcessingRunIsHostSpecific)))
++				        ((hs = kv.Value as IRecognizeHostSpecific) == null || !hs.RequiresProcessingRunIsHostSpecific))) {
+ 					continue;
++				}
+ 
+ 				settings.HostSpecific = true;
+ 				pt.LogWarning ("Directive processor '" + kv.Key + "' requires hostspecific=true, forcing on.");
+@@ -529,7 +547,7 @@ public static TemplateSettings GetSettings (ITextTemplatingEngineHost host, Pars
+ 			if (settings.Namespace == null)
+ 				settings.Namespace = $"{typeof (TextTransformation).Namespace}{new Random ().Next ():x}";
+ 
+-			//resolve the CodeDOM provider
++			// resolve the CodeDOM provider
+ 			if (string.IsNullOrEmpty (settings.Language)) {
+ 				settings.Language = "C#";
+ 			}
+diff --git a/Mono.TextTemplating/Mono.TextTemplating/TemplatingEngineException.cs b/Mono.TextTemplating/Mono.TextTemplating/TemplatingEngineException.cs
+index 0d8e51d..b5aac63 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating/TemplatingEngineException.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating/TemplatingEngineException.cs
+@@ -9,8 +9,11 @@ namespace Mono.TextTemplating
+ 	class TemplatingEngineException : Exception
+ 	{
+ 		public TemplatingEngineException () { }
++
+ 		public TemplatingEngineException (string message) : base (message) { }
++
+ 		public TemplatingEngineException (string message, Exception inner) : base (message, inner) { }
++
+ 		protected TemplatingEngineException (SerializationInfo info, StreamingContext context) : base (info, context) { }
+ 	}
+ }
+diff --git a/Mono.TextTemplating/Mono.TextTemplating/Tokeniser.cs b/Mono.TextTemplating/Mono.TextTemplating/Tokeniser.cs
+index 9fea774..aa62f5a 100644
+--- a/Mono.TextTemplating/Mono.TextTemplating/Tokeniser.cs
++++ b/Mono.TextTemplating/Mono.TextTemplating/Tokeniser.cs
+@@ -28,7 +28,6 @@
+ 
+ namespace Mono.TextTemplating
+ {
+-	
+ 	public class Tokeniser
+ 	{
+ 		readonly string content;
+@@ -100,7 +99,7 @@ State GetBlockEnd ()
+ 					position++;
+ 					TagEndLocation = nextStateLocation;
+ 					
+-					//skip newlines directly after blocks, unless they're expressions
++					// skip newlines directly after blocks, unless they're expressions
+ 					if (State != State.Expression && (position += IsNewLine()) > 0) {
+ 						nextStateLocation = nextStateLocation.AddLine ();
+ 					}
+@@ -135,8 +134,9 @@ State GetDirectiveValue ()
+ 					if (position + 1 < content.Length && content[position + 1] == '\n')
+ 						position++;
+ 					nextStateLocation = nextStateLocation.AddLine();
+-				} else if (c == '\n')
++				} else if (c == '\n') {
+ 					nextStateLocation = nextStateLocation.AddLine();
++				}
+ 				if (delimiter == '\0') {
+ 					if (c == '\'' || c == '"') {
+ 						start = position;
+@@ -195,7 +195,8 @@ State NextStateInContent ()
+ 					return State.Block;
+ 				}
+ 			}
+-			//EOF is only valid when we're in content
++
++			// EOF is only valid when we're in content
+ 			value = content.Substring (start);
+ 			return State.EOF;
+ 		}
+@@ -232,7 +233,7 @@ State NextStateInContent ()
+ 					TagEndLocation = nextStateLocation.AddCols (2);
+ 					nextStateLocation = nextStateLocation.AddCols (3);
+ 					
+-					//skip newlines directly after directives
++					// skip newlines directly after directives
+ 					if ((position += IsNewLine()) > 0) {
+ 						nextStateLocation = nextStateLocation.AddLine();
+ 					}
+@@ -247,9 +248,7 @@ State NextStateInContent ()
+ 			throw new ParserException ("Unexpected end of file.", nextStateLocation);
+ 		}
+ 		
+-		public State State {
+-			get; private set;
+-		}
++		public State State { get; private set; }
+ 		
+ 		public int Position {
+ 			get { return position; }
+diff --git a/TextTransform/TextTransform.cs b/TextTransform/TextTransform.cs
+index 25d01e4..93e00ff 100644
+--- a/TextTransform/TextTransform.cs
++++ b/TextTransform/TextTransform.cs
+@@ -54,12 +54,13 @@ static int MainInternal (string[] args)
+ 			}
+ 			
+ 			var generator = new TemplateGenerator ();
+-			string outputFile = null, inputFile = null;
++			string outputFile = null;
++			string inputFile = null;
+ 			var directives = new List<string> ();
+ 			var parameters = new List<string> ();
+ 			string preprocess = null;
+ 			
+-			optionSet = new OptionSet () {
++			optionSet = new OptionSet {
+ 				{ "o=|out=", "The name of the output {file}", s => outputFile = s },
+ 				{ "r=", "Assemblies to reference", s => generator.Refs.Add (s) },
+ 				{ "u=", "Namespaces to import <{0:namespace}>", s => generator.Imports.Add (s) },
+@@ -68,8 +69,8 @@ static int MainInternal (string[] args)
+ 				{ "dp=", "Directive processor (name!class!assembly)", s => directives.Add (s) },
+ 				{ "a=", "Parameters (name=value) or ([processorName!][directiveName!]name!value)", s => parameters.Add (s) },
+ 				{ "h|?|help", "Show help", s => ShowHelp (false) },
+-		//		{ "k=,", "Session {key},{value} pairs", (s, t) => session.Add (s, t) },
+-				{ "c=", "Preprocess the template into {0:class}", (s) => preprocess = s },
++		// 		{ "k=,", "Session {key},{value} pairs", (s, t) => session.Add (s, t) },
++				{ "c=", "Preprocess the template into {0:class}", s => preprocess = s },
+ 			};
+ 			
+ 			var remainingArgs = optionSet.Parse (args);
+@@ -137,16 +138,26 @@ static int MainInternal (string[] args)
+ 					className = preprocess.Substring (s + 1);
+ 				}
+ 
+-				generator.PreprocessTemplate (inputFile, className, classNamespace, outputFile, new System.Text.UTF8Encoding (encoderShouldEmitUTF8Identifier: false),
+-					out string language, out string[] references);
++				generator.PreprocessTemplate (inputFile,
++					className,
++					classNamespace,
++					outputFile,
++					new System.Text.UTF8Encoding (encoderShouldEmitUTF8Identifier: false),
++					out string language,
++					out string[] references);
+ 				if (generator.Errors.HasErrors) {
+ 					Console.Write ("Preprocessing '{0}' into class '{1}.{2}' failed.", inputFile, classNamespace, className);
+ 				}
+ 			}
+ 			
+-			foreach (System.CodeDom.Compiler.CompilerError err in generator.Errors)
+-				Console.Error.WriteLine ("{0}({1},{2}): {3} {4}", err.FileName, err.Line, err.Column,
+-				                   err.IsWarning? "WARNING" : "ERROR", err.ErrorText);
++			foreach (System.CodeDom.Compiler.CompilerError err in generator.Errors) {
++				Console.Error.WriteLine ("{0}({1},{2}): {3} {4}",
++				                   err.FileName,
++				                   err.Line,
++				                   err.Column,
++				                   err.IsWarning? "WARNING" : "ERROR",
++				                   err.ErrorText);
++			}
+ 			
+ 			return generator.Errors.HasErrors? -1 : 0;
+ 		}
+diff --git a/dotnet-t4/TextTransform.cs b/dotnet-t4/TextTransform.cs
+index c293677..0361b62 100644
+--- a/dotnet-t4/TextTransform.cs
++++ b/dotnet-t4/TextTransform.cs
+@@ -53,9 +53,11 @@ public static async Task<int> Main (string [] args)
+ 		sealed class CustomOption : Option
+ 		{
+ 			readonly Action<OptionValueCollection> action;
++
+ 			public CustomOption (string prototype, string description, int count, Action<OptionValueCollection> action, bool hidden = false)
+ 				: base (prototype, description, count, hidden)
+ 				=> this.action = action ?? throw new ArgumentNullException (nameof (action));
++
+ 			protected override void OnParseComplete (OptionContext c) => action (c.OptionValues);
+ 		}
+ 
+@@ -66,7 +68,8 @@ static async Task<int> MainInternal (string [] args)
+ 			}
+ 
+ 			var generator = new ToolTemplateGenerator ();
+-			string outputFile = null, inputFile = null;
++			string outputFile = null;
++			string inputFile = null;
+ 			var properties = new Dictionary<string,string> ();
+ 			string preprocessClassName = null;
+ 			bool debug = false;
+@@ -104,7 +107,7 @@ static async Task<int> MainInternal (string [] args)
+ 				{
+ 					"c=|class=",
+ 					"Preprocess the template into class {<name>} for use as a runtime template. The class name may include a namespace.",
+-					(s) => preprocessClassName = s
++					s => preprocessClassName = s
+ 				},
+ 				{
+ 					"l|useRelativeLinePragmas",
+@@ -151,7 +154,6 @@ static async Task<int> MainInternal (string [] args)
+ 							generator.AddParameter (null, null, a[0], a[1]);
+ 						} else if (a.Count == 3) {
+ 							generator.AddParameter (null, a[0], a[1], a[2]);
+-
+ 						} else {
+ 							generator.AddParameter (a[0], a[1], a[2], a[3]);
+ 						}
+@@ -298,7 +300,10 @@ static void AddCoercedSessionParameters (ToolTemplateGenerator generator, Parsed
+ 
+ 						generator.Errors.Add (
+ 							new CompilerError (
+-								null, 0, 0, null,
++								null,
++								0,
++								0,
++								null,
+ 								$"Could not convert property '{p.Key}'='{p.Value}' to parameter type '{typeName}'"
+ 							)
+ 						);
+diff --git a/dotnet-t4/ToolTemplateSession.cs b/dotnet-t4/ToolTemplateSession.cs
+index 120522d..6e65e90 100644
+--- a/dotnet-t4/ToolTemplateSession.cs
++++ b/dotnet-t4/ToolTemplateSession.cs
+@@ -20,10 +20,10 @@
+ // THE SOFTWARE.
+ 
+ using System;
+-using Microsoft.VisualStudio.TextTemplating;
+ using System.Collections;
+ using System.Collections.Generic;
+ using System.Runtime.Serialization;
++using Microsoft.VisualStudio.TextTemplating;
+ 
+ namespace Mono.TextTemplating
+ {
+@@ -47,17 +47,29 @@ public ToolTemplateSession (ToolTemplateGenerator toolTemplateGenerator)
+ 		public ICollection<object> Values => session.Values;
+ 		public int Count => session.Count;
+ 		public bool IsReadOnly => false;
++
+ 		public void Add (string key, object value) => session.Add (key, value);
++
+ 		public void Add (KeyValuePair<string, object> item) => session.Add (item.Key, item.Value);
++
+ 		public void Clear () => session.Clear ();
++
+ 		public bool Contains (KeyValuePair<string, object> item) => session.TryGetValue (item.Key, out object v) && item.Value == v;
++
+ 		public bool ContainsKey (string key) => session.ContainsKey (key);
++
+ 		public bool Remove (string key) => session.Remove (key);
++
+ 		public bool Remove (KeyValuePair<string, object> item) => Contains(item) && session.Remove (item.Key);
++
+ 		public bool Equals (ITextTemplatingSession other) => other != null && Id == other.Id;
++
+ 		public bool Equals (Guid other) => Id.Equals (other);
++
+ 		public IEnumerator<KeyValuePair<string, object>> GetEnumerator () => session.GetEnumerator ();
++
+ 		public bool TryGetValue (string key, out object value) => session.TryGetValue (key, out value);
++
+ 		IEnumerator IEnumerable.GetEnumerator () => session.GetEnumerator ();
+ 
+ 		public void CopyTo (KeyValuePair<string, object> [] array, int arrayIndex)
+@@ -71,6 +83,5 @@ public void GetObjectData (SerializationInfo info, StreamingContext context)
+ 		{
+ 			throw new NotSupportedException ();
+ 		}
+-
+ 	}
+ }

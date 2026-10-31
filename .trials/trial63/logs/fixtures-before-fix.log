@@ -1,0 +1,190 @@
+== Packing 0.0.0-fixture.20261030222557 into /home/user/fx63-b2/feed
+You can invoke the tool using the following command: bro
+Tool 'stylebro.tool' (version '0.0.0-fixture.20261030222557') was successfully installed.
+== first-run-framework-merge : a multi-targeted test project on a fresh clone (no restore output yet)
+  preview                      exit 0 (13 s)
+  init                         exit 0 (2 s)
+  host-format                  exit 0 (13 s)
+  host-check                   exit 0 (0 s)
+  host-check-build             exit 0 (46 s)
+  dotnet-format-format         exit 0 (32 s)
+  dotnet-format-check          exit 0 (0 s)
+  dotnet-format-check-build    exit 0 (45 s)
+  FAIL first-run-framework-merge (162 s)
+    - host's format made a net8.0 run of its own:
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net8.0). net8.0: only the projects whose code compiles differently there.
+Checked net8.0 (run 1 of 2)
+Checked net10.0 (run 2 of 2)
+== net10.0 (2 project(s), 2 files with findings)
+== net8.0 (1 project(s), 1 file with findings)
+Run 1: 2 files changed:
+  src/Lib/Calc.cs
+  tests/Lib.Tests/CalcTests.cs
+Checked net8.0 (run 1 of 2)
+Checked net10.0 (run 2 of 2)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+
+    - dotnet-format's format made a net8.0 run of its own:
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net8.0). net8.0: only the projects whose code compiles differently there.
+Checked net8.0 (run 1 of 2)
+Checked net10.0 (run 2 of 2)
+== net10.0 (2 project(s), 2 files with findings)
+== net8.0 (1 project(s), 1 file with findings)
+Run 1: 2 files changed:
+  src/Lib/Calc.cs
+  tests/Lib.Tests/CalcTests.cs
+Checked net8.0 (run 1 of 2)
+Checked net10.0 (run 2 of 2)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+
+    --- build.txt (last 12 lines)
+        Restored /home/user/fx63-b2/first-run-framework-merge/host/tests/Lib.Tests/Lib.Tests.csproj (in 415 ms).
+        Restored /home/user/fx63-b2/first-run-framework-merge/host/src/Lib/Lib.csproj (in 412 ms).
+        Lib -> /home/user/fx63-b2/first-run-framework-merge/host/src/Lib/bin/Debug/net10.0/Lib.dll
+        Lib -> /home/user/fx63-b2/first-run-framework-merge/host/src/Lib/bin/Debug/net8.0/Lib.dll
+        Lib.Tests -> /home/user/fx63-b2/first-run-framework-merge/host/tests/Lib.Tests/bin/Debug/net10.0/Lib.Tests.dll
+        Lib.Tests -> /home/user/fx63-b2/first-run-framework-merge/host/tests/Lib.Tests/bin/Debug/net8.0/Lib.Tests.dll
+      
+      Build succeeded.
+          0 Warning(s)
+          0 Error(s)
+      
+      Time Elapsed 00:00:02.41
+    --- dotnet-format-check-build.txt (last 12 lines)
+      Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+      Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+      Building Fixture.sln in Debug, Debug|x64, Debug|x86, Release, Release|x64, Release|x86 with warnings as errors, and a copy of HEAD to compare...
+      Debug: no findings, no new errors.
+      Debug|x64: no findings, no new errors.
+      Debug|x86: no findings, no new errors.
+      Release: no findings, no new errors.
+      Release|x64: no findings, no new errors.
+      Release|x86: no findings, no new errors.
+      Clean.
+    --- dotnet-format-check.txt (last 12 lines)
+      Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+      Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+      Clean.
+    --- dotnet-format-format.txt (last 12 lines)
+      Multi-targeted: one 'dotnet format' run per target framework (net10.0, net8.0). net8.0: only the projects whose code compiles differently there.
+      Checked net8.0 (run 1 of 2)
+      Checked net10.0 (run 2 of 2)
+      == net10.0 (2 project(s), 2 files with findings)
+      == net8.0 (1 project(s), 1 file with findings)
+      Run 1: 2 files changed:
+        src/Lib/Calc.cs
+        tests/Lib.Tests/CalcTests.cs
+      Checked net8.0 (run 1 of 2)
+      Checked net10.0 (run 2 of 2)
+      Run 2: 0 files changed, clean.
+      Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+    --- host-check-build.txt (last 12 lines)
+      Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+      Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+      Building Fixture.sln in Debug, Debug|x64, Debug|x86, Release, Release|x64, Release|x86 with warnings as errors, and a copy of HEAD to compare...
+      Debug: no findings, no new errors.
+      Debug|x64: no findings, no new errors.
+      Debug|x86: no findings, no new errors.
+      Release: no findings, no new errors.
+      Release|x64: no findings, no new errors.
+      Release|x86: no findings, no new errors.
+      Clean.
+    --- host-check.txt (last 12 lines)
+      Checking StyleBro's rules: nothing changed since the last clean 'bro format' here (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.
+      Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+      Clean.
+    --- host-format.txt (last 12 lines)
+      Multi-targeted: one 'dotnet format' run per target framework (net10.0, net8.0). net8.0: only the projects whose code compiles differently there.
+      Checked net8.0 (run 1 of 2)
+      Checked net10.0 (run 2 of 2)
+      == net10.0 (2 project(s), 2 files with findings)
+      == net8.0 (1 project(s), 1 file with findings)
+      Run 1: 2 files changed:
+        src/Lib/Calc.cs
+        tests/Lib.Tests/CalcTests.cs
+      Checked net8.0 (run 1 of 2)
+      Checked net10.0 (run 2 of 2)
+      Run 2: 0 files changed, clean.
+      Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+    --- init.txt (last 12 lines)
+          dotnet_diagnostic.BRO1505.severity, dotnet_diagnostic.BRO1503.severity, dotnet_diagnostic.BRO1306.severity,
+          csharp_space_between_method_call_parameter_list_parentheses,
+          csharp_space_between_method_declaration_parameter_list_parentheses.
+      
+      2 projects target several frameworks (src/Lib/Lib.csproj, tests/Lib.Tests/Lib.Tests.csproj).
+      Run 'bro format' instead of 'dotnet format' here: with IDE0055 on, 'dotnet format' crashes on multi-targeted
+      projects (Roslyn can't merge the target frameworks' copies of a file). The command runs it once per target framework.
+      Wrote the built-in rule severities to .editorconfig.
+      Set the preset version in Directory.Build.props (<StyleBroPreset>1.0</StyleBroPreset>): rules of newer releases stay off until you raise it.
+      To report them on build too: <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> in Directory.Build.props.
+      Tip: --agents-md writes a StyleBro section into AGENTS.md for AI coding agents.
+      Next: run 'bro format'. Plain 'dotnet format' also applies every other analyzer's and the compiler's fixes.
+    --- preview.txt (last 12 lines)
+        +    {
+        +        Assert.Equal(4, Lib.Calc.Twice(2));
+        +    }
+      Sample (BRO1001, BRO1106, src/Lib/Calc.cs; BRO1509, IDE0036 changed this file too):
+        -    public string Name = "";
+        +    public static int Twice(int x)
+        +    {
+        +        return x * 2;
+        +    }
+      Full diff: .git/stylebro-preview.patch (87 lines)
+      Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+      Done in 13s.
+    --- test.txt (last 12 lines)
+      Test run for /home/user/fx63-b2/first-run-framework-merge/host/tests/Lib.Tests/bin/Debug/net10.0/Lib.Tests.dll (.NETCoreApp,Version=v10.0)
+      Test run for /home/user/fx63-b2/first-run-framework-merge/host/tests/Lib.Tests/bin/Debug/net8.0/Lib.Tests.dll (.NETCoreApp,Version=v8.0)
+      A total of 1 test files matched the specified pattern.
+      A total of 1 test files matched the specified pattern.
+      
+      Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 7 ms - Lib.Tests.dll (net10.0)
+      
+      Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 7 ms - Lib.Tests.dll (net8.0)
+    --- untouched-build.txt (last 12 lines)
+      
+      Build succeeded.
+          0 Warning(s)
+          0 Error(s)
+      
+      Time Elapsed 00:00:03.27
+| Shape | Result | Time |
+| --- | --- | --- |
+| first-run-framework-merge | FAIL: host's format made a net8.0 run of its own:
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net8.0). net8.0: only the projects whose code compiles differently there.
+Checked net8.0 (run 1 of 2)
+Checked net10.0 (run 2 of 2)
+== net10.0 (2 project(s), 2 files with findings)
+== net8.0 (1 project(s), 1 file with findings)
+Run 1: 2 files changed:
+  src/Lib/Calc.cs
+  tests/Lib.Tests/CalcTests.cs
+Checked net8.0 (run 1 of 2)
+Checked net10.0 (run 2 of 2)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+<br>dotnet-format's format made a net8.0 run of its own:
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net8.0). net8.0: only the projects whose code compiles differently there.
+Checked net8.0 (run 1 of 2)
+Checked net10.0 (run 2 of 2)
+== net10.0 (2 project(s), 2 files with findings)
+== net8.0 (1 project(s), 1 file with findings)
+Run 1: 2 files changed:
+  src/Lib/Calc.cs
+  tests/Lib.Tests/CalcTests.cs
+Checked net8.0 (run 1 of 2)
+Checked net10.0 (run 2 of 2)
+Run 2: 0 files changed, clean.
+Not checked: IDE0049: this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)
+ | 162 s |
+Work folder: /home/user/fx63-b2

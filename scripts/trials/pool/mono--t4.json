@@ -1,0 +1,25 @@
+{
+  "repo": "mono/t4",
+  "branch": "main",
+  "commit": "e128cfc9c86f4de2191cfe8ccbb58fccbe965096",
+  "csFiles": 94,
+  "tags": [
+    "library",
+    "app",
+    "multi-target",
+    "if-in-bodies",
+    "tabs",
+    "encoding"
+  ],
+  "setups": "Mono.TextTemplating.sln; .editorconfig with [*.cs] indent_style = tab (93 of 94 files tab-indented), Mono license headers framed by '//', AnalysisLevel latest-Recommended, LangVersion 10.0, Nerdbank.GitVersioning (needs the full history); netstandard2.0;net472;net6.0 libraries (net472/net48 only on Windows for some), dotnet-t4 net6.0 tool, tests net6.0;net7.0; Mono.TextTemplating.Build.csproj has a BOM, the .sln is CRLF (*.sln eol=crlf).",
+  "build": "ok",
+  "workaround": null,
+  "tests": "dotnet test Mono.TextTemplating.sln (DOTNET_ROLL_FORWARD=Major for net6.0/net7.0): 114 + 7 pass per framework. The untouched TreatWarningsAsErrors build fails (CA2263, CA1859).",
+  "usedIn": "trial 63",
+  "verified": {
+    "by": "trial 63 session",
+    "date": "2026-10-30",
+    "sdks": "10.0.113, 8.0.132"
+  },
+  "notes": "Targeted at trial 62's tab and encoding fixes (held: no space-indented lines added). Found: one-line members grouped in 133 of 203 pairs (BRO1505 separated them: init now counts stylebro_allow_adjacent_single_line_members), and the first format of a fresh clone ran net7.0 on its own (fixed)."
+}

@@ -1249,3 +1249,43 @@ engines (`.trials/README.md`, "Engine soak").
 - Environment: SDK 10.0.113 + 8.0.132; the trial feed in the user NuGet.Config; `-p:NuGetAudit=false`; net40 builds need
   `/usr/lib/mono/4.0-api` (linked to Microsoft.NETFramework.ReferenceAssemblies.net40 1.0.3); Rebus's tests take ~10 minutes
   per configuration.
+
+## Trial 63 (2026-10-30, not clean: owner "Not clean", tally 0; host soak: clean, the eighth clean soak with the host as the default)
+
+- Repos (three random plus one targeted): serilog/serilog-sinks-file, tonerdo/pose, NLog/NLog.Extensions.Logging (random,
+  seed 63: draws 56, 56, 37 of 95 entries; 0-90 are used, PolySharp needs SDK 11, Statiq.Framework is too large, so they
+  walked to 91 and 94; the third ran out and entries 95-103 were appended: ExtendedXmlSerializer too large, SuperSocket needs
+  workloads, 97 picked; `.trials/trial63/logs/picks.md`), mono/t4 (targeted at trial 62's fixes: tabs in 93 of 94 files,
+  Mono `//` headers, a BOM csproj; found with `.trials/trial63/shape.py`; added to the pool). Tested main 16988c8 (after
+  #320) plus this PR's commits: round 1 on 0.8.0-trial63.1 (`default`/`dotnet`), round 2 on .3 (all four,
+  `default2`/`dotnet2`). Logs: `.trials/trial63/<repo>/logs/`; the scripts are trial 62's.
+- One session, two lanes; the worker restarted twice (after round 2, during the local test runs). Wall clock: 21:18 start,
+  round 1 21:29-22:11, round 2 22:36-23:10, verdict 01:30.
+- NLog.Extensions.Logging: `using ExtractorDictionary = ConcurrentDictionary<Type, Func<object, KeyValuePair<string, object?>>>;`
+  inside the namespace: BRO1126 qualified it from the symbol, whose display drops a reference type's `?`, and the build broke
+  (CS8619/CS8624, check --build said Not clean). A nullable type argument now keeps its `?` (`QualifiedUsings.Expected`). Its
+  `.editorconfig` says `end_of_line = crlf` on an LF checkout (init's note, `end_of_line = unset`); its src/ projects import
+  only src/Directory.Build.props, and the preview added the package there too.
+- mono/t4: trial 62's fixes held (no space-indented lines; its own `.editorconfig` says tabs for C#). BRO1505 added ~130 blank
+  lines between one-line members t4 groups (`public void Clear () => session.Clear ();`): owner's decision, init writes
+  `stylebro_allow_adjacent_single_line_members = true` from 3 such pairs (133 of 203 here), and those pairs no longer count
+  for BRO1505's severity. The first format of each fresh clone made a net7.0 run that later runs merged with net6.0: loading
+  the projects evaluated Mono.TextTemplating.Tests' net6.0 before the restore, without Microsoft.NET.Test.Sdk's Program.cs
+  (a Compile item from its restored build props), and the plan reused it; the per-framework evaluations now go after
+  format's restore (fixture `first-run-framework-merge`, which needs LangVersion set: unset, each framework has its own C#
+  version and nothing merges). Fewer TWAE errors after StyleBro: the multi-target guard hides CA2263 (by design).
+- pose: snake_case and `m_` fields (2 `m_` fields renamed, as StyleCop's SA1308); 6 tests fail untouched in Debug only
+  (ILGenerator internals on a newer runtime). serilog-sinks-file: clean on both engines.
+- #312: `bro check` after a clean format answered from the record with the verdict and exit code of the full check after
+  deleting the record (Clean, 0) on all four and both engines; check --build said Clean (SF, PO, NL) or Not verified (t4:
+  the untouched CA1859 errors stop its projects) on both engines.
+- Every TWAE build (Debug, Release) failed or passed as untouched (NL CA2017, t4 CA1859), and the tests matched the untouched
+  code in round 2: SF 71 per framework, PO 20 + 6 failing (Debug) / 26 (Release), NL 143 + 34 per framework, t4 114 + 7 per
+  framework.
+- Host soak: no fallback; both rounds' trees, exit codes, verdicts, --json and logs identical on all four, every
+  Compare-Format run the same; none of the documented differences appeared. Format (s, host/dotnet-format, r2): NL 57/147,
+  t4 54/181, SF 22/49, PO 18/39; check --build: 93/116, 65/95, 38/42, 50/50; full check: 27/49, 25/46, 16/16, 12/10. Soak
+  (Compare-Format, check; format): NL 52/174; 43/132, t4 62/162; 39/151, SF 24/58; 19/42, PO 26/47; 16/41.
+- Environment: SDK 10.0.113 + 8.0.132; the trial feed in the user NuGet.Config; `-p:NuGetAudit=false`; t4's
+  Nerdbank.GitVersioning needs the full history (the trial clones from a full local clone); `pkill -f`/`pgrep -f` with a
+  pattern from the same command line killed the calling shell twice (use a bracketed pattern like `[I]nvoke-Mutations`).

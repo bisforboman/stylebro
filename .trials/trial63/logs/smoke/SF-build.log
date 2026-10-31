@@ -1,0 +1,18 @@
+  Determining projects to restore...
+  Restored /home/user/cand63/serilog-serilog-sinks-file/test/Serilog.Sinks.File.Tests/Serilog.Sinks.File.Tests.csproj (in 3.79 sec).
+  Restored /home/user/cand63/serilog-serilog-sinks-file/src/Serilog.Sinks.File/Serilog.Sinks.File.csproj (in 3.93 sec).
+  Restored /home/user/cand63/serilog-serilog-sinks-file/example/Sample/Sample.csproj (in 4.22 sec).
+  Serilog.Sinks.File -> /home/user/cand63/serilog-serilog-sinks-file/src/Serilog.Sinks.File/bin/Debug/netstandard2.0/Serilog.Sinks.File.dll
+  Serilog.Sinks.File -> /home/user/cand63/serilog-serilog-sinks-file/src/Serilog.Sinks.File/bin/Debug/net6.0/Serilog.Sinks.File.dll
+  Serilog.Sinks.File -> /home/user/cand63/serilog-serilog-sinks-file/src/Serilog.Sinks.File/bin/Debug/net9.0/Serilog.Sinks.File.dll
+  Serilog.Sinks.File -> /home/user/cand63/serilog-serilog-sinks-file/src/Serilog.Sinks.File/bin/Debug/net8.0/Serilog.Sinks.File.dll
+  Sample -> /home/user/cand63/serilog-serilog-sinks-file/example/Sample/bin/Debug/net8.0/Sample.dll
+  Serilog.Sinks.File.Tests -> /home/user/cand63/serilog-serilog-sinks-file/test/Serilog.Sinks.File.Tests/bin/Debug/net8.0/Serilog.Sinks.File.Tests.dll
+  Serilog.Sinks.File.Tests -> /home/user/cand63/serilog-serilog-sinks-file/test/Serilog.Sinks.File.Tests/bin/Debug/net9.0/Serilog.Sinks.File.Tests.dll
+  Sample -> /home/user/cand63/serilog-serilog-sinks-file/example/Sample/bin/Debug/net48/Sample.exe
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:24.51

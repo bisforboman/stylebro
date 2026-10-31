@@ -1,0 +1,48 @@
+Note: switching to '8569aec80b5f567cb1918d69dddb69e82cf25a51'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+Note: switching to '8569aec80b5f567cb1918d69dddb69e82cf25a51'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+== soak2-src: dotnet-format check
+== soak2-src: host check
+== soak2-src: dotnet-format format
+== soak2-src: host format
+== soak2-src: dotnet-format recheck
+== soak2-src: host recheck
+Times (soak2-src):
+  dotnet-format check        46.9 s
+  host check                 25.7 s
+  dotnet-format format       40.6 s
+  host format                15.6 s
+  dotnet-format recheck       0.5 s
+  host recheck                0.5 s
+Same (soak2-src): exit codes, output, trees and reports.
