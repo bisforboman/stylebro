@@ -1,0 +1,18 @@
+Using ArchUnit.sln; its solution filters (ArchUnitNET.mtp.slnf, ArchUnitNET.vstest.slnf) are parts of it: name one to run on only its projects, e.g. 'bro format ArchUnitNET.mtp.slnf'.
+Checking StyleBro's rules and the built-in rules init and migrate turn on (141 ids), changing nothing; --all checks every analyzer's and compiler fix too.
+No whitespace pass: IDE0055 is off in the settings, so no whitespace formatting: style and analyzer fixes only.
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net462, net472, netstandard2.0).
+Configurations: runs for Release (ArchUnitNETTests) too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.
+Checked net472 (run 1 of 5)
+Checked netstandard2.0 (run 2 of 5)
+Checked net10.0 (run 3 of 5)
+Checked net462 (run 4 of 5)
+Checked net10.0, Release (run 5 of 5)
+Formatting a copy: net10.0 (25 project(s), 5 files with findings)
+Formatting a copy: net10.0, Release (1 project(s), 5 files with findings)
+== net10.0 (25 project(s))
+'dotnet format' had warnings loading the workspace in its net10.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.
+== net10.0, Release (1 project(s))
+Building ArchUnit.sln in Debug, Debug|x64, Debug|x86, Release, Release|x64, Release|x86 with warnings as errors, and a copy of HEAD to compare...
+Debug: no findings, no new errors.

@@ -3,3 +3,5 @@ setup	0	23s	bash -c printf "<Project>\n  <ItemGroup>\n    <PackageReference Incl
 format	0	167s	bro format
 check	0	111s	bro check
 check-json	0
+check-full	0	176s	bro check
+checkbuild	0	582s	bro check --build
