@@ -1,0 +1,9 @@
+Using ArchUnit.sln; its solution filters (ArchUnitNET.mtp.slnf, ArchUnitNET.vstest.slnf) are parts of it: name one to run on only its projects, e.g. 'bro format ArchUnitNET.mtp.slnf'.
+Fixing StyleBro's rules, xunit.analyzers' assertion rules where they are warnings or errors and the built-in rules init and migrate turn on (161 ids); --all applies every analyzer's and compiler fix.
+No whitespace pass: IDE0055 is off in the settings, so no whitespace formatting: style and analyzer fixes only.
+xUnit: xunit.analyzers 1.27.0 is restored here, and from 1.24 on its code fixes have no Fix All, which 'dotnet format' needs: its assertion fixes aren't applied (the build still reports their warnings; your IDE fixes them one at a time).
+Held back: IDE0049: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; a newer .NET SDK's 'dotnet format' applies them where the guard allows.
+Multi-targeted: one 'dotnet format' run per target framework (net10.0, net462, net472, netstandard2.0).
+Configurations: runs for Release (ArchUnitNETTests) too: their code compiles differently there ('#if DEBUG', files or docs of that configuration), and the build of every configuration gets the same fixes and checks.
+Checked net472 (run 1 of 5)
+Checked netstandard2.0 (run 2 of 5)

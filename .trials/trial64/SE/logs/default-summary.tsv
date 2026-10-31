@@ -9,3 +9,5 @@ checkbuild-json	0
 twae-Debug	0	8s	twae Debug
 test-Debug	0	14s	env CFG=Debug bash -c dotnet test serilog-expressions.sln -c $CFG
 twae-Release	0	12s	twae Release
+test-Release	0	248s	env CFG=Release bash -c dotnet test serilog-expressions.sln -c $CFG
+DONE
