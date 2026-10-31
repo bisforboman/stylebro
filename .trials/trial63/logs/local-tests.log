@@ -1,0 +1,29 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  StyleBro.FormatHost -> /home/user/stylebro/src/StyleBro.FormatHost/bin/Debug/net8.0/StyleBro.FormatHost.dll
+  StyleBro.Analyzers -> /home/user/stylebro/src/StyleBro.Analyzers/bin/Debug/netstandard2.0/StyleBro.Analyzers.dll
+  StyleBro.CodeFixes -> /home/user/stylebro/src/StyleBro.CodeFixes/bin/Debug/netstandard2.0/StyleBro.CodeFixes.dll
+  StyleBro.Migrate -> /home/user/stylebro/src/StyleBro.Migrate/bin/Debug/net8.0/StyleBro.Migrate.dll
+  StyleBro.Tests -> /home/user/stylebro/tests/StyleBro.Tests/bin/Debug/net10.0/StyleBro.Tests.dll
+Test run for /home/user/stylebro/tests/StyleBro.Tests/bin/Debug/net10.0/StyleBro.Tests.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:02:33.66]     StyleBro.Tests.MigrationTests.Migrate_WithALockedFile_WritesNothing [FAIL]
+  Failed StyleBro.Tests.MigrationTests.Migrate_WithALockedFile_WritesNothing [29 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 1
+Actual:   0
+  Stack Trace:
+     at StyleBro.Tests.MigrationTests.<Migrate_WithALockedFile_WritesNothing>b__542_1() in /home/user/stylebro/tests/StyleBro.Tests/MigrationTests.Trial28Init.cs:line 58
+   at StyleBro.Tests.MigrationTests.Capture(Action action) in /home/user/stylebro/tests/StyleBro.Tests/MigrationTests.cs:line 1647
+   at StyleBro.Tests.MigrationTests.Migrate_WithALockedFile_WritesNothing() in /home/user/stylebro/tests/StyleBro.Tests/MigrationTests.Trial28Init.cs:line 58
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+Failed!  - Failed:     1, Passed:  2815, Skipped:     0, Total:  2816, Duration: 5 m 22 s - StyleBro.Tests.dll (net10.0)
+tests rc=1
