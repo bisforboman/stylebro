@@ -1,2 +1,5 @@
 preview	2	574s	bro preview init --engine dotnet-format
 setup	0	20s	bash -c printf "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"StyleBro.Analyzers\" Version=\"${V:-0.8.0-trial64.1}\" PrivateAssets=\"all\" />\n  </ItemGroup>\n</Project>\n" > Directory.Build.props && git add -N Directory.Build.props && git diff --stat && bro init --write
+format	2	552s	bro format --engine dotnet-format
+check	2	398s	bro check --engine dotnet-format
+check-json	2
