@@ -122,14 +122,13 @@ A brief for a container run (written per trial, not committed) must give the age
 Start/Remove lines, say that every command runs through `docker exec` (paths `/work`, `/logs`, `/feed`), to clone inside
 the container, and the no-desktop rule.
 
-## Engine soak (until the next release)
+## Engine soak (dropped 2026-11-02)
 
 Since 2026-10-25 the in-process host is `bro format`'s default engine
 ([decision](../docs/decisions/2026-10-25-the-format-host-becomes-the-default-engine.md)); `--engine dotnet-format` is the old
-one. Until the next release, every trial still runs its soak on both: `scripts/format-speed/Compare-Format.ps1` on each
-repository (it names both engines, `check`, `format`, `check`), plus `bro check --build` with each engine. A difference
-between the engines makes the soak not clean (decision of 2026-10-23); the trial's own commands use the default (host).
-Allowed differences: the load-warning note (compared unordered), the old engine's loose load of a referenced project, C#
-projects that reference a Visual Basic project (Not checked on the old engine), and the old engine's duplicate finding lines
-from a second instance of a multi-targeted referenced project in `check` on unformatted code (compare the distinct findings
-as sets; [decision](../docs/decisions/2026-10-29-the-old-engines-duplicate-findings-from-a-second-project.md), trial 60).
+one. Trials 52-64 ran a soak on both engines (`scripts/format-speed/Compare-Format.ps1`, `bro check --build` per engine) and
+all nine were clean, so the owner dropped it
+([decision](../docs/decisions/2026-11-02-trials-stop-comparing-the-two-engines.md)). From trial 65 on a trial runs each
+repository with the default engine (the host) only and says whether the host fell back to `dotnet format` and why. The old
+engine stays available as `--engine dotnet-format` for at least one release, and `Compare-Format.ps1` stays for targeted
+checks. The verdict question is only "is the trial clean".

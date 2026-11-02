@@ -1,8 +1,8 @@
 # First-run trials
 
 One section per trial (repositories, what broke, what was fixed, the owner's verdict and the clean-trial tally, environment notes). A new trial adds its `## Trial NN` section at the end of this file. Moved from CLAUDE.md on 2026-10-23.
-Since 2026-10-25 the host is `bro format`'s default engine; until the next release each trial's soak still compares both
-engines (`.trials/README.md`, "Engine soak").
+Since 2026-10-25 the host is `bro format`'s default engine; trials 52-64 compared both engines in a soak, and since trial 65
+(2026-11-02) trials use the host only (`.trials/README.md`, "Engine soak").
 
 ## Trial 22 init/migrate fixes (2026-10-15)
 
