@@ -78,4 +78,21 @@ public sealed partial class MigrationTests
 
         Assert.Equal(width, Conventions.CSharpierPrintWidth(root, settings));
     }
+
+    [Fact]
+    public void TheWhitespacePass_LeavesOutAHiddenIde0055_OnlyWhereCSharpierFormats()
+    {
+        // Trial 65, FlameCsv: tools/Bench/.editorconfig says IDE0055 = silent; CSharpier undid the whitespace pass there.
+        Write("src/Lib/Lib.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
+        Write("src/Lib/A.cs", "class A\n{\n}\n");
+        Write("tools/Bench/Bench.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
+        Write("tools/Bench/B.cs", "class B\n{\n}\n");
+        Write(".editorconfig", "root = true\n\n[*.cs]\ndotnet_diagnostic.IDE0055.severity = warning\n");
+        Write("tools/Bench/.editorconfig", "[*.cs]\ndotnet_diagnostic.IDE0055.severity = silent\n");
+
+        Assert.Null(FormatCommand.WhitespaceExclusions(root)); // no CSharpier: silent still gets the whitespace pass
+
+        Write(".csharpierrc.yaml", "printWidth: 110\n");
+        Assert.Equal(["tools/Bench/"], FormatCommand.WhitespaceExclusions(root));
+    }
 }

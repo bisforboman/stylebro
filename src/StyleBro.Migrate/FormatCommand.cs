@@ -1557,6 +1557,7 @@ internal static partial class FormatCommand
         }
 
         var set = ConfigSet(root, texts);
+        var csharpier = Conventions.CSharpier(root) is not null;
         var top = Path.GetFullPath(root);
         var off = new List<string>();
         var onFolders = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -1565,7 +1566,10 @@ internal static partial class FormatCommand
             var relative = Path.GetRelativePath(top, file).Replace(Path.DirectorySeparatorChar, '/');
 
             // An id's severity (a .globalconfig's too) beats a category's or the bulk one, as in the compiler.
-            if (Severity(set, file, "IDE0055") == Microsoft.CodeAnalysis.ReportDiagnostic.Suppress)
+            // With CSharpier laying the code out, a hidden IDE0055 ('silent') is off too (trial 65, FlameCsv: tools/Bench/.editorconfig
+            // says silent; the whitespace pass ran there and CSharpier undid it, "Not clean" with no way out).
+            var severity = Severity(set, file, "IDE0055");
+            if (severity == Microsoft.CodeAnalysis.ReportDiagnostic.Suppress || (severity == Microsoft.CodeAnalysis.ReportDiagnostic.Hidden && csharpier))
             {
                 off.Add(relative);
                 continue;
