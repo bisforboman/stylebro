@@ -1,0 +1,9 @@
+== SC-test: dotnet test /home/user/cand65/serilog-serilog-sinks-console/serilog-sinks-console.sln (20:12:44)
+   exit 0 (20:13:03) 0 error lines
+== AR-test: dotnet test /home/user/cand65/stefanprodan-AspNetCoreRateLimit/AspNetCoreRateLimit.sln (20:13:03)
+   exit 0 (20:13:17) 0 error lines
+== DE-test: dotnet test /home/user/cand65/dynamicexpresso-DynamicExpresso/DynamicExpresso.sln (20:13:17)
+   exit 1 (20:13:41) 0 error lines
+== FC-build: dotnet build /home/user/cand65/ovska-FlameCsv/FlameCsv.sln (20:13:41)
+   exit 0 (20:14:18) 0 error lines
+SMOKE-DONE

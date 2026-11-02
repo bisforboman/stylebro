@@ -1,0 +1,24 @@
+{
+  "repo": "ovska/FlameCsv",
+  "branch": "main",
+  "commit": "145fad86e060192ddc7adf0ad3064ef6d1b119cf",
+  "csFiles": 413,
+  "tags": [
+    "library",
+    "multi-target",
+    "csharpier",
+    "generator",
+    "twae-no"
+  ],
+  "setups": "FlameCsv.sln; CSharpier 1.1.1 local tool (.csharpierrc.yaml), .editorconfig files incl. tools/Bench (IDE0055 silent), in-solution source generator, signed.",
+  "build": "ok",
+  "workaround": null,
+  "tests": "dotnet test FlameCsv.sln -c Debug|Release --blame-hang-timeout 5m; 578 Reading tests fail untouched in Debug, one test hangs in Release without the timeout.",
+  "usedIn": "trial 65",
+  "verified": {
+    "by": "trial 65 session",
+    "date": "2026-11-02",
+    "sdks": "10.0.114, 8.0.133"
+  },
+  "notes": "Targeted at trial 64's fix (CSharpier and checked/unchecked): BoundedMemory.Creation.cs has checked blocks; found a hidden IDE0055 in a sub-folder and a doc-comment auto-generated header."
+}
