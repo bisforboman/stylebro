@@ -32,6 +32,25 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
+    public void CheckBuild_InSeveralConfigurations_MakesTheNextRunRestore()
+    {
+        // Trial 65, AspNetCoreRateLimit: the Demo project takes project references in Debug and packages in Release; the Release
+        // build's restore output made every later 'check' fail to load the projects ("The target CoreCompile does not exist").
+        var (project, assets, cache, _) = RestoredProject();
+        List<(string Project, string AssetsFile)> projects = [(project, assets)];
+        var stamps = Path.Combine(root, "stamps");
+
+        FormatCommand.ForgetRestore(() => [assets], 1); // one configuration leaves what format's own restore leaves
+        Assert.True(File.Exists(cache));
+        Assert.True(FormatCommand.RestoreIsCurrent(root, projects, stamps));
+
+        FormatCommand.ForgetRestore(() => [assets, string.Empty], 2);
+        Assert.False(File.Exists(cache));
+        Assert.False(FormatCommand.RestoreIsCurrent(root, projects, stamps));
+        FormatCommand.ForgetRestore(() => [assets], 2); // already gone
+    }
+
+    [Fact]
     public void Format_SkipsTheRestore_OnlyWhenItsOutputIsCurrent()
     {
         // PalCalc: 'dotnet restore' of an already restored solution took 17.5 s before every format and verify.

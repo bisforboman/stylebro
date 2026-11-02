@@ -269,6 +269,7 @@ internal static partial class FormatCommand
         }
         finally
         {
+            ForgetRestoreOfBuilds(workspacePath, configurations.Count);
             if (temp is not null && Directory.Exists(temp))
             {
                 PreviewCommand.Delete(temp);
@@ -430,6 +431,43 @@ internal static partial class FormatCommand
         var (name, platform) = SplitConfiguration(configuration);
         var exitCode = Dotnet(folder, null, ["build", workspace, "-c", name, .. PlatformProperty(platform), "-p:TreatWarningsAsErrors=true", "-p:NuGetAudit=false", "--no-incremental", "-nologo", "-nodeReuse:false", "-clp:NoSummary"], output.Add);
         return (exitCode, output);
+    }
+
+    /// <summary>
+    /// After builds in several configurations the restore output is the last one's, and a project whose references depend on the
+    /// configuration (trial 65, AspNetCoreRateLimit: the Demo project takes project references in Debug and the published packages
+    /// in Release) leaves assets the next Debug load can't use: every 'check' after 'check --build' said "Not checked ... The
+    /// target "CoreCompile" does not exist" until a 'dotnet restore'. Deleting the projects' project.nuget.cache makes the next
+    /// run restore (<see cref="RestoreIsCurrent"/> needs it), for the default configuration. One configuration leaves what
+    /// format's own restore leaves, so nothing is deleted then.
+    /// </summary>
+    private static void ForgetRestoreOfBuilds(string workspacePath, int configurationCount)
+    {
+        try
+        {
+            ForgetRestore(() => ReadProjects(workspacePath).Values.Select(p => p.AssetsFile), configurationCount);
+        }
+        catch (Exception e) when (e is ToolException or IOException or UnauthorizedAccessException)
+        {
+        }
+    }
+
+    /// <summary>
+    /// Deletes the project.nuget.cache next to each of the <paramref name="assetsFiles"/> after builds in
+    /// <paramref name="configurationCount"/> configurations (a missing one is skipped), so the next restore isn't taken for
+    /// current. Not after one configuration: that leaves what format's own restore leaves.
+    /// </summary>
+    public static void ForgetRestore(Func<IEnumerable<string>> assetsFiles, int configurationCount)
+    {
+        if (configurationCount < 2)
+        {
+            return;
+        }
+
+        foreach (var assets in assetsFiles().Where(a => a.Length > 0))
+        {
+            File.Delete(Path.Combine(Path.GetDirectoryName(assets)!, "project.nuget.cache"));
+        }
     }
 
     /// <summary>The names of the workspace's C# projects a configuration builds (<see cref="NotBuiltFolders"/> left out), none when they can't be read.</summary>

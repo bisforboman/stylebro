@@ -135,6 +135,13 @@ function Test-Verdict($result, [int]$expected, [string]$reason, $failures) {
 }
 
 # The exit code and output pattern a step expects: the engine's own (EngineExpect/EngineReasons, keyed by engine) first.
+# Deletes format's clean record of a folder (FormatCommand.KeptRecord), so the next check does all of its work instead of answering from it.
+function Remove-KeptRecord([string]$root) {
+    $full = [IO.Path]::GetFullPath($root).TrimEnd([IO.Path]::DirectorySeparatorChar).ToUpperInvariant()
+    $hash = [BitConverter]::ToString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($full))).Replace('-', '').Substring(0, 16)
+    Remove-Item (Join-Path ([IO.Path]::GetTempPath()) "stylebro-kept/$hash.tsv") -ErrorAction SilentlyContinue
+}
+
 function Expected($spec, [string]$step, [string]$engine = '') {
     $expect = if ($engine -and $spec.EngineExpect -and $spec.EngineExpect.Contains($engine)) { $spec.EngineExpect[$engine] } else { $spec.Expect }
     $reasons = if ($engine -and $spec.EngineReasons -and $spec.EngineReasons.Contains($engine)) { $spec.EngineReasons[$engine] } else { $spec.Reasons }
@@ -222,10 +229,12 @@ foreach ($file in $chosen) {
             if ($spec.Before) { & $spec.Before $clone $context }
             $option = if ($engine -eq 'host') { @() } else { @('--engine', $engine) }
             $steps = [ordered]@{}
-            foreach ($step in 'format', 'check', 'check-build') {
-                [string[]]$arguments = switch ($step) { 'format' { @('format') } 'check' { @('check') } 'check-build' { @('check', '--build') } }
+            # 'check-again' is a full check (the record deleted) after check --build (trial 65, AspNetCoreRateLimit: the builds' restore output made it fail to load): the same verdict as the first check.
+            foreach ($step in 'format', 'check', 'check-build', 'check-again') {
+                [string[]]$arguments = switch ($step) { 'format' { @('format') } 'check' { @('check') } 'check-build' { @('check', '--build') } 'check-again' { @('check') } }
+                if ($step -eq 'check-again') { Remove-KeptRecord $clone }
                 $result = Run-Bro $clone $logs "$engine-$step" ($arguments + @($spec.Args | Where-Object { $_ }) + $option)
-                $expected, $reason = Expected $spec $step $engine
+                $expected, $reason = Expected $spec ($step -replace '-again$', '') $engine
                 Test-Verdict $result $expected $reason $failures
                 $steps[$step] = $result
                 if ($step -eq 'format') { $steps['tree'] = Tree $clone }
