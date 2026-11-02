@@ -409,6 +409,24 @@ internal static partial class FormatCommand
 
     public static bool StopsCompiling(BuildMessage message) => message.Error && !message.InSource && !EmitErrors.Contains(message.Id);
 
+    /// <summary>
+    /// Deletes the project.nuget.cache next to each of the <paramref name="assetsFiles"/> after builds in
+    /// <paramref name="configurationCount"/> configurations (a missing one is skipped), so the next restore isn't taken for
+    /// current. Not after one configuration: that leaves what format's own restore leaves.
+    /// </summary>
+    public static void ForgetRestore(Func<IEnumerable<string>> assetsFiles, int configurationCount)
+    {
+        if (configurationCount < 2)
+        {
+            return;
+        }
+
+        foreach (var assets in assetsFiles().Where(a => a.Length > 0))
+        {
+            File.Delete(Path.Combine(Path.GetDirectoryName(assets)!, "project.nuget.cache"));
+        }
+    }
+
     /// <summary>Runs <paramref name="action"/> with <see cref="HookVariable"/> set to <paramref name="hook"/> (every MSBuild node inherits it).</summary>
     private static T WithHook<T>(string hook, Func<T> action)
     {
@@ -447,26 +465,9 @@ internal static partial class FormatCommand
         {
             ForgetRestore(() => ReadProjects(workspacePath).Values.Select(p => p.AssetsFile), configurationCount);
         }
-        catch (Exception e) when (e is ToolException or IOException or UnauthorizedAccessException)
+        catch (Exception e) when (e is ToolException or IOException or UnauthorizedAccessException or AggregateException or System.ComponentModel.Win32Exception)
         {
-        }
-    }
-
-    /// <summary>
-    /// Deletes the project.nuget.cache next to each of the <paramref name="assetsFiles"/> after builds in
-    /// <paramref name="configurationCount"/> configurations (a missing one is skipped), so the next restore isn't taken for
-    /// current. Not after one configuration: that leaves what format's own restore leaves.
-    /// </summary>
-    public static void ForgetRestore(Func<IEnumerable<string>> assetsFiles, int configurationCount)
-    {
-        if (configurationCount < 2)
-        {
-            return;
-        }
-
-        foreach (var assets in assetsFiles().Where(a => a.Length > 0))
-        {
-            File.Delete(Path.Combine(Path.GetDirectoryName(assets)!, "project.nuget.cache"));
+            // The projects can't be read now: nothing to forget.
         }
     }
 
