@@ -298,3 +298,55 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
   surviving entries (#91, #92); test edits can stop exercising a guard.
 - A "conflict" right after a push is often GitHub recomputing: watchers should require DIRTY several times.
 - Agents squashing onto a moved main can revert other PRs' changes: check a PR's file list before trusting it.
+
+## Moved from CLAUDE.md (2026-11-02)
+
+History that CLAUDE.md used to carry beside its rules; the rules themselves stay there.
+
+- **Release policy**: user's decision, 2026-09-30: don't publish a version for every batch of rules while the project
+  is starting out; release again once there's a critical mass. Since 2026-10-03 (user: "don't focus on releases yet,
+  I'll let you know when we can do that"): don't suggest releases at all.
+- **Stable 1.0**: owner's decisions of 2026-10-11 (docs/decisions/2026-10-11-when-stylebro-goes-stable.md). From
+  0.1.0-alpha.5 on, release.yml also packs `bro` (StyleBro.Tool) with the same version.
+- **Name**: renamed from "Kempt" (pure text and file-name replacement). Checked 2026-09-29: the NuGet ids `StyleBro` and
+  `StyleBro.Analyzers` were free, as was a `stylebro` GitHub user or organisation, and no similar C# project existed.
+- **Known open questions, all answered**: `dotnet format` does pick up code fixes from analyzers referenced as
+  `ProjectReference OutputItemType="Analyzer"` (as in samples/Messy); help links and `PackageProjectUrl` point to
+  `github.com/bisforboman/stylebro`.
+- **Line endings**: the C# files under src/ and tests/ were normalized to LF on 2026-09-30; a few had become mixed from
+  scripted edits inserting CRLF, which then made exact-text replacements fail.
+- **verify-package.ps1** (2026-10-02, CI and release.yml): packs StyleBro.Analyzers as 0.0.0-verify into a temp feed,
+  restores it (isolated RestorePackagesPath) into a project outside the repository and checks what only the package's
+  build targets do: the preset reaches the compiler (BRO1112 off, BRO1106 on), `StyleBroPreset=none`, `init --write` +
+  `dotnet format` (IDE0040/IDE0036/BRO1106 fixed, preset option applied, second run clean), baseline. Verified that it
+  fails (3 checks) with the old GlobalAnalyzerConfigFiles targets.
+- **The self-check** (2026-10-02): its first run found about 535 findings (190 BRO1601 inheritdoc, 144+144
+  BRO1107/BRO1108 on `VerifyFixAsync("""...""", """...""")` in tests, BRO1303 unified `_field`/`field` to `field`); 142
+  files changed, it built, 397 tests passed, and a second run was clean. The push of 2026-10-03 failed CI on doc
+  summaries and blank lines in new code, hence "run the self-check before pushing".
+- **Two copies of every fixer** (found 2026-10-03): `dotnet format` on a sample also loads the referenced
+  StyleBro.Analyzers/CodeFixes projects, which carry the published StyleBro (self-check) as analyzers; with two fixers
+  for one rule it picks either, so verify-format sometimes tested the release, not the code (BRO1519's blank lines came
+  and went: 1 run in 3-4). verify-format.ps1 has set `StyleBroSelf=none` since (an explicit value wins in
+  Directory.Build.props). The CI self-check (`dotnet format StyleBro.slnx`) can likewise pick the dev fixers through
+  Messy's project references; harmless while they agree.
+- **samples/MultiTarget** does not reproduce the old linked-file bug (no minimal repro was found); the reference for
+  that bug is Newtonsoft.Json (8 target frameworks) with all rules in the real-world run.
+- **PR pipeline**: 2026-10-03, user's request: "verify new changes before merging to main". Scoped PR runs: owner's
+  decision, 2026-10-09. The real-world check for a second run that still changes files: since 2026-10-04. Jellyfin,
+  FluentValidation, eShopOnWeb and Mapperly moved to ubuntu-26.04 on 2026-10-10, same results as on Windows;
+  Serilog/MediatR lose their net462 findings on Linux. The nightly mutation run went to 8 shards on 2026-10-18 (it
+  outgrew 4 x 60 minutes).
+- **Fewer conflicts** (2026-10-18): the measurements behind the rules are in docs/decisions/2026-10-18-fewer-pr-conflicts.md.
+- **Asking the owner** (2026-10-17, owner: "Remember to prompt me when you want any input from me").
+- **Decision log**: user's request, 2026-10-03; split from the single docs/decisions.md on 2026-10-11 so parallel PRs
+  don't conflict (that page now only points to the folder). **Backlog**: user's request, 2026-10-03 ("easier to track
+  progress and goals"); not committed since 2026-10-11 (every rule PR changed it). After StyleCop parity (2026-10-03,
+  the user chose all four directions) its "Work beyond single rules" list held hardening, the last parity items,
+  adoption polish and a survey of other analyzers. The SDK rules that broke multi-targeted projects (IDE0011, IDE0040,
+  IDE0047, IDE0048, IDE2000/2002/2003) have since been replaced by StyleBro rules (docs/ci.md).
+- **skipped.psd1** and **differences-from-stylecop.md**: user's requests of 2026-10-01 ("so they can easily be
+  revisited later", "so it's obvious later").
+- **Package name**: StyleBro.Tool since 2026-10-18 (owner's decision, docs/decisions/2026-10-18-the-bro-command-in-stylebrotool.md);
+  it was `stylebro-migrate` in StyleBro.Migrate. The `stylecop` style (2026-10-18, owner) only names the default.
+- **Release setup** (Trusted Publishing, environments, the first 401): docs/notes/release.md.
