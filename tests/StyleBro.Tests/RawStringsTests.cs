@@ -11,9 +11,6 @@ public sealed class RawStringsTests
     // moq4's MockSetupGeneratorTests.Usage, as the fix for BRO1521 leaves it (the arrow on the literal's line).
     private const string Start = "class C\n{\n    static string Usage(string type)\n        => $$\"\"\"\n";
 
-    private static string Source(string firstLine = "        static class {{name}}", string closingBraceLine = "        }", string callLine = "            static object Run() => Moq.Mock.Of<{{type}}>();")
-        => Start + firstLine + "\n        {\n" + callLine + "\n" + closingBraceLine + "\n        \"\"\";\n}\n";
-
     [Fact]
     public void ALiteralThatSaysTheSame_IsTheSame()
     {
@@ -79,4 +76,7 @@ public sealed class RawStringsTests
         Assert.Equal(Source(), (await kept.GetDocument(id)!.GetTextAsync()).ToString());
         Assert.Equal(Source().Replace("static string", "private static string", StringComparison.Ordinal), (await allowed.GetDocument(id)!.GetTextAsync()).ToString());
     }
+
+    private static string Source(string firstLine = "        static class {{name}}", string closingBraceLine = "        }", string callLine = "            static object Run() => Moq.Mock.Of<{{type}}>();") =>
+        Start + firstLine + "\n        {\n" + callLine + "\n" + closingBraceLine + "\n        \"\"\";\n}\n";
 }

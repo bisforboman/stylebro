@@ -86,6 +86,7 @@ public static class RawStrings
                 case LiteralExpressionSyntax { Token: { } token } when token.IsKind(SyntaxKind.MultiLineRawStringLiteralToken):
                     values.Add(Unindented(node.ToString()));
                     break;
+
                 case InterpolatedStringExpressionSyntax { StringStartToken: { } start } interpolated when start.IsKind(SyntaxKind.InterpolatedMultiLineRawStringStartToken):
                     // The literal's source (a text token's own text leaves the margin out), each hole one placeholder.
                     var text = interpolated.ToString();
