@@ -1433,7 +1433,10 @@ Since 2026-10-25 the host is `bro format`'s default engine; trials 52-64 compare
 - Environment: SDK 10.0.114 + 8.0.133; the trial feed added with `dotnet nuget add source`; `-p:NuGetAudit=false`;
   `DOTNET_ROLL_FORWARD=Major`; moq4's src/Directory.props `RestoreAdditionalProjectSources` (kzu.blob.core.windows.net, 403) deleted;
   SecurityHeaders' global.json lowered; MSBuild `-getProperty` and `--files` runs (80 s) were enough to bisect the moq4 findings.
-- Owner's answers (2026-11-03): "Not clean", tally 0; a file the raw string guard keeps makes format and check say Not verified
-  (decision `2026-11-03-trial-66-not-clean-and-a-kept-raw-string-file-is-not.md`, backlog 078, not done in this PR).
+- Owner's answers (2026-11-03): "Not clean", tally 0; a file the raw string guard keeps is Not verified, in this PR (decision
+  `2026-11-03-trial-66-not-clean-and-a-kept-raw-string-file-is-not.md`). Done for `bro format`: the kept file is a
+  `Not checked:` line, exit 3 (moq4's file, checked with `--files`). NOT done for `bro check`: it applies no fix, so nothing is
+  kept, and on the formatted tree the host's IDE0055 analysis does not report the file while the build's does, so
+  check says Clean (exit 0) next to `check --build` Not clean (exit 2) and format Not verified (exit 3); backlog 078.
 - CI on #325: `Real world (Mediator)` failed on the first push: the guard also stopped BRO1138's fix, which turns plain strings into
   raw ones and back on purpose (4 findings left); BRO1138 is exempt now (`RawStrings.KeepAsync` takes the rule id).

@@ -1,4 +1,5 @@
 using StyleBro.Host;
+using StyleBro.Migrate;
 
 namespace StyleBro.Tests;
 
@@ -78,6 +79,17 @@ public sealed class RawStringsTests
         Assert.Equal(Source(), (await kept.GetDocument(id)!.GetTextAsync()).ToString());
         Assert.Equal(Source(firstLine: "         static class {{name}}"), (await converted.GetDocument(id)!.GetTextAsync()).ToString());
         Assert.Equal(Source().Replace("static string", "private static string", StringComparison.Ordinal), (await allowed.GetDocument(id)!.GetTextAsync()).ToString());
+    }
+
+    [Fact]
+    public void AKeptFile_IsAGap_SoFormatAndCheckEndNotVerified()
+    {
+        var line = RawStrings.GapLine(Path.Combine(Environment.CurrentDirectory, "src", "A.cs"), "the fix for IDE0055");
+
+        Assert.Equal("Not checked: src/A.cs: the fix for IDE0055 would change the text of a raw string literal, so the file was left as it was", line);
+        Assert.True(FormatCommand.IsGapLine(line));
+        Assert.Single(FormatCommand.Unverified([line]));
+        Assert.StartsWith("Not checked: /elsewhere/A.cs: ", RawStrings.GapLine("/elsewhere/A.cs", "x"), StringComparison.Ordinal);
     }
 
     private static string Source(string firstLine = "        static class {{name}}", string closingBraceLine = "        }", string callLine = "            static object Run() => Moq.Mock.Of<{{type}}>();") =>

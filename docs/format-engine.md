@@ -67,7 +67,7 @@ only the last one in what a fix writes:
   projects that reference them.
 - **A raw string literal keeps its text.** A fix or the whitespace formatting may move a `"""` literal (all its lines
   and the closing quotes together), but when it would change what the literal says, the host puts the file back as it was
-  before that step and prints `Kept <file> as it was: ... would change the text of a raw string literal.` Without this,
+  before that step and names the file in a `Not checked:` line, so format and check end Not verified (exit 3). Without this,
   IDE0055's formatter added a space to two lines of a `$$"""` literal in every run of one test project (moq4, trial 66), so
   `bro format` never settled and the program's text changed. The file's other formatting findings stay then: fix them by hand,
   or turn the rule off for the file in `.editorconfig`. (`--engine dotnet-format` has no such guard.)

@@ -17,4 +17,6 @@ Is the trial clean, and what should format and check say about a kept file?
 
 Owner (2026-11-03): "Not clean" (tally 0 after trial 66), and a file kept by the raw string guard makes format and check say
 Not verified, with a `Not checked: <file>: a fix would change the text of a raw string literal` line, so they agree with the
-build. Not done in PR #325: backlog `scripts/backlog/work/078-kept-raw-string-files-are-not-verified.json`.
+build. Owner's second answer, through the parent session: do it in PR #325. Done there for `bro format` (the guard prints the
+`Not checked:` line, exit 3). `bro check` still says Clean, because it applies no fix and the host's IDE0055 analysis no longer
+reports the formatted file: open as backlog `scripts/backlog/work/078-kept-raw-string-files-are-not-verified.json`.

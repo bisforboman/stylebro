@@ -56,12 +56,23 @@ public static class RawStrings
                     continue;
                 }
 
-                warn($"Kept {old.FilePath ?? old.Name} as it was: {id} would change the text of a raw string literal.");
+                warn(GapLine(old.FilePath ?? old.Name, id));
                 after = after.WithDocumentText(documentId, oldText, PreservationMode.PreserveValue);
             }
         }
 
         return after;
+    }
+
+    /// <summary>
+    /// The line a kept file is reported with: a "Not checked:" gap, so format and check end Not verified (exit 3) instead of Clean
+    /// (owner, trial 66: the build still reports what Roslyn wanted to change there, so the verdicts must not say Clean).
+    /// The path is relative to the folder the command runs in when it is under it.
+    /// </summary>
+    public static string GapLine(string path, string id)
+    {
+        var relative = System.IO.Path.IsPathRooted(path) ? System.IO.Path.GetRelativePath(Environment.CurrentDirectory, path).Replace('\\', '/') : path;
+        return $"Not checked: {(relative.StartsWith("..", StringComparison.Ordinal) ? path : relative)}: {id} would change the text of a raw string literal, so the file was left as it was";
     }
 
     /// <summary>Whether two documents' raw string literals say the same (the order of the literals doesn't count).</summary>
