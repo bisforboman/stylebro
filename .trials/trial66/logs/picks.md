@@ -17,3 +17,12 @@ Targeted at trial 65's fixes (config-dependent references, CSharpier + IDE0055 p
   R3 has one conditional Debug PackageReference in a sandbox (Avalonia.Diagnostics) and no ProjectReference switch; none had CSharpier
   tooling or IDE0055 per folder. The web search for the Debug-ProjectReference/Release-PackageReference pattern found no repository.
   Pool unused: DiscordChatExporter (cloned, no CSharpier tool, no auto-generated files, no conditional references: not a match).
+
+## Setup notes (2026-11-03 ~10:20Z)
+- Pack: 0.8.0-trial66.1 into /home/user/feed66, bro in /home/user/bro66; feed added with `dotnet nuget add source`.
+- Smoke builds (untouched, Debug): jwt ok, SecurityHeaders ok, FluentBuilder ok; moq4 failed NU1301 (src/Directory.props adds
+  RestoreAdditionalProjectSources https://kzu.blob.core.windows.net/nuget/index.json, proxy 403); with that line removed it builds
+  (workaround in moq4's PREP).
+- SecurityHeaders uses StyleCop.Analyzers 1.2.0-beta.556 (two src projects, .ruleset files) and a CycloneDX local tool, not CSharpier
+  (the pool-style tag was a guess): migrate path. jwt, moq4, FluentBuilder: init.
+- Scripts: .trials/trial66/{chain,run,prep,lanes1}.sh and <KEY>/env.sh (JW jwt, MQ moq4, SH SecurityHeaders, FB FluentBuilder).
