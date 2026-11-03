@@ -45,8 +45,8 @@ Engine: the host couldn't load the workspace (The solution does not contain the 
 ## How it fixes
 
 A fix run in the host does what a `dotnet format` run does, in the same order: the whitespace, line ending, charset and
-import formatters as they are, then the code-style fixes, then the fixes of your projects' analyzers. Four things differ,
-none of them in what a fix writes:
+import formatters as they are, then the code-style fixes, then the fixes of your projects' analyzers. Five things differ,
+only the last one in what a fix writes:
 
 - **The ids are fixed in a fixed order**, ordinal (`BRO1001`, ..., `BRO1619`, `CA...`, `IDE...`, `xUnit...`), where
   `dotnet format` takes them in an order that changes from one run to the next. StyleBro's tests require the same result in
@@ -65,6 +65,12 @@ none of them in what a fix writes:
   that had it. The host keeps each analyzer's results per project, for as long as the project's content (its documents and
   those of the projects it references) stays as it was, and runs it again only on the projects a fix changed and on the
   projects that reference them.
+- **A raw string literal keeps its text.** A fix or the whitespace formatting may move a `"""` literal (all its lines
+  and the closing quotes together), but when it would change what the literal says, the host puts the file back as it was
+  before that step and prints `Kept <file> as it was: ... would change the text of a raw string literal.` Without this,
+  IDE0055's formatter added a space to two lines of a `$$"""` literal in every run of one test project (moq4, trial 66), so
+  `bro format` never settled and the program's text changed. The file's other formatting findings stay then: fix them by hand,
+  or turn the rule off for the file in `.editorconfig`. (`--engine dotnet-format` has no such guard.)
 
 ## What it reuses
 

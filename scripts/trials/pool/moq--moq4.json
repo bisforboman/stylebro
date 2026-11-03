@@ -1,0 +1,26 @@
+{
+  "repo": "moq/moq4",
+  "branch": "main",
+  "commit": "bdf16e758e8022c40cef2bfd025181f845bbd2a9",
+  "csFiles": 155,
+  "tags": [
+    "library",
+    "multi-target",
+    "cpm",
+    "generator",
+    "raw-strings",
+    "csharp14",
+    "net48-dropped-off-windows"
+  ],
+  "setups": "Moq.slnx; devlooped Directory.Build.props/Directory.props/Directory.targets, central package management (the Moq.Package .msbuildproj turns it off: needs the version-ful reference pair), an in-solution source generator, C# 14 extension blocks, test projects <TargetFrameworks>net48;net10.0</TargetFrameworks> with a Directory.targets that drops net48 off Windows.",
+  "build": "ok with workaround",
+  "workaround": "src/Directory.props adds https://kzu.blob.core.windows.net/nuget/index.json as RestoreAdditionalProjectSources (403 through the proxy): the line is deleted.",
+  "tests": "dotnet test src/Moq.Tests, Moq.Sdk.Tests, Moq.StaticProxy.UnitTests, Moq.CodeAnalysis.UnitTests, Moq.CodeFixes.UnitTests with -f net10.0 (net48 left out: mono).",
+  "usedIn": "trial 66 (random, seed 66)",
+  "verified": {
+    "by": "trial 66 session",
+    "date": "2026-11-03",
+    "sdks": "10.0.114, 8.0.133"
+  },
+  "notes": "Found: a single entry left in TargetFrameworks gave a false 'Not checked ... CoreCompile does not exist' for five test projects; IDE0055's formatter added a space to the lines of a $$\"\"\" literal in every run (format never settled). One bro run is 8-9 minutes."
+}

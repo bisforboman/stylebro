@@ -1,0 +1,24 @@
+{
+  "repo": "jwt-dotnet/jwt",
+  "branch": "main",
+  "commit": "78fa44d6685de5a682c54c687acf0eaf7f6b4c7f",
+  "csFiles": 108,
+  "tags": [
+    "library",
+    "multi-target",
+    "cpm",
+    "crlf-mixed",
+    "netstandard1"
+  ],
+  "setups": "JWT.sln; Directory.Build.props + Directory.Packages.props (central package management), .editorconfig with stray semicolons (root = true;), net35/net40/net462/netstandard1.3 to net8.0 library, MSTest projects per framework.",
+  "build": "ok",
+  "workaround": "DOTNET_ROLL_FORWARD=Major (no .NET Core 3.1 / 6 runtime)",
+  "tests": "dotnet test per project: tests/JWT.Tests.Net80, Net60, Extensions.AspNetCore.Tests and Extensions.DependencyInjection.Tests (-f net8.0); net35/40/46 and netcoreapp3.1 projects left out (mono, no runtime).",
+  "usedIn": "trial 66 (random, seed 66)",
+  "verified": {
+    "by": "trial 66 session",
+    "date": "2026-11-03",
+    "sdks": "10.0.114, 8.0.133"
+  },
+  "notes": "Warnings as errors fails untouched (24 distinct errors, the same after). netstandard1.3 does not load in dotnet format (Not verified by design). The .editorconfig's values end in ';' and the engine still read end_of_line = crlf."
+}
