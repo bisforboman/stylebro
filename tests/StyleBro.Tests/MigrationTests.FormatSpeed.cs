@@ -1,5 +1,6 @@
 using System.Text.Json.Nodes;
 using StyleBro.Analyzers;
+using StyleBro.Host;
 using StyleBro.Migrate;
 
 namespace StyleBro.Tests;
@@ -360,6 +361,69 @@ public sealed partial class MigrationTests
         FormatCommand.SaveKept(root, formatArgs, [kept]);
         Assert.False(FormatCommand.LoadRecord(root, [root])!.Checked);
         Assert.Null(FormatCommand.VerifyFromRecord([root, "--verify-no-changes"], root, _ => { }));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Verify_SaysWhatFormatSaidAboutAFileTheRawStringGuardKept_FromTheRecordAndWithoutIt(bool guardSpeaksInTheLastRunToo)
+    {
+        // Trial 66, moq4: format kept MockSetupGeneratorTests.cs (a fix would have changed a $$""" literal), check applied no fix and said Clean.
+        Write("src/A/A.csproj", "<Project />");
+        Write("src/A/X.cs", "class X { }");
+        var gap = RawStrings.GapLine(Path.Combine(root, "src", "A", "X.cs"), "the fix for IDE0055");
+        Assert.True(FormatCommand.IsRawStringGap(gap));
+        Assert.EndsWith(FormatCommand.RawStringGapEnd, gap, StringComparison.Ordinal);
+
+        // A format run that checked every plan entry clean but for the kept file: the record answers, with Not verified.
+        // Run 1 changes a file and the guard speaks in it; run 2 settles, with the line or without it (the line stays said).
+        var runs = 0;
+        var formatLog = new List<string>();
+        var formatCode = FormatCommand.Run([root], formatLog.Add, (_, output) =>
+        {
+            if (++runs == 1)
+            {
+                output!(gap);
+                Write("src/A/X.cs", "class X { }\n");
+            }
+            else
+            {
+                if (guardSpeaksInTheLastRunToo)
+                {
+                    output!(gap);
+                }
+
+                FormatCommand.MarkCheckedClean(root);
+            }
+
+            return 0;
+        });
+        Assert.True(runs == 2, string.Join("\n", formatLog));
+        Assert.Equal(FormatCommand.NotVerifiedExitCode, formatCode);
+        Assert.Equal([gap], FormatCommand.RecordedRawStringGaps(root, [root, "--verify-no-changes"]));
+
+        var lines = new List<string>();
+        JsonReport.Begin("check");
+        var code = FormatCommand.Run([root, "--verify-no-changes"], lines.Add, (_, _) => throw new InvalidOperationException("verify ran 'dotnet format'"));
+        var json = JsonNode.Parse(JsonReport.End(code))!;
+        Assert.Equal(FormatCommand.NotVerifiedExitCode, code);
+        Assert.Contains(gap, lines);
+        Assert.StartsWith(FormatCommand.NotVerifiedMarker, lines[^1], StringComparison.Ordinal);
+        Assert.DoesNotContain("Clean.", lines);
+        Assert.Contains("X.cs", json["notChecked"]!.AsArray().Single()!.GetValue<string>(), StringComparison.Ordinal);
+
+        // The full check (no clean-check mark in the record) says the same, though its own run finds nothing.
+        FormatCommand.SaveKept(root, [root, FormatCommand.CheckFirstOption], [], null, null, null, [gap]);
+        lines.Clear();
+        Assert.Equal(FormatCommand.NotVerifiedExitCode, FormatCommand.Verify([root, "--verify-no-changes"], root, lines.Add, (_, _) => 0));
+        Assert.Contains(gap, lines);
+        Assert.StartsWith(FormatCommand.NotVerifiedMarker, lines[^1], StringComparison.Ordinal);
+
+        // Another state of the repository (the file was edited) has no record: Clean again.
+        Write("src/A/X.cs", "class X { int a; }");
+        lines.Clear();
+        Assert.Equal(0, FormatCommand.Verify([root, "--verify-no-changes"], root, lines.Add, (_, _) => 0));
+        Assert.DoesNotContain(gap, lines);
     }
 
     [Fact]

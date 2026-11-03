@@ -1440,3 +1440,13 @@ Since 2026-10-25 the host is `bro format`'s default engine; trials 52-64 compare
   check says Clean (exit 0) next to `check --build` Not clean (exit 2) and format Not verified (exit 3); backlog 078.
 - CI on #325: `Real world (Mediator)` failed on the first push: the guard also stopped BRO1138's fix, which turns plain strings into
   raw ones and back on purpose (4 findings left); BRO1138 is exempt now (`RawStrings.KeepAsync` takes the rule id).
+- Follow-up, backlog 078 (2026-11-03, a later session; moq4 at bdf16e7 with the same two workarounds, `bro init`, StyleBro.Analyzers
+  added to csproj files only because of central package management): before the change `bro format` ended Not verified (exit 3,
+  472 s) and `bro check` Clean (exit 0, 329 s, `--json` clean). After it `bro format` 3, `bro check` 3 with the same `Not checked:`
+  line (326 s) and `--json` `notChecked` naming the file, `bro check --build` 2 (the three IDE0055 errors and the `Not verified`
+  line). The fix: format writes the kept files into the record it keeps for the fast check (`#rawstring` lines) and check says them
+  again while the code and settings are the same; it cannot find them itself because the host's own IDE0055 analysis reports nothing
+  there after format. The fast record path did not engage on moq4 (check still took 326 s), for a reason that has nothing to do with
+  raw strings: the run-2 check reports "7 files with findings" no fix changes, so it is not a clean check of every run. The Debug
+  build in `check --build` also failed once on a `deps.json` file lock between parallel builds (a race, not seen in the before run).
+  No fixture: still no small project that makes Roslyn change that literal.
