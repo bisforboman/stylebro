@@ -17,12 +17,21 @@ namespace StyleBro.Host;
 /// </summary>
 public static class RawStrings
 {
+    private const string ConvertsStrings = "BRO1138";
+
     /// <summary>
     /// <paramref name="after"/> with every document the fixer changed put back to its text in <paramref name="before"/> when the
-    /// change altered a raw string literal; the files it kept are named in the log.
+    /// change altered a raw string literal; the files it kept are named in the log. <paramref name="ruleId"/> is the rule whose
+    /// fix ran (null: the whitespace formatting); BRO1138 turns plain strings into raw ones and back on purpose, so its fix is not
+    /// held to this (the Mediator real-world run, which converts four).
     /// </summary>
-    public static async Task<Solution> KeepAsync(Solution before, Solution after, string id, Action<string> warn, CancellationToken cancellation)
+    public static async Task<Solution> KeepAsync(Solution before, Solution after, string? ruleId, string id, Action<string> warn, CancellationToken cancellation)
     {
+        if (ruleId == ConvertsStrings)
+        {
+            return after;
+        }
+
         foreach (var project in after.GetChanges(before).GetProjectChanges())
         {
             foreach (var documentId in project.GetChangedDocuments())

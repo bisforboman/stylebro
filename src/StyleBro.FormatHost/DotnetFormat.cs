@@ -112,7 +112,7 @@ internal sealed class DotnetFormat
     public static async Task<Solution> ApplyAsync(AnalyzerParts parts, Solution solution, object result, CodeFixProvider fixer, string id, ILogger logger, CancellationToken cancellation)
     {
         var task = (Task<Solution>)parts.Applier.GetType().GetMethod("ApplyCodeFixesAsync")!.Invoke(parts.Applier, [solution, result, fixer, id, logger, cancellation])!;
-        return await RawStrings.KeepAsync(solution, await task.ConfigureAwait(false), $"the fix for {id}", message => logger.LogWarning("{Message}", message), cancellation).ConfigureAwait(false);
+        return await RawStrings.KeepAsync(solution, await task.ConfigureAwait(false), id, $"the fix for {id}", message => logger.LogWarning("{Message}", message), cancellation).ConfigureAwait(false);
     }
 
     /// <summary>One of dotnet-format's messages ("Complete in {0}ms.").</summary>
@@ -169,7 +169,7 @@ internal sealed class DotnetFormat
         var task = (Task<Solution>)this.formatterFormat.Invoke(formatter, [workspace, solution, documents, options, logger, files, cancellation])!;
 
         // The whitespace formatter is Roslyn's: it re-indented the lines of a raw string literal (trial 66, moq4).
-        return await RawStrings.KeepAsync(solution, await task.ConfigureAwait(false), "the whitespace formatting", message => logger.LogWarning("{Message}", message), cancellation).ConfigureAwait(false);
+        return await RawStrings.KeepAsync(solution, await task.ConfigureAwait(false), null, "the whitespace formatting", message => logger.LogWarning("{Message}", message), cancellation).ConfigureAwait(false);
     }
 
     /// <summary>
