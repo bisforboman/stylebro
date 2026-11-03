@@ -112,7 +112,7 @@ internal sealed class DotnetFormat
     public static async Task<Solution> ApplyAsync(AnalyzerParts parts, Solution solution, object result, CodeFixProvider fixer, string id, ILogger logger, CancellationToken cancellation)
     {
         var task = (Task<Solution>)parts.Applier.GetType().GetMethod("ApplyCodeFixesAsync")!.Invoke(parts.Applier, [solution, result, fixer, id, logger, cancellation])!;
-        return await task.ConfigureAwait(false);
+        return await RawStrings.KeepAsync(solution, await task.ConfigureAwait(false), id, message => logger.LogWarning("{Message}", message), cancellation).ConfigureAwait(false);
     }
 
     /// <summary>One of dotnet-format's messages ("Complete in {0}ms.").</summary>
