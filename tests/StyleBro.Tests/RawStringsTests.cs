@@ -73,8 +73,8 @@ public sealed class RawStringsTests
         var corrupted = before.WithDocumentText(id, Microsoft.CodeAnalysis.Text.SourceText.From(Source(firstLine: "         static class {{name}}")));
         var fine = before.WithDocumentText(id, Microsoft.CodeAnalysis.Text.SourceText.From(Source().Replace("static string", "private static string", StringComparison.Ordinal)));
 
-        var kept = await RawStrings.KeepAsync(before, corrupted, "IDE0055", _ => { }, CancellationToken.None);
-        var allowed = await RawStrings.KeepAsync(before, fine, "BRO1404", _ => { }, CancellationToken.None);
+        var kept = await RawStrings.KeepAsync(before, corrupted, "the fix for IDE0055", _ => { }, CancellationToken.None);
+        var allowed = await RawStrings.KeepAsync(before, fine, "the fix for BRO1404", _ => { }, CancellationToken.None);
 
         Assert.Equal(Source(), (await kept.GetDocument(id)!.GetTextAsync()).ToString());
         Assert.Equal(Source().Replace("static string", "private static string", StringComparison.Ordinal), (await allowed.GetDocument(id)!.GetTextAsync()).ToString());

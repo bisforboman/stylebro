@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
@@ -48,7 +47,7 @@ public static class RawStrings
                     continue;
                 }
 
-                warn($"Kept {old.FilePath ?? old.Name} as it was: the fix for {id} would change the text of a raw string literal.");
+                warn($"Kept {old.FilePath ?? old.Name} as it was: {id} would change the text of a raw string literal.");
                 after = after.WithDocumentText(documentId, oldText, PreservationMode.PreserveValue);
             }
         }
@@ -85,16 +84,17 @@ public static class RawStrings
             switch (node)
             {
                 case LiteralExpressionSyntax { Token: { } token } when token.IsKind(SyntaxKind.MultiLineRawStringLiteralToken):
-                    values.Add(Unindented(token.Text));
+                    values.Add(Unindented(node.ToString()));
                     break;
                 case InterpolatedStringExpressionSyntax { StringStartToken: { } start } interpolated when start.IsKind(SyntaxKind.InterpolatedMultiLineRawStringStartToken):
-                    var text = new StringBuilder(start.Text);
-                    foreach (var content in interpolated.Contents)
+                    // The literal's source (a text token's own text leaves the margin out), each hole one placeholder.
+                    var text = interpolated.ToString();
+                    foreach (var hole in interpolated.Contents.OfType<InterpolationSyntax>().Reverse())
                     {
-                        text.Append(content is InterpolatedStringTextSyntax part ? part.TextToken.Text : "{}");
+                        text = text.Remove(hole.Span.Start - interpolated.SpanStart, hole.Span.Length).Insert(hole.Span.Start - interpolated.SpanStart, "{}");
                     }
 
-                    values.Add(Unindented(text.Append(interpolated.StringEndToken.Text).ToString()));
+                    values.Add(Unindented(text));
                     break;
             }
         }
