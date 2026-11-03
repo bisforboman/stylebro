@@ -1371,7 +1371,7 @@ Since 2026-10-25 the host is `bro format`'s default engine; trials 52-64 compare
 - Environment: SDK 10.0.114 + 8.0.133; the trial feed added with `dotnet nuget add source`; `-p:NuGetAudit=false`;
   `DOTNET_ROLL_FORWARD=Major` (no .NET 6 runtime); DynamicExpresso has two solutions (init needs `--project`).
 
-## Trial 66 (2026-11-03, verdict: see the end; the Sonnet session again; host engine only, no soak)
+## Trial 66 (2026-11-03, not clean: owner "Not clean", tally 0; the Sonnet session again; host engine only, no soak)
 
 - Repos (three random plus one targeted): jwt-dotnet/jwt, moq/moq4, andrewlock/NetEscapades.AspNetCore.SecurityHeaders (random,
   seed 66: draws 9, 39, 55 of 106 entries all walked to the end of the list: 92 PolySharp needs SDK 11, 93 Statiq.Framework is too
@@ -1433,3 +1433,7 @@ Since 2026-10-25 the host is `bro format`'s default engine; trials 52-64 compare
 - Environment: SDK 10.0.114 + 8.0.133; the trial feed added with `dotnet nuget add source`; `-p:NuGetAudit=false`;
   `DOTNET_ROLL_FORWARD=Major`; moq4's src/Directory.props `RestoreAdditionalProjectSources` (kzu.blob.core.windows.net, 403) deleted;
   SecurityHeaders' global.json lowered; MSBuild `-getProperty` and `--files` runs (80 s) were enough to bisect the moq4 findings.
+- Owner's answers (2026-11-03): "Not clean", tally 0; a file the raw string guard keeps makes format and check say Not verified
+  (decision `2026-11-03-trial-66-not-clean-and-a-kept-raw-string-file-is-not.md`, backlog 078, not done in this PR).
+- CI on #325: `Real world (Mediator)` failed on the first push: the guard also stopped BRO1138's fix, which turns plain strings into
+  raw ones and back on purpose (4 findings left); BRO1138 is exempt now (`RawStrings.KeepAsync` takes the rule id).

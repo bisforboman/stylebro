@@ -1,0 +1,6 @@
+{
+  "area": "Hardening",
+  "item": "A file kept by the raw string guard is Not verified",
+  "notes": "Trial 66 (docs/decisions/2026-11-03-trial-66-not-clean-and-a-kept-raw-string-file-is-not.md, owner: yes). The host's RawStrings.KeepAsync puts a document back when a fix or the whitespace formatting would change a raw string literal's text and only logs 'Kept <file> as it was'. In moq4 (MockSetupGeneratorTests.cs) Roslyn's IDE0055 keeps reporting 3 spots there, so the warnings-as-errors build fails while bro format and bro check say Clean (exit 0) and bro check --build says Not clean (exit 2). To do: carry the kept files from the host to the verdict as 'Not checked: <file>: a fix would change the text of a raw string literal' (exit 3), say them again from the record, and test it. A fixture needs the Roslyn behaviour, which only moq4's test project showed (IDE0055 on the committed file: the literal's first and last content lines and a '{ TypeArguments.Length: 1 }' it wants as 'Length : 1'): look for a small project that reproduces it first, and find why Roslyn wants those edits there (removing the project reference to Moq or IDE0055 made it stop; xunit, Nullable, ImplicitUsings, the TFM and LangVersion did not).",
+  "status": "Planned"
+}
