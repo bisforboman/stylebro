@@ -1,0 +1,18 @@
+  Determining projects to restore...
+/usr/lib/dotnet/sdk/10.0.114/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/cand65/stefanprodan-AspNetCoreRateLimit/test/AspNetCoreRateLimit.Demo/AspNetCoreRateLimit.Demo.csproj]
+  Restored /home/user/cand65/stefanprodan-AspNetCoreRateLimit/src/AspNetCoreRateLimit/AspNetCoreRateLimit.csproj (in 2.13 sec).
+  Restored /home/user/cand65/stefanprodan-AspNetCoreRateLimit/src/AspNetCoreRateLimit.Redis/AspNetCoreRateLimit.Redis.csproj (in 2.13 sec).
+  Restored /home/user/cand65/stefanprodan-AspNetCoreRateLimit/test/AspNetCoreRateLimit.Demo/AspNetCoreRateLimit.Demo.csproj (in 2.52 sec).
+  Restored /home/user/cand65/stefanprodan-AspNetCoreRateLimit/test/AspNetCoreRateLimit.Tests/AspNetCoreRateLimit.Tests.csproj (in 2.66 sec).
+  AspNetCoreRateLimit -> /home/user/cand65/stefanprodan-AspNetCoreRateLimit/src/AspNetCoreRateLimit/bin/Debug/net6.0/AspNetCoreRateLimit.dll
+/usr/lib/dotnet/sdk/10.0.114/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.EolTargetFrameworks.targets(32,5): warning NETSDK1138: The target framework 'net6.0' is out of support and will not receive security updates in the future. Please refer to https://aka.ms/dotnet-core-support for more information about the support policy. [/home/user/cand65/stefanprodan-AspNetCoreRateLimit/test/AspNetCoreRateLimit.Demo/AspNetCoreRateLimit.Demo.csproj]
+  AspNetCoreRateLimit.Redis -> /home/user/cand65/stefanprodan-AspNetCoreRateLimit/src/AspNetCoreRateLimit.Redis/bin/Debug/net6.0/AspNetCoreRateLimit.Redis.dll
+  AspNetCoreRateLimit.Demo -> /home/user/cand65/stefanprodan-AspNetCoreRateLimit/test/AspNetCoreRateLimit.Demo/bin/Debug/net6.0/AspNetCoreRateLimit.Demo.dll
+  AspNetCoreRateLimit.Tests -> /home/user/cand65/stefanprodan-AspNetCoreRateLimit/test/AspNetCoreRateLimit.Tests/bin/Debug/net6.0/AspNetCoreRateLimit.Tests.dll
+Test run for /home/user/cand65/stefanprodan-AspNetCoreRateLimit/test/AspNetCoreRateLimit.Tests/bin/Debug/net6.0/AspNetCoreRateLimit.Tests.dll (.NETCoreApp,Version=v6.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    48, Skipped:     0, Total:    48, Duration: 2 s - AspNetCoreRateLimit.Tests.dll (net6.0)

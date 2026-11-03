@@ -1,0 +1,46 @@
+  Determining projects to restore...
+  Restored /home/user/cand65/ovska-FlameCsv/test/Lib/FlameCsv.Tests.Lib.csproj (in 2.08 sec).
+/home/user/cand65/ovska-FlameCsv/src/Core/FlameCsv.Core.csproj : warning NU1902: Package 'Microsoft.Build.Tasks.Git' 8.0.0 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-23fw-v26w-5fgq [/home/user/cand65/ovska-FlameCsv/FlameCsv.sln]
+  Restored /home/user/cand65/ovska-FlameCsv/src/Core/FlameCsv.Core.csproj (in 432 ms).
+  Restored /home/user/cand65/ovska-FlameCsv/src/SourceGen/FlameCsv.SourceGen.csproj (in 2.77 sec).
+  Restored /home/user/cand65/ovska-FlameCsv/test/Reading/FlameCsv.Tests.Reading.csproj (in 502 ms).
+  Restored /home/user/cand65/ovska-FlameCsv/test/Core/FlameCsv.Tests.csproj (in 3.29 sec).
+  Restored /home/user/cand65/ovska-FlameCsv/test/Binding/FlameCsv.Tests.Binding.csproj (in 3.29 sec).
+  Restored /home/user/cand65/ovska-FlameCsv/tools/Fuzzing/FlameCsv.Fuzzing.csproj (in 587 ms).
+  Restored /home/user/cand65/ovska-FlameCsv/test/Writing/FlameCsv.Tests.Writing.csproj (in 315 ms).
+  Restored /home/user/cand65/ovska-FlameCsv/tools/Console/FlameCsv.Console.csproj (in 916 ms).
+  Restored /home/user/cand65/ovska-FlameCsv/tools/Bench/FlameCsv.Benchmark.csproj (in 3.24 sec).
+  Restored /home/user/cand65/ovska-FlameCsv/test/SourceGen/FlameCsv.Tests.SourceGen.csproj (in 3.22 sec).
+/home/user/cand65/ovska-FlameCsv/src/Core/FlameCsv.Core.csproj : warning NU1902: Package 'Microsoft.Build.Tasks.Git' 8.0.0 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-23fw-v26w-5fgq [TargetFramework=net9.0]
+/home/user/cand65/ovska-FlameCsv/src/Core/FlameCsv.Core.csproj : warning NU1902: Package 'Microsoft.Build.Tasks.Git' 8.0.0 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-23fw-v26w-5fgq [TargetFramework=net10.0]
+  FlameCsv.SourceGen -> /home/user/cand65/ovska-FlameCsv/src/SourceGen/bin/Debug/netstandard2.0/FlameCsv.SourceGen.dll
+  FlameCsv.Core -> /home/user/cand65/ovska-FlameCsv/src/Core/bin/Debug/net9.0/FlameCsv.Core.dll
+  FlameCsv.Core -> /home/user/cand65/ovska-FlameCsv/src/Core/bin/Debug/net10.0/FlameCsv.Core.dll
+  FlameCsv.Benchmark -> /home/user/cand65/ovska-FlameCsv/tools/Bench/bin/Debug/net9.0/FlameCsv.Benchmark.dll
+  FlameCsv.Tests.Lib -> /home/user/cand65/ovska-FlameCsv/test/Lib/bin/Debug/net9.0/FlameCsv.Tests.Lib.dll
+  FlameCsv.Tests.SourceGen -> /home/user/cand65/ovska-FlameCsv/test/SourceGen/bin/Debug/net9.0/FlameCsv.Tests.SourceGen.dll
+  FlameCsv.Fuzzing -> /home/user/cand65/ovska-FlameCsv/tools/Fuzzing/bin/Debug/net9.0/FlameCsv.Fuzzing.dll
+  FlameCsv.Tests.Writing -> /home/user/cand65/ovska-FlameCsv/test/Writing/bin/Debug/net9.0/FlameCsv.Tests.Writing.dll
+  FlameCsv.Console -> /home/user/cand65/ovska-FlameCsv/tools/Console/bin/Debug/net9.0/FlameCsv.Console.dll
+  FlameCsv.Tests.Reading -> /home/user/cand65/ovska-FlameCsv/test/Reading/bin/Debug/net9.0/FlameCsv.Tests.Reading.dll
+  FlameCsv.Tests -> /home/user/cand65/ovska-FlameCsv/test/Core/bin/Debug/net9.0/FlameCsv.Tests.dll
+  FlameCsv.Tests.SourceGen -> /home/user/cand65/ovska-FlameCsv/test/SourceGen/bin/Debug/net10.0/FlameCsv.Tests.SourceGen.dll
+  FlameCsv.Tests.Binding -> /home/user/cand65/ovska-FlameCsv/test/Binding/bin/Debug/net9.0/FlameCsv.Tests.Binding.dll
+  FlameCsv.Benchmark -> /home/user/cand65/ovska-FlameCsv/tools/Bench/bin/Debug/net10.0/FlameCsv.Benchmark.dll
+  FlameCsv.Tests.Lib -> /home/user/cand65/ovska-FlameCsv/test/Lib/bin/Debug/net10.0/FlameCsv.Tests.Lib.dll
+  FlameCsv.Fuzzing -> /home/user/cand65/ovska-FlameCsv/tools/Fuzzing/bin/Debug/net10.0/FlameCsv.Fuzzing.dll
+  FlameCsv.Tests.Binding -> /home/user/cand65/ovska-FlameCsv/test/Binding/bin/Debug/net10.0/FlameCsv.Tests.Binding.dll
+  FlameCsv.Tests.Writing -> /home/user/cand65/ovska-FlameCsv/test/Writing/bin/Debug/net10.0/FlameCsv.Tests.Writing.dll
+  FlameCsv.Tests.Reading -> /home/user/cand65/ovska-FlameCsv/test/Reading/bin/Debug/net10.0/FlameCsv.Tests.Reading.dll
+  FlameCsv.Tests -> /home/user/cand65/ovska-FlameCsv/test/Core/bin/Debug/net10.0/FlameCsv.Tests.dll
+  FlameCsv.Console -> /home/user/cand65/ovska-FlameCsv/tools/Console/bin/Debug/net10.0/FlameCsv.Console.dll
+
+Build succeeded.
+
+/home/user/cand65/ovska-FlameCsv/src/Core/FlameCsv.Core.csproj : warning NU1902: Package 'Microsoft.Build.Tasks.Git' 8.0.0 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-23fw-v26w-5fgq [/home/user/cand65/ovska-FlameCsv/FlameCsv.sln]
+/home/user/cand65/ovska-FlameCsv/src/Core/FlameCsv.Core.csproj : warning NU1902: Package 'Microsoft.Build.Tasks.Git' 8.0.0 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-23fw-v26w-5fgq [TargetFramework=net9.0]
+/home/user/cand65/ovska-FlameCsv/src/Core/FlameCsv.Core.csproj : warning NU1902: Package 'Microsoft.Build.Tasks.Git' 8.0.0 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-23fw-v26w-5fgq [TargetFramework=net10.0]
+    3 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:36.78
