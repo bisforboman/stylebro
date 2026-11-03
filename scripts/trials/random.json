@@ -108,6 +108,8 @@
     "stefanprodan/AspNetCoreRateLimit",
     "thomaslevesque/WeakEvent",
     "dynamicexpresso/DynamicExpresso",
-    "jwt-dotnet/jwt"
+    "jwt-dotnet/jwt",
+    "moq/moq4",
+    "andrewlock/NetEscapades.AspNetCore.SecurityHeaders"
   ]
 }
