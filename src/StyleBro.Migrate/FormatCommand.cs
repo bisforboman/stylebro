@@ -4298,6 +4298,18 @@ internal static partial class FormatCommand
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, Lazy<string?>> LoadFailures = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
+    /// The framework <see cref="LoadFailure"/> builds a project for: its run's (<paramref name="runFramework"/>, normalized), else
+    /// the project's first. A run without a framework (one run for the whole solution) still builds the project for a framework
+    /// when it names one: even a single entry in &lt;TargetFrameworks&gt; (a Directory.Build.targets that drops net48 off
+    /// Windows leaves one) makes the project an outer build, which has no CoreCompile target, so the probe reported "The target
+    /// CoreCompile does not exist" for a project that loaded fine (trial 66, moq4).
+    /// </summary>
+    internal static string LoadProbeFramework(string runFramework, IReadOnlyList<string> own) =>
+        runFramework.Length == 0
+            ? (own.Count > 0 ? own[0] : string.Empty)
+            : own.FirstOrDefault(f => NormalizeFramework(f) == runFramework) ?? runFramework;
+
+    /// <summary>
     /// The error that stops <paramref name="fullPath"/>'s design-time build for <paramref name="framework"/> (and
     /// <paramref name="configuration"/>) before the compiler's command line, as MSBuildWorkspace runs it; null when the command
     /// line is there. Such a project loads in 'dotnet format' without its build settings, and only a "Warnings were encountered
@@ -5937,8 +5949,7 @@ internal static partial class FormatCommand
                 .WithDegreeOfParallelism(Math.Max(1, Environment.ProcessorCount))
                 .Select(r =>
                 {
-                    var own = projects[r.Project].Frameworks;
-                    var framework = r.Framework.Length == 0 ? (own.Length > 1 ? own[0] : string.Empty) : own.FirstOrDefault(f => NormalizeFramework(f) == r.Framework) ?? r.Framework;
+                    var framework = LoadProbeFramework(r.Framework, projects[r.Project].Frameworks);
                     return (r.Run, r.Project, Message: LoadFailure(projects[r.Project].FullPath, framework, r.Configuration));
                 })
                 .Where(r => r.Message is not null)

@@ -1,0 +1,25 @@
+{
+  "repo": "andrewlock/NetEscapades.AspNetCore.SecurityHeaders",
+  "branch": "main",
+  "commit": "5dc582144ffd1993418e2e3d8e4e07545f8747e5",
+  "csFiles": 250,
+  "tags": [
+    "stylecop",
+    "library",
+    "multi-target",
+    "generator",
+    "web",
+    "artifacts-output"
+  ],
+  "setups": "NetEscapades.AspNetCore.SecurityHeaders.sln; StyleCop.Analyzers 1.2.0-beta.556 with .ruleset and stylecop.json in two src projects, UseArtifactsOutput, a CycloneDX local tool, global.json 10.0.101, net6.0..net10.0 tests, netcoreapp3.1 library on Linux.",
+  "build": "ok",
+  "workaround": "global.json lowered to 10.0.100 with latestFeature",
+  "tests": "dotnet test test/NetEscapades.AspNetCore.SecurityHeaders.Test, ...TagHelpers.Test and SourceGenerator.Test (254 + 16 + 9 per framework).",
+  "usedIn": "trial 66 (random, seed 66)",
+  "verified": {
+    "by": "trial 66 session",
+    "date": "2026-11-03",
+    "sdks": "10.0.114, 8.0.133"
+  },
+  "notes": "Clean on migrate, format, check and check --build (3 IDE0036 fixes); every TreatWarningsAsErrors build passes."
+}
