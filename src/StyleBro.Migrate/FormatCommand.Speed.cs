@@ -25,6 +25,9 @@ internal static partial class FormatCommand
     /// <summary>The line the record's answer to --verify-no-changes starts with (<see cref="VerifyFromRecord"/>).</summary>
     public const string FromRecordHeader = "Checking StyleBro's rules: nothing changed since the last clean 'bro format' here";
 
+    /// <summary>How the gap line for a kept raw string file ends (<c>RawStrings.GapLine</c> in the format host; a test keeps them the same).</summary>
+    public const string RawStringGapEnd = "would change the text of a raw string literal, so the file was left as it was";
+
     /// <summary>The record line that says the run that ended clean checked every plan entry (<see cref="SaveKept"/>).</summary>
     private const string CheckedMark = "#checked";
 
@@ -40,6 +43,9 @@ internal static partial class FormatCommand
     /// <summary>The start of the record line verify says before the generator builds (<see cref="GeneratorConfigurationsLine"/>).</summary>
     private const string GeneratorMark = "#before\t";
 
+    /// <summary>The start of a record line with a gap line for a file the raw string guard kept (<see cref="RecordedRawStringGaps"/>).</summary>
+    private const string RawStringMark = "#rawstring\t";
+
     /// <summary>The roots whose last 'format' run (not --verify-no-changes) was a check of every plan entry that was clean (<see cref="IsCleanCheck"/>).</summary>
     private static readonly ConcurrentDictionary<string, bool> CheckedClean = new(StringComparer.OrdinalIgnoreCase);
 
@@ -54,6 +60,9 @@ internal static partial class FormatCommand
 
     /// <summary>The line a 'format' run on a root would say about its generator builds as --verify-no-changes (<see cref="GeneratorConfigurationsLine"/>), for its record.</summary>
     private static readonly ConcurrentDictionary<string, string> GeneratorLines = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Whether a gap line is for a file the raw string guard kept.</summary>
+    public static bool IsRawStringGap(string line) => IsGapLine(line) && line.EndsWith(RawStringGapEnd, StringComparison.Ordinal);
 
     /// <summary>
     /// Whether the restore output of <paramref name="projects"/> (project file, ProjectAssetsFile) is current, so 'dotnet restore'
@@ -300,7 +309,8 @@ internal static partial class FormatCommand
                 body.Contains(CheckedMark),
                 body.Where(l => l.StartsWith(VerdictMark, StringComparison.Ordinal)).Select(l => l.Substring(VerdictMark.Length)).ToList(),
                 body.Where(l => l.StartsWith(BuildMark, StringComparison.Ordinal)).Select(l => l.Split('\t')).Where(p => p.Length == 3).Select(p => (p[1], p[2])).ToList(),
-                body.FirstOrDefault(l => l.StartsWith(GeneratorMark, StringComparison.Ordinal))?.Substring(GeneratorMark.Length));
+                body.FirstOrDefault(l => l.StartsWith(GeneratorMark, StringComparison.Ordinal))?.Substring(GeneratorMark.Length),
+                body.Where(l => l.StartsWith(RawStringMark, StringComparison.Ordinal)).Select(l => l.Substring(RawStringMark.Length)).ToList());
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
@@ -316,6 +326,13 @@ internal static partial class FormatCommand
         reported.Count == 0
             ? [.. notes ?? [], "Clean."]
             : [.. KeptSummary(reported, root, clean: true), .. new[] { BaselineOffLine(root, reported.Count) }.OfType<string>(), .. notes ?? []];
+
+    /// <summary>
+    /// The gap lines of the files the last 'format' on this state of the repository kept because a fix would have changed a raw
+    /// string literal's text (<c>RawStrings</c>). --verify-no-changes applies no fix, so it can't find them again: it says what
+    /// format said (Not verified, exit 3), as the build's IDE0055 errors in those files agree with.
+    /// </summary>
+    public static List<string> RecordedRawStringGaps(string root, IEnumerable<string> args) => LoadRecord(root, args)?.RawStringGaps ?? [];
 
     /// <summary>
     /// --verify-no-changes from the record of the last clean 'format' on this state (owner's decision 2026-10-17): when that
@@ -358,9 +375,19 @@ internal static partial class FormatCommand
         }
 
         // The held-back SDK rules' note (CleanVerdict), with --json's 'notChecked' as verify sets it.
-        if (Gaps(record.Verdict) is { Count: > 0 } notes)
+        var raw = record.RawStringGaps ?? [];
+        if (Gaps(record.Verdict.Concat(raw)) is { Count: > 0 } notes)
         {
             ReportGaps(notes);
+        }
+
+        // The files format kept (RecordedRawStringGaps) are gaps that count: Not verified, not "Clean." (trial 66, moq4).
+        if (raw.Count > 0)
+        {
+            record.Verdict.Where(l => l != "Clean.").ToList().ForEach(log);
+            raw.ForEach(log);
+            log(NotVerifiedLine(raw.Count + Unverified(Gaps(record.Verdict)).Count));
+            return NotVerifiedExitCode;
         }
 
         record.Verdict.ForEach(log);
@@ -484,5 +511,5 @@ internal static partial class FormatCommand
     }
 
     /// <summary>What a clean 'format' recorded for --verify-no-changes (<see cref="LoadRecord"/>).</summary>
-    public sealed record CleanRecord(List<KeptFinding> Kept, bool Checked, List<string> Verdict, List<(string Project, string Configuration)> Builds, string? GeneratorLine);
+    public sealed record CleanRecord(List<KeptFinding> Kept, bool Checked, List<string> Verdict, List<(string Project, string Configuration)> Builds, string? GeneratorLine, List<string>? RawStringGaps = null);
 }

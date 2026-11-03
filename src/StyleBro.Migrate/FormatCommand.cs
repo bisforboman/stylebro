@@ -3518,7 +3518,7 @@ internal static partial class FormatCommand
     /// then, the generator <paramref name="builds"/> it makes after it, and the line it says about them, <paramref name="generatorLine"/>),
     /// verify answers from the record (<see cref="VerifyFromRecord"/>).
     /// </summary>
-    public static void SaveKept(string root, IEnumerable<string> args, IEnumerable<KeptFinding> kept, IReadOnlyCollection<string>? verdict = null, IReadOnlyCollection<(string Project, string Configuration)>? builds = null, string? generatorLine = null)
+    public static void SaveKept(string root, IEnumerable<string> args, IEnumerable<KeptFinding> kept, IReadOnlyCollection<string>? verdict = null, IReadOnlyCollection<(string Project, string Configuration)>? builds = null, string? generatorLine = null, IReadOnlyCollection<string>? rawStringGaps = null)
     {
         try
         {
@@ -3530,7 +3530,7 @@ internal static partial class FormatCommand
                     .Concat((builds ?? []).Select(b => $"{BuildMark}{b.Project}\t{b.Configuration}"))
                     .Concat(generatorLine is null || builds is not { Count: > 0 } ? [] : [GeneratorMark + generatorLine])
                     .Prepend(CheckedMark);
-            File.WriteAllLines(file, kept.Select(k => k.ToString()).Concat(checks).Prepend(StateKey(root, args)));
+            File.WriteAllLines(file, kept.Select(k => k.ToString()).Concat(checks).Concat((rawStringGaps ?? []).Select(g => RawStringMark + g)).Prepend(StateKey(root, args)));
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
@@ -3831,7 +3831,9 @@ internal static partial class FormatCommand
         });
 
         // What the runs didn't check the way the build does (Gap): listed with the verdict, which isn't "Clean" then.
-        var gaps = Gaps(lines);
+        // And the files the last 'format' on this state kept because a fix would have changed a raw string literal's text: this
+        // check applies no fix, so it can't see them (trial 66, moq4: Clean here, Not verified from format, Not clean from the build).
+        var gaps = Gaps(lines.Concat(RecordedRawStringGaps(root, args)));
         lines.RemoveAll(IsGapLine);
         ReportGaps(gaps);
 
@@ -4971,6 +4973,9 @@ internal static partial class FormatCommand
         var allChanged = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var allFailures = new SortedSet<string>(StringComparer.Ordinal);
 
+        // The files the raw string guard kept in any run (RawStringGapEnd): a later run may not try the fix again, the file is still as it was.
+        var rawStringGaps = new SortedSet<string>(StringComparer.Ordinal);
+
         // CSharpier, where the repository formats with it: on the files each run changed (owner's decision 2026-10-16).
         var csharpier = CSharpierStep.Find(root);
 
@@ -5027,12 +5032,14 @@ internal static partial class FormatCommand
             // The run checked every plan entry, clean apart from kept findings, and loaded every project: verify's checks find the
             // same on this state (VerifyFromRecord). The held-back SDK rules' note too: the SDK's version is in the record's key, and
             // verify says the note again (trial 58: SDK 10.0.1xx's IDE0049 note made NPoco's check run every run again, 85 s).
-            var checkedClean = TakeCheckedClean(root) && !incomplete && gaps.All(IsHeldBackGap);
-            var heldBackNotes = checkedClean ? gaps.ToList() : [];
+            // The files the raw string guard kept are recorded too (RecordedRawStringGaps): verify says them again, so check agrees with format.
+            rawStringGaps.UnionWith(gaps.Where(IsRawStringGap));
+            var checkedClean = TakeCheckedClean(root) && !incomplete && gaps.All(g => IsHeldBackGap(g) || IsRawStringGap(g));
+            var heldBackNotes = checkedClean ? gaps.Where(IsHeldBackGap).ToList() : [];
             var checkFindings = TakeCheckFindings(root);
 
             // The configurations an in-solution generator keeps from the runs: 'bro check' builds them, format doesn't (a gap).
-            gaps = Gaps(gaps.Concat(GeneratorGaps(root)));
+            gaps = Gaps(gaps.Concat(GeneratorGaps(root)).Concat(rawStringGaps));
 
             // Usings the run's fixes left unused ('Int32' -> 'int' keeps 'using System;') go in the same run, where IDE0005 is
             // enforced: otherwise they took a run of their own, and a third run said clean (trial 21).
@@ -5138,7 +5145,7 @@ internal static partial class FormatCommand
                 {
                     // The run's check reported the kept findings (and nothing else), so verify's does, and ends with these lines.
                     // Not after a run that changed files (endings only): its check was of the files before.
-                    SaveKept(root, args, keptFindings, checkedClean && changed.Count == 0 ? CleanVerdict(root, keptFindings, heldBackNotes) : null, UncheckedByFormat.TryRemove(Key(root), out var builds) ? builds : null, GeneratorLines.TryRemove(Key(root), out var generatorLine) ? generatorLine : null);
+                    SaveKept(root, args, keptFindings, checkedClean && changed.Count == 0 ? CleanVerdict(root, keptFindings, heldBackNotes) : null, UncheckedByFormat.TryRemove(Key(root), out var builds) ? builds : null, GeneratorLines.TryRemove(Key(root), out var generatorLine) ? generatorLine : null, rawStringGaps);
                 }
 
                 JsonReport.AddKept(keptFindings);

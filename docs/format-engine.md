@@ -71,6 +71,9 @@ only the last one in what a fix writes:
   IDE0055's formatter added a space to two lines of a `$$"""` literal in every run of one test project (moq4, trial 66), so
   `bro format` never settled and the program's text changed. The file's other formatting findings stay then: fix them by hand,
   or turn the rule off for the file in `.editorconfig`. (`--engine dotnet-format` has no such guard.)
+  `bro check` applies no fix, so it can't find such a file itself: it says what the last `bro format` on the same code and
+  settings said (the record `bro format` keeps for the fast check), so the two agree. After you edit anything, that
+  record no longer applies and `bro check` runs on its own again; `bro check --build` always sees the build's errors there.
 
 ## What it reuses
 
