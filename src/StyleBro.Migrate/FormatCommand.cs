@@ -1347,6 +1347,13 @@ internal static partial class FormatCommand
             .Any(f => CodeStyleReference.IsMatch(File.ReadAllText(f)));
 
     /// <summary>
+    /// <paramref name="passes"/> with the plain run (all three passes at once, <see cref="string.Empty"/>) split into its three when
+    /// <paramref name="codeStyle"/> (<see cref="ReferencesCodeStyle"/>): the analyzer pass then runs with other options.
+    /// </summary>
+    public static string[] SeparatePasses(string[] passes, bool codeStyle) =>
+        codeStyle && passes.Contains(string.Empty) ? ["whitespace", "style", "analyzers"] : passes;
+
+    /// <summary>
     /// The options for the analyzer pass without the SDK's own IDE ids: the style pass fixes those. A project that references
     /// Microsoft.CodeAnalysis.CSharp.CodeStyle (moq4: 3.8.0, from 2020) brings that version's IDE0055 into the analyzer pass, and its
     /// fix, which doesn't know C# 10's '{ A.B.Count: 1 }' or C# 14's 'extension(...)', wrote 'Count : 1' and 'extension (...)' that
@@ -5662,16 +5669,14 @@ internal static partial class FormatCommand
         // The host engine: the checks and fixes of this run in this process, each configuration's workspace loaded once per command.
         using var hostScope = HostScope.For(root, log);
 
+        // The package's old IDE analyzers and fixes run in the analyzer pass besides the SDK's: that pass gets no IDE ids (WithoutStyleIds).
+        var codeStyle = ownIds && ReferencesCodeStyle(root);
+
         int Format(string target, List<string> options, Func<IEnumerable<string>, int> run, string[]? runPasses = null)
         {
             // Each pass would write its own format-report.json over the last one: each gets a folder, merged after.
             runPasses = Relevant(runPasses ?? passes, OptionValues(options, "--diagnostics"));
-            if (ownIds && runPasses.Contains(string.Empty) && ReferencesCodeStyle(root))
-            {
-                // The analyzer pass must not get the IDE ids (WithoutStyleIds), so it runs apart from the style pass.
-                runPasses = ["whitespace", "style", "analyzers"];
-            }
-
+            runPasses = SeparatePasses(runPasses, codeStyle);
             var at = options.IndexOf("--report");
             var report = runPasses.Length > 1 && at >= 0 && at + 1 < options.Count ? options[at + 1] : null;
             var folders = new List<string>();
@@ -5689,7 +5694,7 @@ internal static partial class FormatCommand
                 {
                     passOptions = WhitespaceOptions(passOptions, whitespaceExclusions ?? []);
                 }
-                else if (pass == "analyzers" && ownIds && ReferencesCodeStyle(root))
+                else if (pass == "analyzers" && codeStyle)
                 {
                     passOptions = WithoutStyleIds(passOptions);
                 }

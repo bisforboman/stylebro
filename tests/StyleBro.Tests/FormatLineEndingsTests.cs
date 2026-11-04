@@ -103,6 +103,86 @@ public sealed class FormatLineEndingsTests : IDisposable
         Assert.Contains("Not clean: formatting would change 1 file. Run 'bro format'.", lines);
     }
 
+    [Fact]
+    public void Verify_AFormattingFindingInAnLfFile_IsNotLineEndingNoise()
+    {
+        // Backlog 079 (moq4): a finding the copy's run doesn't change, in a file that has only LF, was "only this OS's line ending"
+        // (so a check before any format said Clean). It's a finding no fix changes. (On Windows the file would be the other kind.)
+        var root = NewFolder(("C.cs", "class C\n{\n}\n"));
+        var finding = $"{Path.Combine(root, "C.cs")}(1,8): warning IDE0055: Fix formatting";
+        var lines = new List<string>();
+
+        var code = FormatCommand.Run(new[] { root, "--verify-no-changes" }, lines.Add, (args, output) =>
+        {
+            if (args.Contains("--verify-no-changes"))
+            {
+                output?.Invoke(finding);
+                return 2;
+            }
+
+            return 0;
+        });
+
+        Assert.Equal(OperatingSystem.IsWindows() ? 0 : FormatCommand.NotCleanExitCode, code);
+        Assert.DoesNotContain(lines, l => l.Contains("only this OS's line ending", StringComparison.Ordinal) && !OperatingSystem.IsWindows());
+        if (!OperatingSystem.IsWindows())
+        {
+            Assert.Contains(finding, lines);
+            Assert.Contains(lines, l => l.StartsWith("Not clean: 1 finding above no fix changes", StringComparison.Ordinal));
+        }
+    }
+
+    [Fact]
+    public void Verify_AFileTheRawStringGuardKeptInTheCopy_IsNotVerifiedLikeFormat()
+    {
+        // Backlog 079: without a format record before it, a check said Clean for the kept raw string file (its IDE0055 spots were
+        // "line endings"), where format says Not checked (exit 3). The copy's run names the file, as format's run does.
+        var root = NewFolder(("R.cs", "class R\n{\n}\n"));
+        var finding = $"{Path.Combine(root, "R.cs")}(1,8): warning IDE0055: Fix formatting";
+        var lines = new List<string>();
+
+        var code = FormatCommand.Run(new[] { root, "--verify-no-changes" }, lines.Add, (args, output) =>
+        {
+            if (args.Contains("--verify-no-changes"))
+            {
+                output?.Invoke(finding);
+                return 2;
+            }
+
+            output?.Invoke($"Not checked: {Path.Combine(args[0], "R.cs")}: IDE0055 {FormatCommand.RawStringGapEnd}");
+            return 0;
+        });
+
+        Assert.Equal(FormatCommand.NotVerifiedExitCode, code);
+        Assert.Contains(lines, l => l.StartsWith("Not checked:", StringComparison.Ordinal) && l.Contains("R.cs", StringComparison.Ordinal) && !l.Contains("stylebro-verify-", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void SeparatePasses_SplitsThePlainRun_OnlyWithTheCodeStylePackage()
+    {
+        // Backlog 079: the analyzer pass must run apart from the style pass, to leave the IDE ids to the SDK's.
+        Assert.Equal(["whitespace", "style", "analyzers"], FormatCommand.SeparatePasses([string.Empty], codeStyle: true));
+        Assert.Equal([string.Empty], FormatCommand.SeparatePasses([string.Empty], codeStyle: false));
+        Assert.Equal(["style", "analyzers"], FormatCommand.SeparatePasses(["style", "analyzers"], codeStyle: true));
+    }
+
+    [Theory]
+    [InlineData("a\r\nb\r\n", false, true)]
+    [InlineData("a\nb\n", false, false)]
+    [InlineData("a\nb\n", true, true)]
+    [InlineData("a\r\nb\r\n", true, false)]
+    [InlineData("a\r\nb\n", true, true)]
+    [InlineData("ab", false, false)]
+    public void HasOtherLineEnding_IsWhatThisOsDoesntWrite(string text, bool windows, bool other)
+    {
+        var root = NewFolder(("F.cs", text));
+        Assert.Equal(other, FormatCommand.HasOtherLineEnding(Path.Combine(root, "F.cs"), windows));
+    }
+
+    [Fact]
+    public void HasOtherLineEnding_AMissingFile_HasNone() =>
+        Assert.False(FormatCommand.HasOtherLineEnding(Path.Combine(Path.GetTempPath(), "stylebro-missing-" + Guid.NewGuid().ToString("N") + ".cs")));
+
     [Theory]
     [InlineData("a\r\nb\r\n", true)]
     [InlineData("a\nb\n", false)]
