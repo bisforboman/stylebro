@@ -295,6 +295,27 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
+    public void Verify_AnswersFromTheRecord_WithTheXunitNoteToo()
+    {
+        // Trial 67, CQRSlite (xunit.v3): xunit.analyzers' note (no Fix All) next to IDE0049's kept the record from being marked checked,
+        // so the check after a clean format ran in full (18 s against 1 s with only the held-back note, Dumpify).
+        Write("src/A/A.csproj", "<Project />");
+        Write("src/A/X.cs", "class X { }");
+        var notes = new[] { FormatCommand.XunitGap("2.1.0"), FormatCommand.HeldBackGap(["IDE0049"]) };
+        Assert.Equal(0, FormatCommand.Run([root], _ => { }, (_, output) =>
+        {
+            FormatCommand.MarkCheckedClean(root);
+            notes.ToList().ForEach(n => output?.Invoke(n));
+            return 0;
+        }));
+
+        var lines = new List<string>();
+        Assert.Equal(0, FormatCommand.Run([root, "--verify-no-changes"], lines.Add, (_, _) => throw new InvalidOperationException("verify ran 'dotnet format'")));
+        Assert.StartsWith(FormatCommand.FromRecordHeader, lines[0], StringComparison.Ordinal);
+        Assert.Equal([.. notes, "Clean."], lines.Skip(1));
+    }
+
+    [Fact]
     public void Verify_RunsTheChecks_WhenTheCleanRunDidntCheckEveryRun()
     {
         // A first run of one plain 'dotnet format' (no check) that changed nothing, or a check that loaded only some projects

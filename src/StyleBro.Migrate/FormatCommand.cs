@@ -5030,12 +5030,13 @@ internal static partial class FormatCommand
             runPhase.Dispose();
 
             // The run checked every plan entry, clean apart from kept findings, and loaded every project: verify's checks find the
-            // same on this state (VerifyFromRecord). The held-back SDK rules' note too: the SDK's version is in the record's key, and
-            // verify says the note again (trial 58: SDK 10.0.1xx's IDE0049 note made NPoco's check run every run again, 85 s).
+            // same on this state (VerifyFromRecord). The notes too (the held-back SDK rules', xunit.analyzers'): the SDK's version is in the record's key, and
+            // verify says the notes again (trial 58: SDK 10.0.1xx's IDE0049 note made NPoco's check run every run again, 85 s; trial 67: xunit.analyzers'
+            // note made CQRSlite's check run in full, 18 s against 1 s).
             // The files the raw string guard kept are recorded too (RecordedRawStringGaps): verify says them again, so check agrees with format.
             rawStringGaps.UnionWith(gaps.Where(IsRawStringGap));
-            var checkedClean = TakeCheckedClean(root) && !incomplete && gaps.All(g => IsHeldBackGap(g) || IsRawStringGap(g));
-            var heldBackNotes = checkedClean ? gaps.Where(IsHeldBackGap).ToList() : [];
+            var checkedClean = TakeCheckedClean(root) && !incomplete && gaps.All(g => IsNoteGap(g) || IsRawStringGap(g));
+            var heldBackNotes = checkedClean ? gaps.Where(IsNoteGap).ToList() : [];
             var checkFindings = TakeCheckFindings(root);
 
             // The configurations an in-solution generator keeps from the runs: 'bro check' builds them, format doesn't (a gap).

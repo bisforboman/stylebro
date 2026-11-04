@@ -202,6 +202,28 @@ internal static class InitCommand
             }
         }
 
+        // Code where the team suppressed a built-in rule the block turns off for StyleBro's (IDE0040 for BRO1404) stays exempt from the
+        // rules that replace it (owner's choice 2026-11-04, trial 67, RestEase: `#pragma warning disable IDE0040` around an implicit
+        // private interface a test depends on; BRO1404 added `private`).
+        if (!migrated)
+        {
+            var blockedIde = new List<string>();
+            var (addedIde, filesIde, _, _) = Program.RewriteSuppressions(root, Suppressions.WithIde(new Dictionary<string, SortedSet<string>>()), write, blocked: blockedIde);
+            if (Program.BlockedLine(blockedIde, write) is { } blockedIdeLine)
+            {
+                Console.WriteLine(blockedIdeLine);
+                if (write)
+                {
+                    return 1;
+                }
+            }
+
+            if (addedIde > 0)
+            {
+                Console.WriteLine($"Suppressions: {addedIde} {(write ? "added" : "to add")} for the rules that replace the built-in rules the block turns off (IDE0040 and the like) in {filesIde} files (the IDE ones stay).");
+            }
+        }
+
         // The root, then every folder with C# code whose .editorconfig says 'root = true': the root's block never reaches it.
         // Without an .editorconfig of its own and C# code it would reach, the root gets none: the starter kit's code is all
         // under src/, whose .editorconfig says root = true, and init created a root one nothing read.
