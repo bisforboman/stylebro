@@ -2,6 +2,6 @@
 @{
     File = 'src/StyleBro.Migrate/FormatCommand.cs'
     Find = '!(IsFormattingLine(l) && IsInFiles(l, rawStringFiles))'
-    Replace = 'false'
+    Replace = 'true'
     Tests = 'FormatLineEndingsTests.Verify_AFileTheRawStringGuardKeptInTheCopy'
 }
