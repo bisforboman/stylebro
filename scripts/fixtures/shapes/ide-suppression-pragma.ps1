@@ -25,7 +25,7 @@ public class Outer
         int Value();
     }
 
-    public int Use(IImplicit item) { return item.Value(); }
+    int Use(IImplicit item) { return item.Value(); }
 }
 '@
         New-TestProject $root 'tests/Lib.Tests/Lib.Tests.csproj' -References '../../src/Lib/Lib.csproj'

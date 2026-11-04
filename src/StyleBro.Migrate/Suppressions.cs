@@ -27,8 +27,6 @@ internal static class Suppressions
         ["stylebro_keep_overloads_together"] = "false",
     };
 
-    private static readonly Regex CheckId = new(@"^(SA\d{4}|SX\d{4}|SST\d{4}|S\d{3,4}|IDE\d{4})\b", RegexOptions.IgnoreCase);
-
     /// <summary>
     /// The built-in rules the generated block turns off (sdk-rules.editorconfig) because StyleBro's rules replace them, and those rules:
     /// code the team exempted from the built-in rule (<c>#pragma warning disable IDE0040</c>) stays exempt from them (owner's choice
@@ -60,6 +58,8 @@ internal static class Suppressions
 
         return all;
     }
+
+    private static readonly Regex CheckId = new(@"^(SA\d{4}|SX\d{4}|SST\d{4}|S\d{3,4}|IDE\d{4})\b", RegexOptions.IgnoreCase);
 
     private static readonly Regex NoWarn = new(@"(<NoWarn(?:\s[^>]*)?>)([^<]*)(</NoWarn>)", RegexOptions.IgnoreCase);
 
