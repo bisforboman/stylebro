@@ -304,7 +304,7 @@ internal static partial class FormatCommand
     public static bool IsOnlyFileLock(IReadOnlyList<string> output)
     {
         var errors = output.Select(l => Regex.Match(l, @"\berror (?<id>[A-Z]+\d+):")).Where(m => m.Success).Select(m => m.Groups["id"].Value).Distinct().ToList();
-        return errors is [ "MSB4018" ] && output.Any(l => l.Contains("being used by another process", StringComparison.Ordinal));
+        return errors is ["MSB4018"] && output.Any(l => l.Contains("being used by another process", StringComparison.Ordinal));
     }
 
     /// <summary>

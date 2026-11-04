@@ -11,6 +11,8 @@ namespace StyleBro.Tests;
 [Collection(FormatEnvironmentCollection.Name)]
 public sealed class FormatCoverageTests : IDisposable
 {
+    private const string LockError = "/r/src/Moq.Sdk/Moq.Sdk.csproj(55,5): error MSB4018: The \"GenerateDepsFile\" task failed unexpectedly. System.IO.IOException: The process cannot access the file '/r/src/Moq.Sdk/bin/Debug/netstandard2.0/Moq.Sdk.deps.json' because it is being used by another process.";
+
     private readonly List<string> folders = [];
 
     public void Dispose() => folders.ForEach(f =>
@@ -229,8 +231,6 @@ public sealed class FormatCoverageTests : IDisposable
         // Without the untouched build (no git): every error counts.
         Assert.Equal(2, FormatCommand.CompareBuild(messages, null, new HashSet<string>(["BRO1002"])).New.Count);
     }
-
-    private const string LockError = "/r/src/Moq.Sdk/Moq.Sdk.csproj(55,5): error MSB4018: The \"GenerateDepsFile\" task failed unexpectedly. System.IO.IOException: The process cannot access the file '/r/src/Moq.Sdk/bin/Debug/netstandard2.0/Moq.Sdk.deps.json' because it is being used by another process.";
 
     [Fact]
     public void IsOnlyFileLock_IsTheDepsFileRaceAndNothingElse()
