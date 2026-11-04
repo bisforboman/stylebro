@@ -195,6 +195,13 @@ public sealed partial class MigrationTests
         Assert.Equal("sdk 10.0.100; StyleBro.Analyzers 1.1.0", FormatCommand.Versions(root, _ => "10.0.100"));
         Assert.Equal("sdk unknown; StyleBro.Analyzers 1.1.0", FormatCommand.Versions(root, _ => throw new ToolException("no dotnet")));
 
+        // xunit.analyzers' version is in it too (trial 67: its "no Fix All" note is in the record).
+        Write("src/A/obj/project.assets.json", "{ \"libraries\": { \"StyleBro.Analyzers/1.1.0\": { }, \"xunit.analyzers/1.23.0\": { } } }");
+        Assert.Equal("sdk 10.0.100; StyleBro.Analyzers 1.1.0; xunit.analyzers 1.23.0", FormatCommand.Versions(root, _ => "10.0.100"));
+        Write("src/A/obj/project.assets.json", "{ \"libraries\": { \"StyleBro.Analyzers/1.1.0\": { }, \"xunit.analyzers/1.27.0\": { } } }");
+        Assert.Equal("sdk 10.0.100; StyleBro.Analyzers 1.1.0; xunit.analyzers 1.27.0", FormatCommand.Versions(root, _ => "10.0.100"));
+        Write("src/A/obj/project.assets.json", "{ \"libraries\": { \"StyleBro.Analyzers/1.1.0\": { } } }");
+
         // In the record's key: another package version (restored, so in obj/, which the file hashes leave out) is another state.
         var key = FormatCommand.StateKey(root, [root]);
         Write("src/A/obj/project.assets.json", "{ \"libraries\": { \"StyleBro.Analyzers/1.2.0\": { } } }");

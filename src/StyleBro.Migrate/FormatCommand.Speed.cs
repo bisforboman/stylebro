@@ -265,7 +265,14 @@ internal static partial class FormatCommand
         var packages = assets.SelectMany(a => Regex.Matches(File.ReadAllText(a), "\"StyleBro\\.Analyzers/(?<version>[^\"]+)\"", RegexOptions.IgnoreCase).Select(m => m.Groups["version"].Value))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Order(StringComparer.OrdinalIgnoreCase);
-        return $"sdk {version}; StyleBro.Analyzers {string.Join(",", packages)}";
+
+        // xunit.analyzers' version too: the note that its fixes have no Fix All (XunitGap) is in the record (trial 67), and a restore can
+        // change the version (the transitive one of xunit.v3) without a file the key hashes changing.
+        var xunit = assets.SelectMany(a => Regex.Matches(File.ReadAllText(a), "\"xunit\\.analyzers/(?<version>[^\"]+)\"", RegexOptions.IgnoreCase).Select(m => m.Groups["version"].Value))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        return $"sdk {version}; StyleBro.Analyzers {string.Join(",", packages)}" + (xunit.Count == 0 ? string.Empty : $"; xunit.analyzers {string.Join(",", xunit)}");
     }
 
     /// <summary>Marks the check of every plan entry of a 'format' run on <paramref name="root"/> as clean (<see cref="CheckedClean"/>; tests stand in for 'dotnet format' with it).</summary>
