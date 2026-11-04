@@ -217,10 +217,10 @@ internal static partial class FormatCommand
             foreach (var configuration in configurations)
             {
                 using var phase = PhaseTimes.Measure($"build: {configuration}");
-                var (exitCode, output) = build(root, workspacePath, configuration);
+                var (exitCode, output) = RetryAfterFileLock(() => build(root, workspacePath, configuration), log, configuration);
                 var current = BuildMessages(output, top);
                 (int ExitCode, IReadOnlyList<string> Output)? before = untouched is { Length: > 0 } copy
-                    ? WithHook(UntouchedHook(Path.GetDirectoryName(Path.GetFullPath(copy))!, ids, leftAlone.Select(f => Path.GetFullPath(Path.Combine(copy, f)))), () => build(Path.GetFullPath(Path.Combine(copy, Path.GetRelativePath(top, root))), Path.GetFullPath(Path.Combine(copy, relative)), configuration))
+                    ? WithHook(UntouchedHook(Path.GetDirectoryName(Path.GetFullPath(copy))!, ids, leftAlone.Select(f => Path.GetFullPath(Path.Combine(copy, f)))), () => RetryAfterFileLock(() => build(Path.GetFullPath(Path.Combine(copy, Path.GetRelativePath(top, root))), Path.GetFullPath(Path.Combine(copy, relative)), configuration), log, $"untouched code's {configuration}"))
                     : null;
                 var beforeMessages = before is { } b ? BuildMessages(b.Output, untouched!) : untouched == string.Empty ? current : null;
 
@@ -293,6 +293,34 @@ internal static partial class FormatCommand
             : notComparedPart is null ? notVerified
             : notVerified is null ? $"{NotVerifiedMarker} {notComparedPart}: fix the errors the untouched code has too, then run again."
             : $"{notVerified} Also, {notComparedPart}.";
+    }
+
+    /// <summary>
+    /// Whether a failed build's <paramref name="output"/> has no error but "The process cannot access the file ... because it is being
+    /// used by another process" in an MSBuild task (MSB4018, trial 66 and 67, moq4: GenerateDepsFile on Moq.Sdk.deps.json). That is a
+    /// race between two builds of one project that write the same output (a project reached through several references with
+    /// other global properties, in one 'dotnet build' of the solution), not a finding of the code.
+    /// </summary>
+    public static bool IsOnlyFileLock(IReadOnlyList<string> output)
+    {
+        var errors = output.Select(l => Regex.Match(l, @"\berror (?<id>[A-Z]+\d+):")).Where(m => m.Success).Select(m => m.Groups["id"].Value).Distinct().ToList();
+        return errors is [ "MSB4018" ] && output.Any(l => l.Contains("being used by another process", StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// <paramref name="run"/> (a build) once more when it failed only on such a file lock (<see cref="IsOnlyFileLock"/>), with a note
+    /// saying so; a second failure counts as it is. Nothing else is retried: any other error is the code's.
+    /// </summary>
+    public static (int ExitCode, IReadOnlyList<string> Output) RetryAfterFileLock(Func<(int ExitCode, IReadOnlyList<string> Output)> run, Action<string> log, string what)
+    {
+        var result = run();
+        if (result.ExitCode != 0 && IsOnlyFileLock(result.Output))
+        {
+            log($"  The {what} build failed only on a file lock between projects built at once (MSB4018: a file \"is being used by another process\"), not on the code: building it again.");
+            result = run();
+        }
+
+        return result;
     }
 
     /// <summary>
