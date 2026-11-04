@@ -1450,3 +1450,72 @@ Since 2026-10-25 the host is `bro format`'s default engine; trials 52-64 compare
   raw strings: the run-2 check reports "7 files with findings" no fix changes, so it is not a clean check of every run. The Debug
   build in `check --build` also failed once on a `deps.json` file lock between parallel builds (a race, not seen in the before run).
   No fixture: still no small project that makes Roslyn change that literal.
+
+## Trial 67 (2026-11-04, verdict pending; the Sonnet session again; host engine only, no soak)
+
+- Repos (three random plus one targeted, and one extra): MoaidHathot/Dumpify, canton7/RestEase, gautema/CQRSlite (random, seed 67:
+  draws 19, 29, 104 of 128 entries; 19 walked past the used entries and 92 PolySharp, 93 Statiq.Framework, 103 WeakEvent (trial 66's
+  skips) to 108 Gridify, which targets net11.0 (NETSDK1045 on SDK 10.0.114, rejected), so the draws took 109, 110 and 111;
+  `.trials/trial67/logs/picks.md`), moq/moq4 again (targeted at trial 66's fixes: single-entry `<TargetFrameworks>`, the kept `$$"""`
+  file), stefanprodan/AspNetCoreRateLimit again (the extra: trial 66 suspected its trial 65 finding was the single-entry
+  `<TargetFrameworks>` bug). Tested main ebd9a5d (after #326) as 0.8.0-trial67.1. Logs: `.trials/trial67/<repo>/logs/` (`base-`
+  untouched, `r1-` round 1, `r2-` the fixed tool on CQRSlite and AspNetCoreRateLimit).
+- The host engine never fell back to `dotnet format`.
+- Dumpify (init, central package management, a nuget.config that clears its sources: the trial feed and a `StyleBro.*` mapping added):
+  81 files changed, converged, Clean everywhere; check 1 s from format's record against 23 s for a full check (record deleted), same
+  output and exit code; check --build Clean; both TreatWarningsAsErrors builds pass untouched and after; tests 431 the same.
+- CQRSlite (init, central package management, xunit.v3 on Microsoft.Testing.Platform: `dotnet test --solution`, and without
+  `DOTNET_ROLL_FORWARD`, which made the test hosts fail the handshake with exit 5): 60 files, Clean everywhere, TWAE builds pass, 126
+  tests the same. Finding 1: the check after a clean format took 22 s, not ~1 s: format's record is marked checked only when every gap
+  is the held-back SDK note, and xunit.analyzers' "no Fix All" note (also one the verdict doesn't count) kept it unmarked (backlog 077,
+  which trial 64 left open). Fixed: any note gap keeps the record usable (`FormatCommand.IsNoteGap`) and xunit.analyzers' version is
+  part of the record's key (`FormatCommand.Versions`); with the fixed tool CQRSlite's check takes 0 s with the same output. Unit tests,
+  mutation entries, and the `xunit-no-fixall` fixture now asserts that the host's check answers from the record.
+- RestEase (init; nine frameworks from netstandard1.1 and netcoreapp1.0 to net6.0, a source generator): format, check (`--json` too)
+  and check --build all exit 3, Not verified, because netstandard1.1 and netcoreapp1.0 don't load in `dotnet format` (known, by design,
+  as jwt in trial 66). TWAE builds pass untouched and after. Tests (DOTNET_ROLL_FORWARD=Major): 10 header tests fail per framework
+  untouched (they expect CRLF; Linux), and after StyleBro two more fail in RestEase.SourceGenerator.UnitTests: the tests assert the
+  line and column of diagnostics in source they read. One is BRO1102 splitting `[Get, Post]` (a line moves: formatting-coupled, not a
+  bug). Finding 2, the other: `#pragma warning disable IDE0040` around an interface left implicitly private on purpose; init turns IDE0040
+  off for BRO1404, which ignored that pragma and added `private` (column 19 became 27). Owner's choice (decision
+  2026-11-04-bro-init-carries-ide0040-suppressions-over-to-bro1404.md): `bro init --write` carries suppressions of the built-in rules
+  its block turns off for StyleBro's over to the replacing rules (`#pragma`, `[SuppressMessage]`, `<NoWarn>`; IDE0040, IDE0011,
+  IDE0047, IDE0048, IDE0065), as migrate does for SA ids. Unit test, mutation entries, fixture `ide-suppression-pragma` (fails before,
+  passes after). A locked file is said but doesn't stop init (`Init_SkipsALockedCSharpFile`).
+- moq4 (the targeted re-check; init, the same two workarounds as trial 66): the single-entry `<TargetFrameworks>` projects loaded (no
+  false "Not checked"), and the kept raw string file gives `Not checked:` and exit 3 in format, check and `check --json` (#325, #326);
+  check --build exit 2 (the three IDE0055 spots in that file, as in trial 66). `format --files` and `check --files` on that file agree
+  (3). The TWAE builds fail after StyleBro on those 3 IDE0055 errors (untouched ones pass), tests 110/148/33/37/9 the same. Open,
+  for the owner and the Opus re-check:
+  1. `bro check --files <the file>` WITHOUT a format record before it says Clean (exit 0) and calls the three IDE0055 findings "only
+     this OS's line ending" (`IsFormattingLine` exempts any whitespace/IDE0055 finding the format copy doesn't change); the file is LF.
+     The same holds for a plain `bro check` on a fresh clone (CI) of such a tree. Backlog 079.
+  2. `bro check --report` after format lists 47 WHITESPACE/IDE0055 findings in 7 LF files (logs/r1-check-report.json), all exempted
+     the same way, so neither format nor check mentions them and format's record is never marked checked (check 337 s). bro format
+     itself made them: it rewrote `{ ArgumentList.Arguments.Count: 1 }` to `Count : 1` (CustomDelegateCodeFix.cs) and
+     `extension(IMock mock)` to `extension (IMock mock)` (MockRuntimeExtensions.cs), which the host's check then flags again. The
+     build reports none of them. Small projects with the same code (`.trials/trial67/spot/pragma`, also with netstandard2.0 and
+     `LangVersion Latest`, an alias-qualified type pattern) don't reproduce it, so no fixture. Probably the same unexplained cause as
+     trial 66's raw string spots. Backlog 079.
+  3. check --build's Debug build failed on an MSB4018 GenerateDepsFile IOException (`Moq.Sdk.deps.json` in use by another process),
+     the second sighting after trial 66's follow-up; the comparison then calls it a new error. A race, not a finding of the code.
+     Backlog 080.
+- AspNetCoreRateLimit (the extra; init): Clean everywhere, including two full checks after check --build; TWAE builds pass; 48 tests
+  the same. Confirm or refute: a tool built from 27ba34f~1 (before trial 65's restore fix) reproduces trial 65's "Not checked: ...
+  The target CoreCompile does not exist" after check --build; one built from 0ab038f~1 (with the restore fix, without trial 66's
+  single-entry fix) is Clean. So trial 65's finding was the restore, and trial 66's suspicion is refuted for this repository.
+- #312 fast check: where it engaged (Dumpify; CQRSlite with the fix) the verdict, output and exit code equal a full check. It does not
+  engage after a format that changed nothing (its first run is a plain format without a check, by design: AspNetCoreRateLimit's check
+  takes 13 s), nor on moq4 (item 2 above).
+- Agreement: format, check, `check --json` and check --build agree on every repository (exit codes CQRSlite 0/0/0/0, Dumpify
+  0/0/0/0, RestEase 3/3/3/3, AspNetCoreRateLimit 0/0/0/0); moq4 3/3/3/2, where check --build's 2 is the three IDE0055 errors the
+  build reports in the kept file (honest; by the owner's 2026-11-03 decision format and check say Not verified there).
+- Timings (s, host, round 1): format CQ 35, DU 65, RE 93, AR 23, MQ 492; second format 21, 26, 34, 12, 178; check 22 (0 with the fix),
+  1, 30, 13, 337; check --build 75, 66, 82, 37, 395; preview CQ 46.
+- Environment: SDK 10.0.114 + 8.0.133; the trial feed added with `dotnet nuget add source` (and in Dumpify's nuget.config);
+  `-p:NuGetAudit=false`; `DOTNET_ROLL_FORWARD=Major` only for RestEase's and AspNetCoreRateLimit's tests (it breaks Microsoft.Testing.
+  Platform's handshake in CQRSlite); moq4's dead feed line removed in a local commit so `git archive HEAD` gives the untouched copy for
+  the baseline builds. verify-format.ps1 fails in the trial checkout with the trial clones in `.trials/` ("Fixes did not converge on
+  Messy") and passes in a clean worktree of the same commit: a gotcha CLAUDE.md already names.
+- The session: about 3 hours of wall clock to this point (17:34 start), one worker, two lanes. A compound command that built a third-party
+  repository was refused by the permission classifier (as in trial 65); split into a script file and a plain run it worked.
