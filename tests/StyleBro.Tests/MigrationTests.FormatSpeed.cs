@@ -195,6 +195,13 @@ public sealed partial class MigrationTests
         Assert.Equal("sdk 10.0.100; StyleBro.Analyzers 1.1.0", FormatCommand.Versions(root, _ => "10.0.100"));
         Assert.Equal("sdk unknown; StyleBro.Analyzers 1.1.0", FormatCommand.Versions(root, _ => throw new ToolException("no dotnet")));
 
+        // xunit.analyzers' version is in it too (trial 67: its "no Fix All" note is in the record).
+        Write("src/A/obj/project.assets.json", "{ \"libraries\": { \"StyleBro.Analyzers/1.1.0\": { }, \"xunit.analyzers/1.23.0\": { } } }");
+        Assert.Equal("sdk 10.0.100; StyleBro.Analyzers 1.1.0; xunit.analyzers 1.23.0", FormatCommand.Versions(root, _ => "10.0.100"));
+        Write("src/A/obj/project.assets.json", "{ \"libraries\": { \"StyleBro.Analyzers/1.1.0\": { }, \"xunit.analyzers/1.27.0\": { } } }");
+        Assert.Equal("sdk 10.0.100; StyleBro.Analyzers 1.1.0; xunit.analyzers 1.27.0", FormatCommand.Versions(root, _ => "10.0.100"));
+        Write("src/A/obj/project.assets.json", "{ \"libraries\": { \"StyleBro.Analyzers/1.1.0\": { } } }");
+
         // In the record's key: another package version (restored, so in obj/, which the file hashes leave out) is another state.
         var key = FormatCommand.StateKey(root, [root]);
         Write("src/A/obj/project.assets.json", "{ \"libraries\": { \"StyleBro.Analyzers/1.2.0\": { } } }");
@@ -292,6 +299,27 @@ public sealed partial class MigrationTests
             return 0;
         });
         Assert.False(FormatCommand.LoadRecord(root, [root])!.Checked);
+    }
+
+    [Fact]
+    public void Verify_AnswersFromTheRecord_WithTheXunitNoteToo()
+    {
+        // Trial 67, CQRSlite (xunit.v3): xunit.analyzers' note (no Fix All) next to IDE0049's kept the record from being marked checked,
+        // so the check after a clean format ran in full (18 s against 1 s with only the held-back note, Dumpify).
+        Write("src/A/A.csproj", "<Project />");
+        Write("src/A/X.cs", "class X { }");
+        var notes = new[] { FormatCommand.XunitGap("2.1.0"), FormatCommand.HeldBackGap(["IDE0049"]) };
+        Assert.Equal(0, FormatCommand.Run([root], _ => { }, (_, output) =>
+        {
+            FormatCommand.MarkCheckedClean(root);
+            notes.ToList().ForEach(n => output?.Invoke(n));
+            return 0;
+        }));
+
+        var lines = new List<string>();
+        Assert.Equal(0, FormatCommand.Run([root, "--verify-no-changes"], lines.Add, (_, _) => throw new InvalidOperationException("verify ran 'dotnet format'")));
+        Assert.StartsWith(FormatCommand.FromRecordHeader, lines[0], StringComparison.Ordinal);
+        Assert.Equal([.. notes, "Clean."], lines.Skip(1));
     }
 
     [Fact]

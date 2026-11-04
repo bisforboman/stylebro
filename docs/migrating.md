@@ -286,6 +286,10 @@ harmless, and the suppression stays right if the code changes. Rules the generat
 analyzer like StyleSharp's SST1462 reports a suppression of a rule that never reports). The count the tool prints is of rule ids added (a
 `disable`/`restore` pair counts twice), and the preview counts the same way. Sonar's suppressions get the same treatment ([Coming from SonarQube](#coming-from-sonarqube)).
 
+`bro init --write` (a repository without StyleCop) does this for the built-in rules its block turns off in favour of StyleBro's:
+IDE0040 (BRO1007, BRO1404), IDE0011 (BRO1514-BRO1516), IDE0047 (BRO1405), IDE0048 (BRO1406, BRO1407) and IDE0065 (BRO1008). A
+`#pragma warning disable IDE0040` around an interface left implicitly private on purpose gets BRO1007, BRO1404 beside it.
+
 EF Core migrations are `dotnet ef`'s output: when the repository has them, the block marks their folders
 `generated_code = true` (a section per folder, e.g. `[src/Ordering.Infrastructure/Migrations/**]`), so formatting
 and StyleBro leave them alone.

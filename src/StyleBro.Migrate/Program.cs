@@ -742,7 +742,7 @@ internal static class Program
         int files = 0;
         int notCarried = 0;
         int already = 0;
-        var mentions = new Regex(@"\bS(?:[AX]|ST)?\d{3,4}\b", RegexOptions.IgnoreCase);
+        var mentions = new Regex(@"\b(?:S(?:[AX]|ST)?|IDE)\d{3,4}\b", RegexOptions.IgnoreCase);
 
         // Suppressions of a rule 'dotnet format' ignores can't take effect: its whitespace pass ignores
         // '#pragma warning disable IDE0055' (Spectre.Console's SA1028 pragmas got one), so none is added; the report says so.

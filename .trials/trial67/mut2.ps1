@@ -1,0 +1,2 @@
+Set-Location /home/user/stylebro
+& ./scripts/mutation/New-Mutation.ps1 -File 'src/StyleBro.Migrate/FormatCommand.cs' -Find 'gaps.All(g => IsNoteGap(g) || IsRawStringGap(g));' -Replace 'gaps.All(g => g.Contains("IDE0049") || IsRawStringGap(g));' -Tests 'Verify_AnswersFromTheRecord_WithTheXunitNoteToo' -Comment 'Trial 67 (CQRSlite): any note gap (xunit.analyzers too) keeps the record usable, not only the held-back one.'
