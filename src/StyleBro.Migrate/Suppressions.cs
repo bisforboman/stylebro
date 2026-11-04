@@ -30,7 +30,7 @@ internal static class Suppressions
     /// <summary>
     /// The built-in rules the generated block turns off (sdk-rules.editorconfig) because StyleBro's rules replace them, and those rules:
     /// code the team exempted from the built-in rule (<c>#pragma warning disable IDE0040</c>) stays exempt from them (owner's choice
-    /// 2026-11-04, trial 67, RestEase: BRO1404 added <c>private</c> inside such a pragma pair and a test that reads the source broke).
+    /// 2026-11-04, trial 67, RestEase: BRO1404 added <see langword="private"/> inside such a pragma pair and a test that reads the source broke).
     /// </summary>
     public static readonly IReadOnlyDictionary<string, string[]> IdeReplacements = new Dictionary<string, string[]>(StringComparer.Ordinal)
     {
@@ -40,6 +40,10 @@ internal static class Suppressions
         ["IDE0048"] = ["BRO1406", "BRO1407"],
         ["IDE0065"] = ["BRO1008"],
     };
+
+    private static readonly Regex CheckId = new(@"^(SA\d{4}|SX\d{4}|SST\d{4}|S\d{3,4}|IDE\d{4})\b", RegexOptions.IgnoreCase);
+
+    private static readonly Regex NoWarn = new(@"(<NoWarn(?:\s[^>]*)?>)([^<]*)(</NoWarn>)", RegexOptions.IgnoreCase);
 
     /// <summary><paramref name="replacements"/> plus <see cref="IdeReplacements"/> (only those in <paramref name="off"/>, or all when null).</summary>
     public static SortedDictionary<string, SortedSet<string>> WithIde(IReadOnlyDictionary<string, SortedSet<string>> replacements, IEnumerable<string>? off = null)
@@ -58,10 +62,6 @@ internal static class Suppressions
 
         return all;
     }
-
-    private static readonly Regex CheckId = new(@"^(SA\d{4}|SX\d{4}|SST\d{4}|S\d{3,4}|IDE\d{4})\b", RegexOptions.IgnoreCase);
-
-    private static readonly Regex NoWarn = new(@"(<NoWarn(?:\s[^>]*)?>)([^<]*)(</NoWarn>)", RegexOptions.IgnoreCase);
 
     /// <summary>
     /// <paramref name="replacements"/> (StyleCop's) plus StyleSharp's: each SST rule gets the rules that replace the StyleCop
