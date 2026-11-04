@@ -2,10 +2,17 @@
 # Owner's choice: a note like IDE0049's (XunitGap), printed by the preview, format and check alike, on a fresh clone and after
 # a restore; the verdict doesn't count it. The findings stay for the build (the repository's own TWAE build fails on them,
 # before and after StyleBro). A repository mixing versions gets the note for all of its test projects (one run, one id list).
+# Trial 67 (CQRSlite): the note kept the record of the clean format from being marked checked, so the check after it ran in full
+# (18 s against 1 s): the host's check answers from the record again.
 @{
     Description = 'xunit.analyzers 1.25 (no Fix All): the note, before and after a restore'
     Reasons = @{ preview = 'no Fix All'; format = 'no Fix All'; check = 'no Fix All' }
     BuildFails = 'xUnit2004 at warning, which format can''t fix with xunit.analyzers 1.25 (the note says so)'
+    Assert = {
+        param($repo, $runs)
+        $check = $runs['host'].Steps['check']
+        if ($check -isnot [string] -and $check.Text -notmatch 'nothing changed since the last clean') { 'the check after a clean format did not answer from its record (the xunit.analyzers note kept it from being marked checked)' }
+    }
     Before = {
         param($repo)
         if ((Split-Path $repo -Leaf) -eq 'host') { dotnet restore $repo --nologo -v q | Out-Null }
