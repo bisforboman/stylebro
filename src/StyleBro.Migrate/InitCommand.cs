@@ -268,6 +268,7 @@ internal static class InitCommand
         }
 
         var agentsMd = args.Contains(AgentsFile.Option);
+        var skill = args.Contains(SkillFile.Option);
         targets = targets.SelectMany(t => t.Nested.Prepend(t)).ToList();
         targets = Synced(root, targets);
         if (!write)
@@ -300,6 +301,7 @@ internal static class InitCommand
 
             PinPreset(root, write: false, pinnedStyle);
             AgentsFile.Update(root, write: false, agentsMd).ForEach(Console.WriteLine);
+            SkillFile.Update(root, write: false, skill).ForEach(Console.WriteLine);
             return 0;
         }
 
@@ -354,6 +356,7 @@ internal static class InitCommand
         }
 
         AgentsFile.Update(root, write: true, agentsMd).ForEach(Console.WriteLine);
+        SkillFile.Update(root, write: true, skill).ForEach(Console.WriteLine);
         Console.WriteLine(Program.NextHint(root));
         Program.PrintWorkspaceHint(root, workspace);
         return 0;

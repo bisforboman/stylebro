@@ -1,8 +1,9 @@
 # Using StyleBro from scripts and AI agents
 
-`bro` has three things for scripts and AI coding agents: a JSON result for every command (`--json`), a
-fast format of just the files an edit touched (`format --files`), and, on request (`--agents-md`), a section in the
-repository's `AGENTS.md` that tells an agent how to work with StyleBro. The site also has an index for agents:
+`bro` has four things for scripts and AI coding agents: a JSON result for every command (`--json`), a
+fast format of just the files an edit touched (`format --files`), and, on request, a section in the
+repository's `AGENTS.md` (`--agents-md`) and [a skill](#the-skill) (`--skill`) that tell an agent how to work with
+StyleBro. The skill is also a Claude Code plugin, for setting StyleBro up before `bro` is installed. The site also has an index for agents:
 [llms.txt](https://bisforboman.github.io/stylebro/llms.txt) (every page and rule with one line each) and
 [llms-full.txt](https://bisforboman.github.io/stylebro/llms-full.txt) (all pages in one file).
 
@@ -74,6 +75,7 @@ keeps the text on the screen and the object in the file.
   "conventions": [],
   "sonar": null,
   "agentsMd": null,
+  "skill": null,
   "runs": [
     { "run": 1, "filesChanged": [ "src/Orders/Order.cs" ], "changesPerRule": { "BRO1303": 2, "IDE0055": 1 } },
     { "run": 2, "filesChanged": [], "changesPerRule": {} }
@@ -111,6 +113,7 @@ Every field is always there (empty or `null` where it doesn't apply). Paths in t
 | `conventions` | array | `init`: each convention found in the code: `key`, `what`, `counts` (value -> places), `verdict` (`kept`, `default`, `mixed`, `off`, `set`, `tooFew`), `result` (the text after the verdict in the report: the value, the rule turned off, or why the default stays). |
 | `sonar` | object or null | With a SonarQube setup: `sources`, `rulesOn`, `fixed` (`sonar`, `by`), `notApplied` (`sonar`, `reason`), `notes`. |
 | `agentsMd` | object or null | `init`/`migrate`: `file`, `created`, `changed`, `written` (null without `--agents-md`). |
+| `skill` | object or null | `init`/`migrate`: the same for the [skill](#the-skill) (null without `--skill`). |
 | `runs` | array | `format`/`preview`: each `dotnet format` run: `run` (1-based), `filesChanged`, `changesPerRule` (`format` only; `{}` in a preview). With `--verify-no-changes`: at most one entry, the files formatting would change. |
 | `changesPerRule` | object | Rule id -> changes, all runs together (`format`: from `dotnet format`'s report; `preview`: what the check before the fixes found). Whitespace counts as `IDE0055`. |
 | `filesPerRule` | object or null | `preview`: rule id -> the files it changed (`IDE0055` for whitespace-only files, `other` when nothing was reported). |
@@ -164,3 +167,39 @@ This repository uses [StyleBro](https://bisforboman.github.io/stylebro/): analyz
   https://bisforboman.github.io/stylebro/llms.txt).
 <!-- END stylebro -->
 ```
+
+## The skill
+
+A skill is a file of instructions an agent loads when a task needs it: Claude Code, GitHub Copilot, Cursor and other
+agents that read the [Agent Skills](https://agentskills.io/) format do. StyleBro's skill covers what the AGENTS.md
+section does (format the files you edited, `bro check` before finishing, leave the findings kept on purpose) and also how
+to set StyleBro up or move from StyleCop. Its text: [SKILL.md](https://bisforboman.github.io/stylebro/SKILL.md) (in the
+repository: [plugins/stylebro/skills/stylebro/SKILL.md](https://github.com/bisforboman/stylebro/blob/main/plugins/stylebro/skills/stylebro/SKILL.md)).
+
+Three ways to get it:
+
+- **Claude Code plugin**, for you on every repository, also before StyleBro is set up there:
+
+    ```
+    /plugin marketplace add bisforboman/stylebro
+    /plugin install stylebro@stylebro
+    ```
+
+    It follows `main`: `/plugin marketplace update stylebro` gets the newest text.
+
+- **In the repository**, for everyone working on it: `bro init --write --skill` (or `bro migrate --write --skill`)
+  writes it to `.claude/skills/stylebro/SKILL.md`, where Claude Code, GitHub Copilot and Cursor find a repository's
+  skills. Commit it. The text is the one of the `bro` you run, with a line that marks the file as bro's:
+
+    ```
+    <!-- written by bro (StyleBro.Tool); bro init or migrate with --write --skill replaces this file -->
+    ```
+
+    Running the command again with `--skill` replaces a file with that line (after a `bro` upgrade, say) and leaves a
+    `SKILL.md` without it alone. Without `--write` the commands say whether they would write it; `--diff --skill` includes
+    it in the patch. `--json` reports it as `skill`: `file`, `created`, `changed`, `written` (null without `--skill`).
+
+- **By hand**: copy [SKILL.md](https://bisforboman.github.io/stylebro/SKILL.md) to the folder your agent reads skills from
+  (`.agents/skills/stylebro/` for Codex, `~/.claude/skills/stylebro/` for all your repositories in Claude Code).
+
+`--agents-md` and `--skill` go together: AGENTS.md is read on every task, the skill only when one involves C# style.

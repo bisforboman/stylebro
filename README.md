@@ -83,6 +83,27 @@ build, the IDE and `dotnet format` then ignore those (every StyleBro rule and th
 turns on), so only new code has to follow the rules; a violation counts as new once its line is edited. See
 [docs/baseline.md](https://github.com/bisforboman/stylebro/blob/main/docs/baseline.md).
 
+## AI coding agents
+
+StyleBro is built to be run by agents: `bro format --files` formats just the files an edit touched, `bro check` exits 0
+when nothing is left to fix (the findings kept on purpose don't fail it), and every command takes `--json`.
+
+- **The skill** tells an agent how to work with StyleBro, and how to set it up or move from StyleCop. In Claude Code:
+
+  ```
+  /plugin marketplace add bisforboman/stylebro
+  /plugin install stylebro@stylebro
+  ```
+
+  Or put it into your repository for every agent working on it (Claude Code, GitHub Copilot, Cursor):
+  `bro init --write --skill` writes `.claude/skills/stylebro/SKILL.md`.
+- **AGENTS.md**: `bro init --write --agents-md` adds a short StyleBro section.
+- **The docs for agents**: [llms.txt](https://bisforboman.github.io/stylebro/llms.txt) (every page and rule, one line
+  each), [llms-full.txt](https://bisforboman.github.io/stylebro/llms-full.txt) and
+  [Scripts and AI agents](https://bisforboman.github.io/stylebro/agents/).
+
+Agents working on StyleBro itself: [AGENTS.md](https://github.com/bisforboman/stylebro/blob/main/AGENTS.md).
+
 ## Versions and security
 
 What the version numbers mean and when 1.0 ships: [docs/versioning.md](https://github.com/bisforboman/stylebro/blob/main/docs/versioning.md). What changed: [CHANGELOG.md](https://github.com/bisforboman/stylebro/blob/main/CHANGELOG.md) (GitHub Releases). Report vulnerabilities privately: [SECURITY.md](https://github.com/bisforboman/stylebro/blob/main/SECURITY.md).

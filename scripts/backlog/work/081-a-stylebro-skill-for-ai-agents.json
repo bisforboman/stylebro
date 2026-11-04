@@ -1,0 +1,6 @@
+{
+  "area": "Agents",
+  "item": "A StyleBro skill: plugin marketplace, bro init --skill, docs",
+  "notes": "Owner's request 2026-11-04 (docs/decisions/2026-11-04-a-stylebro-skill-for-ai-agents.md): one SKILL.md in plugins/stylebro/skills/stylebro/, served by the Claude Code plugin marketplace (.claude-plugin/marketplace.json), embedded in the tool (`--skill` writes .claude/skills/stylebro/SKILL.md, replaced only when it has bro's marker) and published on the docs site as SKILL.md. Also: AGENTS.md for agents working on this repository (CLAUDE.md imports it), .github/copilot-instructions.md, a README section.",
+  "status": "Done (2026-11-04)"
+}

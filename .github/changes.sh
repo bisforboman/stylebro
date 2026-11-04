@@ -15,10 +15,10 @@ if [ "${GITHUB_EVENT_NAME:-}" != pull_request ]; then
 fi
 
 files=$(git diff --name-only "origin/$GITHUB_BASE_REF...HEAD")
-# Docs, markdown outside src/tests/samples, the docs site's setup, the backlog generator and its items, New-Decision, the
+# Docs, markdown outside src/tests/samples/plugins (the tool embeds the skill), the docs site's setup, the backlog generator and its items, New-Decision, the
 # trial containers (scripts/trials, run by hand only), the changelog fold script (the build job checks it), and the
 # StyleCop survey except what the parity check and StyleBro.Migrate (embedded CSVs) read.
-docs='^(docs/|(?!(src|tests|samples)/).*\.md$|mkdocs\.yml$|\.github/docs-requirements\.txt$|\.github/workflows/docs\.yml$|scripts/New-Backlog\.py$|scripts/backlog/|scripts/New-Decision\.ps1$|scripts/trials/|scripts/changelog\.py$|scripts/stylecop-survey/(?!Compare-WithStyleCop\.ps1$|parity/|data/inventory-|data/mapping\.csv$))'
+docs='^(docs/|(?!(src|tests|samples|plugins)/).*\.md$|mkdocs\.yml$|\.github/docs-requirements\.txt$|\.github/workflows/docs\.yml$|scripts/New-Backlog\.py$|scripts/backlog/|scripts/New-Decision\.ps1$|scripts/trials/|scripts/changelog\.py$|scripts/stylecop-survey/(?!Compare-WithStyleCop\.ps1$|parity/|data/inventory-|data/mapping\.csv$))'
 fixtures='^(src/|scripts/fixtures/|Directory\.|global\.json$|nuget\.config$|[^/]*\.slnx$|\.github/workflows/fixtures\.yml$|\.github/changes\.sh$)'
 perf='^(src/|scripts/benchmark/|scripts/realworld/repos\.psd1$|Directory\.|global\.json$|[^/]*\.slnx$|\.github/workflows/ci\.yml$)'
 

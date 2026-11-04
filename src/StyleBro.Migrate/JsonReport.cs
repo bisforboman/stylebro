@@ -41,6 +41,7 @@ internal static class JsonReport
             ["conventions"] = new JsonArray(),
             ["sonar"] = null,
             ["agentsMd"] = null,
+            ["skill"] = null,
             ["runs"] = new JsonArray(),
             ["changesPerRule"] = new JsonObject(),
             ["filesPerRule"] = null,
