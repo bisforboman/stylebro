@@ -181,7 +181,7 @@ W '   the repos are listed in [stylecop-mapping.md](stylecop-mapping.md#how-this
 W '2. If the SDK might cover it, add a case to `scripts/stylecop-survey/sdk-check-cases.ps1` and run'
 W '   `Test-SdkCoverage.ps1`. Then check it doesn''t change code StyleCop accepts: `Measure-MigrationDelta.ps1` on a'
 W '   StyleCop-clean repo (that''s how the preset''s SA1501/SA1502 and IDE0040 settings were caught).'
-W '3. For a StyleBro rule, follow the design rules in CLAUDE.md (fix + Fix All, idempotent, skip unsafe cases), add a'
+W '3. For a StyleBro rule, follow the design rules in AGENTS.md (fix + Fix All, idempotent, skip unsafe cases), add a'
 W '   parity set to `parity/parity.psd1` and run `Compare-WithStyleCop.ps1` against StyleCop 1.2.'
 W '4. Move the entry out of `skipped.psd1` (into `decisions.psd1`) and regenerate.'
 W

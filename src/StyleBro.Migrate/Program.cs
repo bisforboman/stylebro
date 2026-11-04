@@ -27,12 +27,12 @@ internal static class Program
           Settings:        https://bisforboman.github.io/stylebro/configuration/
 
         Usage:
-          bro migrate [path] [--write] [--agents-md] [--sonar-profile <file>]
+          bro migrate [path] [--write] [--agents-md] [--skill] [--sonar-profile <file>]
               Coming from StyleCop: reads the StyleCop setup at 'path' (default: the current folder) and prints the
               StyleBro and .NET settings that enforce the same things. --write puts them into the .editorconfig files,
               turns StyleBro's preset off and carries StyleCop suppressions over.
 
-          bro init [path] [--write] [--modernize] [--style microsoft|stylecop] [--agents-md] [--sonar-profile <file>] [--project <solution or project>]
+          bro init [path] [--write] [--modernize] [--style microsoft|stylecop] [--agents-md] [--skill] [--sonar-profile <file>] [--project <solution or project>]
               Without StyleCop: the built-in .NET rules StyleBro's preset relies on, for the root .editorconfig.
               --modernize adds the SDK's rules for newer C# and APIs. --style microsoft sets the Microsoft style
               (dotnet/runtime's; <StyleBroStyle>) and the built-in rules it needs; your code's own conventions still win.
@@ -41,6 +41,8 @@ internal static class Program
 
               --agents-md (both): also write a StyleBro section into AGENTS.md (instructions for AI agents, between
               markers, updated on every run). Opt-in.
+              --skill (both): also write StyleBro's skill for AI agents (Claude Code, GitHub Copilot, Cursor) to
+              .claude/skills/stylebro/SKILL.md, replaced on every run. Opt-in.
 
               Both follow a SonarQube setup too (SonarAnalyzer.CSharp, Sonar rule severities in rulesets and configs):
               the Sonar rules that are on turn on the StyleBro and .NET rules that fix what they report. --sonar-profile
@@ -434,6 +436,7 @@ internal static class Program
         }
 
         AgentsFile.Update(root, write, rest.Contains(AgentsFile.Option)).ForEach(Console.WriteLine);
+        SkillFile.Update(root, write, rest.Contains(SkillFile.Option)).ForEach(Console.WriteLine);
 
         // Where the swap goes first, then what to do next.
         PackageHints(setup, root).ForEach(Console.WriteLine);
@@ -877,9 +880,9 @@ internal static class Program
         var (command, known) = args.FirstOrDefault() switch
         {
             "baseline" => ("baseline", new[] { "--project" }),
-            "init" => ("init", new[] { "--write", "--modernize", InitCommand.StyleOption, AgentsFile.Option, SonarProfileOption }.Concat(PreviewCommand.Options).ToArray()),
+            "init" => ("init", new[] { "--write", "--modernize", InitCommand.StyleOption, AgentsFile.Option, SkillFile.Option, SonarProfileOption }.Concat(PreviewCommand.Options).ToArray()),
             "format" => ("format", null),
-            _ => (null, new[] { "--write", AgentsFile.Option, SonarProfileOption }.Concat(PreviewCommand.Options).ToArray()),
+            _ => (null, new[] { "--write", AgentsFile.Option, SkillFile.Option, SonarProfileOption }.Concat(PreviewCommand.Options).ToArray()),
         };
         var options = args.Skip(command is null ? 0 : 1).ToArray();
 

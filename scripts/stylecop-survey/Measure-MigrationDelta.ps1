@@ -10,7 +10,7 @@
 #      like a real migration would. The remaining working-tree diff is StyleBro's.
 #
 # DESTRUCTIVE for the target: resets it to origin/HEAD and commits into it. Use a throwaway clone
-# (git clone file:///C:/dev/<repo> survives the temp cleanup better than a hard-linked clone, see CLAUDE.md).
+# (git clone file:///C:/dev/<repo> survives the temp cleanup better than a hard-linked clone, see AGENTS.md).
 #
 #   ./Measure-MigrationDelta.ps1 -Path <clone> -Solution Polly.slnx -ResetTargetRepo
 #   then: git -C <clone> diff --ignore-cr-at-eol

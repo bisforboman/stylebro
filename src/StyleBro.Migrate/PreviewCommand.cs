@@ -287,7 +287,7 @@ internal static class PreviewCommand
             {
                 // Its output goes to the log file only: on a failure Settings prints it, and the end of the log shown then is
                 // format's (the init report came twice before).
-                var settings = Settings(command, target, rest.Contains("--modernize"), rest.Contains(AgentsFile.Option), profile, LogFile, style);
+                var settings = Settings(command, target, rest.Contains("--modernize"), rest.Contains(AgentsFile.Option), rest.Contains(SkillFile.Option), profile, LogFile, style);
                 if (settings != 0)
                 {
                     return Fail(tail, settings, $"{(command == "init" ? "'bro init --write'" : "'bro migrate --write'")} failed (exit code {settings}, see above).");
@@ -324,7 +324,7 @@ internal static class PreviewCommand
                 return Fail(tail, 1, NoRestoreOutput);
             }
 
-            var formatArgs = new[] { project is null ? target : Path.Combine(target, project) }.Concat(rest.Where(o => o != "--modernize" && o != AgentsFile.Option)).ToList();
+            var formatArgs = new[] { project is null ? target : Path.Combine(target, project) }.Concat(rest.Where(o => o != "--modernize" && o != AgentsFile.Option && o != SkillFile.Option)).ToList();
 
             // The copy restores with NuGet's locked mode off: the reference the preview added changes the packages, and with
             // RestoreLockedMode always on the restore failed (NU1004) and told the user to fix their repository.
@@ -805,6 +805,7 @@ internal static class PreviewCommand
         {
             if (file.EndsWith(".editorconfig", StringComparison.OrdinalIgnoreCase) || Path.GetFileName(file).Equals("Directory.Build.props", StringComparison.OrdinalIgnoreCase)
                 || file.Equals(AgentsFile.FileName, StringComparison.Ordinal)
+                || file.Equals(SkillFile.FileName, StringComparison.Ordinal)
                 || Path.GetFileName(file).Equals("Directory.Packages.props", StringComparison.OrdinalIgnoreCase))
             {
                 var addedText = GitChecked(copy, "diff", "-U0", from, to, "--", file);
@@ -1624,7 +1625,7 @@ internal static class PreviewCommand
     /// Init's or the migration's '--write' on the copy; their output goes to the log (the dry run prints it), except the
     /// Sonar part of the report: which Sonar rules turned on which rules.
     /// </summary>
-    private static int Settings(string? command, string target, bool modernize, bool agentsMd, string? profile, Action<string> log, string? style = null)
+    private static int Settings(string? command, string target, bool modernize, bool agentsMd, bool skill, string? profile, Action<string> log, string? style = null)
     {
         var original = Console.Out;
         using var writer = new StringWriter();
@@ -1634,6 +1635,7 @@ internal static class PreviewCommand
         {
             var sonar = (profile is null ? Array.Empty<string>() : new[] { Program.SonarProfileOption, Path.GetFullPath(profile) })
                 .Concat(agentsMd ? new[] { AgentsFile.Option } : Array.Empty<string>())
+                .Concat(skill ? new[] { SkillFile.Option } : Array.Empty<string>())
                 .Concat(style is null ? Array.Empty<string>() : new[] { InitCommand.StyleOption, style })
                 .ToArray();
             code = command == "init"

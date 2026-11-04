@@ -42,6 +42,8 @@
     <EmbeddedResource Include="..\..\scripts\stylecop-survey\data\inventory-stylesharp-5.1.2.csv" LogicalName="StyleSharpRules.csv" />
     <EmbeddedResource Include="..\..\scripts\stylecop-survey\data\stylesharp-mapping.csv" LogicalName="StyleSharpMapping.csv" />
     <EmbeddedResource Include="sdk-rules.editorconfig" LogicalName="SdkRules.editorconfig" />
+    <!-- The skill bro writes (SkillFile.cs): the same file the plugin marketplace serves. -->
+    <EmbeddedResource Include="..\..\plugins\stylebro\skills\stylebro\SKILL.md" LogicalName="Skill.md" />
     <EmbeddedResource Include="modernize-rules.editorconfig" LogicalName="ModernizeRules.editorconfig" />
     <!-- The preset's layers: init writes their severities by id where a bulk severity would hide them from 'dotnet format'. -->
     <EmbeddedResource Include="..\StyleBro.Package\build\presets\*.globalconfig" LogicalName="Preset.%(Filename)%(Extension)" />

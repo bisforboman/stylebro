@@ -9,8 +9,8 @@ public sealed partial class MigrationTests
 {
     private static readonly string[] SchemaFields =
     {
-        "schemaVersion", "command", "previewOf", "path", "write", "settings", "conventions", "sonar", "agentsMd", "runs",
-        "changesPerRule", "filesPerRule", "keptFindings", "patch", "clean", "exitCode",
+        "schemaVersion", "command", "previewOf", "path", "write", "settings", "conventions", "sonar", "agentsMd", "skill",
+        "runs", "changesPerRule", "filesPerRule", "keptFindings", "patch", "clean", "exitCode",
     };
 
     [Fact]

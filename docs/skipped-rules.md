@@ -13,7 +13,7 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 2. If the SDK might cover it, add a case to `scripts/stylecop-survey/sdk-check-cases.ps1` and run
    `Test-SdkCoverage.ps1`. Then check it doesn't change code StyleCop accepts: `Measure-MigrationDelta.ps1` on a
    StyleCop-clean repo (that's how the preset's SA1501/SA1502 and IDE0040 settings were caught).
-3. For a StyleBro rule, follow the design rules in CLAUDE.md (fix + Fix All, idempotent, skip unsafe cases), add a
+3. For a StyleBro rule, follow the design rules in AGENTS.md (fix + Fix All, idempotent, skip unsafe cases), add a
    parity set to `parity/parity.psd1` and run `Compare-WithStyleCop.ps1` against StyleCop 1.2.
 4. Move the entry out of `skipped.psd1` (into `decisions.psd1`) and regenerate.
 

@@ -1,0 +1,12 @@
+{
+  "name": "stylebro",
+  "description": "A skill for working with StyleBro: format the files you edited, check before finishing, leave the findings kept on purpose, set StyleBro up or migrate from StyleCop.",
+  "author": {
+    "name": "StyleBro",
+    "url": "https://github.com/bisforboman/stylebro"
+  },
+  "homepage": "https://bisforboman.github.io/stylebro/agents/",
+  "repository": "https://github.com/bisforboman/stylebro",
+  "license": "MIT",
+  "keywords": ["csharp", "dotnet", "stylecop", "analyzers", "dotnet-format"]
+}

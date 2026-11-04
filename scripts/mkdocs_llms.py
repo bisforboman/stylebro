@@ -1,10 +1,14 @@
 """MkDocs hook: writes llms.txt (an index of every page with a one-line description, https://llmstxt.org/) and
 llms-full.txt (every page's Markdown) into the built site, so agents find the right page without crawling.
 
+It also publishes StyleBro's skill for agents (plugins/stylebro/skills/stylebro/SKILL.md) as SKILL.md.
+
 The build fails when a rule page (docs/rules/BROxxxx.md) is missing from llms.txt.
 """
 
+import os
 import re
+import shutil
 
 from mkdocs.exceptions import PluginError
 
@@ -53,7 +57,7 @@ def on_post_build(config):
         f"# {config['site_name']}\n\n> {config['site_description']}\n\n"
         "Install the StyleBro.Analyzers package, run `bro init --write` (or `bro migrate --write` when "
         "coming from StyleCop), then `bro format`. For scripts and AI agents (`--json`, `format --files`, "
-        f"AGENTS.md): {config['site_url']}agents/\n\n"
+        f"AGENTS.md, a skill): {config['site_url']}agents/\n\n"
         "## Docs\n\n" + "\n".join(docs) + "\n\n## Rules\n\n" + "\n".join(rules) + "\n"
     )
     with open(f"{site}/llms.txt", "w", encoding="utf-8", newline="\n") as f:
@@ -65,3 +69,6 @@ def on_post_build(config):
             if uri in _pages:
                 title, url, markdown = _pages[uri]
                 f.write(f"\n\n---\nSource: {url}\n\n{markdown.strip()}\n")
+
+    skill = os.path.join(os.path.dirname(os.path.abspath(config["config_file_path"])), "plugins", "stylebro", "skills", "stylebro", "SKILL.md")
+    shutil.copyfile(skill, f"{site}/SKILL.md")

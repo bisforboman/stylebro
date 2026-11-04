@@ -23,7 +23,7 @@ It is a survey (2026-10-03), not a plan. The top five are in the "Maybe" section
 - Value is a judgment: how often the pattern appears in real code, whether teams argue about it (style guides,
   issues), and whether the source package turns it on by default. Almost all Roslynator formatting rules are off by
   default and need an option, so "on by default" says little there.
-- Effort and risk use StyleBro's design rules (CLAUDE.md): Fix All through `LinkedFileFixAllProvider`, idempotent
+- Effort and risk use StyleBro's design rules (AGENTS.md): Fix All through `LinkedFileFixAllProvider`, idempotent
   fixes, skip `#if` and comment cases rather than guess.
 
 ## Ranked candidates

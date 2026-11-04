@@ -1,0 +1,19 @@
+{
+  "name": "stylebro",
+  "owner": {
+    "name": "StyleBro",
+    "url": "https://github.com/bisforboman/stylebro"
+  },
+  "metadata": {
+    "description": "StyleBro for AI coding agents: C# analyzers whose fixes dotnet format applies."
+  },
+  "plugins": [
+    {
+      "name": "stylebro",
+      "source": "./plugins/stylebro",
+      "description": "A skill for working with StyleBro: format the files you edited, check before finishing, leave the findings kept on purpose, set StyleBro up or migrate from StyleCop.",
+      "category": "development",
+      "homepage": "https://bisforboman.github.io/stylebro/agents/"
+    }
+  ]
+}

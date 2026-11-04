@@ -10,5 +10,6 @@ docs/differences-from-stylecop.md merge=union
 mkdocs.yml merge=union
 scripts/stylecop-survey/*.psd1 merge=union
 scripts/stylecop-survey/data/*.csv merge=union
+AGENTS.md merge=union
 CLAUDE.md merge=union
 docs/notes/*.md merge=union

@@ -315,7 +315,7 @@ name the workflow lines (`.github/workflows`, `azure-pipelines.yml`) that still 
 To check the staged files before each commit: [Pre-commit hook](pre-commit.md).
 
 With `--agents-md`, `init --write` also puts a short StyleBro section into `AGENTS.md` for AI coding
-agents (opt-in). For scripts and agents there are `format --files` (just the files an edit touched) and `--json`:
+agents (opt-in), and with `--skill` StyleBro's [skill](agents.md#the-skill). For scripts and agents there are `format --files` (just the files an edit touched) and `--json`:
 [Scripts and AI agents](agents.md).
 
 ## B. Coming from StyleCop
