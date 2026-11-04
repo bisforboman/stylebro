@@ -289,11 +289,11 @@ internal static partial class FormatCommand
 
     /// <summary>
     /// The findings among a run's check <paramref name="lines"/> that its fixes should change: not whitespace or IDE0055
-    /// (<see cref="IsFormattingLine"/>: only line endings where the run changes nothing, or kept indentation) and not one the
+    /// (<see cref="IsLineEndingLine"/>: only line endings where the run changes nothing, in a file with the other ending) and not one the
     /// fixes keep on purpose (<paramref name="known"/>).
     /// </summary>
     public static List<string> FindingsToFix(IEnumerable<string> lines, IReadOnlyCollection<KeptFinding> known) =>
-        lines.Where(l => IsFindingLine(l) && !IsFormattingLine(l) && AsKept(l, known) is null).Select(l => l.Trim()).Distinct(StringComparer.Ordinal).ToList();
+        lines.Where(l => IsFindingLine(l) && !IsLineEndingLine(l) && AsKept(l, known) is null).Select(l => l.Trim()).Distinct(StringComparer.Ordinal).ToList();
 
     /// <summary>What 'format' and --verify-no-changes say about findings no fix changes.</summary>
     public static string UnfixedLine(int count) =>

@@ -929,6 +929,83 @@ internal static partial class FormatCommand
     public static bool IsFormattingLine(string line) => IsWhitespaceLine(line) || line.Contains(" IDE0055: ", StringComparison.Ordinal);
 
     /// <summary>
+    /// A formatting line (<see cref="IsFormattingLine"/>) that is only this OS's line ending: its file really has the other one
+    /// (<see cref="HasOtherLineEnding"/>). Any other formatting finding where the run changes nothing is a real one that no fix
+    /// changes (backlog 079, moq4: 47 findings in LF files were called "only this OS's line ending", and a check before any format
+    /// said Clean).
+    /// </summary>
+    public static bool IsLineEndingLine(string line) =>
+        IsFormattingLine(line) && FindingPath(line) is { } path && HasOtherLineEnding(path);
+
+    /// <summary>
+    /// Whether the file has a line ending the whitespace pass doesn't write on this OS (without end_of_line it writes the OS's
+    /// own): a CR on Linux and macOS, a lone LF on Windows. A file that is missing has none.
+    /// </summary>
+    public static bool HasOtherLineEnding(string path, bool? windows = null)
+    {
+        if (!File.Exists(path))
+        {
+            return false;
+        }
+
+        var bytes = File.ReadAllBytes(path);
+        var onWindows = windows ?? OperatingSystem.IsWindows();
+        for (var i = 0; i < bytes.Length; i++)
+        {
+            if (bytes[i] == '\r')
+            {
+                if (!onWindows)
+                {
+                    return true;
+                }
+
+                i += i + 1 < bytes.Length && bytes[i + 1] == '\n' ? 1 : 0;
+            }
+            else if (bytes[i] == '\n' && onWindows)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// The full paths of the files the raw string guard kept (<see cref="RawStringGapEnd"/> gap lines): their formatting
+    /// findings stay on purpose and the gap says so (Not verified, exit 3).
+    /// </summary>
+    public static HashSet<string> RawStringGapFiles(IEnumerable<string> gaps) =>
+        gaps.Where(IsRawStringGap)
+            .Select(g => Regex.Match(g, "^" + Regex.Escape(NotCheckedPrefix) + @" (?<path>.+?): \w+ " + Regex.Escape(RawStringGapEnd) + "$"))
+            .Where(m => m.Success)
+            .Select(m => Path.GetFullPath(m.Groups["path"].Value))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>The raw string gap line of a file in <paramref name="copy"/>, as it reads for the same file in <paramref name="source"/>.</summary>
+    public static string InSource(string gap, string copy, string source)
+    {
+        var match = Regex.Match(gap, "^" + Regex.Escape(NotCheckedPrefix) + @" (?<path>.+?): (?<id>\w+) " + Regex.Escape(RawStringGapEnd) + "$");
+        if (!match.Success)
+        {
+            return gap;
+        }
+
+        var full = Path.GetFullPath(match.Groups["path"].Value);
+        var under = Path.TrimEndingDirectorySeparator(Path.GetFullPath(copy)) + Path.DirectorySeparatorChar;
+        if (!full.StartsWith(under, StringComparison.OrdinalIgnoreCase))
+        {
+            return gap;
+        }
+
+        var there = Path.Combine(source, Path.GetRelativePath(copy, full));
+        var relative = Path.GetRelativePath(Environment.CurrentDirectory, there).Replace('\\', '/');
+        return Gap(relative.StartsWith("..", StringComparison.Ordinal) ? there : relative, $"{match.Groups["id"].Value} {RawStringGapEnd}");
+    }
+
+    /// <summary>Whether a finding line is in one of <paramref name="files"/> (full paths).</summary>
+    public static bool IsInFiles(string line, IReadOnlySet<string> files) => FindingPath(line) is { } path && files.Contains(path);
+
+    /// <summary>
     /// The files that differ between two snapshots (removed or with other content), sorted. Not new files: 'dotnet format'
     /// never adds one, a build step does (recyclarr's git-ignored Generated/*.g.cs, missing in verify's copy and written
     /// during its run: "would change 3 files" for 1).
@@ -1257,6 +1334,47 @@ internal static partial class FormatCommand
         StyleCopSetup.EnumerateFiles(root)
             .Where(f => Path.GetExtension(f).ToLowerInvariant() is ".csproj" or ".props" or ".targets" || Path.GetFileName(f).Equals("packages.config", StringComparison.OrdinalIgnoreCase))
             .Any(f => XunitReference.IsMatch(File.ReadAllText(f)));
+
+    private static readonly Regex CodeStyleReference = new(@"<(?:PackageReference|PackageVersion|GlobalPackageReference)\b[^>]*\b(?:Include|Update)\s*=\s*""Microsoft\.CodeAnalysis\.[\w.]*CodeStyle""", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    /// <summary>
+    /// Whether a project, props or targets file at or below <paramref name="root"/> references the Microsoft.CodeAnalysis.*.CodeStyle
+    /// package: the IDE analyzers and fixes of its own (old) version, which 'dotnet format's analyzer pass runs besides the SDK's.
+    /// </summary>
+    public static bool ReferencesCodeStyle(string root) =>
+        StyleCopSetup.EnumerateFiles(root)
+            .Where(f => Path.GetExtension(f).ToLowerInvariant() is ".csproj" or ".vbproj" or ".props" or ".targets")
+            .Any(f => CodeStyleReference.IsMatch(File.ReadAllText(f)));
+
+    /// <summary>
+    /// The options for the analyzer pass without the SDK's own IDE ids: the style pass fixes those. A project that references
+    /// Microsoft.CodeAnalysis.CSharp.CodeStyle (moq4: 3.8.0, from 2020) brings that version's IDE0055 into the analyzer pass, and its
+    /// fix, which doesn't know C# 10's '{ A.B.Count: 1 }' or C# 14's 'extension(...)', wrote 'Count : 1' and 'extension (...)' that
+    /// the SDK's own IDE0055 reports again (backlog 079).
+    /// </summary>
+    public static List<string> WithoutStyleIds(IReadOnlyList<string> options)
+    {
+        var result = new List<string>();
+        for (var i = 0; i < options.Count; i++)
+        {
+            result.Add(options[i]);
+            if (options[i] != "--diagnostics")
+            {
+                continue;
+            }
+
+            while (i + 1 < options.Count && !options[i + 1].StartsWith('-'))
+            {
+                i++;
+                if (!options[i].StartsWith("IDE", StringComparison.OrdinalIgnoreCase))
+                {
+                    result.Add(options[i]);
+                }
+            }
+        }
+
+        return result;
+    }
 
     /// <summary>
     /// Whether the .editorconfig files at and above <paramref name="root"/> (nearer ones win) make IDE0005 (unnecessary
@@ -3875,6 +3993,7 @@ internal static partial class FormatCommand
         var keptFile = verifyTemp + ".kept.tsv";
         var copyFailures = new SortedSet<string>(StringComparer.Ordinal);
         var putBack = new List<string>();
+        var copyRawStringGaps = new List<string>();
         (int Code, List<KeptFinding> Kept, List<string> Changed) FormatCopy()
         {
             // Files the projects compile from outside the repository (a sibling one) go next to the copy too.
@@ -3957,6 +4076,11 @@ internal static partial class FormatCommand
             {
                 copyCode = runOnce(copyArgs.ToArray(), line =>
                 {
+                    if (IsRawStringGap(line))
+                    {
+                        copyRawStringGaps.Add(line);
+                    }
+
                     if (FixFailure(line) is { } failure)
                     {
                         copyFailures.Add(failure);
@@ -4011,6 +4135,10 @@ internal static partial class FormatCommand
 
             var (copyCode, kept, changedFiles) = copied;
             var changed = changedFiles.Count;
+
+            // The files the raw string guard kept in the copy, as the last format would have said them (this check applies no fix on
+            // the repository itself, but the copy's run does; its paths are the copy's).
+            gaps.AddRange(copyRawStringGaps.Select(g => InSource(g, copy, source)).Where(g => !gaps.Contains(g)).Distinct(StringComparer.Ordinal).ToList());
             JsonReport.AddRun(1, changedFiles, null);
             if (putBack.Count > 0 && changed == 0 && copyCode == 0)
             {
@@ -4038,9 +4166,12 @@ internal static partial class FormatCommand
 
             JsonReport.AddKept(kept);
 
-            // Whitespace findings in a copy that formats clean only swapped line endings (KeepingLineEndings).
-            var endingsOnly = lines.Count(IsFormattingLine);
-            lines.Where(l => !IsKeptLine(l, kept) && !IsFormattingLine(l)).ToList().ForEach(log);
+            // Whitespace findings in a copy that formats clean, in a file with the other OS's line ending, only swapped line endings
+            // (KeepingLineEndings). In any other file they are findings no fix changes (backlog 079), except where the raw string
+            // guard kept the file: the gap says so.
+            var rawStringFiles = RawStringGapFiles(gaps);
+            var endingsOnly = lines.Count(IsLineEndingLine);
+            lines.Where(l => !IsKeptLine(l, kept) && !IsLineEndingLine(l)).ToList().ForEach(log);
             if (endingsOnly > 0)
             {
                 log($"{endingsOnly} whitespace finding{(endingsOnly == 1 ? " is" : "s are")} only this OS's line ending where a file uses the other one: ignored, 'format' keeps each file's own ending (set end_of_line to choose one).");
@@ -4048,7 +4179,7 @@ internal static partial class FormatCommand
 
             // Findings no fix changes and no fix keeps on purpose: the build still reports them (AngleSharp's IDE0049 in a
             // using alias, which the SDK's fix can't rewrite: "Clean" with three errors above it).
-            var unfixed = lines.Where(l => IsFindingLine(l) && !IsKeptLine(l, kept) && !IsFormattingLine(l)).Select(l => l.Trim()).Distinct(StringComparer.Ordinal).Count();
+            var unfixed = lines.Where(l => IsFindingLine(l) && !IsKeptLine(l, kept) && !IsLineEndingLine(l) && !(IsFormattingLine(l) && IsInFiles(l, rawStringFiles))).Select(l => l.Trim()).Distinct(StringComparer.Ordinal).Count();
             KeptSummary(kept, root, clean: unfixed == 0 && copyFailures.Count == 0 && Unverified(gaps).Count == 0).ForEach(log);
             if (BaselineOffLine(root, kept.Count) is { } off)
             {
@@ -5130,7 +5261,8 @@ internal static partial class FormatCommand
 
             // What the run's checks found and its fixes didn't change: the build reports it, as verify says (trial 34,
             // protobuf-net: BRO1008's fix needs every project compiling the file to agree, and "Clean" stood above it).
-            var unfixed = changed.Count == 0 ? checkFindings.Where(l => AsKept(l, ReadKept(keptFile, root, root)) is null).ToList() : [];
+            var keptRawStrings = RawStringGapFiles(rawStringGaps);
+            var unfixed = changed.Count == 0 ? checkFindings.Where(l => AsKept(l, ReadKept(keptFile, root, root)) is null && !(IsFormattingLine(l) && IsInFiles(l, keptRawStrings))).ToList() : [];
 
             // Not "clean" when CSharpier put back what the fixes changed (trial 26: "Run 1: 0 files changed, clean." then "Not clean").
             log($"Run {run}: {changed.Count} file{(changed.Count == 1 ? string.Empty : "s")} changed{(endingsOnly ? ", line endings or byte order marks only (no run needed after it), clean:" : changed.Count > 0 ? ":" : failures.Count > 0 ? ", but code fixes failed (below)." : putBack.Count > 0 ? ", but CSharpier put back what the fixes changed (below)." : unfixed.Count > 0 ? ", but its check found what no fix changes (below)." : Unverified(gaps).Count > 0 ? ", but not everything was checked (below)." : ", clean.")}");
@@ -5425,8 +5557,10 @@ internal static partial class FormatCommand
         // By default only StyleBro's rules and the built-in ones init/migrate turn on: plain 'dotnet format' also applies
         // every other analyzer's fixes and compiler fixes (CS8618's 'required', a Sonar fix removing 'init;': build
         // errors in Kavita). Whitespace formatting still runs. --all keeps them.
+        var ownIds = false;
         if (!passThrough.Remove("--all") && !passThrough.Contains("--diagnostics"))
         {
+            ownIds = true;
             var ids = Diagnostics(root);
             log(RulesLine(passThrough.Contains("--verify-no-changes"), ids.Count, ids.Contains(Analyzers.Baseline.BaselineSuppressor.XunitIds[0])));
             passThrough.Add("--diagnostics");
@@ -5532,6 +5666,12 @@ internal static partial class FormatCommand
         {
             // Each pass would write its own format-report.json over the last one: each gets a folder, merged after.
             runPasses = Relevant(runPasses ?? passes, OptionValues(options, "--diagnostics"));
+            if (ownIds && runPasses.Contains(string.Empty) && ReferencesCodeStyle(root))
+            {
+                // The analyzer pass must not get the IDE ids (WithoutStyleIds), so it runs apart from the style pass.
+                runPasses = ["whitespace", "style", "analyzers"];
+            }
+
             var at = options.IndexOf("--report");
             var report = runPasses.Length > 1 && at >= 0 && at + 1 < options.Count ? options[at + 1] : null;
             var folders = new List<string>();
@@ -5547,7 +5687,11 @@ internal static partial class FormatCommand
 
                 if (pass == "whitespace")
                 {
-                    passOptions = WhitespaceOptions(passOptions, whitespaceExclusions!);
+                    passOptions = WhitespaceOptions(passOptions, whitespaceExclusions ?? []);
+                }
+                else if (pass == "analyzers" && ownIds && ReferencesCodeStyle(root))
+                {
+                    passOptions = WithoutStyleIds(passOptions);
                 }
                 else if (pass == "style" && styleExclusions.Count > 0)
                 {
