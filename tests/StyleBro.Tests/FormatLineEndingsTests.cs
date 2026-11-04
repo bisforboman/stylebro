@@ -158,6 +158,10 @@ public sealed class FormatLineEndingsTests : IDisposable
     }
 
     [Fact]
+    public void CodeStyleLine_NamesTheProblemAndTheWayOut() =>
+        Assert.Matches("^Old CodeStyle package: .*remove the reference or update it\\.$", FormatCommand.CodeStyleLine());
+
+    [Fact]
     public void SeparatePasses_SplitsThePlainRun_OnlyWithTheCodeStylePackage()
     {
         // Backlog 079: the analyzer pass must run apart from the style pass, to leave the IDE ids to the SDK's.

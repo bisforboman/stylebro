@@ -847,16 +847,19 @@ public sealed class KeptFindingsTests : IDisposable
         var lines = new List<string>();
         var run = 0;
 
+        // The other OS's ending, so the whitespace and IDE0055 lines below are line endings (backlog 079).
+        var ending = OperatingSystem.IsWindows() ? "\n" : "\r\n";
+        File.WriteAllText(file, $"class C {{ }}{ending}");
         var code = FormatCommand.Run(new[] { root }, lines.Add, (args, _) =>
         {
             if (++run == 1)
             {
-                File.WriteAllText(file, "class C { int x; }\n");
+                File.WriteAllText(file, $"class C {{ int x; }}{ending}");
             }
             else
             {
                 // The same finding from two frameworks' checks counts once; kept findings, whitespace and IDE0055 (where the run
-                // changed nothing, only a line ending) don't count.
+                // changed nothing, only a line ending of a file with the other one) don't count.
                 FormatCommand.RecordCheckFindings(root, FormatCommand.FindingsToFix(new[] { finding, finding + " ", kept, whitespace, formatting }, []));
             }
 

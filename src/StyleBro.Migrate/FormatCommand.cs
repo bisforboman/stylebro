@@ -229,6 +229,9 @@ internal static partial class FormatCommand
     /// <summary>The start of the line that names the StyleBro rules in WarningsNotAsErrors (printed for the first run only).</summary>
     private const string NotAsErrorsHeader = "Warnings not as errors:";
 
+    /// <summary>The note about an old Microsoft.CodeAnalysis.*.CodeStyle package (<see cref="CodeStyleLine"/>).</summary>
+    public const string CodeStyleHeader = "Old CodeStyle package:";
+
     /// <summary>The start of the line that names the files <see cref="DirectiveMask"/> protects (printed for the first run only).</summary>
     private const string ProtectedHeader = "Protected:";
 
@@ -251,7 +254,7 @@ internal static partial class FormatCommand
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, bool> BuiltGenerators = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>The lines a run prints before its 'dotnet format' runs, which later runs and checks say once.</summary>
-    private static readonly string[] Headers = [FixingHeader, XunitHeader, HeldBackHeader, IfBodiesHeader, ProtectedHeader, NotAsErrorsHeader, VisualBasicHeader, GeneratorsHeader, CheckingHeader, MultiTargetedHeader, ConfigurationsHeader, MissingHeader, SharedFilesHeader, TraversalHeader, "Using ", "Engine: ", NoWhitespaceHeader, PartlyWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader, PartlyLoadedHeader, NotBuiltHeader];
+    private static readonly string[] Headers = [FixingHeader, XunitHeader, HeldBackHeader, IfBodiesHeader, ProtectedHeader, NotAsErrorsHeader, CodeStyleHeader, VisualBasicHeader, GeneratorsHeader, CheckingHeader, MultiTargetedHeader, ConfigurationsHeader, MissingHeader, SharedFilesHeader, TraversalHeader, "Using ", "Engine: ", NoWhitespaceHeader, PartlyWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader, PartlyLoadedHeader, NotBuiltHeader];
 
     /// <summary>The projects and configurations a --verify-no-changes run on a folder couldn't check (<see cref="RecordUnchecked"/>), per folder.</summary>
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, List<(string Project, string Configuration)>> Unchecked = new(StringComparer.OrdinalIgnoreCase);
@@ -1345,6 +1348,11 @@ internal static partial class FormatCommand
         StyleCopSetup.EnumerateFiles(root)
             .Where(f => Path.GetExtension(f).ToLowerInvariant() is ".csproj" or ".vbproj" or ".props" or ".targets")
             .Any(f => CodeStyleReference.IsMatch(File.ReadAllText(f)));
+
+    /// <summary>What format and check say once when a project references the CodeStyle package (owner's decision 2026-11-04: the SDK wins).</summary>
+    public static string CodeStyleLine() =>
+        $"{CodeStyleHeader} a project references Microsoft.CodeAnalysis.*.CodeStyle. Its IDE0055 can disagree with the SDK's on newer syntax ({{ A.B: 1 }} patterns, extension(...)); "
+        + "StyleBro follows the SDK's, so a build with that package may report IDE0055 there. The SDK has these analyzers built in: remove the reference or update it.";
 
     /// <summary>
     /// <paramref name="passes"/> with the plain run (all three passes at once, <see cref="string.Empty"/>) split into its three when
@@ -5974,6 +5982,11 @@ internal static partial class FormatCommand
         if (notAsErrors.Count > 0)
         {
             log(NotAsErrorsLine(notAsErrors));
+        }
+
+        if (ReferencesCodeStyle(root))
+        {
+            log(CodeStyleLine());
         }
 
         // A restore just now can bring xunit.analyzers 1.24+ along, which Diagnostics couldn't see before it.
