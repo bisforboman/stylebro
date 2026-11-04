@@ -6484,7 +6484,7 @@ internal static partial class FormatCommand
             }
             else if (atOnce is not null && !verifying)
             {
-                RecordCheckFindings(root, FindingsToFix(atOnce.Values.SelectMany(c => c.Lines), known));
+                RecordCheckFindings(root, FindingsToFix(atOnce.Values.SelectMany(c => c.Lines), known, ifBodies));
             }
 
             // A run 'dotnet format' skipped a project in stands in for the frameworks merged into it: another of them runs
