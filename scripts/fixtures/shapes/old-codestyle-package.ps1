@@ -3,6 +3,8 @@
 # `extension(...)`, wrote `Items.Count : 1`, and the SDK's own IDE0055 reported it again (after format: 47 findings that check
 # then called "only this OS's line ending"). The analyzer pass now leaves the IDE ids to the style pass.
 @{
+    BuildFails = 'the package''s own IDE0055 reports the SDK''s form of the pattern (owner 2026-11-04: the SDK wins; check --build says Not clean)'
+    Expect = @{ 'check-build' = 2 }
     Description = 'an old Microsoft.CodeAnalysis.CSharp.CodeStyle reference and an extended property pattern'
     Assert = {
         param($repo)
