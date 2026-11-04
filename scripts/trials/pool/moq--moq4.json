@@ -16,7 +16,7 @@
   "build": "ok with workaround",
   "workaround": "src/Directory.props adds https://kzu.blob.core.windows.net/nuget/index.json as RestoreAdditionalProjectSources (403 through the proxy): the line is deleted.",
   "tests": "dotnet test src/Moq.Tests, Moq.Sdk.Tests, Moq.StaticProxy.UnitTests, Moq.CodeAnalysis.UnitTests, Moq.CodeFixes.UnitTests with -f net10.0 (net48 left out: mono).",
-  "usedIn": "trial 66 (random, seed 66)",
+  "usedIn": "trial 66 (random, seed 66); trial 67 (targeted re-check)",
   "verified": {
     "by": "trial 66 session",
     "date": "2026-11-03",

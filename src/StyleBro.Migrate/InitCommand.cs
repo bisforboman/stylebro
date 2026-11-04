@@ -209,13 +209,11 @@ internal static class InitCommand
         {
             var blockedIde = new List<string>();
             var (addedIde, filesIde, _, _) = Program.RewriteSuppressions(root, Suppressions.WithIde(new Dictionary<string, SortedSet<string>>()), write, blocked: blockedIde);
+            // A file that can't be read or written (a locked one) is said, but doesn't stop init: it writes the settings anyway, as it does
+            // for a locked file it has no suppressions to carry over from ('Init_SkipsALockedCSharpFile').
             if (Program.BlockedLine(blockedIde, write) is { } blockedIdeLine)
             {
                 Console.WriteLine(blockedIdeLine);
-                if (write)
-                {
-                    return 1;
-                }
             }
 
             if (addedIde > 0)
