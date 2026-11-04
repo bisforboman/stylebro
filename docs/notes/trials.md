@@ -1451,7 +1451,7 @@ Since 2026-10-25 the host is `bro format`'s default engine; trials 52-64 compare
   build in `check --build` also failed once on a `deps.json` file lock between parallel builds (a race, not seen in the before run).
   No fixture: still no small project that makes Roslyn change that literal.
 
-## Trial 67 (2026-11-04, verdict pending; the Sonnet session again; host engine only, no soak)
+## Trial 67 (2026-11-04, not clean: owner "Not clean", tally 0; the Sonnet session again; host engine only, no soak)
 
 - Repos (three random plus one targeted, and one extra): MoaidHathot/Dumpify, canton7/RestEase, gautema/CQRSlite (random, seed 67:
   draws 19, 29, 104 of 128 entries; 19 walked past the used entries and 92 PolySharp, 93 Statiq.Framework, 103 WeakEvent (trial 66's
@@ -1519,3 +1519,4 @@ Since 2026-10-25 the host is `bro format`'s default engine; trials 52-64 compare
   Messy") and passes in a clean worktree of the same commit: a gotcha CLAUDE.md already names.
 - The session: about 3 hours of wall clock to this point (17:34 start), one worker, two lanes. A compound command that built a third-party
   repository was refused by the permission classifier (as in trial 65); split into a script file and a plain run it worked.
+- Owner's answers (2026-11-04): "Not clean", tally 0; init carries IDE0040 suppressions over (decision `2026-11-04-bro-init-carries-ide0040-suppressions-over-to-bro1404.md`). PR #327; open: backlog 079 and 080.
