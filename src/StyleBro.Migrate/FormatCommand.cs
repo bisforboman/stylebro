@@ -1042,7 +1042,11 @@ internal static partial class FormatCommand
     /// a corrupt package cache), else null. Its files weren't formatted, and it says nothing else about them.
     /// </summary>
     public static string? SkippedProject(string line) =>
-        Regex.Match(line, "Required references did not load for (.+?) or referenced project") is { Success: true } match ? match.Groups[1].Value : null;
+        // Singleline and the line breaks cut out: a target framework with a line break in it (trial 68, CacheManager.Tests:
+        // <TargetFrameworks> over three lines, "Lib(net8.0⏎    )") made the host's one message several lines long.
+        Regex.Match(line, "Required references did not load for (.+?) or referenced project", RegexOptions.Singleline) is { Success: true } match
+            ? Regex.Replace(match.Groups[1].Value, @"\s*[\r\n]+\s*", string.Empty)
+            : null;
 
     /// <summary>
     /// The project and framework a skip (<see cref="SkippedProject"/>) in the run for <paramref name="run"/> is about: 'Lib' in
@@ -4591,14 +4595,68 @@ internal static partial class FormatCommand
                 return;
             }
 
+            var joiner = new SkipLineJoiner();
             for (var next = stream.ReadLine(); next is not null; next = stream.ReadLine())
             {
-                line(next);
+                if (joiner.Add(next) is { } whole)
+                {
+                    line(whole);
+                }
+            }
+
+            if (joiner.Flush() is { } rest)
+            {
+                line(rest);
             }
         })
         { IsBackground = true };
         thread.Start();
         return thread;
+    }
+
+    /// <summary>
+    /// Puts back together the one message of 'dotnet format' that can arrive over several lines: "Required references did not
+    /// load for Lib(net8.0⏎    ) or referenced project" when the project's target framework carries a line break (trial 68,
+    /// CacheManager.Tests: <c>&lt;TargetFrameworks&gt;⏎ &lt;!--net481--&gt;;net8.0⏎ &lt;/TargetFrameworks&gt;</c> evaluates to "net8.0⏎    "). The
+    /// checks read line by line, so the skip went unseen and the project's analyzers never ran, with a Clean verdict.
+    /// </summary>
+    internal sealed class SkipLineJoiner
+    {
+        private const int MaxContinuationLines = 4;
+        private string? pending;
+        private int joined;
+
+        /// <summary>The line to pass on now, or null while a skip message is still being put together.</summary>
+        public string? Add(string line)
+        {
+            if (pending is null)
+            {
+                if (!line.Contains("Required references did not load for ", StringComparison.Ordinal) || line.Contains(" or referenced project", StringComparison.Ordinal))
+                {
+                    return line;
+                }
+
+                pending = line.TrimEnd();
+                joined = 0;
+                return null;
+            }
+
+            pending += line.Trim();
+            if (pending.Contains(" or referenced project", StringComparison.Ordinal) || ++joined >= MaxContinuationLines)
+            {
+                return Flush();
+            }
+
+            return null;
+        }
+
+        /// <summary>What is still pending at the end of the stream (a message that never completed), or null.</summary>
+        public string? Flush()
+        {
+            var rest = pending;
+            pending = null;
+            return rest;
+        }
     }
 
     /// <summary>A property of a project's evaluation (<see cref="EvaluateProject"/>), or "" when it isn't set or MSBuild can't evaluate it.</summary>
