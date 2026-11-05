@@ -1,0 +1,4 @@
+export NUGET_CERT_REVOCATION_MODE=offline
+export DiffEngine_Disabled=true
+export CI=true
+export DOTNET_CLI_TELEMETRY_OPTOUT=1
