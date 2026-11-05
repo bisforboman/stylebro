@@ -1618,6 +1618,13 @@ internal static partial class FormatCommand
         return [.. result, "--include", .. include];
     }
 
+    /// <summary>Whether <c>--report</c> is the last argument or followed by another option, so it has no path.</summary>
+    public static bool ReportWithoutValue(IReadOnlyList<string> args)
+    {
+        var at = args.ToList().IndexOf("--report");
+        return at >= 0 && (at + 1 >= args.Count || args[at + 1].StartsWith('-'));
+    }
+
     /// <summary>
     /// A plan entry's 'dotnet format' options: its own report folder, '--verify-no-changes' for a check. The check before a
     /// fixing run (<see cref="CheckFirstOption"/>) writes no report: it would list the findings, where the merged report has
@@ -4813,6 +4820,14 @@ internal static partial class FormatCommand
         DeleteStaleTemp(Path.GetTempPath(), DateTime.UtcNow.AddDays(-1));
 
         runOnce = KeepingLineEndings(runOnce ?? RunOnce);
+
+        // --report without a folder or file would take the next option for it ('bro check --report' got '--verify-no-changes'
+        // appended, which became the report folder, and the check formatted the tree: trial 68).
+        if (ReportWithoutValue(args))
+        {
+            (output ?? Console.Error.WriteLine)("--report needs the folder or file to write the report to: --report <path>.");
+            return 1;
+        }
 
         // --report: the plain run (the preview reads the report). --once: one run, reported like the usual ones.
         if (args.Contains("--report") && !args.Contains("--verify-no-changes"))

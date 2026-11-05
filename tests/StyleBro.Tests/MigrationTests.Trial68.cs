@@ -54,4 +54,22 @@ public sealed partial class MigrationTests
         Assert.Equal("Required references did not load for Lib(abcde", joiner.Add("e"));
         Assert.Equal("next", joiner.Add("next"));
     }
+
+    // `bro check <solution> --report` (no path): check adds --verify-no-changes after it, which 'dotnet format' took for the
+    // report folder, so the "check" ran without it and formatted 85 files.
+    [Theory]
+    [InlineData(new[] { "App.sln", "--report" }, true)]
+    [InlineData(new[] { "App.sln", "--report", "--verify-no-changes" }, true)]
+    [InlineData(new[] { "App.sln", "--report", "out", "--verify-no-changes" }, false)]
+    [InlineData(new[] { "App.sln", "--verify-no-changes" }, false)]
+    public void ReportWithoutAPath_IsRefused(string[] args, bool refused)
+    {
+        Assert.Equal(refused, FormatCommand.ReportWithoutValue(args));
+        if (refused)
+        {
+            var said = new List<string>();
+            Assert.Equal(1, FormatCommand.Run(args, said.Add));
+            Assert.Contains("--report needs", Assert.Single(said));
+        }
+    }
 }
