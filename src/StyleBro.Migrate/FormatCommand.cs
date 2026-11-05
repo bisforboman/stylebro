@@ -5300,7 +5300,6 @@ internal static partial class FormatCommand
                 gaps = Gaps(gaps.Append(looseGap));
             }
 
-
             // Not "clean" when CSharpier put back what the fixes changed (trial 26: "Run 1: 0 files changed, clean." then "Not clean").
             log($"Run {run}: {changed.Count} file{(changed.Count == 1 ? string.Empty : "s")} changed{(endingsOnly ? ", line endings or byte order marks only (no run needed after it), clean:" : changed.Count > 0 ? ":" : failures.Count > 0 ? ", but code fixes failed (below)." : putBack.Count > 0 ? ", but CSharpier put back what the fixes changed (below)." : unfixed.Count > 0 ? ", but its check found what no fix changes (below)." : Unverified(gaps).Count > 0 ? ", but not everything was checked (below)." : ", clean.")}");
             ListFiles(shown, changed, 10).ForEach(log);
