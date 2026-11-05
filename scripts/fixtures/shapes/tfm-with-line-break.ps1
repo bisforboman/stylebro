@@ -1,20 +1,17 @@
 # Trial 68 (CacheManager): a test project writes <TargetFrameworks> over several lines with a commented-out entry, which
-# evaluates to ";net10.0" plus the line breaks, so its target framework is "net10.0<line break>    ". 'dotnet format' then
-# printed "Required references did not load for Lib(net10.0<line break>    ) or referenced project" over two lines, which
-# format read line by line (the host's one message with a line break in it was not matched by a '.' either): the skip went
-# unseen, the project's analyzers never ran and format, check and --json said Clean while the build reported its findings.
-# Such a project is "Not checked", the verdict Not verified; check --build still reports what the build sees.
-# The old engine (--engine dotnet-format) rewrites <TargetFrameworks> to the run's framework, so the line breaks never reach
-# MSBuild's inner builds and it formats the project: the engines differ here (open question for the owner: should the host
-# do the same?). Two parts of the host: the skip message has a line break in it, and the project's instance name
-# 'Spread(net10.0<line break>    )' matched none of the runs' frameworks, so the project was in no run at all.
+# evaluates to ";net10.0" plus the line breaks, so its target framework was "net10.0<line break>    ". The host loaded the
+# project as 'Spread(net10.0<line break>    )', which matched none of the runs' frameworks: the project was in no run, its
+# analyzers never ran and format, check and --json said Clean while the build reported its findings. (The old engine put the
+# run's framework in the environment and formatted it.) bro now cuts the white space out of the list for its runs (the
+# injected targets file), so both engines format the project, and a skip message with a line break in it is still read.
 @{
     Description = 'a project whose <TargetFrameworks> has line breaks in it'
-    Expect = @{ preview = 3; format = 3; check = 3; 'check-build' = 2 }
-    Reasons = @{ format = 'Not checked.*Spread'; check = 'Spread' }
-    EnginesDiffer = 'the old engine rewrites <TargetFrameworks> per run and formats the project; the host reports it as not checked'
-    EngineExpect = @{ 'dotnet-format' = @{} }
-    EngineReasons = @{ 'dotnet-format' = @{} }
+    Assert = {
+        param($formatted, $runs, $context)
+        foreach ($engine in $runs.Keys) {
+            if ((Get-Content -Raw (Join-Path $runs[$engine].Clone 'src/Spread/Thing.cs')) -notmatch 'public static int Twice\(') { "$engine did not format the project with the multi-line TargetFrameworks" }
+        }
+    }
     Target = 'src/Other/Other.csproj'
     Create = {
         param($root)

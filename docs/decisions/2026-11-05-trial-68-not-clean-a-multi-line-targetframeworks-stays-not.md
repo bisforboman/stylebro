@@ -11,4 +11,4 @@ Trial 68 found CacheManager.Tests, whose `<TargetFrameworks>` spans three lines,
 
 ## Decision
 
-Owner (2026-11-05): leave the host Not verified, leave the fast check as is, and the trial is "Not clean" (tally 0).
+Owner (2026-11-05, confirmed twice after two conflicting relays): make the host format such a project too (the injected targets file cuts white space out of TargetFrameworks; backlog 082 Done), leave the fast check as is (backlog 083), and the trial is "Not clean" (tally 0).

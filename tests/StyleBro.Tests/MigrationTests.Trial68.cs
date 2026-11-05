@@ -72,4 +72,19 @@ public sealed partial class MigrationTests
             Assert.Contains("--report needs", Assert.Single(said));
         }
     }
+
+    // The old engine formatted CacheManager.Tests and the host did not (it was in no run): the injected targets file cuts the
+    // white space out of <TargetFrameworks> for bro's runs, so the project loads as 'Lib(net8.0)'.
+    [Fact]
+    public void RunTargets_CutWhiteSpaceOutOfTargetFrameworks()
+    {
+        Write("App/App.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFrameworks>\n      <!--net481-->;net8.0\n    </TargetFrameworks>\n  </PropertyGroup>\n</Project>\n");
+        Write("select.targets", FormatCommand.SelectFrameworkTargets);
+        var project = Path.Combine(root, "App", "App.csproj");
+        string Frameworks(bool hook) => FormatCommand.EvaluatedProperty(project, "TargetFrameworks");
+
+        Assert.Contains("\n", Frameworks(false)); // as written
+        var json = FormatCommand.Capture(root, ["msbuild", project, $"-property:BeforeMicrosoftNETSdkTargets={Path.Combine(root, "select.targets")}", "-getProperty:TargetFrameworks", "-nologo"]);
+        Assert.Equal(";net8.0", json.Trim());
+    }
 }

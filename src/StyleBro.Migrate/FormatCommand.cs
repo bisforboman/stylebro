@@ -41,6 +41,11 @@ internal static partial class FormatCommand
     /// </summary>
     public const string SelectFrameworkTargets = """
         <Project>
+          <!-- White space in the list (a <TargetFrameworks> over several lines, trial 68, CacheManager.Tests: ';net8.0' and line
+               breaks) made the project load as 'Lib(net8.0 + line break)', which no run's framework matched: cut out first. -->
+          <PropertyGroup Condition="'$(TargetFrameworks)' != '' and $([System.Text.RegularExpressions.Regex]::IsMatch('$(TargetFrameworks)', '\s'))">
+            <TargetFrameworks>$([System.Text.RegularExpressions.Regex]::Replace('$(TargetFrameworks)', '\s+', ''))</TargetFrameworks>
+          </PropertyGroup>
           <!-- bro format: TargetFramework comes from the environment; projects not on the keep list load as usual, and so do
                the projects without the run's framework (StyleBroFormatOther: kept only because they reference a kept one). -->
           <PropertyGroup Condition="'$(TargetFrameworks)' != '' and (('$(StyleBroFormatKeep)' != '' and !$(StyleBroFormatKeep.Contains('|$(MSBuildProjectFullPath.ToUpperInvariant())|'))) or '$(StyleBroFormatLoose)' == 'true' or ('$(StyleBroFormatOther)' != '' and $(StyleBroFormatOther.Contains('|$(MSBuildProjectFullPath.ToUpperInvariant())|'))))">
