@@ -84,7 +84,7 @@ public sealed partial class MigrationTests
         string Frameworks(bool hook) => FormatCommand.EvaluatedProperty(project, "TargetFrameworks");
 
         Assert.Contains("\n", Frameworks(false)); // as written
-        var json = FormatCommand.Capture(root, ["msbuild", project, $"-property:BeforeMicrosoftNETSdkTargets={Path.Combine(root, "select.targets")}", "-getProperty:TargetFrameworks", "-nologo"]);
-        Assert.Equal(";net8.0", json.Trim());
+        var json = FormatCommand.Capture(root, "msbuild", project, $"-property:BeforeMicrosoftNETSdkTargets={Path.Combine(root, "select.targets")}", "-getProperty:TargetFrameworks", "-nologo");
+        Assert.Equal(";net8.0", json.TrimEnd('\r', '\n')); // only the line end the command prints
     }
 }
