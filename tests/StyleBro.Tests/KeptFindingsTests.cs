@@ -871,6 +871,7 @@ public sealed class KeptFindingsTests : IDisposable
         Assert.Contains("Run 2: 0 files changed, but its check found what no fix changes (below).", lines);
         Assert.Contains(finding, lines);
         Assert.DoesNotContain(kept, lines);
+        Assert.DoesNotContain(lines, l => l.Contains("formatting finding", StringComparison.Ordinal)); // line endings of this OS's other kind: no gap either
         Assert.DoesNotContain(lines, l => l.StartsWith("Clean: ", StringComparison.Ordinal));
         Assert.Equal(FormatCommand.UnfixedLine(1), lines[^1]);
 
