@@ -11,6 +11,8 @@ namespace StyleBro.Tests;
 [Collection(FormatEnvironmentCollection.Name)]
 public sealed class FormatCoverageTests : IDisposable
 {
+    private const string LockError = "/r/src/Moq.Sdk/Moq.Sdk.csproj(55,5): error MSB4018: The \"GenerateDepsFile\" task failed unexpectedly. System.IO.IOException: The process cannot access the file '/r/src/Moq.Sdk/bin/Debug/netstandard2.0/Moq.Sdk.deps.json' because it is being used by another process.";
+
     private readonly List<string> folders = [];
 
     public void Dispose() => folders.ForEach(f =>
@@ -228,6 +230,43 @@ public sealed class FormatCoverageTests : IDisposable
 
         // Without the untouched build (no git): every error counts.
         Assert.Equal(2, FormatCommand.CompareBuild(messages, null, new HashSet<string>(["BRO1002"])).New.Count);
+    }
+
+    [Fact]
+    public void IsOnlyFileLock_IsTheDepsFileRaceAndNothingElse()
+    {
+        Assert.True(FormatCommand.IsOnlyFileLock([LockError, LockError]));
+        Assert.False(FormatCommand.IsOnlyFileLock([LockError, "/r/A.cs(1,1): error CS0103: The name 'Y' does not exist"]));
+        Assert.False(FormatCommand.IsOnlyFileLock(["/r/A.csproj : error MSB4018: The \"Csc\" task failed unexpectedly. System.NullReferenceException"]));
+        Assert.False(FormatCommand.IsOnlyFileLock([]));
+    }
+
+    [Fact]
+    public void BuildCheck_AFileLockRace_BuildsTheConfigurationAgainOnce()
+    {
+        var root = NewFolder();
+        var solution = Path.Combine(root, "App.sln");
+        File.WriteAllText(solution, "Global\n\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\n\t\tDebug|Any CPU = Debug|Any CPU\n\tEndGlobalSection\nEndGlobal\n");
+        var builds = 0;
+        var lines = new List<string>();
+
+        // The first build fails on the lock, the second is fine: no new error, and a note says what happened.
+        var line = FormatCommand.BuildCheckLine(root, solution, lines.Add, (_, _, _) => ++builds == 1 ? (1, [LockError]) : (0, []), () => string.Empty);
+
+        Assert.Equal(2, builds);
+        Assert.Null(line);
+        Assert.Contains(lines, l => l.Contains("failed only on a file lock", StringComparison.Ordinal) && l.Contains("building it again", StringComparison.Ordinal));
+
+        // A second failure on the lock counts: nothing is retried twice.
+        builds = 0;
+        var again = FormatCommand.BuildCheckLine(root, solution, _ => { }, (_, _, _) => { builds++; return (1, [LockError]); }, () => null);
+        Assert.Equal(2, builds);
+        Assert.NotNull(again);
+
+        // Another error isn't retried.
+        builds = 0;
+        FormatCommand.BuildCheckLine(root, solution, _ => { }, (_, _, _) => { builds++; return (1, ["/r/A.cs(1,1): error CS0103: The name 'Y' does not exist"]); }, () => string.Empty);
+        Assert.Equal(1, builds);
     }
 
     [Fact]

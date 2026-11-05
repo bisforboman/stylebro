@@ -120,6 +120,32 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
+    public void WithoutStyleIds_DropsTheIdeIds_ForTheAnalyzerPass()
+    {
+        // Backlog 079: Microsoft.CodeAnalysis.CSharp.CodeStyle 3.8.0's IDE0055 fix wrote 'Count : 1' and 'extension (' in the analyzer pass.
+        Assert.Equal(["--no-restore", "--diagnostics", "BRO1002", "CA1822", "--severity", "info"], FormatCommand.WithoutStyleIds(["--no-restore", "--diagnostics", "BRO1002", "IDE0055", "CA1822", "IDE0011", "--severity", "info"]));
+        Assert.Equal(["--severity", "warn"], FormatCommand.WithoutStyleIds(["--severity", "warn"]));
+    }
+
+    [Fact]
+    public void ReferencesCodeStyle_FindsThePackage()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "stylebro-codestyle-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        try
+        {
+            File.WriteAllText(Path.Combine(root, "A.csproj"), "<Project><ItemGroup><PackageReference Include=\"Newtonsoft.Json\" /></ItemGroup></Project>");
+            Assert.False(FormatCommand.ReferencesCodeStyle(root));
+            File.WriteAllText(Path.Combine(root, "B.csproj"), "<Project><ItemGroup><PackageReference Include=\"Microsoft.CodeAnalysis.CSharp.CodeStyle\" Pack=\"false\" /></ItemGroup></Project>");
+            Assert.True(FormatCommand.ReferencesCodeStyle(root));
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
     public void Verify_FormatsOnlyTheFilesWithFindings_InTheCopy()
     {
         // splat: the copy was formatted whole (41 minutes) for 9 kept findings in 4 files.

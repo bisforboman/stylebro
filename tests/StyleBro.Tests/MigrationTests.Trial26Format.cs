@@ -68,6 +68,11 @@ public sealed partial class MigrationTests
 
         Assert.True(IfBodies.IsKeptFinding(Line(10, 13, "Delete 4 characters."), protectedLines));
 
+        // Format's own "its check found what no fix changes" leaves them out too (backlog 079: the line-ending catch-all used to hide
+        // them; Newtonsoft's real-world run listed 10 of them).
+        Assert.Empty(FormatCommand.FindingsToFix([Line(10, 13, "Delete 4 characters.")], [], protectedLines));
+        Assert.Single(FormatCommand.FindingsToFix([Line(10, 13, "Delete 4 characters.")], []));
+
         // The line break of the code line above the '#if' block (the one every parse has), or inside it: written by the same edit.
         Assert.True(IfBodies.IsKeptFinding(Line(4, 6, @"Replace 1 characters with '\r\n'."), protectedLines));
         Assert.True(IfBodies.IsKeptFinding(Line(8, 13, @"Replace 1 characters with '\r\n'."), protectedLines));

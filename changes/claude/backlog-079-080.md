@@ -1,0 +1,6 @@
+### Fixed
+
+- `bro format` no longer rewrites `{ A.B.Count: 1 }` to `Count : 1` or `extension(x)` to `extension (x)` in projects that reference an old `Microsoft.CodeAnalysis.CSharp.CodeStyle` package (3.8.0 in moq4). Its IDE0055 fix ran in the analyzer pass beside the SDK's and did not know that syntax, so every `bro format` wrote what the next `bro check` reported again. The analyzer pass now leaves the built-in (IDE) rules to the SDK's style pass.
+- `bro check` calls a whitespace or IDE0055 finding "only this OS's line ending" only in a file that really has the other ending. In any other file it is a finding no fix changes ("Not clean"), so a check before any `bro format` no longer says Clean where format says Not verified: a file the raw string guard keeps is now named by the check too, and ends Not verified (exit 3).
+- `bro check --build` builds a configuration once more when it failed only on a file lock between projects built at once (`MSB4018 GenerateDepsFile ... being used by another process`), and says so, instead of calling the race a new error.
+- Formatting findings that no fix changes, in files with the ending the OS writes (Roslyn's whitespace formatter near `#if`), are listed and end Not verified (exit 3) with a `Not checked:` line; before, they were called line endings and ignored.
