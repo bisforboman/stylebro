@@ -106,8 +106,8 @@ public sealed class FormatLineEndingsTests : IDisposable
     [Fact]
     public void Verify_AFormattingFindingInAnLfFile_IsNotLineEndingNoise()
     {
-        // Backlog 079 (moq4): a finding the copy's run doesn't change, in a file that has only LF, was "only this OS's line ending"
-        // (so a check before any format said Clean). It's a finding no fix changes. (On Windows the file would be the other kind.)
+        // Backlog 079 (moq4, Newtonsoft): a finding the copy's run doesn't change, in a file that has only LF, was "only this OS's line
+        // ending" (so a check before any format said Clean). It is listed and ends Not verified (owner 2026-11-05).
         var root = NewFolder(("C.cs", "class C\n{\n}\n"));
         var finding = $"{Path.Combine(root, "C.cs")}(1,8): warning IDE0055: Fix formatting";
         var lines = new List<string>();
@@ -123,13 +123,15 @@ public sealed class FormatLineEndingsTests : IDisposable
             return 0;
         });
 
-        Assert.Equal(OperatingSystem.IsWindows() ? 0 : FormatCommand.NotCleanExitCode, code);
-        Assert.DoesNotContain(lines, l => l.Contains("only this OS's line ending", StringComparison.Ordinal) && !OperatingSystem.IsWindows());
-        if (!OperatingSystem.IsWindows())
+        if (OperatingSystem.IsWindows())
         {
-            Assert.Contains(finding, lines);
-            Assert.Contains(lines, l => l.StartsWith("Not clean: 1 finding above no fix changes", StringComparison.Ordinal));
+            return; // an LF file is the other kind there
         }
+
+        Assert.Equal(FormatCommand.NotVerifiedExitCode, code);
+        Assert.Contains(finding, lines);
+        Assert.DoesNotContain(lines, l => l.Contains("only this OS's line ending", StringComparison.Ordinal));
+        Assert.Contains(lines, l => l.StartsWith("Not checked: C.cs: 1 formatting finding no fix changes", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -155,6 +157,7 @@ public sealed class FormatLineEndingsTests : IDisposable
 
         Assert.Equal(FormatCommand.NotVerifiedExitCode, code);
         Assert.Contains(lines, l => l.StartsWith("Not checked:", StringComparison.Ordinal) && l.Contains("R.cs", StringComparison.Ordinal) && !l.Contains("stylebro-verify-", StringComparison.Ordinal));
+        Assert.DoesNotContain(lines, l => l.Contains("formatting finding", StringComparison.Ordinal)); // the raw string gap accounts for it
     }
 
     [Fact]

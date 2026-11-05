@@ -1005,6 +1005,18 @@ internal static partial class FormatCommand
         return Gap(relative.StartsWith("..", StringComparison.Ordinal) ? there : relative, $"{match.Groups["id"].Value} {RawStringGapEnd}");
     }
 
+    /// <summary>
+    /// The gap for formatting findings (<see cref="IsFormattingLine"/>) that no fix changes and that aren't line endings, nor in a file
+    /// the raw string guard kept: the whitespace formatter and its check disagree there (Newtonsoft, near '#if'). Not verified (owner's
+    /// decision 2026-11-05), not Clean, not Not clean; null for none.
+    /// </summary>
+    public static string? UnfixableWhitespaceGap(IEnumerable<string> lines, string root)
+    {
+        var files = lines.Select(FindingPath).OfType<string>().Select(f => Path.GetRelativePath(root, f).Replace('\\', '/')).Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList();
+        var count = lines.Count();
+        return count == 0 ? null : Gap(ShortList(files), $"{count} formatting finding{(count == 1 ? string.Empty : "s")} no fix changes and the whitespace formatter keeps (listed above)");
+    }
+
     /// <summary>Whether a finding line is in one of <paramref name="files"/> (full paths).</summary>
     public static bool IsInFiles(string line, IReadOnlySet<string> files) => FindingPath(line) is { } path && files.Contains(path);
 
@@ -4194,7 +4206,12 @@ internal static partial class FormatCommand
 
             // Findings no fix changes and no fix keeps on purpose: the build still reports them (AngleSharp's IDE0049 in a
             // using alias, which the SDK's fix can't rewrite: "Clean" with three errors above it).
-            var unfixed = lines.Where(l => IsFindingLine(l) && !IsKeptLine(l, kept) && !IsLineEndingLine(l) && !(IsFormattingLine(l) && IsInFiles(l, rawStringFiles))).Select(l => l.Trim()).Distinct(StringComparer.Ordinal).Count();
+            var unfixed = lines.Where(l => IsFindingLine(l) && !IsKeptLine(l, kept) && !IsFormattingLine(l)).Select(l => l.Trim()).Distinct(StringComparer.Ordinal).Count();
+            if (UnfixableWhitespaceGap(lines.Where(l => IsFormattingLine(l) && IsFindingLine(l) && !IsKeptLine(l, kept) && !IsLineEndingLine(l) && !IsInFiles(l, rawStringFiles)).Select(l => l.Trim()).Distinct(StringComparer.Ordinal).ToList(), source) is { } looseGap)
+            {
+                gaps.Add(looseGap);
+            }
+
             KeptSummary(kept, root, clean: unfixed == 0 && copyFailures.Count == 0 && Unverified(gaps).Count == 0).ForEach(log);
             if (BaselineOffLine(root, kept.Count) is { } off)
             {
@@ -5277,7 +5294,12 @@ internal static partial class FormatCommand
             // What the run's checks found and its fixes didn't change: the build reports it, as verify says (trial 34,
             // protobuf-net: BRO1008's fix needs every project compiling the file to agree, and "Clean" stood above it).
             var keptRawStrings = RawStringGapFiles(rawStringGaps);
-            var unfixed = changed.Count == 0 ? checkFindings.Where(l => AsKept(l, ReadKept(keptFile, root, root)) is null && !(IsFormattingLine(l) && IsInFiles(l, keptRawStrings))).ToList() : [];
+            var unfixed = changed.Count == 0 ? checkFindings.Where(l => AsKept(l, ReadKept(keptFile, root, root)) is null && !IsFormattingLine(l)).ToList() : [];
+            if (changed.Count == 0 && UnfixableWhitespaceGap(checkFindings.Where(l => IsFormattingLine(l) && AsKept(l, ReadKept(keptFile, root, root)) is null && !IsInFiles(l, keptRawStrings)).ToList(), root) is { } looseGap)
+            {
+                gaps = Gaps(gaps.Append(looseGap));
+            }
+
 
             // Not "clean" when CSharpier put back what the fixes changed (trial 26: "Run 1: 0 files changed, clean." then "Not clean").
             log($"Run {run}: {changed.Count} file{(changed.Count == 1 ? string.Empty : "s")} changed{(endingsOnly ? ", line endings or byte order marks only (no run needed after it), clean:" : changed.Count > 0 ? ":" : failures.Count > 0 ? ", but code fixes failed (below)." : putBack.Count > 0 ? ", but CSharpier put back what the fixes changed (below)." : unfixed.Count > 0 ? ", but its check found what no fix changes (below)." : Unverified(gaps).Count > 0 ? ", but not everything was checked (below)." : ", clean.")}");
