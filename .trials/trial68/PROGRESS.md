@@ -1,3 +1,4 @@
 - feed 0.8.0-trial68.1 at /root/stylebro-trial68/feed (main 315ca90), bro installed
 - Picks (logs/picks.md): seed 68 draws 119 CacheManager (symlink App.config->app.config local commit), 28->112 minsk REJECTED (generator on Roslyn 3.6.0-4 prerelease fails on SDK 10) ->113 BedrockFramework (global.json lowered), 62->114 sendgrid-csharp. Targeted: apache/avro lang/csharp (CodeStyle 4.7.0 + StyleCop + NetAnalyzers, IDE0011/47/48 silent in globalconfig; no old 3.x CodeStyle found, no IDE0040 pragma): clone in avro-full, project dir lang/csharp.
 - baseline driver baseall.sh running (logs/base-*), check-in armed
+- Baselines done (Debug build ok all; logs/base-*): CacheManager 1 fail (Redis_TwoServerSetup_ClearWorks, redis) of 1863+9; Bedrock 219+219 pass; sendgrid many Integration* fail (need prism mock) + LicenseTests year; avro Zstandard tests fail (native). Failing lists in */logs/base-failed.txt.
