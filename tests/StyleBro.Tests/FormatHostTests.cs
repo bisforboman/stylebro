@@ -60,6 +60,7 @@ public sealed class FormatHostTests : IDisposable
     [InlineData("Lib(net10.0-windows)", "net10.0-windows")]
     [InlineData("Lib", null)]
     [InlineData("(x", null)]
+    [InlineData("Lib(net8.0\n    )", "net8.0")] // <TargetFrameworks> over several lines (trial 68, CacheManager.Tests)
     public void FrameworkOf_ReadsTheInstanceName(string name, string? framework) => Assert.Equal(framework, Views.FrameworkOf(name));
 
     [Fact]

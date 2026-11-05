@@ -1,0 +1,22 @@
+{
+  "repo": "MichaCo/CacheManager",
+  "branch": "dev",
+  "commit": "c0018f5dd779fd7fe2a526de1ac76c036a01bf8c",
+  "csFiles": 134,
+  "tags": [
+    "library",
+    "multi-target",
+    "tfm-line-break"
+  ],
+  "setups": "CacheManager.sln; net472;netstandard2.0;netstandard2.1;net8.0 libraries; test project's <TargetFrameworks> over three lines with a commented-out net481; no props files; .editorconfig.",
+  "build": "ok with workaround",
+  "workaround": "symlink App.config -> app.config next to the test project's app.config (case-sensitive file system)",
+  "tests": "dotnet test test/CacheManager.Tests (1863 tests; Redis ones fail untouched without a server) and CacheManager.MSConfiguration.TypeLoad.Tests (9)",
+  "usedIn": "trial 68 (random, seed 68)",
+  "verified": {
+    "by": "trial 68 session",
+    "date": "2026-11-05",
+    "sdks": "10.0.114, 8.0.133"
+  },
+  "notes": "A multi-line <TargetFrameworks> evaluates to ';net8.0<line break>    ': the host named the project 'CacheManager.Tests(net8.0<line break>    )', so it belonged to no run and format/check said Clean while the build reported 460 findings in it (fixed in trial 68)."
+}

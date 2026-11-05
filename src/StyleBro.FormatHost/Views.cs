@@ -63,7 +63,7 @@ public static class Views
         // A framework's run loads the projects that target it as single-framework builds, named without the framework.
         foreach (var project in solution.Projects.Where(p => keep.Contains(p.Id) && FrameworkOf(p.Name) is { } f && frameworks.Contains(f)))
         {
-            names[project.Name] = project.Name.Substring(0, project.Name.Length - FrameworkOf(project.Name)!.Length - 2);
+            names[project.Name] = project.Name.Substring(0, project.Name.LastIndexOf('('));
         }
 
         var view = solution;
@@ -84,9 +84,13 @@ public static class Views
         return view;
     }
 
-    /// <summary>The framework of a project MSBuildWorkspace loaded once per framework ('Lib(net8.0)'), else null.</summary>
+    /// <summary>
+    /// The framework of a project MSBuildWorkspace loaded once per framework ('Lib(net8.0)'), else null. Trimmed: a
+    /// <c>&lt;TargetFrameworks&gt;</c> over several lines makes the name 'Lib(net8.0⏎    )' (trial 68, CacheManager.Tests), and
+    /// the project then belonged to none of the runs: its analyzers never ran, with a Clean verdict.
+    /// </summary>
     public static string? FrameworkOf(string name) =>
-        name.EndsWith(")", StringComparison.Ordinal) && name.LastIndexOf('(') is var open and > 0 ? name.Substring(open + 1, name.Length - open - 2) : null;
+        name.EndsWith(")", StringComparison.Ordinal) && name.LastIndexOf('(') is var open and > 0 ? name.Substring(open + 1, name.Length - open - 2).Trim() : null;
 
     /// <summary>
     /// The workspace's load warnings a view has: one about a project (a ProjectDiagnostic) when the view has that project;

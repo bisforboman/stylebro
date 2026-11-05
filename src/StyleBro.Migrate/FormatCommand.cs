@@ -41,6 +41,11 @@ internal static partial class FormatCommand
     /// </summary>
     public const string SelectFrameworkTargets = """
         <Project>
+          <!-- White space in the list (a <TargetFrameworks> over several lines, trial 68, CacheManager.Tests: ';net8.0' and line
+               breaks) made the project load as 'Lib(net8.0 + line break)', which no run's framework matched: cut out first. -->
+          <PropertyGroup Condition="'$(TargetFrameworks)' != '' and $([System.Text.RegularExpressions.Regex]::IsMatch('$(TargetFrameworks)', '\s'))">
+            <TargetFrameworks>$([System.Text.RegularExpressions.Regex]::Replace('$(TargetFrameworks)', '\s+', ''))</TargetFrameworks>
+          </PropertyGroup>
           <!-- bro format: TargetFramework comes from the environment; projects not on the keep list load as usual, and so do
                the projects without the run's framework (StyleBroFormatOther: kept only because they reference a kept one). -->
           <PropertyGroup Condition="'$(TargetFrameworks)' != '' and (('$(StyleBroFormatKeep)' != '' and !$(StyleBroFormatKeep.Contains('|$(MSBuildProjectFullPath.ToUpperInvariant())|'))) or '$(StyleBroFormatLoose)' == 'true' or ('$(StyleBroFormatOther)' != '' and $(StyleBroFormatOther.Contains('|$(MSBuildProjectFullPath.ToUpperInvariant())|'))))">
@@ -1042,7 +1047,11 @@ internal static partial class FormatCommand
     /// a corrupt package cache), else null. Its files weren't formatted, and it says nothing else about them.
     /// </summary>
     public static string? SkippedProject(string line) =>
-        Regex.Match(line, "Required references did not load for (.+?) or referenced project") is { Success: true } match ? match.Groups[1].Value : null;
+        // Singleline and the line breaks cut out: a target framework with a line break in it (trial 68, CacheManager.Tests:
+        // <TargetFrameworks> over three lines, "Lib(net8.0⏎    )") made the host's one message several lines long.
+        Regex.Match(line, "Required references did not load for (.+?) or referenced project", RegexOptions.Singleline) is { Success: true } match
+            ? Regex.Replace(match.Groups[1].Value, @"\s*[\r\n]+\s*", string.Empty)
+            : null;
 
     /// <summary>
     /// The project and framework a skip (<see cref="SkippedProject"/>) in the run for <paramref name="run"/> is about: 'Lib' in
@@ -1612,6 +1621,13 @@ internal static partial class FormatCommand
         }
 
         return [.. result, "--include", .. include];
+    }
+
+    /// <summary>Whether <c>--report</c> is the last argument or followed by another option, so it has no path.</summary>
+    public static bool ReportWithoutValue(IReadOnlyList<string> args)
+    {
+        var at = args.ToList().IndexOf("--report");
+        return at >= 0 && (at + 1 >= args.Count || args[at + 1].StartsWith('-'));
     }
 
     /// <summary>
@@ -4591,14 +4607,68 @@ internal static partial class FormatCommand
                 return;
             }
 
+            var joiner = new SkipLineJoiner();
             for (var next = stream.ReadLine(); next is not null; next = stream.ReadLine())
             {
-                line(next);
+                if (joiner.Add(next) is { } whole)
+                {
+                    line(whole);
+                }
+            }
+
+            if (joiner.Flush() is { } rest)
+            {
+                line(rest);
             }
         })
         { IsBackground = true };
         thread.Start();
         return thread;
+    }
+
+    /// <summary>
+    /// Puts back together the one message of 'dotnet format' that can arrive over several lines: "Required references did not
+    /// load for Lib(net8.0⏎    ) or referenced project" when the project's target framework carries a line break (trial 68,
+    /// CacheManager.Tests: <c>&lt;TargetFrameworks&gt;⏎ &lt;!--net481--&gt;;net8.0⏎ &lt;/TargetFrameworks&gt;</c> evaluates to "net8.0⏎    "). The
+    /// checks read line by line, so the skip went unseen and the project's analyzers never ran, with a Clean verdict.
+    /// </summary>
+    internal sealed class SkipLineJoiner
+    {
+        private const int MaxContinuationLines = 4;
+        private string? pending;
+        private int joined;
+
+        /// <summary>The line to pass on now, or null while a skip message is still being put together.</summary>
+        public string? Add(string line)
+        {
+            if (pending is null)
+            {
+                if (!line.Contains("Required references did not load for ", StringComparison.Ordinal) || line.Contains(" or referenced project", StringComparison.Ordinal))
+                {
+                    return line;
+                }
+
+                pending = line.TrimEnd();
+                joined = 0;
+                return null;
+            }
+
+            pending += line.Trim();
+            if (pending.Contains(" or referenced project", StringComparison.Ordinal) || ++joined >= MaxContinuationLines)
+            {
+                return Flush();
+            }
+
+            return null;
+        }
+
+        /// <summary>What is still pending at the end of the stream (a message that never completed), or null.</summary>
+        public string? Flush()
+        {
+            var rest = pending;
+            pending = null;
+            return rest;
+        }
     }
 
     /// <summary>A property of a project's evaluation (<see cref="EvaluateProject"/>), or "" when it isn't set or MSBuild can't evaluate it.</summary>
@@ -4755,6 +4825,14 @@ internal static partial class FormatCommand
         DeleteStaleTemp(Path.GetTempPath(), DateTime.UtcNow.AddDays(-1));
 
         runOnce = KeepingLineEndings(runOnce ?? RunOnce);
+
+        // --report without a folder or file would take the next option for it ('bro check --report' got '--verify-no-changes'
+        // appended, which became the report folder, and the check formatted the tree: trial 68).
+        if (ReportWithoutValue(args))
+        {
+            (output ?? Console.Error.WriteLine)("--report needs the folder or file to write the report to: --report <path>.");
+            return 1;
+        }
 
         // --report: the plain run (the preview reads the report). --once: one run, reported like the usual ones.
         if (args.Contains("--report") && !args.Contains("--verify-no-changes"))

@@ -1,0 +1,22 @@
+{
+  "repo": "sendgrid/sendgrid-csharp",
+  "branch": "main",
+  "commit": "4a315350e910ef10c6579ca5291ed7f82ad9d376",
+  "csFiles": 165,
+  "tags": [
+    "library",
+    "stylecop",
+    "multi-target"
+  ],
+  "setups": "SendGrid.sln; StyleCop.Analyzers 1.* in SendGrid.Extensions.DependencyInjection only, stylecop.json and a ruleset in src/SendGrid; netstandard1.3;netstandard2.0;net452;net40; netcoreapp2.1 tests; two packages.config example projects.",
+  "build": "ok",
+  "workaround": null,
+  "tests": "dotnet test SendGrid.sln (232 of 436 SendGrid.Tests fail untouched: integration tests need a mock server; the year in LicenseTests)",
+  "usedIn": "trial 68 (random, seed 68)",
+  "verified": {
+    "by": "trial 68 session",
+    "date": "2026-11-05",
+    "sdks": "10.0.114, 8.0.133"
+  },
+  "notes": "Partial StyleCop (one small project): migrate leaves the rest alone, says so, and format/check stay Clean."
+}
