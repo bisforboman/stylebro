@@ -1,0 +1,22 @@
+{
+  "repo": "davidfowl/BedrockFramework",
+  "branch": "main",
+  "commit": "587e46dd760e6c24c302d87aa83cde06c7ea5316",
+  "csFiles": 205,
+  "tags": [
+    "library",
+    "multi-target",
+    "app"
+  ],
+  "setups": "BedrockFramework.sln; net8.0;net9.0; Directory.Build.props in root, samples/ and tests/ (the nested ones don't import the root's); global.json 9.0.100.",
+  "build": "ok with workaround",
+  "workaround": "global.json lowered to 10.0.100 with rollForward latestMajor (no .NET 9 SDK)",
+  "tests": "dotnet test tests/Bedrock.Framework.Tests (219 per framework, DOTNET_ROLL_FORWARD=Major)",
+  "usedIn": "trial 68 (random, seed 68)",
+  "verified": {
+    "by": "trial 68 session",
+    "date": "2026-11-05",
+    "sdks": "10.0.114, 8.0.133"
+  },
+  "notes": "A StyleBro.Analyzers reference only in the root props reaches none of samples/ or tests/ (they have their own Directory.Build.props): format/check print 'Without StyleBro' and still say Clean. Warnings as errors fails untouched (54 distinct errors)."
+}

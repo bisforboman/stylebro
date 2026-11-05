@@ -1,0 +1,23 @@
+{
+  "repo": "apache/avro",
+  "branch": "main",
+  "commit": "3a207fa6e87c535b95eafca4cf5a6ef524d77df2",
+  "csFiles": 229,
+  "tags": [
+    "stylecop",
+    "codestyle-package",
+    "multi-target",
+    "library"
+  ],
+  "setups": "lang/csharp/Avro.sln inside the full avro repository; Microsoft.CodeAnalysis.CSharp.CodeStyle 4.7.0, NetAnalyzers and StyleCop 1.1.118 from common.props; CodeAnalysis.src/test.globalconfig; net8.0-net10.0 tests.",
+  "build": "ok",
+  "workaround": null,
+  "tests": "dotnet test lang/csharp/Avro.sln (62 Avro.test and 176 Zstandard tests fail untouched)",
+  "usedIn": "trial 68 (targeted at #327/#329)",
+  "verified": {
+    "by": "trial 68 session",
+    "date": "2026-11-05",
+    "sdks": "10.0.114, 8.0.133"
+  },
+  "notes": "RunAnalyzers is false for the src projects (IsSourceProject is never set): StyleCop ran in test projects only, and migrate says 'Leaving alone: src/...'. The 'Old CodeStyle package' note shows in format and a full check, not in the check from format's record."
+}
