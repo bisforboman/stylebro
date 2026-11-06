@@ -67,7 +67,9 @@ them (IDE rules, `.editorconfig`); the preset turns those built-in rules on inst
   slowdowns under the per-PR `performance` threshold can't add up unnoticed.
 - **Other workflows**: sonar-interop.yml (weekly) checks the fixes for Sonar's S1066/S2971/S3878 against the real
   SonarAnalyzer package (`scripts/sonar-interop.ps1`); dependabot-auto-merge.yml turns on auto-merge for Dependabot's
-  minor and patch PRs.
+  minor and patch PRs; vulnerable-packages.yml (weekly) lists vulnerable NuGet packages, direct or transitive, and opens
+  or comments on an issue (every restore already fails on one: Directory.Build.props; fix with a pin that names the
+  advisory, never a suppression; docs/decisions/2026-11-06-vulnerable-packages-fail-every-build.md).
 - **Fewer conflicts** (docs/decisions/2026-10-18-fewer-pr-conflicts.md): a trial opens one PR (if it must split, the PR
   touching the shared files merges first, the others merge main once after it). Merge main into a PR only when GitHub
   keeps showing a real conflict (DIRTY several times) or CI needs main's code; after any merge, build, rerun the tests
