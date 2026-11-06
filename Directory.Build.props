@@ -25,6 +25,32 @@
   </PropertyGroup>
 
   <!--
+    The .NET SDK's security analyzers (category Security: CA2xxx, CA3xxx, CA5xxx) all run on every build of StyleBro's
+    own code, and each finding is an error there, not only where TreatWarningsAsErrors is on
+    (docs/decisions/2026-11-06-security-analyzers-and-codeql.md). AnalysisModeSecurity=All makes the SDK add its global
+    config enabling every Security rule; the suffix picks that config's own variant with each rule at error, the one
+    CodeAnalysisTreatWarningsAsErrors would pick, but for Security only (that property would also make other
+    categories' rules errors). A category line in .editorconfig can't do it: the global config's per-rule severities win
+    over a category's. _StyleBroCheckSecurityAnalyzers (Directory.Build.targets) fails the build if the analyzers don't
+    run or an SDK stops honouring the suffix. A false positive is suppressed where it is, with a justification. Left
+    out: samples/ (users' code shapes, checked only by StyleBro's own rules) and scripts/fixtures/ (packed for the
+    fixture matrix's repositories). This only reaches the repository's builds: StyleBro's package and presets don't turn
+    these rules on for its users, and the trial, fixture, real-world and verify-package runs build outside these props.
+  -->
+  <PropertyGroup>
+    <_StyleBroProjectPath>$([MSBuild]::MakeRelative('$(MSBuildThisFileDirectory)', '$(MSBuildProjectDirectory)/').Replace('\', '/'))</_StyleBroProjectPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="!$(_StyleBroProjectPath.StartsWith('samples/')) and !$(_StyleBroProjectPath.StartsWith('scripts/fixtures/'))">
+    <_StyleBroSecurityAnalyzers>true</_StyleBroSecurityAnalyzers>
+    <!-- The SDK turns its analyzers off for netstandard2.0 (the analyzer and code-fix projects) and gives no analysis
+         level there: on for every project, at the SDK's newest Security rules (not the target framework's). -->
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevelSecurity>latest</AnalysisLevelSecurity>
+    <AnalysisModeSecurity>All</AnalysisModeSecurity>
+    <_GlobalAnalyzerConfigFileName_MicrosoftCodeAnalysisNetAnalyzersSecurity_WarnAsErrorSuffix>_warnaserror</_GlobalAnalyzerConfigFileName_MicrosoftCodeAnalysisNetAnalyzersSecurity_WarnAsErrorSuffix>
+  </PropertyGroup>
+
+  <!--
     StyleBro checks its own code with its latest published release from nuget.org (StyleBroSelfVersion), not the code
     being built. Left out: the samples (their input is deliberately messy and is checked by the analyzers being built,
     see scripts/verify-format.ps1) and StyleBro.Package, which is that package and has no code. The analyzer and

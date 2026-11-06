@@ -7,4 +7,14 @@
     <Analyzer Include="$(_StyleBroSelfRoot)analyzers/dotnet/cs/*.dll" />
   </ItemGroup>
   <Import Project="$(_StyleBroSelfRoot)build/StyleBro.Analyzers.targets" Condition="'$(StyleBroSelf)' == 'download' and Exists('$(_StyleBroSelfRoot)build/StyleBro.Analyzers.targets')" />
+
+  <!--
+    The security analyzers must run and their global config must be the SDK's all-rules-at-error one (see
+    Directory.Build.props). After CoreCompile, so it runs whatever order the SDK's targets take, also on an
+    incremental build that skips compiling.
+  -->
+  <Target Name="_StyleBroCheckSecurityAnalyzers" AfterTargets="CoreCompile" Condition="'$(_StyleBroSecurityAnalyzers)' == 'true'">
+    <Error Condition="'$(EnableNETAnalyzers)' != 'true' or !$([System.String]::Copy('$(_GlobalAnalyzerConfigFile_MicrosoftCodeAnalysisNetAnalyzersSecurity)').EndsWith('_all_warnaserror.globalconfig')) or !Exists('$(_GlobalAnalyzerConfigFile_MicrosoftCodeAnalysisNetAnalyzersSecurity)')"
+           Text="The security analyzers aren't all errors here: EnableNETAnalyzers is '$(EnableNETAnalyzers)' and this SDK's global config is '$(_GlobalAnalyzerConfigFile_MicrosoftCodeAnalysisNetAnalyzersSecurity)'. See docs/decisions/2026-11-06-security-analyzers-and-codeql.md." />
+  </Target>
 </Project>
