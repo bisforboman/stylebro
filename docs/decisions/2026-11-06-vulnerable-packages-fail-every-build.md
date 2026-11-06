@@ -9,18 +9,26 @@ noticed by hand.
 
 ## Choices
 
-1. Fail every build: `NuGetAudit` on, `NuGetAuditMode` all (transitive packages too), `NuGetAuditLevel` low, NU1901 to
-   NU1904 as errors, in Directory.Build.props, so a local build, CI, the pack and the release all stop on a finding.
-2. Fail only in CI (`-p:WarningsAsErrors=...` on CI's commands): local builds keep working offline or behind an
-   advisory, but every other workflow and the release need the flag too.
-3. Keep the warnings and only report: a scheduled listing opens an issue.
+Asked of the owner as two multiple-choice questions (2026-11-06).
 
-And separately, whether a scheduled check also looks for advisories published against packages main already uses (a
-build fails only when something builds).
+Q1, "A vulnerable NuGet package (direct or transitive) should fail which builds?":
+
+1. **Every build (Recommended)**: `NuGetAudit` on, `NuGetAuditMode` all (transitive packages too), `NuGetAuditLevel`
+   low, NU1901 to NU1904 as errors, in Directory.Build.props, so a local build, CI, the pack and the release all stop
+   on a finding.
+2. **CI and release only** (`-p:WarningsAsErrors=...` on CI's commands): local builds keep working offline or behind
+   an advisory, but every other workflow and the release need the flag too.
+3. **Release only**: the warnings stay everywhere else; only the release stops.
+
+Q2, "Add the weekly check that opens an issue when main has a vulnerable package?" (a build fails only when something
+builds; this looks for advisories published against packages main already uses):
+
+1. **Yes, weekly issue (Recommended)**
+2. **No**
 
 ## Decision
 
-The owner chose 1, plus a weekly check (2026-11-06, multiple-choice prompt):
+The owner answered "Every build" to Q1 and yes to Q2 (2026-11-06, multiple-choice prompt):
 
 - Directory.Build.props sets the four properties and appends NU1901;NU1902;NU1903;NU1904 to `$(WarningsAsErrors)`.
   NU1905 (the audit source can't be read) stays a warning, so an offline restore still works. It reaches only this
