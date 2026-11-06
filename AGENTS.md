@@ -69,7 +69,11 @@ them (IDE rules, `.editorconfig`); the preset turns those built-in rules on inst
   SonarAnalyzer package (`scripts/sonar-interop.ps1`); dependabot-auto-merge.yml turns on auto-merge for Dependabot's
   minor and patch PRs; vulnerable-packages.yml (weekly) lists vulnerable NuGet packages, direct or transitive, and opens
   or comments on an issue (every restore already fails on one: Directory.Build.props; fix with a pin that names the
-  advisory, never a suppression; docs/decisions/2026-11-06-vulnerable-packages-fail-every-build.md).
+  advisory, never a suppression; docs/decisions/2026-11-06-vulnerable-packages-fail-every-build.md); codeql.yml (pull
+  requests to main but docs-only ones, pushes to main, weekly) is GitHub's code scanning of the C#, not required.
+- **Security analyzers**: the SDK's Security rules (CA2xxx, CA3xxx, CA5xxx) all run as errors on every build of
+  StyleBro's own projects, not samples/ or scripts/fixtures/ (Directory.Build.props). Fix a real finding; suppress a
+  false positive where it is, with a justification (docs/decisions/2026-11-06-security-analyzers-and-codeql.md).
 - **Fewer conflicts** (docs/decisions/2026-10-18-fewer-pr-conflicts.md): a trial opens one PR (if it must split, the PR
   touching the shared files merges first, the others merge main once after it). Merge main into a PR only when GitHub
   keeps showing a real conflict (DIRTY several times) or CI needs main's code; after any merge, build, rerun the tests
