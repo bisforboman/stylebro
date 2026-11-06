@@ -1,0 +1,40 @@
+name: Vulnerable packages
+
+# Every restore already fails on a known vulnerable package (NU1901-NU1904 as errors, Directory.Build.props), but only
+# when something builds: an advisory published against a package main already uses shows up here, weekly, without
+# waiting for the next PR. .github/vulnerable-packages.py restores each solution and project StyleBro builds or ships
+# with those errors off and lists `dotnet list package --vulnerable --include-transitive`; a finding fails the job, and
+# on main (scheduled, or dispatched on main) opens or comments on the issue "Vulnerable packages found", one per streak
+# (.github/nightly-issue.sh). Not a required check. docs/decisions/2026-11-06-vulnerable-packages-fail-every-build.md.
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: vulnerable-packages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  vulnerable-packages:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          dotnet-version: 10.0.x
+
+      - name: List vulnerable packages
+        id: scan
+        run: python3 .github/vulnerable-packages.py "$RUNNER_TEMP/vulnerable-packages.md"
+
+      - name: Open or update the issue
+        if: ${{ failure() && steps.scan.outcome == 'failure' && github.ref == 'refs/heads/main' }}
+        run: bash .github/nightly-issue.sh "Vulnerable packages found" "$RUNNER_TEMP/vulnerable-packages.md"
+        env:
+          GH_TOKEN: ${{ github.token }}

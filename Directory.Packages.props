@@ -14,6 +14,15 @@
     <!-- bro's format host compiles against these and runs on the SDK's own copies (src/StyleBro.FormatHost). -->
     <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.8.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.14" />
+    <!--
+      Pin the format host's transitive packages above their advisories: System.Text.Json 7.0.3 from Workspaces.MSBuild
+      (NU1903, GHSA-hh2w-p6rv-4g7w) and System.Drawing.Common 4.7.0 from Microsoft.Build.Framework 16.10 through
+      System.Security.Permissions and System.Windows.Extensions (NU1904, GHSA-rxg9-xrhp-64gj). Compile-time only: the
+      format host excludes their runtime assets and runs on the SDK's own copies, so no shipped package contains them.
+      8.0.x matches its net8.0 target.
+    -->
+    <PackageVersion Include="System.Text.Json" Version="8.0.6" />
+    <PackageVersion Include="System.Drawing.Common" Version="8.0.33" />
 
     <!-- StyleBro checks its own code with its latest published release (not the code being built). -->
     <PackageVersion Include="StyleBro.Analyzers" Version="$(StyleBroSelfVersion)" />

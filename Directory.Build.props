@@ -9,6 +9,22 @@
   </PropertyGroup>
 
   <!--
+    No vulnerable package, direct or transitive, gets into what StyleBro builds or ships: every restore audits the whole
+    graph and a known vulnerability of any severity fails it (docs/decisions/2026-11-06-vulnerable-packages-fail-every-build.md).
+    NU1905 (the audit source can't be read) stays a warning, so an offline restore still works. Fix a finding with a
+    bump or a pin in Directory.Packages.props that names the advisory, never with a suppression. This file reaches only
+    this repository's projects: samples/StyleCopMigration and .trials/ have props of their own that stop it, and the
+    fixture, real-world and verify-package runs work outside the repository, so third-party repositories' own
+    dependencies are audited by their own settings. .github/workflows/vulnerable-packages.yml lists findings weekly.
+  -->
+  <PropertyGroup>
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <NuGetAuditLevel>low</NuGetAuditLevel>
+    <WarningsAsErrors>$(WarningsAsErrors);NU1901;NU1902;NU1903;NU1904</WarningsAsErrors>
+  </PropertyGroup>
+
+  <!--
     StyleBro checks its own code with its latest published release from nuget.org (StyleBroSelfVersion), not the code
     being built. Left out: the samples (their input is deliberately messy and is checked by the analyzers being built,
     see scripts/verify-format.ps1) and StyleBro.Package, which is that package and has no code. The analyzer and

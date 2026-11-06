@@ -15,6 +15,9 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" PrivateAssets="all" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" PrivateAssets="all" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" PrivateAssets="all" ExcludeAssets="runtime" />
+    <!-- Pins above advisories (Directory.Packages.props), not used by the code. -->
+    <PackageReference Include="System.Drawing.Common" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="System.Text.Json" PrivateAssets="all" ExcludeAssets="runtime" />
   </ItemGroup>
 
   <ItemGroup>
