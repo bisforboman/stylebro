@@ -1,0 +1,2 @@
+- feed 0.8.0-trial69.1 at /root/stylebro-trial69/feed (main 5aa09f5), bro installed
+- Picks (logs/picks.md, owner chose Arch): azure-cost-cli, dotliquid, NModbus, Arch. All Debug builds pass.
