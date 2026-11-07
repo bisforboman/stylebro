@@ -1,6 +1,6 @@
 {
   "area": "Hardening",
   "item": "The check from format's record leaves out the notes format and a full check print",
-  "notes": "Trial 68 (sendgrid-csharp, Avro, Bedrock): the verdict and exit code of a check answered from format's record equal those of a full check (record deleted), but its output lacks the informational lines the full check prints: 'Leaving alone: ... StyleCop didn't run there', 'Old CodeStyle package: ...' (#329), 'Configurations: ...', 'Without StyleBro: ...' and the workspace-warnings note. In CI there is no record, so a fresh clone prints them; after a local format they were printed by format. To decide: keep the notes in the record and say them again, or leave it.",
-  "status": "Open"
+  "notes": "Trial 68 (sendgrid-csharp, Avro, Bedrock): the verdict and exit code of a check answered from format's record equal those of a full check (record deleted), but its output lacks the informational lines the full check prints: 'Leaving alone: ... StyleCop didn't run there', 'Old CodeStyle package: ...' (#329), 'Configurations: ...', 'Without StyleBro: ...' and the workspace-warnings note. In CI there is no record, so a fresh clone prints them; after a local format they were printed by format. To decide: keep the notes in the record and say them again, or leave it. Owner (2026-11-07): store them and say them again (reverses 2026-11-05; docs/decisions/2026-11-07-the-check-from-formats-record-prints-formats-notes-again.md). Format's first run records its notes about the repository (IsRecordedNote: the header lines but the run's own, and the workspace warnings' note) as #note lines; the check from the record prints them after its first line.",
+  "status": "Done (2026-11-07)"
 }
