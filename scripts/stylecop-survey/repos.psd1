@@ -1,4 +1,4 @@
-# Repos included in docs/stylecop-mapping.md. Each needs data/<Name>-configs.csv and data/<Name>-counts.csv
+# Repos included in survey.md. Each needs data/<Name>-configs.csv and data/<Name>-counts.csv
 # (from Invoke-RepoSurvey.ps1). ProdConfigs lists the config files that apply to production code, lowest
 # precedence first (.editorconfig beats rulesets and global configs, so it goes last).
 @{

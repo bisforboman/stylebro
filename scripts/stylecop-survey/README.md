@@ -1,22 +1,27 @@
 # StyleCop survey
 
-Scripts and data behind [docs/stylecop-mapping.md](../../docs/stylecop-mapping.md): what happens to each StyleCop rule
-when a project moves to StyleBro.
+Scripts and data behind [docs/stylecop-mapping.md](../../docs/stylecop-mapping.md) and
+[docs/skipped-rules.md](../../docs/skipped-rules.md): what happens to each StyleCop rule when a project moves to
+StyleBro. The full survey, with StyleCop's own defaults and fixes, the surveyed teams and the counts, is
+[survey.md](survey.md): internal, not on the site. The published pages only say what StyleBro or the SDK covers,
+never what StyleCop does (its behaviour changes between versions; see docs/decisions/).
 
 | Step | Script | Writes |
 |---|---|---|
 | 1. List every StyleCop rule, and whether StyleCop has a fix for it | `Get-Inventory.ps1` | `data/inventory-<version>.csv` |
 | 2. Survey a repo that uses StyleCop: its settings, and counts with every rule on | `Invoke-RepoSurvey.ps1` | `data/<name>-configs.csv`, `data/<name>-counts.csv` |
 | 3. Check which rules `dotnet format` already fixes with SDK settings alone | `Test-SdkCoverage.ps1` | `data/sdk-check.csv` |
-| 4. Generate the mapping and the skipped-rules list | `New-Mapping.ps1` | `docs/stylecop-mapping.md`, `docs/skipped-rules.md`, `data/mapping.csv` |
+| 4. Generate the mapping, the skipped-rules list and the survey | `New-Mapping.ps1` | `docs/stylecop-mapping.md`, `docs/skipped-rules.md`, `survey.md`, `data/mapping.csv` |
 | Check a migration changes (almost) nothing in a StyleCop-clean repo | `Measure-MigrationDelta.ps1` | commits in the target clone |
 | StyleSharp (a StyleCop successor, SST ids): its rules, and the StyleCop rule each stands for (exceptions in the script) | `Get-Inventory.ps1 -Package StyleSharp.Analyzers -Versions <v>`, then `New-StyleSharpMapping.ps1` | `data/inventory-stylesharp-<version>.csv`, `data/stylesharp-mapping.csv` |
 
 The measured data is committed, so step 4 works on its own. Hand-written parts live in three files:
 
-- `decisions.psd1`: the proposal per covered rule (SDK / StyleBro), which SDK setting covers a rule, and notes.
-- `skipped.psd1`: every rule StyleBro doesn't cover: status, why, and what it would take to revisit it.
-  `New-Mapping.ps1` warns about an uncovered rule without an entry.
+- `decisions.psd1`: the proposal per covered rule (SDK / StyleBro; survey evidence, may compare with StyleCop), which
+  SDK setting covers a rule, notes, and `Mapping`: the published "Covered by" text where it needs a scope note.
+- `skipped.psd1`: every rule StyleBro doesn't cover: status, why, and what it would take to revisit it. Published and
+  shown by `bro migrate`'s report, so it says only what StyleBro does and why. `New-Mapping.ps1` warns about an
+  uncovered rule without an entry.
 - `repos.psd1`: the surveyed repos, and which of their config files apply to production code.
 
 ## Checking a rule against StyleCop
