@@ -1,2 +1,3 @@
 - feed 0.8.0-trial69.1 at /root/stylebro-trial69/feed (main 5aa09f5), bro installed
 - Picks (logs/picks.md, owner chose Arch): azure-cost-cli, dotliquid, NModbus, Arch. All Debug builds pass.
+- azure-cost-cli r1 (preview, init, ref in root Directory.Build.props): preview 52s (70 files, clean after 1 run) = format 42s (70 files), format2 0, check 0, json 0, check --build 3 (untouched TWAE build has 342 errors; Tests didn't compile: honest Not verified). IDE0049 held back (SDK 10.0.114 note).
