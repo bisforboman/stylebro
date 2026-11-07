@@ -239,7 +239,7 @@ owner's decisions of 2026-10-04 and 2026-10-11 in [decisions](https://github.com
 | [BRO1611](rules/BRO1611.md) (SA1612) | `<param>` tags of primary constructors (classes, structs, records) are checked; SA1612 has a fix (its rename drops the tag's text; StyleBro's keeps it) | Not checked; no fix | [#3833](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/3833), [#4354](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4354) |
 
 New differences: 1.3 changed these and StyleBro still does what 1.2 did. Whether StyleBro follows each one is open
-(the owner decides per rule). Until then a repository that is clean on 1.3 can get findings from these rules after
+(the owner decides per rule: [#338](https://github.com/bisforboman/stylebro/issues/338)). Until then a repository that is clean on 1.3 can get findings from these rules after
 `bro migrate`, or keep code 1.3 would report:
 
 | Rule | 1.3.177-beta | StyleBro (like 1.2.0-beta.556) | StyleCop change |

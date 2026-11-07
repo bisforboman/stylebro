@@ -313,7 +313,7 @@ as one on 1.2; what's different:
 
 - **The rules 1.3 added count.** With a 1.3 version (`1.3.151-beta`, ...) SA1143, SA1315, SA1317, SA1653 and SA1654
   (on by default) and SX1412 (off by default) are read like every other rule; with 1.2 they count as off. None of them
-  is carried over yet, so the report lists those that are on under "Not enforced after removing StyleCop":
+  is carried over yet ([#339](https://github.com/bisforboman/stylebro/issues/339)), so the report lists those that are on under "Not enforced after removing StyleCop":
   - SA1143 (conditional expression layout), SA1315 (parameter names of overrides) and SA1654 (generic crefs in braces)
     under *Not covered yet*. StyleBro has close rules, [BRO1524](rules/BRO1524.md), [BRO1313](rules/BRO1313.md) and
     [BRO1617](rules/BRO1617.md), but the migration turns them off like every rule StyleCop 1.2 doesn't have; turn them
