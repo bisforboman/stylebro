@@ -15,7 +15,7 @@ new rules, new code fixes and many bug fixes. Everything below was measured agai
 | Rules beyond StyleCop | None | 33 (most from Roslynator, Meziantou, Sonar or StyleCop's own tracker); 3 more now have a 1.3 counterpart |
 | Analyzer time, Newtonsoft.Json (242 files) | 1,057-1,077 ms (188 analyzers) | 347-356 ms (76 analyzers); 3.0x faster in each of 3 runs ([Speed](#speed)) |
 | StyleCop bugs on the replaced rules (54 issues, read 2026-10-04) | Re-run on 1.3.177-beta: 24 fixed in 1.3, 3 changed, 13 still there, 14 not reproducible on 1.2.0-beta.556 either | 34 not shared, 8 shared (7 fixed, 1 kept on purpose), 12 not applicable or the same by design (2026-10-04) |
-| Moving a StyleCop-clean repo | (the starting point) | Files changed after `bro migrate --write` + `dotnet format`: MIGRATION_SUMMARY ([Migration](#migration)) |
+| Moving a StyleCop-clean repo | (the starting point) | Files changed after `bro migrate --write` + `dotnet format`: Polly 0, OpenTelemetry 1 (an SDK trimming fix, not StyleBro) ([Migration](#migration)) |
 | Baseline (fail only on new violations) | No | Yes (`bro baseline`) |
 | Multi-targeted projects | Not measured | Fix All merges each target framework's copy itself (no conflict markers in Newtonsoft.Json, 8 frameworks); `bro format` works around the SDK's IDE0055 crash |
 | Release status | 1.3.177-beta (a beta; last stable 1.1.118); 1.2.0-beta.556 before it | 0.8.0-alpha.1 on nuget.org (129 rules), a prerelease |
@@ -138,7 +138,7 @@ the compiler, so the wall-clock difference is smaller: a private app built in th
   `MemberSearchFlags` serializes an attribute-less class's private fields by reflection, in declaration order).
 - **Mutation testing:** 2,224 guards (`scripts/mutation/entries/`) are each broken on purpose; a test must fail for
   every one.
-- **Unit tests:** UNIT_TESTS, including every example on every rule page (before compiles and is reported, one Fix All
+- **Unit tests:** 2,871, including every example on every rule page (before compiles and is reported, one Fix All
   pass gives exactly the after, the after is clean).
 
 ## Migration
@@ -153,7 +153,15 @@ Files `dotnet format` changes after `bro migrate --write` on repositories that w
 2026-11-07 with `scripts/stylecop-survey/Measure-MigrationDelta.ps1` (a plain `dotnet format` first as the baseline,
 then `bro migrate --write`, then `dotnet format` with StyleBro and without StyleCop):
 
-MIGRATION_TABLE
+| Repository | StyleCop | Files changed | What |
+|---|---|---:|---|
+| Polly (`8a37f64`, 2026-11-07) | 1.2.0-beta.556 | 0 | |
+| OpenTelemetry (`1fc102a`, 2026-10-28, the last commit before it needs .NET 11) | 1.3.151-beta | 1 | Two `[RequiresUnreferencedCode]`/`[RequiresDynamicCode]` attributes from the SDK's trimming analyzer (the measurement runs plain `dotnet format`), not a StyleBro rule |
+
+Both with the global.json lowered to SDK 10.0.1xx. OpenTelemetry first gave 210 files: `bro migrate` didn't follow its
+`$([MSBuild]::GetDirectoryNameOfFileAbove(...))` imports, so its rulesets weren't read and BRO1601 and BRO1506 came on
+(fixed on `main` the same day). The earlier figures (2026-10-03: Polly 1, OpenTelemetry 1, a private app 7) were measured on
+older commits of these repositories, both on StyleCop 1.2; the private app wasn't re-measured.
 
 The rules StyleCop doesn't have are turned off by the migration, so they change nothing there.
 
