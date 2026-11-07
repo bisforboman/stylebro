@@ -2,7 +2,7 @@
 
 ## Question
 
-Three candidates from [beyond-stylecop.md](../beyond-stylecop.md) (#6, #16, #17): Roslynator's RCS0061 (blank line between
+Three candidates from [beyond-stylecop.md](../notes/rule-candidates.md) (#6, #16, #17): Roslynator's RCS0061 (blank line between
 switch sections), Meziantou's MA0071 / Roslynator's RCS1211 (no `else` after a branch that ends in a jump) and Sonar's
 S4136 (overloads next to each other). Defaults, and how each agrees with the rules that touch the same code: BRO1519
 (SA1513) wants a blank line after a case block's `}` before the next label (kept in "StyleCop's open bugs", #3568), and

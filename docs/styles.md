@@ -1,6 +1,6 @@
 # Styles
 
-StyleBro's preset follows StyleCop's defaults: that is the **`stylecop`** style, the default. Another style is a second
+StyleBro's preset is the **`stylecop`** style, the default (named after the conventions it comes from). Another style is a second
 layer on top of the preset, for code that follows another well-known way of writing C#. There is one: **`microsoft`**,
 the coding style of
 [dotnet/runtime](https://github.com/dotnet/runtime/blob/main/docs/coding-guidelines/coding-style.md), which much of .NET
@@ -27,7 +27,7 @@ Plain `init` suggests the style when your code looks like runtime's (`_` and `s_
 by itself.
 
 To say in the build which style you use when it's the default, set `<StyleBroStyle>stylecop</StyleBroStyle>` (`init
---style stylecop --write` writes it). It changes nothing: the preset already is StyleCop's defaults.
+--style stylecop --write` writes it). It changes nothing: the preset already is that style.
 
 CSharpier isn't a style: it decides who formats the layout, not which conventions the code follows, so it works with
 any style. When the repository uses it (a `.csharpierrc`, the `csharpier` dotnet tool or the CSharpier.MsBuild
@@ -71,7 +71,7 @@ one field per declaration, `Nullable<T>`, empty comments, literal suffixes, anon
 comments before `{`, variable and type parameter names, `m_` prefixes and underscores in field names, tuple element
 casing, trailing commas, unnecessary and precedence parentheses, most blank-line rules (BRO1501-BRO1506, BRO1511,
 BRO1513, BRO1518, BRO1519), single-line blocks and accessor layout (BRO1508-BRO1510), and the documentation rules that
-reword or add text (BRO1601-BRO1607, BRO1610, BRO1611). StyleBro's rules beyond StyleCop (BRO1133-BRO1151, BRO1408,
+reword or add text (BRO1601-BRO1607, BRO1610, BRO1611). The rules that replace no StyleCop rule (BRO1133-BRO1151, BRO1408,
 BRO1410, BRO1520-BRO1527, BRO1616-BRO1619) are off too: runtime says nothing about them. Turn any of them back on in
 `.editorconfig` (`dotnet_diagnostic.BRO1401.severity = warning`).
 

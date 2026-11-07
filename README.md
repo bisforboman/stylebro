@@ -1,17 +1,16 @@
 # StyleBro
 
-Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternative to StyleCop, built so that **`dotnet format` fixes everything it reports**.
+Roslyn analyzers and code fixes that keep C# code tidy, built so that **`dotnet format` fixes everything they report**:
+every rule has a fix, Fix All works, and one run leaves nothing behind. Most StyleCop rules have a StyleBro or SDK
+replacement, and `bro migrate` moves a StyleCop project over without reformatting it.
 
-> StyleCop writes you a ticket. StyleBro just fixes it. Rule IDs use the `BRO` prefix.
+> Every warning comes with its fix. Rule IDs use the `BRO` prefix.
 
 **Documentation:** [bisforboman.github.io/stylebro](https://bisforboman.github.io/stylebro/) (the `docs/` folder as a
 searchable site).
 
 **New here?** [Getting started](https://github.com/bisforboman/stylebro/blob/main/docs/getting-started.md): from install to the first `dotnet format` run, for a new
 project or coming from StyleCop.
-
-**Deciding whether to switch from StyleCop?** [StyleBro vs StyleCop](https://github.com/bisforboman/stylebro/blob/main/docs/stylebro-vs-stylecop.md): coverage, speed,
-correctness and migration, with measured numbers.
 
 ## Principles
 
@@ -35,8 +34,6 @@ default: **[docs/rules](https://github.com/bisforboman/stylebro/blob/main/docs/r
 
 How every StyleCop rule maps to StyleBro or the SDK: [docs/stylecop-mapping.md](https://github.com/bisforboman/stylebro/blob/main/docs/stylecop-mapping.md). The rules
 StyleBro doesn't cover, why, and what it would take to add them: [docs/skipped-rules.md](https://github.com/bisforboman/stylebro/blob/main/docs/skipped-rules.md).
-Where the preset and the rules differ from StyleCop's defaults, and how to get StyleCop's behavior back:
-[docs/differences-from-stylecop.md](https://github.com/bisforboman/stylebro/blob/main/docs/differences-from-stylecop.md).
 
 ## Usage
 

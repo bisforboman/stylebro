@@ -6,7 +6,6 @@ src/StyleBro.Analyzers/AnalyzerReleases.Unshipped.md merge=union
 src/StyleBro.Analyzers/DiagnosticIds.cs merge=union
 src/StyleBro.Package/build/presets/*.globalconfig merge=union
 docs/rules/README.md merge=union
-docs/differences-from-stylecop.md merge=union
 mkdocs.yml merge=union
 scripts/stylecop-survey/*.psd1 merge=union
 scripts/stylecop-survey/data/*.csv merge=union

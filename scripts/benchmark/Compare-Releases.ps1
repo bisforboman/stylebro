@@ -8,7 +8,7 @@
     in Release (unless -Head names a DLL), and runs `scripts/benchmark compare <release> <head> <sources> <runs>` for
     every version, with and without --all-rules, -Repeat times each. `stylecop` as a version compares
     StyleCop.Analyzers 1.2.0-beta.556 (the StyleCop.Analyzers.Unstable 1.2.0.556 package) with the default rules only,
-    as docs/stylebro-vs-stylecop.md did. Each run's output goes to -Work/logs/<version>-<rules>-<n>.txt; the summary
+    as the former docs/stylebro-vs-stylecop.md did. Each run's output goes to -Work/logs/<version>-<rules>-<n>.txt; the summary
     lines (totals) are printed at the end.
 
 .EXAMPLE

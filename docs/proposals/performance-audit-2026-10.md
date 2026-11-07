@@ -42,7 +42,7 @@ same noise, so ratios held better than totals. The tables give every repeat's ra
   (Newtonsoft.Json at the real-world pin `52fa3ae`, 242 files), three times per version and rule set, written by
   `scripts/benchmark/Compare-Releases.ps1` and summarized by `scripts/benchmark/summarize-compare.py`. Releases from
   nuget.org (StyleBro.Analyzers 0.2.0-alpha.1, 0.7.0-alpha.1, 0.8.0-alpha.1; StyleCop.Analyzers.Unstable 1.2.0.556, default
-  rules only, as docs/stylebro-vs-stylecop.md did).
+  rules only, as the former docs/stylebro-vs-stylecop.md did).
 - **Per file**: `scripts/benchmark file`, `--all-rules`, 7 runs, two alternated rounds of main and 0.7.0-alpha.1:
   Newtonsoft.Json's 10 largest files with its netstandard2.0 symbols, Jellyfin's EncodingHelper.cs, BaseItem.cs and
   Folder.cs (MediaBrowser.Controller at the real-world pin `305a964`, without its project references). Scaling: copies

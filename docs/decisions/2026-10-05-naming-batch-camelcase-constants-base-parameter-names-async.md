@@ -2,7 +2,7 @@
 
 ## Question
 
-Three naming candidates from [beyond-stylecop.md](../beyond-stylecop.md): camelCase private constants and static readonly
+Three naming candidates from [beyond-stylecop.md](../notes/rule-candidates.md): camelCase private constants and static readonly
 fields (StyleCop #2641, #3793; tracker #10), a parameter named like the one it overrides or implements (StyleCop's
 proposed SA1315, #1949, the SDK's CA1725 without a fix; tracker #12), and the `Async` suffix on asynchronous methods
 (Roslynator RCS1046, Meziantou MA0137; survey #18). All three are renames, so the rename guards apply, and two of them

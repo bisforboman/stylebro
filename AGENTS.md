@@ -107,8 +107,10 @@ The details are in CONTRIBUTING.md, "What every rule needs".
 3. When a fix could be unsafe, skip the case: no diagnostic rather than a wrong fix.
 4. Configuration goes through `.editorconfig` keys `stylebro_*`, read via `AnalyzerConfigOptionsProvider` in both the
    analyzer and the fix.
-5. Docs and tests: a rule page, its index rows, docs/differences-from-stylecop.md (also every preset value that
-   differs from StyleCop's), unit tests for the single fix and Fix All, a samples/Messy case, a mutation entry per guard.
+5. Docs and tests: a rule page, its index rows, unit tests for the single fix and Fix All, a samples/Messy case, a
+   mutation entry per guard. The docs describe StyleBro, never compare it with StyleCop: a rule page names StyleCop
+   only in its one `Replaces StyleCop **SAxxxx**.` line (test-enforced;
+   docs/decisions/2026-11-07-the-docs-describe-stylebro-not-stylecop.md).
 
 ## Layout
 

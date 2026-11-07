@@ -3,7 +3,7 @@
 ## Question
 
 The sweep of StyleCop's open bug reports (results in
-[differences-from-stylecop.md](../differences-from-stylecop.md#stylecops-open-bugs)) found 8 that StyleBro shares. Five are
+differences-from-stylecop.md (removed 2026-11-07)) found 8 that StyleBro shares. Five are
 plain bugs and were fixed. Three are StyleCop's behavior that its users call a bug: should StyleBro keep matching
 StyleCop there?
 
@@ -21,6 +21,6 @@ For each: change StyleBro (and say so under "Compared with StyleCop"), or keep S
 ## Decision
 
 The owner: #3392 changed, `=>` counts like `{` for BRO1504 (this reverses the earlier rejection of #3550 in
-[beyond-stylecop.md](../beyond-stylecop.md)). #2832 changed too, after seeing code examples: BRO1501 leaves the brace of
+[beyond-stylecop.md](../notes/rule-candidates.md)). #2832 changed too, after seeing code examples: BRO1501 leaves the brace of
 an initializer's entry alone, so blank lines grouping the entries stay (first answer was "keep"). #3568: keep
 StyleCop's behavior (BRO1519 wants the blank line between a case block's `}` and the next label).

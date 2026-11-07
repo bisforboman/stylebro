@@ -20,7 +20,7 @@ Projects in the old format (`<Project ToolsVersion="15.0" ...>` without `Sdk=`, 
   `Microsoft.NETFramework.ReferenceAssemblies.net462` NuGet package (the version your projects target) and point
   MSBuild at it with an environment variable, which reaches both `msbuild` and `dotnet format`:
   `set TargetFrameworkRootPath=%NUGET_PACKAGES%\microsoft.netframework.referenceassemblies.net462\1.0.3\build`.
-- **Install StyleBro.Analyzers the packages.config way**, like StyleCop was: Visual Studio's package manager
+- **Install StyleBro.Analyzers the packages.config way**: Visual Studio's package manager
   (or `Install-Package StyleBro.Analyzers` in its console) writes all three parts, or add them by hand. In
   `packages.config`:
 

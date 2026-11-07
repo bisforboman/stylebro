@@ -1,13 +1,12 @@
 # Rules
 
 Every StyleBro rule, by area. Each one has a code fix that `dotnet format` applies (Fix All included), and each page
-has an example, the reasons, the configuration and how it differs from StyleCop.
+has an example, the reasons, the configuration and what it leaves alone.
 
 **Default**: *on* means the rule reports as a warning with the package's preset; *off* rules are opt-in
 (`dotnet_diagnostic.BROxxxx.severity = warning` in `.editorconfig`). `bro migrate` sets each rule from your
-StyleCop setup instead, and turns off the rules StyleCop doesn't have.
+StyleCop setup instead, and turns off the rules that replace no StyleCop rule.
 
-Where the rules and the preset differ from StyleCop: [differences-from-stylecop.md](../differences-from-stylecop.md).
 How every StyleCop rule maps to StyleBro or the SDK: [stylecop-mapping.md](../stylecop-mapping.md), and the ones
 StyleBro leaves out: [skipped-rules.md](../skipped-rules.md).
 
@@ -74,10 +73,10 @@ counts.
 | [BRO1131](BRO1131.md) | Do not prefix calls with base unless local implementation exists | SA1100 | on |
 | [BRO1132](BRO1132.md) | Block statements should not contain embedded comments | SA1108 | on |
 | [BRO1133](BRO1133.md) | Check for null in one form | (none; Roslynator RCS1248) | on |
-| [BRO1134](BRO1134.md) | Declarations should not contain embedded comments | (none; StyleCop issue #605) | on |
+| [BRO1134](BRO1134.md) | Declarations should not contain embedded comments | (none) | on |
 | [BRO1135](BRO1135.md) | Integer literal suffixes should be upper case | (none; Sonar S818) | on |
-| [BRO1136](BRO1136.md) | A lambda's single parameter should not be in parentheses | (none; StyleCop issue #762) | on |
-| [BRO1137](BRO1137.md) | Remove a redundant 'return;' or 'yield break;' | (none; StyleCop issue #760, Roslynator RCS1134) | on |
+| [BRO1136](BRO1136.md) | A lambda's single parameter should not be in parentheses | (none) | on |
+| [BRO1137](BRO1137.md) | Remove a redundant 'return;' or 'yield break;' | (none; Roslynator RCS1134) | on |
 | [BRO1138](BRO1138.md) | A string literal should be a plain string when nothing needs more | (none; Roslynator RCS1214/RCS1192/RCS1262) | on |
 | [BRO1139](BRO1139.md) | Write 'else if' on one line | (none; Roslynator RCS0041/RCS1006) | on |
 | [BRO1140](BRO1140.md) | A record with an empty body should end with ';' | (none; Roslynator RCS1251) | on |
@@ -124,7 +123,7 @@ counts.
 | [BRO1406](BRO1406.md) | Arithmetic expressions should declare precedence | SA1407 | on |
 | [BRO1407](BRO1407.md) | Conditional expressions should declare precedence | SA1408 | on |
 | [BRO1408](BRO1408.md) | Remove a redundant base type | (none; Roslynator RCS1042) | on |
-| [BRO1409](BRO1409.md) | Methods of internal types should be internal, not public | (none; StyleCop issue #2981, never implemented) | off |
+| [BRO1409](BRO1409.md) | Methods of internal types should be internal, not public | (none) | off |
 | [BRO1410](BRO1410.md) | Patterns should not use unnecessary parentheses | (none; SA1119 checks expressions only) | on |
 
 ## Layout
@@ -154,7 +153,7 @@ counts.
 | [BRO1521](BRO1521.md) | Place '=>' consistently when an expression body wraps | (none; Roslynator RCS0032) | on |
 | [BRO1522](BRO1522.md) | Place '=' consistently when an assignment wraps | (none; Roslynator RCS0052) | on |
 | [BRO1523](BRO1523.md) | Each call of a split call chain starts its own line | (none; Roslynator RCS0054) | on |
-| [BRO1524](BRO1524.md) | A split conditional expression has the condition, '?' and ':' parts on their own lines | (none; StyleCop issue #651) | on |
+| [BRO1524](BRO1524.md) | A split conditional expression has the condition, '?' and ':' parts on their own lines | (none) | on |
 | [BRO1525](BRO1525.md) | Attributes should not be followed by a blank line | (none; SA1521 proposed, never implemented) | on |
 | [BRO1526](BRO1526.md) | Blank line between switch sections | (none; Roslynator RCS0061) | on |
 | [BRO1527](BRO1527.md) | Auto-accessors should be on one line | (none; Roslynator RCS0042) | on |
@@ -179,6 +178,6 @@ counts.
 | [BRO1614](BRO1614.md) | Generic type parameter documentation should declare parameter name | SA1621 | on |
 | [BRO1615](BRO1615.md) | File should have the XML copyright header (needs `stylebro_file_header_company`) | SA1633-SA1638, SA1640, SA1641 | on |
 | [BRO1616](BRO1616.md) | Write the summary's tags consistently on their own lines or on the text's line | (none; Roslynator RCS1253, Meziantou MA0177/MA0211) | on |
-| [BRO1617](BRO1617.md) | Write a cref's type arguments in braces | (none; StyleCop's proposed SA1653) | on |
+| [BRO1617](BRO1617.md) | Write a cref's type arguments in braces | SA1653 | on |
 | [BRO1618](BRO1618.md) | Write a C# keyword in documentation as `<see langword="..."/>` | (none; Meziantou MA0154) | on |
 | [BRO1619](BRO1619.md) | Put the documentation elements in the standard order | (none) | on |

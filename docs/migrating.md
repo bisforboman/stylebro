@@ -1,9 +1,8 @@
 # Migrating from StyleCop
 
-Switching a StyleCop-clean repository to StyleBro shouldn't reformat code StyleCop was happy with. StyleBro's preset
-follows StyleCop's defaults with a few deliberate exceptions ([differences-from-stylecop.md](differences-from-stylecop.md)),
-but most teams have changed some of StyleCop's defaults anyway. `bro migrate` reads what your team changed
-and writes the matching settings.
+Switching a StyleCop-clean repository to StyleBro shouldn't reformat code StyleCop was happy with. `bro migrate` reads
+the repository's StyleCop setup, including what your team changed, and writes StyleBro and SDK settings that turn on the
+replacing rules only where their StyleCop rules were on.
 
 ```
 dotnet tool install --global StyleBro.Tool --prerelease
@@ -245,7 +244,7 @@ tool again replaces the block, so put your own settings outside it.
   become [BRO1601](rules/BRO1601.md)'s `stylebro_document_*` settings.
 - **Documentation language and punctuation.** A `documentationCulture` other than English (`de-DE`, `fr-FR`; any
   `en-*` counts as English) turns off [BRO1604](rules/BRO1604.md)-[BRO1607](rules/BRO1607.md), which write English
-  summary sentences (StyleCop checks translated ones); the report says so. `excludeFromPunctuationCheck`, when it
+  summary sentences; the report says so. `excludeFromPunctuationCheck`, when it
   differs from StyleCop's default (`["seealso"]`), becomes [BRO1603](rules/BRO1603.md)'s
   `stylebro_exclude_from_punctuation_check`.
 
@@ -481,7 +480,7 @@ for that folder with `stylebro_keep_overloads_together = false`, and BRO1001 sta
 
 ## Modernizing afterwards
 
-StyleCop has no rules for newer C# or APIs, so the migration turns none on. To add the SDK's modernization rules
+The migration turns on no rules for newer C# or APIs. To add the SDK's modernization rules
 (their own block, kept when you run `bro migrate --write` again): `bro init --modernize --write`,
 see [modernizing.md](modernizing.md).
 

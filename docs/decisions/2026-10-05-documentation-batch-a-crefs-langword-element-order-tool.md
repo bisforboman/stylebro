@@ -2,7 +2,7 @@
 
 ## Question
 
-Four candidates from [beyond-stylecop.md](../beyond-stylecop.md) (StyleCop issues #758 and #3546/#1490, Meziantou
+Four candidates from [beyond-stylecop.md](../notes/rule-candidates.md) (StyleCop issues #758 and #3546/#1490, Meziantou
 MA0154, survey #15): should they be built, on by default, and what does `stylebro-migrate` do with them?
 
 ## Choices

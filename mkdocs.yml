@@ -9,7 +9,6 @@ docs_dir: docs
 # Internal pages (plans, decisions, proposals) stay on GitHub only.
 exclude_docs: |
   backlog.md
-  beyond-stylecop.md
   decisions.md
   decisions/
   notes/
@@ -219,8 +218,6 @@ nav:
       - Scripts and AI agents: agents.md
       - Modernizing: modernizing.md
       - Versioning: versioning.md
-  - StyleCop:
-      - StyleBro vs StyleCop: stylebro-vs-stylecop.md
-      - Differences from StyleCop: differences-from-stylecop.md
-      - StyleCop mapping: stylecop-mapping.md
-      - Skipped rules: skipped-rules.md
+  - StyleCop rules:
+      - StyleCop rule mapping: stylecop-mapping.md
+      - StyleCop rules not covered: skipped-rules.md

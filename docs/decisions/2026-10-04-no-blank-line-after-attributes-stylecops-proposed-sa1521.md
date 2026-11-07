@@ -2,7 +2,7 @@
 
 ## Question
 
-BRO1525 ([beyond-stylecop.md](../beyond-stylecop.md#from-stylecops-issue-tracker) #2): StyleCop's issue #738 proposed SA1521,
+BRO1525 ([beyond-stylecop.md](../notes/rule-candidates.md#from-stylecops-issue-tracker) #2): StyleCop's issue #738 proposed SA1521,
 "attributes defined for type or member should never be followed by blank line", and never implemented it (no
 documentation page, no analyzer). Which gaps count (before the element only, or also between two attribute lists of
 one element), what about comments in the gap, and does it conflict with BRO1505 (elements separated by a blank line)?

@@ -2,7 +2,7 @@
 
 ## Question
 
-[beyond-stylecop.md](../beyond-stylecop.md) #4: when a call chain is split over several lines, every call starts its own
+[beyond-stylecop.md](../notes/rule-candidates.md) #4: when a call chain is split over several lines, every call starts its own
 line. Which chains count, what may stay on the chain's first line, what is a "call", and which indentation do new lines
 get?
 

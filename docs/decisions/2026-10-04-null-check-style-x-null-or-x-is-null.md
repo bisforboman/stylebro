@@ -2,7 +2,7 @@
 
 ## Question
 
-[BRO1133](../rules/BRO1133.md) ([beyond-stylecop.md](../beyond-stylecop.md) #3, Roslynator RCS1248) writes null checks in one
+[BRO1133](../rules/BRO1133.md) ([beyond-stylecop.md](../notes/rule-candidates.md) #3, Roslynator RCS1248) writes null checks in one
 form. Which form by default, and what about `null == x`?
 
 Facts: the SDK has no rule or option for it. `dotnet_style_prefer_is_null_check_over_reference_equality_method` only

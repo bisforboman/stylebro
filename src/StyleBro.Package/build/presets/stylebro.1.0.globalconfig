@@ -1,7 +1,7 @@
 is_global = true
 global_level = -2
 
-# Follows StyleCop's defaults except where docs/differences-from-stylecop.md says otherwise (test-enforced).
+# The 'stylecop' style (docs/styles.md). bro migrate writes a repository's own StyleCop settings over it.
 
 # ---------------------------------------------------------------------------
 # StyleBro rules
@@ -430,7 +430,7 @@ dotnet_style_qualification_for_property = false
 dotnet_style_qualification_for_method = false
 dotnet_style_qualification_for_event = false
 
-# Not set on purpose (see docs/differences-from-stylecop.md):
+# Not set on purpose:
 # - File headers: BRO1615 above needs your company name; for a plain header instead, set file_header_template in
 #   your .editorconfig and IDE0073 to warning.
 # - Naming (IDE1006): StyleBro's BRO13xx rules cover it, and IDE1006 has no Fix All for 'dotnet format'.

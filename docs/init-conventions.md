@@ -124,8 +124,8 @@ A few settings work a little differently:
   or type parameters): in one list (`[A, B]`) or one per list. Mostly one per list: the rule stays on; mostly combined or
   mixed: it's turned off, so `format` doesn't split them.
 - **Summary wording** ([BRO1604](rules/BRO1604.md) for properties, [BRO1606](rules/BRO1606.md) for constructors) counts
-  summaries that start the StyleCop way (`Gets ...`, `Gets or sets ...`; `Initializes a new instance of ...`) against
-  ones in their own words (`The samples, ...`, `Whether ...`; `Opens a file ...`). Mostly the StyleCop way: the rule
+  summaries that start the `stylecop` way (`Gets ...`, `Gets or sets ...`; `Initializes a new instance of ...`) against
+  ones in their own words (`The samples, ...`, `Whether ...`; `Opens a file ...`). Mostly the `stylecop` way: the rule
   stays on; mostly their own words or mixed: it's turned off, so `format` doesn't reword public documentation. A summary
   that starts with an element (`<see cref="..."/>`) isn't counted.
 - **CSharpier**: when the repository uses [CSharpier](https://csharpier.com) (a `.csharpierrc`, `.csharpierrc.json`,

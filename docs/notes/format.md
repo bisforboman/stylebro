@@ -138,7 +138,7 @@ The `bro format` investigation (per-framework runs, convergence, speed on large 
     `Touched` files), their own checks found nothing there. The host loads the instance the build uses. Owner: a documented
     difference of the fallback engine (docs/decisions/2026-10-25-the-old-engines-loose-load-of-a-referenced-project-stays-a.md).
 
-- **Tracker bugs** (2026-10-04, docs/beyond-stylecop.md "Possible bugs to check", all fixed): BRO1504 treats a
+- **Tracker bugs** (2026-10-04, docs/notes/rule-candidates.md "Possible bugs to check", all fixed): BRO1504 treats a
   collection expression's `[` like `{` (StyleCop #3766); BRO1603 accepts a period before closing `)`/`]`/`"`/`'`
   (#2860), puts the period after a trailing entity (`&gt;.`), and skips `stylebro_exclude_from_punctuation_check` tags
   (StyleCop's excludeFromPunctuationCheck, default `seealso`; never checked anyway); BRO1606 judges a summary that

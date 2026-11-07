@@ -2,7 +2,7 @@
 
 ## Question
 
-StyleCop issue #605 ([beyond-stylecop.md](../beyond-stylecop.md#from-stylecops-issue-tracker) #4) proposes SA1108's check
+StyleCop issue #605 ([beyond-stylecop.md](../notes/rule-candidates.md#from-stylecops-issue-tracker) #4) proposes SA1108's check
 for declarations: no comment between a class's, namespace's, member's or accessor's header and its `{`. Extend BRO1132
 (same id) or a new rule, and which declarations?
 

@@ -47,7 +47,7 @@ python -m venv .venv
 
 A new page needs an entry in `nav` in `mkdocs.yml` (a new rule page under its area, in the order of
 `docs/rules/README.md`; `DocExamplesTests` checks that). Links that leave `docs/`, or point to the internal pages the
-site leaves out (`decisions.md`, `decisions/`, `backlog.md`, `beyond-stylecop.md`, `proposals/`), are absolute GitHub links.
+site leaves out (`decisions.md`, `decisions/`, `backlog.md`, `notes/`, `proposals/`), are absolute GitHub links.
 
 ## What every rule needs
 
@@ -63,9 +63,10 @@ site leaves out (`decisions.md`, `decisions/`, `backlog.md`, `beyond-stylecop.md
   directives).
 - **Configuration through `.editorconfig`**, with keys prefixed `stylebro_`.
 - **Docs and tests:** a `docs/rules/BROxxxx.md` page (Example with Before/After, Why, then as needed How the fix works,
-  Configuration, Not reported, Compared with StyleCop), a row in `docs/rules/README.md` and
-  `AnalyzerReleases.Unshipped.md`, an entry in `docs/differences-from-stylecop.md`, unit tests for the single fix and
-  Fix All, and a case in `samples/Messy`. `DocExamplesTests` runs every rule page's example.
+  Configuration, Not reported), a row in `docs/rules/README.md` and `AnalyzerReleases.Unshipped.md`, unit tests for
+  the single fix and Fix All, and a case in `samples/Messy`. The page describes StyleBro only: StyleCop appears once,
+  in the intro's `Replaces StyleCop **SAxxxx**.` line naming the SA ids of the rule's description (none for a rule
+  that replaces no StyleCop rule); `MigrationTests` checks it. `DocExamplesTests` runs every rule page's example.
 - **A mutation entry for every guard**, one file per entry: `scripts/mutation/entries/<Area>/<file>-<hash>.psd1`. Write
   it with `scripts/mutation/New-Mutation.ps1 -File <path> -Find <text> -Replace <text> -Tests <filter> [-Comment <text>]`,
   which picks the folder (the guarded file's source folder: `Readability/` for `src/StyleBro.Analyzers/Readability/` and
@@ -121,7 +122,7 @@ rule report more; settings and rule ids are kept). Vulnerabilities: [SECURITY.md
 
 Lists that every pull request adds to are one file per entry (decisions, backlog items, mutation entries), so parallel
 pull requests don't touch the same file. The lists whose format is fixed (`AnalyzerReleases.Unshipped.md`,
-`DiagnosticIds.cs`, the preset, `docs/rules/README.md`, `docs/differences-from-stylecop.md`, `mkdocs.yml`, the StyleCop
+`DiagnosticIds.cs`, the preset, `docs/rules/README.md`, `mkdocs.yml`, the StyleCop
 survey data) are `merge=union` in `.gitattributes`: a local `git merge origin/main` keeps both sides' new lines. GitHub's
 own merge ignores that, so when a pull request shows a conflict, merge `main` locally and check the result for doubled
 lines. Keep `AnalyzerReleases.Unshipped.md`'s `### New Rules` table even when it's empty, and rows there and in

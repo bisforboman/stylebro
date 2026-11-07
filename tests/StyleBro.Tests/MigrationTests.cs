@@ -306,14 +306,33 @@ public sealed partial class MigrationTests : IDisposable
 
         Assert.NotEmpty(rules);
         Assert.Equal(["SA1201", "SA1202", "SA1203", "SA1204", "SA1214"], rules.Single(r => r.Id == "BRO1001").StyleCop);
+    }
 
-        // A rule without a StyleCop rule is one beyond StyleCop: listed as such on the differences page.
-        var page = File.ReadAllText(Path.Combine(RepositoryRoot(), "docs", "differences-from-stylecop.md"));
-        var beyond = page.Substring(page.IndexOf("## Rules beyond StyleCop", StringComparison.Ordinal));
-        beyond = beyond.Substring(0, beyond.IndexOf("\n## ", 1, StringComparison.Ordinal) is var end and > 0 ? end : beyond.Length);
-        Assert.All(rules.Where(r => r.StyleCop.Count == 0), r => Assert.True(
-            beyond.Contains($"[{r.Id}](rules/{r.Id}.md)", StringComparison.Ordinal),
-            $"{r.Id} names no StyleCop rule it replaces; add 'Replaces StyleCop SAxxxx' to its description or list it under 'Rules beyond StyleCop'."));
+    [Fact]
+    public void EveryRulePage_NamesTheSameStyleCopRules_AndComparesWithNothing()
+    {
+        // The docs describe StyleBro, not StyleCop (docs/decisions/2026-11-07-the-docs-describe-stylebro-not-stylecop.md):
+        // a rule page names StyleCop only on its 'Replaces StyleCop' line, with the SA IDs that bro migrate reads from
+        // the rule's description.
+        var ids = new System.Text.RegularExpressions.Regex(@"SA(\d{4})(?:-SA(\d{4}))?");
+        Assert.All(Migration.StyleBroRules(), rule =>
+        {
+            var lines = File.ReadAllLines(Path.Combine(RepositoryRoot(), "docs", "rules", rule.Id + ".md"));
+            var replaces = lines.Where(l => l.Contains("Replaces StyleCop", StringComparison.Ordinal)).ToList();
+            var named = replaces.SelectMany(l => ids.Matches(l))
+                .SelectMany(m => Enumerable.Range(int.Parse(m.Groups[1].Value), (m.Groups[2].Success ? int.Parse(m.Groups[2].Value) : int.Parse(m.Groups[1].Value)) - int.Parse(m.Groups[1].Value) + 1))
+                .Select(n => "SA" + n)
+                .Distinct()
+                .Order(StringComparer.Ordinal);
+
+            Assert.True(replaces.Count <= 1, $"docs/rules/{rule.Id}.md has {replaces.Count} 'Replaces StyleCop' lines; keep one.");
+            Assert.True(
+                named.SequenceEqual(rule.StyleCop.Distinct().Order(StringComparer.Ordinal)),
+                $"docs/rules/{rule.Id}.md names [{string.Join(", ", named)}] after 'Replaces StyleCop', its description [{string.Join(", ", rule.StyleCop)}].");
+            Assert.All(lines.Except(replaces), l => Assert.False(
+                l.Contains("StyleCop", StringComparison.Ordinal),
+                $"docs/rules/{rule.Id}.md compares with StyleCop: '{l}'. Describe StyleBro's behaviour on its own."));
+        });
     }
 
     [Fact]
@@ -527,35 +546,6 @@ public sealed partial class MigrationTests : IDisposable
 
         Assert.Contains("IDE0073", ids);
         Assert.All(ids, id => Assert.Contains(id, StyleBro.Analyzers.Baseline.BaselineSuppressor.SdkIds));
-    }
-
-    [Fact]
-    public void EveryPresetDifferenceFromStyleCop_IsDocumented()
-    {
-        // What StyleCop's defaults translate to (a repository without StyleCop settings that generates docs) ...
-        Write("Directory.Build.props", "<Project><PropertyGroup><GenerateDocumentationFile>true</GenerateDocumentationFile></PropertyGroup></Project>");
-        var styleCop = KeyValues(Migration.Generate(StyleCopSetup.Read(root), root).Lines);
-
-        // ... against the preset: every key the preset sets differently must be named in docs/differences-from-stylecop.md.
-        var preset = KeyValues(Presets.AllLines());
-        var page = File.ReadAllText(Path.Combine(RepositoryRoot(), "docs", "differences-from-stylecop.md"));
-        var different = preset.Where(p => p.Key is not "is_global" and not "global_level"
-            && styleCop.TryGetValue(p.Key, out var value) && value != p.Value).Select(p => p.Key).ToList();
-
-        Assert.NotEmpty(different);
-        Assert.All(different, key => Assert.True(
-            page.Contains(key, StringComparison.Ordinal) || page.Contains(key[..key.LastIndexOf('_')] + "_*", StringComparison.Ordinal),
-            $"The preset sets {key} = {preset[key]} (StyleCop's defaults: {styleCop[key]}); explain it in docs/differences-from-stylecop.md."));
-    }
-
-    [Fact]
-    public void EveryRule_IsInTheDifferencesPage()
-    {
-        var page = File.ReadAllText(Path.Combine(RepositoryRoot(), "docs", "differences-from-stylecop.md"));
-
-        Assert.All(Migration.StyleBroRules(), rule => Assert.True(
-            page.Contains($"[{rule.Id}](rules/{rule.Id}.md)", StringComparison.Ordinal),
-            $"{rule.Id} is missing from docs/differences-from-stylecop.md (list it under 'Same as StyleCop' if nothing differs)."));
     }
 
     [Fact]
@@ -1652,18 +1642,6 @@ public sealed partial class MigrationTests : IDisposable
         }
 
         return writer.ToString();
-    }
-
-    private static Dictionary<string, string> KeyValues(IEnumerable<string> lines)
-    {
-        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var line in lines.Select(l => l.Trim()).Where(l => l.Contains('=') && !l.StartsWith('#') && !l.StartsWith('[')))
-        {
-            var equals = line.IndexOf('=');
-            result[line[..equals].Trim()] = line[(equals + 1)..].Split('#')[0].Trim();
-        }
-
-        return result;
     }
 
     private static string RepositoryRoot()

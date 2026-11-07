@@ -3,7 +3,7 @@
 ## Question
 
 Which of these candidates (StyleCop issues #762 and #760, and survey #7, #8, #10, #12, #13 and #14 in
-[beyond-stylecop.md](../beyond-stylecop.md)) should StyleBro build, and how should they be configured: `(x) => x`,
+[beyond-stylecop.md](../notes/rule-candidates.md)) should StyleBro build, and how should they be configured: `(x) => x`,
 redundant `return;`/`yield break;`, unneeded `$`/`@`/raw strings, `else if`, empty record bodies, object creation
 parentheses, one local per declaration, redundant base types?
 
