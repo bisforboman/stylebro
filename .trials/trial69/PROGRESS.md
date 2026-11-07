@@ -1,3 +1,4 @@
 - feed 0.8.0-trial69.1 at /root/stylebro-trial69/feed (main 5aa09f5), bro installed
 - Picks (logs/picks.md, owner chose Arch): azure-cost-cli, dotliquid, NModbus, Arch. All Debug builds pass.
 - azure-cost-cli r1 (preview, init, ref in root Directory.Build.props): preview 52s (70 files, clean after 1 run) = format 42s (70 files), format2 0, check 0, json 0, check --build 3 (untouched TWAE build has 342 errors; Tests didn't compile: honest Not verified). IDE0049 held back (SDK 10.0.114 note).
+- dotliquid: SonarAnalyzer 5.11 (Sonar setup read, 8 rules handed over), TWAE in lib, .gitattributes '*.cs text=crlf' (invalid value; 107 CRLF + 39 LF .cs in the index), .editorconfig crlf/utf-8/insert_final_newline=false: init's notes about BOMs, final newlines and LF files are right. preview exit 3 (70s, 112 files): netstandard1.3 and netcoreapp1.0 don't load (known, RestEase trial 67).
