@@ -3,6 +3,11 @@
 What changes when a project moves from StyleCop.Analyzers with its default settings to StyleBro with its preset. Each
 difference is deliberate; this page says why, and how to get StyleCop's behavior back where that's possible.
 
+Which StyleCop: the rule-by-rule comparison (and the parity sets behind it) is written against 1.2.0-beta.556, the
+release most repositories still use. [Changed in StyleCop 1.3](#changed-in-stylecop-13) lists what 1.3.177-beta (the
+newest release, 2026-11-06) does differently, measured 2026-11-07, and the fixes table below says where 1.3's fixes
+behave differently under `dotnet format`.
+
 Teams that changed StyleCop's settings don't need the preset: `bro migrate` writes settings that match theirs
 ([migrating.md](migrating.md)). Rules StyleBro doesn't cover at all are in [skipped-rules.md](skipped-rules.md).
 
@@ -117,7 +122,7 @@ under "Compared with StyleCop". Two things differ for every rule:
 | [BRO1310](rules/BRO1310.md) (SA1305) | Parameters of `extern`, `[DllImport]` and `[LibraryImport]` methods | They keep the native API's names, like BRO1309 leaves the methods alone (StyleCop bug [#2859](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2859), open). |
 | [BRO1002](rules/BRO1002.md) (SA1005) | `dotnet new` template markers `//-:` and `//+:` | A space breaks them (StyleCop bug [#2689](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2689), open). |
 | [BRO1510](rules/BRO1510.md) (SA1504) | One-line accessors where one has an attribute on its own line above it | The attribute isn't part of the accessor's layout; StyleCop counts its line ([#3434](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3434)). |
-| [BRO1601](rules/BRO1601.md) (SA1600) | Everything except overrides and implicit interface implementations | See "Missing documentation" above; explicit implementations like StyleCop's `master`. |
+| [BRO1601](rules/BRO1601.md) (SA1600) | Everything except overrides and implicit interface implementations | See "Missing documentation" above; explicit implementations aren't reported, like StyleCop 1.3. |
 | [BRO1603](rules/BRO1603.md) (SA1629) | Text ending with `?`, `!` or `:`; a period followed by a closing quote or bracket (`"done."`) | Already ends a sentence; StyleCop's fix writes `question?.` and `"done.".`. |
 | [BRO1603](rules/BRO1603.md) (SA1629) | Text whose last word is code: a bracket, brace, `=`, `;`, `:`, slash, `|`, `$`, `#`, `_` or backtick in it (`digraph {`, `Example: A1:B10`, a URL), or a word after an operator (`=> 0`) | A period reads as part of the code; StyleCop's fix writes `digraph {.` (found in Stateless and spreadcheetah). |
 | [BRO1603](rules/BRO1603.md) (SA1629) | Text ending with `,` or `;` (`1033 => "en",`, `value;`) | Code or a list that goes on; a period there gives `"en",.`. |
@@ -161,35 +166,39 @@ under "Compared with StyleCop". Two things differ for every rule:
 
 ### Same reports, different fix
 
+StyleCop's fixes as `dotnet format` applies them (`dotnet format analyzers --diagnostics <id>`, up to three runs, LF
+files), measured 2026-11-07 on one case per row with 1.2.0-beta.556 and 1.3.177-beta. The StyleCop column holds for
+both unless it names one.
+
 | Rule | StyleCop's fix | StyleBro's fix |
 |---|---|---|
-| [BRO1311](rules/BRO1311.md) (SA1316) | Renames the declaration only: every use (`t.count`) and override then breaks the build | Renames every tuple type element with the name, the literals converted to them and every use, in the whole solution; a rename that wouldn't compile is skipped and the warning stays |
+| [BRO1311](rules/BRO1311.md) (SA1316) | No Fix All, so under `dotnet format` nothing is renamed | Renames every tuple type element with the name, the literals converted to them and every use, in the whole solution; a rename that wouldn't compile is skipped and the warning stays |
 | [BRO1603](rules/BRO1603.md) (SA1629) | Text ending with an HTML inline element (`<b>`, `<i>`, `<em>`, `<a>`, ...): StyleCop passes over it and puts the period after the text before it | The period after the element, like after `<c>` or `<see/>`. Other unknown elements (a tool's `<devremarks>`) are passed over like StyleCop. |
-| [BRO1002](rules/BRO1002.md) (SA1005) | `// ` with a trailing space for an empty comment; tabs after `//` become one space | `//`; keeps the tabs (`// ` + the tabs: commented-out code indented with tabs keeps its layout) |
+| [BRO1002](rules/BRO1002.md) (SA1005) | Tabs after `//` become one space (an empty `//` isn't reported) | Keeps the tabs (`// ` + the tabs: commented-out code indented with tabs keeps its layout) |
 | [BRO1104](rules/BRO1104.md) (SA1129) | `default(T)` | `default(T)` too, unless the SDK's `csharp_prefer_simple_default_expression = true` is set: then the `default` literal where it binds the same (IDE0034 then has nothing left to simplify) |
-| [BRO1108](rules/BRO1108.md) (SA1117) | None that works | Each item on its own line |
+| [BRO1108](rules/BRO1108.md) (SA1117) | 1.2: none. 1.3: each item on its own line, like StyleBro | Each item on its own line |
 | [BRO1132](rules/BRO1132.md) (SA1108) | None | Moves the comment into the block, on its own line right after `{` |
-| [BRO1301](rules/BRO1301.md)-[BRO1309](rules/BRO1309.md) (naming) | Lowers/removes only the first letter or prefix, can't fix `_name`, under `dotnet format` applies part of the renames per run or nothing; `MAX_VALUE` -> `MAXVALUE`, `m_Upper` -> `Upper` | The complete correct name in one pass (`MaxValue`), with overrides, implementations, named arguments and docs |
-| [BRO1401](rules/BRO1401.md) (SA1413) | `"beta",}` (no space), nested lists need a second run | `"beta", }`, nested lists in one pass |
+| [BRO1301](rules/BRO1301.md)-[BRO1309](rules/BRO1309.md) (naming) | Lowers/removes only the first letter or prefix (`MAX_VALUE` -> `MAXVALUE`, `m_Upper` -> `Upper`); an implementing method's parameter needs a second run; SA1302 and SA1314 have no Fix All (nothing changes). 1.2 renames `_count` next to a `count` property anyway (CS0102); 1.3 doesn't fix it, and which other renames land in a run depends on the order | The complete correct name in one pass (`MaxValue`), with overrides, implementations, named arguments and docs |
+| [BRO1401](rules/BRO1401.md) (SA1413) | 1.2: nested lists need up to three runs. 1.3: one run, like StyleBro | `"beta", }`, nested lists in one pass |
 | [BRO1505](rules/BRO1505.md) (SA1516) | Misses the blank line above a `///` comment; splits two members on a line without indentation | Inserts above the doc comment; indents |
-| [BRO1508](rules/BRO1508.md), [BRO1509](rules/BRO1509.md) (SA1501, SA1502) | Writes `{` at column 1 in nested blocks, leaves accessors and nested declarations side by side, moves `while` of `do ... while` to its own line, writes CRLF into `\n` files | Indents from `.editorconfig`, one item per line, adds the blank lines BRO1505 wants, keeps `} while (x);` and the file's line endings, respects `csharp_new_line_before_open_brace`/`_else`/`_catch`/`_finally` |
-| [BRO1510](rules/BRO1510.md) (SA1504) | Under `dotnet format`, collapses or expands the accessors of every property in the project the same way, whichever the first diagnostic offers; deletes comments in a body it collapses | Collapses one-statement bodies or expands, per property; never collapses a body with a comment; adds the blank line BRO1505 wants |
+| [BRO1508](rules/BRO1508.md), [BRO1509](rules/BRO1509.md) (SA1501, SA1502) | Writes `{` at column 1 in a block nested in an `if` or a lambda, leaves nested accessors side by side until the next run, moves `while` of `do ... while` to its own line. 1.2 also writes CRLF into `\n` files (1.3 keeps the file's line endings) | Indents from `.editorconfig`, one item per line, adds the blank lines BRO1505 wants, keeps `} while (x);` and the file's line endings, respects `csharp_new_line_before_open_brace`/`_else`/`_catch`/`_finally` |
+| [BRO1510](rules/BRO1510.md) (SA1504) | Under `dotnet format`, collapses or expands the accessors of every property in the project the same way, and which way differs from run to run; 1.2 deletes a `//` comment in a body it expands | Collapses one-statement bodies or expands, per property; never collapses a body with a comment; adds the blank line BRO1505 wants |
 | [BRO1604](rules/BRO1604.md) (SA1623) | `a value indicating whether whether ...` | Keeps the existing "whether" |
 | [BRO1606](rules/BRO1606.md), [BRO1607](rules/BRO1607.md) (SA1642, SA1643) | `class.Opens a connection` (no space) | `class. Opens a connection` |
-| [BRO1114](rules/BRO1114.md) (SA1132) | Keeps the attributes on the first field only, so the others lose them (`[Obsolete]` disappears from the second field) | Copies the attributes and the documentation comment to every field; blank line between event fields |
+| [BRO1114](rules/BRO1114.md) (SA1132) | Copies the attributes and the documentation comment to every field (until 2026-11-07 this page said it kept them on the first field only; that didn't reproduce on 1.2 or 1.3) | The same; a blank line between event fields |
 | [BRO1115](rules/BRO1115.md) (SA1125) | None | `int?` for `Nullable<int>`, nested ones in one pass |
 | [BRO1402](rules/BRO1402.md) (SA1411) | `[Obsolete ]` for `[Obsolete( )]` | `[Obsolete]` |
-| [BRO1118](rules/BRO1118.md), [BRO1119](rules/BRO1119.md) (SA1114, SA1115) | None | Removes the blank lines |
+| [BRO1118](rules/BRO1118.md), [BRO1119](rules/BRO1119.md) (SA1114, SA1115) | 1.2: none. 1.3: removes the blank lines, like StyleBro | Removes the blank lines |
 | [BRO1120](rules/BRO1120.md) (SA1120) | Removes only the reported empty comment; the next one at the same end is reported on the next run | Removes every empty comment at that end of the group |
 | [BRO1121](rules/BRO1121.md) (SA1136) | For an enum on one line, leaves `{ A,` and `C }` on the brace lines | Expands the enum like BRO1509 |
-| [BRO1610](rules/BRO1610.md), [BRO1611](rules/BRO1611.md) (SA1627, SA1612) | None | Removes the empty `<remarks>`; renames, removes and reorders `<param>` tags |
+| [BRO1610](rules/BRO1610.md), [BRO1611](rules/BRO1611.md) (SA1627, SA1612) | SA1627: none. SA1612: 1.2 none; 1.3 renames, removes and reorders `<param>` tags, but a renamed tag loses its text (`<param name="y"></param>`) | Removes the empty `<remarks>`; renames, removes and reorders `<param>` tags, keeping their text |
 | [BRO1612](rules/BRO1612.md), [BRO1613](rules/BRO1613.md), [BRO1614](rules/BRO1614.md) (SA1613, SA1620, SA1621) | None | Names unnamed tags when certain; renames, removes and reorders `<typeparam>` tags |
 | [BRO1112](rules/BRO1112.md) (SA1124) | Removes a region between switch-expression arms with the blank lines around it | Keeps one blank line where it was |
-| [BRO1615](rules/BRO1615.md) (SA1633-SA1641) | Deletes a plain comment header (license text, notes) when it writes the XML header | Keeps any other comment below the new header; otherwise the same headers |
-| [BRO1123](rules/BRO1123.md), [BRO1124](rules/BRO1124.md) (SA1141, SA1142) | None under `dotnet format` (SA1141's has no Fix All, SA1142's throws) | Tuple syntax and element names |
+| [BRO1615](rules/BRO1615.md) (SA1633-SA1641) | Replaces a plain comment header (license text, notes) with the XML header | Keeps any other comment below the new header; otherwise the same headers |
+| [BRO1123](rules/BRO1123.md), [BRO1124](rules/BRO1124.md) (SA1141, SA1142) | SA1141: no Fix All, so nothing changes under `dotnet format`. SA1142: throws on `t?.Item1` (a null reference) and then fixes nothing in the project; other shapes work | Tuple syntax and element names |
 | [BRO1125](rules/BRO1125.md) (SA1130) | Leaves two spaces after `=`, pulls a body on its own line up behind `=>` | Keeps the layout |
-| [BRO1128](rules/BRO1128.md) (SA1103) | Joins the query on one line or splits it, whichever action comes first | Each clause on its own line |
-| [BRO1107](rules/BRO1107.md), [BRO1108](rules/BRO1108.md) (SA1116, SA1117) | Leaves a moved lambda's block body at its old indentation (StyleCop bugs [#1620](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1620), [#3183](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3183), open) | Moves the body with the lambda |
+| [BRO1128](rules/BRO1128.md) (SA1103) | Joins the query on one line or splits it, whichever action comes first (measured: joined, `( from`); a nested query needs a second run | Each clause on its own line |
+| [BRO1107](rules/BRO1107.md), [BRO1108](rules/BRO1108.md) (SA1116, SA1117) | 1.2 leaves a moved lambda's block body at its old indentation (StyleCop bugs [#1620](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1620), [#3183](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3183)); 1.3 moves it, like StyleBro | Moves the body with the lambda |
 
 ### Same as StyleCop
 
@@ -199,34 +208,60 @@ Reports and fixes match StyleCop (checked with `scripts/stylecop-survey/Compare-
 [BRO1304](rules/BRO1304.md), [BRO1305](rules/BRO1305.md), [BRO1501](rules/BRO1501.md),
 [BRO1502](rules/BRO1502.md), [BRO1503](rules/BRO1503.md), [BRO1506](rules/BRO1506.md),
 [BRO1507](rules/BRO1507.md), [BRO1602](rules/BRO1602.md), [BRO1605](rules/BRO1605.md), [BRO1608](rules/BRO1608.md),
-[BRO1129](rules/BRO1129.md), [BRO1130](rules/BRO1130.md). (BRO1304, BRO1305 and BRO1309 have working fixes under `dotnet format`; StyleCop's
-change nothing there.)
+[BRO1129](rules/BRO1129.md), [BRO1130](rules/BRO1130.md). (BRO1304 and BRO1305 have working fixes under `dotnet format`; StyleCop's
+SA1302 and SA1314 have no Fix All and change nothing there, in 1.2 and 1.3.)
 
-### Compared with StyleCop's unreleased `master`
+### Changed in StyleCop 1.3
 
-The tables above compare with the last release, 1.2.0-beta.556. StyleCop's `master` has changed some of these rules
-since (not released; see [decisions](https://github.com/bisforboman/stylebro/blob/main/docs/decisions.md), 2026-10-04). Where `master` fixed a gap, StyleBro follows it:
+The tables above compare with 1.2.0-beta.556. StyleCop 1.3.177-beta (2026-11-06) changed some of these rules. Measured
+2026-11-07: the 50 parity sets run against 1.3.177-beta (30 give the same results as against 1.2; the other 20 are
+below), plus one case per rule under `dotnet format`. The last column is the StyleCop pull request that made the change.
 
-| Rule | Follows `master` | beta.556 |
-|---|---|---|
-| [BRO1104](rules/BRO1104.md) (SA1129) | `new nint()` -> `default(nint)` (also on .NET 7+: the fix must agree across a multi-targeted project's frameworks) | Always `nint.Zero` (CS0117 on older runtimes); `master`: `nint.Zero` on C# 11 + .NET 7+ |
-| [BRO1604](rules/BRO1604.md), [BRO1605](rules/BRO1605.md) (SA1623, SA1624) | `init` accessors: `Gets or initializes`, `Gets or sets` or `Gets`, `Initializes`; `Gets or initializes` is a wrong prefix elsewhere (StyleCop master: `Gets or sets` on `{ get; init; }` is wrong too) | Ignores `init`; its fix writes `Gets or sets or initializes` |
-| [BRO1611](rules/BRO1611.md) (SA1612) | `<param>` tags of primary constructors (classes, structs, records) | Not checked |
-| [BRO1505](rules/BRO1505.md) (SA1516) | No blank line needed between two single-line properties, unless one is documented (`///`) | Wants none even next to a documented one |
-| [BRO1601](rules/BRO1601.md) (SA1600) | Explicit interface implementations not reported | Reported |
+Where 1.3 now does what StyleBro does (for some of these StyleBro followed StyleCop's then unreleased `master`: the
+owner's decisions of 2026-10-04 and 2026-10-11 in [decisions](https://github.com/bisforboman/stylebro/blob/main/docs/decisions.md)):
 
-Where `master` changed behavior StyleBro keeps (the owner's decision):
+| Rule | 1.3.177-beta, like StyleBro | 1.2.0-beta.556 | StyleCop change |
+|---|---|---|---|
+| [BRO1107](rules/BRO1107.md), [BRO1108](rules/BRO1108.md) (SA1116, SA1117) | Record and primary-constructor parameter lists and a base type's argument list are checked; SA1117 has a fix; a moved lambda's body moves with it | Not checked; no SA1117 fix; the body stays behind | [#4139](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4139), [#4353](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4353) |
+| [BRO1110](rules/BRO1110.md) (SA1111) | Target-typed `new(...)` is checked (`: base(...)` and `: this(...)` still aren't; StyleBro checks them) | Not checked | [#4061](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4061) |
+| [BRO1118](rules/BRO1118.md), [BRO1119](rules/BRO1119.md) (SA1114, SA1115) | A comment line before the first item isn't reported; both have a fix that removes the blank lines | Reported; no fix | [#4270](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4270), [#4352](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4352), [#4326](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4326) |
+| [BRO1125](rules/BRO1125.md) (SA1130) | `delegate (int item) { ... }` is reported when the parameter name differs from the delegate's (its fix leaves `( item =>`) | Not reported | [#4179](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4179) |
+| [BRO1131](rules/BRO1131.md) (SA1100) | No fix for `base.M()` of a virtual member in a type that isn't sealed (StyleCop still reports it; StyleBro doesn't) | Fixed to `this.M()` | [#4273](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4273) |
+| [BRO1401](rules/BRO1401.md) (SA1413) | Nested initializers get their commas in one `dotnet format` run | Three runs ([#3953](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3953)) | [#4210](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4210) |
+| [BRO1407](rules/BRO1407.md) (SA1408) | Mixed `and`/`or` patterns are reported and get parentheses | Not checked | [#4058](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4058) |
+| [BRO1504](rules/BRO1504.md) (SA1515) | No blank line wanted before a comment right after `=>` or after a collection expression's `[` | Wanted | [#3940](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/3940), [#3768](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/3768) |
+| [BRO1510](rules/BRO1510.md) (SA1504) | An attribute line above an accessor doesn't make it multi-line | It did ([#3434](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3434)) | [#4210](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4210) |
+| [BRO1519](rules/BRO1519.md) (SA1513) | A switch expression's `}` followed by a continuation (`} + a`) isn't reported (other continuations after initializers and patterns still differ) | Reported | [#4334](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4334) |
+| [BRO1601](rules/BRO1601.md) (SA1600) | Explicit interface implementations aren't reported | Reported | [#4034](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4034) |
+| [BRO1603](rules/BRO1603.md) (SA1629) | Text may end in `?` or `!`, or in a period followed by a closing quote; after an entity the period goes after it (`&gt;.`) | Reported; the entity's `;` was replaced | [#4298](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4298), [#4197](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4197), [#3859](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/3859) |
+| [BRO1604](rules/BRO1604.md), [BRO1605](rules/BRO1605.md) (SA1623, SA1624) | `init` accessors: `Gets or initializes`; a wrong `Gets or initializes` on `{ get; set; }` becomes `Gets or sets` (on `{ get; init; }` StyleBro also accepts `Gets or sets`, 1.3 doesn't) | `init` ignored; its fix wrote `Gets or sets or initializes` | [#4053](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4053) |
+| [BRO1606](rules/BRO1606.md) (SA1642) | A summary that starts with `<para>` isn't reported or given a second standard sentence (1.3 doesn't check the paragraph's text; StyleBro still does) | Reported, sentence put in front of `<para>` | [#3861](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/3861) |
+| [BRO1611](rules/BRO1611.md) (SA1612) | `<param>` tags of primary constructors (classes, structs, records) are checked; SA1612 has a fix (its rename drops the tag's text; StyleBro's keeps it) | Not checked; no fix | [#3833](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/3833), [#4354](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4354) |
 
-| Rule | `master` | StyleBro (like beta.556) |
-|---|---|---|
-| [BRO1505](rules/BRO1505.md) (SA1516) | Two fields need a blank line when the second spans several lines | Only when the first does |
-| [BRO1401](rules/BRO1401.md) (SA1413) | Multi-line property patterns get a trailing comma, nested ones too (94671b70) | Not checked (owner's decision 2026-10-11: follow the release) |
-| [BRO1606](rules/BRO1606.md) (SA1642) | Any summary that starts with `<para>` is accepted, text not checked | Checks the paragraph's text |
-| [BRO1311](rules/BRO1311.md) (SA1316) | Names in an override's or implementation's signature not reported | Reported, renamed together with the base |
+New differences: 1.3 changed these and StyleBro still does what 1.2 did. Whether StyleBro follows each one is open
+(the owner decides per rule). Until then a repository that is clean on 1.3 can get findings from these rules after
+`bro migrate`, or keep code 1.3 would report:
+
+| Rule | 1.3.177-beta | StyleBro (like 1.2.0-beta.556) | StyleCop change |
+|---|---|---|---|
+| [BRO1001](rules/BRO1001.md) (SA1202) | Explicit interface events (`event EventHandler IServer.E { add; remove; }`) are ordered as public | Ordered as private | [#4281](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4281) |
+| [BRO1001](rules/BRO1001.md) (SA1203, SA1204, SA1214) | Records and record structs: constants before fields, static before instance members, `readonly` fields first | Records are ordered by kind and access only | [#4122](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4122), [#4142](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4142) |
+| [BRO1104](rules/BRO1104.md) (SA1129) | `new nint()` -> `nint.Zero` on .NET 7+ with C# 11, `default(nint)` elsewhere | Always `default(nint)`: the fix must agree across a multi-targeted project's frameworks (1.2 always wrote `nint.Zero`: CS0117 on netstandard2.0) | |
+| [BRO1106](rules/BRO1106.md) (SA1122) | `$""` and empty raw strings are reported and become `string.Empty` | Only `""` | [#4178](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4178) |
+| [BRO1306](rules/BRO1306.md) (SA1304) | Lower-case `protected readonly` and `private protected readonly` fields are reported and renamed ([#3557](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3557)) | Not reported | [#4217](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4217) |
+| [BRO1311](rules/BRO1311.md) (SA1316) | Explicit names in tuple expressions (`(lower: 1, Upper: 2)`) are always checked; names in an override's or implementation's signature aren't | Tuple expressions only together with their declarations; signatures reported and renamed together with the base (kept on purpose: owner's decision) | [#4202](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4202), [#3782](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/3782) |
+| [BRO1401](rules/BRO1401.md) (SA1413) | Multi-line collection expressions (`[ 1, 2 ]`) and multi-line property patterns, nested ones too, get a trailing comma | Neither (property patterns: owner's decision 2026-10-11, follow the release) | [#4138](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4138), [#4035](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4035) |
+| [BRO1406](rules/BRO1406.md) (SA1407) | `&`, `\|`, `^` and `>>>` mixed with other operators get parentheses ([#3547](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3547)) | Only `+ - * / % << >>` | [#4289](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4289) |
+| [BRO1407](rules/BRO1407.md) (SA1408) | `??` mixed with `&&` or `\|\|` (`a ?? b && c`) gets parentheses ([#3167](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3167)) | Not reported | [#4323](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4323) |
+| [BRO1505](rules/BRO1505.md) (SA1516) | Two single-line properties may sit together even when one is documented | A documented property wants a blank line above its `///` | [#3936](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/3936) |
+| [BRO1510](rules/BRO1510.md) (SA1504) | `get => x;` next to a multi-line `set { ... }` is reported; the fix makes it a block | Not reported | [#4283](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4283) |
+| [BRO1603](rules/BRO1603.md) (SA1629) | An inline element whose text ends in `?` or `!` (`<paramref>a question?</paramref>`) is passed over, and the period goes before it | Not reported | [#4298](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/pull/4298) |
 
 ## Rules beyond StyleCop
 
-Rules StyleCop doesn't have. The preset turns them on at `warning`:
+Rules StyleCop 1.2 doesn't have (36). Three of them now have a StyleCop 1.3 counterpart: [BRO1313](rules/BRO1313.md)
+(SA1315), [BRO1524](rules/BRO1524.md) (close to SA1143) and [BRO1617](rules/BRO1617.md) (SA1654); the other 33 aren't in
+1.3 either. The preset turns these on at `warning`:
 
 - `dotnet_diagnostic.BRO1133.severity`
 - `dotnet_diagnostic.BRO1134.severity`
@@ -271,7 +306,7 @@ in `.editorconfig` to use them.
 | [BRO1523](rules/BRO1523.md) | In a call chain split over several lines, every call after the first line starts its own line | Roslynator RCS0054 |
 | [BRO1135](rules/BRO1135.md) | Integer literal suffixes in upper case (`1L`, `2U`, `3UL`; only `l` with `stylebro_upper_case_literal_suffixes = l_only`, only a suffix that is just `l` with `lone_l`); real suffixes (`f`, `d`, `m`) aren't checked | Sonar S818, StyleCop issue #1563 |
 | [BRO1525](rules/BRO1525.md) | No blank line between an attribute list and its element or the element's next attribute list | StyleCop's proposed SA1521 ([#738](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/738), never implemented) |
-| [BRO1524](rules/BRO1524.md) | A split conditional expression has the condition, `? a` and `: b` on their own lines (`?`/`:` side from `dotnet_style_operator_placement_when_wrapping`); chains aren't checked | StyleCop issue [#651](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/651) (proposed, never implemented) |
+| [BRO1524](rules/BRO1524.md) | A split conditional expression has the condition, `? a` and `: b` on their own lines (`?`/`:` side from `dotnet_style_operator_placement_when_wrapping`); chains aren't checked | StyleCop issue [#651](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/651); StyleCop 1.3's SA1143 is close (it also allows a chain with one `a ? b :` per line; `bro migrate` doesn't map it yet) |
 | [BRO1526](rules/BRO1526.md) | A blank line between switch sections (`stylebro_blank_line_between_switch_sections = include`, the default), none (`omit`), or none after a section that ends in a block (`omit_after_block`); after a multi-line block BRO1519 (SA1513) decides. The preset turns it on (`dotnet_diagnostic.BRO1526.severity = warning`) | Roslynator RCS0061 |
 | [BRO1143](rules/BRO1143.md) | No `else` after an `if` branch that ends in `return`, `throw`, `break`, `continue`, `goto` or `yield break`. Off by default, also in the preset (a matter of taste) | Meziantou MA0071, Roslynator RCS1211 |
 | [BRO1147](rules/BRO1147.md) | No null-forgiving `!` on a value whose flow state is already not-null. Off by default, also in the preset; skips projects with several target frameworks | Sonar S8969, the SDK's IDE0370 |
@@ -294,9 +329,9 @@ in `.editorconfig` to use them.
 | [BRO1408](rules/BRO1408.md) | No `enum E : int` or `class C : object` | Roslynator RCS1042, Sonar S1939 |
 | [BRO1409](rules/BRO1409.md) | Off by default. `internal`, not `public`, on an ordinary method of a type that can't be seen outside the assembly; properties, constructors, interface implementations, overrides, attributed methods and types, types with a base from another assembly and convention names (`Dispose`, `GetEnumerator`, ...) are left out, and a name found in a string or `nameof` isn't fixed | StyleCop issue [#2981](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2981) (proposed, never implemented) |
 | [BRO1410](rules/BRO1410.md) | Parentheses around a pattern that parses the same without them (`x is (> 0)`, `o is (string s)`); ones BRO1407 (SA1408) wants between `and` and `or` stay | StyleCop's SA1119 checks parenthesized expressions only (its SA1119_p fades the parentheses; StyleBro fades both rules' with BRO1405_p/BRO1410_p) |
-| [BRO1313](rules/BRO1313.md) | Off by default. A parameter of an override or interface implementation has the base member's parameter name (named arguments updated) | StyleCop's proposed SA1315 ([#1949](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1949), never implemented); SDK CA1725 (no fix) |
+| [BRO1313](rules/BRO1313.md) | Off by default. A parameter of an override or interface implementation has the base member's parameter name (named arguments updated) | StyleCop's SA1315 ([#1949](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1949), new in 1.3; `bro migrate` doesn't map it yet); SDK CA1725 (no fix) |
 | [BRO1314](rules/BRO1314.md) | Off by default. Methods returning `Task`, `Task<T>`, `ValueTask`, `ValueTask<T>` or `IAsyncEnumerable<T>` end in `Async`; tests, controllers, hubs, event handlers and attributed methods skipped | Roslynator RCS1046, Meziantou MA0137 |
-| [BRO1617](rules/BRO1617.md) | A cref's type arguments in braces: `cref="List{T}"`, not `cref="List&lt;T&gt;"` | StyleCop's proposed SA1653 ([#758](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/758), never implemented) |
+| [BRO1617](rules/BRO1617.md) | A cref's type arguments in braces: `cref="List{T}"`, not `cref="List&lt;T&gt;"` | StyleCop's SA1654 ([#758](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/758), proposed as SA1653, new in 1.3 as SA1654; `bro migrate` doesn't map it yet) |
 | [BRO1618](rules/BRO1618.md) | A C# keyword alone in `<c>` (`<c>null</c>`) is written `<see langword="null"/>` | Meziantou MA0154 |
 | [BRO1619](rules/BRO1619.md) | Top-level documentation elements in the order summary, typeparam, param, returns, value, exception, remarks, example, seealso | (none; Roslynator RCS1232 orders `<param>` tags only) |
 
@@ -314,57 +349,68 @@ configuration questions, the IDE, missing-documentation rules StyleBro drops).
 | StyleBro had it too | 8: 7 fixed on 2026-10-04, 1 kept like StyleCop by the owner's decision ([decisions.md](https://github.com/bisforboman/stylebro/blob/main/docs/decisions.md)) |
 | Not applicable, or StyleBro is the same or different by design | 12 |
 
-| Issue | Rule | Bug | StyleBro |
-|---|---|---|---|
-| [#1488](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1488) | SA1519 -> BRO1515 | Braceless child under a multi-line `if (a &&\n b)` header not reported | Same or different by design: Same as SA1519 by default; `csharp_prefer_braces = when_multiline` reports and fixes it |
-| [#1588](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1588) | SA1201 -> BRO1001 | Fix moves a method into `#if DEBUG` | Not shared: Not reported (conditional directives are skipped) |
-| [#1620](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1620) | SA1116 -> BRO1107 | Fix doesn't reindent a multi-line lambda argument | Shared, fixed: the lambda body moves with the lambda |
-| [#1956](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1956), [#3358](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3358) | SA1102 -> BRO1127 | Comment between query clauses reported, fix deletes it | Not shared: Gaps with comments skipped; nothing deleted |
-| [#2081](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2081) | SA1626 -> BRO1602 | `//` line inside a `///` block: fix strips slashes from doc lines | Not shared: Not reported, unchanged |
-| [#2112](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2112) | SA1203 -> BRO1001 | Fix across `#region`s produces broken regions | Not shared: Regions are fences; not reported |
-| [#2183](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2183) | SA1519 -> BRO1515 | Wrong indentation wrapping consecutive `using`s | Not shared: With `stylebro_allow_consecutive_usings = false`, correctly nested and indented |
-| [#2696](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2696) | SA1642 -> BRO1606 | Fix output for empty `<summary></summary>` | Not shared: Becomes `<summary>Initializes a new instance of the <see cref="C"/> class.</summary>`; `<summary/>` not reported |
-| [#2832](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2832) | SA1509 -> BRO1501 | Blank line before `{ k, v }` in a dictionary initializer reported | Shared, fixed: an initializer's entries keep their grouping blank line (owner's decision, 2026-10-04) |
-| [#3539](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3539) | SA1509 -> BRO1501 | Blank line before a standalone `{ }` block reported | Same or different by design: matched on purpose (a standalone block after `;` is reported, like SA1509) |
-| [#2880](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2880) | SA1100 -> BRO1131 | `base.Get<T>(x)` from an override of `Get(x)` | Not shared: Rewritten to `this.Get<MyExports>(x)`, same method (maintainer agreed it's correct) |
-| [#3379](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3379) | SA1100 -> BRO1131 | `base.M(other)` in the override of generic virtual `M<T>` reported | Not shared: Not reported |
-| [#2890](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2890) | SA1202/SA1203 -> BRO1001 | SA1202 and SA1203 want opposite orders | Not shared: One sort key; fix converges, compiles |
-| [#2939](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2939) | SA1309 -> BRO1303 | Rename `_documentIndex` clashes with `out int documentIndex` (CS0844) | Not shared: References qualified with `this.`; compiles |
-| [#2967](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2967) | SA1642 -> BRO1606 | `cref="AuthorizationPolicy{XXX}"` not reported | Not shared: Reported and fixed to `{TIDENT}` (stricter than StyleCop, like classic) |
-| [#2984](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2984) | SA1642 -> BRO1606 | `<include>` docs not expanded | Not shared: `<include>` members not reported |
-| [#3122](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3122) | SA1627 -> BRO1610 | Empty remarks reported for `<include>` | Not shared: Not reported |
-| [#3217](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3217) | SA1139 -> BRO1122 | NullReferenceException on `(ulong)14` in an attribute; FP on `unchecked((int)0xFFFFFF0F)` | Not shared: No crash; attribute case fixed to `14UL`; the `unchecked` cast not reported |
-| [#3284](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3284) | SA1114 -> BRO1118 | FP on an argument list with `#if` | Not shared: Not reported |
-| [#2917](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2917) | SA1114 -> BRO1118 | Comment line after `(` reported | Not shared: Not reported |
-| [#3392](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3392) | SA1515 -> BRO1504 | Comment right after `=>` in a switch-expression arm reported | Shared, fixed: `=>` counts like `{` (owner's decision, 2026-10-04) |
-| [#3568](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3568) | SA1513 -> BRO1519 | Blank line demanded between a case block's `}` and the next `case` | Shared, kept: same as SA1513 (owner's decision, 2026-10-04) |
-| [#3581](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3581) | SA1503 -> BRO1514 | Fix ignores a custom indentation size | Not shared: `indent_size = 1` honored |
-| [#3882](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3882), [#3916](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3916) | SA1135 -> BRO1126 | AD0001 on `using X = string;` / tuple aliases | Not shared: No crash, not reported |
-| [#3884](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3884) | SA1135 -> BRO1126 | `using T1 = Tasks.Task;` allowed but `using T2 = System.ValueTuple<Tasks.Task, int>;` reported | Shared, fixed: a type argument starting with an alias is kept |
-| [#3921](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3921) | SA1642 -> BRO1606 | Record struct expected to say "class" | Same or different by design: Records are skipped (documented); plain struct fixed to "struct" correctly |
-| [#3953](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3953) | SA1413 -> BRO1401 | Nested initializers need 3 `dotnet format` runs | Not shared: One pass |
-| [#3948](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3948) | SA1516 -> BRO1505 | Blank line demanded between a property and its backing field | Same or different by design: By design in both (maintainer: fields first) |
-| [#3159](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3159) | SA1516 -> BRO1505 | Usings: blank-line groups handled inconsistently | Not shared: Using+using exempt; not reported |
-| [#3932](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3932) (= #3849) | SA1514 -> BRO1513 | Doc comment on the file's first line reported | Not shared: Not reported |
-| [#3656](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3656) | many | Fixes write CRLF into LF files | Not shared: All rules on a one-line LF file: no `\r` in the output |
-| [#3564](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3564) | SA1501 -> BRO1508 | `catch { }` reported | Same or different by design: Same as StyleCop by design |
-| [#3559](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3559) | SA1307 -> BRO1306 | `public static X _instance` not reported | Not shared: Reported, renamed to `Instance` |
-| [#3557](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3557) | SA1304 -> BRO1306 | `protected readonly foo` never checked | Same or different by design: StyleCop's defaults matched on purpose (protected fields, see BRO1303) |
-| [#3183](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3183) | SA1117 -> BRO1108 | Last-argument lambda exception | Same or different by design: same as StyleCop (maintainer: by design); the fix's indentation bug in the reported variant is #1620's, fixed |
-| [#3096](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3096) | SA1623/SA1629 -> BRO1604/BRO1603 | Reported on internal members with documentInternalElements false | Same or different by design: Same design as StyleCop (validity of docs that exist) |
-| [#3057](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3057) | SA1312 -> BRO1301 | `var _`, `foreach (var _ ...)`, `using var _` reported | Not shared: Not reported (`_`, `__`, `___`, `_3MonthsFromNow`) |
-| [#2947](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2947) | SA1513 -> BRO1519 | `}` of a multi-line interpolation hole reported | Not shared: Not reported |
-| [#2859](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2859) | SA1305 -> BRO1310 | Hungarian P/Invoke parameters reported | Shared, fixed: parameters of native methods aren't reported |
-| [#2784](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2784) | SA1629 -> BRO1603 | Text ending in `<c>"... ."</c>` gets another period | Shared, fixed: not reported |
-| [#2689](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2689) | SA1005 -> BRO1002 | `//-:cnd:noEmit` template markers reported | Shared, fixed: `//-:` and `//+:` aren't reported |
-| [#1371](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1371) | SA1515 -> BRO1504 | Comment/doc right after `#region` reported | Not shared: Not reported (`///` exempt, line above a directive exempt). BRO1513 does want a blank line before docs after `#region`, matching SA1514 (probed earlier) |
-| [#1450](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1450) | SA1119 -> BRO1405 | `(new[] { 1 }).ToArray()` reported | Same or different by design: Same as StyleCop (maintainers kept it) |
-| [#1782](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1782) | SA1612 -> BRO1611 | Stale + missing `<param>` both reported | Not shared: One BRO1611, fix renames the tag to `value` |
-| [#3547](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3547) | SA1407 -> BRO1406 | `&`, `\|`, `^`, `>>>` not checked | Same or different by design: StyleCop's operator families on purpose |
-| [#3167](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3167) | SA1408 -> BRO1407 | `a ?? false && b` not reported | Same or different by design: Feature request; same families as StyleCop |
-| [#3955](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3955) | SA1201 -> BRO1001 | "A <unknown> should not follow a field" on C# 14 `extension` blocks | Not shared: Real build + `dotnet format` (SDK 10, C# 14): no BRO1001 in a type with an extension block (skipped, so also a field after a method there isn't sorted), no crash, compiles |
-| [#2079](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2079) | SA1309 -> BRO1303 | Rename misses a reference in another class | Same or different by design: The repro reads a private field from another class (doesn't compile) |
-| Not planned [#3837](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3837) | SA1106 -> BRO1101 | `public class A;` reported as empty statement | Not shared: Not reported |
-| Not planned [#3659](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3659) | SA1400 -> BRO1404/BRO1007 | `static file class X` asked for a modifier | Not shared: Not reported; a part without `file` of a `file` type isn't either (fixed 2026-10-04: BRO1007 added `internal` there, CS9052) |
-| Not planned [#3716](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3716) | SA1119 -> BRO1405 | `#if (MyProperty)` (templates) reported | Not shared: Not reported |
-| Not planned [#3769](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3769) | SA1300 -> BRO1309 | Record/primary-ctor parameters `name` want PascalCase | Not shared: Not reported |
+StyleCop has closed all of these issues but #1488 since (most between 2026-10-07 and 2026-10-20). On 2026-11-07 each
+was rebuilt as a small case (from the issue's code where it compiles) and run on StyleCop 1.2.0-beta.556 and
+1.3.177-beta, reports and `dotnet format` with StyleCop's own fixes; the last column says what 1.3 does:
+
+| StyleCop 1.3.177-beta | Issues |
+|---|---|
+| Fixed in 1.3 | 24 |
+| Changed, not fixed | 3 (#1782, #2784, #3183) |
+| Still there (some by design) | 13 |
+| Not reproducible on 1.2.0-beta.556 either | 14 (fixed earlier, a fix that 1.2 had turned off, or a repro that needs an older compiler) |
+
+| Issue | Rule | Bug | StyleBro (2026-10-04) | StyleCop 1.3.177-beta (2026-11-07) |
+|---|---|---|---|---|
+| [#1488](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1488) | SA1519 -> BRO1515 | Braceless child under a multi-line `if (a &&\n b)` header not reported | Same or different by design: Same as SA1519 by default; `csharp_prefer_braces = when_multiline` reports and fixes it | Still there (a feature request: no new rule) |
+| [#1588](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1588) | SA1201 -> BRO1001 | Fix moves a method into `#if DEBUG` | Not shared: Not reported (conditional directives are skipped) | Not reproduced on 1.2 (its fix was turned off); 1.3's fix changes nothing there |
+| [#1620](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1620) | SA1116 -> BRO1107 | Fix doesn't reindent a multi-line lambda argument | Shared, fixed: the lambda body moves with the lambda | Fixed: the body moves with the lambda |
+| [#1956](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1956), [#3358](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3358) | SA1102 -> BRO1127 | Comment between query clauses reported, fix deletes it | Not shared: Gaps with comments skipped; nothing deleted | #1956: Fixed: still reported, but no fix is offered, so the comment stays; #3358: Still reported |
+| [#2081](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2081) | SA1626 -> BRO1602 | `//` line inside a `///` block: fix strips slashes from doc lines | Not shared: Not reported, unchanged | Fixed: the stray `//` becomes `///` |
+| [#2112](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2112) | SA1203 -> BRO1001 | Fix across `#region`s produces broken regions | Not shared: Regions are fences; not reported | Not reproduced on 1.2 (its fix was turned off); 1.3's fix changes nothing there |
+| [#2183](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2183) | SA1519 -> BRO1515 | Wrong indentation wrapping consecutive `using`s | Not shared: With `stylebro_allow_consecutive_usings = false`, correctly nested and indented | Fixed: nested and indented |
+| [#2696](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2696) | SA1642 -> BRO1606 | Fix output for empty `<summary></summary>` | Not shared: Becomes `<summary>Initializes a new instance of the <see cref="C"/> class.</summary>`; `<summary/>` not reported | Not reproduced on 1.2 (sensible output in both) |
+| [#2832](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2832) | SA1509 -> BRO1501 | Blank line before `{ k, v }` in a dictionary initializer reported | Shared, fixed: an initializer's entries keep their grouping blank line (owner's decision, 2026-10-04) | Still there |
+| [#3539](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3539) | SA1509 -> BRO1501 | Blank line before a standalone `{ }` block reported | Same or different by design: matched on purpose (a standalone block after `;` is reported, like SA1509) | Still there |
+| [#2880](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2880) | SA1100 -> BRO1131 | `base.Get<T>(x)` from an override of `Get(x)` | Not shared: Rewritten to `this.Get<MyExports>(x)`, same method (maintainer agreed it's correct) | Same in both (the rewrite is correct) |
+| [#3379](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3379) | SA1100 -> BRO1131 | `base.M(other)` in the override of generic virtual `M<T>` reported | Not shared: Not reported | Not reproduced on 1.2 (fixed earlier) |
+| [#2890](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2890) | SA1202/SA1203 -> BRO1001 | SA1202 and SA1203 want opposite orders | Not shared: One sort key; fix converges, compiles | Not reproduced on 1.2; 1.3's fix converges |
+| [#2939](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2939) | SA1309 -> BRO1303 | Rename `_documentIndex` clashes with `out int documentIndex` (CS0844) | Not shared: References qualified with `this.`; compiles | Fixed: `this.` qualified, compiles |
+| [#2967](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2967) | SA1642 -> BRO1606 | `cref="AuthorizationPolicy{XXX}"` not reported | Not shared: Reported and fixed to `{TIDENT}` (stricter than StyleCop, like classic) | Still not reported |
+| [#2984](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2984) | SA1642 -> BRO1606 | `<include>` docs not expanded | Not shared: `<include>` members not reported | Fixed: not reported |
+| [#3122](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3122) | SA1627 -> BRO1610 | Empty remarks reported for `<include>` | Not shared: Not reported | Not reproduced on 1.2 (fixed earlier) |
+| [#3217](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3217) | SA1139 -> BRO1122 | NullReferenceException on `(ulong)14` in an attribute; FP on `unchecked((int)0xFFFFFF0F)` | Not shared: No crash; attribute case fixed to `14UL`; the `unchecked` cast not reported | Not reproduced on 1.2 (no crash in either) |
+| [#3284](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3284) | SA1114 -> BRO1118 | FP on an argument list with `#if` | Not shared: Not reported | Fixed: not reported |
+| [#2917](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2917) | SA1114 -> BRO1118 | Comment line after `(` reported | Not shared: Not reported | Fixed: not reported |
+| [#3392](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3392) | SA1515 -> BRO1504 | Comment right after `=>` in a switch-expression arm reported | Shared, fixed: `=>` counts like `{` (owner's decision, 2026-10-04) | Fixed: not reported |
+| [#3568](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3568) | SA1513 -> BRO1519 | Blank line demanded between a case block's `}` and the next `case` | Shared, kept: same as SA1513 (owner's decision, 2026-10-04) | Still there |
+| [#3581](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3581) | SA1503 -> BRO1514 | Fix ignores a custom indentation size | Not shared: `indent_size = 1` honored | Fixed: the configured indentation |
+| [#3882](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3882), [#3916](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3916) | SA1135 -> BRO1126 | AD0001 on `using X = string;` / tuple aliases | Not shared: No crash, not reported | Fixed: no crash |
+| [#3884](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3884) | SA1135 -> BRO1126 | `using T1 = Tasks.Task;` allowed but `using T2 = System.ValueTuple<Tasks.Task, int>;` reported | Shared, fixed: a type argument starting with an alias is kept | Fixed: not reported |
+| [#3921](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3921) | SA1642 -> BRO1606 | Record struct expected to say "class" | Same or different by design: Records are skipped (documented); plain struct fixed to "struct" correctly | Not reproduced on 1.2 (record structs already handled) |
+| [#3953](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3953) | SA1413 -> BRO1401 | Nested initializers need 3 `dotnet format` runs | Not shared: One pass | Fixed: one run |
+| [#3948](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3948) | SA1516 -> BRO1505 | Blank line demanded between a property and its backing field | Same or different by design: By design in both (maintainer: fields first) | Still there (by design) |
+| [#3159](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3159) | SA1516 -> BRO1505 | Usings: blank-line groups handled inconsistently | Not shared: Using+using exempt; not reported | Not reproduced on 1.2 (one blank line between groups in both) |
+| [#3932](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3932) (= #3849) | SA1514 -> BRO1513 | Doc comment on the file's first line reported | Not shared: Not reported | Fixed: not reported |
+| [#3656](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3656) | many | Fixes write CRLF into LF files | Not shared: All rules on a one-line LF file: no `\r` in the output | Fixed: no CR written (9 rules probed) |
+| [#3564](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3564) | SA1501 -> BRO1508 | `catch { }` reported | Same or different by design: Same as StyleCop by design | Fixed: not reported |
+| [#3559](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3559) | SA1307 -> BRO1306 | `public static X _instance` not reported | Not shared: Reported, renamed to `Instance` | Still not reported |
+| [#3557](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3557) | SA1304 -> BRO1306 | `protected readonly foo` never checked | Same or different by design: StyleCop's defaults matched on purpose (protected fields, see BRO1303) | Fixed: SA1304 reports and renames it |
+| [#3183](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3183) | SA1117 -> BRO1108 | Last-argument lambda exception | Same or different by design: same as StyleCop (maintainer: by design); the fix's indentation bug in the reported variant is #1620's, fixed | Changed: the exception stays (by design); the fixes now move the lambda's body |
+| [#3096](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3096) | SA1623/SA1629 -> BRO1604/BRO1603 | Reported on internal members with documentInternalElements false | Same or different by design: Same design as StyleCop (validity of docs that exist) | Still there |
+| [#3057](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3057) | SA1312 -> BRO1301 | `var _`, `foreach (var _ ...)`, `using var _` reported | Not shared: Not reported (`_`, `__`, `___`, `_3MonthsFromNow`) | Fixed: `foreach`/`using var` discards not reported; `var _` becomes a discard |
+| [#2947](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2947) | SA1513 -> BRO1519 | `}` of a multi-line interpolation hole reported | Not shared: Not reported | Not reproduced on 1.2 |
+| [#2859](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2859) | SA1305 -> BRO1310 | Hungarian P/Invoke parameters reported | Shared, fixed: parameters of native methods aren't reported | Fixed: not reported |
+| [#2784](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2784) | SA1629 -> BRO1603 | Text ending in `<c>"... ."</c>` gets another period | Shared, fixed: not reported | Changed: still reported; the period now goes before `<c>` |
+| [#2689](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2689) | SA1005 -> BRO1002 | `//-:cnd:noEmit` template markers reported | Shared, fixed: `//-:` and `//+:` aren't reported | Fixed: not reported |
+| [#1371](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1371) | SA1515 -> BRO1504 | Comment/doc right after `#region` reported | Not shared: Not reported (`///` exempt, line above a directive exempt). BRO1513 does want a blank line before docs after `#region`, matching SA1514 (probed earlier) | Not reproduced on 1.2 (`///` after `#region` not reported in either) |
+| [#1450](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1450) | SA1119 -> BRO1405 | `(new[] { 1 }).ToArray()` reported | Same or different by design: Same as StyleCop (maintainers kept it) | Still there |
+| [#1782](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1782) | SA1612 -> BRO1611 | Stale + missing `<param>` both reported | Not shared: One BRO1611, fix renames the tag to `value` | Changed: still two reports; SA1612's new fix renames the tag but drops its text |
+| [#3547](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3547) | SA1407 -> BRO1406 | `&`, `\|`, `^`, `>>>` not checked | Same or different by design: StyleCop's operator families on purpose | Fixed: reported, fix adds parentheses (BRO1406 doesn't check these yet) |
+| [#3167](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3167) | SA1408 -> BRO1407 | `a ?? false && b` not reported | Same or different by design: Feature request; same families as StyleCop | Fixed: reported, fix adds parentheses |
+| [#3955](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3955) | SA1201 -> BRO1001 | "A <unknown> should not follow a field" on C# 14 `extension` blocks | Not shared: Real build + `dotnet format` (SDK 10, C# 14): no BRO1001 in a type with an extension block (skipped, so also a field after a method there isn't sorted), no crash, compiles | Fixed: not reported, no crash |
+| [#2079](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2079) | SA1309 -> BRO1303 | Rename misses a reference in another class | Same or different by design: The repro reads a private field from another class (doesn't compile) | Not reproduced on 1.2 (the repro doesn't compile) |
+| Not planned [#3837](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3837) | SA1106 -> BRO1101 | `public class A;` reported as empty statement | Not shared: Not reported | Not reproduced on 1.2 (with SDK 10's compiler) |
+| Not planned [#3659](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3659) | SA1400 -> BRO1404/BRO1007 | `static file class X` asked for a modifier | Not shared: Not reported; a part without `file` of a `file` type isn't either (fixed 2026-10-04: BRO1007 added `internal` there, CS9052) | Not reproduced on 1.2 |
+| Not planned [#3716](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3716) | SA1119 -> BRO1405 | `#if (MyProperty)` (templates) reported | Not shared: Not reported | Still there |
+| Not planned [#3769](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3769) | SA1300 -> BRO1309 | Record/primary-ctor parameters `name` want PascalCase | Not shared: Not reported | Still there |

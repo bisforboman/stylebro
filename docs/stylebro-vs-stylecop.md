@@ -1,21 +1,24 @@
 # StyleBro vs StyleCop.Analyzers
 
 For a team deciding whether to switch. Measured numbers only; each one says where it comes from. As of
-**2026-10-05** (StyleBro's `main`; StyleCop.Analyzers 1.2.0-beta.556, its latest release).
+**2026-11-07**: StyleBro's `main` against **StyleCop.Analyzers 1.3.177-beta** (2026-11-06), the newest release.
+StyleCop is maintained again: since 2026-10-12 it has shipped eleven 1.3 betas (1.3.1-beta to 1.3.177-beta), with
+new rules, new code fixes and many bug fixes. Everything below was measured against 1.3.177-beta; where 1.2.0-beta.556
+(the release before, still the one most repositories use) differs, it says so.
 
 ## Summary
 
-| | StyleCop.Analyzers 1.2.0-beta.556 | StyleBro (`main`, 2026-10-05) |
+| | StyleCop.Analyzers 1.3.177-beta | StyleBro (`main`, 2026-11-07) |
 |---|---|---|
-| Fixes under `dotnet format` | Many rules have no fix, no Fix All, or a fix that misbehaves there ([below](#what-it-is)) | Every rule has a fix with Fix All; one run converges |
-| StyleCop's 197 diagnostics | All | 106 by StyleBro rules, 45 by the .NET SDK's rules, 42 dropped by design, 4 variants or not applicable |
-| Rules beyond StyleCop | None | 26 (most from Roslynator, Meziantou, Sonar or StyleCop's own tracker) |
-| Analyzer time, Newtonsoft.Json (242 files) | 1,291-2,171 ms (182 analyzers) | 411-687 ms (66 analyzers); 3.1-3.4x faster in each of 3 runs ([Speed](#speed)) |
-| StyleCop's open bugs on the replaced rules | 54 checked | 34 not shared, 8 shared (7 fixed, 1 kept on purpose), 12 not applicable or the same by design |
-| Moving a StyleCop-clean repo | (the starting point) | Files changed after `bro migrate --write` + `dotnet format`: Polly 1, OpenTelemetry 1, a private app 7; only 1 of those 9 is a StyleBro fix ([Migration](#migration)) |
+| Fixes under `dotnet format` | 162 of 203 diagnostics have a fix; some have no Fix All, throw, or need several runs ([below](#what-it-is)) | Every rule has a fix with Fix All; one run converges |
+| StyleCop's 203 diagnostics | All | 109 by StyleBro rules, 44 by the .NET SDK's rules, 34 dropped (no safe automatic fix), 10 StyleCop never reports, 4 not yet (new in 1.3), 2 not applicable ([Coverage](#coverage)) |
+| Rules beyond StyleCop | None | 33 (most from Roslynator, Meziantou, Sonar or StyleCop's own tracker); 3 more now have a 1.3 counterpart |
+| Analyzer time, Newtonsoft.Json (242 files) | 1,057-1,077 ms (188 analyzers) | 347-356 ms (76 analyzers); 3.0x faster in each of 3 runs ([Speed](#speed)) |
+| StyleCop bugs on the replaced rules (54 issues, read 2026-10-04) | Re-run on 1.3.177-beta: 24 fixed in 1.3, 3 changed, 13 still there, 14 not reproducible on 1.2.0-beta.556 either | 34 not shared, 8 shared (7 fixed, 1 kept on purpose), 12 not applicable or the same by design (2026-10-04) |
+| Moving a StyleCop-clean repo | (the starting point) | Files changed after `bro migrate --write` + `dotnet format`: MIGRATION_SUMMARY ([Migration](#migration)) |
 | Baseline (fail only on new violations) | No | Yes (`bro baseline`) |
 | Multi-targeted projects | Not measured | Fix All merges each target framework's copy itself (no conflict markers in Newtonsoft.Json, 8 frameworks); `bro format` works around the SDK's IDE0055 crash |
-| Release status | 1.2.0-beta.556 (beta for years; last stable 1.1.118) | 0.8.0-alpha.1 on nuget.org (129 rules), a prerelease |
+| Release status | 1.3.177-beta (a beta; last stable 1.1.118); 1.2.0-beta.556 before it | 0.8.0-alpha.1 on nuget.org (129 rules), a prerelease |
 
 ## What it is
 
@@ -28,111 +31,129 @@ reporting something it can't fix.
 Formatting the SDK already handles (spacing, indentation, using order, modifier order, ...) isn't duplicated: StyleBro's
 preset sets the SDK's options and `bro init` turns the SDK rules on.
 
-StyleCop's fixes, run under `dotnet format`, from [differences-from-stylecop.md](differences-from-stylecop.md#same-reports-different-fix):
+StyleCop's own fixes, run under `dotnet format` (`dotnet format analyzers --diagnostics <id>`, up to three runs, LF
+files) on one small case per claim, 2026-11-07, both versions
+([differences-from-stylecop.md](differences-from-stylecop.md#same-reports-different-fix) has every rule):
 
-- **No fix, or none that works there:** SA1108, SA1114, SA1115, SA1117, SA1125, SA1612/SA1613/SA1620/SA1621/SA1627;
-  SA1141's fix has no Fix All and SA1142's throws.
-- **Renames:** the naming rules (SA1300-SA1314) lower or remove only the first letter or prefix (`MAX_VALUE` -> `MAXVALUE`), and under
-  `dotnet format` apply part of the renames per run or nothing; SA1316 renames the declaration only, so every use
-  breaks the build.
-- **Fixes that lose or mangle code:** SA1132 keeps attributes on the first field only (`[Obsolete]` disappears from the others);
-  SA1501/SA1502 write `{` at column 1 in nested blocks and CRLF into LF files; SA1504 collapses or expands the accessors
-  of every property in the project the same way; SA1633 deletes a plain comment header (license
-  text) when it writes the XML header.
-- **More runs:** nested initializers need several runs for SA1413 (StyleCop issue
-  [#3953](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3953): three); SA1120 and SA1103 leave work for
-  the next run.
+- **No fix, or none that works there:** SA1108, SA1125, SA1613, SA1620, SA1621, SA1627 have no fix (41 of 1.3's 203
+  diagnostics have none). SA1141's fix has no Fix All, so nothing changes; SA1142's throws on a `t?.Item1` and then
+  fixes nothing in the project. SA1302, SA1314 and SA1316 have no Fix All under `dotnet format` either: nothing is
+  renamed.
+- **Renames:** the naming rules (SA1300-SA1314) lower or remove only the first letter or prefix (`MAX_VALUE` ->
+  `MAXVALUE`, `m_Upper` -> `Upper`), and a parameter of an implementing method needs a second run. In 1.3 a
+  `_name` whose new name collides isn't fixed, and which of the other renames lands depends on the order.
+- **Fixes that change more than the finding:** SA1501/SA1502 write `{` at column 1 in a block nested in an `if` or a
+  lambda and split `} while (x);`; SA1504 collapses or expands the accessors of every property in the project the same
+  way (which way differs between runs); SA1633 replaces a plain comment header (license text) with the XML header.
+- **More runs:** SA1120, SA1103, SA1516 (two members on one line) and nested accessors under SA1501/SA1502 leave
+  work for the next run.
+
+1.3 fixed what these pages said about 1.2 for SA1114, SA1115, SA1117 and SA1612 (fixes now), SA1413 (nested
+initializers in one run, was three: [#3953](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3953)), SA1116
+(a moved lambda's body now moves with it), SA1504's fix deleting a `//` comment, and line endings (1.2's fixes wrote
+CRLF into LF files: 44 lines in one SA1501 case; 1.3's write none). Two claims these pages made about 1.2 didn't
+reproduce on either version: SA1132's fix copies the attributes and documentation to every field, and SA1316's fix
+doesn't run under `dotnet format` at all (instead of renaming only the declaration).
 
 ## Coverage
 
-StyleCop 1.2 has 197 diagnostics ([stylecop-mapping.md](stylecop-mapping.md), [backlog.md](https://github.com/bisforboman/stylebro/blob/generated/docs/backlog.md#summary)):
+StyleCop 1.3.177-beta has 203 diagnostics, 6 more than 1.2.0-beta.556 (SA1143, SA1315, SA1317, SA1653, SA1654,
+SX1412), read from its DLLs ([stylecop-mapping.md](stylecop-mapping.md), [skipped-rules.md](skipped-rules.md);
+counted from `scripts/stylecop-survey/data/mapping.csv`):
 
 | | Diagnostics | |
 |---|---:|---|
-| StyleBro rule | 106 | 92 BRO rules replace them; differences listed in [differences-from-stylecop.md](differences-from-stylecop.md) |
-| .NET SDK rule | 45 | Spacing, indentation, using order, modifier order and more: the preset sets the options, `bro init` the severities |
-| Dropped: no safe automatic fix | 32 | [skipped-rules.md](skipped-rules.md#dropped-no-safe-automatic-fix) |
-| Dropped: StyleCop never reports it | 10 | SA1109, SA1126, SA1301, SA1409, SA1628, SA1630-SA1632, SA1644, SA1650 |
-| Variants, not applicable | 4 | SA1119_p, SX1309S, SA0001, SA0002 |
+| StyleBro rule | 109 | Differences listed in [differences-from-stylecop.md](differences-from-stylecop.md) |
+| .NET SDK rule | 44 | Spacing, indentation, using order, modifier order and more: the preset sets the options, `bro init` the severities |
+| Dropped: no safe automatic fix | 34 | [skipped-rules.md](skipped-rules.md#dropped-no-safe-automatic-fix) |
+| Dropped: StyleCop never reports it | 10 | SA1109, SA1126, SA1301, SA1409, SA1628, SA1630-SA1632, SA1644, SA1650 (probed on 1.3.177-beta; SA1628 and SA1644 are empty analyzers in its source) |
+| Not yet: new in 1.3 | 4 | SA1143, SA1315 and SA1654 have a close StyleBro rule ([BRO1524](rules/BRO1524.md), [BRO1313](rules/BRO1313.md), [BRO1617](rules/BRO1617.md)) that `bro migrate` doesn't map yet; SX1412 is the SDK's `charset = utf-8`, which `bro migrate` doesn't write yet |
+| Not applicable | 2 | SA0001, SA0002 |
 
-Why the 32 are dropped ([skipped-rules.md](skipped-rules.md) has every one, with what revisiting would take):
+The SDK column was re-measured on 1.3.177-beta (`Test-SdkCoverage.ps1`): the same verdicts as on 1.2.0-beta.556 for
+every rule, plus SX1412.
+
+Why the 34 are dropped ([skipped-rules.md](skipped-rules.md) has every one, with what revisiting would take):
 
 - **They need text only a person can write.** Missing documentation (SA1601, SA1602, SA1604-SA1611, SA1614-SA1616,
   SA1618, SA1619, SA1622): the only automatic fix is placeholder text, which satisfies the rule and documents nothing
   (SA1600 alone: ~28,000 findings in the three surveyed StyleCop repos). StyleBro adds `/// <inheritdoc/>` to
-  overrides and interface implementations, where that's a real fix (BRO1601).
+  overrides and interface implementations, where that's a real fix (BRO1601). Names with non-Latin letters (SA1317,
+  new in 1.3) need a name a person chooses.
 - **They need code moved between files or files renamed** (SA1402, SA1403, SA1649), which `dotnet format` can't do.
 - **They have no deterministic fix:** SA1118 (where to break a multi-line argument), SA1401 (fields should be private),
-  SA1404-SA1406 (justification and message text), SA1414 (tuple element names), SA1625, SA1645-SA1648 and others.
+  SA1404-SA1406 (justification and message text), SA1414 (tuple element names), SA1653 (which part of a partial type
+  keeps the `<summary>`, new in 1.3), SA1625, SA1645-SA1648 and others.
 
 ## Speed
 
-Measured 2026-10-05 with [scripts/benchmark](https://github.com/bisforboman/stylebro/blob/main/scripts/benchmark/README.md) in `compare` mode on Newtonsoft.Json's main
-project (`Src/Newtonsoft.Json` at `52fa3ae`, 242 files): both analyzer DLLs load into one process and take turns on
-freshly parsed sources (which goes first alternates, garbage collection before each), single-threaded, compiler
-telemetry per analyzer, each analyzer's fastest of 20-30 runs, summed. StyleCop: `StyleCop.Analyzers.dll` from the
-StyleCop.Analyzers.Unstable 1.2.0.556 package (what StyleCop.Analyzers 1.2.0-beta.556 installs). StyleBro: a Release
-build of `src/StyleBro.Analyzers` from `main` (`fb430c4`). Each tool runs with its default rule set and no
-configuration.
+Measured 2026-11-07 with [scripts/benchmark](https://github.com/bisforboman/stylebro/blob/main/scripts/benchmark/README.md)
+in `compare` mode (`Compare-Releases.ps1 -Versions stylecop:1.3.177-beta,stylecop -Runs 20 -Repeat 3`) on
+Newtonsoft.Json's main project (`Src/Newtonsoft.Json` at `52fa3ae`, 242 files): both analyzer DLLs load into one
+process and take turns on freshly parsed sources (which goes first alternates, garbage collection before each),
+single-threaded, compiler telemetry per analyzer, each analyzer's fastest of 20 runs, summed. StyleCop:
+`StyleCop.Analyzers.dll` from the StyleCop.Analyzers 1.3.177-beta package (and, for comparison, from
+StyleCop.Analyzers.Unstable 1.2.0.556, what 1.2.0-beta.556 installs). StyleBro: a Release build of
+`src/StyleBro.Analyzers` from `main` (`5aa09f5`). Each tool runs with its default rule set and no configuration. A
+cloud container with 4 cores, nothing else running.
 
-| Run | StyleCop.Analyzers (182 analyzers, 197 diagnostics) | StyleBro (66 analyzers, 118 rules) | Ratio |
-|---|---:|---:|---:|
-| 1 | 2,171 ms | 687 ms | 3.2x |
-| 2 | 1,467 ms | 435 ms | 3.4x |
-| 3 | 1,291 ms | 411 ms | 3.1x |
+| Run | StyleCop 1.3.177-beta (188 analyzers) | StyleBro (76 analyzers, 129 rules) | Ratio | StyleCop 1.2.0-beta.556 (182 analyzers) |
+|---|---:|---:|---:|---:|
+| 1 | 1,077 ms | 356 ms | 3.0x | 1,695 ms |
+| 2 | 1,065 ms | 353 ms | 3.0x | 1,709 ms |
+| 3 | 1,057 ms | 347 ms | 3.0x | 1,720 ms |
 
-Other builds were running on the machine at the same time, so the totals swing by up to 70 % between runs; the
-alternation exposes both tools to the same noise, and the ratio held. StyleCop's slowest: SA1121 (159 ms), SA1101
-(143 ms), SA1027 (109 ms). StyleBro's: FieldNamingAnalyzer (72 ms), DocumentationAnalyzer (66 ms),
-CommentSpacingAnalyzer (59 ms) (run 1).
+(StyleBro's column is from the 1.3 runs; in the 1.2 runs it took 351-357 ms.) 1.3 is about 38 % faster than 1.2:
+SA1121 went from 109-112 ms to under 32 ms, SA1027 from 73-74 ms to 39 ms. StyleCop 1.3's slowest: SA1101 (121-129
+ms), SA1000 (56-57 ms), SA1625 (45 ms). StyleBro's: the shared tree walk (46 ms), DocumentationAnalyzer (39 ms),
+BlankLineRunsAnalyzer (23 ms) (run 1).
 
 Not the same work: StyleCop's number includes spacing and indentation rules that StyleBro leaves to the SDK (IDE0055 and
 the other rules `init` turns on), whose cost isn't in StyleBro's number. In a real build analyzers run concurrently with
 the compiler, so the wall-clock difference is smaller: a private app built in the same time with and without StyleBro
-(9-12 s either way), Newtonsoft.Json 8.4 -> ~11.8 s with every StyleBro rule ([performance notes](https://github.com/bisforboman/stylebro/blob/main/docs/notes/performance.md), 2026-10-02, alpha.8). An
-earlier figure of 1,671 ms for StyleCop came from the benchmark before it parsed fresh sources per run and isn't
-comparable.
+(9-12 s either way), Newtonsoft.Json 8.4 -> ~11.8 s with every StyleBro rule ([performance notes](https://github.com/bisforboman/stylebro/blob/main/docs/notes/performance.md), 2026-10-02, alpha.8).
 
 ## Correctness
 
-- **StyleCop's open bugs** ([differences-from-stylecop.md](differences-from-stylecop.md#stylecops-open-bugs),
-  2026-10-04): every open issue on a rule StyleBro replaces was read; the 54 that describe behavior StyleBro could share
-  were run against StyleBro. 34 aren't shared, for example: SA1201's fix moves a method into `#if DEBUG`
-  ([#1588](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1588)), SA1309's rename doesn't compile
-  ([#2939](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2939)), SA1135 crashes on `using X = string;`
-  ([#3882](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3882)), fixes write CRLF into LF files
-  ([#3656](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3656)). 8 were shared: 7 fixed, 1 kept like
-  StyleCop by the owner's decision.
-- **Parity with StyleCop:** 42 parity sets run both tools on edge-case files and compare positions and fixed output;
-  every difference must be a documented deviation ([scripts/stylecop-survey](https://github.com/bisforboman/stylebro/tree/main/scripts/stylecop-survey)). StyleCop's
-  unreleased `master` was compared too: where it fixed a gap, StyleBro follows it.
-- **Real-world check on every pull request:** every rule on 8 public repositories (FFMpegCore, Polly, OpenTelemetry,
-  Newtonsoft.Json, Serilog, Jellyfin, FluentValidation, CsvHelper; `scripts/realworld/repos.psd1`). A pull request fails
-  on an analyzer crash, a new compile error, a merge conflict marker, more than 2 `dotnet format` runs to converge, or a
-  test that passed on the untouched code and fails after the fixes. Running the tests found what compiling didn't:
-  renames that broke reflection and serialization, member sorting that changed serialized JSON order. Those cases are
-  now skipped; one known failure is left (Newtonsoft.Json's `MemberSearchFlags` serializes an attribute-less class's
-  private fields by reflection, in declaration order).
-- **Mutation testing:** 320 guards (`scripts/mutation/entries/`) are each broken on purpose; a test must fail for
+- **StyleCop's bugs** ([differences-from-stylecop.md](differences-from-stylecop.md#stylecops-open-bugs)): on
+  2026-10-04 every open issue on a rule StyleBro replaces was read, and the 54 that describe behavior StyleBro could
+  share were run against StyleBro: 34 weren't shared, 8 were (7 fixed, 1 kept like StyleCop by the owner's decision).
+  StyleCop has closed all but one of those 54 since. On 2026-11-07 each was rebuilt as a small case and run on
+  1.2.0-beta.556 and 1.3.177-beta: 24 are fixed in 1.3 (for example SA1201 on C# 14 extension blocks,
+  [#3955](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3955); SA1309's rename that didn't compile,
+  [#2939](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2939); SA1135's crash on `using X = string;`,
+  [#3882](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3882); CRLF in LF files,
+  [#3656](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3656)), 3 changed, 13 are still there, and 14
+  don't reproduce on 1.2.0-beta.556 either.
+- **Parity with StyleCop:** 50 parity sets run both tools on edge-case files and compare positions and fixed output;
+  every difference must be a documented deviation ([scripts/stylecop-survey](https://github.com/bisforboman/stylebro/tree/main/scripts/stylecop-survey)).
+  The sets are written against 1.2.0-beta.556. Run against 1.3.177-beta, 30 of the 50 give the same results; in the
+  other 20, 1.3 now does what StyleBro does for 15 rules where 1.2 didn't, and differs from it in 12 new places
+  ([Changed in StyleCop 1.3](differences-from-stylecop.md#changed-in-stylecop-13)).
+- **Real-world check:** every rule on 13 public repositories (`scripts/realworld/repos.psd1`), on every pull request
+  that changes code. A pull request fails on an analyzer crash, a new compile error, a merge conflict marker, more
+  than 2 `dotnet format` runs to converge, or a test that passed on the untouched code and fails after the fixes.
+  Running the tests found what compiling didn't: renames that broke reflection and serialization, member sorting that
+  changed serialized JSON order. Those cases are now skipped; one known failure is left (Newtonsoft.Json's
+  `MemberSearchFlags` serializes an attribute-less class's private fields by reflection, in declaration order).
+- **Mutation testing:** 2,224 guards (`scripts/mutation/entries/`) are each broken on purpose; a test must fail for
   every one.
-- **Unit tests:** 842, including every example on every rule page (before compiles and is reported, one Fix All pass
-  gives exactly the after, the after is clean).
+- **Unit tests:** UNIT_TESTS, including every example on every rule page (before compiles and is reported, one Fix All
+  pass gives exactly the after, the after is clean).
 
 ## Migration
 
 `bro` ([migrating.md](migrating.md)) reads a repository's StyleCop setup (rulesets, global configs,
-`.editorconfig` files, `stylecop.json`, the StyleCop version) and writes StyleBro and SDK settings that match it, carries
-`#pragma warning disable SA...`, `[SuppressMessage]` and `<NoWarn>` suppressions over to the replacing rules, and
-reports the StyleCop rules nothing enforces any more.
+`.editorconfig` files, `stylecop.json`, the StyleCop version: 1.0, 1.1, 1.2 or 1.3) and writes StyleBro and SDK settings
+that match it, carries `#pragma warning disable SA...`, `[SuppressMessage]` and `<NoWarn>` suppressions over to the
+replacing rules, and reports the StyleCop rules nothing enforces any more. Coming from 1.3:
+[migrating.md](migrating.md#coming-from-stylecop-13).
 
-Files `dotnet format` changes after `bro migrate --write` on repositories that were StyleCop-clean ([real-world log](https://github.com/bisforboman/stylebro/blob/main/docs/notes/real-world-log.md),
-"Migration re-measured with the SDK replacements", 2026-10-03; `scripts/stylecop-survey/Measure-MigrationDelta.ps1`):
+Files `dotnet format` changes after `bro migrate --write` on repositories that were StyleCop-clean, measured
+2026-11-07 with `scripts/stylecop-survey/Measure-MigrationDelta.ps1` (a plain `dotnet format` first as the baseline,
+then `bro migrate --write`, then `dotnet format` with StyleBro and without StyleCop):
 
-| Repository | Files changed | What |
-|---|---:|---|
-| Polly | 1 | A file plain `dotnet format` already breaks (conflict markers in a multi-targeted file), not StyleBro |
-| OpenTelemetry | 1 | A line ending in a file with mixed line endings |
-| A private app | 7 | 6 line-ending-only, 1 BRO1104 on a target-typed `new()`, which the older StyleCop version used there misses (1.2 reports it) |
+MIGRATION_TABLE
 
 The rules StyleCop doesn't have are turned off by the migration, so they change nothing there.
 
@@ -147,12 +168,14 @@ The rules StyleCop doesn't have are turned off by the migration, so they change 
 
 ## Beyond StyleCop
 
-26 rules StyleCop doesn't have ([differences-from-stylecop.md](differences-from-stylecop.md#rules-beyond-stylecop),
+33 rules StyleCop doesn't have, not even in 1.3 ([differences-from-stylecop.md](differences-from-stylecop.md#rules-beyond-stylecop),
 chosen in [beyond-stylecop.md](https://github.com/bisforboman/stylebro/blob/main/docs/beyond-stylecop.md) from Roslynator, Meziantou, Sonar and StyleCop's issue tracker),
 each with a fix like every other rule. For example: null checks in one form (BRO1133), operator placement when an
 expression wraps (BRO1520), split call chains one call per line (BRO1523), no `$`/`@` a plain string doesn't need
-(BRO1138), generic crefs in braces (BRO1617), no `else` after a jump (BRO1143, off by default). The preset turns 22
-of them on; `bro migrate` turns them off, so migrating changes nothing until you opt in.
+(BRO1138), no `else` after a jump (BRO1143, off by default). Three more were proposals in StyleCop's tracker that 1.3
+now ships: BRO1313 (parameter names of overrides, like SA1315), BRO1617 (generic crefs in braces, like SA1654) and
+BRO1524 (split conditional expressions, close to SA1143). `bro migrate` turns all of them off, so migrating changes
+nothing until you opt in.
 
 `bro init --modernize` ([modernizing.md](modernizing.md)) turns on the SDK's own rules for newer C# and
 APIs in tiers, and StyleBro's multi-target guard hides a newer-API rule in a project where one target framework lacks
@@ -169,6 +192,9 @@ What StyleBro doesn't do:
 - **Baseline whitespace formatting.**
 - **Rename everything it reports:** a field whose name appears in a string elsewhere (reflection, serialization) keeps
   its name and its warning (Newtonsoft.Json: 49 such names, 2026-10-01).
+- **Follow every 1.3 change yet:** 12 behaviors StyleCop changed in 1.3 (for example SA1407 checking `&`, `|`, `^` and
+  `>>>`, SA1413 checking collection expressions) aren't in StyleBro; each is listed in
+  [Changed in StyleCop 1.3](differences-from-stylecop.md#changed-in-stylecop-13).
 
 Where it deliberately differs from StyleCop's defaults ([differences-from-stylecop.md](differences-from-stylecop.md#preset-choices)):
 no `this.` prefix, usings outside the namespace, region removal (BRO1112) and namespace-name casing (BRO1312) off, and the

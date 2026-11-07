@@ -162,8 +162,8 @@ real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro
   links from a submodule are another matter: see [excluding vendored code](vendored-code.md#excluding-vendored-code).
 - The StyleCop.Analyzers version: from a `PackageReference` or `PackageVersion`, a `packages.config` entry, or an
   `<Analyzer>` hint path into a `packages` folder (old-style projects). Rules the version's DLL doesn't have count as
-  off: with 1.1.x the rules added in 1.2 (SA1141, SA1142, SA1316, SA1414), with 1.0.x also SA1135, SA1136, SA1137,
-  SA1139, SA1314 and SA1413. 1.1.x's SA1413 doesn't check switch expressions yet: the migration writes
+  off: with 1.2.x the rules added in 1.3 (SA1143, SA1315, SA1317, SA1653, SA1654, SX1412), with 1.1.x also the rules
+  added in 1.2 (SA1141, SA1142, SA1316, SA1414), with 1.0.x also SA1135, SA1136, SA1137, SA1139, SA1314 and SA1413. 1.1.x's SA1413 doesn't check switch expressions yet: the migration writes
   `stylebro_trailing_comma_switch_expressions = false`, so [BRO1401](rules/BRO1401.md) leaves them alone too. 1.1.x's
   SA1629 doesn't check enum members' documentation: the migration writes `stylebro_punctuation_check_enum_members = false`
   for [BRO1603](rules/BRO1603.md).
