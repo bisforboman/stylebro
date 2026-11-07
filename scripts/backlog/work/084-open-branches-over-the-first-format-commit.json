@@ -1,0 +1,6 @@
+{
+  "area": "Agents",
+  "item": "Open branches over the first format commit: a recipe, maybe bro catch-up",
+  "notes": "docs/proposals/agents-in-consumer-repos.md, section 1 (owner's question 2026-11-07): getting-started.md says the first format commit conflicts with open pull requests and stops there. Because the fixes are deterministic, a branch catches up mechanically: merge the commit before it, take its settings, bro format, merge it with -X ours, bro check. To decide: the recipe in getting-started.md only, or also a command that runs it.",
+  "status": "Idea"
+}

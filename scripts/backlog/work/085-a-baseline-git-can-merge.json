@@ -1,0 +1,6 @@
+{
+  "area": "Agents",
+  "item": "A baseline git can merge: duplicates take the larger count, init writes merge=union",
+  "notes": "docs/proposals/agents-in-consumer-repos.md, section 2: bro format rewrites stylebro.baseline (kept findings added, stale entries removed), so parallel pull requests edit the same file. Duplicate lines add their counts today (Baseline.Parse), so a union merge would allow one violation too many; with the larger count, init and baseline can add 'stylebro.baseline merge=union' to .gitattributes.",
+  "status": "Idea"
+}

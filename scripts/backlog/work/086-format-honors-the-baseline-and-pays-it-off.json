@@ -1,0 +1,6 @@
+{
+  "area": "Hardening",
+  "item": "bro baseline --pay-off; warn when the SDK's format ignores the baseline",
+  "notes": "docs/proposals/agents-in-consumer-repos.md, section 3: on SDK 10.0.114 (bro format, 0.8.0-alpha.1 and main's host) and 8.0.133 (plain dotnet format), format fixed a fixable baselined violation and removed its entry, and bro check failed on it, while the build hid it: those SDKs' dotnet format loads no DiagnosticSuppressors. verify-package check 4 now checks it and passes on CI's SDK 10.0.403 (PR #334), so current SDKs are fine. To do: bro baseline --pay-off <folder or files> (format them with the baseline off, rewrite the baseline); maybe a warning from bro when a baseline exists and the SDK's format ignores it. docs/baseline.md's recipe now uses StyleBroBaseline=none.",
+  "status": "Idea"
+}
