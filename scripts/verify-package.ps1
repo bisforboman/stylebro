@@ -127,8 +127,8 @@ try {
     Remove-Item (Join-Path $eng 'stylebro.baseline')
     Set-Content (Join-Path $repo 'stylebro.baseline') $baselineText -NoNewline
     # A fixable baselined violation: 'bro check' agrees with the build, 'bro format' leaves it and keeps its entry, and with
-    # StyleBroBaseline=none (docs/baseline.md, "Keeping it small") format fixes it. On SDK 10.0.1xx, whose dotnet format
-    # loads no DiagnosticSuppressors, format fixed it and check failed (2026-11-07, docs/proposals/agents-in-consumer-repos.md).
+    # StyleBroBaseline=none (docs/baseline.md, "Keeping it small") format fixes it. Passes on CI's SDK 10.0.403; on SDK
+    # 10.0.1xx, whose dotnet format loads no DiagnosticSuppressors, format fixed it and check failed (2026-11-07).
     $oldFile = Join-Path $app 'Old.cs'
     $oldText = Get-Content $oldFile -Raw
     $bro = @('run', '--project', (Join-Path $root 'src/StyleBro.Migrate'), '--no-build', '--', 'format', $project, '--severity', 'warn')

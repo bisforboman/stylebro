@@ -52,10 +52,11 @@ Found while answering "how does one reduce the baseline": on a one-project repos
 10.0.1xx's `dotnet format` loads no DiagnosticSuppressors (the baseline is one), and FormatHost's comments describe the
 suppressor working on 10.0.4xx. Nothing checked it: verify-package's check 4 tested the build only, and check 8's
 baselined finding is a kept one, which no format fixes anyway. Check 4 now also checks that `bro check` passes and `bro
-format` changes nothing with a fixable baselined violation, and that `StyleBroBaseline=none bro format` fixes it. CI
-runs it on the newest SDK 10; if it fails there, it is a bug: one whole-repository `bro format` pays off the whole
-baseline (the one big change a baseline exists to avoid), and `bro check` fails in CI in every repository with a
-baseline.
+format` changes nothing with a fixable baselined violation, and that `StyleBroBaseline=none bro format` fixes it.
+**Result (PR #334, 2026-11-07): all three pass on CI's SDK 10.0.403**, so on a current SDK format honors the baseline.
+On an older SDK (10.0.1xx, and plain `dotnet format` on 8.0.1xx) one whole-repository `bro format` pays off the whole
+baseline and `bro check` fails on it. baseline.md now says so. Open: whether `bro` should warn on such an SDK when a
+baseline exists (backlog 086).
 
 Paying it off: baseline.md's recipe was "fix a folder (`dotnet format --include src/Orders`) and regenerate", which only
 worked where `dotnet format` ignores the baseline. It now says `StyleBroBaseline=none bro format <project>`, then `bro

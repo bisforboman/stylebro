@@ -100,3 +100,7 @@ bro baseline
 The variable works because the package only sets `<StyleBroBaseline>` when it's empty; a `Directory.Build.props` that
 sets it without a condition wins over it (add `Condition="'$(StyleBroBaseline)' == ''"` there). A project or a folder
 per pull request keeps each change small to review and unlikely to conflict with other open branches.
+
+**Use a current .NET SDK.** The baseline reaches `dotnet format` as a diagnostic suppressor, and older SDKs' `dotnet
+format` (10.0.1xx, 8.0.1xx) loads none: there, `bro format` fixes the baselined violations too (all of them, on a whole
+run) and `bro check` fails on them, although the build passes. SDK 10.0.4xx honors it.
