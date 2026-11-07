@@ -1,0 +1,23 @@
+{
+  "repo": "genaray/Arch",
+  "branch": "master",
+  "commit": "cbe716faa116dc61885be696a9af5f27ef9b896a",
+  "csFiles": 124,
+  "tags": [
+    "library",
+    "multi-target",
+    "tfm-white-space",
+    "if-in-bodies"
+  ],
+  "setups": "Arch.sln; library <TargetFrameworks>net8.0; net6.0; netstandard2.1</TargetFrameworks> (spaces) referenced by three net8.0 projects; 6 configurations (Debug/Release x plain, Events, PureECS) with '#if' symbols; .editorconfig with IDE severities; Directory.Build.targets only.",
+  "build": "ok",
+  "workaround": null,
+  "tests": "dotnet test Arch.sln (142 NUnit tests, all pass)",
+  "usedIn": "trial 69 (targeted)",
+  "verified": {
+    "by": "trial 69 session",
+    "date": "2026-11-07",
+    "sdks": "10.0.114, 8.0.133"
+  },
+  "notes": "Trial 68's white-space trim returned the list with an escaped ';': the projects referencing the library didn't load on the host (fixed in trial 69). Untouched TWAE build has 974 errors."
+}

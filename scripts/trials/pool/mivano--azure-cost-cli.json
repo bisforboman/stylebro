@@ -1,0 +1,21 @@
+{
+  "repo": "mivano/azure-cost-cli",
+  "branch": "main",
+  "commit": "f60f863014487c1edb9d2addcc6dcecbf7403e12",
+  "csFiles": 104,
+  "tags": [
+    "app",
+    "multi-target"
+  ],
+  "setups": "src/azure-cost-cli.sln; net8.0;net10.0 console app + xunit tests; Directory.Build.props (Nullable, ImplicitUsings, coverage); no .editorconfig.",
+  "build": "ok",
+  "workaround": null,
+  "tests": "dotnet test src/azure-cost-cli.sln (306 per framework; ConsoleOutputFormatterTests.WriteAnomalyDetectionResults_WithNoAnomalies_WritesNoAnomaliesMessage fails untouched)",
+  "usedIn": "trial 69 (random, seed 69)",
+  "verified": {
+    "by": "trial 69 session",
+    "date": "2026-11-07",
+    "sdks": "10.0.114, 8.0.133"
+  },
+  "notes": "Untouched TreatWarningsAsErrors build fails (342 errors), so check --build is Not verified (honest)."
+}
