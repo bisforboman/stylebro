@@ -225,6 +225,9 @@ internal static partial class FormatCommand
     /// <summary>How 'dotnet format' starts its note about workspace load warnings.</summary>
     private const string WorkspaceWarnings = "Warnings were encountered while loading the workspace";
 
+    /// <summary>How <see cref="Explain"/> says <see cref="WorkspaceWarnings"/> in plain words.</summary>
+    private const string WorkspaceWarningsNote = "'dotnet format' had warnings loading the workspace";
+
     /// <summary>The start of the line that names the files whose old Mac line endings format converted.</summary>
     private const string OldMacHeader = "Line endings:";
 
@@ -259,6 +262,9 @@ internal static partial class FormatCommand
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, bool> BuiltGenerators = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>The lines a run prints before its 'dotnet format' runs, which later runs and checks say once.</summary>
+    /// <summary>The headers about what a run does, not about the repository (<see cref="IsRecordedNote"/>).</summary>
+    private static readonly string[] RunHeaders = [FixingHeader, CheckingHeader, "Using ", "Engine: ", OldMacHeader, GeneratorsHeader];
+
     private static readonly string[] Headers = [FixingHeader, XunitHeader, HeldBackHeader, IfBodiesHeader, ProtectedHeader, NotAsErrorsHeader, CodeStyleHeader, VisualBasicHeader, GeneratorsHeader, CheckingHeader, MultiTargetedHeader, ConfigurationsHeader, MissingHeader, SharedFilesHeader, TraversalHeader, "Using ", "Engine: ", NoWhitespaceHeader, PartlyWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader, PartlyLoadedHeader, NotBuiltHeader];
 
     /// <summary>The projects and configurations a --verify-no-changes run on a folder couldn't check (<see cref="RecordUnchecked"/>), per folder.</summary>
@@ -1070,6 +1076,16 @@ internal static partial class FormatCommand
     /// </summary>
     public static bool IsHeaderLine(string line) => Headers.Any(h => line.StartsWith(h, StringComparison.Ordinal));
 
+    /// <summary>
+    /// Whether a line of format's first run is a note about the repository that a check prints too, so format's record keeps it
+    /// and the check from the record says it again (backlog 083; owner's decision 2026-11-07): the header lines, but not those
+    /// about what the run does (the rules it fixes, the engine, the line endings it converted, the generators it builds), and
+    /// the workspace warnings' note.
+    /// </summary>
+    public static bool IsRecordedNote(string line) =>
+        line.StartsWith(WorkspaceWarningsNote, StringComparison.Ordinal)
+        || (IsHeaderLine(line) && !RunHeaders.Any(h => line.StartsWith(h, StringComparison.Ordinal)));
+
     /// <summary>Whether a line of 'dotnet format''s output says it crashed (an unhandled exception: its changes may be half written).</summary>
     public static bool IsCrash(string line) => line.StartsWith("Unhandled exception", StringComparison.Ordinal);
 
@@ -1225,8 +1241,8 @@ internal static partial class FormatCommand
             ? ("skipped:" + skipped, $"'dotnet format' skipped {skipped}: MSBuild couldn't load it or a project it references for this run (often reference assemblies missing for its target framework). The restore isn't the cause; {see} to see MSBuild's message (\"Msbuild failed when processing the file ...\"){where}.")
             : line.StartsWith(WorkspaceWarnings, StringComparison.Ordinal)
                 ? (WorkspaceWarnings, restoreWarning is null
-                    ? $"'dotnet format' had warnings loading the workspace{where}; they don't stop the run. To see them, {see}."
-                    : $"'dotnet format' had warnings loading the workspace{where}; they don't stop the run. The restore warned too, likely the same: {restoreWarning} To see them all, {see}.")
+                    ? $"{WorkspaceWarningsNote}{where}; they don't stop the run. To see them, {see}."
+                    : $"{WorkspaceWarningsNote}{where}; they don't stop the run. The restore warned too, likely the same: {restoreWarning} To see them all, {see}.")
                 : (null, line);
         if (key is null)
         {
@@ -3679,7 +3695,7 @@ internal static partial class FormatCommand
     /// then, the generator <paramref name="builds"/> it makes after it, and the line it says about them, <paramref name="generatorLine"/>),
     /// verify answers from the record (<see cref="VerifyFromRecord"/>).
     /// </summary>
-    public static void SaveKept(string root, IEnumerable<string> args, IEnumerable<KeptFinding> kept, IReadOnlyCollection<string>? verdict = null, IReadOnlyCollection<(string Project, string Configuration)>? builds = null, string? generatorLine = null, IReadOnlyCollection<string>? rawStringGaps = null)
+    public static void SaveKept(string root, IEnumerable<string> args, IEnumerable<KeptFinding> kept, IReadOnlyCollection<string>? verdict = null, IReadOnlyCollection<(string Project, string Configuration)>? builds = null, string? generatorLine = null, IReadOnlyCollection<string>? rawStringGaps = null, IReadOnlyCollection<string>? notes = null)
     {
         try
         {
@@ -3690,6 +3706,7 @@ internal static partial class FormatCommand
                 : verdict.Select(v => VerdictMark + v)
                     .Concat((builds ?? []).Select(b => $"{BuildMark}{b.Project}\t{b.Configuration}"))
                     .Concat(generatorLine is null || builds is not { Count: > 0 } ? [] : [GeneratorMark + generatorLine])
+                    .Concat((notes ?? []).Select(n => NoteMark + n))
                     .Prepend(CheckedMark);
             File.WriteAllLines(file, kept.Select(k => k.ToString()).Concat(checks).Concat((rawStringGaps ?? []).Select(g => RawStringMark + g)).Prepend(StateKey(root, args)));
         }
@@ -5217,6 +5234,9 @@ internal static partial class FormatCommand
         // The files the raw string guard kept in any run (RawStringGapEnd): a later run may not try the fix again, the file is still as it was.
         var rawStringGaps = new SortedSet<string>(StringComparer.Ordinal);
 
+        // The first run's notes about the repository (IsRecordedNote), for the record: the check from it says them again.
+        var notes = new List<string>();
+
         // CSharpier, where the repository formats with it: on the files each run changed (owner's decision 2026-10-16).
         var csharpier = CSharpierStep.Find(root);
 
@@ -5261,6 +5281,11 @@ internal static partial class FormatCommand
 
                 if (run == 1)
                 {
+                    if (IsRecordedNote(line) && !notes.Contains(line))
+                    {
+                        notes.Add(line);
+                    }
+
                     (output ?? Console.WriteLine)(line);
                 }
                 else if (!IsHeaderLine(line))
@@ -5392,7 +5417,7 @@ internal static partial class FormatCommand
                 {
                     // The run's check reported the kept findings (and nothing else), so verify's does, and ends with these lines.
                     // Not after a run that changed files (endings only): its check was of the files before.
-                    SaveKept(root, args, keptFindings, checkedClean && changed.Count == 0 ? CleanVerdict(root, keptFindings, heldBackNotes) : null, UncheckedByFormat.TryRemove(Key(root), out var builds) ? builds : null, GeneratorLines.TryRemove(Key(root), out var generatorLine) ? generatorLine : null, rawStringGaps);
+                    SaveKept(root, args, keptFindings, checkedClean && changed.Count == 0 ? CleanVerdict(root, keptFindings, heldBackNotes) : null, UncheckedByFormat.TryRemove(Key(root), out var builds) ? builds : null, GeneratorLines.TryRemove(Key(root), out var generatorLine) ? generatorLine : null, rawStringGaps, notes);
                 }
 
                 JsonReport.AddKept(keptFindings);

@@ -46,6 +46,9 @@ internal static partial class FormatCommand
     /// <summary>The start of a record line with a gap line for a file the raw string guard kept (<see cref="RecordedRawStringGaps"/>).</summary>
     private const string RawStringMark = "#rawstring\t";
 
+    /// <summary>The start of a record line with a note format's first run said about the repository (<see cref="IsRecordedNote"/>).</summary>
+    private const string NoteMark = "#note\t";
+
     /// <summary>The roots whose last 'format' run (not --verify-no-changes) was a check of every plan entry that was clean (<see cref="IsCleanCheck"/>).</summary>
     private static readonly ConcurrentDictionary<string, bool> CheckedClean = new(StringComparer.OrdinalIgnoreCase);
 
@@ -317,7 +320,8 @@ internal static partial class FormatCommand
                 body.Where(l => l.StartsWith(VerdictMark, StringComparison.Ordinal)).Select(l => l.Substring(VerdictMark.Length)).ToList(),
                 body.Where(l => l.StartsWith(BuildMark, StringComparison.Ordinal)).Select(l => l.Split('\t')).Where(p => p.Length == 3).Select(p => (p[1], p[2])).ToList(),
                 body.FirstOrDefault(l => l.StartsWith(GeneratorMark, StringComparison.Ordinal))?.Substring(GeneratorMark.Length),
-                body.Where(l => l.StartsWith(RawStringMark, StringComparison.Ordinal)).Select(l => l.Substring(RawStringMark.Length)).ToList());
+                body.Where(l => l.StartsWith(RawStringMark, StringComparison.Ordinal)).Select(l => l.Substring(RawStringMark.Length)).ToList(),
+                body.Where(l => l.StartsWith(NoteMark, StringComparison.Ordinal)).Select(l => l.Substring(NoteMark.Length)).ToList());
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
@@ -357,6 +361,10 @@ internal static partial class FormatCommand
         }
 
         log($"{FromRecordHeader} (the code, settings, options and the SDK, package and tool versions are the same), so its check of every run stands: nothing to run again.");
+
+        // What a full check says about the repository before its verdict, as format said it (backlog 083: "Leaving alone",
+        // "Old CodeStyle package", "Configurations", "Without StyleBro", the workspace warnings).
+        (record.Notes ?? []).ForEach(log);
 
         // What format said about submodules that aren't checked out, said again: it reads only .gitmodules (trial 60).
         if (UncheckedOutSubmodules(RepositoryRoot(root) ?? root) is { Count: > 0 } submodules)
@@ -518,5 +526,5 @@ internal static partial class FormatCommand
     }
 
     /// <summary>What a clean 'format' recorded for --verify-no-changes (<see cref="LoadRecord"/>).</summary>
-    public sealed record CleanRecord(List<KeptFinding> Kept, bool Checked, List<string> Verdict, List<(string Project, string Configuration)> Builds, string? GeneratorLine, List<string>? RawStringGaps = null);
+    public sealed record CleanRecord(List<KeptFinding> Kept, bool Checked, List<string> Verdict, List<(string Project, string Configuration)> Builds, string? GeneratorLine, List<string>? RawStringGaps = null, List<string>? Notes = null);
 }
