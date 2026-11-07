@@ -1598,6 +1598,26 @@ internal sealed class StyleCopSetup
             }
         }
 
+        // The folder that holds a file, then a path below it (OpenTelemetry's src/Directory.Build.props imports
+        // '$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), 'OpenTelemetry.slnx'))\build\Common.prod.props';
+        // not followed, no project had its ruleset, SA1512 and SA1600 counted as on and BRO1601 wrote 418 '<inheritdoc/>').
+        // ponytail: the search starts at the importing file's folder, which is the project's or above it.
+        var nameAbove = Regex.Match(value, @"^\$\(\[MSBuild\]::GetDirectoryNameOfFileAbove\(\s*(?<start>[^,]+?)\s*,\s*'?(?<name>[^',)]+?)'?\s*\)\)(?<rest>.*)$", RegexOptions.IgnoreCase);
+        if (nameAbove.Success)
+        {
+            var start = nameAbove.Groups["start"].Value.Trim('\'');
+            start = start.Contains("$(", StringComparison.Ordinal) ? directory : Path.GetFullPath(Path.Combine(directory, start));
+            value = string.Empty;
+            for (var folder = new DirectoryInfo(start); folder is not null; folder = folder.Parent)
+            {
+                if (File.Exists(Path.Combine(folder.FullName, nameAbove.Groups["name"].Value)))
+                {
+                    value = folder.FullName + nameAbove.Groups["rest"].Value;
+                    break;
+                }
+            }
+        }
+
         if (value.Length == 0 || value.Contains("$(", StringComparison.Ordinal) || value.Contains("@(", StringComparison.Ordinal) || value.Contains('*') || value.Contains(';'))
         {
             return null;
