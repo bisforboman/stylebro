@@ -1,0 +1,6 @@
+{
+  "area": "Hardening",
+  "item": "Format honors the baseline; bro baseline --pay-off",
+  "notes": "docs/proposals/agents-in-consumer-repos.md, section 3: on SDK 10.0.114 and 8.0.133, bro format (0.8.0-alpha.1 and main's host) fixed a fixable baselined violation and removed its entry, and bro check failed on it, while the build hid it. Likely the SDK (10.0.1xx's dotnet format loads no suppressors); verify-package check 4 now checks it on CI's SDK. If it fails there: fix it. Then bro baseline --pay-off <folder or files>: format them with the baseline off and rewrite the baseline. docs/baseline.md's recipe now uses StyleBroBaseline=none.",
+  "status": "Open"
+}

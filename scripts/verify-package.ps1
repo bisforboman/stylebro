@@ -5,7 +5,8 @@
 #   2. <StyleBroPreset>none</StyleBroPreset> turns it off;
 #   3. 'bro init --diff' previews without writing; after 'init --write', 'dotnet format' fixes the built-in rules too (their severities come from
 #      .editorconfig) and applies the preset's formatting options; a second run changes nothing;
-#   4. a stylebro.baseline above the project hides its violations, and a new violation is still reported;
+#   4. a stylebro.baseline above the project hides its violations, and a new violation is still reported; 'bro check'
+#      passes with a fixable baselined violation, 'bro format' leaves it, and with StyleBroBaseline=none fixes it;
 #   5. the multi-target guard: after 'init --modernize --write', 'dotnet format' applies the newer-API rules (tier C) in a
 #      single-target project and not in a netstandard2.0;net10.0 one, which still builds;
 #   6. BRO1145 (C# 12 syntax) isn't reported in a netstandard2.0;net10.0 project unless it sets LangVersion;
@@ -124,6 +125,21 @@ try {
     Check (-not ((Build) -contains 'BRO1106 Old.cs')) 'a relative StyleBroBaseline is found in a folder above the project'
     Set-Content $props $propsText -NoNewline
     Remove-Item (Join-Path $eng 'stylebro.baseline')
+    Set-Content (Join-Path $repo 'stylebro.baseline') $baselineText -NoNewline
+    # A fixable baselined violation: 'bro check' agrees with the build, 'bro format' leaves it and keeps its entry, and with
+    # StyleBroBaseline=none (docs/baseline.md, "Keeping it small") format fixes it. On SDK 10.0.1xx, whose dotnet format
+    # loads no DiagnosticSuppressors, format fixed it and check failed (2026-11-07, docs/proposals/agents-in-consumer-repos.md).
+    $oldFile = Join-Path $app 'Old.cs'
+    $oldText = Get-Content $oldFile -Raw
+    $bro = @('run', '--project', (Join-Path $root 'src/StyleBro.Migrate'), '--no-build', '--', 'format', $project, '--severity', 'warn')
+    dotnet @bro --verify-no-changes | Out-Host
+    Check ($LASTEXITCODE -eq 0) 'bro check exits 0 with only a baselined violation left'
+    dotnet @bro | Out-Host
+    Check ((Get-Content $oldFile -Raw) -eq $oldText -and (Get-Content (Join-Path $repo 'stylebro.baseline') -Raw) -eq $baselineText) 'bro format leaves the baselined violation and its entry'
+    $env:StyleBroBaseline = 'none'
+    try { dotnet @bro | Out-Host } finally { Remove-Item Env:StyleBroBaseline }
+    Check ((Get-Content $oldFile -Raw) -ne $oldText) 'with StyleBroBaseline=none, bro format fixes the baselined violation'
+    Set-Content $oldFile $oldText -NoNewline
     Set-Content (Join-Path $repo 'stylebro.baseline') $baselineText -NoNewline
     Add-Content (Join-Path $app 'Old.cs') "`ninternal class Newer`n{`n    public string Name = `"`";`n}`n"
     Check ((Build) -contains 'BRO1106 Old.cs') 'a new violation in the same file is reported'
