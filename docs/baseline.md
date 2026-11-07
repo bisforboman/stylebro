@@ -88,4 +88,19 @@ that). Renaming or moving a file makes all of its entries stale, so its violatio
 
 Regenerate the baseline whenever you like; it only ever lists what's still there. Entries for fixed code are harmless:
 they only match a line with exactly that text, up to their count, so a stale baseline is just longer than it needs to be.
-To pay off part of the debt, fix a folder (`dotnet format --include src/Orders`) and regenerate.
+`bro format` also removes the entries whose line is gone, so the baseline shrinks as the code gets edited.
+
+To pay off part of the debt, turn the baseline off for one run on a project (or `--files`), then regenerate:
+
+```
+StyleBroBaseline=none bro format src/Orders/Orders.csproj     # PowerShell: $env:StyleBroBaseline = 'none'
+bro baseline
+```
+
+The variable works because the package only sets `<StyleBroBaseline>` when it's empty; a `Directory.Build.props` that
+sets it without a condition wins over it (add `Condition="'$(StyleBroBaseline)' == ''"` there). A project or a folder
+per pull request keeps each change small to review and unlikely to conflict with other open branches.
+
+**Use a current .NET SDK.** The baseline reaches `dotnet format` as a diagnostic suppressor, and older SDKs' `dotnet
+format` (10.0.1xx, 8.0.1xx) loads none: there, `bro format` fixes the baselined violations too (all of them, on a whole
+run) and `bro check` fails on them, although the build passes. SDK 10.0.4xx honors it.
