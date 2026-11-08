@@ -121,6 +121,20 @@ internal sealed class StyleCopSetup
     /// <summary>The per-framework evaluations <see cref="EvaluateStyleCop"/> ran (project|framework), once per process.</summary>
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, Lazy<string>> FrameworkEvaluations = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// The rules 1.3 added and the first 1.3 beta that has them, read from each published beta's DLL (2026-11-08):
+    /// 1.3.1-beta and 1.3.18-beta have none, 1.3.79-beta SA1317 and SA1653, 1.3.98-beta all but SA1654.
+    /// </summary>
+    private static readonly (int Since, string[] Ids)[] MissingIn13 =
+    [
+        (79, ["SA1317", "SA1653"]),
+        (98, ["SA1143", "SA1315", "SX1412"]),
+        (109, ["SA1654"]),
+    ];
+
+    /// <summary>A 1.3 version's build number: '1.3.151-beta' -> 151.</summary>
+    private static readonly Regex Beta13 = new(@"^1\.3\.(\d+)");
+
     private static readonly Regex DiagnosticKey = new(@"^dotnet_diagnostic\.(S[AX]\d{4}\w*|SST\d{4})\.severity$", RegexOptions.IgnoreCase);
     private static readonly Regex SonarKey = new(@"^dotnet_diagnostic\.(S\d+)\.severity$", RegexOptions.IgnoreCase);
 
@@ -270,7 +284,8 @@ internal sealed class StyleCopSetup
         var sources = new List<string>();
         var scopes = new List<Scope>();
 
-        // Rules added in StyleCop 1.2 (SA1651, SA1141, ...) don't exist in 1.1.x, nor 1.3's (SA1143, ...) in 1.2: off, whatever the configs say.
+        // Rules added in StyleCop 1.2 (SA1651, SA1141, ...) don't exist in 1.1.x, nor 1.3's (SA1143, ...) in 1.2 and the early 1.3
+        // betas: off, whatever the configs say.
         var msbuild = files.Where(IsMSBuild).Concat(references.MSBuild).Select(f => (File: f, Text: Migration.ReadOrNull(f) ?? string.Empty)).ToList();
         var documentationParsed = msbuild.Any(m => DocumentationFile.IsMatch(m.Text));
 
@@ -1243,16 +1258,44 @@ internal sealed class StyleCopSetup
     }
 
     /// <summary>
-    /// The rules a StyleCop version before 1.3 has (its DLL's inventory), or null for 1.3 and later (and an unknown version):
-    /// 1.0.x lacks SA1135, SA1136, SA1137, SA1139, SA1314 and SA1413 too (xbox-live-developer-tools, 1.0.2: 94 findings in
-    /// StyleCop-clean code); 1.2 lacks 1.3's SA1143, SA1315, SA1317, SA1653, SA1654 and SX1412.
+    /// The rules a StyleCop version before 1.3.109-beta has (its DLL's inventory), or null for 1.3.109-beta and later (and an
+    /// unknown version): 1.0.x lacks SA1135, SA1136, SA1137, SA1139, SA1314 and SA1413 too (xbox-live-developer-tools,
+    /// 1.0.2: 94 findings in StyleCop-clean code); 1.2 lacks 1.3's SA1143, SA1315, SA1317, SA1653, SA1654 and SX1412, and
+    /// the early 1.3 betas some of them (<see cref="MissingIn13"/>).
     /// </summary>
-    internal static HashSet<string>? OldRules(string? version) =>
-        version is null ? null
-        : version.StartsWith("1.0.", StringComparison.Ordinal) ? LoadIds("StyleCopRules-1.0.2.csv")
-        : version.StartsWith("1.1.", StringComparison.Ordinal) ? LoadIds("StyleCopRules-1.1.118.csv")
-        : version.StartsWith("1.2.", StringComparison.Ordinal) ? LoadIds("StyleCopRules-1.2.0-beta.556.csv")
-        : null;
+    internal static HashSet<string>? OldRules(string? version)
+    {
+        if (version is null)
+        {
+            return null;
+        }
+
+        if (version.StartsWith("1.0.", StringComparison.Ordinal))
+        {
+            return LoadIds("StyleCopRules-1.0.2.csv");
+        }
+
+        if (version.StartsWith("1.1.", StringComparison.Ordinal))
+        {
+            return LoadIds("StyleCopRules-1.1.118.csv");
+        }
+
+        if (version.StartsWith("1.2.", StringComparison.Ordinal))
+        {
+            return LoadIds("StyleCopRules-1.2.0-beta.556.csv");
+        }
+
+        if (Beta13.Match(version) is { Success: true } beta && int.TryParse(beta.Groups[1].Value, out var build)
+            && MissingIn13.Where(m => build < m.Since).SelectMany(m => m.Ids).ToList() is { Count: > 0 } missing)
+        {
+            var ids = LoadIds("StyleCopRules.csv");
+            ids.ExceptWith(missing);
+            return ids;
+        }
+
+        return null;
+    }
+
 
     /// <summary>
     /// The global configs packages add to the projects (<paramref name="read"/>: a project's, null without its restore output),

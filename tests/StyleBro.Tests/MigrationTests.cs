@@ -604,6 +604,33 @@ public sealed partial class MigrationTests : IDisposable
     }
 
     [Fact]
+    public void NoByteOrderMark_IsCharsetUtf8()
+    {
+        Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SX1412.severity = warning\n");
+
+        var result = Migration.Generate(StyleCopSetup.Read(root), root);
+
+        Assert.Contains("charset = utf-8", result.Lines);
+        Assert.DoesNotContain("charset = utf-8-bom", result.Lines);
+        Assert.Contains("SX1412", result.Covered);
+    }
+
+    [Fact]
+    public void BothByteOrderMarkRules_LeaveTheCharsetAlone()
+    {
+        // SA1412 wants a byte order mark, SX1412 none: StyleCop reports every file, whichever charset is written.
+        Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1412.severity = warning\ndotnet_diagnostic.SX1412.severity = warning\n");
+
+        var result = Migration.Generate(StyleCopSetup.Read(root), root);
+
+        Assert.DoesNotContain(result.Lines, l => l.StartsWith("charset", StringComparison.Ordinal));
+        Assert.DoesNotContain("SA1412", result.Covered);
+        Assert.DoesNotContain("SX1412", result.Covered);
+        Assert.Contains("SA1412", result.Reasons.Keys);
+        Assert.Contains("SX1412", result.Reasons.Keys);
+    }
+
+    [Fact]
     public void CharsetIsLeftAlone_WhenSA1412IsOff()
     {
         Assert.DoesNotContain(Migration.Generate(StyleCopSetup.Read(root), root).Lines, l => l.StartsWith("charset", StringComparison.Ordinal));

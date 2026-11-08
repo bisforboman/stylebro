@@ -86,6 +86,41 @@ public sealed partial class MigrationTests
         Assert.True(setup.IsOn("SA1413"));
     }
 
+    [Theory]
+    [InlineData("1.3.18-beta", "")]
+    [InlineData("1.3.82-beta", "SA1317 SA1653")]
+    [InlineData("1.3.98-beta", "SA1143 SA1315 SA1317 SA1653 SX1412")]
+    [InlineData("1.3.109-beta", "SA1143 SA1315 SA1317 SA1653 SA1654 SX1412")]
+    public void EarlyStyleCop13Betas_LackSomeOfItsNewRules(string version, string has)
+    {
+        // Read from each beta's DLL: an early beta's StyleCop-clean code was never checked by the rules it doesn't have.
+        var rules = StyleCopSetup.OldRules(version);
+
+        foreach (var id in new[] { "SA1143", "SA1315", "SA1317", "SA1653", "SA1654", "SX1412" })
+        {
+            Assert.Equal(has.Split(' ').Contains(id), rules?.Contains(id) ?? true);
+        }
+
+        Assert.True(rules?.Contains("SA1413") ?? true);
+    }
+
+    [Theory]
+    [InlineData("1.2.0-beta.556", "none")]
+    [InlineData("1.3.177-beta", "warning")]
+    public void StyleCop13sNewRules_TurnOnTheRulesThatReplaceThem(string version, string severity)
+    {
+        // SA1143 -> BRO1524, SA1315 -> BRO1313 (off by default), SA1654 -> BRO1617: on where StyleCop 1.3 has them on.
+        Write("A.csproj", $"""<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><PackageReference Include="StyleCop.Analyzers" Version="{version}" /></ItemGroup></Project>""");
+
+        var result = Migration.Generate(StyleCopSetup.Read(root), root);
+
+        foreach (var (sa, bro) in new[] { ("SA1143", "BRO1524"), ("SA1315", "BRO1313"), ("SA1654", "BRO1617") })
+        {
+            Assert.Contains($"dotnet_diagnostic.{bro}.severity = {severity}", result.Lines);
+            Assert.Equal(severity != "none", result.Covered.Contains(sa));
+        }
+    }
+
     [Fact]
     public void AddPackage_FollowsANestedPropsImportThroughAProperty()
     {

@@ -30,7 +30,8 @@ The measured data is committed, so step 4 works on its own. Hand-written parts l
 reported positions, lets each tool fix its own copy, and diffs the fixed files (both must still compile). Every
 difference has to be listed under `Expected` in `parity/parity.psd1`, next to a comment naming the documented
 deviation; anything else fails. Run it after changing a rule; add a set (and edge-case files) for every new rule
-that replaces a StyleCop rule.
+that replaces a StyleCop rule. The sets run against StyleCop 1.2.0-beta.556, except those with a `StyleCopVersion`
+(the rules 1.3 added: conditional-layout, inherited-parameter-names, generic-crefs run against 1.3.177-beta).
 
 ```powershell
 ./Compare-WithStyleCop.ps1                  # all sets
