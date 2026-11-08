@@ -90,16 +90,22 @@ Regenerate the baseline whenever you like; it only ever lists what's still there
 they only match a line with exactly that text, up to their count, so a stale baseline is just longer than it needs to be.
 `bro format` also removes the entries whose line is gone, so the baseline shrinks as the code gets edited.
 
-To pay off part of the debt, turn the baseline off for one run on a project (or `--files`), then regenerate:
+To pay off part of the debt, name the folders or files:
 
 ```
-StyleBroBaseline=none bro format src/Orders/Orders.csproj     # PowerShell: $env:StyleBroBaseline = 'none'
-bro baseline
+bro baseline --pay-off src/Orders            # or several: bro baseline --pay-off src/Orders src/Billing/Invoice.cs
 ```
 
-The variable works because the package only sets `<StyleBroBaseline>` when it's empty; a `Directory.Build.props` that
-sets it without a condition wins over it (add `Condition="'$(StyleBroBaseline)' == ''"` there). A project or a folder
-per pull request keeps each change small to review and unlikely to conflict with other open branches.
+It takes those files' entries out of the baseline (every baseline that has them, wherever `<StyleBroBaseline>` puts it)
+and runs `bro format --files` on the files they name: the fixes run there as in a first format, the rest of the
+repository keeps its baseline, and the findings format keeps on purpose go back in with their reasons. It ends with
+`Baseline: paid off 12 of 14 baselined findings in src/Orders; 2 kept on purpose stay in the baseline`. When the run
+doesn't end clean (exit code 2 or 3, or an error), the entries for the lines it left go back, so the build doesn't fail
+on them. A folder per pull request keeps each change small to review and unlikely to conflict with other open branches.
+
+Turning the baseline off for one run works too (`StyleBroBaseline=none bro format src/Orders/Orders.csproj`, then `bro
+baseline`; PowerShell: `$env:StyleBroBaseline = 'none'`), but only where no `Directory.Build.props` sets
+`<StyleBroBaseline>` without a condition, and the run formats everything it covers, not just the baselined files.
 
 **Use a current .NET SDK.** The baseline reaches `dotnet format` as a diagnostic suppressor, and older SDKs' `dotnet
 format` (10.0.1xx, 8.0.1xx) loads none: there, `bro format` fixes the baselined violations too (all of them, on a whole

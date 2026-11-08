@@ -447,4 +447,4 @@ only new code has to follow the rules. A baseline can't hide whitespace formatti
 per target framework. On Orleans (about 200 projects, several target frameworks) the first `bro format`
 took 57 minutes and about 9 GB of memory, and `format --verify-no-changes` 11.5 minutes. A repository that size with
 `TreatWarningsAsErrors` is best started with a baseline: the build passes right away, and the backlog can be fixed a
-project at a time (`bro format path/to/Project.csproj`) or a few files at a time (`--files`).
+folder or a few files at a time (`bro baseline --pay-off src/Orders`, [Keeping it small](baseline.md#keeping-it-small)).

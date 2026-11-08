@@ -89,6 +89,10 @@ internal static class Program
           bro baseline [path or solution or project] [--project <solution or project>]
               Writes stylebro.baseline with today's violations, so only new code has to follow the rules.
 
+          bro baseline --pay-off <folder or file> [...]
+              Fixes the baselined findings in those files: takes their entries out of the baseline and formats them
+              (format --files); the findings format keeps on purpose go back in.
+
           --json (any command): one JSON object on stdout (settings, conventions, runs, changes per rule, kept
               findings, clean, exit code; https://bisforboman.github.io/stylebro/agents/); the text goes to stderr.
 
@@ -879,7 +883,7 @@ internal static class Program
         // 'format' passes unknown options on to 'dotnet format'.
         var (command, known) = args.FirstOrDefault() switch
         {
-            "baseline" => ("baseline", new[] { "--project" }),
+            "baseline" => ("baseline", new[] { "--project", BaselineCommand.PayOffOption }),
             "init" => ("init", new[] { "--write", "--modernize", InitCommand.StyleOption, AgentsFile.Option, SkillFile.Option, SonarProfileOption }.Concat(PreviewCommand.Options).ToArray()),
             "format" => ("format", null),
             _ => (null, new[] { "--write", AgentsFile.Option, SkillFile.Option, SonarProfileOption }.Concat(PreviewCommand.Options).ToArray()),

@@ -109,9 +109,11 @@ without the StyleBro.Analyzers reference gets it in the copy. `--keep` keeps the
 
 ```
 bro baseline [path or solution] [--project MySolution.sln]
+bro baseline --pay-off <folder or file> [...]
 ```
 
 Writes `stylebro.baseline` with every violation `dotnet format` would fix today. The StyleBro.Analyzers package then
 hides those in the build, the IDE and `dotnet format`, so only new code has to follow the rules; a violation counts as
-new once its line is edited. Whitespace formatting can't be baselined. Details:
+new once its line is edited. Whitespace formatting can't be baselined. `--pay-off` fixes the baselined findings in
+the folders or files named (their entries come out, `format --files` runs on them, kept findings go back in). Details:
 [docs/baseline.md](https://bisforboman.github.io/stylebro/baseline/).
