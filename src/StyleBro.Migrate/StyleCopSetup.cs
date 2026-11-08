@@ -1296,7 +1296,6 @@ internal sealed class StyleCopSetup
         return null;
     }
 
-
     /// <summary>
     /// The global configs packages add to the projects (<paramref name="read"/>: a project's, null without its restore output),
     /// in order, without the repository's own files (read with the others). A project without restore output whose MSBuild
