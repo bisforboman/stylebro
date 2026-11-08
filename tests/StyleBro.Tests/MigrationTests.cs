@@ -1475,6 +1475,7 @@ public sealed partial class MigrationTests : IDisposable
         // Central package management: the version in Directory.Packages.props, the reference in Directory.Build.props.
         Write("Directory.Packages.props", """<Project><ItemGroup><PackageVersion Include="SonarAnalyzer.CSharp" Version="10.34.0.3385" /></ItemGroup></Project>""");
         Write("Directory.Build.props", """<Project><ItemGroup><PackageReference Include="SonarAnalyzer.CSharp" PrivateAssets="all" /></ItemGroup></Project>""");
+        Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1315.severity = none\n");   // else BRO1313 is on through SA1315, for every parameter
 
         var sonar = SonarSetup.Read(root)!;
         Assert.True(sonar.IsOn("S2325"));   // Sonar way
@@ -1527,6 +1528,7 @@ public sealed partial class MigrationTests : IDisposable
     public void Sonar_AQualityProfile_ReplacesTheDefaults()
     {
         Write("Directory.Build.props", """<Project><ItemGroup><PackageReference Include="SonarAnalyzer.CSharp" Version="10.34.0.3385" /></ItemGroup></Project>""");
+        Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1315.severity = none\n");   // else BRO1313 is on through SA1315
         var profile = Path.Combine(root, "..", Path.GetFileName(root) + "-profile.xml");
         File.WriteAllText(profile, """
             <?xml version="1.0" encoding="UTF-8"?>
