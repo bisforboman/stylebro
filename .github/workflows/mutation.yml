@@ -34,12 +34,15 @@ jobs:
     needs: changes
     runs-on: ubuntu-26.04
     # The full nightly run outgrew 4 shards x 60 minutes (2026-10-14..18: two shards cancelled at the timeout with 1,811
-    # entries): it runs 8 shards, a pull request (only its files' entries) keeps 4. Same runner minutes, half the wall time.
+    # entries), then 8 shards x 90 minutes (2026-11-08: cancelled with 2,241), and a pull request that changes a big test
+    # class outgrew 4 (#336: 873 MigrationTests entries, a shard cancelled twice): the nightly runs 12 shards, a pull
+    # request (only its files' entries) 8. Same runner minutes, shorter wall time
+    # (docs/decisions/2026-11-08-more-mutation-shards.md).
     timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
-        shard: ${{ fromJSON(github.event_name == 'pull_request' && '[0, 1, 2, 3]' || '[0, 1, 2, 3, 4, 5, 6, 7]') }}
+        shard: ${{ fromJSON(github.event_name == 'pull_request' && '[0, 1, 2, 3, 4, 5, 6, 7]' || '[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]') }}
     steps:
       - uses: actions/checkout@v7
 
@@ -55,7 +58,7 @@ jobs:
         run: |
           $only = @{}
           if ('${{ github.event_name }}' -eq 'pull_request') { $only.OnlyFiles = @($env:CHANGED_FILES -split "`n" | Where-Object { $_ }) }
-          ./scripts/mutation/Invoke-Mutations.ps1 -Shard ${{ matrix.shard }} -Shards ${{ github.event_name == 'pull_request' && 4 || 8 }} @only
+          ./scripts/mutation/Invoke-Mutations.ps1 -Shard ${{ matrix.shard }} -Shards ${{ github.event_name == 'pull_request' && 8 || 12 }} @only
 
   # The required check. `always()` so a failed or cancelled shard fails it instead of skipping it.
   mutation:
