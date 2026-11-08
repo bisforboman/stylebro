@@ -47,8 +47,10 @@ internal sealed class Baseline
             var parts = line.Split('\t');
             if (parts.Length == 4 && int.TryParse(parts[3], out var count) && count > 0)
             {
+                // A key on two lines takes the larger count: 'merge=union' (.gitattributes, which bro writes) keeps both
+                // branches' lines for an entry both changed, and adding them up would allow violations neither side had.
                 var key = new Key(parts[0], NormalizePath(parts[1]), parts[2]);
-                counts[key] = counts.TryGetValue(key, out var existing) ? existing + count : count;
+                counts[key] = counts.TryGetValue(key, out var existing) ? Math.Max(existing, count) : count;
             }
         }
 

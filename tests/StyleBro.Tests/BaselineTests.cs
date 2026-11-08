@@ -91,10 +91,12 @@ public class BaselineTests
         var baseline = Baseline.Parse(text);
 
         Assert.Equal(2, baseline.Count);
-        Assert.Equal(3, baseline.Allowed(new Baseline.Key("BRO1106", "src/B.cs", "0000000000000001")));
+
+        // The same key twice (a union merge keeps both branches' lines): the larger count, not the sum.
+        Assert.Equal(2, baseline.Allowed(new Baseline.Key("BRO1106", "src/B.cs", "0000000000000001")));
         var rendered = baseline.Render();
         Assert.StartsWith(Baseline.Header, rendered);
-        Assert.EndsWith("BRO1001\tsrc/A.cs\t0000000000000002\t1\nBRO1106\tsrc/B.cs\t0000000000000001\t3\n", rendered);
+        Assert.EndsWith("BRO1001\tsrc/A.cs\t0000000000000002\t1\nBRO1106\tsrc/B.cs\t0000000000000001\t2\n", rendered);
         Assert.Equal(rendered, Baseline.Parse(rendered).Render());
     }
 
