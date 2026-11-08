@@ -7,7 +7,8 @@
 #   SdkLater       The SDK can fix it (measured by Test-SdkCoverage.ps1), but the preset and bro migrate don't
 #                  turn that on yet (see Why for the catch).
 #   Drop           No safe automatic fix (the fix needs human-written text, an API change, or file operations).
-#   NotInStyleCop  StyleCop 1.2 never reports it (probed with an obvious violation in sdk-check-cases.ps1).
+#   NotInStyleCop  StyleCop never reports it (probed with an obvious violation in sdk-check-cases.ps1; 1.2.0-beta.556
+#                  and 1.3.177-beta).
 #   Variant        A variant id of another rule.
 #   NotApplicable  Not a code rule.
 #
@@ -27,12 +28,18 @@
             Revisit = 'Only if a deterministic extraction is acceptable (variable name from the parameter name). Probably stays a human job.' }
         SA1126 = @{ Status = 'NotInStyleCop'; Why = 'Off by default and no diagnostic on an unprefixed member call (probed).'
             Revisit = 'Nothing to port.' }
+        SA1143 = @{ Status = 'Candidate'; Why = 'New in StyleCop 1.3 (on by default, with a fix). BRO1524 asks for the same expanded layout (condition, `? a` and `: b` each starting a line), but not SA1143''s chained layout (`a ? b :` one per line), and bro migrate doesn''t carry SA1143 over to it yet.'
+            Revisit = 'A parity set for SA1143 against BRO1524; with the differences documented, BRO1524''s description names SA1143 and bro migrate maps it.' }
 
         # ---- Ordering ----------------------------------------------------------------------------------------------
 
         # ---- Naming ------------------------------------------------------------------------------------------------
         SA1301 = @{ Status = 'NotInStyleCop'; Why = 'Off by default and no diagnostic (probed). StyleCop keeps the id for compatibility.'
             Revisit = 'Nothing to port.' }
+        SA1315 = @{ Status = 'Candidate'; Why = 'New in StyleCop 1.3 (on by default, with a fix). BRO1313 (off by default) renames such parameters to the base member''s names, but bro migrate doesn''t carry SA1315 over to it yet.'
+            Revisit = 'A parity set for SA1315 against BRO1313; then BRO1313''s description names SA1315 and bro migrate maps it.' }
+        SA1317 = @{ Status = 'Drop'; Why = 'New in StyleCop 1.3, with no fix: a name with a non-Latin letter (`ЕxаmplеClаss`, `café`) needs a new name a person chooses; transliterating is a guess.'
+            Revisit = 'Nothing automatic.' }
 
         # ---- Maintainability ---------------------------------------------------------------------------------------
         SA1401 = @{ Status = 'Drop'; Why = 'Making a public or protected field private changes the public API and breaks callers. 141 / 48 / 39 findings with the rule on.'
@@ -49,8 +56,10 @@
             Revisit = 'Nothing automatic.' }
         SA1409 = @{ Status = 'NotInStyleCop'; Why = 'Off by default and no diagnostic for an empty `try { } finally { }` (probed).'
             Revisit = 'Nothing to port.' }
-        SA1414 = @{ Status = 'Drop'; Why = 'StyleCop has no fix (1.2 only); tuple element names in signatures have to be chosen by a person.'
+        SA1414 = @{ Status = 'Drop'; Why = 'StyleCop has no fix (1.2 and 1.3); tuple element names in signatures have to be chosen by a person.'
             Revisit = 'Nothing automatic.' }
+        SX1412 = @{ Status = 'SdkLater'; Why = 'New in StyleCop 1.3, off by default (the opposite of SA1412). The SDK''s `charset = utf-8` makes `dotnet format` remove the byte order mark, but bro migrate doesn''t write it for SX1412 yet (it writes `utf-8-bom` for SA1412).'
+            Revisit = 'bro migrate writes `charset = utf-8` when SX1412 is on.' }
 
         # ---- Layout ------------------------------------------------------------------------------------------------
 
@@ -91,7 +100,7 @@
             Revisit = 'Revisit with the stub decision.' }
         SA1625 = @{ Status = 'Drop'; Why = 'Identical text copied between tags has to be rewritten by a person.'
             Revisit = 'Nothing automatic.' }
-        SA1628 = @{ Status = 'NotInStyleCop'; Why = 'StyleCop 1.2 never reports it (not implemented, probed while building BRO16xx).'
+        SA1628 = @{ Status = 'NotInStyleCop'; Why = 'StyleCop never reports it (not implemented: probed in 1.2 while building BRO16xx; still an empty analyzer in 1.3.177-beta''s source).'
             Revisit = 'Nothing to port. A capitalization fix would be easy if a team wants it.' }
         SA1630 = @{ Status = 'NotInStyleCop'; Why = 'Off by default and no diagnostic on a one-word summary (probed).'
             Revisit = 'Nothing to port.' }
@@ -101,7 +110,7 @@
             Revisit = 'Nothing to port.' }
         SA1639 = @{ Status = 'Drop'; Why = 'Off by default; the header''s `<summary>` has to be written by a person.'
             Revisit = 'Nothing automatic.' }
-        SA1644 = @{ Status = 'NotInStyleCop'; Why = 'StyleCop 1.2 never reports it (not implemented, probed while building BRO16xx).'
+        SA1644 = @{ Status = 'NotInStyleCop'; Why = 'StyleCop never reports it (not implemented: probed in 1.2 while building BRO16xx; still an empty analyzer in 1.3.177-beta''s source).'
             Revisit = 'Nothing to port.' }
         SA1645 = @{ Status = 'Drop'; Why = 'Off by default; a missing `<include>` file can''t be fixed automatically.'
             Revisit = 'Nothing automatic.' }
@@ -109,12 +118,16 @@
             Revisit = 'Nothing automatic.' }
         SA1647 = @{ Status = 'Drop'; Why = 'Off by default; an `<include>` without file/path can''t be fixed automatically.'
             Revisit = 'Nothing automatic.' }
-        SA1648 = @{ Status = 'Drop'; Why = '`<inheritdoc/>` where there is nothing to inherit: the fix is real documentation.'
+        SA1648 = @{ Status = 'Drop'; Why = '`<inheritdoc/>` where there is nothing to inherit: the fix is real documentation. (StyleCop 1.3''s fix removes the `<inheritdoc/>`, which leaves the member undocumented.)'
             Revisit = 'Nothing automatic. (BRO1601 only adds `<inheritdoc/>` where there is something to inherit.)' }
         SA1649 = @{ Status = 'Drop'; Why = 'Renaming files isn''t something `dotnet format` can do.'
             Revisit = 'Would need a separate tool (bro could do it as a one-off, with `git mv`).' }
         SA1650 = @{ Status = 'NotInStyleCop'; Why = 'Off by default and no diagnostic on misspelled words (probed).'
             Revisit = 'Nothing to port.' }
+        SA1653 = @{ Status = 'Drop'; Why = 'New in StyleCop 1.3. Which part of a partial type keeps the `<summary>` is a person''s choice: StyleCop''s fix keeps the one on the declaration it is applied to and turns the others into `<content>`, so under `dotnet format` the result depends on which diagnostic comes first.'
+            Revisit = 'Only with a deterministic choice (for example the declaration in the file named after the type).' }
+        SA1654 = @{ Status = 'Candidate'; Why = 'New in StyleCop 1.3 (on by default, with a fix). BRO1617 writes a cref''s type arguments in braces the same way, but bro migrate doesn''t carry SA1654 over to it yet.'
+            Revisit = 'A parity set for SA1654 against BRO1617; then BRO1617''s description names SA1654 and bro migrate maps it.' }
     }
 
     Partial = @{

@@ -9,7 +9,7 @@
 
     <PackageId>StyleBro.Analyzers</PackageId>
     <Version>0.8.0-alpha.1</Version>
-    <Description>Roslyn analyzers and code fixes that keep C# code tidy. A modern alternative to StyleCop, built so that 'dotnet format' can fix everything it reports.</Description>
+    <Description>Roslyn analyzers and code fixes that keep C# code tidy, built so that one 'dotnet format' run fixes everything it reports. Replaces StyleCop.Analyzers (1.2 and 1.3), with a migration tool.</Description>
     <PackageTags>analyzers;roslyn;stylecop;code-style;dotnet-format</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>

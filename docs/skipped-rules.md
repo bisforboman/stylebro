@@ -14,16 +14,21 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
    `Test-SdkCoverage.ps1`. Then check it doesn't change code StyleCop accepts: `Measure-MigrationDelta.ps1` on a
    StyleCop-clean repo (that's how the preset's SA1501/SA1502 and IDE0040 settings were caught).
 3. For a StyleBro rule, follow the design rules in AGENTS.md (fix + Fix All, idempotent, skip unsafe cases), add a
-   parity set to `parity/parity.psd1` and run `Compare-WithStyleCop.ps1` against StyleCop 1.2.
+   parity set to `parity/parity.psd1` and run `Compare-WithStyleCop.ps1` against StyleCop.
 4. Move the entry out of `skipped.psd1` (into `decisions.psd1`) and regenerate.
 
 ## Summary
 
-44 rules: 0 candidate, 0 SDK not on yet, 32 drop, 10 not in StyleCop, 0 variant, 2 n/a.
+50 rules: 3 candidate, 1 SDK not on yet, 34 drop, 10 not in StyleCop, 0 variant, 2 n/a.
 
 | Rule | Title | Status | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) |
 |---|---|---|---|---|
+| [SA1143](#sa1143) | Conditional expressions must be formatted consistently | candidate | not surveyed | not surveyed |
+| [SA1315](#sa1315) | Parameter names should match inherited names | candidate | not surveyed | not surveyed |
+| [SA1654](#sa1654) | Properly encode generic brackets | candidate | not surveyed | not surveyed |
+| [SX1412](#sx1412) | Store files as UTF-8 without byte order mark | SDK not on yet | not surveyed | not surveyed |
 | [SA1118](#sa1118) | Parameter should not span multiple lines | drop | on / on / off | 0 / 0 / 126 |
+| [SA1317](#sa1317) | Identifier should be named only with Latin letters | drop | not surveyed | not surveyed |
 | [SA1401](#sa1401) | Fields should be private | drop | off / off / off | 141 / 48 / 39 |
 | [SA1402](#sa1402) | File may only contain a single type | drop | on / off / off | 0 / 34 / 1 |
 | [SA1403](#sa1403) | File may only contain a single namespace | drop | on / on / on | 0 / 0 / 0 |
@@ -48,13 +53,14 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 | [SA1618](#sa1618) | Generic type parameters should be documented | drop | on / on / on | 0 / 0 / 1 |
 | [SA1619](#sa1619) | Generic type parameters should be documented partial class | drop | on / on / on | 0 / 0 / 0 |
 | [SA1622](#sa1622) | Generic type parameter documentation should have text | drop | on / on / on | 0 / 0 / 0 |
-| [SA1625](#sa1625) | Element documentation should not be copied and pasted | drop | on / on / on | 0 / 0 / 0 |
+| [SA1625](#sa1625) | Element documentation should not contain duplicate entries | drop | on / on / on | 0 / 0 / 0 |
 | [SA1639](#sa1639) | File header should have summary | drop | off / off / off | 0 / 0 / 0 |
 | [SA1645](#sa1645) | Included documentation file does not exist | drop | off / on / off | 0 / 0 / 0 |
 | [SA1646](#sa1646) | Included documentation XPath does not exist | drop | off / on / off | 0 / 0 / 0 |
 | [SA1647](#sa1647) | Include node does not contain valid file and path | drop | off / on / off | 0 / 0 / 0 |
 | [SA1648](#sa1648) | inheritdoc should be used with inheriting class | drop | on / on / on | 0 / 0 / 0 |
 | [SA1649](#sa1649) | File name should match first type name | drop | off / on / off | 0 / 0 / 1 |
+| [SA1653](#sa1653) | Only one partial declaration should contain summary documentation | drop | not surveyed | not surveyed |
 | [SA1109](#sa1109) | Block statements should not contain embedded regions | not in StyleCop | off / on / off | 0 / 0 / 0 |
 | [SA1126](#sa1126) | Prefix calls correctly | not in StyleCop | off / off / off | 0 / 0 / 0 |
 | [SA1301](#sa1301) | Element should begin with lower-case letter | not in StyleCop | off / off / off | 0 / 0 / 0 |
@@ -68,6 +74,50 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 | [SA0001](#sa0001) | XML comment analysis disabled | n/a | on / off / off | 0 / 0 / 0 |
 | [SA0002](#sa0002) | Invalid settings file | n/a | on / on / on | 0 / 0 / 0 |
 
+## Not yet: StyleBro candidates
+
+<a id="sa1143"></a>
+
+### SA1143: Conditional expressions must be formatted consistently
+
+Readability rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): not surveyed. Diagnostics with every rule on (OTel / Polly / App): not surveyed.
+
+**Why:** New in StyleCop 1.3 (on by default, with a fix). BRO1524 asks for the same expanded layout (condition, `? a` and `: b` each starting a line), but not SA1143's chained layout (`a ? b :` one per line), and bro migrate doesn't carry SA1143 over to it yet.
+
+**To revisit:** A parity set for SA1143 against BRO1524; with the differences documented, BRO1524's description names SA1143 and bro migrate maps it.
+
+<a id="sa1315"></a>
+
+### SA1315: Parameter names should match inherited names
+
+Naming rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): not surveyed. Diagnostics with every rule on (OTel / Polly / App): not surveyed.
+
+**Why:** New in StyleCop 1.3 (on by default, with a fix). BRO1313 (off by default) renames such parameters to the base member's names, but bro migrate doesn't carry SA1315 over to it yet.
+
+**To revisit:** A parity set for SA1315 against BRO1313; then BRO1313's description names SA1315 and bro migrate maps it.
+
+<a id="sa1654"></a>
+
+### SA1654: Properly encode generic brackets
+
+Documentation rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): not surveyed. Diagnostics with every rule on (OTel / Polly / App): not surveyed.
+
+**Why:** New in StyleCop 1.3 (on by default, with a fix). BRO1617 writes a cref's type arguments in braces the same way, but bro migrate doesn't carry SA1654 over to it yet.
+
+**To revisit:** A parity set for SA1654 against BRO1617; then BRO1617's description names SA1654 and bro migrate maps it.
+
+## Not yet: the SDK can fix it, but it isn't turned on
+
+<a id="sx1412"></a>
+
+### SX1412: Store files as UTF-8 without byte order mark
+
+Maintainability rule. StyleCop: off by default, has a code fix; SDK check: fixed. Teams keeping it on (OTel / Polly / App): not surveyed. Diagnostics with every rule on (OTel / Polly / App): not surveyed.
+
+**Why:** New in StyleCop 1.3, off by default (the opposite of SA1412). The SDK's `charset = utf-8` makes `dotnet format` remove the byte order mark, but bro migrate doesn't write it for SX1412 yet (it writes `utf-8-bom` for SA1412).
+
+**To revisit:** bro migrate writes `charset = utf-8` when SX1412 is on.
+
 ## Dropped: no safe automatic fix
 
 <a id="sa1118"></a>
@@ -79,6 +129,16 @@ Readability rule. StyleCop: on by default, no code fix. Teams keeping it on (OTe
 **Why:** StyleCop has no fix. A multi-line argument (other than the first, or a lambda/anonymous object) needs extracting into a variable: a refactoring that names things. 126 findings in the private app.
 
 **To revisit:** Only if a deterministic extraction is acceptable (variable name from the parameter name). Probably stays a human job.
+
+<a id="sa1317"></a>
+
+### SA1317: Identifier should be named only with Latin letters
+
+Naming rule. StyleCop: on by default, no code fix. Teams keeping it on (OTel / Polly / App): not surveyed. Diagnostics with every rule on (OTel / Polly / App): not surveyed.
+
+**Why:** New in StyleCop 1.3, with no fix: a name with a non-Latin letter (`ЕxаmplеClаss`, `café`) needs a new name a person chooses; transliterating is a guess.
+
+**To revisit:** Nothing automatic.
 
 <a id="sa1401"></a>
 
@@ -146,7 +206,7 @@ Maintainability rule. StyleCop: on by default, no code fix. Teams keeping it on 
 
 Readability rule. StyleCop: on by default, no code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
 
-**Why:** StyleCop has no fix (1.2 only); tuple element names in signatures have to be chosen by a person.
+**Why:** StyleCop has no fix (1.2 and 1.3); tuple element names in signatures have to be chosen by a person.
 
 **To revisit:** Nothing automatic.
 
@@ -322,7 +382,7 @@ Documentation rule. StyleCop: on by default, no code fix. Teams keeping it on (O
 
 <a id="sa1625"></a>
 
-### SA1625: Element documentation should not be copied and pasted
+### SA1625: Element documentation should not contain duplicate entries
 
 Documentation rule. StyleCop: on by default, no code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
 
@@ -374,9 +434,9 @@ Documentation rule. StyleCop: off by default, no code fix. Teams keeping it on (
 
 ### SA1648: inheritdoc should be used with inheriting class
 
-Documentation rule. StyleCop: on by default, no code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
+Documentation rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
 
-**Why:** `<inheritdoc/>` where there is nothing to inherit: the fix is real documentation.
+**Why:** `<inheritdoc/>` where there is nothing to inherit: the fix is real documentation. (StyleCop 1.3's fix removes the `<inheritdoc/>`, which leaves the member undocumented.)
 
 **To revisit:** Nothing automatic. (BRO1601 only adds `<inheritdoc/>` where there is something to inherit.)
 
@@ -389,6 +449,16 @@ Documentation rule. StyleCop: on by default, has a code fix. Teams keeping it on
 **Why:** Renaming files isn't something `dotnet format` can do.
 
 **To revisit:** Would need a separate tool (bro could do it as a one-off, with `git mv`).
+
+<a id="sa1653"></a>
+
+### SA1653: Only one partial declaration should contain summary documentation
+
+Documentation rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): not surveyed. Diagnostics with every rule on (OTel / Polly / App): not surveyed.
+
+**Why:** New in StyleCop 1.3. Which part of a partial type keeps the `<summary>` is a person's choice: StyleCop's fix keeps the one on the declaration it is applied to and turns the others into `<content>`, so under `dotnet format` the result depends on which diagnostic comes first.
+
+**To revisit:** Only with a deterministic choice (for example the declaration in the file named after the type).
 
 ## Dropped: StyleCop never reports it
 
@@ -438,7 +508,7 @@ Maintainability rule. StyleCop: off by default, no code fix; SDK check: StyleCop
 
 Documentation rule. StyleCop: off by default, no code fix. Teams keeping it on (OTel / Polly / App): off / on / off. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
 
-**Why:** StyleCop 1.2 never reports it (not implemented, probed while building BRO16xx).
+**Why:** StyleCop never reports it (not implemented: probed in 1.2 while building BRO16xx; still an empty analyzer in 1.3.177-beta's source).
 
 **To revisit:** Nothing to port. A capitalization fix would be easy if a team wants it.
 
@@ -478,7 +548,7 @@ Documentation rule. StyleCop: off by default, no code fix; SDK check: StyleCop r
 
 Documentation rule. StyleCop: off by default, no code fix. Teams keeping it on (OTel / Polly / App): off / on / off. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
 
-**Why:** StyleCop 1.2 never reports it (not implemented, probed while building BRO16xx).
+**Why:** StyleCop never reports it (not implemented: probed in 1.2 while building BRO16xx; still an empty analyzer in 1.3.177-beta's source).
 
 **To revisit:** Nothing to port.
 

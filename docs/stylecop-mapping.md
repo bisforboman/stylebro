@@ -11,16 +11,16 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **complete: every StyleCop rule is StyleBro, SDK or dropped with a reason (2026-10-07)**. Of 197 rules: 44 SDK, 109 StyleBro (109 done), 42 drop, 0 not yet done, 2 not applicable or variants.
+Status: **every StyleCop 1.3.177-beta rule is StyleBro, SDK, dropped with a reason, or (4 of the rules 1.3 added) not yet done (2026-11-07; complete for 1.2.0-beta.556 since 2026-10-07)**. Of 203 rules: 44 SDK, 109 StyleBro (109 done), 44 drop, 4 not yet done, 2 not applicable or variants.
 
 ## How this was measured
 
 Scripts and data: [scripts/stylecop-survey](https://github.com/bisforboman/stylebro/tree/main/scripts/stylecop-survey).
 
-- **Inventory**: every diagnostic in StyleCop.Analyzers 1.1.118 and 1.2.0-beta.556, read from the analyzer DLLs, including whether StyleCop itself ships a code fix. 1.2.0-beta.556 adds SA1141, SA1142, SA1316, SA1414 and some variants.
+- **Inventory**: every diagnostic in StyleCop.Analyzers 1.1.118, 1.2.0-beta.556 and 1.3.177-beta, read from the analyzer DLLs, including whether StyleCop itself ships a code fix (the column below is 1.3.177-beta's). 1.2.0-beta.556 adds SA1141, SA1142, SA1316, SA1414 and some variants; 1.3.177-beta adds SA1143, SA1315, SA1317, SA1653, SA1654 and SX1412, and fixes for SA1114, SA1115, SA1117, SA1612 and SA1648.
 - **Teams keeping it on**: the effective setting for production code in 3 repos that use StyleCop: [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet) (`ea1e3f3`, StyleCop 1.2.0-beta.556), [Polly](https://github.com/App-vNext/Polly) (`0275bc2`, StyleCop 1.2.0-beta.556), a private 30-project app (StyleCop 1.1.118). Shown as OTel / Polly / App.
-- **Diagnostics with every rule on**: each repo built with all StyleCop rules enabled as warnings (and XML docs on), counting unique diagnostics. Shown as OTel / Polly / App. Where a team keeps a rule on, the count is near zero; where it is off, the count shows how much code would change. 10 of OpenTelemetry's 81 projects (examples and some tests) did not compile in the survey (CS1705 in a shallow clone) and are missing from its counts.
-- **SDK check**: for 94 rules, a small violating example was formatted with `dotnet format style` and `dotnet format whitespace` (SDK only, not StyleCop's own fixes) using StyleCop-like SDK settings, and StyleCop was run again. "fixed" means the diagnostic was gone. Each rule was checked on one example, so a "fixed" rule can still have cases the SDK handles differently.
+- **Diagnostics with every rule on**: each repo built with all StyleCop rules enabled as warnings (and XML docs on), counting unique diagnostics. Shown as OTel / Polly / App. Where a team keeps a rule on, the count is near zero; where it is off, the count shows how much code would change. The surveys ran StyleCop 1.2, so the rules 1.3 added say *not surveyed*. 10 of OpenTelemetry's 81 projects (examples and some tests) did not compile in the survey (CS1705 in a shallow clone) and are missing from its counts.
+- **SDK check**: for 95 rules, a small violating example was formatted with `dotnet format style` and `dotnet format whitespace` (SDK only, not StyleCop's own fixes) using StyleCop-like SDK settings, and StyleCop was run again. "fixed" means the diagnostic was gone. Each rule was checked on one example, so a "fixed" rule can still have cases the SDK handles differently.
 
 ## Not yet done, by demand
 
@@ -28,6 +28,10 @@ Rules that look feasible but aren't covered yet, ordered by how many of the 3 te
 
 | Rule | Title | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) | Status |
 |---|---|---|---|---|
+| [SA1143](skipped-rules.md#sa1143) | Conditional expressions must be formatted consistently | not surveyed | not surveyed | candidate |
+| [SA1315](skipped-rules.md#sa1315) | Parameter names should match inherited names | not surveyed | not surveyed | candidate |
+| [SA1654](skipped-rules.md#sa1654) | Properly encode generic brackets | not surveyed | not surveyed | candidate |
+| [SX1412](skipped-rules.md#sx1412) | Store files as UTF-8 without byte order mark | not surveyed | not surveyed | SDK not on yet |
 
 **Observation.** Polly turns off most of StyleCop's spacing, layout and naming rules and enforces the SDK equivalents instead: 101 IDE rule severities, including IDE0055 (formatting), IDE0011 (braces) and IDE1006 with 10 naming rules, plus `EnforceCodeStyleInBuild`. That is the model StyleBro's preset follows. All three repos turn off SA1200 (using placement) and SA1401 (fields should be private).
 
@@ -53,7 +57,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1609 | Property documentation should have value | off | yes | off / off / off | 292 / 171 / 8 |  | Drop: Off by default. Missing `<value>`; the fix would be placeholder text (no stubs, user decision). ([details](skipped-rules.md#sa1609)) |
 | SA1610 | Property documentation should have value text | on | yes | on / off / on | 0 / 0 / 0 |  | Drop: An empty `<value>`; StyleCop's fix writes placeholder text. ([details](skipped-rules.md#sa1610)) |
 | SA1611 | Element parameters should be documented | on | no | on / on / on | 8 / 1 / 11 |  | Drop: Missing `<param>`; the fix would be placeholder text (no stubs, user decision). ([details](skipped-rules.md#sa1611)) |
-| SA1612 | Element parameter documentation should match element parameters | on | no | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1611** (done), with a fix (StyleCop has none): stale tags renamed or removed, tags reordered |
+| SA1612 | Element parameter documentation should match element parameters | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1611** (done), with a fix (StyleCop has none): stale tags renamed or removed, tags reordered |
 | SA1613 | Element parameter documentation should declare parameter name | on | no | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1612** (done) when the name is certain (one unnamed tag and one undocumented parameter, or all unnamed with one per parameter); StyleCop reports every unnamed tag and has no fix |
 | SA1614 | Element parameter documentation should have text | on | no | on / on / off | 0 / 0 / 4 |  | Drop: An empty `<param>`; the fix would be placeholder text. ([details](skipped-rules.md#sa1614)) |
 | SA1615 | Element return value should be documented | on | yes | on / on / on | 3 / 1 / 6 |  | Drop: Missing `<returns>`; the fix would be placeholder text. ([details](skipped-rules.md#sa1615)) |
@@ -66,10 +70,10 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1622 | Generic type parameter documentation should have text | on | no | on / on / on | 0 / 0 / 0 |  | Drop: An empty `<typeparam>`; the fix would be placeholder text. ([details](skipped-rules.md#sa1622)) |
 | SA1623 | Property summary documentation should match accessors | on | yes | on / on / off | 0 / 0 / 8 |  | StyleBro **BRO1604** (done), same results as StyleCop |
 | SA1624 | Property summary documentation should omit accessor with restricted access | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1605** (done), same results as StyleCop |
-| SA1625 | Element documentation should not be copied and pasted | on | no | on / on / on | 0 / 0 / 0 |  | Drop: Identical text copied between tags has to be rewritten by a person. ([details](skipped-rules.md#sa1625)) |
+| SA1625 | Element documentation should not contain duplicate entries | on | no | on / on / on | 0 / 0 / 0 |  | Drop: Identical text copied between tags has to be rewritten by a person. ([details](skipped-rules.md#sa1625)) |
 | SA1626 | Single-line comments should not use documentation style slashes | on | yes | on / on / on | 0 / 0 / 2 |  | StyleBro **BRO1602** (done), same results as StyleCop |
 | SA1627 | Documentation text should not be empty | on | no | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1610** (done) for empty remarks, with a fix (removal); StyleCop has none |
-| SA1628 | Documentation text should begin with a capital letter | off | no | off / on / off | 0 / 0 / 0 |  | Drop: StyleCop never reports it. StyleCop 1.2 never reports it (not implemented, probed while building BRO16xx). ([details](skipped-rules.md#sa1628)) |
+| SA1628 | Documentation text should begin with a capital letter | off | no | off / on / off | 0 / 0 / 0 |  | Drop: StyleCop never reports it. StyleCop never reports it (not implemented: probed in 1.2 while building BRO16xx; still an empty analyzer in 1.3.177-beta's source). ([details](skipped-rules.md#sa1628)) |
 | SA1629 | Documentation text should end with a period | on | yes | on / on / off | 0 / 0 / 29 |  | StyleBro **BRO1603** (done). Differs from StyleCop: text ending with `?`, `!` or `:` is not reported |
 | SA1630 | Documentation text should contain whitespace | off | no | off / on / off | 0 / 0 / 0 |  | Drop: StyleCop never reports it. Off by default and no diagnostic on a one-word summary (probed). ([details](skipped-rules.md#sa1630)) |
 | SA1631 | Documentation should meet character percentage | off | no | off / on / off | 0 / 0 / 0 |  | Drop: StyleCop never reports it. Off by default and no diagnostic on a summary of symbols (probed). ([details](skipped-rules.md#sa1631)) |
@@ -85,14 +89,16 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1641 | File header company name text should match | on | yes | on / off / on | 0 / 0 / 0 |  | StyleBro **BRO1615** (done), one rule for the XML header; same positions and fixed headers as StyleCop, except that the fix keeps other comments (StyleCop's deletes them) |
 | SA1642 | Constructor summary documentation should begin with standard text | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1606** (done), same results as StyleCop (the fix adds a space after the standard sentence) |
 | SA1643 | Destructor summary documentation should begin with standard text | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1607** (done), same results as StyleCop (the fix adds a space after the standard sentence) |
-| SA1644 | Documentation headers should not contain blank lines | off | no | off / on / off | 0 / 0 / 0 |  | Drop: StyleCop never reports it. StyleCop 1.2 never reports it (not implemented, probed while building BRO16xx). ([details](skipped-rules.md#sa1644)) |
+| SA1644 | Documentation headers should not contain blank lines | off | no | off / on / off | 0 / 0 / 0 |  | Drop: StyleCop never reports it. StyleCop never reports it (not implemented: probed in 1.2 while building BRO16xx; still an empty analyzer in 1.3.177-beta's source). ([details](skipped-rules.md#sa1644)) |
 | SA1645 | Included documentation file does not exist | off | no | off / on / off | 0 / 0 / 0 |  | Drop: Off by default; a missing `<include>` file can't be fixed automatically. ([details](skipped-rules.md#sa1645)) |
 | SA1646 | Included documentation XPath does not exist | off | no | off / on / off | 0 / 0 / 0 |  | Drop: Off by default; a wrong `<include>` XPath can't be fixed automatically. ([details](skipped-rules.md#sa1646)) |
 | SA1647 | Include node does not contain valid file and path | off | no | off / on / off | 0 / 0 / 0 |  | Drop: Off by default; an `<include>` without file/path can't be fixed automatically. ([details](skipped-rules.md#sa1647)) |
-| SA1648 | inheritdoc should be used with inheriting class | on | no | on / on / on | 0 / 0 / 0 |  | Drop: `<inheritdoc/>` where there is nothing to inherit: the fix is real documentation. ([details](skipped-rules.md#sa1648)) |
+| SA1648 | inheritdoc should be used with inheriting class | on | yes | on / on / on | 0 / 0 / 0 |  | Drop: `<inheritdoc/>` where there is nothing to inherit: the fix is real documentation. (StyleCop 1.3's fix removes the `<inheritdoc/>`, which leaves the member undocumented.) ([details](skipped-rules.md#sa1648)) |
 | SA1649 | File name should match first type name | on | yes | off / on / off | 0 / 0 / 1 |  | Drop: Renaming files isn't something `dotnet format` can do. ([details](skipped-rules.md#sa1649)) |
 | SA1650 | Element documentation should be spelled correctly | off | no | off / on / off | 0 / 0 / 0 |  | Drop: StyleCop never reports it. Off by default and no diagnostic on misspelled words (probed). ([details](skipped-rules.md#sa1650)) |
 | SA1651 | Do not use placeholder elements | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1609** (done), same results and output as StyleCop |
+| SA1653 (1.3 beta) | Only one partial declaration should contain summary documentation | on | yes | not surveyed | not surveyed |  | Drop: New in StyleCop 1.3. Which part of a partial type keeps the `<summary>` is a person's choice: StyleCop's fix keeps the one on the declaration it is applied to and turns the others into `<content>`, so under `dotnet format` the result depends on which diagnostic comes first. ([details](skipped-rules.md#sa1653)) |
+| SA1654 (1.3 beta) | Properly encode generic brackets | on | yes | not surveyed | not surveyed |  | Not yet: StyleBro candidate. New in StyleCop 1.3 (on by default, with a fix). BRO1617 writes a cref's type arguments in braces the same way, but bro migrate doesn't carry SA1654 over to it yet. ([details](skipped-rules.md#sa1654)) |
 
 ### Layout
 
@@ -133,13 +139,14 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1404 | Code analysis suppression should have justification | on | yes | on / on / on | 0 / 0 / 0 |  | Drop: The justification of a SuppressMessage has to be written by a person. ([details](skipped-rules.md#sa1404)) |
 | SA1405 | Debug.Assert should provide message text | on | no | on / on / on | 0 / 0 / 0 |  | Drop: StyleCop has no fix; the message for Debug.Assert has to be written by a person. ([details](skipped-rules.md#sa1405)) |
 | SA1406 | Debug.Fail should provide message text | on | no | on / on / on | 0 / 0 / 0 |  | Drop: StyleCop has no fix; the message for Debug.Fail has to be written by a person. ([details](skipped-rules.md#sa1406)) |
-| SA1407 | Arithmetic expressions should declare precedence | on | yes | on / on / off | 0 / 0 / 5 | not fixed | StyleBro **BRO1406** (done; replaces IDE0048, whose fix breaks multi-targeted projects and needed two runs), same positions and output as StyleCop |
+| SA1407 | Arithmetic, bitwise, and shift expressions should declare precedence | on | yes | on / on / off | 0 / 0 / 5 | not fixed | StyleBro **BRO1406** (done; replaces IDE0048, whose fix breaks multi-targeted projects and needed two runs), same positions and output as StyleCop |
 | SA1408 | Conditional expressions should declare precedence | on | yes | on / on / off | 0 / 0 / 14 | fixed | StyleBro **BRO1407** (done; replaces IDE0048). Also checks `and`/`or` patterns, like StyleCop's current source (after 1.2.0-beta.556) |
 | SA1409 | Remove unnecessary code | off | no | off / on / off | 0 / 0 / 0 |  | Drop: StyleCop never reports it. Off by default and no diagnostic for an empty `try { } finally { }` (probed). ([details](skipped-rules.md#sa1409)) |
 | SA1410 | Remove delegate parenthesis when possible | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1403** (done), only where BRO1125 doesn't turn the method into a lambda |
 | SA1411 | Attribute constructor should not use unnecessary parenthesis | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1402** (done), same positions; the fix also removes the space in `( )` |
 | SA1412 | Store files as UTF-8 with byte order mark | off | yes | off / off / off | 876 / 325 / 2,581 | fixed | SDK: `charset = utf-8-bom` (`dotnet format` writes the BOM); off by default in StyleCop and not in the preset; bro migrate sets it when SA1412 is on |
-| SA1413 | Use trailing comma in multi-line initializers | on | yes | on / off / off | 0 / 407 / 1,862 | not fixed | StyleBro **BRO1401** (done). Differs from StyleCop: lists with `#if` between their braces are not reported |
+| SA1413 | Use trailing comma in multi-line initializers and lists | on | yes | on / off / off | 0 / 407 / 1,862 | not fixed | StyleBro **BRO1401** (done). Differs from StyleCop: lists with `#if` between their braces are not reported |
+| SX1412 (1.3 beta) | Store files as UTF-8 without byte order mark | off | yes | not surveyed | not surveyed | fixed | Not yet: the SDK can fix it, but it isn't turned on. New in StyleCop 1.3, off by default (the opposite of SA1412). The SDK's `charset = utf-8` makes `dotnet format` remove the byte order mark, but bro migrate doesn't write it for SX1412 yet (it writes `utf-8-bom` for SA1412). ([details](skipped-rules.md#sx1412)) |
 
 ### Naming
 
@@ -150,7 +157,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1302 | Interface names should begin with I | on | yes | on / off / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1304** (done), rename with Fix All, same results as StyleCop |
 | SA1303 | Const field names should begin with upper-case letter | on | yes | on / off / off | 0 / 0 / 4 | not fixed | StyleBro **BRO1306** (done), rename with Fix All |
 | SA1304 | Non-private readonly fields should begin with upper-case letter | on | yes | on / off / on | 0 / 1 / 0 |  | StyleBro **BRO1306** (done), rename with Fix All |
-| SA1305 | Field names should not use Hungarian notation | off | no | off / off / off | 82 / 1 / 14 |  | StyleBro **BRO1310** (done, off by default like StyleCop), the prefix removed in the same rename as the other naming rules |
+| SA1305 | Names should not use Hungarian notation | off | no | off / off / off | 82 / 1 / 14 |  | StyleBro **BRO1310** (done, off by default like StyleCop), the prefix removed in the same rename as the other naming rules |
 | SA1306 | Field names should begin with lower-case letter | on | yes | on / off / off | 0 / 4 / 11 | not fixed | StyleBro **BRO1303** (done) for private and protected fields; `stylebro_private_field_naming` picks `count` (default) or `_count` |
 | SA1307 | Accessible fields should begin with upper-case letter | on | yes | on / off / on | 0 / 0 / 0 |  | StyleBro **BRO1306** (done), rename with Fix All |
 | SA1308 | Variable names should not be prefixed | on | yes | on / off / on | 0 / 0 / 0 |  | StyleBro **BRO1307** (done), rename to the complete correct name in one pass |
@@ -160,7 +167,9 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1312 | Variable names should begin with lower-case letter | on | yes | on / off / off | 0 / 14 / 7 | not fixed | StyleBro **BRO1301** (done), rename with Fix All; also fixes `_name` |
 | SA1313 | Parameter names should begin with lower-case letter | on | yes | on / off / off | 0 / 0 / 90 | not fixed | StyleBro **BRO1302** (done), rename with Fix All incl. named arguments and overrides; also fixes `_name` |
 | SA1314 | Type parameter names should begin with T | on | yes | on / off / off | 0 / 0 / 0 | not fixed | StyleBro **BRO1305** (done), rename with Fix All, same results as StyleCop |
+| SA1315 (1.3 beta) | Parameter names should match inherited names | on | yes | not surveyed | not surveyed |  | Not yet: StyleBro candidate. New in StyleCop 1.3 (on by default, with a fix). BRO1313 (off by default) renames such parameters to the base member's names, but bro migrate doesn't carry SA1315 over to it yet. ([details](skipped-rules.md#sa1315)) |
 | SA1316 (1.2 beta) | Tuple element names should use correct casing | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1311** (done), the name renamed with every use and override solution-wide; `stylebro_tuple_element_name_casing` from tupleElementNameCasing |
+| SA1317 (1.3 beta) | Identifier should be named only with Latin letters | on | no | not surveyed | not surveyed |  | Drop: New in StyleCop 1.3, with no fix: a name with a non-Latin letter (`ЕxаmplеClаss`, `café`) needs a new name a person chooses; transliterating is a guess. ([details](skipped-rules.md#sa1317)) |
 | SX1309 | Field names should begin with underscore | off | yes | off / off / off | 842 / 0 / 32 |  | StyleBro **BRO1303** (done) with `stylebro_private_field_naming = _camelCase`, which bro migrate sets when SX1309 is on |
 | SX1309S | Static field names should begin with underscore | off | yes | off / off / off | 19 / 1 / 0 |  | StyleBro **BRO1303** (done) with `stylebro_private_mutable_static_field_naming = _camelCase` (the style of private static fields that aren't readonly or const, SX1309S's fields; not set: `stylebro_private_field_naming`'s). bro migrate counts SX1309S as covered when it writes `_camelCase` (always with SX1309); on its own, with instance fields named `count`, SA1309 is off, StyleCop accepts instance fields with and without `_`, and the report lists it as not expressible |
 
@@ -204,10 +213,10 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1111 | Closing parenthesis should be on line of last parameter | on | yes | on / on / off | 0 / 0 / 740 |  | StyleBro **BRO1110** (done), same results and output as StyleCop |
 | SA1112 | Closing parenthesis should be on line of opening parenthesis | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1116** (done), same positions and output as StyleCop |
 | SA1113 | Comma should be on the same line as previous parameter | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1117** (done), same positions and output as StyleCop |
-| SA1114 | Parameter list should follow declaration | on | no | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1118** (done), with a fix (StyleCop has none); a comment before the first item is not reported |
-| SA1115 | Parameter should follow comma | on | no | on / off / off | 0 / 0 / 0 |  | StyleBro **BRO1119** (done), with a fix (StyleCop has none) |
+| SA1114 | Parameter list should follow declaration | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1118** (done), with a fix (StyleCop has none); a comment before the first item is not reported |
+| SA1115 | Parameter should follow comma | on | yes | on / off / off | 0 / 0 / 0 |  | StyleBro **BRO1119** (done), with a fix (StyleCop has none) |
 | SA1116 | Split parameters should start on line after declaration | on | yes | on / off / off | 0 / 375 / 266 | not fixed | StyleBro **BRO1107** (done), also checks record and primary-constructor parameters |
-| SA1117 | Parameters should be on same line or separate lines | on | no | on / off / off | 0 / 370 / 102 | not fixed | StyleBro **BRO1108** (done), also checks record and primary-constructor parameters; unlike StyleCop, has a fix |
+| SA1117 | Parameters should be on same line or separate lines | on | yes | on / off / off | 0 / 370 / 102 | not fixed | StyleBro **BRO1108** (done), also checks record and primary-constructor parameters; unlike StyleCop, has a fix |
 | SA1118 | Parameter should not span multiple lines | on | no | on / on / off | 0 / 0 / 126 |  | Drop: StyleCop has no fix. A multi-line argument (other than the first, or a lambda/anonymous object) needs extracting into a variable: a refactoring that names things. 126 findings in the private app. ([details](skipped-rules.md#sa1118)) |
 | SA1120 | Comments should contain text | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1120** (done), same positions; the fix removes every empty comment at that end of the group in one run |
 | SA1121 | Use built-in type alias | on | yes | on / on / off | 0 / 0 / 0 | fixed | SDK: IDE0049 (`dotnet_style_predefined_type_* = true`) |
@@ -230,7 +239,8 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1139 | Use literal suffix notation instead of casting | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1122** (done), only when the suffixed literal has exactly the cast's value (StyleCop's fix can change decimals) |
 | SA1141 (1.2 beta) | Use tuple syntax | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1123** (done), every type-only position (StyleCop: declarations only); StyleCop's fix has no Fix All |
 | SA1142 (1.2 beta) | Refer to tuple fields by name | on | yes | on / off / on | 0 / 0 / 0 |  | StyleBro **BRO1124** (done), same positions as StyleCop except nameof; StyleCop's fix throws under `dotnet format` |
-| SA1414 (1.2 beta) | Tuple types in signatures should have element names | on | no | on / on / on | 0 / 0 / 0 |  | Drop: StyleCop has no fix (1.2 only); tuple element names in signatures have to be chosen by a person. ([details](skipped-rules.md#sa1414)) |
+| SA1143 (1.3 beta) | Conditional expressions must be formatted consistently | on | yes | not surveyed | not surveyed |  | Not yet: StyleBro candidate. New in StyleCop 1.3 (on by default, with a fix). BRO1524 asks for the same expanded layout (condition, `? a` and `: b` each starting a line), but not SA1143's chained layout (`a ? b :` one per line), and bro migrate doesn't carry SA1143 over to it yet. ([details](skipped-rules.md#sa1143)) |
+| SA1414 (1.2 beta) | Tuple types in signatures should have element names | on | no | on / on / on | 0 / 0 / 0 |  | Drop: StyleCop has no fix (1.2 and 1.3); tuple element names in signatures have to be chosen by a person. ([details](skipped-rules.md#sa1414)) |
 | SX1101 | Do not prefix local calls with 'this.' | off | yes | off / on / off | 6,123 / 0 / 6 |  | SDK: IDE0003 (`dotnet_style_qualification_for_* = false`); off by default in StyleCop and not enforced by the preset; bro migrate turns IDE0003 on when SX1101 is on |
 
 ### Spacing

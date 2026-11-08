@@ -1,8 +1,9 @@
 # StyleBro
 
-Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternative to StyleCop, built so that **`dotnet format` fixes everything it reports**.
-
-> StyleCop writes you a ticket. StyleBro just fixes it. Rule IDs use the `BRO` prefix.
+Roslyn analyzers and code fixes that keep C# code tidy, built so that **one `dotnet format` run fixes everything it
+reports**: every rule has a fix with Fix All, and a second run changes nothing. Coming from StyleCop.Analyzers (1.2 or
+the 1.3 betas)? `bro migrate` carries your settings and suppressions over, and the analyzers take about a third of
+StyleCop 1.3's time ([measured](https://github.com/bisforboman/stylebro/blob/main/docs/stylebro-vs-stylecop.md)).
 
 **Documentation:** [bisforboman.github.io/stylebro](https://bisforboman.github.io/stylebro/) (the `docs/` folder as a
 searchable site).
@@ -21,7 +22,7 @@ correctness and migration, with measured numbers.
 
 ## Rules
 
-128 rules, each with a code fix. The full list, with what each one replaces and whether it's on by
+128 rules, each with a code fix; rule IDs use the `BRO` prefix. The full list, with what each one replaces and whether it's on by
 default: **[docs/rules](https://github.com/bisforboman/stylebro/blob/main/docs/rules/README.md)**.
 
 | Area | Rules | For example |

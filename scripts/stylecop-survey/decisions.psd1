@@ -1,6 +1,6 @@
 # The hand-written part of docs/stylecop-mapping.md. New-Mapping.ps1 combines this with the measured data.
 @{
-    Status = 'complete: every StyleCop rule is StyleBro, SDK or dropped with a reason (2026-10-07)'
+    Status = 'every StyleCop 1.3.177-beta rule is StyleBro, SDK, dropped with a reason, or (4 of the rules 1.3 added) not yet done (2026-11-07; complete for 1.2.0-beta.556 since 2026-10-07)'
 
     # For rules the SDK check fixed: which SDK rule or setting did it.
     SdkSettings = @{

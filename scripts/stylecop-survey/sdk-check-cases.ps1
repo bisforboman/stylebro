@@ -78,6 +78,7 @@ $cases = [ordered]@{
     SA1407 = 'class C { int M(int a, int b, int c) => a + b * c; }'
     SA1408 = 'class C { bool M(bool a, bool b, bool c) => a || b && c; }'
     SA1412 = 'class C { }'
+    SX1412 = 'class C { }'
     SA1413 = "class C`n{`n    int[] M() => new[]`n    {`n        1,`n        2`n    };`n}"
 
     # ---- Layout --------------------------------------------------------------------------------

@@ -259,7 +259,7 @@ internal static class Program
         }
         else if (setup.UnresolvedVersion is { } unresolved)
         {
-            Console.WriteLine($"StyleCop.Analyzers version: unknown (the reference says {unresolved}, and no MSBuild file in the repository defines it): every StyleCop 1.2 rule counts.");
+            Console.WriteLine($"StyleCop.Analyzers version: unknown (the reference says {unresolved}, and no MSBuild file in the repository defines it): every StyleCop 1.3 rule counts.");
         }
 
         if (setup.StyleSharp is { } styleSharp)
