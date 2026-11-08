@@ -5090,7 +5090,8 @@ internal static partial class FormatCommand
             parts.Add($"removed {removed} entr{(removed == 1 ? "y" : "ies")} whose line is gone{(removedFindings == removed ? string.Empty : $" ({removedFindings} findings)")}");
         }
 
-        return $"Baseline: {name}: {string.Join("; ", parts)} (https://bisforboman.github.io/stylebro/baseline/).";
+        var line = $"Baseline: {name}: {string.Join("; ", parts)} (https://bisforboman.github.io/stylebro/baseline/).";
+        return GitAttributes.AddBaselineLine(root, file) is { } attributes ? line + "\n" + attributes : line;
     }
 
     /// <summary>The nearest stylebro.baseline at or above <paramref name="root"/>, else a new one in <see cref="NewBaselineFolder"/>.</summary>

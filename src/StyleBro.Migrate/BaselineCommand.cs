@@ -148,6 +148,10 @@ internal static class BaselineCommand
                 File.WriteAllText(path, KeepOutside(result.Baseline, File.Exists(aside) ? File.ReadAllText(aside) : null, Path.GetDirectoryName(path)!, root).Render());
                 File.Delete(aside);
                 Report(result, Path.GetRelativePath(root, path).Replace('\\', '/'));
+                if (GitAttributes.AddBaselineLine(root, path) is { } attributes)
+                {
+                    Console.WriteLine(attributes);
+                }
             }
 
             return 0;

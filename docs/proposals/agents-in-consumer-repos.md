@@ -29,6 +29,9 @@ too.
 
 ## 2. stylebro.baseline is a shared file every format rewrites (085)
 
+**Done 2026-11-08** (owner's choice: on every baseline write, `bro format`'s too, not only `bro baseline`): see
+[baseline.md](../baseline.md#merging-branches).
+
 `bro format` adds kept findings to the baseline and removes entries whose line is gone, so parallel pull requests that
 run it edit the same file. The entries are sorted by path, so only nearby entries conflict, but they will. Not seen in
 a trial yet: a prediction.

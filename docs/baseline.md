@@ -104,3 +104,23 @@ per pull request keeps each change small to review and unlikely to conflict with
 **Use a current .NET SDK.** The baseline reaches `dotnet format` as a diagnostic suppressor, and older SDKs' `dotnet
 format` (10.0.1xx, 8.0.1xx) loads none: there, `bro format` fixes the baselined violations too (all of them, on a whole
 run) and `bro check` fails on them, although the build passes. SDK 10.0.4xx honors it.
+
+## Merging branches
+
+`bro format` and `bro baseline` rewrite the baseline, so branches that run them in parallel all edit the same file.
+When one of them writes a baseline in a git repository, it adds one line to the `.gitattributes` at the repository's
+root and says so (`Baseline: .gitattributes: added 'stylebro.baseline merge=union' ...`):
+
+```
+# StyleBro: git keeps both branches' baseline entries when it merges them (https://bisforboman.github.io/stylebro/baseline/#merging-branches)
+stylebro.baseline merge=union
+```
+
+With it, git keeps both sides' lines instead of stopping at a conflict. That's safe for this file: an entry that both
+branches changed ends up on two lines, and the larger count counts (never their sum); an entry left over for a line
+that's gone does nothing, and the next `bro format` drops it and sorts the file again. The line covers every
+`stylebro.baseline` in the repository. If a line in that `.gitattributes` already names `stylebro.baseline`, bro leaves
+the file alone: to keep git's usual merge (and its conflicts), replace StyleBro's line with `stylebro.baseline merge`.
+
+Git applies it to merges and rebases it runs itself (`git merge origin/main`). GitHub's own merges and its "Update
+branch" button ignore it: when GitHub shows a conflict in `stylebro.baseline`, merge the base branch locally.
