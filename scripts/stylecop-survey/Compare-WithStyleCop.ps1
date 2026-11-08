@@ -16,8 +16,8 @@
 #   dotnet build sc/StyleCop.Analyzers/StyleCop.Analyzers.CodeFixes -c Release -p:NBGV_GitEngine=Disabled  # SDK 6
 #   pwsh scripts/stylecop-survey/Compare-WithStyleCop.ps1 -StyleCopPackage StyleCop.Analyzers.Unstable `
 #       -StyleCopVersion 1.2.0-g -StyleCopFeed <folder with StyleCop.Analyzers.Unstable.1.2.0-g.nupkg>
-# Differences that are expected against master but not beta.556 then show up as failures; the rule pages and
-# docs/differences-from-stylecop.md ("Compared with StyleCop's unreleased master") say which are deliberate.
+# Differences that are expected against master but not beta.556 then show up as failures; the sets' 'Expected'
+# entries say which are deliberate.
 #
 # -StyleSharp runs StyleSharp.Analyzers (a StyleCop successor, SST ids) instead, as bro migrate reads it: each SA id
 # of a set stands for the SST ids data/stylesharp-mapping.csv maps to it, stylecop.json is left out (StyleSharp doesn't

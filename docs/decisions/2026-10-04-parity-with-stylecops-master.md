@@ -18,7 +18,7 @@ already a documented difference.
 ## Decision
 
 The owner: the clear gaps follow `master`; StyleBro keeps its behavior for BRO1606 (`<para>` text checked), documented
-on the rule pages and in [differences-from-stylecop.md](../differences-from-stylecop.md). First also kept for BRO1505 and
+on the rule pages and in differences-from-stylecop.md (removed 2026-11-07). First also kept for BRO1505 and
 BRO1601; after seeing code examples the owner changed both to follow `master` (same day): two single-line properties
 may sit together, and explicit interface implementations get no `<inheritdoc/>`. The parity sets stay on beta.556;
 `Compare-WithStyleCop.ps1 -StyleCopFeed` runs them against a local `master` build when needed (no CI job).

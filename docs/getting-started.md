@@ -169,8 +169,8 @@ Two things that get in the way of a package from a local feed (trying a build be
   condition on the reference, e.g. `Condition="!$(MSBuildProjectDirectory.Contains('artifacts'))"`, or give that folder a
   `Directory.Build.props` of its own that doesn't import the root one.
 
-The package brings StyleBro's rules and its preset: rule severities and formatting options, close to StyleCop's
-defaults. Your own `.editorconfig` wins over the preset. The preset has a version, and `bro init --write`
+The package brings StyleBro's rules and its preset: rule severities and formatting options (the
+[`stylecop` style](styles.md)). Your own `.editorconfig` wins over the preset. The preset has a version, and `bro init --write`
 (step 2) pins it in `Directory.Build.props` (`<StyleBroPreset>1.0</StyleBroPreset>`), so a later package upgrade adds no
 new rules until you raise it ([versioning](versioning.md#new-rules)). To configure everything yourself instead:
 `<StyleBroPreset>none</StyleBroPreset>`.
@@ -320,8 +320,6 @@ agents (opt-in), and with `--skill` StyleBro's [skill](agents.md#the-skill). For
 
 ## B. Coming from StyleCop
 
-Still deciding? [StyleBro vs StyleCop](stylebro-vs-stylecop.md) compares the two with measured numbers.
-
 `bro migrate` reads your StyleCop setup (rulesets, global configs, `.editorconfig` files, `stylecop.json`) and
 writes StyleBro and SDK settings that enforce the same things, so code StyleCop was happy with stays as it is. A
 walk-through on a small project, with real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro/blob/main/samples/StyleCopMigration/README.md).
@@ -363,16 +361,15 @@ bro format
 ```
 
 Why not plain `dotnet format`: [step 3 of path A](#3-run-bro-format). In a StyleCop-clean repository this should change
-little or nothing. Look at what it did change: usually code StyleCop
-missed, or a rule where StyleBro deliberately differs ([differences-from-stylecop.md](differences-from-stylecop.md)).
+little or nothing. Look at what it did change: code the rule pages say StyleBro
+formats ([rules](rules/README.md)), which the old setup let through.
 Then check the report from step 1 for rules your team relied on that nothing enforces any more. Details:
 [migrating.md](migrating.md). CI: [ci.md](ci.md).
 
 ## The Microsoft style (optional)
 
 For code written like dotnet/runtime's (`_camelCase` and `s_camelCase` fields, no `this.`, braces optional on one-line
-bodies), `bro init --style microsoft --write` puts that style on top of the preset instead of StyleCop's
-defaults; your code's own conventions still win, apart from private static fields: they get the style's `s_` unless
+bodies), `bro init --style microsoft --write` puts that style on top of the preset (the `stylecop` style); your code's own conventions still win, apart from private static fields: they get the style's `s_` unless
 your code clearly has none (the report says how many get it). Lines an earlier `init` wrote that the style says too
 are dropped. Plain `init` suggests it when your code looks like that. What it sets:
 [styles.md](styles.md).

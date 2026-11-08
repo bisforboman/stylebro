@@ -9,7 +9,7 @@
     every version, with and without --all-rules, -Repeat times each. `stylecop` as a version compares
     StyleCop.Analyzers 1.2.0-beta.556 (the StyleCop.Analyzers.Unstable 1.2.0.556 package) with the default rules only;
     `stylecop:<version>` compares that StyleCop.Analyzers version (1.3 betas ship the DLL in StyleCop.Analyzers itself),
-    as docs/stylebro-vs-stylecop.md does (`stylecop:1.3.177-beta`). Each run's output goes to -Work/logs/<version>-<rules>-<n>.txt; the summary
+    e.g. `stylecop:1.3.177-beta`. Each run's output goes to -Work/logs/<version>-<rules>-<n>.txt; the summary
     lines (totals) are printed at the end.
 
 .EXAMPLE

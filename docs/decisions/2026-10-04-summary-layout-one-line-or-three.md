@@ -2,7 +2,7 @@
 
 ## Question
 
-[beyond-stylecop.md](../beyond-stylecop.md) #5: should a `<summary>` be written on one line
+[beyond-stylecop.md](../notes/rule-candidates.md) #5: should a `<summary>` be written on one line
 (`/// <summary>Gets the name.</summary>`) or with its tags on lines of their own, which elements does the rule check,
 and what's the default?
 

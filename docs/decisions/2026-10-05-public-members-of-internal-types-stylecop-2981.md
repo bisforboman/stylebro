@@ -3,7 +3,7 @@
 ## Question
 
 StyleCop issue [#2981](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2981) asks for `internal` instead of
-`public` on members of an internal type. It was rejected in [beyond-stylecop.md](../beyond-stylecop.md) (#11): the rewrite
+`public` on members of an internal type. It was rejected in [beyond-stylecop.md](../notes/rule-candidates.md) (#11): the rewrite
 can change run-time behavior. The owner first questioned whether reflection cares about public vs private at all. It
 does: reflection's defaults (`GetMethods()`, `GetProperties()`, `BindingFlags.Public`) and the libraries built on them
 (System.Text.Json, Newtonsoft.Json, XmlSerializer, data binding, model binding, AutoMapper, Dapper, `Activator`,

@@ -35,7 +35,7 @@ PLANNED = load('planned', 'id', 'title', 'stylecop', 'sdk')
 # Work beyond single rules (decided 2026-10-03, see decisions.md "After StyleCop parity"), in this order.
 WORK = load('work', 'area', 'item', 'notes', 'status')
 
-# Candidates from StyleCop's issue tracker and other analyzers (docs/beyond-stylecop.md); planned as a group (WORK).
+# Candidates from StyleCop's issue tracker and other analyzers (docs/notes/rule-candidates.md); planned as a group (WORK).
 MAYBE = load('maybe', 'source', 'rule', 'notes')
 
 blocks = [
@@ -55,7 +55,7 @@ out.append('Every style rule StyleBro has or aims to add, with its status, and w
 out.append('when work starts or lands; a finished rule also moves from `skipped.psd1` to `decisions.psd1` (see')
 out.append('`docs/stylecop-mapping.md`).\n')
 out.append('Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), **Planned** (decided, not started), **Idea** (work item to pick up later, not decided),')
-out.append('**Maybe** (candidates without an id yet, from the StyleCop tracker and other analyzers; planned as a group under Work, see [beyond-stylecop.md](beyond-stylecop.md)).\n')
+out.append('**Maybe** (candidates without an id yet, from the StyleCop tracker and other analyzers; planned as a group under Work, see [rule-candidates.md](notes/rule-candidates.md)).\n')
 out.append('## Summary\n')
 out.append('| | Rules |')
 out.append('|---|---|')
@@ -113,7 +113,7 @@ out.append('`dotnet format` once per target framework, which avoids the crash. A
 out.append('(dotnet/roslyn).\n')
 
 out.append('## Maybe\n')
-out.append('The next rules from other analyzers, from the survey in [beyond-stylecop.md](beyond-stylecop.md) (more there):\n')
+out.append('The next rules from other analyzers, from the survey in [rule-candidates.md](notes/rule-candidates.md) (more there):\n')
 out.append('| Source | Rule | Notes |')
 out.append('|--------|------|-------|')
 for source, rule, notes in MAYBE:

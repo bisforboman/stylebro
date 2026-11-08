@@ -1,9 +1,8 @@
 # Migrating from StyleCop
 
-Switching a StyleCop-clean repository to StyleBro shouldn't reformat code StyleCop was happy with. StyleBro's preset
-follows StyleCop's defaults with a few deliberate exceptions ([differences-from-stylecop.md](differences-from-stylecop.md)),
-but most teams have changed some of StyleCop's defaults anyway. `bro migrate` reads what your team changed
-and writes the matching settings.
+Switching a StyleCop-clean repository to StyleBro shouldn't reformat code StyleCop was happy with. `bro migrate` reads
+the repository's StyleCop setup, including what your team changed, and writes StyleBro and SDK settings that turn on the
+replacing rules only where their StyleCop rules were on.
 
 ```
 dotnet tool install --global StyleBro.Tool --prerelease
@@ -245,7 +244,7 @@ tool again replaces the block, so put your own settings outside it.
   become [BRO1601](rules/BRO1601.md)'s `stylebro_document_*` settings.
 - **Documentation language and punctuation.** A `documentationCulture` other than English (`de-DE`, `fr-FR`; any
   `en-*` counts as English) turns off [BRO1604](rules/BRO1604.md)-[BRO1607](rules/BRO1607.md), which write English
-  summary sentences (StyleCop checks translated ones); the report says so. `excludeFromPunctuationCheck`, when it
+  summary sentences; the report says so. `excludeFromPunctuationCheck`, when it
   differs from StyleCop's default (`["seealso"]`), becomes [BRO1603](rules/BRO1603.md)'s
   `stylebro_exclude_from_punctuation_check`.
 
@@ -307,36 +306,24 @@ The dry run lists the StyleCop rules that are on but that nothing enforces after
 
 ## Coming from StyleCop 1.3
 
-StyleCop.Analyzers is maintained again: since 2026-10-12 it has shipped the 1.3 betas (1.3.177-beta on 2026-11-06), and
-dependency bots are moving repositories from 1.2.0-beta.556 onto them. A repository on a 1.3 beta migrates the same way
-as one on 1.2; what's different:
+A repository on a StyleCop.Analyzers 1.3 beta migrates the same way as one on 1.2; what's different:
 
 - **The rules 1.3 added count.** With a 1.3 version (`1.3.151-beta`, ...) SA1143, SA1315, SA1317, SA1653 and SA1654
   (on by default) and SX1412 (off by default) are read like every other rule; with 1.2 they count as off. None of them
   is carried over yet ([#339](https://github.com/bisforboman/stylebro/issues/339)), so the report lists those that are on under "Not enforced after removing StyleCop":
   - SA1143 (conditional expression layout), SA1315 (parameter names of overrides) and SA1654 (generic crefs in braces)
-    under *Not covered yet*. StyleBro has close rules, [BRO1524](rules/BRO1524.md), [BRO1313](rules/BRO1313.md) and
-    [BRO1617](rules/BRO1617.md), but the migration turns them off like every rule StyleCop 1.2 doesn't have; turn them
-    on yourself (`dotnet_diagnostic.BRO1524.severity = warning`) to keep the check. BRO1524 doesn't accept SA1143's
-    chained layout (one `a ? b :` per line).
+    under *Not covered yet*. [BRO1524](rules/BRO1524.md), [BRO1313](rules/BRO1313.md) and [BRO1617](rules/BRO1617.md)
+    check close to the same things, but the migration leaves them off; turn them on yourself
+    (`dotnet_diagnostic.BRO1524.severity = warning`) to keep the check. BRO1524 doesn't accept a chained layout (one
+    `a ? b :` per line).
   - SA1317 (non-Latin letters in names) and SA1653 (one `<summary>` per partial type) under *Dropped by design*: no
     fix that doesn't need a person's choice ([skipped-rules.md](skipped-rules.md#sa1317)).
   - SX1412 (UTF-8 without a byte order mark), when you turned it on: write `charset = utf-8` in `.editorconfig`; the
     SDK's formatter then removes the marks (the migration writes `utf-8-bom` for SA1412, not yet `utf-8` for SX1412).
-- **1.3 changed some rules StyleBro still checks like 1.2** ([Changed in StyleCop 1.3](differences-from-stylecop.md#changed-in-stylecop-13)).
-  Most of them make 1.3 stricter (SA1407 with `&`, `|`, `^` and `>>>`, SA1408 with `??`, SA1413 in collection
-  expressions, SA1122 for `$""`, SA1304 for `protected readonly` fields, records in SA1203, SA1204 and SA1214): code
-  clean on 1.3 is clean for StyleBro there too, and StyleBro just doesn't ask for those yet. Where 1.3 is more relaxed,
-  StyleBro can ask for changes in a 1.3-clean repository: a blank line above a documented single-line property next to
-  another (BRO1505), explicit interface events ordered as private instead of public (BRO1001), and the text of a
-  constructor summary that starts with `<para>` (BRO1606).
-- **Fixes 1.3 added** (SA1114, SA1115, SA1117, SA1612, SA1648) and the ones it repaired (CRLF in LF files, nested
-  trailing commas in one run) don't matter after the switch: StyleBro's own fixes replace StyleCop's.
 
 Measured 2026-11-07 on OpenTelemetry at `1fc102a` (StyleCop.Analyzers 1.3.151-beta, StyleCop-clean), with
 `scripts/stylecop-survey/Measure-MigrationDelta.ps1`: `bro migrate --write` and `dotnet format` changed 1 file,
-and not with a StyleBro rule (two trimming attributes from the SDK's analyzer). (`bro migrate` from before 2026-11-07
-didn't read OpenTelemetry's rulesets, which it imports through `GetDirectoryNameOfFileAbove`, and changed 210 files.)
+and not with a StyleBro rule (two trimming attributes from the SDK's analyzer).
 
 If you're still on 1.2.0-beta.556 and a bot proposes a 1.3 beta, you can migrate either before or after it: the
 migration reads the version you're on.
@@ -517,7 +504,7 @@ for that folder with `stylebro_keep_overloads_together = false`, and BRO1001 sta
 
 ## Modernizing afterwards
 
-StyleCop has no rules for newer C# or APIs, so the migration turns none on. To add the SDK's modernization rules
+The migration turns on no rules for newer C# or APIs. To add the SDK's modernization rules
 (their own block, kept when you run `bro migrate --write` again): `bro init --modernize --write`,
 see [modernizing.md](modernizing.md).
 

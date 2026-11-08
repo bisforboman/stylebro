@@ -1,4 +1,7 @@
-# The hand-written part of docs/stylecop-mapping.md. New-Mapping.ps1 combines this with the measured data.
+# The hand-written part of the StyleCop mapping. New-Mapping.ps1 combines this with the measured data: the full survey
+# (Proposals, SdkSettings, Notes) goes to survey.md (internal), the plain ID mapping to docs/stylecop-mapping.md.
+# Proposals may compare with StyleCop (survey evidence, not published); Mapping is published and says only what
+# StyleBro or the SDK covers (see docs/decisions/).
 @{
     Status = 'every StyleCop 1.3.177-beta rule is StyleBro, SDK, dropped with a reason, or (4 of the rules 1.3 added) not yet done (2026-11-07; complete for 1.2.0-beta.556 since 2026-10-07)'
 
@@ -142,10 +145,34 @@
         SA1214 = 'StyleBro **BRO1001** (done)'
     }
 
+    # The published 'Covered by' text where the default (the proposal's BRO ids, or 'SDK: ' + SdkSettings) needs a
+    # scope note. StyleBro and the SDK only: never what StyleCop does. **BROxxxx** becomes a link to the rule page.
+    Mapping = @{
+        SA1200 = '**BRO1008**, where moving the usings can''t change what a name binds to'
+        SA1300 = '**BRO1309**; namespaces: **BRO1312** (off by default; `bro migrate` turns it on with SA1300)'
+        SA1305 = '**BRO1310** (off by default)'
+        SA1306 = '**BRO1303**, for private and protected fields'
+        SA1309 = '**BRO1303** (private and protected fields) and **BRO1306** (constants, static readonly and public or internal fields)'
+        SA1124 = '**BRO1112** (off in the preset)'
+        SA1410 = '**BRO1403**, where BRO1125 doesn''t turn the method into a lambda'
+        SA1600 = '**BRO1601**, for overrides and implementations (`<inheritdoc/>`); other missing documentation isn''t covered ([why](skipped-rules.md#sa1600))'
+        SA1613 = '**BRO1612**, when the parameter name is certain'
+        SA1621 = '**BRO1614**, when the type parameter name is certain'
+        SA1627 = '**BRO1610**, for an empty `<remarks>`'
+        SA1633 = 'SDK: IDE0073 (`file_header_template`) for a plain header; **BRO1615** for the XML header'
+        SA1412 = 'SDK: `charset = utf-8-bom`, not in the preset; `bro migrate` sets it when SA1412 is on'
+        SA1206 = 'SDK: IDE0036 (`csharp_preferred_modifier_order`), which checks the whole modifier order ([details](skipped-rules.md#sa1206))'
+        SX1101 = 'SDK: IDE0003 (`dotnet_style_qualification_for_* = false`), not in the preset; `bro migrate` turns it on when SX1101 is on'
+        SX1309 = '**BRO1303** with `stylebro_private_field_naming = _camelCase` (`bro migrate` sets it when SX1309 is on)'
+        SX1309S = '**BRO1303** with `stylebro_private_mutable_static_field_naming = _camelCase`'
+        SA1119_p = '**BRO1405** (the hidden companion of SA1119, not a rule of its own)'
+    }
+
     # Paragraphs placed after the candidates table.
     Notes = @(
         '**Observation.** Polly turns off most of StyleCop''s spacing, layout and naming rules and enforces the SDK equivalents instead: 101 IDE rule severities, including IDE0055 (formatting), IDE0011 (braces) and IDE1006 with 10 naming rules, plus `EnforceCodeStyleInBuild`. That is the model StyleBro''s preset follows. All three repos turn off SA1200 (using placement) and SA1401 (fields should be private).'
         '**Naming note.** The SDK can detect all of StyleCop''s naming rules (IDE1006 with naming rules in `.editorconfig`), but `dotnet format` cannot fix them: it reports "Unable to fix IDE1006. Code fix NamingStyleCodeFixProvider doesn''t support Fix All in Solution." A StyleBro rename fix with Fix All would close that gap. Renaming public API breaks callers, so it should start with private and local symbols.'
+        '**SA1206 note.** IDE0036 enforces the whole modifier order, while StyleCop only wants the access modifier first and `static` next. Measured on six repos (2026-10-02): IDE0036 reordered nothing that StyleCop accepts (Polly, OpenTelemetry, the private app, FFMpegCore, Serilog 0; Newtonsoft.Json 27 lines, all SA1206 violations such as `public new static`).'
         'The documentation rules (SA16xx) are mostly not tested yet. The ones where StyleCop has a fix are candidates for the planned BRO16xx rules.'
     )
 }

@@ -1,4 +1,4 @@
-# Beyond StyleCop: rules from other analyzers
+# Rule candidates: other analyzers and StyleCop's issue tracker
 
 StyleCop parity is (almost) done. This page lists style rules from other popular C# analyzer packages that could
 become StyleBro rules: rules with a fix that `dotnet format` could apply, that the .NET SDK doesn't already cover.
@@ -51,7 +51,7 @@ It is a survey (2026-10-03), not a plan. The top five are in the "Maybe" section
 
 ### 1. Operator placement when wrapping (RCS0027, RCS0028)
 
-Done (2026-10-04): [BRO1520](rules/BRO1520.md).
+Done (2026-10-04): [BRO1520](../rules/BRO1520.md).
 
 ```csharp
 // before (option: before)                // after
@@ -69,14 +69,14 @@ if (isValid &&                             if (isValid
 
 ### 2. `=>` and `=` placement (RCS0032, RCS0052)
 
-Done (2026-10-04): [BRO1521](rules/BRO1521.md) and [BRO1522](rules/BRO1522.md).
+Done (2026-10-04): [BRO1521](../rules/BRO1521.md) and [BRO1522](../rules/BRO1522.md).
 
 `int P =>` + newline + `value;` vs `int P` + newline + `=> value;`. Same shape as #1 and the same fix code; could be one
 rule with several options, or rules next to #1. The SDK's experimental IDE2006 only removes blank lines after `=>`.
 
 ### 3. Null check style (RCS1248)
 
-Done (2026-10-04): [BRO1133](rules/BRO1133.md).
+Done (2026-10-04): [BRO1133](../rules/BRO1133.md).
 
 `if (x == null)` -> `if (x is null)`, or the reverse. Off by default, needs `roslynator_null_check_style`. SDK: IDE0041
 only rewrites `ReferenceEquals(x, null)`, IDE0150 only `x is object`. Value: high; teams argue about it, and `is null`
@@ -85,7 +85,7 @@ expression trees (`is` patterns don't compile there), and `is not null` before C
 
 ### 4. Call chain layout (RCS0054)
 
-Done (2026-10-04): [BRO1523](rules/BRO1523.md). Only split chains, the first line free, call steps (`.WriteTo.Sink(x)`
+Done (2026-10-04): [BRO1523](../rules/BRO1523.md). Only split chains, the first line free, call steps (`.WriteTo.Sink(x)`
 stays together), the chain's own indentation; see decisions.md.
 
 ```csharp
@@ -103,7 +103,7 @@ bodies reindented, conditional access (`?.`) counts as a link, and `#if` inside 
 
 ### 5. Summary layout (RCS1253, MA0177, MA0211)
 
-Done (2026-10-04): [BRO1616](rules/BRO1616.md).
+Done (2026-10-04): [BRO1616](../rules/BRO1616.md).
 
 `/// <summary>Gets the name.</summary>` vs the three-line form. Off by default in Roslynator; Meziantou has both
 directions as separate rules. SDK: none. Effort: low, text only, same doc helpers as BRO1603. Single-line only when
@@ -115,7 +115,7 @@ Options `include`, `omit`, `omit_after_block`. SDK: none; StyleCop has no rule (
 which BRO1519 already handles, but not after `break;`). Effort: low; reuse `BlankLineRuns`. Must agree with BRO1519
 when a section ends in a block.
 
-Done (2026-10-05): [BRO1526](rules/BRO1526.md), default `include`. After a multi-line block BRO1519 (SA1513) decides
+Done (2026-10-05): [BRO1526](../rules/BRO1526.md), default `include`. After a multi-line block BRO1519 (SA1513) decides
 when it's on, so with `omit`/`omit_after_block` a blank line stays there (the owner kept SA1513's behavior, see
 decisions.md); comments and directives between sections skipped.
 
@@ -125,7 +125,7 @@ decisions.md); comments and directives between sections skipped.
 Effort: low, extend BRO1114. Skip `for` initializers and `using`/`fixed` declarations (splitting changes the scopes
 or doesn't compile).
 
-Done (2026-10-05): [BRO1142](rules/BRO1142.md).
+Done (2026-10-05): [BRO1142](../rules/BRO1142.md).
 
 ### 8. Unneeded `$`, `@`, raw string (RCS1214, RCS1192, RCS1262)
 
@@ -133,28 +133,28 @@ Done (2026-10-05): [BRO1142](rules/BRO1142.md).
 not a `$` without holes (check). Effort: low, text only; the fix must unescape `{{`/`}}` and keep `@` when the text has
 `\`, `"` or a line break.
 
-Done (2026-10-05): [BRO1138](rules/BRO1138.md); no SDK rule does this (IDE0071 only simplifies holes).
+Done (2026-10-05): [BRO1138](../rules/BRO1138.md); no SDK rule does this (IDE0071 only simplifies holes).
 
 ### 9. `langword` in doc comments (MA0154)
 
 `<c>null</c>`, `<c>true</c>` -> `<see langword="null"/>`. Meziantou turns it on (info) and has a fix; the .NET runtime
 repo writes docs this way. Effort: low. Only C# keywords.
 
-Done (2026-10-05): [BRO1618](rules/BRO1618.md), with the reserved keywords and MA0154's contextual ones.
+Done (2026-10-05): [BRO1618](../rules/BRO1618.md), with the reserved keywords and MA0154's contextual ones.
 
 ### 10. Object creation parentheses (RCS1050)
 
 `new List<int>() { 1 }` vs `new List<int> { 1 }`. Off by default, needs `roslynator_object_creation_parentheses_style`.
 SDK: none (IDE0090 is about `new()`). Effort: low; target-typed `new() { }` needs its parentheses.
 
-Done (2026-10-05): [BRO1141](rules/BRO1141.md), `stylebro_object_creation_parentheses = omit` (default) or `include`.
+Done (2026-10-05): [BRO1141](../rules/BRO1141.md), `stylebro_object_creation_parentheses = omit` (default) or `include`.
 
 ### 11. Upper-case literal suffixes (S818)
 
 Sonar has a fix (`LiteralSuffixUpperCaseCodeFix`). The compiler warns (CS0078) about `l` only. Effort: low, next to
 BRO1122. Hex digits are not suffixes (`0xff` stays).
 
-Done (2026-10-04): [BRO1135](rules/BRO1135.md), integer suffixes only.
+Done (2026-10-04): [BRO1135](../rules/BRO1135.md), integer suffixes only.
 
 ### 12. `else if` (RCS0041, RCS1006)
 
@@ -162,28 +162,28 @@ RCS0041 joins `else` and `if` that sit on two lines; RCS1006 turns `else { if (.
 `if`) into `else if`. The first is a gap rewrite; the second needs the inner statement reindented, and a comment in the
 block is a skip.
 
-Done (2026-10-05): [BRO1139](rules/BRO1139.md); adds the braces BRO1514/BRO1516 want when the join changes which of them reports.
+Done (2026-10-05): [BRO1139](../rules/BRO1139.md); adds the braces BRO1514/BRO1516 want when the join changes which of them reports.
 
 ### 13. Empty record body (RCS1251, MA0206)
 
 `record R(int X) { }` -> `record R(int X);`. Effort: low. BRO1101 already treats the bodiless form; check that the two
 fixes don't fight over the `;`.
 
-Done (2026-10-05): [BRO1140](rules/BRO1140.md). MA0206 for classes, structs and interfaces (`class Marker;`, C# 12):
-[BRO1145](rules/BRO1145.md), off by default.
+Done (2026-10-05): [BRO1140](../rules/BRO1140.md). MA0206 for classes, structs and interfaces (`class Marker;`, C# 12):
+[BRO1145](../rules/BRO1145.md), off by default.
 
 ### 14. Redundant base (RCS1042, S1939)
 
 `enum E : int` and `class C : object`. Semantic (`Int32`, aliases). Effort: low. Low value; most code doesn't do it.
 
-Done (2026-10-05): [BRO1408](rules/BRO1408.md), `enum E : int` and `class C : object` only (no redundant interfaces).
+Done (2026-10-05): [BRO1408](../rules/BRO1408.md), `enum E : int` and `class C : object` only (no redundant interfaces).
 
 ### 15. Doc comment element order (RCS1232)
 
 BRO1611 already orders `<param>` tags. A fixed order for the top-level elements is the same move. Only when every
 element has its own lines (like BRO1611).
 
-Done (2026-10-05): [BRO1619](rules/BRO1619.md). RCS1232 itself turned out to order `<param>` tags only (BRO1611's job);
+Done (2026-10-05): [BRO1619](../rules/BRO1619.md). RCS1232 itself turned out to order `<param>` tags only (BRO1611's job);
 the top-level order (summary, typeparam, param, returns, value, exception, remarks, example, seealso) is justified on
 the rule page. Comments with other top-level elements (`<inheritdoc/>`, custom tags) are skipped.
 
@@ -193,7 +193,7 @@ the rule page. Comments with other top-level elements (`<inheritdoc/>`, custom t
 teams want the symmetric form). Effort: medium: unindent the else body, skip when a local declared there would clash
 with one in the enclosing block, skip comments on `else`.
 
-Done (2026-10-05): [BRO1143](rules/BRO1143.md), off by default (also in the preset). `else if` chains skipped; nested
+Done (2026-10-05): [BRO1143](../rules/BRO1143.md), off by default (also in the preset). `else if` chains skipped; nested
 candidates fixed in one pass; an inconsistent chain (`if (x) return;` + `else { }`) waits for BRO1516's braces.
 
 ### 17. Overloads together (S4136)
@@ -202,7 +202,7 @@ Sonar has no fix. For StyleBro it is an extra sort key in BRO1001 (keep members 
 other, inside the kind/access order). Conflicts with StyleCop's access order when overloads differ in access, so an
 option, off by default.
 
-Done (2026-10-05): `stylebro_keep_overloads_together` for [BRO1001](rules/BRO1001.md) (default `false`): methods only,
+Done (2026-10-05): `stylebro_keep_overloads_together` for [BRO1001](../rules/BRO1001.md) (default `false`): methods only,
 the group sorts at its best overload's place.
 
 ### 18. Async suffix (RCS1046, MA0137)
@@ -211,7 +211,7 @@ the group sorts at its best overload's place.
 can't fix IDE1006. StyleBro's renamer could, but this renames public API, and frameworks bind some names (MVC trims
 the suffix from action names; test frameworks don't care). Effort: high; only after the rename guards prove out.
 
-Done (2026-10-05): [BRO1314](rules/BRO1314.md), off by default; tests, controllers, hubs, event handlers and attributed
+Done (2026-10-05): [BRO1314](../rules/BRO1314.md), off by default; tests, controllers, hubs, event handlers and attributed
 methods are skipped. The reverse (no `Async` on synchronous methods) is left out.
 
 ### Small ones, if someone asks
@@ -228,21 +228,21 @@ check `csharp_preserve_single_line_statements` first), Meziantou [MA0175](https:
 
 ### Newer rules (survey of 2026-10-05)
 
-- **Redundant null-forgiving `!` (Sonar S8969/S8970).** Done (2026-10-05): [BRO1147](rules/BRO1147.md), off by default
+- **Redundant null-forgiving `!` (Sonar S8969/S8970).** Done (2026-10-05): [BRO1147](../rules/BRO1147.md), off by default
   (also in the preset). The SDK's IDE0370 does the same in SDK 10 builds and `dotnet format` once its severity is set
   explicitly (`EnforceOnBuild.WhenExplicitlyEnabled`; the survey's probe didn't set it). BRO1147 works with older SDKs,
   decides per `!` from the operand's flow state, and skips multi-targeted projects.
-- **`HasValue` (Meziantou MA0171).** Done (2026-10-05): [BRO1148](rules/BRO1148.md), off by default (also in the
+- **`HasValue` (Meziantou MA0171).** Done (2026-10-05): [BRO1148](../rules/BRO1148.md), off by default (also in the
   preset), in BRO1133's form.
 ### C# 14
 
 A follow-up survey (2026-10-05) of the analyzers' rules since 2025 and of StyleBro on C# 14 code found no fixer anywhere
 for identifiers that C# 14 reads as keywords (Sonar S8367, S8368, S8380 report them; the compiler warns with CS9258).
-Done (2026-10-05): [BRO1144](rules/BRO1144.md) writes `@field`, `@extension`, `@partial` there. The same survey found
-[BRO1001](rules/BRO1001.md) skipping every type with an extension block and [BRO1509](rules/BRO1509.md) not expanding a
+Done (2026-10-05): [BRO1144](../rules/BRO1144.md) writes `@field`, `@extension`, `@partial` there. The same survey found
+[BRO1001](../rules/BRO1001.md) skipping every type with an extension block and [BRO1509](../rules/BRO1509.md) not expanding a
 one-line extension block: both handle them now (decisions.md).
-Done (2026-10-05): RCS0042 as [BRO1527](rules/BRO1527.md), MA0174 (`record class` -> `record`) as
-[BRO1146](rules/BRO1146.md).
+Done (2026-10-05): RCS0042 as [BRO1527](../rules/BRO1527.md), MA0174 (`record class` -> `record`) as
+[BRO1146](../rules/BRO1146.md).
 
 ## Rejected
 
@@ -281,7 +281,7 @@ Done (2026-10-05): RCS0042 as [BRO1527](rules/BRO1527.md), MA0174 (`record class
 | RCS1077, RCS1080, RCS1197, MA0020, MA0028, MA0029 and the other LINQ/StringBuilder rules | Performance, not style |
 | ErrorProne.NET (all) | Correctness and performance only; no style rules |
 | Sonar `SonarAnalyzer.CSharp.Styling` (T0xxx) | SonarSource's own house style (0.2M downloads), no code fixes |
-| StyleCop SX1101, SX1309, SX1309S | Already in [stylecop-mapping.md](stylecop-mapping.md) (IDE0003, BRO1303, skipped-rules.md) |
+| StyleCop SX1101, SX1309, SX1309S | Already in [stylecop-mapping.md](../stylecop-mapping.md) (IDE0003, BRO1303, skipped-rules.md) |
 
 ## Open questions
 
@@ -306,7 +306,7 @@ StyleBro. Not a plan either; the top five are in the "Maybe" section of [backlog
   change what a rule StyleBro replaces reports. StyleBro's parity sets compare with beta.556, so these are behavior
   changes StyleBro hasn't been compared with.
 - StyleCop's `documentation` folder: the proposed rules SA1029, SA1138, SA1315, SA1521 and SA1653 have no page (never
-  implemented). The SX rules (SX1101, SX1309, SX1309S) are already in [stylecop-mapping.md](stylecop-mapping.md).
+  implemented). The SX rules (SX1101, SX1309, SX1309S) are already in [stylecop-mapping.md](../stylecop-mapping.md).
 - Suspected bugs were confirmed with throwaway unit tests (not committed).
 
 Popularity in StyleCop's tracker is low overall: the most-discussed open proposal has 19 reactions. So the signal
@@ -323,14 +323,14 @@ below is "the maintainers agreed and nobody built it" more than "many people ask
 | 5 | [#1563](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1563) (2 reactions, 8 comments) | Upper-case literal suffixes: `1ul` -> `1UL` | Same as #11 above (Sonar S818); CS0078 warns about `l` only | Low |
 | 6 | [#758](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/758) (SA1653, maintainers liked it) | `cref="List&lt;T&gt;"` -> `cref="List{T}"` | No SDK rule | Low, text only |
 | 7 | [#3546](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3546), [#1490](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1490) | Option: tool marker comments (`// ReSharper disable once ...`, `// @formatter:off`) don't need BRO1504's blank line | BRO1504 treats them like any comment (the workaround is `////`) | Low (a prefix list option) |
-| 8 | [#762](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/762) | `(x) => x` -> `x => x` (a maintainer suggested folding it into SA1119) | No SDK rule (check) | Low; keep the parentheses with a type, modifier or attribute. Done (2026-10-05): [BRO1136](rules/BRO1136.md) |
-| 9 | [#760](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/760) | Redundant `return;` at the end of a void method (and `yield break;` at the end of an iterator) | No SDK rule (check); Roslynator RCS1134 | Low; skip when a comment or label is on it. Done (2026-10-05): [BRO1137](rules/BRO1137.md) |
+| 8 | [#762](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/762) | `(x) => x` -> `x => x` (a maintainer suggested folding it into SA1119) | No SDK rule (check) | Low; keep the parentheses with a type, modifier or attribute. Done (2026-10-05): [BRO1136](../rules/BRO1136.md) |
+| 9 | [#760](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/760) | Redundant `return;` at the end of a void method (and `yield break;` at the end of an iterator) | No SDK rule (check); Roslynator RCS1134 | Low; skip when a comment or label is on it. Done (2026-10-05): [BRO1137](../rules/BRO1137.md) |
 | 10 | [#2641](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2641) (4 reactions, 9 comments, wontfix), [#3793](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3793) | camelCase private constants and static readonly fields | BRO1306 always wants PascalCase. Could follow `dotnet_naming_rule.*` like BRO1303 does | Low (an option); the renamer exists |
 | 8 | [#762](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/762) | `(x) => x` -> `x => x` (a maintainer suggested folding it into SA1119) | No SDK rule (check) | Low; keep the parentheses with a type, modifier or attribute |
 | 9 | [#760](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/760) | Redundant `return;` at the end of a void method (and `yield break;` at the end of an iterator) | No SDK rule (check); Roslynator RCS1134 | Low; skip when a comment or label is on it |
-| 10 | [#2641](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2641) (4 reactions, 9 comments, wontfix), [#3793](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3793) | camelCase private constants and static readonly fields | BRO1306 always wants PascalCase. Could follow `dotnet_naming_rule.*` like BRO1303 does | Low (an option); the renamer exists. Done (2026-10-05): BRO1306 follows a naming rule for private constants / static readonly fields ([BRO1306](rules/BRO1306.md#configuration)) |
-| 11 | [#2981](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2981) (3 reactions, 15 comments) | No `public` on members of an internal type: `internal` says the same | No SDK rule | High: implicit interface implementations, overrides and operators must stay `public`, and serializers, data binding and reflection see only public members, so the rewrite can change run-time behavior. Rejected at first; Done (narrow variant, 2026-10-05): [BRO1409](rules/BRO1409.md), off by default, see below |
-| 12 | [#1949](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1949) (SA1315) | A parameter has the same name as in the member it overrides or implements | SDK CA1725 reports it (check whether `dotnet format` can fix it) | Medium: BRO1302's renamer could do it, but callers' named arguments change. Done (2026-10-05): [BRO1313](rules/BRO1313.md), off by default |
+| 10 | [#2641](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2641) (4 reactions, 9 comments, wontfix), [#3793](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3793) | camelCase private constants and static readonly fields | BRO1306 always wants PascalCase. Could follow `dotnet_naming_rule.*` like BRO1303 does | Low (an option); the renamer exists. Done (2026-10-05): BRO1306 follows a naming rule for private constants / static readonly fields ([BRO1306](../rules/BRO1306.md#configuration)) |
+| 11 | [#2981](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2981) (3 reactions, 15 comments) | No `public` on members of an internal type: `internal` says the same | No SDK rule | High: implicit interface implementations, overrides and operators must stay `public`, and serializers, data binding and reflection see only public members, so the rewrite can change run-time behavior. Rejected at first; Done (narrow variant, 2026-10-05): [BRO1409](../rules/BRO1409.md), off by default, see below |
+| 12 | [#1949](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1949) (SA1315) | A parameter has the same name as in the member it overrides or implements | SDK CA1725 reports it (check whether `dotnet format` can fix it) | Medium: BRO1302's renamer could do it, but callers' named arguments change. Done (2026-10-05): [BRO1313](../rules/BRO1313.md), off by default |
 
 #### 1. Conditional expression layout (#651)
 
@@ -347,7 +347,7 @@ the two rules agree. New lines are one indentation unit deeper than the line the
 in the gaps and `#if`. #752 asks the same for chains of binary operators; that is harder (mixed operators and
 precedence) and could come later.
 
-Done (2026-10-04): [BRO1524](rules/BRO1524.md) (chains are skipped, see decisions.md).
+Done (2026-10-04): [BRO1524](../rules/BRO1524.md) (chains are skipped, see decisions.md).
 
 #### 2. No blank line after attributes (SA1521, #738)
 
@@ -356,7 +356,7 @@ sits between, and blank lines inside `#if`. Must agree with BRO1505, which count
 element's code: if that blank line was the only one between two members, BRO1505 then wants one above the attribute
 (check the order-independence as for BRO1509).
 
-Done (2026-10-04): [BRO1525](rules/BRO1525.md) (stacked attribute lists too). BRO1505 turned out not to count a blank
+Done (2026-10-04): [BRO1525](../rules/BRO1525.md) (stacked attribute lists too). BRO1505 turned out not to count a blank
 line below an attribute (an element's code starts at its first attribute), so the two fixes never depend on each other.
 
 #### 3. Braceless jump statements (#2252)
@@ -365,7 +365,7 @@ An option for BRO1514 (for example `stylebro_braces_allow_single_line_jump = tru
 `continue` on the `if` line stay without braces; on the next line they still get braces. StyleCop's maintainers were
 split on it; #1175 asked the same. Off by default, so nothing changes for StyleCop users.
 
-Done (2026-10-04): `stylebro_allow_single_line_jump_statements` ([BRO1514](rules/BRO1514.md#configuration)).
+Done (2026-10-04): `stylebro_allow_single_line_jump_statements` ([BRO1514](../rules/BRO1514.md#configuration)).
 
 #### 4. Comments in declaration headers (#605)
 
@@ -373,17 +373,17 @@ Done (2026-10-04): `stylebro_allow_single_line_jump_statements` ([BRO1514](rules
 such a comment into the block for `if`, `while` and the other statements; the same move works for types and members.
 Skip multi-line headers like BRO1132 does.
 
-Done (2026-10-04): [BRO1134](rules/BRO1134.md), a new id next to BRO1132 (SA1108 covers statements only, and
+Done (2026-10-04): [BRO1134](../rules/BRO1134.md), a new id next to BRO1132 (SA1108 covers statements only, and
 `bro migrate` maps BRO1132 to SA1108).
 
 #### 6. Generic crefs in braces (SA1653, #758)
 
-Done (2026-10-05): [BRO1617](rules/BRO1617.md). Every `cref` attribute; only `&lt;`/`&gt;` around a type argument or
+Done (2026-10-05): [BRO1617](../rules/BRO1617.md). Every `cref` attribute; only `&lt;`/`&gt;` around a type argument or
 type parameter list, so operator crefs and crefs the compiler can't read are left alone.
 
 #### 7. Tool marker comments and BRO1504 (#3546, #1490)
 
-Done (2026-10-05): `stylebro_comment_blank_line_exempt_prefixes` ([BRO1504](rules/BRO1504.md#configuration)),
+Done (2026-10-05): `stylebro_comment_blank_line_exempt_prefixes` ([BRO1504](../rules/BRO1504.md#configuration)),
 comma-separated and case-sensitive, default empty.
 
 #### 11. Public members of internal types (#2981)
@@ -393,9 +393,9 @@ reflection's defaults (`GetMethods()`, `GetProperties()`, `BindingFlags.Public`)
 public members only: System.Text.Json, Newtonsoft.Json and XmlSerializer (properties, fields), WPF/WinForms data binding,
 ASP.NET model binding, AutoMapper and Dapper, `Activator.CreateInstance` and Microsoft.Extensions.DependencyInjection
 (public constructors), and test frameworks (public test methods). The owner asked whether reflection really cares and
-decided on 2026-10-05 ([decisions.md](decisions.md)) to build a narrow, safe variant.
+decided on 2026-10-05 ([decisions.md](../decisions.md)) to build a narrow, safe variant.
 
-Done (narrow variant, 2026-10-05): [BRO1409](rules/BRO1409.md), off by default. Ordinary methods only; overrides,
+Done (narrow variant, 2026-10-05): [BRO1409](../rules/BRO1409.md), off by default. Ordinary methods only; overrides,
 `virtual`/`abstract`, interface implementations (also through a derived class), attributed methods and types, types with
 a base from another assembly, convention names (`Dispose`, `GetEnumerator`, `Add`, `Main`, `Configure`, `Invoke`, ...)
 and `extern`/`partial` methods are left out, and a method whose name is a string literal or `nameof` anywhere in the
@@ -411,7 +411,7 @@ solution is reported but not fixed.
   (SA1118 [#818](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/818), SA1403
   [#353](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/353), SA1648
   [#1464](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1464)) stay as in
-  [skipped-rules.md](skipped-rules.md): nothing in the issues changes those reasons.
+  [skipped-rules.md](../skipped-rules.md): nothing in the issues changes those reasons.
 - Custom member order ([#2541](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2541),
   [#3795](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3795),
   [#3920](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3920)): `stylebro_member_order` and
@@ -432,7 +432,7 @@ solution is reported but not fixed.
 - StyleCop's unreleased changes StyleBro already matches: SA1513 before `into`, `=>`, `&&`/`||` and pattern
   designations (BRO1519), SA1408 for `and`/`or` patterns (BRO1407), SA1110/SA1111 on primary constructors and
   target-typed `new` (BRO1109/BRO1110 report them; StyleCop's `master` now does too, so the "reports more" notes in
-  [differences-from-stylecop.md](differences-from-stylecop.md) hold for beta.556 only), SA1623 skipping summaries
+  the former differences page (removed 2026-11-07, docs/decisions/2026-11-07-the-docs-describe-stylebro-not-stylecop.md) hold for beta.556 only), SA1623 skipping summaries
   that start with an element (BRO1604).
 
 ### Possible bugs to check
@@ -489,7 +489,7 @@ BRO1401 leaves patterns out, like beta.556; a parity follow-up once StyleCop rel
 | [#1357](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1357) file headers with a date | A fix would write the current year: not deterministic |
 | [#3721](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3721) `case A: case B:` -> `case A or B:` | Opinion; the maintainers prefer separate labels |
 | [#3827](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3827) `$` without holes | Closed by the maintainers; already #8 above |
-| [#3458](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3458) `Equals` -> `==`, [#3440](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3440) `&` -> `&&`, [#1455](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1455) `HasValue` -> `!= null`, [#2333](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2333) `default(T)` -> `null` | Change behavior (NaN, side effects) or taste; IDE0034 covers `default`. `HasValue` came back as the off-by-default [BRO1148](rules/BRO1148.md) (2026-10-05) |
+| [#3458](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3458) `Equals` -> `==`, [#3440](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3440) `&` -> `&&`, [#1455](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1455) `HasValue` -> `!= null`, [#2333](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2333) `default(T)` -> `null` | Change behavior (NaN, side effects) or taste; IDE0034 covers `default`. `HasValue` came back as the off-by-default [BRO1148](../rules/BRO1148.md) (2026-10-05) |
 | [#3029](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3029) private auto-properties -> fields, [#2780](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2780) internal fields -> properties | Changes what reflection and serializers see |
 | [#3068](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3068) blank line after a braceless `if` | Only for code without braces, which BRO1514 asks for |
 | [#1613](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1613) `} = value;` after accessors | BRO1519 already doesn't report `} = value;` |
@@ -498,6 +498,6 @@ BRO1401 leaves patterns out, like beta.556; a parity follow-up once StyleCop rel
 
 [#3550](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3550) (a comment right after `=>`) was rejected here
 at first as StyleCop's behavior by design. The owner reversed that on 2026-10-04 with the open-bug sweep
-([#3392](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3392), [decisions.md](decisions.md)): BRO1504
+([#3392](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3392), [decisions.md](../decisions.md)): BRO1504
 treats `=>` like `{`. The sweep's results are in
-[differences-from-stylecop.md](differences-from-stylecop.md#stylecops-open-bugs).
+the former differences page (removed 2026-11-07, docs/decisions/2026-11-07-the-docs-describe-stylebro-not-stylecop.md).

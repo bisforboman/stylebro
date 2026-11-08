@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 # Measures what switching from StyleCop to StyleBro changes in a StyleCop-clean repo, with the settings bro
 # generates. The goal is (almost) nothing: every change is either a StyleBro bug, a migration gap, or an SDK rule that
-# is broader than its StyleCop counterpart (docs/skipped-rules.md, "Covered, with known differences").
+# is broader than its StyleCop counterpart (docs/skipped-rules.md, "Partly covered").
 #
 #   1. Plain 'dotnet format' without StyleBro, committed as the baseline (it has its own noise: line endings, conflict
 #      markers in multi-targeted files).

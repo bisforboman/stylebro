@@ -2,7 +2,7 @@
 
 ## Question
 
-BRO1524 ([beyond-stylecop.md](../beyond-stylecop.md#from-stylecops-issue-tracker) #1): once a conditional expression is
+BRO1524 ([beyond-stylecop.md](../notes/rule-candidates.md#from-stylecops-issue-tracker) #1): once a conditional expression is
 split, the condition, `? a` and `: b` each start their own line. Which side of the line break do `?` and `:` go on, what
 counts as split, and what about chains (`a ? x : b ? y : z`), the open question in #651 (a contributor wanted
 `cond ? value :` per line allowed, the maintainer preferred the strict rule or a switch expression)?

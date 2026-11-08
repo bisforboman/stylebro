@@ -2,7 +2,7 @@
 
 ## Question
 
-The first rules beyond StyleCop ([beyond-stylecop.md](../beyond-stylecop.md) #1 and #2) put a token on one side of a line
+The first rules beyond StyleCop ([beyond-stylecop.md](../notes/rule-candidates.md) #1 and #2) put a token on one side of a line
 break: binary operators and `?`/`:` (Roslynator RCS0027/RCS0028), `=>` (RCS0032), `=` (RCS0052). What shape, which
 tokens, and which defaults?
 
