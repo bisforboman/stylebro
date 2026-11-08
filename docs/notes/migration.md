@@ -90,6 +90,11 @@ How `bro migrate` reads and maps a StyleCop/StyleSharp setup, baseline support, 
 - `bro baseline [path] [--project x]` (`BaselineCommand.cs`): moves an existing baseline aside, runs
   `dotnet format --verify-no-changes --severity warn --report`, dedupes TFM copies, writes the file, prints counts per
   rule, whitespace changes and uncovered ids (other analyzers).
+- `bro baseline --pay-off <folder or file>...` (`BaselineCommand.PayOff.cs`, backlog 086): takes the entries for those
+  files out of the baselines `FormatCommand.BaselineFile` finds for each folder, runs `format --files` on the files the
+  entries name (format re-adds kept findings, `BaselineKeptInto`), and after a run that didn't end clean puts back the
+  entries whose line is still there. Works where props set `<StyleBroBaseline>` unconditionally (`StyleBroBaseline=none`
+  doesn't).
 - FFMpegCore end to end (all rules + preset, TreatWarningsAsErrors): 820 violations on 759 lines baselined; then build
   0 StyleBro errors (519 without), `dotnet format --verify-no-changes` exit 0; a new file's violation and an edited
   baselined line were reported and fixed.

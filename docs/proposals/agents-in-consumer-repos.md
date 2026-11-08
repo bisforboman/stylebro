@@ -67,6 +67,8 @@ baseline` (checked in check 4). Proposed next: `bro baseline --pay-off <folder o
 with the baseline off and rewrites the baseline, in one step an agent can be given ("pay off src/Orders"). Unlike the
 variable, it would also work where a `Directory.Build.props` sets `<StyleBroBaseline>` without a condition.
 
+**`--pay-off` done 2026-11-08** ([baseline.md](../baseline.md#keeping-it-small)); the SDK warning is still open (086).
+
 ## 4. Enforce the loop instead of describing it (087)
 
 Unformatted code that reaches main makes the next agent's format change lines it never edited: diffs that conflict
