@@ -1,0 +1,22 @@
+{
+  "repo": "NModbus/NModbus",
+  "branch": "master",
+  "commit": "baddfca14e2852373a238aee8d234d6627983b20",
+  "csFiles": 176,
+  "tags": [
+    "library",
+    "multi-target",
+    "twae"
+  ],
+  "setups": "NModbus.sln; net46;netstandard1.3;netstandard2.0;net6.0 libraries with TreatWarningsAsErrors; NuGet.config with <clear/>; 8 solution configurations (Any CPU, ARM, x64, x86).",
+  "build": "ok with workaround",
+  "workaround": "the trial feed added to NuGet.config (it clears sources)",
+  "tests": "dotnet test NModbus.sln: unit tests are net4.6 only (mono, left out); integration tests net6.0, 8 of 20 TCP tests fail untouched",
+  "usedIn": "trial 69 (random, seed 69)",
+  "verified": {
+    "by": "trial 69 session",
+    "date": "2026-11-07",
+    "sdks": "10.0.114, 8.0.133"
+  },
+  "notes": "netstandard1.3/1.5 projects don't load in dotnet format (Not verified); the TWAE builds compile them."
+}

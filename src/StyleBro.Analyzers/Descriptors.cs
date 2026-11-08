@@ -491,7 +491,7 @@ internal static class Descriptors
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "A cref names a generic type or member with braces, 'List{T}', not with escaped angle brackets, "
-            + "'List&lt;T&gt;'. Not a StyleCop rule (StyleCop's proposed SA1653, issue #758).",
+            + "'List&lt;T&gt;'. Not a StyleCop rule (StyleCop issue #758).",
         helpLinkUri: HelpBase + DiagnosticIds.GenericCrefBraces + "/");
 
     public static readonly DiagnosticDescriptor LangwordElement = new(

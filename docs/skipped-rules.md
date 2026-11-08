@@ -7,11 +7,16 @@ StyleBro covers only in part are at the end. Every ID and what covers it: [style
 
 ## Summary
 
-44 rules: 0 candidate, 0 SDK not on yet, 32 drop, 10 nothing to replace, 0 variant, 2 n/a.
+50 rules: 3 candidate, 1 SDK not on yet, 34 drop, 10 nothing to replace, 0 variant, 2 n/a.
 
 | Rule | Title | Status |
 |---|---|---|
+| [SA1143](#sa1143) | Conditional expressions must be formatted consistently | candidate |
+| [SA1315](#sa1315) | Parameter names should match inherited names | candidate |
+| [SA1654](#sa1654) | Properly encode generic brackets | candidate |
+| [SX1412](#sx1412) | Store files as UTF-8 without byte order mark | SDK not on yet |
 | [SA1118](#sa1118) | Parameter should not span multiple lines | drop |
+| [SA1317](#sa1317) | Identifier should be named only with Latin letters | drop |
 | [SA1401](#sa1401) | Fields should be private | drop |
 | [SA1402](#sa1402) | File may only contain a single type | drop |
 | [SA1403](#sa1403) | File may only contain a single namespace | drop |
@@ -36,13 +41,14 @@ StyleBro covers only in part are at the end. Every ID and what covers it: [style
 | [SA1618](#sa1618) | Generic type parameters should be documented | drop |
 | [SA1619](#sa1619) | Generic type parameters should be documented partial class | drop |
 | [SA1622](#sa1622) | Generic type parameter documentation should have text | drop |
-| [SA1625](#sa1625) | Element documentation should not be copied and pasted | drop |
+| [SA1625](#sa1625) | Element documentation should not contain duplicate entries | drop |
 | [SA1639](#sa1639) | File header should have summary | drop |
 | [SA1645](#sa1645) | Included documentation file does not exist | drop |
 | [SA1646](#sa1646) | Included documentation XPath does not exist | drop |
 | [SA1647](#sa1647) | Include node does not contain valid file and path | drop |
 | [SA1648](#sa1648) | inheritdoc should be used with inheriting class | drop |
 | [SA1649](#sa1649) | File name should match first type name | drop |
+| [SA1653](#sa1653) | Only one partial declaration should contain summary documentation | drop |
 | [SA1109](#sa1109) | Block statements should not contain embedded regions | nothing to replace |
 | [SA1126](#sa1126) | Prefix calls correctly | nothing to replace |
 | [SA1301](#sa1301) | Element should begin with lower-case letter | nothing to replace |
@@ -56,6 +62,42 @@ StyleBro covers only in part are at the end. Every ID and what covers it: [style
 | [SA0001](#sa0001) | XML comment analysis disabled | n/a |
 | [SA0002](#sa0002) | Invalid settings file | n/a |
 
+## Not yet: StyleBro candidates
+
+<a id="sa1143"></a>
+
+### SA1143: Conditional expressions must be formatted consistently
+
+**Why:** BRO1524 asks for an expanded layout (condition, `? a` and `: b` each starting a line) but not a chained one (`a ? b :` one per line), and bro migrate doesn't carry SA1143 over to it yet.
+
+**To revisit:** A parity set for SA1143 against BRO1524; with the differences documented, BRO1524's description names SA1143 and bro migrate maps it.
+
+<a id="sa1315"></a>
+
+### SA1315: Parameter names should match inherited names
+
+**Why:** BRO1313 (off by default) renames such parameters to the base member's names, but bro migrate doesn't carry SA1315 over to it yet.
+
+**To revisit:** A parity set for SA1315 against BRO1313; then BRO1313's description names SA1315 and bro migrate maps it.
+
+<a id="sa1654"></a>
+
+### SA1654: Properly encode generic brackets
+
+**Why:** BRO1617 writes a cref's type arguments in braces, but bro migrate doesn't carry SA1654 over to it yet.
+
+**To revisit:** A parity set for SA1654 against BRO1617; then BRO1617's description names SA1654 and bro migrate maps it.
+
+## Not yet: the SDK can fix it, but it isn't turned on
+
+<a id="sx1412"></a>
+
+### SX1412: Store files as UTF-8 without byte order mark
+
+**Why:** The opposite of SA1412. The SDK's `charset = utf-8` makes `dotnet format` remove the byte order mark, but bro migrate doesn't write it for SX1412 yet (it writes `utf-8-bom` for SA1412).
+
+**To revisit:** bro migrate writes `charset = utf-8` when SX1412 is on.
+
 ## Not covered: no safe automatic fix
 
 <a id="sa1118"></a>
@@ -65,6 +107,14 @@ StyleBro covers only in part are at the end. Every ID and what covers it: [style
 **Why:** A multi-line argument (other than the first, or a lambda/anonymous object) needs extracting into a variable: a refactoring that names things.
 
 **To revisit:** Only if a deterministic extraction is acceptable (variable name from the parameter name). Probably stays a human job.
+
+<a id="sa1317"></a>
+
+### SA1317: Identifier should be named only with Latin letters
+
+**Why:** A name with a non-Latin letter (`ЕxаmplеClаss`, `café`) needs a new name a person chooses; transliterating is a guess.
+
+**To revisit:** Nothing automatic.
 
 <a id="sa1401"></a>
 
@@ -260,7 +310,7 @@ StyleBro covers only in part are at the end. Every ID and what covers it: [style
 
 <a id="sa1625"></a>
 
-### SA1625: Element documentation should not be copied and pasted
+### SA1625: Element documentation should not contain duplicate entries
 
 **Why:** Identical text copied between tags has to be rewritten by a person.
 
@@ -313,6 +363,14 @@ StyleBro covers only in part are at the end. Every ID and what covers it: [style
 **Why:** Renaming files isn't something `dotnet format` can do.
 
 **To revisit:** Would need a separate tool (bro could do it as a one-off, with `git mv`).
+
+<a id="sa1653"></a>
+
+### SA1653: Only one partial declaration should contain summary documentation
+
+**Why:** Which part of a partial type keeps the `<summary>` is a person's choice; a fix that picks the declaration it is applied to gives a result that depends on which diagnostic comes first.
+
+**To revisit:** Only with a deterministic choice (for example the declaration in the file named after the type).
 
 ## Nothing to replace
 

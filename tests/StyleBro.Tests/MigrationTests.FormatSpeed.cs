@@ -272,6 +272,52 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
+    public void Verify_FromTheRecord_SaysFormatsNotesAboutTheRepository_NotThoseAboutTheRun()
+    {
+        // Trial 68 (sendgrid-csharp, Avro, Bedrock; backlog 083): the check from format's record left out the notes a full check
+        // prints ("Leaving alone", "Old CodeStyle package", "Configurations", "Without StyleBro", the workspace warnings).
+        Write("src/A/A.csproj", "<Project />");
+        Write("src/A/X.cs", "class X { }");
+        string[] notes =
+        [
+            "Leaving alone: src/Legacy/: StyleCop didn't run there, so the migration set nothing up there.",
+            FormatCommand.CodeStyleLine(),
+            "Configurations: runs for Release too.",
+            FormatCommand.PartlyLoadedHeader + " B has no StyleBro.Analyzers in its restore output.",
+            "'dotnet format' had warnings loading the workspace; they don't stop the run.",
+        ];
+        Assert.Equal(0, FormatCommand.Run([root], _ => { }, (_, output) =>
+        {
+            FormatCommand.MarkCheckedClean(root);
+            output?.Invoke("Fixing StyleBro's rules and the SDK's IDE rules.");
+            output?.Invoke("Engine: in-process.");
+            notes.ToList().ForEach(n => output?.Invoke(n));
+            output?.Invoke(notes[1]); // said once
+            return 0;
+        }));
+
+        var lines = new List<string>();
+        Assert.Equal(0, FormatCommand.Run([root, "--verify-no-changes"], lines.Add, (_, _) => throw new InvalidOperationException("verify ran 'dotnet format'")));
+        Assert.StartsWith(FormatCommand.FromRecordHeader, lines[0], StringComparison.Ordinal);
+        Assert.Equal([.. notes, "Clean."], lines.Skip(1));
+    }
+
+    [Fact]
+    public void IsRecordedNote_KeepsTheRepositorysNotes_NotTheRunsHeaders()
+    {
+        Assert.True(FormatCommand.IsRecordedNote(FormatCommand.CodeStyleLine()));
+        Assert.True(FormatCommand.IsRecordedNote("Leaving alone: src/Legacy/: ..."));
+        Assert.True(FormatCommand.IsRecordedNote("'dotnet format' had warnings loading the workspace in its net8.0 run; they don't stop the run."));
+        Assert.False(FormatCommand.IsRecordedNote("Fixing StyleBro's rules"));
+        Assert.False(FormatCommand.IsRecordedNote("Checking StyleBro's rules"));
+        Assert.False(FormatCommand.IsRecordedNote("Using StyleBro.Analyzers 0.8.0"));
+        Assert.False(FormatCommand.IsRecordedNote("Engine: in-process"));
+        Assert.False(FormatCommand.IsRecordedNote("Line endings: a.cs: a CR alone ended ..."));
+        Assert.False(FormatCommand.IsRecordedNote("Generators: building Gen first"));
+        Assert.False(FormatCommand.IsRecordedNote("Run 1: 0 files changed, clean."));
+    }
+
+    [Fact]
     public void Verify_AnswersFromTheRecord_WithTheHeldBackNote_ButNotWithAGapThatCounts()
     {
         // Trial 58, SDK 10.0.1xx: IDE0049's held-back note in every run of NPoco's format made the check after it run again (85 s).

@@ -1,0 +1,6 @@
+{
+  "area": "Hardening",
+  "item": "The white-space trim of <TargetFrameworks> keeps the SDK's inner builds (projects referencing 'net8.0; net6.0' load)",
+  "notes": "Trial 69 (Arch): the library writes <TargetFrameworks>net8.0; net6.0; netstandard2.1</TargetFrameworks> and three net8.0 projects reference it. Backlog 082's trim (the targets file bro injects) returned the list from a property function, which MSBuild escapes, so the SDK's <_TargetFramework Include=\"$(TargetFrameworks)\" /> made one item and the inner builds got 'TargetFramework=net8.0;net6.0;netstandard2.1' (Unsupported,Version=v0.0). The referencing projects then didn't load on the host ('cannot be referenced by a project that targets .NETCoreApp,Version=v8.0'): format said Incomplete, Not verified (exit 3), and left 12 files alone. Never released. Fixed: the trim unescapes its result ($([MSBuild]::Unescape(...))); unit test RunTargets_KeepTheInnerBuildsOfATrimmedTargetFrameworks, mutation entry, fixture tfm-with-spaces-referenced.",
+  "status": "Done (2026-11-07)"
+}

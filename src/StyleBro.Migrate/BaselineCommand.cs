@@ -16,7 +16,7 @@ namespace StyleBro.Migrate;
 /// starts over) and fingerprints each reported line. Whitespace formatting isn't a diagnostic in 'dotnet format' and
 /// can't be baselined; the summary counts it.
 /// </summary>
-internal static class BaselineCommand
+internal static partial class BaselineCommand
 {
     /// <summary>
     /// What 'dotnet format' reports for its formatting passes, not as diagnostics: whitespace, line endings, the charset
@@ -29,6 +29,17 @@ internal static class BaselineCommand
 
     public static int Run(string[] args)
     {
+        if (args.Contains(PayOffOption))
+        {
+            if (args.Contains("--project"))
+            {
+                Console.Error.WriteLine($"{PayOffOption} takes folders and files, not --project: bro baseline {PayOffOption} src/Orders");
+                return 1;
+            }
+
+            return PayOff(args.Where(a => a != PayOffOption).ToArray(), Environment.CurrentDirectory, a => FormatCommand.Run(a, JsonReport.Current is null ? null : Console.Error.WriteLine));
+        }
+
         var (root, project) = Arguments(args, Environment.CurrentDirectory);
         if (!Directory.Exists(root))
         {
@@ -148,6 +159,10 @@ internal static class BaselineCommand
                 File.WriteAllText(path, KeepOutside(result.Baseline, File.Exists(aside) ? File.ReadAllText(aside) : null, Path.GetDirectoryName(path)!, root).Render());
                 File.Delete(aside);
                 Report(result, Path.GetRelativePath(root, path).Replace('\\', '/'));
+                if (GitAttributes.AddBaselineLine(root, path) is { } attributes)
+                {
+                    Console.WriteLine(attributes);
+                }
             }
 
             return 0;

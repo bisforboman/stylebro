@@ -72,6 +72,7 @@ SA1137,SDK: IDE0055 formatting
 SA1139,"StyleBro **BRO1122** (done), only when the suffixed literal has exactly the cast's value (StyleCop's fix can change decimals)"
 SA1141,"StyleBro **BRO1123** (done), every type-only position (StyleCop: declarations only); StyleCop's fix has no Fix All"
 SA1142,"StyleBro **BRO1124** (done), same positions as StyleCop except nameof; StyleCop's fix throws under `dotnet format`"
+SA1143,"Not yet: StyleBro candidate. BRO1524 asks for an expanded layout (condition, `? a` and `: b` each starting a line) but not a chained one (`a ? b :` one per line), and bro migrate doesn't carry SA1143 over to it yet."
 SA1200,"StyleBro **BRO1008** (done; replaces IDE0065, whose fix can change what names bind to: CS0104/CS0118 in eShop and Ocelot). Moves the usings only when no name can be looked up differently; skips files with several namespaces, directives before the namespace body, usings on both levels"
 SA1201,StyleBro **BRO1001** (done)
 SA1202,StyleBro **BRO1001** (done)
@@ -104,7 +105,9 @@ SA1311,"StyleBro **BRO1306** (done), rename with Fix All"
 SA1312,"StyleBro **BRO1301** (done), rename with Fix All; also fixes `_name`"
 SA1313,"StyleBro **BRO1302** (done), rename with Fix All incl. named arguments and overrides; also fixes `_name`"
 SA1314,"StyleBro **BRO1305** (done), rename with Fix All, same results as StyleCop"
+SA1315,"Not yet: StyleBro candidate. BRO1313 (off by default) renames such parameters to the base member's names, but bro migrate doesn't carry SA1315 over to it yet."
 SA1316,"StyleBro **BRO1311** (done), the name renamed with every use and override solution-wide; `stylebro_tuple_element_name_casing` from tupleElementNameCasing"
+SA1317,"Drop: A name with a non-Latin letter (`ЕxаmplеClаss`, `café`) needs a new name a person chooses; transliterating is a guess."
 SA1400,"StyleBro **BRO1404** (done; replaces IDE0040), same positions and output as StyleCop"
 SA1401,Drop: Making a public or protected field private changes the public API and breaks callers.
 SA1402,Drop: Moving a type to its own file isn't something `dotnet format` can do (code fixes can't add documents through it).
@@ -193,6 +196,9 @@ SA1648,Drop: `<inheritdoc/>` where there is nothing to inherit: the fix is real 
 SA1649,Drop: Renaming files isn't something `dotnet format` can do.
 SA1650,"Drop: The rule id reports nothing, even on misspelled words (probed)."
 SA1651,"StyleBro **BRO1609** (done), same results and output as StyleCop"
+SA1653,Drop: Which part of a partial type keeps the `<summary>` is a person's choice; a fix that picks the declaration it is applied to gives a result that depends on which diagnostic comes first.
+SA1654,"Not yet: StyleBro candidate. BRO1617 writes a cref's type arguments in braces, but bro migrate doesn't carry SA1654 over to it yet."
 SX1101,SDK: IDE0003 (`dotnet_style_qualification_for_* = false`); off by default in StyleCop and not enforced by the preset; bro migrate turns IDE0003 on when SX1101 is on
 SX1309,"StyleBro **BRO1303** (done) with `stylebro_private_field_naming = _camelCase`, which bro migrate sets when SX1309 is on"
 SX1309S,"StyleBro **BRO1303** (done) with `stylebro_private_mutable_static_field_naming = _camelCase` (the style of private static fields that aren't readonly or const, SX1309S's fields; not set: `stylebro_private_field_naming`'s). bro migrate counts SX1309S as covered when it writes `_camelCase` (always with SX1309); on its own, with instance fields named `count`, SA1309 is off, StyleCop accepts instance fields with and without `_`, and the report lists it as not expressible"
+SX1412,"Not yet: the SDK can fix it, but it isn't turned on. The opposite of SA1412. The SDK's `charset = utf-8` makes `dotnet format` remove the byte order mark, but bro migrate doesn't write it for SX1412 yet (it writes `utf-8-bom` for SA1412)."

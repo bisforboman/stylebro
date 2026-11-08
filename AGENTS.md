@@ -4,7 +4,7 @@ Instructions for AI coding agents working on this repository (Claude Code reads 
 through .github/copilot-instructions.md). Using StyleBro in another repository instead: plugins/stylebro/skills/stylebro/SKILL.md
 and docs/agents.md.
 
-Roslyn analyzers and code fixes for C#: a modern replacement for StyleCop.Analyzers (stuck in 1.2.0-beta for years).
+Roslyn analyzers and code fixes for C#: a replacement for StyleCop.Analyzers (1.2 and the 1.3 betas).
 Rule prefix `BRO`, config keys `stylebro_*`. Repo: `github.com/bisforboman/stylebro`.
 
 **Core idea**: only analyzers with code fixes that `dotnet format` can apply, so that running `dotnet format` (or

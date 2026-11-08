@@ -62,8 +62,28 @@ public sealed partial class MigrationTests
         }
 
         Assert.True(setup.IsOn("SA1642"));
-        Assert.Null(StyleCopSetup.OldRules("1.2.0-beta.556"));
+        Assert.Null(StyleCopSetup.OldRules("1.3.177-beta"));
         Assert.Contains("SA1413", StyleCopSetup.OldRules("1.1.118")!);
+    }
+
+    [Theory]
+    [InlineData("1.2.0-beta.556", false)]
+    [InlineData("1.3.177-beta", true)]
+    public void StyleCop13_HasItsNewRules_AndStyleCop12DoesNot(string version, bool on)
+    {
+        // StyleCop 1.3 added SA1143, SA1315, SA1317, SA1653 and SA1654 (on by default) and SX1412 (off).
+        Write("A.csproj", $"""<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><PackageReference Include="StyleCop.Analyzers" Version="{version}" /></ItemGroup></Project>""");
+
+        var setup = StyleCopSetup.Read(root);
+
+        Assert.Equal(version, setup.Version);
+        foreach (var id in new[] { "SA1143", "SA1315", "SA1317", "SA1653", "SA1654" })
+        {
+            Assert.Equal(on, setup.IsOn(id));
+        }
+
+        Assert.False(setup.IsOn("SX1412"));
+        Assert.True(setup.IsOn("SA1413"));
     }
 
     [Fact]

@@ -1,0 +1,6 @@
+{
+  "area": "Agents",
+  "item": "Enforce the format loop: bro init --pre-commit, a Stop hook in the plugin",
+  "notes": "docs/proposals/agents-in-consumer-repos.md, section 4: the AGENTS.md section and the skill describe the loop but nothing enforces it. bro init --pre-commit [plain|lefthook|husky] writes pre-commit.md's tested hook (every agent and person); the Claude Code plugin gets a Stop hook running bro check --files on the changed C# files. Only with the flag, like --agents-md (to decide).",
+  "status": "Idea"
+}

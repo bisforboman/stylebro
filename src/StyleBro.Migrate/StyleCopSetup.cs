@@ -270,7 +270,7 @@ internal sealed class StyleCopSetup
         var sources = new List<string>();
         var scopes = new List<Scope>();
 
-        // Rules added in StyleCop 1.2 (SA1651, SA1141, ...) don't exist in 1.1.x: off, whatever the configs say.
+        // Rules added in StyleCop 1.2 (SA1651, SA1141, ...) don't exist in 1.1.x, nor 1.3's (SA1143, ...) in 1.2: off, whatever the configs say.
         var msbuild = files.Where(IsMSBuild).Concat(references.MSBuild).Select(f => (File: f, Text: Migration.ReadOrNull(f) ?? string.Empty)).ToList();
         var documentationParsed = msbuild.Any(m => DocumentationFile.IsMatch(m.Text));
 
@@ -1226,10 +1226,6 @@ internal sealed class StyleCopSetup
     }
 
     /// <summary>
-    /// The rules a StyleCop version before 1.2 has (its DLL's inventory), or null for 1.2 and later: 1.0.x lacks SA1135,
-    /// SA1136, SA1137, SA1139, SA1314 and SA1413 too (xbox-live-developer-tools, 1.0.2: 94 findings in StyleCop-clean code).
-    /// </summary>
-    /// <summary>
     /// A version with its '$(Name)' properties replaced by the values the MSBuild files (<paramref name="texts"/>, without
     /// comments) give them ('&lt;StyleCopVersion&gt;1.2.0-beta.556&lt;/StyleCopVersion&gt;'), or null when one isn't defined.
     /// </summary>
@@ -1246,10 +1242,16 @@ internal sealed class StyleCopSetup
         return value.Contains("$(", StringComparison.Ordinal) ? null : value;
     }
 
+    /// <summary>
+    /// The rules a StyleCop version before 1.3 has (its DLL's inventory), or null for 1.3 and later (and an unknown version):
+    /// 1.0.x lacks SA1135, SA1136, SA1137, SA1139, SA1314 and SA1413 too (xbox-live-developer-tools, 1.0.2: 94 findings in
+    /// StyleCop-clean code); 1.2 lacks 1.3's SA1143, SA1315, SA1317, SA1653, SA1654 and SX1412.
+    /// </summary>
     internal static HashSet<string>? OldRules(string? version) =>
         version is null ? null
         : version.StartsWith("1.0.", StringComparison.Ordinal) ? LoadIds("StyleCopRules-1.0.2.csv")
         : version.StartsWith("1.1.", StringComparison.Ordinal) ? LoadIds("StyleCopRules-1.1.118.csv")
+        : version.StartsWith("1.2.", StringComparison.Ordinal) ? LoadIds("StyleCopRules-1.2.0-beta.556.csv")
         : null;
 
     /// <summary>
@@ -1591,6 +1593,26 @@ internal sealed class StyleCopSetup
                 if (File.Exists(Path.Combine(folder.FullName, above.Groups[1].Value)))
                 {
                     value = Path.Combine(folder.FullName, above.Groups[1].Value);
+                    break;
+                }
+            }
+        }
+
+        // The folder that holds a file, then a path below it (OpenTelemetry's src/Directory.Build.props imports
+        // '$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), 'OpenTelemetry.slnx'))\build\Common.prod.props';
+        // not followed, no project had its ruleset, SA1512 and SA1600 counted as on and BRO1601 wrote 418 '<inheritdoc/>').
+        // ponytail: the search starts at the importing file's folder, which is the project's or above it.
+        var nameAbove = Regex.Match(value, @"^\$\(\[MSBuild\]::GetDirectoryNameOfFileAbove\(\s*(?<start>[^,]+?)\s*,\s*'?(?<name>[^',)]+?)'?\s*\)\)(?<rest>.*)$", RegexOptions.IgnoreCase);
+        if (nameAbove.Success)
+        {
+            var start = nameAbove.Groups["start"].Value.Trim('\'');
+            start = start.Contains("$(", StringComparison.Ordinal) ? directory : Path.GetFullPath(Path.Combine(directory, start));
+            value = string.Empty;
+            for (var folder = new DirectoryInfo(start); folder is not null; folder = folder.Parent)
+            {
+                if (File.Exists(Path.Combine(folder.FullName, nameAbove.Groups["name"].Value)))
+                {
+                    value = folder.FullName + nameAbove.Groups["rest"].Value;
                     break;
                 }
             }

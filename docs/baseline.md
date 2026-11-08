@@ -88,4 +88,45 @@ that). Renaming or moving a file makes all of its entries stale, so its violatio
 
 Regenerate the baseline whenever you like; it only ever lists what's still there. Entries for fixed code are harmless:
 they only match a line with exactly that text, up to their count, so a stale baseline is just longer than it needs to be.
-To pay off part of the debt, fix a folder (`dotnet format --include src/Orders`) and regenerate.
+`bro format` also removes the entries whose line is gone, so the baseline shrinks as the code gets edited.
+
+To pay off part of the debt, name the folders or files:
+
+```
+bro baseline --pay-off src/Orders            # or several: bro baseline --pay-off src/Orders src/Billing/Invoice.cs
+```
+
+It takes those files' entries out of the baseline (every baseline that has them, wherever `<StyleBroBaseline>` puts it)
+and runs `bro format --files` on the files they name: the fixes run there as in a first format, the rest of the
+repository keeps its baseline, and the findings format keeps on purpose go back in with their reasons. It ends with
+`Baseline: paid off 12 of 14 baselined findings in src/Orders; 2 kept on purpose stay in the baseline`. When the run
+doesn't end clean (exit code 2 or 3, or an error), the entries for the lines it left go back, so the build doesn't fail
+on them. A folder per pull request keeps each change small to review and unlikely to conflict with other open branches.
+
+Turning the baseline off for one run works too (`StyleBroBaseline=none bro format src/Orders/Orders.csproj`, then `bro
+baseline`; PowerShell: `$env:StyleBroBaseline = 'none'`), but only where no `Directory.Build.props` sets
+`<StyleBroBaseline>` without a condition, and the run formats everything it covers, not just the baselined files.
+
+**Use a current .NET SDK.** The baseline reaches `dotnet format` as a diagnostic suppressor, and older SDKs' `dotnet
+format` (10.0.1xx, 8.0.1xx) loads none: there, `bro format` fixes the baselined violations too (all of them, on a whole
+run) and `bro check` fails on them, although the build passes. SDK 10.0.4xx honors it.
+
+## Merging branches
+
+`bro format` and `bro baseline` rewrite the baseline, so branches that run them in parallel all edit the same file.
+When one of them writes a baseline in a git repository, it adds one line to the `.gitattributes` at the repository's
+root and says so (`Baseline: .gitattributes: added 'stylebro.baseline merge=union' ...`):
+
+```
+# StyleBro: git keeps both branches' baseline entries when it merges them (https://bisforboman.github.io/stylebro/baseline/#merging-branches)
+stylebro.baseline merge=union
+```
+
+With it, git keeps both sides' lines instead of stopping at a conflict. That's safe for this file: an entry that both
+branches changed ends up on two lines, and the larger count counts (never their sum); an entry left over for a line
+that's gone does nothing, and the next `bro format` drops it and sorts the file again. The line covers every
+`stylebro.baseline` in the repository. If a line in that `.gitattributes` already names `stylebro.baseline`, bro leaves
+the file alone: to keep git's usual merge (and its conflicts), replace StyleBro's line with `stylebro.baseline merge`.
+
+Git applies it to merges and rebases it runs itself (`git merge origin/main`). GitHub's own merges and its "Update
+branch" button ignore it: when GitHub shows a conflict in `stylebro.baseline`, merge the base branch locally.

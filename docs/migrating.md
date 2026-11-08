@@ -161,8 +161,8 @@ real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro
   links from a submodule are another matter: see [excluding vendored code](vendored-code.md#excluding-vendored-code).
 - The StyleCop.Analyzers version: from a `PackageReference` or `PackageVersion`, a `packages.config` entry, or an
   `<Analyzer>` hint path into a `packages` folder (old-style projects). Rules the version's DLL doesn't have count as
-  off: with 1.1.x the rules added in 1.2 (SA1141, SA1142, SA1316, SA1414), with 1.0.x also SA1135, SA1136, SA1137,
-  SA1139, SA1314 and SA1413. 1.1.x's SA1413 doesn't check switch expressions yet: the migration writes
+  off: with 1.2.x the rules added in 1.3 (SA1143, SA1315, SA1317, SA1653, SA1654, SX1412), with 1.1.x also the rules
+  added in 1.2 (SA1141, SA1142, SA1316, SA1414), with 1.0.x also SA1135, SA1136, SA1137, SA1139, SA1314 and SA1413. 1.1.x's SA1413 doesn't check switch expressions yet: the migration writes
   `stylebro_trailing_comma_switch_expressions = false`, so [BRO1401](rules/BRO1401.md) leaves them alone too. 1.1.x's
   SA1629 doesn't check enum members' documentation: the migration writes `stylebro_punctuation_check_enum_members = false`
   for [BRO1603](rules/BRO1603.md).
@@ -303,6 +303,30 @@ The dry run lists the StyleCop rules that are on but that nothing enforces after
 - **Dropped by design:** there's no safe automatic fix (the fix would be placeholder documentation, a file rename, or
   a changed public API).
 - **Not covered yet:** candidates for future StyleBro rules. See [stylecop-mapping.md](stylecop-mapping.md).
+
+## Coming from StyleCop 1.3
+
+A repository on a StyleCop.Analyzers 1.3 beta migrates the same way as one on 1.2; what's different:
+
+- **The rules 1.3 added count.** With a 1.3 version (`1.3.151-beta`, ...) SA1143, SA1315, SA1317, SA1653 and SA1654
+  (on by default) and SX1412 (off by default) are read like every other rule; with 1.2 they count as off. None of them
+  is carried over yet ([#339](https://github.com/bisforboman/stylebro/issues/339)), so the report lists those that are on under "Not enforced after removing StyleCop":
+  - SA1143 (conditional expression layout), SA1315 (parameter names of overrides) and SA1654 (generic crefs in braces)
+    under *Not covered yet*. [BRO1524](rules/BRO1524.md), [BRO1313](rules/BRO1313.md) and [BRO1617](rules/BRO1617.md)
+    check close to the same things, but the migration leaves them off; turn them on yourself
+    (`dotnet_diagnostic.BRO1524.severity = warning`) to keep the check. BRO1524 doesn't accept a chained layout (one
+    `a ? b :` per line).
+  - SA1317 (non-Latin letters in names) and SA1653 (one `<summary>` per partial type) under *Dropped by design*: no
+    fix that doesn't need a person's choice ([skipped-rules.md](skipped-rules.md#sa1317)).
+  - SX1412 (UTF-8 without a byte order mark), when you turned it on: write `charset = utf-8` in `.editorconfig`; the
+    SDK's formatter then removes the marks (the migration writes `utf-8-bom` for SA1412, not yet `utf-8` for SX1412).
+
+Measured 2026-11-07 on OpenTelemetry at `1fc102a` (StyleCop.Analyzers 1.3.151-beta, StyleCop-clean), with
+`scripts/stylecop-survey/Measure-MigrationDelta.ps1`: `bro migrate --write` and `dotnet format` changed 1 file,
+and not with a StyleBro rule (two trimming attributes from the SDK's analyzer).
+
+If you're still on 1.2.0-beta.556 and a bot proposes a 1.3 beta, you can migrate either before or after it: the
+migration reads the version you're on.
 
 ## Coming from StyleSharp
 

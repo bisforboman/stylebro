@@ -1,0 +1,23 @@
+{
+  "repo": "dotliquid/dotliquid",
+  "branch": "master",
+  "commit": "e1e721aa558791e96d65bbd2a7dcfd05a8668caa",
+  "csFiles": 148,
+  "tags": [
+    "sonar",
+    "library",
+    "multi-target",
+    "twae"
+  ],
+  "setups": "src/DotLiquid.sln; SonarAnalyzer.CSharp 5.11 + TreatWarningsAsErrors in the library; netstandard1.3;netstandard2.0;net45;net6.0 library, net461;net6.0;netcoreapp1.0;netcoreapp2.0 tests; .editorconfig crlf, utf-8, insert_final_newline=false; .gitattributes '*.cs text=crlf' (107 CRLF, 39 LF .cs files).",
+  "build": "ok",
+  "workaround": "DOTNET_ROLL_FORWARD=Major for the netcoreapp1.0/2.0 tests; -p:NuGetAudit=false",
+  "tests": "dotnet test src/DotLiquid.sln (about 1430 per framework; 8-9 culture/embedded-resource tests fail untouched)",
+  "usedIn": "trial 69 (random, seed 69)",
+  "verified": {
+    "by": "trial 69 session",
+    "date": "2026-11-07",
+    "sdks": "10.0.114, 8.0.133"
+  },
+  "notes": "Old Sonar (5.11) crashes on the new compiler (AD0001) even untouched; netstandard1.3 and netcoreapp1.0 don't load in dotnet format."
+}

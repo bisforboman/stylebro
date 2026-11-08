@@ -50,7 +50,8 @@ repository changes.
 
 Use the newest version on nuget.org (https://www.nuget.org/packages/StyleBro.Analyzers), the same as the tool's
 (`bro --version`). `--agents-md` with `--write` also writes a short StyleBro section into `AGENTS.md`. In CI:
-`bro check --severity warn`. A large codebase can start from a baseline: `bro baseline`.
+`bro check --severity warn`. A large codebase can start from a baseline: `bro baseline`; it's paid off a folder at a time
+with `bro baseline --pay-off <folder>`.
 
 ## Docs
 

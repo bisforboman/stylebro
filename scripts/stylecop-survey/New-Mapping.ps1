@@ -9,8 +9,9 @@ param(
     [string]$SurveyOut = (Join-Path $PSScriptRoot 'survey.md'))
 $ErrorActionPreference = 'Stop'
 $data = Join-Path $PSScriptRoot 'data'
-$inv = Import-Csv (Join-Path $data 'inventory-1.2.0-beta.556.csv')
+$inv = Import-Csv (Join-Path $data 'inventory-1.3.177-beta.csv')
 $in118 = (Import-Csv (Join-Path $data 'inventory-1.1.118.csv')).Id
+$in12 = (Import-Csv (Join-Path $data 'inventory-1.2.0-beta.556.csv')).Id
 $repos = (Import-PowerShellDataFile (Join-Path $PSScriptRoot 'repos.psd1')).Repos
 $decisions = Import-PowerShellDataFile (Join-Path $PSScriptRoot 'decisions.psd1')
 $skipped = Import-PowerShellDataFile (Join-Path $PSScriptRoot 'skipped.psd1')
@@ -62,8 +63,9 @@ function Get-Proposal($r) {
     if ($r.StyleCopHasFix -eq 'True') { return 'Untested. StyleCop has a fix, so a StyleBro fix is feasible' }
     return 'Untested. StyleCop has no fix'
 }
-function Get-Kept($id) { ($repos | ForEach-Object { $state[$_.Name][$id] }) -join ' / ' }
-function Get-Counts($id) { ($repos | ForEach-Object { ([int]$counts[$_.Name][$id]).ToString('n0', [cultureinfo]::InvariantCulture) }) -join ' / ' }
+function Get-Kept($id) { if ($id -notin $in12) { return 'not surveyed' }; ($repos | ForEach-Object { $state[$_.Name][$id] }) -join ' / ' }
+# The surveys ran StyleCop 1.2: a rule 1.3 added wasn't counted.
+function Get-Counts($id) { if ($id -notin $in12) { return 'not surveyed' }; ($repos | ForEach-Object { ([int]$counts[$_.Name][$id]).ToString('n0', [cultureinfo]::InvariantCulture) }) -join ' / ' }
 function Get-Check($id) { switch ($check[$id]) { 'fixed' { 'fixed' } 'not-fixed' { 'not fixed' } 'partly' { 'partly' } default { '' } } }
 
 $rows = foreach ($r in $inv) {
@@ -142,9 +144,9 @@ W '## How this was measured'
 W
 W 'Scripts and data: this folder ([README.md](README.md)).'
 W
-W '- **Inventory**: every diagnostic in StyleCop.Analyzers 1.1.118 and 1.2.0-beta.556, read from the analyzer DLLs, including whether StyleCop itself ships a code fix. 1.2.0-beta.556 adds SA1141, SA1142, SA1316, SA1414 and some variants.'
+W '- **Inventory**: every diagnostic in StyleCop.Analyzers 1.1.118, 1.2.0-beta.556 and 1.3.177-beta, read from the analyzer DLLs, including whether StyleCop itself ships a code fix (the column below is 1.3.177-beta''s). 1.2.0-beta.556 adds SA1141, SA1142, SA1316, SA1414 and some variants; 1.3.177-beta adds SA1143, SA1315, SA1317, SA1653, SA1654 and SX1412, and fixes for SA1114, SA1115, SA1117, SA1612 and SA1648.'
 W "- **Teams keeping it on**: the effective setting for production code in $($repos.Count) repos that use StyleCop: $(($repos | ForEach-Object Title) -join ', '). Shown as $labels."
-W "- **Diagnostics with every rule on**: each repo built with all StyleCop rules enabled as warnings (and XML docs on), counting unique diagnostics. Shown as $labels. Where a team keeps a rule on, the count is near zero; where it is off, the count shows how much code would change. $(($repos | Where-Object Note | ForEach-Object Note) -join ' ')"
+W "- **Diagnostics with every rule on**: each repo built with all StyleCop rules enabled as warnings (and XML docs on), counting unique diagnostics. Shown as $labels. Where a team keeps a rule on, the count is near zero; where it is off, the count shows how much code would change. The surveys ran StyleCop 1.2, so the rules 1.3 added say *not surveyed*. $(($repos | Where-Object Note | ForEach-Object Note) -join ' ')"
 W "- **SDK check**: for $tested rules, a small violating example was formatted with ``dotnet format style`` and ``dotnet format whitespace`` (SDK only, not StyleCop's own fixes) using StyleCop-like SDK settings, and StyleCop was run again. ""fixed"" means the diagnostic was gone. Each rule was checked on one example, so a ""fixed"" rule can still have cases the SDK handles differently."
 W
 W '## Not yet done, by demand'
@@ -167,7 +169,7 @@ foreach ($cat in ($inv | ForEach-Object Category | Sort-Object -Unique)) {
     W '|---|---|---|---|---|---|---|---|'
     foreach ($row in $rows | Where-Object { $_.Rule.Category -eq $cat }) {
         $r = $row.Rule
-        $id = if ($r.Id -notin $in118 -and $r.Id -match '^SA\d{4}$') { "$($r.Id) (1.2 beta)" } else { $r.Id }
+        $id = if ($r.Id -notin $in12) { "$($r.Id) (1.3 beta)" } elseif ($r.Id -notin $in118 -and $r.Id -match '^SA\d{4}$') { "$($r.Id) (1.2 beta)" } else { $r.Id }
         W ('| {0} | {1} | {2} | {3} | {4} | {5} | {6} | {7} |' -f $id, $r.Title,
             $(if ($r.EnabledByDefault -eq 'True') { 'on' } else { 'off' }), $(if ($r.StyleCopHasFix -eq 'True') { 'yes' } else { 'no' }),
             (Get-Kept $r.Id), (Get-Counts $r.Id), (Get-Check $r.Id), ($row.Proposal + (Get-Link $r.Id '../../docs/skipped-rules.md')))

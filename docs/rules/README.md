@@ -108,7 +108,7 @@ counts.
 | [BRO1310](BRO1310.md) | Field names should not use Hungarian notation | SA1305 | off |
 | [BRO1311](BRO1311.md) | Tuple element names should use correct casing | SA1316 | on |
 | [BRO1312](BRO1312.md) | Namespace names should begin with an upper-case letter | SA1300 | off |
-| [BRO1313](BRO1313.md) | Parameter names should match the base member | (none; SA1315 proposed, never implemented; SDK CA1725) | off |
+| [BRO1313](BRO1313.md) | Parameter names should match the base member | (none; SDK CA1725) | off |
 | [BRO1314](BRO1314.md) | Asynchronous method names should end with Async | (none; Roslynator RCS1046, Meziantou MA0137) | off |
 
 ## Maintainability
@@ -178,6 +178,6 @@ counts.
 | [BRO1614](BRO1614.md) | Generic type parameter documentation should declare parameter name | SA1621 | on |
 | [BRO1615](BRO1615.md) | File should have the XML copyright header (needs `stylebro_file_header_company`) | SA1633-SA1638, SA1640, SA1641 | on |
 | [BRO1616](BRO1616.md) | Write the summary's tags consistently on their own lines or on the text's line | (none; Roslynator RCS1253, Meziantou MA0177/MA0211) | on |
-| [BRO1617](BRO1617.md) | Write a cref's type arguments in braces | SA1653 | on |
+| [BRO1617](BRO1617.md) | Write a cref's type arguments in braces | (none) | on |
 | [BRO1618](BRO1618.md) | Write a C# keyword in documentation as `<see langword="..."/>` | (none; Meziantou MA0154) | on |
 | [BRO1619](BRO1619.md) | Put the documentation elements in the standard order | (none) | on |

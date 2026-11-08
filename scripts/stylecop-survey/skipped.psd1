@@ -32,12 +32,18 @@
             Revisit = 'Only if a deterministic extraction is acceptable (variable name from the parameter name). Probably stays a human job.' }
         SA1126 = @{ Status = 'NotInStyleCop'; Why = 'The rule id reports nothing, even on an unprefixed member call (probed).'
             Revisit = 'Nothing to port.' }
+        SA1143 = @{ Status = 'Candidate'; Why = 'BRO1524 asks for an expanded layout (condition, `? a` and `: b` each starting a line) but not a chained one (`a ? b :` one per line), and bro migrate doesn''t carry SA1143 over to it yet.'
+            Revisit = 'A parity set for SA1143 against BRO1524; with the differences documented, BRO1524''s description names SA1143 and bro migrate maps it.' }
 
         # ---- Ordering ----------------------------------------------------------------------------------------------
 
         # ---- Naming ------------------------------------------------------------------------------------------------
         SA1301 = @{ Status = 'NotInStyleCop'; Why = 'The rule id reports nothing (probed); it is kept only for compatibility.'
             Revisit = 'Nothing to port.' }
+        SA1315 = @{ Status = 'Candidate'; Why = 'BRO1313 (off by default) renames such parameters to the base member''s names, but bro migrate doesn''t carry SA1315 over to it yet.'
+            Revisit = 'A parity set for SA1315 against BRO1313; then BRO1313''s description names SA1315 and bro migrate maps it.' }
+        SA1317 = @{ Status = 'Drop'; Why = 'A name with a non-Latin letter (`ЕxаmplеClаss`, `café`) needs a new name a person chooses; transliterating is a guess.'
+            Revisit = 'Nothing automatic.' }
 
         # ---- Maintainability ---------------------------------------------------------------------------------------
         SA1401 = @{ Status = 'Drop'; Why = 'Making a public or protected field private changes the public API and breaks callers.'
@@ -56,6 +62,8 @@
             Revisit = 'Nothing to port.' }
         SA1414 = @{ Status = 'Drop'; Why = 'Tuple element names in signatures have to be chosen by a person.'
             Revisit = 'Nothing automatic.' }
+        SX1412 = @{ Status = 'SdkLater'; Why = 'The opposite of SA1412. The SDK''s `charset = utf-8` makes `dotnet format` remove the byte order mark, but bro migrate doesn''t write it for SX1412 yet (it writes `utf-8-bom` for SA1412).'
+            Revisit = 'bro migrate writes `charset = utf-8` when SX1412 is on.' }
 
         # ---- Layout ------------------------------------------------------------------------------------------------
 
@@ -120,6 +128,10 @@
             Revisit = 'Would need a separate tool (bro could do it as a one-off, with `git mv`).' }
         SA1650 = @{ Status = 'NotInStyleCop'; Why = 'The rule id reports nothing, even on misspelled words (probed).'
             Revisit = 'Nothing to port.' }
+        SA1653 = @{ Status = 'Drop'; Why = 'Which part of a partial type keeps the `<summary>` is a person''s choice; a fix that picks the declaration it is applied to gives a result that depends on which diagnostic comes first.'
+            Revisit = 'Only with a deterministic choice (for example the declaration in the file named after the type).' }
+        SA1654 = @{ Status = 'Candidate'; Why = 'BRO1617 writes a cref''s type arguments in braces, but bro migrate doesn''t carry SA1654 over to it yet.'
+            Revisit = 'A parity set for SA1654 against BRO1617; then BRO1617''s description names SA1654 and bro migrate maps it.' }
     }
 
     Partial = @{

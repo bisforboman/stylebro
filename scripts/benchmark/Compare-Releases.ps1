@@ -7,8 +7,9 @@
     Downloads each version's StyleBro.Analyzers package from nuget.org into -Work (once), builds src/StyleBro.Analyzers
     in Release (unless -Head names a DLL), and runs `scripts/benchmark compare <release> <head> <sources> <runs>` for
     every version, with and without --all-rules, -Repeat times each. `stylecop` as a version compares
-    StyleCop.Analyzers 1.2.0-beta.556 (the StyleCop.Analyzers.Unstable 1.2.0.556 package) with the default rules only,
-    as the former docs/stylebro-vs-stylecop.md did. Each run's output goes to -Work/logs/<version>-<rules>-<n>.txt; the summary
+    StyleCop.Analyzers 1.2.0-beta.556 (the StyleCop.Analyzers.Unstable 1.2.0.556 package) with the default rules only;
+    `stylecop:<version>` compares that StyleCop.Analyzers version (1.3 betas ship the DLL in StyleCop.Analyzers itself),
+    e.g. `stylecop:1.3.177-beta`. Each run's output goes to -Work/logs/<version>-<rules>-<n>.txt; the summary
     lines (totals) are printed at the end.
 
 .EXAMPLE
@@ -30,6 +31,8 @@ New-Item -ItemType Directory -Force (Join-Path $Work 'logs') | Out-Null
 function Get-Dll([string] $version) {
     $id, $packageVersion, $dll = if ($version -eq 'stylecop') {
         'stylecop.analyzers.unstable', '1.2.0.556', 'StyleCop.Analyzers.dll'
+    } elseif ($version -like 'stylecop:*') {
+        'stylecop.analyzers', $version.Substring(9), 'StyleCop.Analyzers.dll'
     } else {
         'stylebro.analyzers', $version, 'StyleBro.Analyzers.dll'
     }
@@ -58,10 +61,10 @@ $benchmark = Join-Path $repo 'scripts/benchmark/bin/Release/net10.0/Benchmark.dl
 $summary = @()
 foreach ($version in $Versions) {
     $dll = Get-Dll $version
-    $modes = if ($version -eq 'stylecop') { @('default') } else { @('default', 'all') }
+    $modes = if ($version -like 'stylecop*') { @('default') } else { @('default', 'all') }
     foreach ($rules in $modes) {
         for ($n = 1; $n -le $Repeat; $n++) {
-            $log = Join-Path $Work "logs/$version-$rules-$n.txt"
+            $log = Join-Path $Work "logs/$($version -replace ':', '-')-$rules-$n.txt"
             $arguments = @('compare', $dll, $Head, $Sources, $Runs) + $(if ($rules -eq 'all') { '--all-rules' } else { @() })
             $watch = [Diagnostics.Stopwatch]::StartNew()
             dotnet $benchmark @arguments *> $log
