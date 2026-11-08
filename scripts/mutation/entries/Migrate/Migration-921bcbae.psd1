@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Migrate/Migration.cs'
     Find = '.Where(d => !d.CustomTags.Contains(WellKnownDiagnosticTags.NotConfigurable))'
     Replace = ''
-    Tests = 'MigrationTests.EveryStyleBroRule_NamesTheStyleCopRulesItReplaces'
+    Tests = 'MigrationTests.EveryRulePage_NamesTheSameStyleCopRules_AndComparesWithNothing'
 }
