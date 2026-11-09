@@ -27,3 +27,15 @@ Asked of the owner as a multiple-choice question (2026-11-08):
 The owner chose **more shards** (2026-11-08): `.github/workflows/mutation.yml` runs 8 shards on a pull request and 12
 at night, `timeout-minutes` stays 90. The required check is still the summary job `mutation`, so branch protection
 doesn't change.
+
+## Follow-up (2026-11-09)
+
+The first nightly run with 12 shards (all 2,241 entries, 187 a shard) failed too: shard 5 was cancelled at 90 minutes,
+shard 10 finished after 83, the others after 42 to 68. The shards hold the same mix of test classes (70 to 78
+MigrationTests entries each), so the time goes to a few slow entries, and a cancelled shard's log didn't say which:
+the runner printed its table only at the end.
+
+Asked of the owner (2026-11-09), who chose **per-mutation logging and 16 shards**: `Invoke-Mutations.ps1` prints each
+result with its time as it goes and lists the ten slowest at the end; the nightly runs 16 shards, `timeout-minutes`
+stays 90, pull requests stay at 8. The other choices were a 150-minute timeout with 12 shards, or logging only and
+deciding with the measured times.

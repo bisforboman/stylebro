@@ -67,7 +67,13 @@ if ($mine.Count) {
     if ($LASTEXITCODE -ne 0) { throw 'The unmutated build fails.' }
 }
 
+# Each result is printed as it comes, with its time: a shard cancelled at the job's timeout prints no table, and its log
+# still shows which entries ran and how long each took.
+$n = 0
+$total = [Diagnostics.Stopwatch]::StartNew()
 $results = $stale + @(foreach ($m in $mine) {
+    $n++
+    $watch = [Diagnostics.Stopwatch]::StartNew()
     $file = Join-Path $Root $m.File
     $text = [IO.File]::ReadAllText($file)
     [IO.File]::WriteAllText($file, $text.Replace($m.Find, $m.Replace))
@@ -81,10 +87,17 @@ $results = $stale + @(foreach ($m in $mine) {
         git -C $Root checkout -q -- $m.File
     }
 
-    [pscustomobject]@{ Result = $result; File = $m.File; Find = $m.Find; Note = $m.Tests }
+    $seconds = [int]$watch.Elapsed.TotalSeconds
+    Write-Host ("[{0}/{1}, {2:hh\:mm\:ss}] {3} in {4} s: {5} ({6})" -f $n, $mine.Count, $total.Elapsed, $result, $seconds, $m.Source, $m.Tests)
+    [pscustomobject]@{ Result = $result; Seconds = $seconds; File = $m.File; Find = $m.Find; Note = $m.Tests }
 })
 
 $results | Format-Table -AutoSize -Wrap | Out-Host
+$slow = @($results | Where-Object { $null -ne $_.Seconds } | Sort-Object Seconds -Descending | Select-Object -First 10)
+if ($slow.Count) {
+    Write-Host "Slowest of $($mine.Count) mutations ($([int]$total.Elapsed.TotalMinutes) minutes in all):"
+    $slow | Format-Table Seconds, File, Note -AutoSize | Out-Host
+}
 if ($env:GITHUB_STEP_SUMMARY) {
     $title = if ($Shards -gt 1) { "### Mutation testing (shard $Shard of $Shards)" } else { '### Mutation testing' }
     $title, '', '| Result | File | Guard |', '|---|---|---|' | Add-Content $env:GITHUB_STEP_SUMMARY
