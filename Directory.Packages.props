@@ -12,7 +12,7 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.VisualBasic.Workspaces" Version="4.8.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0" />
     <!-- bro's format host compiles against these and runs on the SDK's own copies (src/StyleBro.FormatHost). -->
-    <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.8.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="5.6.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.14" />
     <!--
       Pin the format host's transitive packages above their advisories: System.Text.Json 7.0.3 from Workspaces.MSBuild
@@ -21,7 +21,7 @@
       format host excludes their runtime assets and runs on the SDK's own copies, so no shipped package contains them.
       8.0.x matches its net8.0 target.
     -->
-    <PackageVersion Include="System.Text.Json" Version="8.0.6" />
+    <PackageVersion Include="System.Text.Json" Version="11.0.0" />
     <PackageVersion Include="System.Drawing.Common" Version="8.0.33" />
 
     <!-- StyleBro checks its own code with its latest published release (not the code being built). -->
