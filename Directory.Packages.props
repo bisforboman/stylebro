@@ -13,7 +13,7 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0" />
     <!-- bro's format host compiles against these and runs on the SDK's own copies (src/StyleBro.FormatHost). -->
     <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.8.0" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.14" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="11.0.0" />
     <!--
       Pin the format host's transitive packages above their advisories: System.Text.Json 7.0.3 from Workspaces.MSBuild
       (NU1903, GHSA-hh2w-p6rv-4g7w) and System.Drawing.Common 4.7.0 from Microsoft.Build.Framework 16.10 through
