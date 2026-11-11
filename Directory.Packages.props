@@ -22,7 +22,7 @@
       8.0.x matches its net8.0 target.
     -->
     <PackageVersion Include="System.Text.Json" Version="8.0.6" />
-    <PackageVersion Include="System.Drawing.Common" Version="8.0.33" />
+    <PackageVersion Include="System.Drawing.Common" Version="11.0.0" />
 
     <!-- StyleBro checks its own code with its latest published release (not the code being built). -->
     <PackageVersion Include="StyleBro.Analyzers" Version="$(StyleBroSelfVersion)" />
