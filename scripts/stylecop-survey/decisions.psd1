@@ -3,7 +3,7 @@
 # Proposals may compare with StyleCop (survey evidence, not published); Mapping is published and says only what
 # StyleBro or the SDK covers (see docs/decisions/).
 @{
-    Status = 'every StyleCop 1.3.177-beta rule is StyleBro, SDK, dropped with a reason, or (4 of the rules 1.3 added) not yet done (2026-11-07; complete for 1.2.0-beta.556 since 2026-10-07)'
+    Status = 'every StyleCop 1.3.177-beta rule is StyleBro, SDK, or dropped with a reason (2026-11-08; complete for 1.2.0-beta.556 since 2026-10-07)'
 
     # For rules the SDK check fixed: which SDK rule or setting did it.
     SdkSettings = @{
@@ -88,6 +88,10 @@
         SX1309S = 'StyleBro **BRO1303** (done) with `stylebro_private_mutable_static_field_naming = _camelCase` (the style of private static fields that aren''t readonly or const, SX1309S''s fields; not set: `stylebro_private_field_naming`''s). bro migrate counts SX1309S as covered when it writes `_camelCase` (always with SX1309); on its own, with instance fields named `count`, SA1309 is off, StyleCop accepts instance fields with and without `_`, and the report lists it as not expressible'
         SA1119_p = 'StyleBro **BRO1405** (done). Not a rule of its own: the Hidden companion of SA1119 that StyleCop reports on the same parentheses'' `(` and `)` so the IDE greys them out (it only checks parenthesized expressions, never patterns). BRO1405 reports the same parentheses; the greying isn''t ported'
         SA1412 = 'SDK: `charset = utf-8-bom` (`dotnet format` writes the BOM); off by default in StyleCop and not in the preset; bro migrate sets it when SA1412 is on'
+        SX1412 = 'SDK: `charset = utf-8` (`dotnet format` removes the BOM, Test-SdkCoverage.ps1); off by default in StyleCop and not in the preset; bro migrate sets it when SX1412 is on, and neither charset when SA1412 is on too'
+        SA1143 = 'StyleBro **BRO1524** (done; parity set conditional-layout, 1.3.177-beta). Differs from StyleCop: line breaks only, not indentation (a `:` deeper than its `?`, operator lines not indented beyond the condition); `?`/`:` at the end of the line is BRO1520''s; reported at the token that needs the line break, not the outermost `?`; StyleCop''s fix puts the expression on one line, BRO1524''s expands it. Both accept an aligned chain and nested false branches'
+        SA1315 = 'StyleBro **BRO1313** (done, off by default; parity set inherited-parameter-names, 1.3.177-beta). Differs from StyleCop: also checks indexers; not reported: discards, names in `nameof`, public API (without `stylebro_rename_public_api`). Both accept a name that matches any implemented interface'
+        SA1654 = 'StyleBro **BRO1617** (done; parity set generic-crefs, 1.3.177-beta), same results and output as StyleCop except a cref the compiler can''t read (`List&lt;int&gt;`), which BRO1617 leaves alone'
         SA1005 = 'StyleBro **BRO1002** (done), same results as StyleCop 1.2 (1.1.118 also reported `//  two spaces`)'
         SA1106 = 'StyleBro **BRO1101** (done). Differs from StyleCop: embedded (`while (x) ;`) and labeled empty statements are not reported'
         SA1110 = 'StyleBro **BRO1109** (done), same results and output as StyleCop'
@@ -151,6 +155,7 @@
         SA1200 = '**BRO1008**, where moving the usings can''t change what a name binds to'
         SA1300 = '**BRO1309**; namespaces: **BRO1312** (off by default; `bro migrate` turns it on with SA1300)'
         SA1305 = '**BRO1310** (off by default)'
+        SA1315 = '**BRO1313** (off by default; `bro migrate` turns it on with SA1315)'
         SA1306 = '**BRO1303**, for private and protected fields'
         SA1309 = '**BRO1303** (private and protected fields) and **BRO1306** (constants, static readonly and public or internal fields)'
         SA1124 = '**BRO1112** (off in the preset)'
@@ -161,6 +166,7 @@
         SA1627 = '**BRO1610**, for an empty `<remarks>`'
         SA1633 = 'SDK: IDE0073 (`file_header_template`) for a plain header; **BRO1615** for the XML header'
         SA1412 = 'SDK: `charset = utf-8-bom`, not in the preset; `bro migrate` sets it when SA1412 is on'
+        SX1412 = 'SDK: `charset = utf-8`, not in the preset; `bro migrate` sets it when SX1412 is on'
         SA1206 = 'SDK: IDE0036 (`csharp_preferred_modifier_order`), which checks the whole modifier order ([details](skipped-rules.md#sa1206))'
         SX1101 = 'SDK: IDE0003 (`dotnet_style_qualification_for_* = false`), not in the preset; `bro migrate` turns it on when SX1101 is on'
         SX1309 = '**BRO1303** with `stylebro_private_field_naming = _camelCase` (`bro migrate` sets it when SX1309 is on)'

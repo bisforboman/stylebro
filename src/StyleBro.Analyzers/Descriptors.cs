@@ -241,7 +241,7 @@ internal static class Descriptors
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: false,
         description: "A parameter of an override or interface implementation has the name of the base member's parameter "
-            + "(proposed for StyleCop in issue #1949; the SDK's CA1725 reports it without a fix). Off by default."
+            + "(the SDK's CA1725 reports it without a fix). Off by default. Replaces StyleCop SA1315."
             + KeptNote,
         helpLinkUri: HelpBase + DiagnosticIds.ParameterMatchesBase + "/");
 
@@ -491,7 +491,7 @@ internal static class Descriptors
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "A cref names a generic type or member with braces, 'List{T}', not with escaped angle brackets, "
-            + "'List&lt;T&gt;'. Not a StyleCop rule (StyleCop issue #758).",
+            + "'List&lt;T&gt;'. Replaces StyleCop SA1654.",
         helpLinkUri: HelpBase + DiagnosticIds.GenericCrefBraces + "/");
 
     public static readonly DiagnosticDescriptor LangwordElement = new(
@@ -1198,7 +1198,7 @@ internal static class Descriptors
         isEnabledByDefault: true,
         description: "A conditional expression is on one line, or the condition, the '? a' part and the ': b' part each start "
             + "their own line, with '?' and ':' on the side dotnet_style_operator_placement_when_wrapping asks for (the "
-            + "beginning of the line by default). Not a StyleCop rule (proposed in StyleCop's issue #651).",
+            + "beginning of the line by default). Replaces StyleCop SA1143.",
         helpLinkUri: HelpBase + DiagnosticIds.ConditionalLayout + "/");
 
     public static readonly DiagnosticDescriptor ElseAfterJump = new(
