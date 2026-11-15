@@ -85,13 +85,15 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
     }
 
     /// <summary>
-    /// Whether a type derived from the field's type declares a member with the new name: it would hide the renamed field,
-    /// and the derived type's 'this.count' would mean that member. Protected readonly fields are used by exactly those
-    /// types. Derived types in other projects are the fix's to see.
+    /// Whether the field is a protected (or private protected) readonly instance field and a type derived from its type
+    /// declares a member with the new name: it would hide the renamed field, and the derived type's 'this.count' would
+    /// mean that member. Such a field is used by exactly those types. Derived types in other projects are the fix's to
+    /// see, and so are the other fields' (a simple name that would see the member keeps the finding).
     /// </summary>
     private static bool IsHiddenInDerivedType(IFieldSymbol field, string newName, Lazy<ILookup<INamedTypeSymbol, INamedTypeSymbol>> derived)
     {
-        if (field.DeclaredAccessibility == Accessibility.Private || field.ContainingType is not { TypeKind: TypeKind.Class, IsSealed: false, IsStatic: false })
+        if (field is not { DeclaredAccessibility: Accessibility.Protected or Accessibility.ProtectedAndInternal, IsReadOnly: true, IsStatic: false }
+            || field.ContainingType.IsSealed)
         {
             return false;
         }

@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Analyzers/Naming/FieldNamingAnalyzer.cs'
     Find = '            && !IsHiddenInDerivedType(field, newName, derived)'
     Replace = ''
-    Tests = 'FieldNamingTests.HidingInDerivedTypes_KeepsTheName'
+    Tests = 'FieldNamingTests.ProtectedReadOnlyFields_ADerivedTypeWouldHide_AreNotReported'
 }

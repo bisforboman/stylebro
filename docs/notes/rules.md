@@ -277,11 +277,13 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   a `_` name in the `_camelCase` style (and with stylebro_allow_leading_underscore_in_pascal_fields), and makes
   `_size` -> `Size` in the camelCase style (SA1309 + SA1304 in one rename; it was `size`, BRO1303). An enforced SDK
   naming rule for protected fields still wins. `FieldNames.IsPascalChecked` is unchanged (Conventions' count of
-  non-private casing doesn't include protected fields). New analyzer guard for every non-private field of an unsealed
-  class (`FieldNamingAnalyzer.IsHiddenInDerivedType`): a class derived from the field's type in the same compilation
-  with a member named like the new name -> no diagnostic (the fix only refused when a SIMPLE-name reference saw the
-  member; `this.depth`/`base.depth` in the derived type would have been rebound, or CS0108). Derived types in other
-  projects stay the fix's check (kept finding). `IsDataMember` (word-inside-string guard) no longer
+  non-private casing doesn't include protected fields). New analyzer guard for these fields only
+  (`FieldNamingAnalyzer.IsHiddenInDerivedType`): a class derived from the field's type in the same compilation
+  with a member named like the new name -> no diagnostic (the fix only refuses when a SIMPLE-name reference sees the
+  member; `this.depth` in the derived type would be rebound to the member, and without a reference CS0108 appears).
+  Derived types in other projects stay the fix's check (kept finding). Open: the other non-private fields have the
+  same gap (`this.limit` in a derived type with a `Limit`); they keep the reported-but-kept behaviour
+  (KeptFindingsTests.AFieldADerivedMemberWouldHide). `IsDataMember` (word-inside-string guard) no longer
   includes protected fields: in Messy it blocked `Total` because the referenced StyleBro projects' strings contain it.
 - **BRO1307** (SA1308, `m_`/`s_`/`t_` prefixes, lowercase only) and **BRO1308** (SA1310, underscore inside a field
   name): `FieldNames.GetRename` gives every field at most ONE rule and the COMPLETE new name (prefix > underscore >

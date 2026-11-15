@@ -979,30 +979,42 @@ public class FieldNamingTests
             """,
         ]);
 
-    // A derived type's member with the new name would hide the renamed field ('this.limit' there would mean the property).
     [Fact]
-    public Task HidingInDerivedTypes_KeepsTheName() => VerifyNoDiagnosticsAsync(
-        ("/0/Base.cs", """
+    public Task HidingInDerivedTypes_KeepsTheName() => VerifyNotFixedAsync(
+        [
+            """
             public class Base
             {
-                public static readonly int limit = 1;
-                protected readonly int depth = 2;
-                private protected readonly int width = 3;
+                public static readonly int {|BRO1306:limit|} = 1;
             }
-            """),
-        ("/0/Derived.cs", """
+            """,
+            """
             public class Derived : Base
             {
                 public int Limit => 2;
 
                 public int Get() => limit;
             }
+            """,
+        ]);
 
-            public class Middle : Base
+    // A derived type's member with the new name would hide a renamed protected readonly field ('this.depth' there would
+    // mean the property): not reported.
+    [Fact]
+    public Task ProtectedReadOnlyFields_ADerivedTypeWouldHide_AreNotReported() => VerifyNoDiagnosticsAsync(
+        ("/0/Base.cs", """
+            internal class Base
+            {
+                protected readonly int depth = 2;
+                private protected readonly int width = 3;
+            }
+            """),
+        ("/0/Derived.cs", """
+            internal class Middle : Base
             {
             }
 
-            public class MoreDerived : Middle
+            internal class MoreDerived : Middle
             {
                 public int Depth => this.depth;
 

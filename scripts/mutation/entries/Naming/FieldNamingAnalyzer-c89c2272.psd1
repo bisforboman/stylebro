@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Analyzers/Naming/FieldNamingAnalyzer.cs'
     Find = '                pending.Push(type);'
     Replace = ''
-    Tests = 'FieldNamingTests.HidingInDerivedTypes_KeepsTheName'
+    Tests = 'FieldNamingTests.ProtectedReadOnlyFields_ADerivedTypeWouldHide_AreNotReported'
 }
