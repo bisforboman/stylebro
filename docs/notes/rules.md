@@ -49,7 +49,13 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
 - **BRO1104** (SA1129) `new T()` for value types -> `default(T)`, or like StyleCop `CancellationToken.None`,
   `Guid.Empty`, `IntPtr/UIntPtr.Zero`, an enum's zero member; `default(T)` in parameter defaults (must be constant).
   Not reported: explicit parameterless struct ctor (like StyleCop), type parameters and `new S();` statements
-  (deviations; StyleCop's fix for the statement doesn't compile). Needs the semantic model.
+  (deviations; StyleCop's fix for the statement doesn't compile). Needs the semantic model. `new nint()`/`new nuint()`
+  (2026-11-15, following StyleCop 1.3.177-beta, issue 338): `nint.Zero` with C# 11+ on a runtime with numeric IntPtr
+  (`DefaultValueConstructors.HasNumericIntPtr`), `default(nint)` elsewhere. The analyzer asks its own compilation; the fix
+  asks every linked copy's (`LinkedFileFixAllProvider.HoldsForEveryCopyAsync`), so a net8.0;netstandard2.0 project gets
+  `default(nint)` in every copy (the net8.0 analyzer's message still says `nint.Zero`, like the `default` literal's
+  language version). The test harness' default references have numeric IntPtr: older targets are tested with
+  `ReferenceAssemblies.NetStandard.NetStandard20`.
 - For both, StyleCop and StyleBro were run on the same probe files: positions and fixed output are identical except
   the three documented deviations.
 - **BRO1105** (SA1128) `: base(...)`/`: this(...)` on its own line, one level deeper than the constructor
@@ -77,6 +83,14 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   families (`+ -`, `* /`, `<< >>`, `%` alone; `&&`/`and` vs `||`/`or`); the fix inserts `(`/`)` per operand, combined per
   position (`((`/`))`) so nested operands are fixed in one pass. Also `and`/`or` patterns, like StyleCop's current
   source; 1.2.0-beta.556 doesn't (parity `precedence`: 8/10, documented).
+  Since 2026-11-15 (StyleCop 1.3.177-beta, issue 338; its source wasn't reachable from the cloud session, so the
+  grouping was measured with a probe project, positions and fixed output): BRO1406 also has `&`, `|`, `^` (each a
+  family of its own) and `>>>` (a shift); the rule stays "a binary-expression operand of another family", which under
+  a bitwise operator includes comparisons, `is T` and `as` (`a == b & c` -> `(a == b) & c`; not `is` patterns, not
+  a bitwise operand of `&&`/`||`/`==`). BRO1407 also has `??` as a third family next to `&&` and `||`: an `&&`/`||`
+  operand of `??` on either side (`a && b ?? c` -> `(a && b) ?? c`); `??` with anything else isn't reported. The
+  SDK's groups fit: `& | ^` and shifts are "arithmetic", `??` is "other" (`Precedence.IsWanted`). BRO1405 keeps
+  all of these parentheses (FixOrderTests `BitwiseAndCoalesceParentheses_NextToRedundantOnes`).
 - **BRO1517-BRO1519** (SA1507/SA1508/SA1513, 2026-10-03, `Layout/BlankLineRuns.cs`, one tree analyzer + one fix,
   replace IDE2000/IDE2002/IDE2003): StyleCop's logic, minus places another blank-line rule fixes when it's on (after
   `{` BRO1503, below `//` BRO1506, before `}` BRO1518 for BRO1517; a comment/doc/member after `}` BRO1504/BRO1513/
@@ -129,11 +143,24 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
 - **BRO1106** (SA1122) `""`/`@""` -> `string.Empty`, except constant contexts (const, attribute args, parameter
   defaults, case labels, patterns). Same results as StyleCop, except expression trees (trial 58, owner's decision
   2026-10-27: both directions skip a lambda or query converted to System.Linq.Expressions, `NullChecks.IsInExpressionTree`;
-  ExpressionTreeToString's tests render `() => string.Empty`).
+  ExpressionTreeToString's tests render `() => string.Empty`). Since 2026-11-15 (StyleCop 1.3.177-beta's SA1122,
+  issue 338) also `$""`/`$@""`/an empty interpolated raw string and a raw literal whose value is empty (only a
+  multi-line one can be: `""""""` doesn't parse), same constant contexts. Measured against 1.3.177-beta: same positions
+  and output, including what it skips (`FormattableString f = $""`, `IFormattable`, a `FormattableString` parameter); the
+  guard is BRO1138's (converted type string or object), so a handler parameter and a user-defined conversion from
+  string stay too. The literal style (`stylebro_empty_string_style = literal`) still leaves `$""` and empty raw
+  strings alone (BRO1138 leaves empty strings to this rule): a gap, not decided.
 - **BRO1401** (SA1413, maintainability block) trailing comma in multi-line array/object/collection/with initializers,
-  anonymous objects, enums, switch expressions (not collection expressions/patterns/`{k, v}` pairs, like StyleCop 1.2).
+  anonymous objects, enums, switch expressions (not patterns/`{k, v}` pairs, like StyleCop 1.2).
   Inserts `, ` when code follows directly (StyleCop's `,}` broke SA1001 in the private app). Skips lists with
   directives between the braces (the multi-targeting conflict). Nested lists fixed in one pass (StyleCop needs two).
+  Since 2026-11-15 (StyleCop 1.3.177-beta, issue 338) also collection expressions (`[ ... ]`, multi-line by their
+  brackets; a spread or a nested collection as the last element too; omit mode removes theirs as well). Before the
+  `]` on the same line the insertion is `,` not `, ` (`2];` -> `2,];`, StyleCop's output; the formatter wants no
+  space before `]`). Like StyleCop a one-element collection whose element spans lines (`[.. items.Where(...)` +
+  line break + `.ToList()]`) is reported. 1.3 also reports property patterns: still not (owner's decision); list
+  patterns neither. No key to turn collection expressions off (unlike switch/with), and `bro migrate` writes nothing
+  for a repository coming from StyleCop 1.2, which didn't check them.
 - **BRO1107** (SA1116) first item on the line after `(` when the list is split, and **BRO1108** (SA1117) items all
   on one line or each on its own (`Readability/ParameterLayout.cs`). Lists: parameter/bracketed parameter/argument/
   bracketed argument/attribute argument lists and array rank specifiers. SA1117 as probed: the first two items'
