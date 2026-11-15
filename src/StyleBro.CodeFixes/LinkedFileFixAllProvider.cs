@@ -62,6 +62,25 @@ internal sealed class LinkedFileFixAllProvider : FixAllProvider
             .DefaultIfEmpty(LanguageVersion.Latest)
             .Min();
 
+    /// <summary>
+    /// Whether <paramref name="holds"/> for the compilation of every copy of the document (see
+    /// <see cref="GetLowestLanguageVersion"/>): for what a fix may write only where every target framework compiles it.
+    /// </summary>
+    internal static async Task<bool> HoldsForEveryCopyAsync(Document document, Func<Compilation, bool> holds, CancellationToken cancellationToken)
+    {
+        foreach (var id in document.GetLinkedDocumentIds().Add(document.Id))
+        {
+            if (document.Project.Solution.GetProject(id.ProjectId) is not { } project
+                || await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false) is not { } compilation
+                || !holds(compilation))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     /// <summary>Identical changes are kept once; a change that conflicts with an accepted one is dropped.</summary>
     internal static List<TextChange> Merge(List<TextChange> changes)
     {
