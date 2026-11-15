@@ -296,6 +296,172 @@ public class TrailingCommaTests
         }
         """);
 
+    // Like StyleCop 1.3: a collection expression is a list too, nested ones and a spread as the last element included.
+    [Fact]
+    public Task MultiLineCollectionExpressions_GetATrailingComma() => VerifyFixAsync(
+        """
+        using System.Collections.Generic;
+
+        class C
+        {
+            int[] a =
+            [
+                1,
+                {|BRO1401:2|}
+            ];
+
+            int[][] b =
+            [
+                [1, 2],
+                {|BRO1401:[
+                    3,
+                    {|BRO1401:4|}
+                ]|}
+            ];
+
+            List<int> c =
+            [
+                1,
+                {|BRO1401:2|} // last
+            ];
+
+            int[] d = [1,
+                {|BRO1401:2|}];
+
+            int[] e = [1, {|BRO1401:2|}
+            ];
+
+            int[] f = [
+                {|BRO1401:1|} ];
+
+            int[] M(int[] more) =>
+            [
+                1,
+                {|BRO1401:.. more|}
+            ];
+        }
+        """,
+        """
+        using System.Collections.Generic;
+
+        class C
+        {
+            int[] a =
+            [
+                1,
+                2,
+            ];
+
+            int[][] b =
+            [
+                [1, 2],
+                [
+                    3,
+                    4,
+                ],
+            ];
+
+            List<int> c =
+            [
+                1,
+                2, // last
+            ];
+
+            int[] d = [1,
+                2,];
+
+            int[] e = [1, 2,
+            ];
+
+            int[] f = [
+                1, ];
+
+            int[] M(int[] more) =>
+            [
+                1,
+                .. more,
+            ];
+        }
+        """);
+
+    [Fact]
+    public Task CollectionExpressions_OnOneLineWithTheCommaEmptyOrWithDirectives_NoDiagnostic() => VerifyNoDiagnosticsAsync("""
+        class C
+        {
+            int[] oneLine = [1, 2];
+
+            int[] done =
+            [
+                1,
+                2,
+            ];
+
+            int[] empty =
+            [
+            ];
+
+            int[] directive =
+            [
+                1,
+        #if SOMETHING
+                2
+        #endif
+            ];
+
+            int[][] nested =
+            [
+                [1, 2],
+                [3, 4],
+            ];
+        }
+        """);
+
+    [Fact]
+    public Task Omit_RemovesTrailingCommasOfCollectionExpressions() => VerifyFixAsync(
+        """
+        class C
+        {
+            int[] a =
+            [
+                1,
+                2{|BRO1401:,|}
+            ];
+
+            int[] b = [1, 2{|BRO1401:,|}];
+
+            int[][] c =
+            [
+                [
+                    3{|BRO1401:,|} // last
+                ]{|BRO1401:,|}
+            ];
+
+            int[] d = [1, 2];
+        }
+        """,
+        """
+        class C
+        {
+            int[] a =
+            [
+                1,
+                2
+            ];
+
+            int[] b = [1, 2];
+
+            int[][] c =
+            [
+                [
+                    3 // last
+                ]
+            ];
+
+            int[] d = [1, 2];
+        }
+        """,
+        "stylebro_trailing_comma = omit\n");
+
     [Fact]
     public Task OtherLists_NoDiagnostic() => VerifyNoDiagnosticsAsync("""
         using System.Collections.Generic;
