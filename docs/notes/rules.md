@@ -444,6 +444,13 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   comment or `#if`); the fix inserts above the element's first line (comment/doc/attribute/directive), diagnostic at
   that line's start (FullSpan.Start). Same positions as StyleCop (28/28); StyleCop's fix misses doc comments and
   mangles two-members-on-one-line.
+- BRO1505 properties (2026-11-15, issue #338, owner: follow StyleCop 1.3.177-beta, its PR 3936): two single-line
+  properties may sit together also when either has a `///` comment. Before, a documented property was set apart
+  (`HasDocumentation` in `NeedsBlankLine`, added for Ocelot's fix-order problem with BRO1601) and BRO1601's fix added
+  the blank line below the property it documented (`GetBlankLineBelowOnceDocumented`); both are gone. The `///` right
+  below a property is BRO1513's finding (StyleCop: SA1514), and BRO1601's fix still brings that blank line itself, so
+  the order doesn't matter (FixOrderTests `InheritDoc_OnPropertiesTheSortMoves`, `DocumentedSingleLineProperties_StayTogether`).
+  With BRO1513 off, a `///` property stays right below the previous property.
 - BRO1505 accessors: only two accessors that BOTH have block bodies, when either is multi-line (an expression-bodied
   `get => x;` next to a multi-line `set { }` is fine, like StyleCop; found via 26 false positives in OpenTelemetry).
 - **BRO1506** (SA1512) no blank line below a `//` comment (not the file header, `///`/`////`, trailing comments, or

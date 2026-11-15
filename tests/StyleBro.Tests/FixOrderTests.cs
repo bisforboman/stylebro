@@ -2740,6 +2740,40 @@ public class FixOrderTests
         "BRO1513",
         "BRO1601");
 
+    // Issue 338: single-line properties may sit together also when documented (BRO1505); the '///' comment gets BRO1513's
+    // blank line, whether it was there, BRO1601 adds it or BRO1001's sort moves it.
+    [Fact]
+    public Task DocumentedSingleLineProperties_StayTogether() => AssertConvergesInEveryOrderAsync(
+        """
+        public interface IRoute
+        {
+            /// <summary>Gets or sets the host.</summary>
+            string Host { get; set; }
+        }
+
+        public class Route : IRoute
+        {
+            private int hits;
+            /// <summary>Gets or sets the name.</summary>
+            public string Name { get; set; }
+            public string Keys { get; set; }
+            public string Host { get; set; }
+            /// <summary>Gets or sets the path.</summary>
+            internal string Path { get; set; }
+            /// <summary>Gets the port.</summary>
+            public int Port => hits;
+            public int Hits
+            {
+                get { return hits; }
+            }
+            public int Weight { get; set; }
+        }
+        """,
+        "BRO1001",
+        "BRO1505",
+        "BRO1513",
+        "BRO1601");
+
     // Serilog's DummyWithLevelSwitchSink: the sort put the constructor between a field and the comment below it, and the
     // comment then wanted other blank lines on the next run.
     [Fact]

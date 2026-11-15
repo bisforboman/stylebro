@@ -592,10 +592,10 @@ public class DocumentationTests
         }
         """);
 
-    // Ocelot's FileAggregateRoute: a documented property is set apart from the property below it too (BRO1505), so the
-    // result doesn't depend on whether BRO1601 runs before BRO1001's sort.
+    // Ocelot's FileAggregateRoute: the '<inheritdoc/>' gets BRO1513's blank line above it; the property below a documented
+    // single-line property may stay right below it (BRO1505, issue 338).
     [Fact]
-    public Task InheritDoc_OnAdjacentProperties_SeparatesThem() => VerifyFixAsync(
+    public Task InheritDoc_OnAdjacentProperties_LeavesThePropertyBelowTogether() => VerifyFixAsync(
         """
         public interface IRoute
         {
@@ -639,7 +639,6 @@ public class DocumentationTests
 
             /// <inheritdoc/>
             public int Priority { get; set; }
-
             public string Keys { get; set; }
 
             /// <inheritdoc/>

@@ -259,10 +259,28 @@ public class ElementSeparationTests
         }
         """);
 
-    // Ocelot: a documented property is set apart like any other member (BRO1601's '<inheritdoc/>' made the result depend
-    // on the fix order otherwise).
+    // Two single-line properties may sit together also when either has a '///' comment (issue 338, like StyleCop
+    // 1.3.177-beta); the comment's own blank line is BRO1513's.
     [Fact]
-    public Task DocumentedProperties_AreSetApart() => VerifyFixAsync(
+    public Task DocumentedSingleLineProperties_MaySitTogether() => VerifyNoDiagnosticsAsync("""
+        class C
+        {
+            /// <summary>Gets or sets A.</summary>
+            public int A { get; set; }
+            public int B { get; set; }
+            /// <summary>Gets or sets C1.</summary>
+            public int C1 { get; set; }
+            /// <summary>Gets D.</summary>
+            public int D => 1;
+            /** <summary>Gets E.</summary> */
+            public int E => 2;
+        }
+        """);
+
+    // Only two properties: a documented property next to another kind of member is set apart as before, and so is a
+    // documented property that spans several lines.
+    [Fact]
+    public Task DocumentedProperty_NextToOtherMembersOrMultiLine_IsSetApart() => VerifyFixAsync(
         """
         class C
         {
@@ -270,9 +288,17 @@ public class ElementSeparationTests
 
             /// <summary>Gets B.</summary>
             public int B { get; set; }
-        {|BRO1505:|}    public int C1 { get; set; }
         {|BRO1505:|}    /// <inheritdoc/>
             public override string ToString() => string.Empty;
+        {|BRO1505:|}    /// <summary>Gets C1.</summary>
+            public int C1 { get; set; }
+        {|BRO1505:|}    /// <summary>Gets D.</summary>
+            public int D
+            {
+                get => 1;
+            }
+        {|BRO1505:|}    /// <summary>Gets E.</summary>
+            public int E { get; set; }
         }
         """,
         """
@@ -283,10 +309,56 @@ public class ElementSeparationTests
             /// <summary>Gets B.</summary>
             public int B { get; set; }
 
-            public int C1 { get; set; }
-
             /// <inheritdoc/>
             public override string ToString() => string.Empty;
+
+            /// <summary>Gets C1.</summary>
+            public int C1 { get; set; }
+
+            /// <summary>Gets D.</summary>
+            public int D
+            {
+                get => 1;
+            }
+
+            /// <summary>Gets E.</summary>
+            public int E { get; set; }
+        }
+        """);
+
+    // Fix All: the documented single-line properties stay together, the multi-line one gets its blank lines.
+    [Fact]
+    public Task DocumentedProperties_FixAll() => VerifyFixAsync(
+        """
+        class C
+        {
+            /// <summary>Gets or sets A.</summary>
+            public int A { get; set; }
+            public int B { get; set; }
+        {|BRO1505:|}    public int D
+            {
+                get => 1;
+            }
+        {|BRO1505:|}    /// <summary>Gets or sets E.</summary>
+            public int E { get; set; }
+            public int F { get; set; }
+        }
+        """,
+        """
+        class C
+        {
+            /// <summary>Gets or sets A.</summary>
+            public int A { get; set; }
+            public int B { get; set; }
+
+            public int D
+            {
+                get => 1;
+            }
+
+            /// <summary>Gets or sets E.</summary>
+            public int E { get; set; }
+            public int F { get; set; }
         }
         """);
 
