@@ -53,10 +53,13 @@ $summary = $env:GITHUB_STEP_SUMMARY
 # Nor a CI at all: with GITHUB_ACTIONS set and no $GITHUB_ENV, Nerdbank.GitVersioning's build failed.
 Remove-Item Env:GITHUB_ENV, Env:GITHUB_OUTPUT, Env:GITHUB_PATH, Env:GITHUB_STEP_SUMMARY, Env:GITHUB_ACTIONS, Env:CI -ErrorAction SilentlyContinue
 
-Write-Host "== SDK $(dotnet --version)"
 $Work = [IO.Path]::GetFullPath($Work)
 if ($Work.StartsWith($root + [IO.Path]::DirectorySeparatorChar)) { throw '-Work must be outside the repository (its props would leak into the fixtures).' }
 New-Item -ItemType Directory -Force $Work | Out-Null
+# Asked in the work folder: the shapes run outside the repository, where its global.json (SDK 10) doesn't apply.
+Push-Location $Work
+try { Write-Host "== SDK for the shapes: $(dotnet --version)" }
+finally { Pop-Location }
 
 if (-not $Feed) {
     $Feed = Join-Path $Work 'feed'

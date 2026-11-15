@@ -80,8 +80,11 @@ jobs:
           "commit=$($entry.Commit)" >> $env:GITHUB_OUTPUT
           $settings = [Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes("$($entry.Tests)|$($entry.TestFilter)"))
           "testsettings=$([Convert]::ToHexString($settings).Substring(0, 16))" >> $env:GITHUB_OUTPUT
-          # The SDK the commands really use: the runner image can hold a newer one than setup-dotnet installs.
+          # The SDK the clone's commands really use: the runner image can hold a newer one than setup-dotnet installs.
+          # Asked outside this checkout, whose global.json pins StyleBro's own build to SDK 10.
+          Push-Location '${{ runner.temp }}'
           "sdk=$(dotnet --version)" >> $env:GITHUB_OUTPUT
+          Pop-Location
           "WORK=${{ runner.temp }}/realworld" >> $env:GITHUB_ENV
           "NUGET_PACKAGES=${{ runner.temp }}/realworld-nuget" >> $env:GITHUB_ENV
 

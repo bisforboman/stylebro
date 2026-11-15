@@ -243,7 +243,10 @@ if ($csharpier) {
 }
 
 $before = Measure-Phase 'untouched code: build with analyzers' { Invoke-Build }
-$report.Add("- SDK: $(dotnet --version)")
+# Asked in the clone: its global.json decides, not StyleBro's.
+Push-Location $path
+try { $report.Add("- SDK: $(dotnet --version)") }
+finally { Pop-Location }
 $report.Add("- findings: $($before.Findings); compile errors before: $($before.Errors.Count)")
 $before.Crashes | ForEach-Object { $problems.Add("analyzer crash: $_") }
 
