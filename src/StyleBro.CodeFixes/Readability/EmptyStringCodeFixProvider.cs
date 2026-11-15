@@ -69,7 +69,7 @@ public sealed class EmptyStringCodeFixProvider : CodeFixProvider
         foreach (var span in diagnostics.Select(d => d.Location.SourceSpan).Distinct())
         {
             var node = root.FindNode(span, getInnermostNodeForTie: true);
-            if (!literalStyle && node is LiteralExpressionSyntax literal && EmptyStrings.ShouldReplace(literal, model, cancellationToken))
+            if (!literalStyle && node is ExpressionSyntax literal && EmptyStrings.ShouldReplace(literal, model, cancellationToken))
             {
                 changes.Add(new TextChange(literal.Span, "string.Empty"));
             }
