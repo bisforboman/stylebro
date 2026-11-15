@@ -5,6 +5,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <!-- The tests run on the newest runtime installed, like 'bro' itself: a command that uses the host runs again on the
+         newest runtime (FormatHost.RollForward), and a test calling Program.Main on an older one started a child process
+         whose output it couldn't read (the runner image of 2026-11-11 has .NET 11 next to .NET 10). -->
+    <RollForward>LatestMajor</RollForward>
   </PropertyGroup>
 
   <ItemGroup>
