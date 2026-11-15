@@ -604,6 +604,33 @@ public sealed partial class MigrationTests : IDisposable
     }
 
     [Fact]
+    public void NoByteOrderMark_IsCharsetUtf8()
+    {
+        Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SX1412.severity = warning\n");
+
+        var result = Migration.Generate(StyleCopSetup.Read(root), root);
+
+        Assert.Contains("charset = utf-8", result.Lines);
+        Assert.DoesNotContain("charset = utf-8-bom", result.Lines);
+        Assert.Contains("SX1412", result.Covered);
+    }
+
+    [Fact]
+    public void BothByteOrderMarkRules_LeaveTheCharsetAlone()
+    {
+        // SA1412 wants a byte order mark, SX1412 none: StyleCop reports every file, whichever charset is written.
+        Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1412.severity = warning\ndotnet_diagnostic.SX1412.severity = warning\n");
+
+        var result = Migration.Generate(StyleCopSetup.Read(root), root);
+
+        Assert.DoesNotContain(result.Lines, l => l.StartsWith("charset", StringComparison.Ordinal));
+        Assert.DoesNotContain("SA1412", result.Covered);
+        Assert.DoesNotContain("SX1412", result.Covered);
+        Assert.Contains("SA1412", result.Reasons.Keys);
+        Assert.Contains("SX1412", result.Reasons.Keys);
+    }
+
+    [Fact]
     public void CharsetIsLeftAlone_WhenSA1412IsOff()
     {
         Assert.DoesNotContain(Migration.Generate(StyleCopSetup.Read(root), root).Lines, l => l.StartsWith("charset", StringComparison.Ordinal));
@@ -1448,6 +1475,7 @@ public sealed partial class MigrationTests : IDisposable
         // Central package management: the version in Directory.Packages.props, the reference in Directory.Build.props.
         Write("Directory.Packages.props", """<Project><ItemGroup><PackageVersion Include="SonarAnalyzer.CSharp" Version="10.34.0.3385" /></ItemGroup></Project>""");
         Write("Directory.Build.props", """<Project><ItemGroup><PackageReference Include="SonarAnalyzer.CSharp" PrivateAssets="all" /></ItemGroup></Project>""");
+        Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1315.severity = none\n");   // else BRO1313 is on through SA1315, for every parameter
 
         var sonar = SonarSetup.Read(root)!;
         Assert.True(sonar.IsOn("S2325"));   // Sonar way
@@ -1500,6 +1528,7 @@ public sealed partial class MigrationTests : IDisposable
     public void Sonar_AQualityProfile_ReplacesTheDefaults()
     {
         Write("Directory.Build.props", """<Project><ItemGroup><PackageReference Include="SonarAnalyzer.CSharp" Version="10.34.0.3385" /></ItemGroup></Project>""");
+        Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1315.severity = none\n");   // else BRO1313 is on through SA1315
         var profile = Path.Combine(root, "..", Path.GetFileName(root) + "-profile.xml");
         File.WriteAllText(profile, """
             <?xml version="1.0" encoding="UTF-8"?>

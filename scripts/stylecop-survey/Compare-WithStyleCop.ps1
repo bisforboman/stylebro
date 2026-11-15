@@ -5,10 +5,12 @@
 # a diagnostic behind would need a second 'dotnet format' run. Every difference must be listed in the set's
 # 'Expected' entries, which document StyleBro's deliberate deviations; anything else fails. A set with
 # CompareOutput = $false skips the output comparison (for StyleCop rules without a working fix). Optional per set:
-# StyleCopJson (stylecop.json for both projects) and EditorConfig (extra .editorconfig lines, e.g. StyleBro settings).
+# StyleCopJson (stylecop.json for both projects), EditorConfig (extra .editorconfig lines, e.g. StyleBro settings) and
+# StyleCopVersion (the version the set is written against, for rules a later version added: SA1143 is 1.3's; used
+# unless -StyleCopVersion is passed, and a 1.0-1.2 version passed skips the set).
 # Several StyleCop rules may map to one StyleBro rule; StyleCop's reports at the same position then count once.
 #
-# The 'Expected' entries are written against StyleCop 1.2.0-beta.556 (the last release). To compare with another build,
+# The 'Expected' entries are written against StyleCop 1.2.0-beta.556 (the last release), or the set's StyleCopVersion. To compare with another build,
 # e.g. StyleCop's unreleased master, pass its package: -StyleCopPackage/-StyleCopVersion and -StyleCopFeed (a folder
 # with the .nupkg; restored into an isolated folder so the odd version stays out of the global cache). For master:
 #   git clone --filter=blob:none https://github.com/DotNetAnalyzers/StyleCopAnalyzers sc
@@ -48,6 +50,7 @@ stylebro_allow_empty_single_line_blocks = true
 stylebro_exclude_from_punctuation_check = seealso, param, typeparam, exception, see, paramref, typeparamref, c, a, b, i, u, em, strong, sub, sup, span, tt
 dotnet_diagnostic.BRO1312.severity = none
 '@
+$versionGiven = $PSBoundParameters.ContainsKey('StyleCopVersion')
 $fromStyleCop = @{}
 if ($StyleSharp) {
     if ($StyleCopPackage -eq 'StyleCop.Analyzers') { $StyleCopPackage = 'StyleSharp.Analyzers' }
@@ -77,10 +80,11 @@ function New-Project([string]$dir, [string[]]$ids, [string]$cases, [bool]$withSt
         Set-Content (Join-Path $dir 'stylecop.json') $set.StyleCopJson
         $bro += '<AdditionalFiles Include="stylecop.json" />'
     }
+    $version = if ($set.StyleCopVersion -and -not $versionGiven -and -not $StyleSharp) { $set.StyleCopVersion } else { $StyleCopVersion }
     Set-Content (Join-Path $dir 'p.csproj') @"
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><TargetFramework>net10.0</TargetFramework><OutputType>Library</OutputType><Nullable>disable</Nullable><ImplicitUsings>disable</ImplicitUsings><LangVersion>latest</LangVersion><GenerateDocumentationFile>true</GenerateDocumentationFile><NoWarn>CS0168;CS0219;CS8321;CS0660;CS0661;CS1718;CS0665;CS0414;CS0642;CS0164;CS0162;CS1591;CS1587;CS1572;CS1573;CS0067</NoWarn>$restore</PropertyGroup>
-  <ItemGroup><PackageReference Include="$StyleCopPackage" Version="$StyleCopVersion" PrivateAssets="all" />$bro</ItemGroup>
+  <ItemGroup><PackageReference Include="$StyleCopPackage" Version="$version" PrivateAssets="all" />$bro</ItemGroup>
 </Project>
 "@
     Set-Content (Join-Path $dir '.editorconfig') ("root = true`n[*.cs]`ndotnet_analyzer_diagnostic.category-StyleCop.CSharp.DocumentationRules.severity = none`n" +
@@ -98,6 +102,9 @@ function Get-CompileErrors([string]$dir, [string[]]$remainingIds = @()) {
 $failed = $false
 foreach ($s in $config.Sets) {
     if ($Set -and $s.Name -notin $Set) { continue }
+    if ($s.StyleCopVersion -and $versionGiven -and -not $StyleSharp -and $StyleCopVersion -match '^1\.[012]\.') {
+        "SKIP $($s.Name): written against $($s.StyleCopVersion), whose rules $StyleCopVersion doesn't have"; continue
+    }
     $pairs = @{}; foreach ($m in $s.Map) { $sa, $bro = $m -split '='; foreach ($id in $(if ($StyleSharp) { $fromStyleCop[$sa] } else { $sa })) { $pairs[$id] = $bro } }
     if ($pairs.Count -eq 0) { "SKIP $($s.Name): no StyleSharp rule stands for $($s.Map -join ', ')"; continue }
     if ($StyleSharp) { $s = $s.Clone(); $s.EditorConfig = "$($s.EditorConfig)`n$styleSharpSettings`n" }

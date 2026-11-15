@@ -981,5 +981,66 @@
                 'StyleBro output only: FileScoped.cs: []'
             )
         }
+        @{
+            Name            = 'conditional-layout'
+            Map             = @('SA1143=BRO1524')
+            StyleCopVersion = '1.3.177-beta'
+            # StyleCop's first code action (the one 'dotnet format' applies) puts the expression on one line; BRO1524's
+            # fix expands it. Positions only.
+            CompareOutput   = $false
+            Expected        = @(
+                # BRO1524 reports the token that needs the line break ('?' then ':'), StyleCop the outermost '?'.
+                'only StyleBro: BRO1524 Conditionals.cs(25,21)'
+                'only StyleCop: BRO1524 Conditionals.cs(25,17)'
+                # Which side of '?' and ':' the line break goes on is BRO1520's (dotnet_style_operator_placement_when_wrapping).
+                'only StyleCop: BRO1524 Conditionals.cs(38,23)'
+                # BRO1524 checks line breaks, not indentation: a ':' indented deeper than its '?', operator lines not
+                # indented beyond the condition (its last line, for a condition that spans lines).
+                'only StyleCop: BRO1524 Conditionals.cs(47,17)'
+                'only StyleCop: BRO1524 Conditionals.cs(55,13)'
+                'only StyleCop: BRO1524 Conditionals.cs(82,17)'
+            )
+        }
+        @{
+            Name            = 'inherited-parameter-names'
+            Map             = @('SA1315=BRO1313')
+            StyleCopVersion = '1.3.177-beta'
+            # Both accept a name that matches any of the interfaces a member implements (Load). Default settings: what
+            # bro migrate writes (stylebro_rename_public_api stays false).
+            Expected        = @(
+                # BRO1313 checks indexers too.
+                'only StyleBro: BRO1313 Parameters.cs(19,29)'
+                'StyleBro output only: Parameters.cs: [        public int this[int index] => index;]'
+                'StyleCop output only: Parameters.cs: [        public int this[int position] => position;]'
+                # A discard is unused on purpose.
+                'only StyleCop: BRO1313 Parameters.cs(64,39)'
+                'StyleBro output only: Parameters.cs: [        public override void Stop(int _)]'
+                'StyleCop output only: Parameters.cs: [        public override void Stop(int code)]'
+                # A name in nameof reaches run time (an exception's ParamName).
+                'only StyleCop: BRO1313 Parameters.cs(71,38)'
+                'StyleBro output only: Parameters.cs: [        public override void Run(int amount)]'
+                'StyleBro output only: Parameters.cs: [            if (amount < 0)]'
+                'StyleBro output only: Parameters.cs: [                throw new System.ArgumentOutOfRangeException(nameof(amount));]'
+                'StyleCop output only: Parameters.cs: [        public override void Run(int count)]'
+                'StyleCop output only: Parameters.cs: [            if (count < 0)]'
+                'StyleCop output only: Parameters.cs: [                throw new System.ArgumentOutOfRangeException(nameof(count));]'
+                # Public API: renaming breaks named arguments in other assemblies (stylebro_rename_public_api = false).
+                'only StyleCop: BRO1313 Parameters.cs(87,29)'
+                'StyleBro output only: Parameters.cs: [        public void Put(int key) => System.Console.WriteLine(key);]'
+                'StyleCop output only: Parameters.cs: [        public void Put(int id) => System.Console.WriteLine(id);]'
+            )
+        }
+        @{
+            Name            = 'generic-crefs'
+            Map             = @('SA1654=BRO1617')
+            StyleCopVersion = '1.3.177-beta'
+            Expected        = @(
+                # A cref the compiler can't read ('List<int>' names a type argument, not a type parameter): a person decides
+                # what was meant.
+                'only StyleCop: BRO1617 Crefs.cs(39,67)'
+                'StyleBro output only: Crefs.cs: [        /// <summary>A type argument, not a parameter: <see cref="List&lt;int&gt;"/>.</summary>]'
+                'StyleCop output only: Crefs.cs: [        /// <summary>A type argument, not a parameter: <see cref="List{int}"/>.</summary>]'
+            )
+        }
     )
 }

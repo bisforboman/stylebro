@@ -9,7 +9,7 @@ turn on the StyleBro rules that replace the StyleCop rules a project has on, and
 - **SDK**: a .NET SDK rule or setting that `dotnet format` fixes; StyleBro's preset turns it on unless the entry says otherwise.
 - **Not covered**: StyleBro has no rule for it, usually because there is no safe automatic fix. Each one is explained in [skipped-rules.md](skipped-rules.md).
 
-Of 203 rules: 44 SDK, 109 StyleBro (109 done), 44 drop, 4 not yet done, 2 not applicable or variants.
+Of 203 rules: 45 SDK, 112 StyleBro (112 done), 44 drop, 0 not yet done, 2 not applicable or variants.
 
 ## Documentation
 
@@ -68,7 +68,7 @@ Of 203 rules: 44 SDK, 109 StyleBro (109 done), 44 drop, 4 not yet done, 2 not ap
 | SA1650 | Element documentation should be spelled correctly | Nothing to replace ([why](skipped-rules.md#sa1650)) |
 | SA1651 | Do not use placeholder elements | [BRO1609](rules/BRO1609.md) |
 | SA1653 | Only one partial declaration should contain summary documentation | Not covered ([why](skipped-rules.md#sa1653)) |
-| SA1654 | Properly encode generic brackets | Not covered yet ([why](skipped-rules.md#sa1654)) |
+| SA1654 | Properly encode generic brackets | [BRO1617](rules/BRO1617.md) |
 
 ## Layout
 
@@ -116,7 +116,7 @@ Of 203 rules: 44 SDK, 109 StyleBro (109 done), 44 drop, 4 not yet done, 2 not ap
 | SA1411 | Attribute constructor should not use unnecessary parenthesis | [BRO1402](rules/BRO1402.md) |
 | SA1412 | Store files as UTF-8 with byte order mark | SDK: `charset = utf-8-bom`, not in the preset; `bro migrate` sets it when SA1412 is on |
 | SA1413 | Use trailing comma in multi-line initializers and lists | [BRO1401](rules/BRO1401.md) |
-| SX1412 | Store files as UTF-8 without byte order mark | Not covered yet ([why](skipped-rules.md#sx1412)) |
+| SX1412 | Store files as UTF-8 without byte order mark | SDK: `charset = utf-8`, not in the preset; `bro migrate` sets it when SX1412 is on |
 
 ## Naming
 
@@ -137,7 +137,7 @@ Of 203 rules: 44 SDK, 109 StyleBro (109 done), 44 drop, 4 not yet done, 2 not ap
 | SA1312 | Variable names should begin with lower-case letter | [BRO1301](rules/BRO1301.md) |
 | SA1313 | Parameter names should begin with lower-case letter | [BRO1302](rules/BRO1302.md) |
 | SA1314 | Type parameter names should begin with T | [BRO1305](rules/BRO1305.md) |
-| SA1315 | Parameter names should match inherited names | Not covered yet ([why](skipped-rules.md#sa1315)) |
+| SA1315 | Parameter names should match inherited names | [BRO1313](rules/BRO1313.md) (off by default; `bro migrate` turns it on with SA1315) |
 | SA1316 | Tuple element names should use correct casing | [BRO1311](rules/BRO1311.md) |
 | SA1317 | Identifier should be named only with Latin letters | Not covered ([why](skipped-rules.md#sa1317)) |
 | SX1309 | Field names should begin with underscore | [BRO1303](rules/BRO1303.md) with `stylebro_private_field_naming = _camelCase` (`bro migrate` sets it when SX1309 is on) |
@@ -209,7 +209,7 @@ Of 203 rules: 44 SDK, 109 StyleBro (109 done), 44 drop, 4 not yet done, 2 not ap
 | SA1139 | Use literal suffix notation instead of casting | [BRO1122](rules/BRO1122.md) |
 | SA1141 | Use tuple syntax | [BRO1123](rules/BRO1123.md) |
 | SA1142 | Refer to tuple fields by name | [BRO1124](rules/BRO1124.md) |
-| SA1143 | Conditional expressions must be formatted consistently | Not covered yet ([why](skipped-rules.md#sa1143)) |
+| SA1143 | Conditional expressions must be formatted consistently | [BRO1524](rules/BRO1524.md) |
 | SA1414 | Tuple types in signatures should have element names | Not covered ([why](skipped-rules.md#sa1414)) |
 | SX1101 | Do not prefix local calls with 'this.' | SDK: IDE0003 (`dotnet_style_qualification_for_* = false`), not in the preset; `bro migrate` turns it on when SX1101 is on |
 

@@ -2272,11 +2272,17 @@ internal static partial class Migration
             lines.Add($"indent_style = {(useTabs.GetBoolean() ? "tab" : "space")}");
         }
 
-        // UTF-8 with a byte order mark (SA1412, off by default): 'dotnet format' writes it with this setting.
-        if (setup.IsOn("SA1412"))
+        // UTF-8 with a byte order mark (SA1412) or without one (SX1412), both off by default: 'dotnet format' writes or
+        // removes the mark with this setting. Both on ask for opposite files: neither is carried over.
+        if (setup.IsOn("SA1412") && setup.IsOn("SX1412"))
         {
-            result.Covered.Add("SA1412");
-            lines.Add("charset = utf-8-bom");
+            result.Reasons["SA1412"] = result.Reasons["SX1412"] = "SA1412 and SX1412 are both on: one asks for a byte order mark, the other for none";
+        }
+        else if (setup.IsOn("SA1412") || setup.IsOn("SX1412"))
+        {
+            var withMark = setup.IsOn("SA1412");
+            result.Covered.Add(withMark ? "SA1412" : "SX1412");
+            lines.Add(withMark ? "charset = utf-8-bom" : "charset = utf-8");
         }
 
         // Braces.

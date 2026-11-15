@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.Text;
 namespace StyleBro.Analyzers.Layout;
 
 /// <summary>
-/// BRO1524 (StyleCop issue #651): a conditional expression is on one line, or the condition, the '? a' part and the
+/// BRO1524 (StyleCop's SA1143): a conditional expression is on one line, or the condition, the '? a' part and the
 /// ': b' part each start their own line. Only expressions already split are checked: when the line breaks next to one of
 /// '?' and ':', the other one gets a line break too, on the side BRO1520's setting
 /// (dotnet_style_operator_placement_when_wrapping) asks for. A token with a line break on the wrong side is BRO1520's,
