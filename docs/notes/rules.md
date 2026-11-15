@@ -444,6 +444,18 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   comment or `#if`); the fix inserts above the element's first line (comment/doc/attribute/directive), diagnostic at
   that line's start (FullSpan.Start). Same positions as StyleCop (28/28); StyleCop's fix misses doc comments and
   mangles two-members-on-one-line.
+- BRO1510 expression-bodied accessors (2026-11-15, issue #338, owner: follow StyleCop 1.3.177-beta, its PR 4283):
+  an accessor list counts when every accessor has a body, block or expression (before: blocks only); `get;` still
+  skips the list. Measured against 1.3.177-beta: `get => x;` + multi-line `set { }` reported, `get => x;` + one-line
+  `set { }` not, multi-line `get =>\n x;` + one-line block reported, + multi-line block not, events too. The fix keeps
+  the rule's order: collapse first (the one-statement block joins the expression body's layout on one line; the
+  expression body stays), else expand, where a one-line expression body becomes a block (`ExpandExpression`: `return`
+  for a getter, the bare statement for set/init/add/remove and for `get => throw`). A multi-line expression body is
+  never touched. The new block gets BRO1505's blank line here (`BecomesBlock`: BRO1505 wants none next to an expression
+  body, so on the original it reports nothing; FixOrderTests `ExpressionAccessor_BecomesABlock_WithItsBlankLine`, with
+  BRO1003). Skipped: expanding while IDE0027 prefers expression bodies (option `true`/`when_on_single_line`, or the rule
+  on with the option unset: the two fixes would undo each other), and a comment between the keyword and the `;`.
+  StyleCop reports both.
 - BRO1505 properties (2026-11-15, issue #338, owner: follow StyleCop 1.3.177-beta, its PR 3936): two single-line
   properties may sit together also when either has a `///` comment. Before, a documented property was set apart
   (`HasDocumentation` in `NeedsBlankLine`, added for Ocelot's fix-order problem with BRO1601) and BRO1601's fix added

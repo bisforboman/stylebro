@@ -2740,6 +2740,51 @@ public class FixOrderTests
         "BRO1513",
         "BRO1601");
 
+    // Issue 338: BRO1510 turns an expression-bodied accessor next to a longer block into a block, which BRO1505 then
+    // wants a blank line next to (it wants none beside an expression body), and BRO1003 moves the getter up.
+    [Fact]
+    public Task ExpressionAccessor_BecomesABlock_WithItsBlankLine() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            private int x;
+            private int y;
+
+            public int Sum
+            {
+                set
+                {
+                    this.x = value;
+                    this.y = value;
+                }
+                get => this.x + this.y;
+            }
+
+            public int First
+            {
+                get => this.x;
+                set
+                {
+                    this.x = value;
+                }
+            }
+
+            public event System.EventHandler Changed
+            {
+                add => this.x++;
+                remove
+                {
+                    this.x--;
+                    this.y--;
+                }
+            }
+        }
+        """,
+        "BRO1003",
+        "BRO1505",
+        "BRO1510",
+        "BRO1519");
+
     // Issue 338: single-line properties may sit together also when documented (BRO1505); the '///' comment gets BRO1513's
     // blank line, whether it was there, BRO1601 adds it or BRO1001's sort moves it.
     [Fact]

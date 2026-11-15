@@ -627,8 +627,8 @@ internal static class Descriptors
         category: "Layout",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
-        description: "When every accessor has a block body, they are either all single-line or all multi-line. The fix puts "
-            + "one-statement bodies on one line, or expands the single-line ones. Replaces StyleCop SA1504.",
+        description: "When every accessor has a body (a block or an expression), they are either all single-line or all multi-line. "
+            + "The fix puts one-statement bodies on one line, or expands the single-line ones. Replaces StyleCop SA1504.",
         helpLinkUri: HelpBase + DiagnosticIds.AccessorsConsistentLayout + "/");
 
     public static readonly DiagnosticDescriptor PropertyAccessorOrder = new(

@@ -59,7 +59,11 @@ public sealed class AccessorLayoutCodeFixProvider : CodeFixProvider
         {
             if (root.FindToken(diagnostic.Location.SourceSpan.Start).Parent?.AncestorsAndSelf().OfType<AccessorListSyntax>().FirstOrDefault() is { } list)
             {
-                changes.AddRange(AccessorLayout.GetChanges(list, text, options) ?? []);
+                changes.AddRange(AccessorLayout.GetChanges(
+                    list,
+                    text,
+                    options,
+                    id => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, id, cancellationToken, enabledByDefault: false)) ?? []);
             }
         }
 
