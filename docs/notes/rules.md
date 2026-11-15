@@ -21,6 +21,12 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   comment above a directive. A doc comment moved right below a region line gets BRO1513's blank
   line (found in Messy: depending on fix order `dotnet format` needed a second run).
 - Types where sorting would swap dependent field/auto-property initializers are skipped (`InitializerOrder.cs`).
+- Since 2026-11-15 (issue #338, owner: follow StyleCop 1.3.177-beta): explicit interface events count as public like
+  the other explicit implementations (StyleCop PR 4281; 1.2 left them private), and records get all five keys
+  (constants, static, readonly: StyleCop PRs 4122 and 4142; 1.2 checked kind and access only, so `GetKey` had an
+  `inRecord` switch, now gone). A record struct's instance fields stay layout (`ObservableOrder`), so a readonly field
+  below a mutable one is not reported there, as in a struct. Parity set `member-order-records-events` was written
+  against 1.2's behaviour.
 - Since 2026-10-03 also the members of a namespace (block or file-scoped) and a file: StyleCop's OuterOrder (namespace,
   delegate, enum, interface, struct, class) + access + static, a type without a modifier is internal there. Skipped: a
   file whose first type carries the header (nothing before it), top-level statements (no kind), directives between
