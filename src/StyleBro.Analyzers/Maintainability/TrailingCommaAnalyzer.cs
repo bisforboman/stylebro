@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace StyleBro.Analyzers.Maintainability;
 
-/// <summary>BRO1401: reports the last item of a multi-line initializer, enum or switch expression without a trailing comma.</summary>
+/// <summary>BRO1401: reports the last item of a multi-line initializer, enum, switch expression or collection expression without a trailing comma.</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class TrailingCommaAnalyzer : DiagnosticAnalyzer
 {
@@ -37,6 +37,7 @@ public sealed class TrailingCommaAnalyzer : DiagnosticAnalyzer
             SyntaxKind.WithInitializerExpression,
             SyntaxKind.AnonymousObjectCreationExpression,
             SyntaxKind.EnumDeclaration,
-            SyntaxKind.SwitchExpression);
+            SyntaxKind.SwitchExpression,
+            SyntaxKind.CollectionExpression);
     }
 }

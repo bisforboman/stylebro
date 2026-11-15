@@ -1601,15 +1601,21 @@ public class FixOrderTests
 
     [Fact]
     public Task Strings_EmptyOnesAreLeftToBro1106() => AssertConvergesInEveryOrderAsync(
-        """
+        """"
         public class C
         {
             public string A = @"";
             public string B = $"";
             public string D = $@"";
             public string E = @"text";
+            public string F = """
+
+                """;
+            public string G = $"""
+
+                """;
         }
-        """,
+        """",
         "BRO1106",
         "BRO1138");
 
@@ -2423,6 +2429,50 @@ public class FixOrderTests
         "BRO1401",
         "BRO1509");
 
+    // BRO1401's comma in a collection expression next to the rules that look at the lists around it: a params call
+    // (BRO1151 unwraps the array), the closing parenthesis after it (BRO1110) and the argument layout (BRO1107/BRO1108).
+    [Fact]
+    public Task TrailingCommas_InCollectionExpressions() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public int[][] A =
+            [
+                [1, 2],
+                [
+                    3,
+                    4
+                ]
+            ];
+
+            public int[] B = [1,
+                2];
+
+            public void M(params int[] values)
+            {
+                M(
+                [
+                    1,
+                    2
+                ]);
+                N(1, [
+                    1,
+                    2
+                ]
+                );
+            }
+
+            public void N(int first, int[] values)
+            {
+            }
+        }
+        """,
+        "BRO1107",
+        "BRO1108",
+        "BRO1110",
+        "BRO1151",
+        "BRO1401");
+
     [Fact]
     public Task AllowedEmptyBlocks_InsideExpandedOnes() => AssertConvergesInEveryOrderWithConfigAsync(
         """
@@ -2457,6 +2507,27 @@ public class FixOrderTests
         "BRO1406",
         "BRO1407",
         "BRO1410");
+
+    // The parentheses BRO1406 adds around a bitwise or '>>>' operand (a comparison too) and BRO1407 around the '&&' or
+    // '||' next to a '??' stay under BRO1405, which removes the extra pair and the pair around a whole right side.
+    [Fact]
+    public Task BitwiseAndCoalesceParentheses_NextToRedundantOnes() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public bool M(int a, int b, int c, bool f, bool g, bool? n)
+            {
+                var x = a & b | c ^ a + b >>> 2;
+                var y = ((a & b)) | c;
+                var z = (a == b & c == a);
+                var w = a < b | (f) & g;
+                return n ?? f && g || (n ?? (f || g));
+            }
+        }
+        """,
+        "BRO1405",
+        "BRO1406",
+        "BRO1407");
 
     [Fact]
     public Task MemberOrder_InAOneLineType() => AssertConvergesInEveryOrderAsync(

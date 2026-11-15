@@ -65,20 +65,188 @@ public class EmptyStringTests
         """);
 
     [Fact]
-    public Task OtherLiterals_NoDiagnostic() => VerifyNoDiagnosticsAsync("""
+    public Task OtherLiterals_NoDiagnostic() => VerifyNoDiagnosticsAsync(""""
         using System;
+
+        class C
+        {
+            void M(string s)
+            {
+                ReadOnlySpan<byte> b = ""u8;
+                var c = "x";
+                var d = " ";
+                var e = $" ";
+                var f = $"{s}";
+                var g = $"{s}{s}";
+                var h = """ """;
+                var i = """
+
+
+                    """;
+                var j = $"""
+
+
+                    """;
+                var k = $"{{";
+            }
+        }
+        """");
+
+    // An interpolated string without content and a raw literal whose value is empty are empty strings too.
+    [Fact]
+    public Task EmptyInterpolatedAndRawStrings_BecomeStringEmpty() => VerifyFixAsync(
+        """"
+        class C
+        {
+            string field = {|BRO1106:$""|};
+
+            string M(string s, object o)
+            {
+                var a = {|BRO1106:$""|};
+                var b = {|BRO1106:$@""|};
+                var c = {|BRO1106:@$""|};
+                var d = {|BRO1106:"""
+
+                    """|};
+                var e = {|BRO1106:$"""
+
+                    """|};
+                o = {|BRO1106:$""|};
+                M({|BRO1106:$""|}, {|BRO1106:$""|});
+                var g = {|BRO1106:$""|} + s;
+                var h = $"{(s == {|BRO1106:$""|} ? {|BRO1106:""|} : s)}";
+                var i = {|BRO1106:$""|}
+                    .Length;
+                return s == {|BRO1106:$""|} ? {|BRO1106:$""|} : "x";
+            }
+        }
+        """",
+        """"
+        class C
+        {
+            string field = string.Empty;
+
+            string M(string s, object o)
+            {
+                var a = string.Empty;
+                var b = string.Empty;
+                var c = string.Empty;
+                var d = string.Empty;
+                var e = string.Empty;
+                o = string.Empty;
+                M(string.Empty, string.Empty);
+                var g = string.Empty + s;
+                var h = $"{(s == string.Empty ? string.Empty : s)}";
+                var i = string.Empty
+                    .Length;
+                return s == string.Empty ? string.Empty : "x";
+            }
+        }
+        """");
+
+    [Fact]
+    public Task EmptyInterpolatedAndRawStrings_InConstantContexts_Stay() => VerifyNoDiagnosticsAsync(""""
+        using System;
+
+        class C
+        {
+            const string Constant = $"";
+            const string Raw = """
+
+                """;
+            const string Combined = $"" + "x";
+
+            [Obsolete($"")]
+            int M(string s = $"", string t = """
+
+                """)
+            {
+                const string local = $"";
+                switch (s)
+                {
+                    case $"":
+                        break;
+                }
+
+                bool b = s is $"";
+                return s switch { $"" => 1, _ => 2 };
+            }
+        }
+        """");
+
+    // There the interpolated string isn't a string: 'string.Empty' wouldn't compile, or would pick another overload.
+    [Fact]
+    public Task EmptyInterpolatedStrings_AsFormattableOrHandler_Stay() => VerifyNoDiagnosticsAsync("""
+        using System;
+        using System.Runtime.CompilerServices;
 
         class C
         {
             void M()
             {
-                var a = $"";
-                ReadOnlySpan<byte> b = ""u8;
-                var c = "x";
-                var d = " ";
+                FormattableString a = $"";
+                IFormattable b = $"";
+                Formattable($"");
+                Handler($"");
+            }
+
+            void Formattable(FormattableString text)
+            {
+            }
+
+            void Handler(DefaultInterpolatedStringHandler text)
+            {
             }
         }
         """);
+
+    [Fact]
+    public Task EmptyInterpolatedString_WithAStringOverload_BecomesStringEmpty() => VerifyFixAsync(
+        """
+        using System;
+
+        class C
+        {
+            void M() => Both({|BRO1106:$""|});
+
+            void Both(FormattableString text)
+            {
+            }
+
+            void Both(string text)
+            {
+            }
+        }
+        """,
+        """
+        using System;
+
+        class C
+        {
+            void M() => Both(string.Empty);
+
+            void Both(FormattableString text)
+            {
+            }
+
+            void Both(string text)
+            {
+            }
+        }
+        """);
+
+    [Fact]
+    public Task LiteralStyle_EmptyInterpolatedAndRawStrings_NoDiagnostic() => VerifyNoDiagnosticsAsync(
+        """"
+        class C
+        {
+            string a = $"";
+            string b = """
+
+                """;
+        }
+        """",
+        LiteralStyle);
 
     [Fact]
     public Task LiteralStyle_StringEmptyBecomesTheLiteral() => VerifyFixAsync(
