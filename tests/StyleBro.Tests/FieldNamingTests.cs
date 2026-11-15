@@ -572,8 +572,8 @@ public class FieldNamingTests
         {
             protected int {|BRO1303:Count|};
             protected int {|BRO1303:_total|};
-            protected readonly int limit = 1;
-            protected readonly int {|BRO1303:_size|} = 2;
+            protected readonly int {|BRO1306:limit|} = 1;
+            protected readonly int {|BRO1306:_size|} = 2;
             private protected int {|BRO1303:Level|};
             protected int fine;
             protected readonly int Ready = 3;
@@ -584,8 +584,8 @@ public class FieldNamingTests
         {
             protected int count;
             protected int total;
-            protected readonly int limit = 1;
-            protected readonly int size = 2;
+            protected readonly int Limit = 1;
+            protected readonly int Size = 2;
             private protected int level;
             protected int fine;
             protected readonly int Ready = 3;
@@ -600,7 +600,7 @@ public class FieldNamingTests
             protected int {|BRO1303:_Count|};
             protected int {|BRO1303:Total|};
             protected readonly int _logger = 1;
-            protected readonly int limit = 2;
+            protected readonly int {|BRO1306:limit|} = 2;
             protected int fine;
             protected int _alsoFine;
         }
@@ -611,12 +611,130 @@ public class FieldNamingTests
             protected int _count;
             protected int total;
             protected readonly int _logger = 1;
-            protected readonly int limit = 2;
+            protected readonly int Limit = 2;
             protected int fine;
             protected int _alsoFine;
         }
         """,
         editorConfig: Underscore);
+
+    // StyleCop 1.3's SA1304: lower-case protected and private protected readonly fields are PascalCase (issue 338).
+    [Fact]
+    public Task ProtectedReadOnlyFields_ArePascalCase() => VerifyFixAsync(
+        """
+        public class Base
+        {
+            protected readonly int {|BRO1306:limit|} = 1;
+            private protected readonly int {|BRO1306:depth|} = 2;
+            protected readonly int {|BRO1307:m_size|} = 3;
+            protected readonly int {|BRO1308:max_count|} = 4;
+            protected readonly int Ready = 5;
+            protected int mutable;
+            private readonly int own = 6;
+
+            public int Sum() => limit + this.depth + m_size + max_count + Ready + mutable + own;
+        }
+
+        public class Derived : Base
+        {
+            public int Twice() => (limit * 2) + base.depth;
+        }
+        """,
+        """
+        public class Base
+        {
+            protected readonly int Limit = 1;
+            private protected readonly int Depth = 2;
+            protected readonly int Size = 3;
+            protected readonly int MaxCount = 4;
+            protected readonly int Ready = 5;
+            protected int mutable;
+            private readonly int own = 6;
+
+            public int Sum() => Limit + this.Depth + Size + MaxCount + Ready + mutable + own;
+        }
+
+        public class Derived : Base
+        {
+            public int Twice() => (Limit * 2) + base.Depth;
+        }
+        """);
+
+    // A protected field of a public type is public API: only stylebro_rename_public_api renames it. A private protected
+    // one, and a protected one of an internal type, never leave the assembly.
+    [Fact]
+    public Task ProtectedReadOnlyFields_OfAPublicType_ArePublicApi() => VerifyFixAsync(
+        """
+        public class Visible
+        {
+            protected readonly int limit = 1;
+            private protected readonly int {|BRO1306:depth|} = 2;
+        }
+
+        internal class Hidden
+        {
+            protected readonly int {|BRO1306:limit|} = 1;
+        }
+        """,
+        """
+        public class Visible
+        {
+            protected readonly int limit = 1;
+            private protected readonly int Depth = 2;
+        }
+
+        internal class Hidden
+        {
+            protected readonly int Limit = 1;
+        }
+        """,
+        "stylebro_rename_public_api = false");
+
+    // The new name is taken (by a property of the type, or by a member of a derived type): the field keeps its name.
+    [Fact]
+    public Task ProtectedReadOnlyFields_KeepTheirName_WhenThePascalNameIsTaken() => VerifyNoDiagnosticsAsync(
+        """
+        public class Base
+        {
+            protected readonly int limit = 1;
+            protected readonly int depth = 2;
+
+            public int Limit => limit;
+        }
+
+        public class Derived : Base
+        {
+        }
+
+        public class MoreDerived : Derived
+        {
+            public int Depth => this.depth;
+        }
+        """);
+
+    // stylebro_internal_field_naming = like_private: a private protected field follows the private style (BRO1303), a
+    // protected one is still PascalCase.
+    [Fact]
+    public Task ProtectedReadOnlyFields_WithInternalLikePrivate() => VerifyFixAsync(
+        """
+        public class C
+        {
+            private protected readonly int {|BRO1303:depth|} = 1;
+            private protected readonly int _fine = 2;
+            protected readonly int {|BRO1306:limit|} = 3;
+            protected readonly int _kept = 4;
+        }
+        """,
+        """
+        public class C
+        {
+            private protected readonly int _depth = 1;
+            private protected readonly int _fine = 2;
+            protected readonly int Limit = 3;
+            protected readonly int _kept = 4;
+        }
+        """,
+        editorConfig: Underscore + "\nstylebro_internal_field_naming = like_private");
 
     [Fact]
     public Task PartialTypes_AreRenamedInEveryPart() => VerifyFixAsync(
@@ -861,24 +979,65 @@ public class FieldNamingTests
             """,
         ]);
 
+    // A derived type's member with the new name would hide the renamed field ('this.limit' there would mean the property).
     [Fact]
-    public Task HidingInDerivedTypes_KeepsTheName() => VerifyNotFixedAsync(
-        [
-            """
+    public Task HidingInDerivedTypes_KeepsTheName() => VerifyNoDiagnosticsAsync(
+        ("/0/Base.cs", """
             public class Base
             {
-                public static readonly int {|BRO1306:limit|} = 1;
+                public static readonly int limit = 1;
+                protected readonly int depth = 2;
+                private protected readonly int width = 3;
             }
-            """,
-            """
+            """),
+        ("/0/Derived.cs", """
             public class Derived : Base
             {
                 public int Limit => 2;
 
                 public int Get() => limit;
             }
-            """,
-        ]);
+
+            public class Middle : Base
+            {
+            }
+
+            public class MoreDerived : Middle
+            {
+                public int Depth => this.depth;
+
+                public int Width() => base.width;
+            }
+            """));
+
+    // The analyzer sees only its own project's derived types: one in another project is the fix's to find.
+    [Fact]
+    public async Task HidingInDerivedTypesOfAnotherProject_KeepsTheName()
+    {
+        const string Library = """
+            [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("App")]
+
+            internal class Base
+            {
+                protected readonly int {|BRO1306:limit|} = 1;
+            }
+            """;
+        var test = new CSharpCodeFixTest<FieldNamingAnalyzer, CamelCaseNamingCodeFixProvider, DefaultVerifier>
+        {
+            TestCode = Library,
+            FixedCode = Library,
+            NumberOfIncrementalIterations = 0,
+            NumberOfFixAllIterations = 0,
+            CodeFixTestBehaviors = CodeFixTestBehaviors.SkipFixAllInDocumentCheck,
+        };
+        foreach (var state in new[] { test.TestState, test.FixedState })
+        {
+            state.AdditionalProjects["App"].Sources.Add("internal class Derived : Base\n{\n    public int Limit => 2;\n\n    public int Get() => limit;\n}\n");
+            state.AdditionalProjects["App"].AdditionalProjectReferences.Add("TestProject");
+        }
+
+        await test.RunAsync();
+    }
 
     [Fact]
     public Task PrefixesAndUnderscores_GetTheCompleteName() => VerifyFixAsync(
@@ -1640,10 +1799,29 @@ public class FieldNamingTests
 
         public class C
         {
-            protected readonly int _field;
             private int m_Field;
 
-            public int Value => _field + m_Field;
+            public int Value => m_Field;
+        }
+        """);
+
+    // A protected readonly field is PascalCase: 'Field' is no keyword.
+    [Fact]
+    public Task ProtectedReadOnlyFields_NamedField_BecomePascalCase() => VerifyFixAsync(
+        """
+        public class C
+        {
+            protected readonly int {|BRO1306:_field|};
+
+            public int Value => _field;
+        }
+        """,
+        """
+        public class C
+        {
+            protected readonly int Field;
+
+            public int Value => Field;
         }
         """);
 

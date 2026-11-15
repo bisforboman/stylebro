@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -32,7 +33,8 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
             // Each type's strings and names are read once for all its fields (they were read per field before).
             var facts = new ConcurrentDictionary<INamedTypeSymbol, Lazy<FieldNames.TypeFacts>>(SymbolEqualityComparer.Default);
             var styles = new ConcurrentDictionary<SyntaxTree, FieldStyles>();
-            start.RegisterSymbolAction(c => AnalyzeField(c, facts, styles), SymbolKind.Field);
+            var derived = new Lazy<ILookup<INamedTypeSymbol, INamedTypeSymbol>>(() => GetDerivedTypes(start.Compilation));
+            start.RegisterSymbolAction(c => AnalyzeField(c, facts, styles, derived), SymbolKind.Field);
         });
     }
 
@@ -60,10 +62,63 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
         ? DisabledCode.Mentions(scope, field.Name, context.CancellationToken)
         : DisabledCode.Mentions(context.Compilation, field.Name);
 
+    /// <summary>The compilation's types that have a base class, by that base's definition: read once, for the first field that asks.</summary>
+    private static ILookup<INamedTypeSymbol, INamedTypeSymbol> GetDerivedTypes(Compilation compilation)
+    {
+        var types = new List<INamedTypeSymbol>();
+        var pending = new Stack<INamespaceOrTypeSymbol>();
+        pending.Push(compilation.Assembly.GlobalNamespace);
+        while (pending.Count > 0)
+        {
+            var current = pending.Pop();
+            foreach (var member in current is INamespaceSymbol ns ? ns.GetMembers() : current.GetTypeMembers().CastArray<INamespaceOrTypeSymbol>())
+            {
+                pending.Push(member);
+                if (member is INamedTypeSymbol { TypeKind: TypeKind.Class, BaseType.SpecialType: not SpecialType.System_Object })
+                {
+                    types.Add((INamedTypeSymbol)member);
+                }
+            }
+        }
+
+        return types.ToLookup<INamedTypeSymbol, INamedTypeSymbol>(t => t.BaseType!.OriginalDefinition, SymbolEqualityComparer.Default);
+    }
+
+    /// <summary>
+    /// Whether a type derived from the field's type declares a member with the new name: it would hide the renamed field,
+    /// and the derived type's 'this.count' would mean that member. Protected readonly fields are used by exactly those
+    /// types. Derived types in other projects are the fix's to see.
+    /// </summary>
+    private static bool IsHiddenInDerivedType(IFieldSymbol field, string newName, Lazy<ILookup<INamedTypeSymbol, INamedTypeSymbol>> derived)
+    {
+        if (field.DeclaredAccessibility == Accessibility.Private || field.ContainingType is not { TypeKind: TypeKind.Class, IsSealed: false, IsStatic: false })
+        {
+            return false;
+        }
+
+        var pending = new Stack<INamedTypeSymbol>();
+        pending.Push(field.ContainingType.OriginalDefinition);
+        while (pending.Count > 0)
+        {
+            foreach (var type in derived.Value[pending.Pop()])
+            {
+                if (type.MemberNames.Contains(newName))
+                {
+                    return true;
+                }
+
+                pending.Push(type);
+            }
+        }
+
+        return false;
+    }
+
     private static void AnalyzeField(
         SymbolAnalysisContext context,
         ConcurrentDictionary<INamedTypeSymbol, Lazy<FieldNames.TypeFacts>> cache,
-        ConcurrentDictionary<SyntaxTree, FieldStyles> styles)
+        ConcurrentDictionary<SyntaxTree, FieldStyles> styles,
+        Lazy<ILookup<INamedTypeSymbol, INamedTypeSymbol>> derived)
     {
         var field = (IFieldSymbol)context.Symbol;
         if (field.Locations.FirstOrDefault(l => l.IsInSource) is not { SourceTree: { } tree } location)
@@ -86,6 +141,7 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
             && !(rule == FieldRule.Prefix && FieldNames.IsPrefixRequiredByNamingRule(field.Name.Substring(0, 2), options))
             && FieldNames.CanRename(field, newName, style, cache.GetOrAdd(field.ContainingType, t => new Lazy<FieldNames.TypeFacts>(() => FieldNames.TypeFacts.For(t, context.CancellationToken))).Value, hungarian)
             && NamingRules.AllowsRename(context.Compilation, options, location, field, newName, context.CancellationToken)
+            && !IsHiddenInDerivedType(field, newName, derived)
 
             // Last: it searches the compilation's disabled code for the name.
             && (field.DeclaredAccessibility == Accessibility.Private || !IsInDisabledCode(field, context)))

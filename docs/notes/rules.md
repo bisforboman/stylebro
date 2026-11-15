@@ -270,7 +270,18 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   non-readonly protected/private protected fields are camelCase (SA1306, BRO1303); a readonly one's casing isn't
   checked (SA1306 skips it, SA1304 defers to SA1307, which checks public/internal only: Polly has both
   `DurationOfBreak` and `absoluteExpirationTime`); a leading underscore (SA1309) is removed in the camelCase style and
-  kept in `_camelCase` (no underscore added: SX1309 is private). `IsDataMember` (word-inside-string guard) no longer
+  kept in `_camelCase` (no underscore added: SX1309 is private). **2026-11-15 (issue 338, StyleCop 1.3.177-beta's
+  SA1304, PR 4217)**: a protected or private protected READONLY field (not static readonly, not like_private's) is
+  now PascalCase, BRO1306's (`IsProtectedReadOnly`; `limit` -> `Limit`, with the prefix and inner-underscore rules in
+  Pascal). StyleCop reports only a lower-case first character, so `_logger` is left where SA1309 is off: BRO1306 keeps
+  a `_` name in the `_camelCase` style (and with stylebro_allow_leading_underscore_in_pascal_fields), and makes
+  `_size` -> `Size` in the camelCase style (SA1309 + SA1304 in one rename; it was `size`, BRO1303). An enforced SDK
+  naming rule for protected fields still wins. `FieldNames.IsPascalChecked` is unchanged (Conventions' count of
+  non-private casing doesn't include protected fields). New analyzer guard for every non-private field of an unsealed
+  class (`FieldNamingAnalyzer.IsHiddenInDerivedType`): a class derived from the field's type in the same compilation
+  with a member named like the new name -> no diagnostic (the fix only refused when a SIMPLE-name reference saw the
+  member; `this.depth`/`base.depth` in the derived type would have been rebound, or CS0108). Derived types in other
+  projects stay the fix's check (kept finding). `IsDataMember` (word-inside-string guard) no longer
   includes protected fields: in Messy it blocked `Total` because the referenced StyleBro projects' strings contain it.
 - **BRO1307** (SA1308, `m_`/`s_`/`t_` prefixes, lowercase only) and **BRO1308** (SA1310, underscore inside a field
   name): `FieldNames.GetRename` gives every field at most ONE rule and the COMPLETE new name (prefix > underscore >
@@ -336,7 +347,7 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   naming-rule guards (`IsLeftByNamingRule`, `ruled == Other`, `IsPrefixRequiredByNamingRule`) redundant for enforced
   rules: their mutation entries were dropped. Not done: two-run renames (a field whose new name a
   method renamed in the same run frees).
-- Remaining naming: protected readonly casing, namespaces.
+- Remaining naming: namespaces.
 
 ## BRO16xx: documentation
 
