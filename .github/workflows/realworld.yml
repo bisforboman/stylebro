@@ -80,6 +80,8 @@ jobs:
           "commit=$($entry.Commit)" >> $env:GITHUB_OUTPUT
           $settings = [Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes("$($entry.Tests)|$($entry.TestFilter)"))
           "testsettings=$([Convert]::ToHexString($settings).Substring(0, 16))" >> $env:GITHUB_OUTPUT
+          # The SDK the commands really use: the runner image can hold a newer one than setup-dotnet installs.
+          "sdk=$(dotnet --version)" >> $env:GITHUB_OUTPUT
           "WORK=${{ runner.temp }}/realworld" >> $env:GITHUB_ENV
           "NUGET_PACKAGES=${{ runner.temp }}/realworld-nuget" >> $env:GITHUB_ENV
 
@@ -100,7 +102,7 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: ${{ env.NUGET_PACKAGES }}
-          key: realworld-nuget-${{ runner.os }}-${{ matrix.repo }}-${{ steps.pin.outputs.commit }}-sdk${{ steps.dotnet.outputs.dotnet-version }}
+          key: realworld-nuget-${{ runner.os }}-${{ matrix.repo }}-${{ steps.pin.outputs.commit }}-sdk${{ steps.pin.outputs.sdk }}
           restore-keys: realworld-nuget-${{ runner.os }}-${{ matrix.repo }}-
 
       # The tests that fail on the untouched code. They depend on the pinned commit, the SDK, the OS and the test logic
@@ -112,7 +114,7 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: ${{ runner.temp }}/realworld-tests.json
-          key: realworld-tests-${{ runner.os }}-${{ matrix.repo }}-${{ steps.pin.outputs.commit }}-sdk${{ steps.dotnet.outputs.dotnet-version }}-${{ steps.pin.outputs.testsettings }}-${{ hashFiles('scripts/realworld/FailedTests.ps1') }}
+          key: realworld-tests-${{ runner.os }}-${{ matrix.repo }}-${{ steps.pin.outputs.commit }}-sdk${{ steps.pin.outputs.sdk }}-${{ steps.pin.outputs.testsettings }}-${{ hashFiles('scripts/realworld/FailedTests.ps1') }}
 
       - name: Run StyleBro on ${{ matrix.repo }}
         id: run

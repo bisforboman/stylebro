@@ -60,6 +60,7 @@ if ($PSBoundParameters.ContainsKey('OnlyFiles')) {
 }
 
 $mine = @(for ($i = $Shard; $i -lt $run.Count; $i += $Shards) { if ((Get-Count $run[$i]) -eq 1) { $run[$i] } })
+Write-Host "SDK $(dotnet --version)"
 Write-Host "Shard $Shard of ${Shards}: $($mine.Count) mutations of $($run.Count) selected, $($all.Count) in total ($($stale.Count) stale)."
 
 if ($mine.Count) {

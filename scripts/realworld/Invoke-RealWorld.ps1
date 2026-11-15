@@ -243,6 +243,7 @@ if ($csharpier) {
 }
 
 $before = Measure-Phase 'untouched code: build with analyzers' { Invoke-Build }
+$report.Add("- SDK: $(dotnet --version)")
 $report.Add("- findings: $($before.Findings); compile errors before: $($before.Errors.Count)")
 $before.Crashes | ForEach-Object { $problems.Add("analyzer crash: $_") }
 
@@ -316,7 +317,12 @@ if ($csharpier) {
 }
 
 $after = Measure-Phase 'build after the fixes' { Invoke-Build }
-$newErrors = @($after.Errors | Where-Object { $_ -notin $before.Errors })
+# A fix moves code, so an error of the untouched code comes back at another line or column: an error is new when its
+# file has more errors with that text than before, wherever they are.
+function Get-ErrorKey([string]$e) { $e -replace '\(\d+,\d+(,\d+,\d+)?\): error ', ': error ' }
+$known = @{}
+$before.Errors | ForEach-Object { $known[(Get-ErrorKey $_)] = 1 + $known[(Get-ErrorKey $_)] }
+$newErrors = @($after.Errors | Where-Object { ($known[(Get-ErrorKey $_)] = $known[(Get-ErrorKey $_)] - 1) -lt 0 })
 $newErrors | ForEach-Object { $problems.Add("new compile error: $_") }
 $after.Crashes | Where-Object { $_ -notin $before.Crashes } | ForEach-Object { $problems.Add("analyzer crash after fixing: $_") }
 $report.Add("- warnings left (kept by guards): $($after.Findings); new compile errors: $($newErrors.Count)")
