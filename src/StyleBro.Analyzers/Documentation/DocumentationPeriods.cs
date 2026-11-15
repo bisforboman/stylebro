@@ -69,7 +69,8 @@ internal static class DocumentationPeriods
     };
 
     /// <summary>
-    /// Inline elements: the sentence's last word ('Returns &lt;see langword="true"/&gt;'), so the period goes after them.
+    /// Inline elements: the sentence's last word ('Returns &lt;see langword="true"/&gt;'), so the period goes after them
+    /// (but see <see cref="EndsWithQuestionOrExclamation"/> and <see cref="EndsWithSentence"/>).
     /// StyleCop's (c, see, paramref, typeparamref) plus HTML's inline elements. Any other element (a tool's own
     /// '&lt;devremarks&gt;', '&lt;para/&gt;') is passed over, like StyleCop: the text before it counts.
     /// </summary>
@@ -159,7 +160,8 @@ internal static class DocumentationPeriods
     /// <summary>
     /// An inline element whose own text ends a sentence: <c>&lt;paramref name="name"&gt;The name of the request.&lt;/paramref&gt;</c>
     /// (SSH.NET, trial 21), or a quoted one in code: <c>&lt;c&gt;"User logged in."&lt;/c&gt;</c> (StyleCop #2784). Another
-    /// period after it would be doubled.
+    /// period after it would be doubled. Asked after <see cref="EndsWithQuestionOrExclamation"/>, so what's left of '?' and
+    /// '!' here is what that one doesn't take ('is it done?]').
     /// </summary>
     private static bool EndsWithSentence(XmlElementSyntax element)
     {
@@ -169,13 +171,48 @@ internal static class DocumentationPeriods
         }
 
         // '<c>' holds code ('Calls <c>Done.</c>' still gets its period): only a quoted sentence in it counts.
-        var text = string.Concat(element.Content.SelectMany(c => c.DescendantTokens())
-            .Where(t => t.IsKind(SyntaxKind.XmlTextLiteralToken) || t.IsKind(SyntaxKind.XmlEntityLiteralToken))
-            .Select(t => t.ValueText)).TrimEnd();
+        var text = GetText(element);
         var sentence = text.TrimEnd(ClosingPunctuation).TrimEnd();
         return (element.StartTag.Name.LocalName.ValueText != "c" || (text.Length > 0 && text[text.Length - 1] is '"' or '\''))
             && sentence.Length > 0 && sentence[sentence.Length - 1] is '.' or '?' or '!';
     }
+
+    /// <summary>
+    /// An inline element whose own text ends in '?' or '!', then closing quotes, then one ')' at most
+    /// (<c>&lt;see cref="Done"&gt;is it done?&lt;/see&gt;</c>): a finished question or exclamation of its own, so it is passed
+    /// over and the text before it is what's checked ('Asks. &lt;c&gt;Is it done?&lt;/c&gt;'), like StyleCop 1.3's SA1629
+    /// (its PR 4298). '&lt;c&gt;' holds code, where a single word ending so is a type or an expression
+    /// ('&lt;c&gt;int?&lt;/c&gt;', '&lt;c&gt;value!&lt;/c&gt;'): only text with a space in it or a quoted one counts there.
+    /// </summary>
+    private static bool EndsWithQuestionOrExclamation(XmlElementSyntax element)
+    {
+        var name = element.StartTag.Name.LocalName.ValueText;
+        if (!InlineElements.Contains(name))
+        {
+            return false;
+        }
+
+        var text = GetText(element);
+        var end = text.Length;
+        if (end > 0 && text[end - 1] == ')')
+        {
+            end--;
+        }
+
+        while (end > 0 && text[end - 1] is '"' or '\'' or '\u2019' or '\u201D')
+        {
+            end--;
+        }
+
+        return end > 0 && text[end - 1] is '?' or '!'
+            && (name != "c" || text[text.Length - 1] is '\'' or '"' || text.Any(char.IsWhiteSpace));
+    }
+
+    /// <summary>The element's text, entities resolved, without trailing whitespace.</summary>
+    private static string GetText(XmlElementSyntax element) =>
+        string.Concat(element.Content.SelectMany(c => c.DescendantTokens())
+            .Where(t => t.IsKind(SyntaxKind.XmlTextLiteralToken) || t.IsKind(SyntaxKind.XmlEntityLiteralToken))
+            .Select(t => t.ValueText)).TrimEnd();
 
     /// <summary>
     /// Whether the text ends in code rather than a sentence: its last word has a bracket, brace, '=', ';', ':', a slash,
@@ -256,7 +293,18 @@ internal static class DocumentationPeriods
 
                 case XmlElementSyntax child:
                     var name = child.StartTag.Name.LocalName.ValueText;
-                    if (BlockElements.Contains(name) || excluded.Contains(name) || EndsWithSentence(child))
+                    if (BlockElements.Contains(name) || excluded.Contains(name))
+                    {
+                        return null;
+                    }
+
+                    // A question or an exclamation of its own: the text before it is the sentence that's checked.
+                    if (EndsWithQuestionOrExclamation(child))
+                    {
+                        continue;
+                    }
+
+                    if (EndsWithSentence(child))
                     {
                         return null;
                     }

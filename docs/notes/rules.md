@@ -368,6 +368,18 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
     inline element; nested containers (`<remarks>` inside `<param>`, `<para>`, `<placeholder>`) judged by their own
     text; deviations: `?`, `!`, `:` endings are fine; content ending in `<inheritdoc/>`/`<include/>` isn't checked
     (OpenTelemetry uses `<param name="key"><inheritdoc cref=... path="/param"/></param>`: 72 false positives before).
+    **2026-11-15 (issue 338, StyleCop 1.3.177-beta's SA1629, PR 4298: `?` and `!` end a sentence)**: an inline
+    element at the end whose own text ends in `?`/`!` (then closing quotes `"` `'` `’` `”`, then one `)`:
+    StyleCop's EndsWithValidPunctuation) is passed over and the text before it is checked, so the period goes before
+    the element (`Asks. <c>Is it done?</c>`; `DocumentationPeriods.EndsWithQuestionOrExclamation`, asked before
+    `EndsWithSentence`). Measured against 1.3.177-beta: same positions and output for `<c>Is it done?</c>`,
+    `<c>"Really?"</c>`, `<i>really?</i>` after `<see/>`, an element on its own line, `<c>(or is it?)</c>`, and nothing
+    for `<summary><c>It works!</c></summary>`. Before, such an element got nothing (see, paramref) or a period after
+    it (`<c>`). Deviations kept: ONE word in `<c>` (`<c>int?</c>`, `<c>value!</c>`) is code and keeps the period after
+    the element (StyleCop: `Gets an. <c>int?</c>`); the text before the element follows BRO1603's own endings
+    (`Asks: <c>Is it?</c>` is fine, StyleCop writes `Asks:. <c>`); an element ending in a PERIOD is unchanged (nothing
+    for see/paramref, the period after `<c>`; StyleCop passes those over too, in 1.2 already); `?]` isn't StyleCop's
+    closing punctuation and stays `EndsWithSentence`'s (nothing).
   - **BRO1604/BRO1605** (SA1623/SA1624) property summary verb matches the accessors; private/internal setter =
     restricted, protected isn't (as StyleCop). Deviation: a bool summary may use the plain verb ("Gets the open
     state"); only summaries that already say "whether" get "a value indicating whether" (StyleCop's fix writes
