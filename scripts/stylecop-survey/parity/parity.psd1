@@ -30,14 +30,15 @@
         @{
             Name     = 'member-order-records-events'
             Map      = @('SA1201=BRO1001', 'SA1202=BRO1001', 'SA1203=BRO1001', 'SA1204=BRO1001', 'SA1214=BRO1001')
-            # Explicit event implementations count as private (SA1202 makes only methods, properties and indexers public);
-            # records are checked for kind and access only (StyleCop's SA1203/SA1204/SA1214 skip them). Output identical.
+            # Explicit event implementations count as public, and records get the full ordering (constants, static, readonly),
+            # both like StyleCop 1.3 (owner's decision 2026-11-15). Output identical.
             Expected = @(
                 # BRO1001 reports an event field at its name, StyleCop at its first modifier.
-                'only StyleBro: BRO1001 Cases.cs(30,35)'
                 'only StyleCop: BRO1001 Cases.cs(30,9)'
                 # BRO1001 reports once per type (the first out-of-place member); the fix sorts all of it.
                 'only StyleCop: BRO1001 Cases.cs(38,22)'
+                # BRO1001 reports once per type (the first out-of-place member); the fix sorts all of it.
+                'only StyleCop: BRO1001 Cases.cs(80,30)'
             )
         }
         @{
@@ -59,7 +60,6 @@
                 'only StyleCop: BRO1519 Continuations.cs(13,18)'
                 'only StyleCop: BRO1519 Continuations.cs(19,14)'
                 'only StyleCop: BRO1519 Continuations.cs(24,14)'
-                'only StyleCop: BRO1519 Continuations.cs(33,14)'
                 'only StyleCop: BRO1519 Continuations.cs(38,14)'
                 'only StyleCop: BRO1519 Continuations.cs(45,18)'
                 'only StyleCop: BRO1519 Continuations.cs(52,14)'
@@ -77,12 +77,6 @@
             Map      = @('SA1407=BRO1406', 'SA1408=BRO1407')
             Expected = @(
                 # BRO1407 also checks 'and'/'or' patterns, like StyleCop's current source (added after 1.2.0-beta.556).
-                'only StyleBro: BRO1407 Precedence.cs(18,41)'
-                'only StyleBro: BRO1407 Precedence.cs(23,38)'
-                'StyleBro output only: Precedence.cs: [            var p = a || (b && c) || (v is (> 1 and < 5) or 10 && a);]'
-                'StyleBro output only: Precedence.cs: [        public bool P(int v) => v is (> 1 and < 5) or 10;]'
-                'StyleCop output only: Precedence.cs: [            var p = a || (b && c) || (v is > 1 and < 5 or 10 && a);]'
-                'StyleCop output only: Precedence.cs: [        public bool P(int v) => v is > 1 and < 5 or 10;]'
             )
         }
         @{
@@ -139,8 +133,6 @@
             Expected = @(
                 # BRO1131: virtual members in a type that isn't sealed are skipped ('this.' dispatches virtually).
                 'only StyleCop: BRO1131 BaseCalls.cs(26,32)'
-                'StyleBro output only: BaseCalls.cs: [        public void Clear() => base.Reset();]'
-                'StyleCop output only: BaseCalls.cs: [        public void Clear() => this.Reset();]'
             )
         }
         @{
@@ -171,7 +163,6 @@
                 # BRO1101: labeled empty statements are left alone (removing the ';' can break the build).
                 'only StyleCop: BRO1101 Empty.cs(13,20)'
                 'StyleBro output only: Empty.cs: [            label: ;]'
-                'StyleCop output only: Empty.cs: [        label:]'
                 # BRO1101: '; // comment' keeps the comment's indentation; StyleCop's fix leaves one space.
                 'StyleBro output only: Empty.cs: [            // trailing comment]'
                 'StyleCop output only: Empty.cs: [ // trailing comment]'
@@ -180,6 +171,8 @@
                 'StyleBro output only: Attrs.cs: [        [Obsolete("a, b"), /* why */ DebuggerStepThrough]]'
                 'StyleCop output only: Attrs.cs: [        [Obsolete("a, b")]]'
                 'StyleCop output only: Attrs.cs: [        [DebuggerStepThrough]]'
+                # StyleCop 1.3's fix indents the label like a statement; StyleBro leaves labels to the formatter.
+                'StyleCop output only: Empty.cs: [            label:]'
             )
         }
         @{
@@ -199,18 +192,11 @@
             Expected = @(
                 # A comment right after a collection expression's '[' is like one after '{' (StyleCop fixed this after
                 # 1.2.0-beta.556, #3766).
-                'only StyleCop: BRO1504 More.cs(39,13)'
                 'StyleCop output only: More.cs: []'
                 # A comment right below an element's attribute list stays attached to it (BRO1525 wants no blank line
                 # there; trial 26).
                 'only StyleCop: BRO1504 More.cs(6,9)'
                 # A comment right after '=>' is like one after '{' (StyleCop #3392/#3550, owner's decision 2026-10-04).
-                'only StyleCop: BRO1504 Arrows.cs(11,17)'
-                'only StyleCop: BRO1504 Arrows.cs(17,13)'
-                'only StyleCop: BRO1504 Arrows.cs(21,13)'
-                'StyleCop output only: Arrows.cs: []'
-                'StyleCop output only: Arrows.cs: []'
-                'StyleCop output only: Arrows.cs: []'
                 # A comment between the links of a call chain needs no blank line above it (owner's decision 2026-10-11).
                 'only StyleCop: BRO1504 Chains.cs(12,17)'
                 'only StyleCop: BRO1504 Chains.cs(16,17)'
@@ -236,10 +222,6 @@
                 # With documentation generated, StyleCop 1.2.0-beta.556 no longer reports a member whose '///' comment
                 # directly follows the previous member (no blank line); it did with documentation off. BRO1505 reports it either way.
                 'only StyleBro: BRO1505 Cases.cs(38,1)'
-                # BRO1505: two single-line properties may sit together, like StyleCop's master (2aeb4e3d); beta.556
-                # wants a blank line. (In the output that blank line and the one BRO1505 adds above a '///' doc comment,
-                # which StyleCop's fix leaves out, look the same, so Cases.cs shows no output difference.)
-                'only StyleCop: BRO1505 Cases.cs(15,1)'
                 # BRO1505: two members on one line: StyleBro adds a blank line and keeps the indentation; StyleCop's
                 # fix leaves a trailing space and puts the second member at column 0.
                 'StyleBro output only: FileScoped.cs: [    public void M() { }]'
@@ -247,6 +229,8 @@
                 'StyleBro output only: FileScoped.cs: []'
                 'StyleCop output only: FileScoped.cs: [    public void M() { } ]'
                 'StyleCop output only: FileScoped.cs: [public void N() { }]'
+                # BRO1505 adds the blank line above a method's '///' comment that StyleCop's fix leaves out (Documented).
+                'StyleBro output only: Cases.cs: []'
             )
         }
         @{
@@ -302,25 +286,30 @@
             Expected = @(
                 # BRO1401: nested multi-line initializers get both commas in one pass; StyleCop's Fix All only adds
                 # the outer one, so a second 'dotnet format' run would still find the inner list.
-                'StyleBro output only: CommaEdges.cs: [                    2,]'
-                'StyleCop output only: CommaEdges.cs: [                    2]'
                 # BRO1401: when code follows the last item directly, the fix inserts ', ' instead of ','; StyleCop's
                 # '2,}' breaks SA1001 (comma followed by whitespace).
                 'StyleBro output only: CommaEdges.cs: [                B = 2, };]'
                 'StyleCop output only: CommaEdges.cs: [                B = 2,};]'
+                # Property patterns get no trailing comma (owner's decision 2026-10-11, kept 2026-11-15); StyleCop 1.3 adds one.
+                'only StyleCop: BRO1401 Commas.cs(72,17)'
+                'only StyleCop: BRO1401 Commas.cs(77,17)'
+                'only StyleCop: BRO1401 Commas.cs(79,21)'
+                'StyleBro output only: Commas.cs: [                Y: 2]'
+                'StyleBro output only: Commas.cs: [                    Next: { Y: 2 }]'
+                'StyleBro output only: Commas.cs: [                }]'
+                'StyleCop output only: Commas.cs: [                Y: 2,]'
+                'StyleCop output only: Commas.cs: [                    Next: { Y: 2 },]'
+                'StyleCop output only: Commas.cs: [                },]'
             )
         }
         @{
             Name     = 'parameter-layout'
             Map      = @('SA1116=BRO1107', 'SA1117=BRO1108')
-            # StyleCop's SA1117 fix does nothing, so only positions are compared; StyleBro's output must still be clean.
+            # Only positions are compared (StyleCop 1.2's SA1117 fix did nothing); StyleBro's output must still be clean.
             CompareOutput = $false
             Expected = @(
                 # Record and primary-constructor parameters, and a primary constructor's base arguments: StyleCop
                 # doesn't check these newer lists; StyleBro treats them like any other.
-                'only StyleBro: BRO1107 Declarations.cs(6,25)'
-                'only StyleBro: BRO1107 Declarations.cs(16,26)'
-                'only StyleBro: BRO1107 Declarations.cs(17,23)'
             )
         }
         @{
@@ -453,6 +442,15 @@
             # StyleCop's fix renames only the declaration (the uses then don't compile); positions only.
             CompareOutput = $false
             Expected = @(
+                # Signatures of overrides and implementations are reported and renamed with the base (owner's decision); StyleCop 1.3
+                # skips them. A literal converted to a declared tuple type follows that type's names: its declaration is reported.
+                'only StyleBro: BRO1311 Tuples.cs(19,17)'
+                'only StyleBro: BRO1311 Tuples.cs(19,28)'
+                'only StyleBro: BRO1311 Tuples.cs(21,26)'
+                'only StyleBro: BRO1311 Tuples.cs(21,40)'
+                'only StyleCop: BRO1311 Tuples.cs(21,56)'
+                'only StyleCop: BRO1311 Tuples.cs(21,66)'
+                'only StyleCop: BRO1311 Tuples.cs(25,33)'
             )
         }
         @{
@@ -504,16 +502,12 @@
                 # BRO1110 treats them like any other argument list (found via the private app: 305 extra, 297 new()).
                 'only StyleBro: BRO1110 Initializers.cs(13,13)'
                 'only StyleBro: BRO1110 Initializers.cs(24,13)'
-                'only StyleBro: BRO1110 Initializers.cs(31,9)'
                 'StyleBro output only: Initializers.cs: [                0)]'
                 'StyleBro output only: Initializers.cs: [                y)]'
-                'StyleBro output only: Initializers.cs: [            0);]'
                 'StyleCop output only: Initializers.cs: [                0]'
                 'StyleCop output only: Initializers.cs: [            )]'
                 'StyleCop output only: Initializers.cs: [                y]'
                 'StyleCop output only: Initializers.cs: [            )]'
-                'StyleCop output only: Initializers.cs: [            0]'
-                'StyleCop output only: Initializers.cs: [        );]'
             )
         }
         @{
@@ -537,7 +531,6 @@
                 'only StyleCop: BRO1601 Inherit.cs(56,21)'
                 'only StyleCop: BRO1601 Inherit.cs(67,20)'
                 # BRO1601: explicit interface implementations aren't reported, like StyleCop's master (2959cac8).
-                'only StyleCop: BRO1601 Inherit.cs(44,26)'
             )
         }
         @{
@@ -555,16 +548,13 @@
                 # no period after it; StyleCop passes over an inline element with content and checks the text before it.
                 'only StyleCop: BRO1603 Inline.cs(18,22)'
                 'only StyleCop: BRO1603 Inline.cs(23,22)'
-                'only StyleCop: BRO1603 Inline.cs(28,64)'
                 'StyleBro output only: Inline.cs: [        /// Ends with <see cref="Inline">a sentence in a see.</see>]'
                 # '<c>' holds code: it gets its period after the element unless it's a quoted sentence; StyleCop puts it
                 # before the element.
                 'only StyleBro: BRO1603 Inline.cs(23,56)'
                 'StyleBro output only: Inline.cs: [        /// Ends with <c>code ending with a period.</c>.]'
-                'StyleBro output only: Inline.cs: [        /// Ends with <paramref name="x">a question?</paramref>]'
                 'StyleCop output only: Inline.cs: [        /// Ends with. <see cref="Inline">a sentence in a see.</see>]'
                 'StyleCop output only: Inline.cs: [        /// Ends with. <c>code ending with a period.</c>]'
-                'StyleCop output only: Inline.cs: [        /// Ends with <paramref name="x">a question?</paramref>.]'
                 # A word ending in a period and digits ('HTML 5.0', AngleSharp's 'it.0') reads as a number: a period after
                 # it would read as part of it.
                 'only StyleCop: BRO1603 Inline.cs(41,48)'
@@ -580,20 +570,11 @@
             Map      = @('SA1629=BRO1603', 'SA1623=BRO1604', 'SA1624=BRO1605')
             Expected = @(
                 # Text ending with '?', '!' or ':' is a finished sentence; StyleCop turns it into 'question?.'.
-                'only StyleCop: BRO1603 Periods.cs(16,43)'
                 'only StyleCop: BRO1603 Periods.cs(37,40)'
-                'only StyleCop: BRO1603 Periods.cs(52,47)'
-                'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with a question?.</summary>]'
                 'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with a colon:.</summary>]'
-                'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with an exclamation!.</summary>]'
                 # A period followed by closing punctuation ends the sentence ('"done."'; StyleCop accepts only '.)', #2860).
-                'only StyleCop: BRO1603 Periods.cs(46,52)'
-                'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with a quoted "sentence.".</summary>]'
                 # Text ending in an entity: the period goes after it; StyleCop 1.2.0-beta.556 reports the ';' and its fix
                 # replaces it (#3802, fixed after beta.556).
-                'only StyleBro: BRO1603 Periods.cs(49,55)'
-                'only StyleCop: BRO1603 Periods.cs(49,54)'
-                'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with an entity List&lt;T&gt.</summary>]'
                 # A bool's summary may use the plain verb ('Gets the open state'); StyleCop requires 'a value indicating
                 # whether' and puts it in front of any text ('whether gets the return value condition').
                 'only StyleCop: BRO1604 Bools.cs(10,21)'
@@ -621,9 +602,6 @@
                 # 'Gets or sets or initializes'. 'Gets or sets' on get+init is fine in StyleBro (unlike master; trial 22).
                 'only StyleCop: BRO1604 Properties.cs(37,20)'
                 'StyleBro output only: Properties.cs: [        /// <summary>Gets or sets the init thing.</summary>]'
-                'StyleBro output only: Properties.cs: [        /// <summary>Gets or sets the set thing.</summary>]'
-                'StyleCop output only: Properties.cs: [        /// <summary>Gets the init thing.</summary>]'
-                'StyleCop output only: Properties.cs: [        /// <summary>Gets or sets or initializes the set thing.</summary>]'
                 # BRO1604 only prefixes noun phrases (an article or a lower-case word; owner's decision 2026-10-09): these probe
                 # summaries start with a capitalized word ('Ends with ...', 'Value doc', 'Number 42'). StyleCop prefixes them all.
                 'only StyleCop: BRO1604 Periods.cs(11,20)'
@@ -667,6 +645,12 @@
                 # 2026-10-12, #132).
                 'only StyleCop: BRO1604 Bools.cs(13,21)'
                 'StyleBro output only: Bools.cs: [        /// <summary>The open state.</summary>]'
+                # StyleCop 1.3's text of the differences above (it no longer adds a period after '?', '!', a quoted sentence or an entity).
+                'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with a question?</summary>]'
+                'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with a quoted "sentence."</summary>]'
+                'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with an entity List&lt;T&gt;.</summary>]'
+                'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with an exclamation!</summary>]'
+                'StyleCop output only: Properties.cs: [        /// <summary>Gets or initializes the init thing.</summary>]'
             )
         }
         @{
@@ -689,11 +673,6 @@
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Generic{T}"/> class.Makes one.</summary>]'
                 # A summary that starts with '<para>' is judged by the paragraph (StyleCop fixed this after 1.2.0-beta.556);
                 # StyleBro's fix puts the sentence inside the paragraph, StyleCop's in front of it.
-                'only StyleCop: BRO1606 Words.cs(31,13)'
-                'StyleBro output only: Words.cs: [        /// <summary><para>Initializes a new instance of the <see cref="Words"/> class.</para></summary>]'
-                'StyleBro output only: Words.cs: [        /// <summary><para>Creates a words object from a float.</para></summary>]'
-                'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class.<para>Initializes a new instance of the <see cref="Words"/> class.</para></summary>]'
-                'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class.<para>Creates a words object from a float.</para></summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class.Initializes a new instance of Words with the given name.</summary>]'
                 # BRO1606: a summary that is a constructor sentence of its own ('Initializes the static members.') isn't reported:
                 # the standard sentence in front would repeat it, and replacing it would lose what it says (Scrutor). StyleCop prefixes it.
@@ -703,7 +682,6 @@
                 'StyleBro output only: Words.cs: [        /// <summary>Initializes the static members.</summary>]'
                 # BRO1606: a constructor summary with text of its own isn't reported (owner's decision 2026-10-12, #132).
                 'only StyleCop: BRO1606 Words.cs(13,13)'
-                'only StyleCop: BRO1606 Words.cs(37,13)'
                 'only StyleCop: BRO1606 Words.cs(124,13)'
                 'only StyleCop: BRO1606 Words.cs(135,13)'
             )
@@ -718,8 +696,6 @@
                 # without the stale tag 'b' is where it belongs, so BRO1611 only reports 'old'.
                 'only StyleCop: BRO1611 Params.cs(62,26)'
                 # Primary constructor parameters (records here), like StyleCop master (24dd9011); beta.556 doesn't check them.
-                'only StyleBro: BRO1611 Params.cs(173,22)'
-                'only StyleBro: BRO1611 Params.cs(174,22)'
             )
         }
         @{
@@ -750,8 +726,6 @@
             Expected = @(
                 # An attribute line above an accessor doesn't make it multi-line in StyleBro; StyleCop counts it (#3434),
                 # so it reports two one-line accessors and misses a one-line accessor next to a multi-line one.
-                'only StyleCop: BRO1510 More.cs(21,13)'
-                'only StyleBro: BRO1510 More.cs(28,13)'
             )
         }
         @{
@@ -793,7 +767,6 @@
             Map      = @('SA1004=BRO1005', 'SA1112=BRO1116', 'SA1113=BRO1117', 'SA1114=BRO1118', 'SA1115=BRO1119', 'SA1120=BRO1120', 'SA1136=BRO1121', 'SA1506=BRO1511', 'SA1511=BRO1512', 'SA1514=BRO1513')
             Expected = @(
                 # A comment between '(' and the first item: the fix would have to move it (StyleCop has no fix).
-                'only StyleCop: BRO1118 Cases.cs(54,13)'
                 # Documentation right below a comment: a blank line there would break SA1512/BRO1506, and the fixes would
                 # undo each other. StyleCop's fix adds it.
                 'only StyleCop: BRO1513 More.cs(61,9)'
@@ -811,14 +784,8 @@
                 # on the next run; StyleBro removes the whole empty run at that end of the group.
                 'StyleCop output only: Cases.cs: [            //]'
                 'StyleCop output only: Cases.cs: [            //    ]'
-                # SA1114/SA1115 have no StyleCop fix: the blank lines in the lists stay in StyleCop's output.
-                'StyleCop output only: Cases.cs: []'
-                'StyleCop output only: Cases.cs: []'
+                # StyleCop's fix keeps the blank line between '// plain comment' and the '///' comment below it; StyleBro's removes it.
                 'StyleCop output only: More.cs: []'
-                'StyleCop output only: Third.cs: []'
-                'StyleCop output only: Third.cs: []'
-                'StyleCop output only: Third.cs: []'
-                'StyleCop output only: Third.cs: []'
                 # The file header's empty '//' lines stay (owner's decision 2026-10-29, trial 60: log4net's license header).
                 'only StyleCop: BRO1120 Header.cs(1,1)'
                 'only StyleCop: BRO1120 Header.cs(4,1)'
@@ -907,11 +874,9 @@
                 'StyleCop output only: Tuples.cs: [            var b = ValueTuple.Create(1, 2L);]'
                 'StyleCop output only: Tuples.cs: [            var e = t.Item1 + t.Item2.Length;]'
                 'StyleCop output only: Tuples.cs: [            var f = maybe?.Item2;]'
-                # StyleCop misses List<int>.ForEach(delegate (int item) ...): its overload check compares the reduced and
-                # constructed method symbols. StyleBro's binds the lambda and finds the same method.
-                'only StyleBro: BRO1125 Lambdas.cs(28,27)'
+                # List<int>.ForEach(delegate (int item) ...): StyleCop 1.2 missed it (the anonymous method's parameter
+                # name differs from the delegate's, StyleCop #4179); 1.3 converts it too (its output below).
                 'StyleBro output only: Lambdas.cs: [            items.ForEach(item => { Console.WriteLine(item); });]'
-                'StyleCop output only: Lambdas.cs: [            items.ForEach(delegate (int item) { Console.WriteLine(item); });]'
                 # delegate() { }: StyleCop reports SA1410 and SA1130; StyleBro only BRO1125, whose lambda replaces both.
                 'only StyleCop: BRO1403 Lambdas.cs(24,32)'
                 # StyleCop's lambda fix leaves two spaces after '=' and pulls a body on its own line up behind '=>'.
@@ -922,6 +887,8 @@
                 'StyleCop output only: Lambdas.cs: [        private Func<int, int> twice =  x => { return x * 2; };]'
                 'StyleCop output only: Lambdas.cs: [            Func<int, int, int> add =  (x, y) => { return x + y; };]'
                 'StyleCop output only: Lambdas.cs: [            this.Changed +=  (s, e) =>             {]'
+                # StyleCop 1.3 converts this anonymous method too, and its fix leaves a space after '('.
+                'StyleCop output only: Lambdas.cs: [            items.ForEach( item => { Console.WriteLine(item); });]'
             )
         }
             @{
