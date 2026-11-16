@@ -10,7 +10,8 @@ namespace StyleBro.Analyzers.Maintainability;
 
 /// <summary>
 /// BRO1406 (SA1407) arithmetic and BRO1407 (SA1408) conditional expressions declare precedence: an operand that is an
-/// operation of another family gets parentheses. Which ones follow StyleCop.
+/// operation of another family gets parentheses. Which ones follow StyleCop (1.3: also the bitwise operators and
+/// '>>>' for BRO1406, '??' for BRO1407).
 /// </summary>
 internal static class Precedence
 {
@@ -18,7 +19,10 @@ internal static class Precedence
     {
         SyntaxKind.AddExpression, SyntaxKind.SubtractExpression, SyntaxKind.MultiplyExpression, SyntaxKind.DivideExpression,
         SyntaxKind.ModuloExpression, SyntaxKind.LeftShiftExpression, SyntaxKind.RightShiftExpression,
-        SyntaxKind.LogicalAndExpression, SyntaxKind.LogicalOrExpression, SyntaxKind.AndPattern, SyntaxKind.OrPattern,
+        SyntaxKind.UnsignedRightShiftExpression, SyntaxKind.BitwiseAndExpression, SyntaxKind.BitwiseOrExpression,
+        SyntaxKind.ExclusiveOrExpression,
+        SyntaxKind.LogicalAndExpression, SyntaxKind.LogicalOrExpression, SyntaxKind.CoalesceExpression,
+        SyntaxKind.AndPattern, SyntaxKind.OrPattern,
     };
 
     /// <summary>
@@ -58,17 +62,18 @@ internal static class Precedence
                 continue;
             }
 
-            if (IsLogical(op))
+            if (IsConditional(op))
             {
-                // SA1408: '&&'/'and' and '||'/'or' don't mix without parentheses.
-                if (IsLogical(inner) && !SameLogicalFamily(op, inner))
+                // SA1408: '&&'/'and', '||'/'or' and '??' don't mix without parentheses.
+                if (IsConditional(inner) && !SameConditionalFamily(op, inner))
                 {
                     yield return (operand, DiagnosticIds.ConditionalPrecedence);
                 }
             }
             else if (operand is BinaryExpressionSyntax && !SameArithmeticFamily(op, inner))
             {
-                // SA1407: any other operation inside '+ -', '* /', '%' or '<< >>'.
+                // SA1407: any other operation inside '+ -', '* /', '%', '<< >> >>>', '&', '|' or '^'. Under a bitwise
+                // operator that is also a comparison: 'a == b & c' becomes '(a == b) & c'.
                 yield return (operand, DiagnosticIds.ArithmeticPrecedence);
             }
         }
@@ -100,20 +105,28 @@ internal static class Precedence
         _ => default,
     };
 
-    private static bool IsLogical(SyntaxToken token) => IsAnd(token) || IsOr(token);
+    private static bool IsConditional(SyntaxToken token) => IsAnd(token) || IsOr(token) || IsCoalesce(token);
 
     private static bool IsAnd(SyntaxToken token) => token.Kind() is SyntaxKind.AmpersandAmpersandToken or SyntaxKind.AndKeyword;
 
     private static bool IsOr(SyntaxToken token) => token.Kind() is SyntaxKind.BarBarToken or SyntaxKind.OrKeyword;
 
-    private static bool SameLogicalFamily(SyntaxToken a, SyntaxToken b) => (IsAnd(a) && IsAnd(b)) || (IsOr(a) && IsOr(b));
+    private static bool IsCoalesce(SyntaxToken token) => token.IsKind(SyntaxKind.QuestionQuestionToken);
+
+    private static bool SameConditionalFamily(SyntaxToken a, SyntaxToken b) =>
+        (IsAnd(a) && IsAnd(b)) || (IsOr(a) && IsOr(b)) || (IsCoalesce(a) && IsCoalesce(b));
 
     private static bool SameArithmeticFamily(SyntaxToken a, SyntaxToken b) =>
-        (IsAdditive(a) && IsAdditive(b)) || (IsMultiplicative(a) && IsMultiplicative(b)) || (IsShift(a) && IsShift(b));
+        (IsAdditive(a) && IsAdditive(b)) || (IsMultiplicative(a) && IsMultiplicative(b)) || (IsShift(a) && IsShift(b))
+        || (IsBitwise(a) && a.RawKind == b.RawKind);
 
     private static bool IsAdditive(SyntaxToken token) => token.Kind() is SyntaxKind.PlusToken or SyntaxKind.MinusToken;
 
     private static bool IsMultiplicative(SyntaxToken token) => token.Kind() is SyntaxKind.AsteriskToken or SyntaxKind.SlashToken;
 
-    private static bool IsShift(SyntaxToken token) => token.Kind() is SyntaxKind.LessThanLessThanToken or SyntaxKind.GreaterThanGreaterThanToken;
+    private static bool IsShift(SyntaxToken token) => token.Kind() is SyntaxKind.LessThanLessThanToken or SyntaxKind.GreaterThanGreaterThanToken
+        or SyntaxKind.GreaterThanGreaterThanGreaterThanToken;
+
+    /// <summary>'&amp;', '|' and '^' are each a family of their own: 'a &amp; b &amp; c' is fine, 'a &amp; b | c' isn't.</summary>
+    private static bool IsBitwise(SyntaxToken token) => token.Kind() is SyntaxKind.AmpersandToken or SyntaxKind.BarToken or SyntaxKind.CaretToken;
 }

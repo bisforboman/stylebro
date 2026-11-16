@@ -36,8 +36,8 @@ internal static class TrailingCommas
     /// Roslynator's RCS1260 omit), where a comma never saves a diff line.
     /// <para>
     /// Like StyleCop, the lists are array, object, collection and 'with' initializers, anonymous objects, enums, switch
-    /// expressions (not property patterns, like StyleCop 1.2.0-beta.556; only its unreleased master checks them); a
-    /// list is multi-line when its braces are on different lines. The comma goes right after the last item's code, so before a trailing comment ('2 // last' becomes
+    /// expressions and, like StyleCop 1.3, collection expressions ('[1, 2]'; not property patterns, which 1.3 checks too:
+    /// the owner's decision, and not list patterns); a list is multi-line when its braces or brackets are on different lines. The comma goes right after the last item's code, so before a trailing comment ('2 // last' becomes
     /// '2, // last'). Lists with a preprocessor directive between their braces are skipped: which item is last can then
     /// depend on the build configuration, and in a multi-targeted project each target framework would want a different
     /// edit to the same file, which 'dotnet format' merges into conflict markers. The options are only read for a list
@@ -93,12 +93,13 @@ internal static class TrailingCommas
 
     /// <summary>
     /// The text to insert after the last item: ',' or, when code follows directly ('"x"}'), ', ' so the fix doesn't
-    /// leave a comma without the space after it that the formatter and StyleCop's SA1001 expect.
+    /// leave a comma without the space after it that the formatter and StyleCop's SA1001 expect. Before a collection
+    /// expression's ']' it is ',' ('2]' becomes '2,]'): the formatter wants no space before the bracket.
     /// </summary>
     public static string GetInsertion(SyntaxNode lastItem, SourceText text)
     {
         var end = lastItem.Span.End;
-        return end < text.Length && text[end] is not (' ' or '\t' or '\r' or '\n') ? ", " : ",";
+        return end < text.Length && text[end] is not (' ' or '\t' or '\r' or '\n' or ']') ? ", " : ",";
     }
 
     /// <summary>Whether the key is <see langword="false"/>: those lists aren't checked.</summary>
@@ -136,6 +137,8 @@ internal static class TrailingCommas
                 Describe(enumDeclaration.Members, enumDeclaration.OpenBraceToken, enumDeclaration.CloseBraceToken),
             SwitchExpressionSyntax switchExpression =>
                 Describe(switchExpression.Arms, switchExpression.OpenBraceToken, switchExpression.CloseBraceToken),
+            CollectionExpressionSyntax collection =>
+                Describe(collection.Elements, collection.OpenBracketToken, collection.CloseBracketToken),
             _ => null,
         };
     }

@@ -21,6 +21,12 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   comment above a directive. A doc comment moved right below a region line gets BRO1513's blank
   line (found in Messy: depending on fix order `dotnet format` needed a second run).
 - Types where sorting would swap dependent field/auto-property initializers are skipped (`InitializerOrder.cs`).
+- Since 2026-11-15 (issue #338, owner: follow StyleCop 1.3.177-beta): explicit interface events count as public like
+  the other explicit implementations (StyleCop PR 4281; 1.2 left them private), and records get all five keys
+  (constants, static, readonly: StyleCop PRs 4122 and 4142; 1.2 checked kind and access only, so `GetKey` had an
+  `inRecord` switch, now gone). A record struct's instance fields stay layout (`ObservableOrder`), so a readonly field
+  below a mutable one is not reported there, as in a struct. Parity set `member-order-records-events` was written
+  against 1.2's behaviour.
 - Since 2026-10-03 also the members of a namespace (block or file-scoped) and a file: StyleCop's OuterOrder (namespace,
   delegate, enum, interface, struct, class) + access + static, a type without a modifier is internal there. Skipped: a
   file whose first type carries the header (nothing before it), top-level statements (no kind), directives between
@@ -49,7 +55,13 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
 - **BRO1104** (SA1129) `new T()` for value types -> `default(T)`, or like StyleCop `CancellationToken.None`,
   `Guid.Empty`, `IntPtr/UIntPtr.Zero`, an enum's zero member; `default(T)` in parameter defaults (must be constant).
   Not reported: explicit parameterless struct ctor (like StyleCop), type parameters and `new S();` statements
-  (deviations; StyleCop's fix for the statement doesn't compile). Needs the semantic model.
+  (deviations; StyleCop's fix for the statement doesn't compile). Needs the semantic model. `new nint()`/`new nuint()`
+  (2026-11-15, following StyleCop 1.3.177-beta, issue 338): `nint.Zero` with C# 11+ on a runtime with numeric IntPtr
+  (`DefaultValueConstructors.HasNumericIntPtr`), `default(nint)` elsewhere. The analyzer asks its own compilation; the fix
+  asks every linked copy's (`LinkedFileFixAllProvider.HoldsForEveryCopyAsync`), so a net8.0;netstandard2.0 project gets
+  `default(nint)` in every copy (the net8.0 analyzer's message still says `nint.Zero`, like the `default` literal's
+  language version). The test harness' default references have numeric IntPtr: older targets are tested with
+  `ReferenceAssemblies.NetStandard.NetStandard20`.
 - For both, StyleCop and StyleBro were run on the same probe files: positions and fixed output are identical except
   the three documented deviations.
 - **BRO1105** (SA1128) `: base(...)`/`: this(...)` on its own line, one level deeper than the constructor
@@ -77,6 +89,14 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   families (`+ -`, `* /`, `<< >>`, `%` alone; `&&`/`and` vs `||`/`or`); the fix inserts `(`/`)` per operand, combined per
   position (`((`/`))`) so nested operands are fixed in one pass. Also `and`/`or` patterns, like StyleCop's current
   source; 1.2.0-beta.556 doesn't (parity `precedence`: 8/10, documented).
+  Since 2026-11-15 (StyleCop 1.3.177-beta, issue 338; its source wasn't reachable from the cloud session, so the
+  grouping was measured with a probe project, positions and fixed output): BRO1406 also has `&`, `|`, `^` (each a
+  family of its own) and `>>>` (a shift); the rule stays "a binary-expression operand of another family", which under
+  a bitwise operator includes comparisons, `is T` and `as` (`a == b & c` -> `(a == b) & c`; not `is` patterns, not
+  a bitwise operand of `&&`/`||`/`==`). BRO1407 also has `??` as a third family next to `&&` and `||`: an `&&`/`||`
+  operand of `??` on either side (`a && b ?? c` -> `(a && b) ?? c`); `??` with anything else isn't reported. The
+  SDK's groups fit: `& | ^` and shifts are "arithmetic", `??` is "other" (`Precedence.IsWanted`). BRO1405 keeps
+  all of these parentheses (FixOrderTests `BitwiseAndCoalesceParentheses_NextToRedundantOnes`).
 - **BRO1517-BRO1519** (SA1507/SA1508/SA1513, 2026-10-03, `Layout/BlankLineRuns.cs`, one tree analyzer + one fix,
   replace IDE2000/IDE2002/IDE2003): StyleCop's logic, minus places another blank-line rule fixes when it's on (after
   `{` BRO1503, below `//` BRO1506, before `}` BRO1518 for BRO1517; a comment/doc/member after `}` BRO1504/BRO1513/
@@ -129,11 +149,24 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
 - **BRO1106** (SA1122) `""`/`@""` -> `string.Empty`, except constant contexts (const, attribute args, parameter
   defaults, case labels, patterns). Same results as StyleCop, except expression trees (trial 58, owner's decision
   2026-10-27: both directions skip a lambda or query converted to System.Linq.Expressions, `NullChecks.IsInExpressionTree`;
-  ExpressionTreeToString's tests render `() => string.Empty`).
+  ExpressionTreeToString's tests render `() => string.Empty`). Since 2026-11-15 (StyleCop 1.3.177-beta's SA1122,
+  issue 338) also `$""`/`$@""`/an empty interpolated raw string and a raw literal whose value is empty (only a
+  multi-line one can be: `""""""` doesn't parse), same constant contexts. Measured against 1.3.177-beta: same positions
+  and output, including what it skips (`FormattableString f = $""`, `IFormattable`, a `FormattableString` parameter); the
+  guard is BRO1138's (converted type string or object), so a handler parameter and a user-defined conversion from
+  string stay too. The literal style (`stylebro_empty_string_style = literal`) still leaves `$""` and empty raw
+  strings alone (BRO1138 leaves empty strings to this rule): a gap, not decided.
 - **BRO1401** (SA1413, maintainability block) trailing comma in multi-line array/object/collection/with initializers,
-  anonymous objects, enums, switch expressions (not collection expressions/patterns/`{k, v}` pairs, like StyleCop 1.2).
+  anonymous objects, enums, switch expressions (not patterns/`{k, v}` pairs, like StyleCop 1.2).
   Inserts `, ` when code follows directly (StyleCop's `,}` broke SA1001 in the private app). Skips lists with
   directives between the braces (the multi-targeting conflict). Nested lists fixed in one pass (StyleCop needs two).
+  Since 2026-11-15 (StyleCop 1.3.177-beta, issue 338) also collection expressions (`[ ... ]`, multi-line by their
+  brackets; a spread or a nested collection as the last element too; omit mode removes theirs as well). Before the
+  `]` on the same line the insertion is `,` not `, ` (`2];` -> `2,];`, StyleCop's output; the formatter wants no
+  space before `]`). Like StyleCop a one-element collection whose element spans lines (`[.. items.Where(...)` +
+  line break + `.ToList()]`) is reported. 1.3 also reports property patterns: still not (owner's decision); list
+  patterns neither. No key to turn collection expressions off (unlike switch/with), and `bro migrate` writes nothing
+  for a repository coming from StyleCop 1.2, which didn't check them.
 - **BRO1107** (SA1116) first item on the line after `(` when the list is split, and **BRO1108** (SA1117) items all
   on one line or each on its own (`Readability/ParameterLayout.cs`). Lists: parameter/bracketed parameter/argument/
   bracketed argument/attribute argument lists and array rank specifiers. SA1117 as probed: the first two items'
@@ -270,7 +303,20 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   non-readonly protected/private protected fields are camelCase (SA1306, BRO1303); a readonly one's casing isn't
   checked (SA1306 skips it, SA1304 defers to SA1307, which checks public/internal only: Polly has both
   `DurationOfBreak` and `absoluteExpirationTime`); a leading underscore (SA1309) is removed in the camelCase style and
-  kept in `_camelCase` (no underscore added: SX1309 is private). `IsDataMember` (word-inside-string guard) no longer
+  kept in `_camelCase` (no underscore added: SX1309 is private). **2026-11-15 (issue 338, StyleCop 1.3.177-beta's
+  SA1304, PR 4217)**: a protected or private protected READONLY field (not static readonly, not like_private's) is
+  now PascalCase, BRO1306's (`IsProtectedReadOnly`; `limit` -> `Limit`, with the prefix and inner-underscore rules in
+  Pascal). StyleCop reports only a lower-case first character, so `_logger` is left where SA1309 is off: BRO1306 keeps
+  a `_` name in the `_camelCase` style (and with stylebro_allow_leading_underscore_in_pascal_fields), and makes
+  `_size` -> `Size` in the camelCase style (SA1309 + SA1304 in one rename; it was `size`, BRO1303). An enforced SDK
+  naming rule for protected fields still wins. `FieldNames.IsPascalChecked` is unchanged (Conventions' count of
+  non-private casing doesn't include protected fields). New analyzer guard for these fields only
+  (`FieldNamingAnalyzer.IsHiddenInDerivedType`): a class derived from the field's type in the same compilation
+  with a member named like the new name -> no diagnostic (the fix only refuses when a SIMPLE-name reference sees the
+  member; `this.depth` in the derived type would be rebound to the member, and without a reference CS0108 appears).
+  Derived types in other projects stay the fix's check (kept finding). Open: the other non-private fields have the
+  same gap (`this.limit` in a derived type with a `Limit`); they keep the reported-but-kept behaviour
+  (KeptFindingsTests.AFieldADerivedMemberWouldHide). `IsDataMember` (word-inside-string guard) no longer
   includes protected fields: in Messy it blocked `Total` because the referenced StyleBro projects' strings contain it.
 - **BRO1307** (SA1308, `m_`/`s_`/`t_` prefixes, lowercase only) and **BRO1308** (SA1310, underscore inside a field
   name): `FieldNames.GetRename` gives every field at most ONE rule and the COMPLETE new name (prefix > underscore >
@@ -311,6 +357,31 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   Off-by-default plumbing: `Severities.IsOn(..., enabledByDefault: false)`; the test framework turns on EVERY supported
   diagnostic, so `Verifier.RunAsync` suppresses off-by-default ids unless the test's .editorconfig sets them;
   DocExamplesTests runs all analyzers supporting an id; the parity runner sets the BRO ids' severity too.
+- **BRO1311, tuple literals (2026-11-15, issue 338; StyleCop 1.3.177-beta's SA1316, PR 4202)**: StyleCop now checks
+  every explicit name in a tuple EXPRESSION (`(lower: 1, 2)`; signatures of overrides and implementations stay reported
+  here, the owner's earlier decision), and its fix replaces just that token (`var t = (lower: 1, 2); t.lower` stops
+  compiling). StyleBro: `TupleElementNamingAnalyzer.AnalyzeLiteral` + `TupleElementNames.ClassifyLiteralElement`, shared
+  with `TupleElementRenamer`. Probed (Roslyn 4.8 in the tests): `GetTypeInfo(literal).ConvertedType`'s elements are
+  declared AT THE LITERAL (the explicit name's token, or the argument an inferred name comes from) when the literal
+  keeps its own type (`var`, a generic argument, a lambda's inferred return, `?:` and switch arms, array initializers of
+  `new[]`, `object`), and at the declaration (or in metadata) when it is converted to a declared tuple type (also
+  `yield return`, a `(..)[]` initializer, a parameter, `(long, long)`); a nullable target shows `Nullable<(..)>`
+  (unwrapped), a `==`/`!=` operand shows its own type (the other side comes from the operation tree,
+  `ITupleBinaryOperation`; CS8383 is the warning there). The older note below ("can't tell a renamed target from none")
+  didn't hold in this probe; the operation-tree target (`GetTargetType`, moved to TupleElementNames) is kept as the
+  second opinion. Three kinds: **Own** (reported; the name's token is a renamed place, so step 3 renames the uses bound
+  to it, by the element's location), **FollowsTarget** (same name as the declared element: NOT reported, the
+  declaration's diagnostic and rename take it along, as before; a library's/public/suppressed declaration keeps both:
+  the one deliberate difference from StyleCop's positions), **Ignored** (the target names it differently or not at
+  all, CS8123 already: reported, only the token changes). Guards: `HasNameClash` (another element of the literal has
+  the new name, explicit or inferred: CS8127, or the inferred name would silently go and `t.Lower` rebind; or the new
+  name is a tuple member: Rest, ToString, ItemN elsewhere), DisabledCode, IDE1006 suppression. Inferred names: a use
+  that names a literal's element (`(t.lower, 5)`) used to get the old name written out; that would now be an explicit
+  wrong-cased name, reported in the next run, so the inferred element is renamed with the use and its uses follow
+  (loop until nothing new); the old name is written out only next to an element that has the new name (and
+  `HasNameClash` then keeps the rule off it). Anonymous objects still get the name written out. `AddsErrorsAsync` also
+  counts CS8383. Parity: under 1.3 the positions differ only by FollowsTarget literals; StyleCop's output differs
+  wherever a use had to follow (it doesn't compile there).
 - **BRO1311** (SA1316, tuple element casing; 2026-10-03; `Naming/TupleElementNames.cs`, `TupleElementNamingAnalyzer`,
   fix `TupleElementRenamer`): StyleCop's reports exactly (tuple TYPE elements, first letter, `_` skipped, names forced by
   a LIBRARY member whose own declaration names them; overrides of solution members ARE reported; parity
@@ -336,7 +407,7 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   naming-rule guards (`IsLeftByNamingRule`, `ruled == Other`, `IsPrefixRequiredByNamingRule`) redundant for enforced
   rules: their mutation entries were dropped. Not done: two-run renames (a field whose new name a
   method renamed in the same run frees).
-- Remaining naming: protected readonly casing, namespaces.
+- Remaining naming: namespaces.
 
 ## BRO16xx: documentation
 
@@ -357,6 +428,18 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
     inline element; nested containers (`<remarks>` inside `<param>`, `<para>`, `<placeholder>`) judged by their own
     text; deviations: `?`, `!`, `:` endings are fine; content ending in `<inheritdoc/>`/`<include/>` isn't checked
     (OpenTelemetry uses `<param name="key"><inheritdoc cref=... path="/param"/></param>`: 72 false positives before).
+    **2026-11-15 (issue 338, StyleCop 1.3.177-beta's SA1629, PR 4298: `?` and `!` end a sentence)**: an inline
+    element at the end whose own text ends in `?`/`!` (then closing quotes `"` `'` `’` `”`, then one `)`:
+    StyleCop's EndsWithValidPunctuation) is passed over and the text before it is checked, so the period goes before
+    the element (`Asks. <c>Is it done?</c>`; `DocumentationPeriods.EndsWithQuestionOrExclamation`, asked before
+    `EndsWithSentence`). Measured against 1.3.177-beta: same positions and output for `<c>Is it done?</c>`,
+    `<c>"Really?"</c>`, `<i>really?</i>` after `<see/>`, an element on its own line, `<c>(or is it?)</c>`, and nothing
+    for `<summary><c>It works!</c></summary>`. Before, such an element got nothing (see, paramref) or a period after
+    it (`<c>`). Deviations kept: ONE word in `<c>` (`<c>int?</c>`, `<c>value!</c>`) is code and keeps the period after
+    the element (StyleCop: `Gets an. <c>int?</c>`); the text before the element follows BRO1603's own endings
+    (`Asks: <c>Is it?</c>` is fine, StyleCop writes `Asks:. <c>`); an element ending in a PERIOD is unchanged (nothing
+    for see/paramref, the period after `<c>`; StyleCop passes those over too, in 1.2 already); `?]` isn't StyleCop's
+    closing punctuation and stays `EndsWithSentence`'s (nothing).
   - **BRO1604/BRO1605** (SA1623/SA1624) property summary verb matches the accessors; private/internal setter =
     restricted, protected isn't (as StyleCop). Deviation: a bool summary may use the plain verb ("Gets the open
     state"); only summaries that already say "whether" get "a value indicating whether" (StyleCop's fix writes
@@ -438,6 +521,25 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   comment or `#if`); the fix inserts above the element's first line (comment/doc/attribute/directive), diagnostic at
   that line's start (FullSpan.Start). Same positions as StyleCop (28/28); StyleCop's fix misses doc comments and
   mangles two-members-on-one-line.
+- BRO1510 expression-bodied accessors (2026-11-15, issue #338, owner: follow StyleCop 1.3.177-beta, its PR 4283):
+  an accessor list counts when every accessor has a body, block or expression (before: blocks only); `get;` still
+  skips the list. Measured against 1.3.177-beta: `get => x;` + multi-line `set { }` reported, `get => x;` + one-line
+  `set { }` not, multi-line `get =>\n x;` + one-line block reported, + multi-line block not, events too. The fix keeps
+  the rule's order: collapse first (the one-statement block joins the expression body's layout on one line; the
+  expression body stays), else expand, where a one-line expression body becomes a block (`ExpandExpression`: `return`
+  for a getter, the bare statement for set/init/add/remove and for `get => throw`). A multi-line expression body is
+  never touched. The new block gets BRO1505's blank line here (`BecomesBlock`: BRO1505 wants none next to an expression
+  body, so on the original it reports nothing; FixOrderTests `ExpressionAccessor_BecomesABlock_WithItsBlankLine`, with
+  BRO1003). Skipped: expanding while IDE0027 prefers expression bodies (option `true`/`when_on_single_line`, or the rule
+  on with the option unset: the two fixes would undo each other), and a comment between the keyword and the `;`.
+  StyleCop reports both.
+- BRO1505 properties (2026-11-15, issue #338, owner: follow StyleCop 1.3.177-beta, its PR 3936): two single-line
+  properties may sit together also when either has a `///` comment. Before, a documented property was set apart
+  (`HasDocumentation` in `NeedsBlankLine`, added for Ocelot's fix-order problem with BRO1601) and BRO1601's fix added
+  the blank line below the property it documented (`GetBlankLineBelowOnceDocumented`); both are gone. The `///` right
+  below a property is BRO1513's finding (StyleCop: SA1514), and BRO1601's fix still brings that blank line itself, so
+  the order doesn't matter (FixOrderTests `InheritDoc_OnPropertiesTheSortMoves`, `DocumentedSingleLineProperties_StayTogether`).
+  With BRO1513 off, a `///` property stays right below the previous property.
 - BRO1505 accessors: only two accessors that BOTH have block bodies, when either is multi-line (an expression-bodied
   `get => x;` next to a multi-line `set { }` is fine, like StyleCop; found via 26 false positives in OpenTelemetry).
 - **BRO1506** (SA1512) no blank line below a `//` comment (not the file header, `///`/`////`, trailing comments, or

@@ -10,7 +10,7 @@
 # unless -StyleCopVersion is passed, and a 1.0-1.2 version passed skips the set).
 # Several StyleCop rules may map to one StyleBro rule; StyleCop's reports at the same position then count once.
 #
-# The 'Expected' entries are written against StyleCop 1.2.0-beta.556 (the last release), or the set's StyleCopVersion. To compare with another build,
+# The 'Expected' entries are written against StyleCop 1.3.177-beta (since 2026-11-16; before, 1.2.0-beta.556), or the set's StyleCopVersion. To compare with another build,
 # e.g. StyleCop's unreleased master, pass its package: -StyleCopPackage/-StyleCopVersion and -StyleCopFeed (a folder
 # with the .nupkg; restored into an isolated folder so the odd version stays out of the global cache). For master:
 #   git clone --filter=blob:none https://github.com/DotNetAnalyzers/StyleCopAnalyzers sc
@@ -30,7 +30,7 @@
 param(
     [string[]]$Set,
     [string]$StyleCopPackage = 'StyleCop.Analyzers',
-    [string]$StyleCopVersion = '1.2.0-beta.556',
+    [string]$StyleCopVersion = '1.3.177-beta',
     [string]$StyleCopFeed,
     [switch]$StyleSharp)
 $ErrorActionPreference = 'Stop'
@@ -54,7 +54,7 @@ $versionGiven = $PSBoundParameters.ContainsKey('StyleCopVersion')
 $fromStyleCop = @{}
 if ($StyleSharp) {
     if ($StyleCopPackage -eq 'StyleCop.Analyzers') { $StyleCopPackage = 'StyleSharp.Analyzers' }
-    if ($StyleCopVersion -eq '1.2.0-beta.556') { $StyleCopVersion = '5.1.2' }
+    if (-not $versionGiven) { $StyleCopVersion = '5.1.2' }
     foreach ($row in Import-Csv (Join-Path $PSScriptRoot 'data/stylesharp-mapping.csv')) {
         foreach ($sa in $row.StyleCop -split ' ' | Where-Object { $_ }) { $fromStyleCop[$sa] = @($fromStyleCop[$sa]) + $row.Id | Where-Object { $_ } }
     }

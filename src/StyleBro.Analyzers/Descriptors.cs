@@ -627,8 +627,8 @@ internal static class Descriptors
         category: "Layout",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
-        description: "When every accessor has a block body, they are either all single-line or all multi-line. The fix puts "
-            + "one-statement bodies on one line, or expands the single-line ones. Replaces StyleCop SA1504.",
+        description: "When every accessor has a body (a block or an expression), they are either all single-line or all multi-line. "
+            + "The fix puts one-statement bodies on one line, or expands the single-line ones. Replaces StyleCop SA1504.",
         helpLinkUri: HelpBase + DiagnosticIds.AccessorsConsistentLayout + "/");
 
     public static readonly DiagnosticDescriptor PropertyAccessorOrder = new(
@@ -861,7 +861,8 @@ internal static class Descriptors
         category: "Maintainability",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
-        description: "An operation inside an arithmetic operation of another kind ('a + b * c', 'a * b % c', 'a << b + c') is in parentheses. Replaces StyleCop SA1407.",
+        description: "An operation inside an arithmetic, shift or bitwise operation of another kind ('a + b * c', 'a * b % c', 'a << b + c', 'a & b | c') "
+            + "is in parentheses. Replaces StyleCop SA1407.",
         helpLinkUri: HelpBase + DiagnosticIds.ArithmeticPrecedence + "/");
 
     public static readonly DiagnosticDescriptor ConditionalPrecedence = new(
@@ -871,7 +872,7 @@ internal static class Descriptors
         category: "Maintainability",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
-        description: "'&&' and '||' (and the 'and'/'or' patterns) aren't mixed without parentheses. Replaces StyleCop SA1408.",
+        description: "'&&', '||' and '??' (and the 'and'/'or' patterns) aren't mixed without parentheses. Replaces StyleCop SA1408.",
         helpLinkUri: HelpBase + DiagnosticIds.ConditionalPrecedence + "/");
 
     public static readonly DiagnosticDescriptor HungarianNotation = new(

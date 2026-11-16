@@ -23,14 +23,15 @@ public sealed class EmptyStringAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxNodeAction(
             c =>
             {
-                var literal = (LiteralExpressionSyntax)c.Node;
+                var literal = (ExpressionSyntax)c.Node;
                 if (!EmptyStrings.PrefersLiteral(c.Options.AnalyzerConfigOptionsProvider.GetOptions(literal.SyntaxTree))
                     && EmptyStrings.ShouldReplace(literal, c.SemanticModel, c.CancellationToken))
                 {
-                    c.ReportDiagnostic(Diagnostic.Create(Descriptors.EmptyString, literal.GetLocation(), "string.Empty", literal.Token.Text));
+                    c.ReportDiagnostic(Diagnostic.Create(Descriptors.EmptyString, literal.GetLocation(), "string.Empty", EmptyStrings.Describe(literal)));
                 }
             },
-            SyntaxKind.StringLiteralExpression);
+            SyntaxKind.StringLiteralExpression,
+            SyntaxKind.InterpolatedStringExpression);
         context.RegisterSyntaxNodeAction(
             c =>
             {

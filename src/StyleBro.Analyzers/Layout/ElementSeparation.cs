@@ -30,7 +30,7 @@ internal static class ElementSeparation
     /// Pairs of neighbouring elements (previous, current) that need a blank line and don't have one. Elements are the
     /// usings, extern aliases, assembly attributes and members of a file or namespace, the members of a type, and the
     /// accessors of a property, indexer or event. Like StyleCop, these pairs don't need one: two fields (unless the first
-    /// spans several lines); two single-line properties (like StyleCop's unreleased master); two usings, two extern
+    /// spans several lines); two single-line properties, documented or not (like StyleCop 1.3.177-beta); two usings, two extern
     /// aliases or two attribute lists; and two accessors that are both on a single line. <paramref name="autoAccessorLines"/>:
     /// see <see cref="NeedsBlankLine"/>; <paramref name="allowAdjacentSingleLine"/>: <see cref="AllowAdjacentSingleLineMembersKey"/>;
     /// <paramref name="commentBlankLines"/>: see <see cref="HasBlankLineBetween"/>.
@@ -106,11 +106,9 @@ internal static class ElementSeparation
             // Like StyleCop: two fields need one only when the first spans several lines (a multi-line initializer).
             (FieldDeclarationSyntax field, FieldDeclarationSyntax) => SpansSeveralLines(field, text),
 
-            // Like StyleCop's master (unreleased, 2aeb4e3d): two properties need one only when either spans several lines;
-            // also when either is documented (Ocelot: with BRO1601 adding '<inheritdoc/>', which properties ended up
-            // separated depended on the fix order).
-            (PropertyDeclarationSyntax property, PropertyDeclarationSyntax next) => IsMultiLineProperty(property, text, autoAccessorLines) || IsMultiLineProperty(next, text, autoAccessorLines)
-                || HasDocumentation(property) || HasDocumentation(next),
+            // Like StyleCop 1.3.177-beta: two properties need one only when either spans several lines, documented or
+            // not (issue 338; a '///' comment right below a property is BRO1513's to set apart).
+            (PropertyDeclarationSyntax property, PropertyDeclarationSyntax next) => IsMultiLineProperty(property, text, autoAccessorLines) || IsMultiLineProperty(next, text, autoAccessorLines),
             (UsingDirectiveSyntax, UsingDirectiveSyntax) => false,
             (ExternAliasDirectiveSyntax, ExternAliasDirectiveSyntax) => false,
             (AttributeListSyntax, AttributeListSyntax) => false,
@@ -161,24 +159,6 @@ internal static class ElementSeparation
                 .Select(g => g.First());
 
     /// <summary>
-    /// BRO1601's fix: where a blank line goes below a property it documents, when another property sits right below it
-    /// (a documented property needs one, <see cref="NeedsBlankLine"/>); null when none is needed or BRO1505 adds it anyway.
-    /// </summary>
-    public static TextChange? GetBlankLineBelowOnceDocumented(PropertyDeclarationSyntax property, SourceText text, AnalyzerConfigOptions? autoAccessorLines, bool allowAdjacentSingleLine)
-    {
-        if (property.Parent is not TypeDeclarationSyntax type
-            || (type.Members.IndexOf(property) + 1 is var index && (index >= type.Members.Count || type.Members[index] is not PropertyDeclarationSyntax next))
-            || (allowAdjacentSingleLine && IsCompact(property, text, autoAccessorLines) && IsCompact(next, text, autoAccessorLines))
-            || NeedsBlankLine(property, next, text, autoAccessorLines, allowAdjacentSingleLine)
-            || HasBlankLineBetween(property, next, text))
-        {
-            return null;
-        }
-
-        return new TextChange(new TextSpan(text.Lines.GetLineFromPosition(GetFirstLineStart(next, text)).Start, 0), GetLineBreak(text, text.Lines.GetLineFromPosition(property.Span.End)));
-    }
-
-    /// <summary>
     /// Whether a field or property spans several lines, like StyleCop's SA1516: from the line where the last attribute
     /// list's trivia ends (attributes on their own lines don't count) or the member's first line, to its last line.
     /// </summary>
@@ -207,11 +187,6 @@ internal static class ElementSeparation
             _ => false,
         };
     }
-
-    /// <summary>A '///' or '/** */' comment above the member (parsed as documentation or not: that depends on the project).</summary>
-    private static bool HasDocumentation(SyntaxNode member) =>
-        member.GetLeadingTrivia().Any(t => t.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) || t.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia)
-            || (t.IsKind(SyntaxKind.SingleLineCommentTrivia) && t.ToString().StartsWith("///", System.StringComparison.Ordinal) && !t.ToString().StartsWith("////", System.StringComparison.Ordinal)));
 
     private static bool HasBlockAccessor(BasePropertyDeclarationSyntax property)
     {

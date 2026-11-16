@@ -19,19 +19,26 @@ internal static class EmptyStrings
         options.TryGetValue(StyleKey, out var value) && value.Trim().Equals("literal", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
-    /// An empty regular or verbatim string literal ("" or @"") outside a context that requires a constant.
-    /// 'string.Empty' is not a constant, so attribute arguments, parameter defaults, case labels, patterns and
-    /// const declarations keep "". Interpolated ($""), UTF-8 (""u8) and raw literals are different kinds of literal. Neither
-    /// form is replaced in an expression tree: a constant and a field access are different trees (owner's decision
-    /// 2026-10-27, trial 58).
+    /// An empty string outside a context that requires a constant: a regular or verbatim literal ("" or @""), a raw
+    /// literal whose value is empty (only a multi-line one can be) or an interpolated string without content ($"",
+    /// $@"", an empty interpolated raw string), like StyleCop 1.3. 'string.Empty' is not a constant, so attribute
+    /// arguments, parameter defaults, case labels, patterns and const declarations keep theirs. A UTF-8 literal (""u8) is
+    /// a different kind of literal. Neither form is replaced in an expression tree: a constant and a field access are
+    /// different trees (owner's decision 2026-10-27, trial 58).
     /// </summary>
-    public static bool ShouldReplace(LiteralExpressionSyntax literal, SemanticModel model, CancellationToken cancellationToken)
+    public static bool ShouldReplace(ExpressionSyntax expression, SemanticModel model, CancellationToken cancellationToken)
     {
-        return literal.IsKind(SyntaxKind.StringLiteralExpression)
-            && literal.Token.IsKind(SyntaxKind.StringLiteralToken)
-            && literal.Token.ValueText.Length == 0
-            && !IsInConstantContext(literal)
-            && !NullChecks.IsInExpressionTreeOrTwin(literal, model, cancellationToken);
+        return IsEmpty(expression, model, cancellationToken)
+            && !IsInConstantContext(expression)
+            && !NullChecks.IsInExpressionTreeOrTwin(expression, model, cancellationToken);
+    }
+
+    /// <summary>The expression as a diagnostic's message shows it: its first line.</summary>
+    public static string Describe(ExpressionSyntax expression)
+    {
+        var text = expression.ToString();
+        var lineBreak = text.IndexOfAny(new[] { '\r', '\n' });
+        return lineBreak < 0 ? text : text.Substring(0, lineBreak) + "...";
     }
 
     /// <summary>
@@ -47,6 +54,19 @@ internal static class EmptyStrings
             && model.GetSymbolInfo(access, cancellationToken).Symbol is IFieldSymbol { ContainingType.SpecialType: SpecialType.System_String }
             && !NullChecks.IsInExpressionTreeOrTwin(access, model, cancellationToken);
     }
+
+    private static bool IsEmpty(ExpressionSyntax expression, SemanticModel model, CancellationToken cancellationToken) => expression switch
+    {
+        LiteralExpressionSyntax literal => literal.IsKind(SyntaxKind.StringLiteralExpression)
+            && literal.Token.Kind() is SyntaxKind.StringLiteralToken or SyntaxKind.MultiLineRawStringLiteralToken
+            && literal.Token.ValueText.Length == 0,
+
+        // As a FormattableString, an IFormattable or an interpolated string handler, 'string.Empty' wouldn't compile or
+        // would mean something else (the same check as BRO1138's).
+        InterpolatedStringExpressionSyntax interpolated => interpolated.Contents.All(c => c is InterpolatedStringTextSyntax { TextToken.ValueText.Length: 0 })
+            && model.GetTypeInfo(interpolated, cancellationToken).ConvertedType?.SpecialType is SpecialType.System_String or SpecialType.System_Object,
+        _ => false,
+    };
 
     private static bool IsInNameof(SyntaxNode node)
     {

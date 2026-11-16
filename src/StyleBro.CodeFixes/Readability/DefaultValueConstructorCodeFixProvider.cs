@@ -59,11 +59,14 @@ public sealed class DefaultValueConstructorCodeFixProvider : CodeFixProvider
 
         var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
         var version = LinkedFileFixAllProvider.GetLowestLanguageVersion(document);
+
+        // 'nint.Zero' only where every target framework's copy of the file compiles it: the copies get the same text.
+        var numericIntPtr = await LinkedFileFixAllProvider.HoldsForEveryCopyAsync(document, DefaultValueConstructors.HasNumericIntPtr, cancellationToken).ConfigureAwait(false);
         var replacements = new Dictionary<SyntaxNode, string>();
         foreach (var diagnostic in diagnostics)
         {
             if (root.FindNode(diagnostic.Location.SourceSpan, getInnermostNodeForTie: true) is BaseObjectCreationExpressionSyntax creation
-                && DefaultValueConstructors.GetReplacement(creation, model, options, cancellationToken, version) is { } replacement)
+                && DefaultValueConstructors.GetReplacement(creation, model, options, cancellationToken, version, numericIntPtr) is { } replacement)
             {
                 replacements[creation] = replacement.StartsWith("default(", System.StringComparison.Ordinal)
                     ? "default" + Indentation.GetCallParenthesis(options) + replacement.Substring("default(".Length)
