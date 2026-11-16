@@ -58,6 +58,7 @@ One file per shape in `shapes/`, returning a hashtable; its header comment names
 | `InitReason` | a pattern init's (or migrate's) output must match: a note it must give |
 | `Target`, `BuildArgs` | what the TWAE build and the tests run on (default: the root) |
 | `BuildFails` | the reason the repository's own build fails, before and after StyleBro |
+| `HostFallback` | `$true` when the default engine may fall back to `dotnet format` here (otherwise a fallback fails the shape) |
 | `Tests` | `$false` when the fixture has no tests |
 | `Assert` | `{ param($formatted, $runs, $context) }` returns problems as strings |
 

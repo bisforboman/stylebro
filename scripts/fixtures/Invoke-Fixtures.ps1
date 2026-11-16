@@ -231,6 +231,11 @@ foreach ($file in $chosen) {
                 $result = Run-Bro $clone $logs "$engine-$step" ($arguments + @($spec.Args | Where-Object { $_ }) + $option)
                 $expected, $reason = Expected $spec $step $engine
                 Test-Verdict $result $expected $reason $failures
+                # The default engine must run in-process: a silent fallback to 'dotnet format' hid that SDK 11's dotnet-format
+                # changed what the host calls (every shape still passed, both engines being 'dotnet format').
+                if ($engine -eq 'host' -and $result.Text -match "the host can't run here \(([^\n]*)\)" -and -not $spec.HostFallback) {
+                    $failures.Add("$engine-$step fell back to 'dotnet format': $($Matches[1]) (log: $($result.Log))")
+                }
                 $steps[$step] = $result
                 if ($step -eq 'format') { $steps['tree'] = Tree $clone }
             }
