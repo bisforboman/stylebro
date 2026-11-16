@@ -889,9 +889,7 @@ internal static class FieldNames
         : field.IsStatic && field.IsReadOnly ? style.StaticReadOnly
         : null;
 
-    /// <summary>
-    /// Protected and private protected fields that aren't constants or readonly (and not named like private ones): camelCase.
-    /// </summary>
+    /// <summary>Protected and private protected fields that aren't constants or readonly (and not named like private ones): camelCase.</summary>
     private static bool IsProtectedChecked(IFieldSymbol field, FieldStyles style) =>
         IsProtectedInstanceLike(field, style) && !field.IsReadOnly;
 

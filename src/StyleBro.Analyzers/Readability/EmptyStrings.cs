@@ -41,19 +41,6 @@ internal static class EmptyStrings
         return lineBreak < 0 ? text : text.Substring(0, lineBreak) + "...";
     }
 
-    private static bool IsEmpty(ExpressionSyntax expression, SemanticModel model, CancellationToken cancellationToken) => expression switch
-    {
-        LiteralExpressionSyntax literal => literal.IsKind(SyntaxKind.StringLiteralExpression)
-            && literal.Token.Kind() is SyntaxKind.StringLiteralToken or SyntaxKind.MultiLineRawStringLiteralToken
-            && literal.Token.ValueText.Length == 0,
-
-        // As a FormattableString, an IFormattable or an interpolated string handler, 'string.Empty' wouldn't compile or
-        // would mean something else (the same check as BRO1138's).
-        InterpolatedStringExpressionSyntax interpolated => interpolated.Contents.All(c => c is InterpolatedStringTextSyntax { TextToken.ValueText.Length: 0 })
-            && model.GetTypeInfo(interpolated, cancellationToken).ConvertedType?.SpecialType is SpecialType.System_String or SpecialType.System_Object,
-        _ => false,
-    };
-
     /// <summary>
     /// 'string.Empty' (also 'String.Empty', 'System.String.Empty') for the literal style: the member access binds to
     /// the field. Skipped inside 'nameof' ('nameof("")' doesn't compile) and with a comment inside the access.
@@ -67,6 +54,19 @@ internal static class EmptyStrings
             && model.GetSymbolInfo(access, cancellationToken).Symbol is IFieldSymbol { ContainingType.SpecialType: SpecialType.System_String }
             && !NullChecks.IsInExpressionTreeOrTwin(access, model, cancellationToken);
     }
+
+    private static bool IsEmpty(ExpressionSyntax expression, SemanticModel model, CancellationToken cancellationToken) => expression switch
+    {
+        LiteralExpressionSyntax literal => literal.IsKind(SyntaxKind.StringLiteralExpression)
+            && literal.Token.Kind() is SyntaxKind.StringLiteralToken or SyntaxKind.MultiLineRawStringLiteralToken
+            && literal.Token.ValueText.Length == 0,
+
+        // As a FormattableString, an IFormattable or an interpolated string handler, 'string.Empty' wouldn't compile or
+        // would mean something else (the same check as BRO1138's).
+        InterpolatedStringExpressionSyntax interpolated => interpolated.Contents.All(c => c is InterpolatedStringTextSyntax { TextToken.ValueText.Length: 0 })
+            && model.GetTypeInfo(interpolated, cancellationToken).ConvertedType?.SpecialType is SpecialType.System_String or SpecialType.System_Object,
+        _ => false,
+    };
 
     private static bool IsInNameof(SyntaxNode node)
     {

@@ -413,6 +413,13 @@ public class DefaultValueConstructorTests
         """,
         "csharp_space_between_method_call_name_and_opening_parenthesis = true\n");
 
+    private static string Fixed(string nint, string nuint) => NativeIntegers
+        .Replace("{|BRO1104:new()|}", nint, StringComparison.Ordinal)
+        .Replace("{|BRO1104:new nint()|}", nint, StringComparison.Ordinal)
+        .Replace("{|BRO1104:new nuint()|}", nuint, StringComparison.Ordinal)
+        .Replace("{|BRO1104:new IntPtr()|}", "IntPtr.Zero", StringComparison.Ordinal)
+        .Replace("{|BRO1104:new UIntPtr()|}", "UIntPtr.Zero", StringComparison.Ordinal);
+
     private sealed class FixAllDiagnostics : FixAllContext.DiagnosticProvider
     {
         private readonly DiagnosticAnalyzer analyzer;
@@ -436,11 +443,4 @@ public class DefaultValueConstructorTests
         public override Task<IEnumerable<Diagnostic>> GetAllDiagnosticsAsync(Project project, CancellationToken cancellationToken) =>
             Task.FromResult(Enumerable.Empty<Diagnostic>());
     }
-
-    private static string Fixed(string nint, string nuint) => NativeIntegers
-        .Replace("{|BRO1104:new()|}", nint, StringComparison.Ordinal)
-        .Replace("{|BRO1104:new nint()|}", nint, StringComparison.Ordinal)
-        .Replace("{|BRO1104:new nuint()|}", nuint, StringComparison.Ordinal)
-        .Replace("{|BRO1104:new IntPtr()|}", "IntPtr.Zero", StringComparison.Ordinal)
-        .Replace("{|BRO1104:new UIntPtr()|}", "UIntPtr.Zero", StringComparison.Ordinal);
 }
