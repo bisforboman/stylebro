@@ -324,6 +324,31 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   Off-by-default plumbing: `Severities.IsOn(..., enabledByDefault: false)`; the test framework turns on EVERY supported
   diagnostic, so `Verifier.RunAsync` suppresses off-by-default ids unless the test's .editorconfig sets them;
   DocExamplesTests runs all analyzers supporting an id; the parity runner sets the BRO ids' severity too.
+- **BRO1311, tuple literals (2026-11-15, issue 338; StyleCop 1.3.177-beta's SA1316, PR 4202)**: StyleCop now checks
+  every explicit name in a tuple EXPRESSION (`(lower: 1, 2)`; signatures of overrides and implementations stay reported
+  here, the owner's earlier decision), and its fix replaces just that token (`var t = (lower: 1, 2); t.lower` stops
+  compiling). StyleBro: `TupleElementNamingAnalyzer.AnalyzeLiteral` + `TupleElementNames.ClassifyLiteralElement`, shared
+  with `TupleElementRenamer`. Probed (Roslyn 4.8 in the tests): `GetTypeInfo(literal).ConvertedType`'s elements are
+  declared AT THE LITERAL (the explicit name's token, or the argument an inferred name comes from) when the literal
+  keeps its own type (`var`, a generic argument, a lambda's inferred return, `?:` and switch arms, array initializers of
+  `new[]`, `object`), and at the declaration (or in metadata) when it is converted to a declared tuple type (also
+  `yield return`, a `(..)[]` initializer, a parameter, `(long, long)`); a nullable target shows `Nullable<(..)>`
+  (unwrapped), a `==`/`!=` operand shows its own type (the other side comes from the operation tree,
+  `ITupleBinaryOperation`; CS8383 is the warning there). The older note below ("can't tell a renamed target from none")
+  didn't hold in this probe; the operation-tree target (`GetTargetType`, moved to TupleElementNames) is kept as the
+  second opinion. Three kinds: **Own** (reported; the name's token is a renamed place, so step 3 renames the uses bound
+  to it, by the element's location), **FollowsTarget** (same name as the declared element: NOT reported, the
+  declaration's diagnostic and rename take it along, as before; a library's/public/suppressed declaration keeps both:
+  the one deliberate difference from StyleCop's positions), **Ignored** (the target names it differently or not at
+  all, CS8123 already: reported, only the token changes). Guards: `HasNameClash` (another element of the literal has
+  the new name, explicit or inferred: CS8127, or the inferred name would silently go and `t.Lower` rebind; or the new
+  name is a tuple member: Rest, ToString, ItemN elsewhere), DisabledCode, IDE1006 suppression. Inferred names: a use
+  that names a literal's element (`(t.lower, 5)`) used to get the old name written out; that would now be an explicit
+  wrong-cased name, reported in the next run, so the inferred element is renamed with the use and its uses follow
+  (loop until nothing new); the old name is written out only next to an element that has the new name (and
+  `HasNameClash` then keeps the rule off it). Anonymous objects still get the name written out. `AddsErrorsAsync` also
+  counts CS8383. Parity: under 1.3 the positions differ only by FollowsTarget literals; StyleCop's output differs
+  wherever a use had to follow (it doesn't compile there).
 - **BRO1311** (SA1316, tuple element casing; 2026-10-03; `Naming/TupleElementNames.cs`, `TupleElementNamingAnalyzer`,
   fix `TupleElementRenamer`): StyleCop's reports exactly (tuple TYPE elements, first letter, `_` skipped, names forced by
   a LIBRARY member whose own declaration names them; overrides of solution members ARE reported; parity
