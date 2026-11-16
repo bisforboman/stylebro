@@ -851,6 +851,28 @@ public class TupleElementNamingTests
         """,
         "stylebro_rename_public_api = false");
 
+    // A literal follows its own target type: renaming one declaration's element leaves the literal of another one,
+    // which keeps its name (public API here), alone.
+    [Fact]
+    public Task NamesInTupleLiterals_ThatFollowAnotherDeclaration_KeepTheirNames() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public (int lower, int B) Kept() => (lower: 1, 2);
+
+            private (int {|BRO1311:lower|}, int B) Mine() => (lower: 1, 2);
+        }
+        """,
+        """
+        public class C
+        {
+            public (int lower, int B) Kept() => (lower: 1, 2);
+
+            private (int Lower, int B) Mine() => (Lower: 1, 2);
+        }
+        """,
+        "stylebro_rename_public_api = false");
+
     // Another element has the new name already (a second one is an error, or takes an inferred name away so that
     // 't.Lower' would mean the other element), or the new name is one of the tuple's own members.
     [Fact]
