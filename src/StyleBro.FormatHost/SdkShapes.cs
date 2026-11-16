@@ -19,8 +19,6 @@ public static class SdkShapes
             return projectPath;
         }
 
-        return projectPath.Length == 0
-            ? null
-            : solution.Projects.FirstOrDefault(p => string.Equals(p.FilePath, projectPath, StringComparison.OrdinalIgnoreCase))?.Id;
+        return solution.Projects.FirstOrDefault(p => string.Equals(p.FilePath, projectPath, StringComparison.OrdinalIgnoreCase))?.Id;
     }
 }
