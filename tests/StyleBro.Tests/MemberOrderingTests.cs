@@ -1351,7 +1351,8 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task ExplicitEventImplementation_CountsAsPrivate_LikeStyleCop() => VerifyNoDiagnosticsAsync("""
+    public Task ExplicitEventImplementation_CountsAsPublic() => VerifyFixAsync(
+        """
         using System;
 
         interface I
@@ -1365,11 +1366,53 @@ public class MemberOrderingTests
         {
             private static event EventHandler S;
 
-            event EventHandler I.E { add { } remove { } }
+            event EventHandler I.{|BRO1001:E|} { add { } remove { } }
 
             private event EventHandler P;
 
             void I.M() { }
+        }
+        """,
+        """
+        using System;
+
+        interface I
+        {
+            event EventHandler E;
+
+            void M();
+        }
+
+        class C : I
+        {
+            event EventHandler I.E { add { } remove { } }
+
+            private static event EventHandler S;
+
+            private event EventHandler P;
+
+            void I.M() { }
+        }
+        """);
+
+    [Fact]
+    public Task ExplicitEventImplementation_BetweenPublicAndPrivateEvents_NoDiagnostic() => VerifyNoDiagnosticsAsync("""
+        using System;
+
+        interface I
+        {
+            event EventHandler E;
+        }
+
+        class C : I
+        {
+            public event EventHandler A;
+
+            event EventHandler I.E { add { } remove { } }
+
+            internal event EventHandler B;
+
+            private event EventHandler P;
         }
         """);
 
@@ -1403,19 +1446,13 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task Record_StaticConstantAndReadonlyNotChecked_LikeStyleCop() => VerifyNoDiagnosticsAsync("""
-        record struct S(int X)
-        {
-            public void Instance() { }
-
-            public static void Create() { }
-        }
-
+    public Task Record_ConstantStaticAndReadonly_AreOrdered() => VerifyFixAsync(
+        """
         record R(string Name)
         {
             private static int s;
 
-            private const int C = 1;
+            private const int {|BRO1001:C|} = 1;
 
             private int a;
 
@@ -1424,6 +1461,157 @@ public class MemberOrderingTests
             internal void Instance() { }
 
             internal static R Create() => new("x");
+        }
+        """,
+        """
+        record R(string Name)
+        {
+            private const int C = 1;
+
+            private static int s;
+
+            private readonly int b;
+
+            private int a;
+
+            internal static R Create() => new("x");
+
+            internal void Instance() { }
+        }
+        """);
+
+    [Fact]
+    public Task Record_StaticBelowInstance_IsReported() => VerifyFixAsync(
+        """
+        record R
+        {
+            public void Instance() { }
+
+            public static void {|BRO1001:Create|}() { }
+        }
+        """,
+        """
+        record R
+        {
+            public static void Create() { }
+
+            public void Instance() { }
+        }
+        """);
+
+    [Fact]
+    public Task Record_ReadonlyBelowMutableField_IsReported() => VerifyFixAsync(
+        """
+        record class R(string Name)
+        {
+            private int a;
+
+            private readonly int {|BRO1001:b|};
+        }
+        """,
+        """
+        record class R(string Name)
+        {
+            private readonly int b;
+
+            private int a;
+        }
+        """);
+
+    [Fact]
+    public Task RecordStruct_StaticBelowInstance_IsReported() => VerifyFixAsync(
+        """
+        record struct S(int X)
+        {
+            public void Instance() { }
+
+            public static void {|BRO1001:Create|}() { }
+        }
+        """,
+        """
+        record struct S(int X)
+        {
+            public static void Create() { }
+
+            public void Instance() { }
+        }
+        """);
+
+    // A record struct's instance fields are its memory layout, like a struct's: a sort that would swap them is skipped.
+    [Fact]
+    public Task RecordStruct_InstanceFieldOrder_IsLayout_NoDiagnostic() => VerifyNoDiagnosticsAsync("""
+        record struct S(int X)
+        {
+            private int a;
+
+            private readonly int b;
+        }
+        """);
+
+    [Fact]
+    public Task Record_InFullOrder_NoDiagnostic() => VerifyNoDiagnosticsAsync("""
+        record R(string Name)
+        {
+            private const int C = 1;
+
+            private static int s;
+
+            private readonly int b;
+
+            private int a;
+
+            internal static R Create() => new("x");
+
+            internal void Instance() { }
+        }
+
+        record Empty(string Name);
+        """);
+
+    [Fact]
+    public Task Records_FixAll() => VerifyFixAsync(
+        """
+        using System;
+
+        interface I
+        {
+            event EventHandler E;
+        }
+
+        record struct B(int X)
+        {
+            private int a;
+
+            private const int {|BRO1001:C|} = 1;
+        }
+
+        record A(string Name) : I
+        {
+            private event EventHandler P;
+
+            event EventHandler I.{|BRO1001:E|} { add { } remove { } }
+        }
+        """,
+        """
+        using System;
+
+        interface I
+        {
+            event EventHandler E;
+        }
+
+        record struct B(int X)
+        {
+            private const int C = 1;
+
+            private int a;
+        }
+
+        record A(string Name) : I
+        {
+            event EventHandler I.E { add { } remove { } }
+
+            private event EventHandler P;
         }
         """);
 
@@ -1446,9 +1634,9 @@ public class MemberOrderingTests
         {
             public int Count { get; set; }
 
-            internal void Instance() { }
-
             internal static void Create() { }
+
+            internal void Instance() { }
 
             private void P() { }
         }

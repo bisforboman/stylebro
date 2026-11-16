@@ -26,7 +26,7 @@ public sealed class AccessorLayoutAnalyzer : DiagnosticAnalyzer
                 var list = (AccessorListSyntax)c.Node;
                 var text = c.Node.SyntaxTree.GetText(c.CancellationToken);
                 var options = c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Node.SyntaxTree);
-                if (AccessorLayout.GetFinding(list, text, options) is { } first)
+                if (AccessorLayout.GetFinding(list, text, options, id => Severities.IsOn(c.Compilation.Options, c.Node.SyntaxTree, id, c.CancellationToken, enabledByDefault: false)) is { } first)
                 {
                     c.ReportDiagnostic(Diagnostic.Create(Descriptors.AccessorsConsistentLayout, first.Keyword.GetLocation()));
                 }

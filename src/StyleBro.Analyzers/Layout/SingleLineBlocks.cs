@@ -176,6 +176,10 @@ internal static class SingleLineBlocks
         return kinds.Contains(kind);
     }
 
+    /// <summary><see cref="NewLineBeforeBrace"/> for an accessor's block that isn't there yet.</summary>
+    internal static bool NewLineBeforeAccessorBrace(AnalyzerConfigOptions options) =>
+        NewLineBeforeBrace(SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration, SyntaxFactory.Block()).Body!, options);
+
     /// <summary>The line break the file uses: the one ending the node's line, or the first one in the file.</summary>
     internal static string LineBreak(SourceText text, int position)
     {

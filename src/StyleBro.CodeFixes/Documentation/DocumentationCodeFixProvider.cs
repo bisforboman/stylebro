@@ -107,11 +107,7 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
         var fixedMembers = new HashSet<(SyntaxNode, ParameterDocumentation.TagKind)>();
         var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
         var blankLineBefore = Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.BlankLineBeforeDocumentation, cancellationToken);
-        var separate = Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.ElementsSeparatedByBlankLine, cancellationToken);
         var noBlankLineBelowComment = Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.BlankLineAfterComment, cancellationToken);
-        var documented = new HashSet<SyntaxNode>(diagnostics.Where(d => d.Id == DiagnosticIds.InheritDocumentation)
-            .Select(d => root.FindToken(d.Location.SourceSpan.Start).Parent?.AncestorsAndSelf().FirstOrDefault(n => n is MemberDeclarationSyntax))
-            .Where(m => m is not null)!);
         foreach (var diagnostic in diagnostics)
         {
             var span = diagnostic.Location.SourceSpan;
@@ -122,19 +118,6 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
                 if (member is not null && !DocumentationComments.HasDocumentation(member))
                 {
                     changes.Add(DocumentationComments.GetInheritDocChange(member, text, options, blankLineBefore, noBlankLineBelowComment));
-
-                    // Documented, a property needs a blank line before the property below it too (BRO1505), unless that
-                    // one gets documented in this batch: its own edit brings the blank line (BRO1513).
-                    if (separate && member is PropertyDeclarationSyntax property
-                        && ElementSeparation.GetBlankLineBelowOnceDocumented(
-                            property,
-                            text,
-                            Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.AutoAccessorsOnOneLine, cancellationToken) ? options : null,
-                            ElementSeparation.AllowsAdjacentSingleLineMembers(options)) is { } blankLine
-                        && !(blankLineBefore && property.Parent is TypeDeclarationSyntax type && documented.Contains(type.Members[type.Members.IndexOf(property) + 1])))
-                    {
-                        changes.Add(blankLine);
-                    }
                 }
             }
             else if (diagnostic.Id is DiagnosticIds.PropertySummaryWording or DiagnosticIds.PropertySummaryRestrictedSetter)
