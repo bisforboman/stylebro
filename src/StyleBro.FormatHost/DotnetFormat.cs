@@ -155,15 +155,7 @@ internal sealed class DotnetFormat
     /// <summary>The documents dotnet-format formats in <paramref name="solution"/> (CodeFormatter.DetermineFormattableFilesAsync).</summary>
     public async Task<(int Count, ImmutableArray<DocumentId> Documents)> FormattableAsync(Solution solution, string projectPath, object options, ILogger logger, CancellationToken cancellation)
     {
-        // SDK 10 takes the project's path (empty for a solution), SDK 11 the project's id (null for a solution).
-        object? project = projectPath;
-        if (this.determineFiles.GetParameters()[1].ParameterType.FullName == typeof(ProjectId).FullName)
-        {
-            project = projectPath.Length == 0
-                ? null
-                : solution.Projects.FirstOrDefault(p => string.Equals(p.FilePath, projectPath, StringComparison.OrdinalIgnoreCase))?.Id;
-        }
-
+        var project = SdkShapes.ProjectArgument(this.determineFiles.GetParameters()[1].ParameterType, solution, projectPath);
         var task = (Task)this.determineFiles.Invoke(null, [solution, project, options, logger, cancellation])!;
         await task.ConfigureAwait(false);
         var result = ((int, ImmutableArray<DocumentId>))task.GetType().GetProperty("Result")!.GetValue(task)!;
