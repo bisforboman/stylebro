@@ -10,6 +10,17 @@ updates:
       # Pinned on purpose: the analyzers must load in older SDKs and Visual Studio (AGENTS.md, "Roslyn stays pinned to 4.8.0").
       - dependency-name: Microsoft.CodeAnalysis.CSharp
       - dependency-name: Microsoft.CodeAnalysis.CSharp.Workspaces
+      - dependency-name: Microsoft.CodeAnalysis.VisualBasic.Workspaces
+      # The format host compiles against Roslyn 4.8.0 and runs on the SDK's own copies (src/StyleBro.FormatHost).
+      - dependency-name: Microsoft.CodeAnalysis.Workspaces.MSBuild
+      # Compile-time pins of the net8.0 tools (Directory.Packages.props): they stay on the major that matches net8.0
+      # (System.Text.Json, System.Drawing.Common) or the SDK the host runs on (Logging.Abstractions).
+      - dependency-name: System.Text.Json
+        update-types: [version-update:semver-major]
+      - dependency-name: System.Drawing.Common
+        update-types: [version-update:semver-major]
+      - dependency-name: Microsoft.Extensions.Logging.Abstractions
+        update-types: [version-update:semver-major]
       # The StyleCop version the migration sample and parity runs compare against.
       - dependency-name: StyleCop.Analyzers
       # The self-check's version is StyleBroSelfVersion, bumped by hand after each release.
