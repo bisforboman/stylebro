@@ -73,6 +73,10 @@ function New-TestProject {
 }
 
 # A solution listing the projects (paths relative to the root). -Format sln or slnx; -Path may put it in a subfolder.
+# Written here, in the layout 'dotnet new sln' and 'dotnet sln add' of SDK 10 gave (a solution folder per parent folder,
+# none for the project's own), so a shape is the same repository whatever SDK creates it: on the runner image of
+# 2026-11-11 'dotnet sln add' failed for a project another listed project references ("Solution folder 'src' already
+# contains a project with the filename 'Lib.csproj'").
 function New-Solution {
     param(
         [Parameter(Mandatory)][string]$Root,
@@ -81,12 +85,72 @@ function New-Solution {
     $full = Join-Path $Root $Path
     $folder = Split-Path $full -Parent
     New-Item -ItemType Directory -Force $folder | Out-Null
-    $format = [IO.Path]::GetExtension($Path).TrimStart('.')
-    $name = [IO.Path]::GetFileNameWithoutExtension($Path)
-    dotnet new sln -n $name -o $folder --format $format | Out-Null
-    if ($LASTEXITCODE -ne 0) { throw "dotnet new sln failed for $Path." }
-    dotnet sln $full add @($Projects | ForEach-Object { Join-Path $Root $_ }) | Out-Null
-    if ($LASTEXITCODE -ne 0) { throw "dotnet sln add failed for $Path." }
+    $entries = @(foreach ($project in $Projects) {
+        $relative = [IO.Path]::GetRelativePath($folder, (Join-Path $Root $project)).Replace('\', '/')
+        $name = [IO.Path]::GetFileNameWithoutExtension($relative)
+        $parts = @($relative.Split('/'))
+        $dirs = @($parts | Select-Object -SkipLast 1)
+        if ($dirs.Count -and $dirs[-1] -eq $name) { $dirs = @($dirs | Select-Object -SkipLast 1) }
+        if ($dirs.Count -gt 1 -or $dirs -contains '..') { throw "New-Solution writes one level of solution folders: $project in $Path." }
+        [pscustomobject]@{ Path = $relative; Name = $name; Folder = "$($dirs -join '')" }
+    })
+    $folders = @($entries.Folder | Where-Object { $_ } | Select-Object -Unique)
+    $lines = [Collections.Generic.List[string]]::new()
+    if ([IO.Path]::GetExtension($Path) -eq '.slnx') {
+        $lines.Add('<Solution>')
+        foreach ($f in $folders) {
+            $lines.Add("  <Folder Name=`"/$f/`">")
+            $entries | Where-Object Folder -EQ $f | ForEach-Object { $lines.Add("    <Project Path=`"$($_.Path)`" />") }
+            $lines.Add('  </Folder>')
+        }
+        $entries | Where-Object { -not $_.Folder } | ForEach-Object { $lines.Add("  <Project Path=`"$($_.Path)`" />") }
+        $lines.Add('</Solution>')
+        [IO.File]::WriteAllText($full, ($lines -join "`n") + "`n", [Text.UTF8Encoding]::new($false))
+        return
+    }
+
+    # Ids from the names, so the file is the same on every run.
+    $id = { param($text) '{' + ([guid]::new([Security.Cryptography.MD5]::HashData([Text.Encoding]::UTF8.GetBytes($text)))).ToString().ToUpperInvariant() + '}' }
+    $lines.Add('')
+    $lines.Add('Microsoft Visual Studio Solution File, Format Version 12.00')
+    $lines.Add('# Visual Studio Version 17')
+    $lines.Add('VisualStudioVersion = 17.0.31903.59')
+    $lines.Add('MinimumVisualStudioVersion = 10.0.40219.1')
+    $written = @{}
+    foreach ($e in $entries) {
+        if ($e.Folder -and -not $written[$e.Folder]) {
+            $written[$e.Folder] = $true
+            $lines.Add("Project(`"{2150E333-8FDC-42A3-9474-1A3956D46DE8}`") = `"$($e.Folder)`", `"$($e.Folder)`", `"$(& $id "folder:$($e.Folder)")`"")
+            $lines.Add('EndProject')
+        }
+        $type = if ($e.Path.EndsWith('.vbproj')) { '{F184B08F-C81C-45F6-A57F-5ABD9991F28F}' } else { '{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}' }
+        $lines.Add("Project(`"$type`") = `"$($e.Name)`", `"$($e.Path.Replace('/', '\'))`", `"$(& $id $e.Path)`"")
+        $lines.Add('EndProject')
+    }
+    $configurations = @(foreach ($c in 'Debug', 'Release') { foreach ($platform in 'Any CPU', 'x64', 'x86') { "$c|$platform" } })
+    $lines.Add('Global')
+    $lines.Add("`tGlobalSection(SolutionConfigurationPlatforms) = preSolution")
+    $configurations | ForEach-Object { $lines.Add("`t`t$_ = $_") }
+    $lines.Add("`tEndGlobalSection")
+    $lines.Add("`tGlobalSection(ProjectConfigurationPlatforms) = postSolution")
+    foreach ($e in $entries) {
+        foreach ($c in $configurations) {
+            $target = "$($c.Split('|')[0])|Any CPU"
+            $lines.Add("`t`t$(& $id $e.Path).$c.ActiveCfg = $target")
+            $lines.Add("`t`t$(& $id $e.Path).$c.Build.0 = $target")
+        }
+    }
+    $lines.Add("`tEndGlobalSection")
+    $lines.Add("`tGlobalSection(SolutionProperties) = preSolution")
+    $lines.Add("`t`tHideSolutionNode = FALSE")
+    $lines.Add("`tEndGlobalSection")
+    if ($folders.Count) {
+        $lines.Add("`tGlobalSection(NestedProjects) = preSolution")
+        $entries | Where-Object Folder | ForEach-Object { $lines.Add("`t`t$(& $id $_.Path) = $(& $id "folder:$($_.Folder)")") }
+        $lines.Add("`tEndGlobalSection")
+    }
+    $lines.Add('EndGlobal')
+    [IO.File]::WriteAllText($full, ($lines -join "`n") + "`n", [Text.UTF8Encoding]::new($true))
 }
 
 # A C# file with a few findings the first run fixes (BRO1106, IDE0036, BRO1509, BRO1001): every shape has something to

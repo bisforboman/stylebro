@@ -51,7 +51,9 @@ internal sealed class DotnetFormat
         Type Find(string name) => assembly.GetType(name, throwOnError: true)!;
         MethodInfo Method(Type type, string name) => type.GetMethod(name, Statics) ?? throw new MissingMethodException(type.FullName, name);
         this.options = Find("Microsoft.CodeAnalysis.Tools.FormatOptions");
-        this.optionsConstructor = this.options.GetConstructors().Single(c => c.GetParameters().Length == 15);
+
+        // SDK 10's record has 15 parameters, SDK 11's 16 (TargetFramework, --framework): the longest one, filled by name.
+        this.optionsConstructor = this.options.GetConstructors().OrderByDescending(c => c.GetParameters().Length).First();
         this.workspaceType = Find("Microsoft.CodeAnalysis.Tools.WorkspaceType");
         this.fixCategory = Find("Microsoft.CodeAnalysis.Tools.FixCategory");
         this.createMatcher = Method(Find("Microsoft.CodeAnalysis.Tools.Utilities.SourceFileMatcher"), "CreateMatcher");
@@ -143,6 +145,9 @@ internal sealed class DotnetFormat
             ["ReportPath"] = arguments.Report,
             ["BinaryLogPath"] = null,
             ["IncludeGeneratedFiles"] = arguments.IncludeGenerated,
+
+            // SDK 11: the --framework option, which bro doesn't pass (its per-framework runs set the property instead).
+            ["TargetFramework"] = null,
         };
         return this.optionsConstructor.Invoke(this.optionsConstructor.GetParameters().Select(p => values.TryGetValue(p.Name!, out var value) ? value : throw new MissingMemberException(this.options.FullName, p.Name)).ToArray());
     }
@@ -150,7 +155,8 @@ internal sealed class DotnetFormat
     /// <summary>The documents dotnet-format formats in <paramref name="solution"/> (CodeFormatter.DetermineFormattableFilesAsync).</summary>
     public async Task<(int Count, ImmutableArray<DocumentId> Documents)> FormattableAsync(Solution solution, string projectPath, object options, ILogger logger, CancellationToken cancellation)
     {
-        var task = (Task)this.determineFiles.Invoke(null, [solution, projectPath, options, logger, cancellation])!;
+        var project = SdkShapes.ProjectArgument(this.determineFiles.GetParameters()[1].ParameterType, solution, projectPath);
+        var task = (Task)this.determineFiles.Invoke(null, [solution, project, options, logger, cancellation])!;
         await task.ConfigureAwait(false);
         var result = ((int, ImmutableArray<DocumentId>))task.GetType().GetProperty("Result")!.GetValue(task)!;
         return (result.Item1, result.Item2);

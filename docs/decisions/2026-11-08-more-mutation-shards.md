@@ -27,3 +27,9 @@ Asked of the owner as a multiple-choice question (2026-11-08):
 The owner chose **more shards** (2026-11-08): `.github/workflows/mutation.yml` runs 8 shards on a pull request and 12
 at night, `timeout-minutes` stays 90. The required check is still the summary job `mutation`, so branch protection
 doesn't change.
+
+## Update (2026-11-15)
+
+Twelve shards were not enough either: from 2026-11-09 to 2026-11-15 one to six shards were cancelled at the 90-minute
+timeout every night (issue #342; a shard that passed took 66 minutes or more). Following the same choice, the nightly
+run uses 16 shards; pull requests stay at 8.

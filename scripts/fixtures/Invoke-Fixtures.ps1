@@ -56,6 +56,10 @@ Remove-Item Env:GITHUB_ENV, Env:GITHUB_OUTPUT, Env:GITHUB_PATH, Env:GITHUB_STEP_
 $Work = [IO.Path]::GetFullPath($Work)
 if ($Work.StartsWith($root + [IO.Path]::DirectorySeparatorChar)) { throw '-Work must be outside the repository (its props would leak into the fixtures).' }
 New-Item -ItemType Directory -Force $Work | Out-Null
+# Asked in the work folder: the shapes run outside the repository, where its global.json (SDK 10) doesn't apply.
+Push-Location $Work
+try { Write-Host "== SDK for the shapes: $(dotnet --version)" }
+finally { Pop-Location }
 
 if (-not $Feed) {
     $Feed = Join-Path $Work 'feed'
@@ -227,6 +231,11 @@ foreach ($file in $chosen) {
                 $result = Run-Bro $clone $logs "$engine-$step" ($arguments + @($spec.Args | Where-Object { $_ }) + $option)
                 $expected, $reason = Expected $spec $step $engine
                 Test-Verdict $result $expected $reason $failures
+                # The default engine must run in-process: a silent fallback to 'dotnet format' hid that SDK 11's dotnet-format
+                # changed what the host calls (every shape still passed, both engines being 'dotnet format').
+                if ($engine -eq 'host' -and $result.Text -match "the host can't run here \(([^\n]*)\)" -and -not $spec.HostFallback) {
+                    $failures.Add("$engine-$step fell back to 'dotnet format': $($Matches[1]) (log: $($result.Log))")
+                }
                 $steps[$step] = $result
                 if ($step -eq 'format') { $steps['tree'] = Tree $clone }
             }

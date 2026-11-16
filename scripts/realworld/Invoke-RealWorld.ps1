@@ -160,10 +160,14 @@ function Get-Diff([string[]]$options = @()) {
     $out
 }
 
+# Every command on the clone runs in the clone's folder: 'dotnet' picks its SDK from the folder it starts in, and started
+# in StyleBro's checkout it took StyleBro's global.json (SDK 10) while the tools it starts for the clone's projects took
+# the newest SDK (eShopOnWeb: its Razor generator didn't run, and a field the page uses was renamed).
 function Invoke-Build {
     $env:CustomAfterMicrosoftCommonTargets = $hook
+    Push-Location $path
     try { $out = dotnet build $sln -nologo --no-incremental -p:TreatWarningsAsErrors=false -p:CodeAnalysisTreatWarningsAsErrors=false 2>&1 }
-    finally { Remove-Item Env:\CustomAfterMicrosoftCommonTargets -ErrorAction SilentlyContinue }
+    finally { Pop-Location; Remove-Item Env:\CustomAfterMicrosoftCommonTargets -ErrorAction SilentlyContinue }
     @{
         Errors = @($out | Where-Object { "$_" -match ': error (?!BRO|AD0001)' } | ForEach-Object { ("$_" -replace '\s*\[.*$', '').Replace($path, '') } | Sort-Object -Unique)
         Crashes = @($out | Where-Object { "$_" -match 'AD0001' } | ForEach-Object { ("$_" -replace '^.*AD0001: ', '') -replace '\s*\[.*$', '' } | Sort-Object -Unique)
@@ -173,6 +177,7 @@ function Invoke-Build {
 
 function Invoke-Format([switch]$Verify) {
     $env:CustomAfterMicrosoftCommonTargets = $hook
+    Push-Location $path
     try {
         if ($csharpier) {
             $migrateArgs = @('format', $sln)
@@ -185,7 +190,7 @@ function Invoke-Format([switch]$Verify) {
         dotnet @formatArgs 2>&1 | Out-Null
         return $LASTEXITCODE
     }
-    finally { Remove-Item Env:\CustomAfterMicrosoftCommonTargets -ErrorAction SilentlyContinue }
+    finally { Pop-Location; Remove-Item Env:\CustomAfterMicrosoftCommonTargets -ErrorAction SilentlyContinue }
 }
 
 . (Join-Path $PSScriptRoot 'FailedTests.ps1')
@@ -243,6 +248,10 @@ if ($csharpier) {
 }
 
 $before = Measure-Phase 'untouched code: build with analyzers' { Invoke-Build }
+# Asked in the clone: its global.json decides, not StyleBro's.
+Push-Location $path
+try { $report.Add("- SDK: $(dotnet --version)") }
+finally { Pop-Location }
 $report.Add("- findings: $($before.Findings); compile errors before: $($before.Errors.Count)")
 $before.Crashes | ForEach-Object { $problems.Add("analyzer crash: $_") }
 
@@ -316,7 +325,12 @@ if ($csharpier) {
 }
 
 $after = Measure-Phase 'build after the fixes' { Invoke-Build }
-$newErrors = @($after.Errors | Where-Object { $_ -notin $before.Errors })
+# A fix moves code, so an error of the untouched code comes back at another line or column: an error is new when its
+# file has more errors with that text than before, wherever they are.
+function Get-ErrorKey([string]$e) { $e -replace '\(\d+,\d+(,\d+,\d+)?\): error ', ': error ' }
+$known = @{}
+$before.Errors | ForEach-Object { $known[(Get-ErrorKey $_)] = 1 + $known[(Get-ErrorKey $_)] }
+$newErrors = @($after.Errors | Where-Object { ($known[(Get-ErrorKey $_)] = $known[(Get-ErrorKey $_)] - 1) -lt 0 })
 $newErrors | ForEach-Object { $problems.Add("new compile error: $_") }
 $after.Crashes | Where-Object { $_ -notin $before.Crashes } | ForEach-Object { $problems.Add("analyzer crash after fixing: $_") }
 $report.Add("- warnings left (kept by guards): $($after.Findings); new compile errors: $($newErrors.Count)")

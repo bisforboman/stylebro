@@ -44,6 +44,9 @@ them (IDE rules, `.editorconfig`); the preset turns those built-in rules on inst
   Record design decisions in docs/decisions/.
 - **Where work runs**: long work (PRs, CI waits, releases) runs as cloud sessions; the owner's computer must stay free. Work that needs it (local timings, Windows-only checks) is asked for, never started unasked;
   a PR that needs such a step says so.
+- **SDK**: global.json pins StyleBro's own build to SDK 10 (10.0.x), and the tests' temporary folders get a copy
+  (tests/StyleBro.Tests/TestSdk.cs), so the `dotnet` a test starts is SDK 10 too. Fixtures and real world run outside
+  the repository on the newest SDK installed and print it (docs/decisions/2026-11-15-stylebros-own-build-and-tests-run-on-sdk-10.md).
 - **Before pushing**: `dotnet test StyleBro.slnx -p:StyleBroSelf=none`, `pwsh scripts/verify-format.ps1`, and the
   self-check `dotnet format StyleBro.slnx --verify-no-changes --severity warn --exclude samples` (CI runs all three,
   plus `pwsh scripts/verify-package.ps1` and the pack). One test: `dotnet test StyleBro.slnx -p:StyleBroSelf=none

@@ -64,6 +64,21 @@ public sealed class FormatHostTests : IDisposable
     public void FrameworkOf_ReadsTheInstanceName(string name, string? framework) => Assert.Equal(framework, Views.FrameworkOf(name));
 
     [Fact]
+    public void TheProjectArgument_FitsEachSdksDotnetFormat()
+    {
+        // SDK 10's DetermineFormattableFilesAsync takes the project's path, SDK 11's its ProjectId (null: the whole solution).
+        using var workspace = new AdhocWorkspace();
+        var id = ProjectId.CreateNewId("App");
+        var solution = workspace.CurrentSolution.AddProject(ProjectInfo.Create(id, VersionStamp.Default, "App", "App", LanguageNames.CSharp, filePath: "/r/App/App.csproj"));
+
+        Assert.Equal("/r/App/App.csproj", SdkShapes.ProjectArgument(typeof(string), solution, "/r/App/App.csproj"));
+        Assert.Equal(string.Empty, SdkShapes.ProjectArgument(typeof(string), solution, string.Empty));
+        Assert.Equal(id, SdkShapes.ProjectArgument(typeof(ProjectId), solution, "/r/app/App.csproj"));
+        Assert.Null(SdkShapes.ProjectArgument(typeof(ProjectId), solution, string.Empty));
+        Assert.Null(SdkShapes.ProjectArgument(typeof(ProjectId), solution, "/r/Other/Other.csproj"));
+    }
+
+    [Fact]
     public void AView_HasTheRunsInstances_AndWhatTheyReference()
     {
         using var workspace = new AdhocWorkspace();
