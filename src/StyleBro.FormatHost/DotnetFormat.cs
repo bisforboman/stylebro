@@ -51,6 +51,7 @@ internal sealed class DotnetFormat
         Type Find(string name) => assembly.GetType(name, throwOnError: true)!;
         MethodInfo Method(Type type, string name) => type.GetMethod(name, Statics) ?? throw new MissingMethodException(type.FullName, name);
         this.options = Find("Microsoft.CodeAnalysis.Tools.FormatOptions");
+
         // SDK 10's record has 15 parameters, SDK 11's 16 (TargetFramework, --framework): the longest one, filled by name.
         this.optionsConstructor = this.options.GetConstructors().OrderByDescending(c => c.GetParameters().Length).First();
         this.workspaceType = Find("Microsoft.CodeAnalysis.Tools.WorkspaceType");
@@ -158,7 +159,8 @@ internal sealed class DotnetFormat
         object? project = projectPath;
         if (this.determineFiles.GetParameters()[1].ParameterType.FullName == typeof(ProjectId).FullName)
         {
-            project = projectPath.Length == 0 ? null
+            project = projectPath.Length == 0
+                ? null
                 : solution.Projects.FirstOrDefault(p => string.Equals(p.FilePath, projectPath, StringComparison.OrdinalIgnoreCase))?.Id;
         }
 
