@@ -303,7 +303,20 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   non-readonly protected/private protected fields are camelCase (SA1306, BRO1303); a readonly one's casing isn't
   checked (SA1306 skips it, SA1304 defers to SA1307, which checks public/internal only: Polly has both
   `DurationOfBreak` and `absoluteExpirationTime`); a leading underscore (SA1309) is removed in the camelCase style and
-  kept in `_camelCase` (no underscore added: SX1309 is private). `IsDataMember` (word-inside-string guard) no longer
+  kept in `_camelCase` (no underscore added: SX1309 is private). **2026-11-15 (issue 338, StyleCop 1.3.177-beta's
+  SA1304, PR 4217)**: a protected or private protected READONLY field (not static readonly, not like_private's) is
+  now PascalCase, BRO1306's (`IsProtectedReadOnly`; `limit` -> `Limit`, with the prefix and inner-underscore rules in
+  Pascal). StyleCop reports only a lower-case first character, so `_logger` is left where SA1309 is off: BRO1306 keeps
+  a `_` name in the `_camelCase` style (and with stylebro_allow_leading_underscore_in_pascal_fields), and makes
+  `_size` -> `Size` in the camelCase style (SA1309 + SA1304 in one rename; it was `size`, BRO1303). An enforced SDK
+  naming rule for protected fields still wins. `FieldNames.IsPascalChecked` is unchanged (Conventions' count of
+  non-private casing doesn't include protected fields). New analyzer guard for these fields only
+  (`FieldNamingAnalyzer.IsHiddenInDerivedType`): a class derived from the field's type in the same compilation
+  with a member named like the new name -> no diagnostic (the fix only refuses when a SIMPLE-name reference sees the
+  member; `this.depth` in the derived type would be rebound to the member, and without a reference CS0108 appears).
+  Derived types in other projects stay the fix's check (kept finding). Open: the other non-private fields have the
+  same gap (`this.limit` in a derived type with a `Limit`); they keep the reported-but-kept behaviour
+  (KeptFindingsTests.AFieldADerivedMemberWouldHide). `IsDataMember` (word-inside-string guard) no longer
   includes protected fields: in Messy it blocked `Total` because the referenced StyleBro projects' strings contain it.
 - **BRO1307** (SA1308, `m_`/`s_`/`t_` prefixes, lowercase only) and **BRO1308** (SA1310, underscore inside a field
   name): `FieldNames.GetRename` gives every field at most ONE rule and the COMPLETE new name (prefix > underscore >
@@ -344,6 +357,31 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   Off-by-default plumbing: `Severities.IsOn(..., enabledByDefault: false)`; the test framework turns on EVERY supported
   diagnostic, so `Verifier.RunAsync` suppresses off-by-default ids unless the test's .editorconfig sets them;
   DocExamplesTests runs all analyzers supporting an id; the parity runner sets the BRO ids' severity too.
+- **BRO1311, tuple literals (2026-11-15, issue 338; StyleCop 1.3.177-beta's SA1316, PR 4202)**: StyleCop now checks
+  every explicit name in a tuple EXPRESSION (`(lower: 1, 2)`; signatures of overrides and implementations stay reported
+  here, the owner's earlier decision), and its fix replaces just that token (`var t = (lower: 1, 2); t.lower` stops
+  compiling). StyleBro: `TupleElementNamingAnalyzer.AnalyzeLiteral` + `TupleElementNames.ClassifyLiteralElement`, shared
+  with `TupleElementRenamer`. Probed (Roslyn 4.8 in the tests): `GetTypeInfo(literal).ConvertedType`'s elements are
+  declared AT THE LITERAL (the explicit name's token, or the argument an inferred name comes from) when the literal
+  keeps its own type (`var`, a generic argument, a lambda's inferred return, `?:` and switch arms, array initializers of
+  `new[]`, `object`), and at the declaration (or in metadata) when it is converted to a declared tuple type (also
+  `yield return`, a `(..)[]` initializer, a parameter, `(long, long)`); a nullable target shows `Nullable<(..)>`
+  (unwrapped), a `==`/`!=` operand shows its own type (the other side comes from the operation tree,
+  `ITupleBinaryOperation`; CS8383 is the warning there). The older note below ("can't tell a renamed target from none")
+  didn't hold in this probe; the operation-tree target (`GetTargetType`, moved to TupleElementNames) is kept as the
+  second opinion. Three kinds: **Own** (reported; the name's token is a renamed place, so step 3 renames the uses bound
+  to it, by the element's location), **FollowsTarget** (same name as the declared element: NOT reported, the
+  declaration's diagnostic and rename take it along, as before; a library's/public/suppressed declaration keeps both:
+  the one deliberate difference from StyleCop's positions), **Ignored** (the target names it differently or not at
+  all, CS8123 already: reported, only the token changes). Guards: `HasNameClash` (another element of the literal has
+  the new name, explicit or inferred: CS8127, or the inferred name would silently go and `t.Lower` rebind; or the new
+  name is a tuple member: Rest, ToString, ItemN elsewhere), DisabledCode, IDE1006 suppression. Inferred names: a use
+  that names a literal's element (`(t.lower, 5)`) used to get the old name written out; that would now be an explicit
+  wrong-cased name, reported in the next run, so the inferred element is renamed with the use and its uses follow
+  (loop until nothing new); the old name is written out only next to an element that has the new name (and
+  `HasNameClash` then keeps the rule off it). Anonymous objects still get the name written out. `AddsErrorsAsync` also
+  counts CS8383. Parity: under 1.3 the positions differ only by FollowsTarget literals; StyleCop's output differs
+  wherever a use had to follow (it doesn't compile there).
 - **BRO1311** (SA1316, tuple element casing; 2026-10-03; `Naming/TupleElementNames.cs`, `TupleElementNamingAnalyzer`,
   fix `TupleElementRenamer`): StyleCop's reports exactly (tuple TYPE elements, first letter, `_` skipped, names forced by
   a LIBRARY member whose own declaration names them; overrides of solution members ARE reported; parity
@@ -369,7 +407,7 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
   naming-rule guards (`IsLeftByNamingRule`, `ruled == Other`, `IsPrefixRequiredByNamingRule`) redundant for enforced
   rules: their mutation entries were dropped. Not done: two-run renames (a field whose new name a
   method renamed in the same run frees).
-- Remaining naming: protected readonly casing, namespaces.
+- Remaining naming: namespaces.
 
 ## BRO16xx: documentation
 
@@ -390,6 +428,18 @@ Per-rule implementation notes: logic, skips, StyleCop parity, deviations and the
     inline element; nested containers (`<remarks>` inside `<param>`, `<para>`, `<placeholder>`) judged by their own
     text; deviations: `?`, `!`, `:` endings are fine; content ending in `<inheritdoc/>`/`<include/>` isn't checked
     (OpenTelemetry uses `<param name="key"><inheritdoc cref=... path="/param"/></param>`: 72 false positives before).
+    **2026-11-15 (issue 338, StyleCop 1.3.177-beta's SA1629, PR 4298: `?` and `!` end a sentence)**: an inline
+    element at the end whose own text ends in `?`/`!` (then closing quotes `"` `'` `’` `”`, then one `)`:
+    StyleCop's EndsWithValidPunctuation) is passed over and the text before it is checked, so the period goes before
+    the element (`Asks. <c>Is it done?</c>`; `DocumentationPeriods.EndsWithQuestionOrExclamation`, asked before
+    `EndsWithSentence`). Measured against 1.3.177-beta: same positions and output for `<c>Is it done?</c>`,
+    `<c>"Really?"</c>`, `<i>really?</i>` after `<see/>`, an element on its own line, `<c>(or is it?)</c>`, and nothing
+    for `<summary><c>It works!</c></summary>`. Before, such an element got nothing (see, paramref) or a period after
+    it (`<c>`). Deviations kept: ONE word in `<c>` (`<c>int?</c>`, `<c>value!</c>`) is code and keeps the period after
+    the element (StyleCop: `Gets an. <c>int?</c>`); the text before the element follows BRO1603's own endings
+    (`Asks: <c>Is it?</c>` is fine, StyleCop writes `Asks:. <c>`); an element ending in a PERIOD is unchanged (nothing
+    for see/paramref, the period after `<c>`; StyleCop passes those over too, in 1.2 already); `?]` isn't StyleCop's
+    closing punctuation and stays `EndsWithSentence`'s (nothing).
   - **BRO1604/BRO1605** (SA1623/SA1624) property summary verb matches the accessors; private/internal setter =
     restricted, protected isn't (as StyleCop). Deviation: a bool summary may use the plain verb ("Gets the open
     state"); only summaries that already say "whether" get "a value indicating whether" (StyleCop's fix writes

@@ -2707,12 +2707,120 @@ public class DocumentationTests
     public Task InlineElementEndingASentence_GetsNoPeriod() => VerifyFixAsync(
         "/// <summary>A holder.</summary>\npublic class Holder\n{\n    /// <summary>\n    /// Starts. <paramref name=\"name\">The name of the request.</paramref>\n    /// </summary>\n"
             + "    /// <param name=\"name\">The name.</param>\n    public void A(string name) { }\n\n"
-            + "    /// <summary>Asks <see cref=\"Holder\">is it done?</see></summary>\n    public void B() { }\n\n"
+            + "    /// <summary>Asks{|BRO1603:|} <see cref=\"Holder\">is it done?</see></summary>\n    public void B() { }\n\n"
             + "    /// <summary>Ends with <c>no period</c>{|BRO1603:|}</summary>\n    public void C() { }\n}\n",
         "/// <summary>A holder.</summary>\npublic class Holder\n{\n    /// <summary>\n    /// Starts. <paramref name=\"name\">The name of the request.</paramref>\n    /// </summary>\n"
             + "    /// <param name=\"name\">The name.</param>\n    public void A(string name) { }\n\n"
-            + "    /// <summary>Asks <see cref=\"Holder\">is it done?</see></summary>\n    public void B() { }\n\n"
+            + "    /// <summary>Asks. <see cref=\"Holder\">is it done?</see></summary>\n    public void B() { }\n\n"
             + "    /// <summary>Ends with <c>no period</c>.</summary>\n    public void C() { }\n}\n");
+
+    // StyleCop 1.3's SA1629 (issue 338): an inline element whose own text ends in '?' or '!' is a finished sentence of
+    // its own and is passed over; the text before it is the sentence that gets the period.
+    [Fact]
+    public Task InlineElementEndingInAQuestionOrExclamation_IsPassedOver() => VerifyFixAsync(
+        """
+        /// <summary>A holder.</summary>
+        public class Holder
+        {
+            /// <summary>Asks the user{|BRO1603:|} <c>Is it done?</c></summary>
+            /// <param name="name">The name{|BRO1603:|} <paramref name="name">It works!</paramref></param>
+            /// <returns>
+            /// Something{|BRO1603:|}
+            /// <b>Careful!</b>
+            /// </returns>
+            /// <remarks>Says{|BRO1603:|} <c>"Really?"</c> </remarks>
+            public int A(string name) => 1;
+
+            /// <summary>Asks <see cref="Holder"/>{|BRO1603:|} <i>really?</i></summary>
+            /// <remarks><para>First{|BRO1603:|} <c>Is it?</c></para></remarks>
+            /// <returns>The <c>x</c>{|BRO1603:|} <c>(or is it?)</c></returns>
+            public int B() => 2;
+
+            /// <summary>Text <c>one?</c>{|BRO1603:|} <c>Two words!</c></summary>
+            /// <remarks>Text{|BRO1603:|} <see cref="Holder">is <b>it?</b></see></remarks>
+            public int C() => 3;
+        }
+        """,
+        """
+        /// <summary>A holder.</summary>
+        public class Holder
+        {
+            /// <summary>Asks the user. <c>Is it done?</c></summary>
+            /// <param name="name">The name. <paramref name="name">It works!</paramref></param>
+            /// <returns>
+            /// Something.
+            /// <b>Careful!</b>
+            /// </returns>
+            /// <remarks>Says. <c>"Really?"</c> </remarks>
+            public int A(string name) => 1;
+
+            /// <summary>Asks <see cref="Holder"/>. <i>really?</i></summary>
+            /// <remarks><para>First. <c>Is it?</c></para></remarks>
+            /// <returns>The <c>x</c>. <c>(or is it?)</c></returns>
+            public int B() => 2;
+
+            /// <summary>Text <c>one?</c>. <c>Two words!</c></summary>
+            /// <remarks>Text. <see cref="Holder">is <b>it?</b></see></remarks>
+            public int C() => 3;
+        }
+        """);
+
+    // Nothing before the element, or text that is a finished sentence already: nothing to add.
+    [Fact]
+    public Task InlineElementEndingInAQuestionOrExclamation_WithoutAnOpenSentenceBefore_IsNotReported() => VerifyNoDiagnosticsAsync(
+        """
+        /// <summary>A holder.</summary>
+        public class Holder
+        {
+            /// <summary><c>It works!</c></summary>
+            /// <remarks><c>Is this right?</c></remarks>
+            /// <returns>
+            /// <see cref="Holder">Is it done?</see>
+            /// </returns>
+            public int A() => 1;
+
+            /// <summary>Asks the user. <c>Is it done?</c></summary>
+            /// <remarks>Asks the user: <c>Is it done?</c></remarks>
+            /// <returns>Is it? <b>Really?</b></returns>
+            public int B() => 2;
+
+            /// <summary>Asks <seealso cref="Holder">is it done?</seealso></summary>
+            /// <remarks><c>Is it done?</c><code>x</code></remarks>
+            /// <returns>Intro text <para>Is it done?</para></returns>
+            public int C() => 3;
+        }
+        """);
+
+    // '<c>' holds code: one word ending in '?' or '!' is a type or an expression, not a question, and stays the
+    // sentence's last word. Other closing punctuation than quotes and one ')' isn't a sentence's end either.
+    [Fact]
+    public Task CodeEndingInAQuestionOrExclamationMark_StillEndsTheSentence() => VerifyFixAsync(
+        """
+        /// <summary>A holder.</summary>
+        public class Holder
+        {
+            /// <summary>Returns an <c>int?</c>{|BRO1603:|}</summary>
+            /// <remarks>Never null: <c>value!</c>{|BRO1603:|}</remarks>
+            /// <returns>The <c>(int?)</c>{|BRO1603:|}</returns>
+            public int? A() => 1;
+
+            /// <summary>Asks <see cref="Holder">is it [done?]</see></summary>
+            public int B() => 2;
+        }
+        """,
+        """
+        /// <summary>A holder.</summary>
+        public class Holder
+        {
+            /// <summary>Returns an <c>int?</c>.</summary>
+            /// <remarks>Never null: <c>value!</c>.</remarks>
+            /// <returns>The <c>(int?)</c>.</returns>
+            public int? A() => 1;
+
+            /// <summary>Asks <see cref="Holder">is it [done?]</see></summary>
+            public int B() => 2;
+        }
+        """);
 
     // AngleSharp (trial 21): a word ending in a period and digits reads as a number ('processes it.0' became 'it.0.').
     [Fact]

@@ -5,14 +5,36 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Operations;
 
 namespace StyleBro.Analyzers.Naming;
 
+/// <summary>What an element of a tuple literal ('(count: 1, 2)') is to the type the literal ends up as.</summary>
+internal enum TupleLiteralElement
+{
+    /// <summary>The literal keeps its own type ('var t = (count: 1, 2)'): the name is the element's, and uses bind to it ('t.count').</summary>
+    Own,
+
+    /// <summary>
+    /// The literal is converted to a tuple type declared elsewhere that names the element the same ('(int count, int b) t =
+    /// (count: 1, 2)'): the name has to follow that declaration's (else CS8123), and is renamed with it.
+    /// </summary>
+    FollowsTarget,
+
+    /// <summary>
+    /// The literal is converted to a tuple type declared elsewhere that names the element differently or not at all
+    /// ('(int a, int b) t = (count: 1, 2)'): the compiler ignores the name (CS8123), nothing binds to it.
+    /// </summary>
+    Ignored,
+}
+
 /// <summary>
-/// BRO1311 (SA1316): element names in tuple types use the configured casing, PascalCase by default ('(int Count, string
-/// Name)'). Like StyleCop only the first letter counts, '_' is fine, and names a member has to take from a library member
-/// it overrides or implements aren't reported. An override of a member in the solution is reported: the fix renames
-/// both.
+/// BRO1311 (SA1316): element names in tuple types and explicit names in tuple literals use the configured casing,
+/// PascalCase by default ('(int Count, string Name)', '(Count: 1, Name: "a")'). Like StyleCop only the first letter
+/// counts, '_' is fine, and names a member has to take from a library member it overrides or implements aren't reported.
+/// An override of a member in the solution is reported: the fix renames both. A literal's name that follows a declared
+/// tuple type's (<see cref="TupleLiteralElement.FollowsTarget"/>) isn't reported on its own: the declaration's rename
+/// takes it along.
 /// </summary>
 internal static class TupleElementNames
 {
@@ -97,6 +119,120 @@ internal static class TupleElementNames
             _ => null,
         };
         return (type is not null && type.Span.Contains(node.Span)) || (parameters is not null && parameters.Span.Contains(node.Span));
+    }
+
+    /// <summary>
+    /// What the element at <paramref name="index"/> of a tuple literal is to the type the literal ends up as, and that
+    /// type's element (null when the literal has no tuple type at all). The literal's own type's elements are declared
+    /// in the literal (at the explicit name, or at the argument an inferred name comes from); a declared target's
+    /// elements are declared somewhere else (or in a library).
+    /// </summary>
+    public static (TupleLiteralElement Kind, IFieldSymbol? Element) ClassifyLiteralElement(TupleExpressionSyntax tuple, int index, SemanticModel model, CancellationToken cancellationToken)
+    {
+        var argument = tuple.Arguments[index];
+        bool IsOwn(IFieldSymbol element) => element.Locations.Any(l => l.SourceTree == tuple.SyntaxTree && argument.Span.Contains(l.SourceSpan));
+
+        var info = model.GetTypeInfo(tuple, cancellationToken);
+        var element = GetElement(info.ConvertedType, index);
+        if (element is null || IsOwn(element))
+        {
+            // The conversion as the operation tree has it, for what the type info doesn't show as one.
+            if (GetElement(GetTargetType(tuple, model, cancellationToken), index) is not { } target || IsOwn(target))
+            {
+                return (TupleLiteralElement.Own, element ?? GetElement(info.Type, index));
+            }
+
+            element = target;
+        }
+
+        var name = argument.NameColon?.Name.Identifier.ValueText ?? GetInferredName(argument.Expression);
+        return (element.Name == name ? TupleLiteralElement.FollowsTarget : TupleLiteralElement.Ignored, element);
+    }
+
+    /// <summary>
+    /// Whether another element of the literal has the name already, written or inferred ('(count: 1, Count: 2)', '(count:
+    /// 1, other.Count)'): a second 'Count' is an error (CS8127), or silently takes the inferred name away, and 't.Count'
+    /// would then mean the other element. Or the name is one of the tuple's own members ('rest' -> 'Rest', 'item2' ->
+    /// 'Item2' for the first element: CS8126, CS8125).
+    /// </summary>
+    public static bool HasNameClash(TupleExpressionSyntax tuple, int index, string newName)
+    {
+        if (newName is "CompareTo" or "Deconstruct" or "Equals" or "GetHashCode" or "Rest" or "ToString"
+            || (newName.StartsWith("Item", StringComparison.Ordinal) && int.TryParse(newName.Substring(4), out var position) && position != index + 1))
+        {
+            return true;
+        }
+
+        for (var i = 0; i < tuple.Arguments.Count; i++)
+        {
+            if (i != index && (tuple.Arguments[i].NameColon?.Name.Identifier.ValueText ?? GetInferredName(tuple.Arguments[i].Expression)) == newName)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>The name a tuple literal's element takes from its expression ('pair.first', 'first', 'pair?.first'), or null.</summary>
+    public static string? GetInferredName(ExpressionSyntax expression) => expression switch
+    {
+        IdentifierNameSyntax identifier => identifier.Identifier.ValueText,
+        MemberAccessExpressionSyntax access => access.Name.Identifier.ValueText,
+        ConditionalAccessExpressionSyntax conditional => GetInferredName(conditional.WhenNotNull),
+        MemberBindingExpressionSyntax binding => binding.Name.Identifier.ValueText,
+        _ => null,
+    };
+
+    /// <summary>
+    /// The type a tuple literal is converted to, from its context in the operation tree, or the type of what it's compared
+    /// with ('pair == (count: 1, 2)': a name the other side doesn't have is ignored with a warning, CS8383; another
+    /// literal there is no declared type); null where the context isn't one of these.
+    /// </summary>
+    private static ITypeSymbol? GetTargetType(TupleExpressionSyntax tuple, SemanticModel model, CancellationToken cancellationToken)
+    {
+        var operation = model.GetOperation(tuple, cancellationToken);
+        while (operation?.Parent is IConversionOperation or IParenthesizedOperation)
+        {
+            operation = operation.Parent;
+        }
+
+        return operation?.Parent switch
+        {
+            IConversionOperation conversion => conversion.Type,
+            ISimpleAssignmentOperation assignment => assignment.Target.Type,
+            IVariableInitializerOperation { Parent: IVariableDeclaratorOperation declarator } => declarator.Symbol.Type,
+            IFieldInitializerOperation field => field.InitializedFields.FirstOrDefault()?.Type,
+            IPropertyInitializerOperation property => property.InitializedProperties.FirstOrDefault()?.Type,
+            IArgumentOperation argument => argument.Parameter?.Type,
+            IReturnOperation => ReturnType(model.GetEnclosingSymbol(tuple.SpanStart, cancellationToken) as IMethodSymbol),
+            ITupleBinaryOperation comparison => ComparedType(comparison.LeftOperand == operation ? comparison.RightOperand : comparison.LeftOperand),
+            _ => null,
+        };
+    }
+
+    private static ITypeSymbol? ComparedType(IOperation other)
+    {
+        while (other is IConversionOperation or IParenthesizedOperation)
+        {
+            other = other is IConversionOperation conversion ? conversion.Operand : ((IParenthesizedOperation)other).Operand;
+        }
+
+        return other is ITupleOperation ? null : other.Type;
+    }
+
+    private static ITypeSymbol? ReturnType(IMethodSymbol? method) =>
+        method is { IsAsync: true, ReturnType: INamedTypeSymbol { TypeArguments.Length: 1 } task } ? task.TypeArguments[0] : method?.ReturnType;
+
+    /// <summary>The tuple type's element at <paramref name="index"/> (a nullable tuple's too), or null.</summary>
+    private static IFieldSymbol? GetElement(ITypeSymbol? type, int index)
+    {
+        if (type is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T, TypeArguments.Length: 1 } nullable)
+        {
+            type = nullable.TypeArguments[0];
+        }
+
+        return type is INamedTypeSymbol { IsTupleType: true } tuple && index < tuple.TupleElements.Length ? tuple.TupleElements[index] : null;
     }
 
     /// <summary>Whether a member's own signature (before type arguments are filled in) names tuple elements.</summary>

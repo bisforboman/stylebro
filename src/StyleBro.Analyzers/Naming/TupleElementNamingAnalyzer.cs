@@ -6,7 +6,10 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace StyleBro.Analyzers.Naming;
 
-/// <summary>BRO1311: element names in tuple types use the configured casing (<see cref="TupleElementNames"/>).</summary>
+/// <summary>
+/// BRO1311: element names in tuple types and explicit names in tuple literals use the configured casing
+/// (<see cref="TupleElementNames"/>).
+/// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class TupleElementNamingAnalyzer : DiagnosticAnalyzer
 {
@@ -20,6 +23,44 @@ public sealed class TupleElementNamingAnalyzer : DiagnosticAnalyzer
         context.EnableConcurrentExecution();
         context = context.SkipForeignFiles();
         context.RegisterSyntaxNodeAction(Analyze, SyntaxKind.TupleElement);
+        context.RegisterSyntaxNodeAction(AnalyzeLiteral, SyntaxKind.TupleExpression);
+    }
+
+    /// <summary>
+    /// The explicit names of a tuple literal ('(count: 1, name: "a")'), like StyleCop 1.3's SA1316: always checked, but
+    /// for a name that follows a declared tuple type's (that declaration is reported, and its fix renames the literal
+    /// too; a library's or a public signature's names can't change) and one whose new name another element has.
+    /// </summary>
+    private static void AnalyzeLiteral(SyntaxNodeAnalysisContext context)
+    {
+        var tuple = (TupleExpressionSyntax)context.Node;
+        AnalyzerConfigOptions? options = null;
+        for (var i = 0; i < tuple.Arguments.Count; i++)
+        {
+            if (tuple.Arguments[i].NameColon is not { Name.Identifier: { IsMissing: false } identifier })
+            {
+                continue;
+            }
+
+            var name = identifier.ValueText;
+            options ??= context.Options.AnalyzerConfigOptionsProvider.GetOptions(tuple.SyntaxTree);
+            if (TupleElementNames.GetNewName(name, TupleElementNames.IsCamelCase(options)) is not { } newName
+                || TupleElementNames.HasNameClash(tuple, i, newName)
+                || TupleElementNames.ClassifyLiteralElement(tuple, i, context.SemanticModel, context.CancellationToken).Kind == TupleLiteralElement.FollowsTarget
+                || DisabledCode.Mentions(context.Compilation, identifier.ValueText)
+                || (context.ContainingSymbol is { } owner
+                    && !NamingRules.AllowsRename(context.Compilation, options, identifier.GetLocation(), owner, null, context.CancellationToken)))
+            {
+                continue;
+            }
+
+            context.ReportDiagnostic(Diagnostic.Create(
+                Descriptors.TupleElementCasing,
+                identifier.GetLocation(),
+                ImmutableDictionary<string, string?>.Empty.Add(CamelCaseNamingAnalyzer.NewNameKey, newName).Add(TupleElementNames.OldNameKey, name),
+                name,
+                newName));
+        }
     }
 
     private static void Analyze(SyntaxNodeAnalysisContext context)

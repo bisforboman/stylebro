@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Operations;
 using Microsoft.CodeAnalysis.Text;
 using StyleBro.Analyzers;
 using StyleBro.Analyzers.Naming;
@@ -21,11 +20,14 @@ namespace StyleBro.CodeFixes.Naming;
 /// <item>every tuple type element with the old name, except in a member that overrides or implements a library member
 /// whose own declaration has tuple names (they have to match; 'IComparer&lt;(int a, int b)&gt;.Compare' takes them from
 /// the type argument, which is renamed too), and in a public signature unless stylebro_rename_public_api is true;</item>
-/// <item>every explicit name in a tuple literal ('(count: 1, ...)') converted to a renamed element (else the compiler
-/// warns that the name is ignored, CS8123); a literal that keeps its natural type isn't a tuple type the rule checks, and
-/// keeps its names;</item>
+/// <item>every explicit name in a tuple literal ('(count: 1, ...)'): one converted to a declared tuple type with that
+/// name when that element is renamed (else the compiler warns that the name is ignored, CS8123), one the compiler ignores
+/// anyway, and one of a literal that keeps its own type ('var t = (count: 1, 2)'), whose element is then a renamed
+/// place too. Not where another element of the literal has the new name
+/// (<see cref="TupleElementNames.HasNameClash"/>);</item>
 /// <item>every use ('t.count', 't?.count', 'nameof', '(count: var c)' in a pattern) of an element declared at a renamed
-/// place. Inferred names and elements from libraries keep theirs.</item>
+/// place. A use that gives a tuple literal's element its inferred name ('(t.count, 1)') renames that element too, and
+/// so its uses, and so on. Elements from libraries keep their names.</item>
 /// </list>
 /// A rename that adds compile errors anywhere, or a report of IDE0042 where that's a warning or an error
 /// (<see cref="Deconstruction"/>), is dropped and its warning stays (a deliberate exception, like the naming rules'
@@ -387,12 +389,12 @@ internal static class TupleElementRenamer
             }
         }
 
-        // 2. Explicit names in tuple literals, when the element they end up in is renamed (or is their own).
+        // 2. Explicit names in tuple literals: with the declared element they follow, or on their own (in onlyIn's files).
         foreach (var (document, root, model) in documents)
         {
+            var inScope = onlyIn is null || onlyIn.Contains(document.FilePath ?? document.Name);
             foreach (var tuple in root.DescendantNodes().OfType<TupleExpressionSyntax>())
             {
-                var converted = GetTargetType(tuple, model, cancellationToken) as INamedTypeSymbol;
                 for (var i = 0; i < tuple.Arguments.Count; i++)
                 {
                     if (tuple.Arguments[i].NameColon is not { } nameColon || nameColon.Name.Identifier.ValueText != oldName)
@@ -400,36 +402,85 @@ internal static class TupleElementRenamer
                         continue;
                     }
 
-                    var target = converted is { IsTupleType: true } && i < converted.TupleElements.Length ? converted.TupleElements[i] : null;
-                    if (target is not null && target.Locations.Any(l => l.IsInSource && renamed.Contains(Key(l))))
+                    var (kind, target) = TupleElementNames.ClassifyLiteralElement(tuple, i, model, cancellationToken);
+                    if (kind == TupleLiteralElement.FollowsTarget)
                     {
+                        if (target is not null && target.Locations.Any(l => l.IsInSource && renamed.Contains(Key(l))))
+                        {
+                            Rename(document, nameColon.Name.Identifier);
+                        }
+                    }
+                    else if (inScope && !TupleElementNames.HasNameClash(tuple, i, newName))
+                    {
+                        // The literal's own element: its uses follow (step 3). An ignored name has none.
+                        if (kind == TupleLiteralElement.Own)
+                        {
+                            renamed.Add(Key(nameColon.Name.Identifier.GetLocation()));
+                        }
+
                         Rename(document, nameColon.Name.Identifier);
                     }
                 }
             }
         }
 
-        // 3. Uses of renamed elements.
-        foreach (var (document, root, model) in documents)
+        // 3. Uses of renamed elements, until no use renames another element (an inferred name's).
+        var uses = documents.Select(d => (d.Document, d.Model, Names: d.Root.DescendantNodes().OfType<IdentifierNameSyntax>().Where(n => n.Identifier.ValueText == oldName && IsElementUse(n)).ToList())).ToList();
+        var done = new HashSet<IdentifierNameSyntax>();
+        for (var more = true; more;)
         {
-            foreach (var name in root.DescendantNodes().OfType<IdentifierNameSyntax>().Where(n => n.Identifier.ValueText == oldName && IsElementUse(n)))
+            more = false;
+            foreach (var (document, model, names) in uses)
             {
-                if (model.GetSymbolInfo(name, cancellationToken).Symbol is IFieldSymbol { ContainingType.IsTupleType: true } element
-                    && element.Locations.Any(l => l.IsInSource && renamed.Contains(Key(l))))
+                foreach (var name in names.Where(n => !done.Contains(n)))
                 {
+                    if (model.GetSymbolInfo(name, cancellationToken).Symbol is not IFieldSymbol { ContainingType.IsTupleType: true } element
+                        || !element.Locations.Any(l => l.IsInSource && renamed.Contains(Key(l))))
+                    {
+                        continue;
+                    }
+
                     // The hole's text is a log key (CamelCaseRenamer.GetLogKeyHandlerAsync).
                     if (CamelCaseRenamer.GetLogKeyHandler(name, name.Span, model, cancellationToken) is { } handler)
                     {
                         return (null, visible, $"{document.FilePath ?? document.Name}({name.GetLocation().GetLineSpan().StartLinePosition.Line + 1}) in {handler}");
                     }
 
-                    // '(pair.first, ...)' and 'new { pair.first }' infer a name from the use: it's written out, so the
-                    // inferred element (and every use of it) keeps the old name. Not in a literal converted to a tuple
-                    // type, whose names win: there the written-out name was only a CS8123 (coverlet's 'return (false,
-                    // map.First().documentName)', trial 20).
-                    if (InferredNameStart(name, model, cancellationToken) is { } start)
+                    done.Add(name);
+                    switch (GetInferredElement(name))
                     {
-                        Edit(document, new TextChange(new TextSpan(start.Position, 0), oldName + start.Separator));
+                        // 'new { pair.first }' infers a property name from the use: it's written out, so the anonymous
+                        // type's property (and every use of it) keeps the old name.
+                        case AnonymousObjectMemberDeclaratorSyntax member:
+                            Edit(document, new TextChange(new TextSpan(member.SpanStart, 0), oldName + " = "));
+                            break;
+
+                        // '(pair.first, ...)' infers an element name from the use. In a literal that keeps its own type
+                        // that element is renamed with the use, and its uses after it ('var u = (pair.first, 1); u.first').
+                        // Written out with the old name it would be an explicit name in the wrong case, reported in the
+                        // next run; that is only done where another element has the new name already (the inferred one
+                        // would be lost, or 'u.First' would mean the other element), and there the rule leaves it. In
+                        // a literal converted to a declared tuple type that type's names win: nothing to keep (coverlet's
+                        // 'return (false, map.First().documentName)', trial 20).
+                        case ArgumentSyntax { Parent: TupleExpressionSyntax tuple } argument:
+                            var index = tuple.Arguments.IndexOf(argument);
+                            if (TupleElementNames.ClassifyLiteralElement(tuple, index, model, cancellationToken) is (TupleLiteralElement.Own, { } inferred)
+                                && inferred.Name == oldName)
+                            {
+                                if (TupleElementNames.HasNameClash(tuple, index, newName))
+                                {
+                                    Edit(document, new TextChange(new TextSpan(argument.SpanStart, 0), oldName + ": "));
+                                }
+                                else
+                                {
+                                    foreach (var location in inferred.Locations.Where(l => l.IsInSource))
+                                    {
+                                        more |= renamed.Add(Key(location));
+                                    }
+                                }
+                            }
+
+                            break;
                     }
 
                     Rename(document, name.Identifier);
@@ -457,39 +508,10 @@ internal static class TupleElementRenamer
     }
 
     /// <summary>
-    /// The type a tuple literal is converted to, from its context: GetTypeInfo's ConvertedType (and the natural type) have
-    /// elements that point at the literal's own names, so they can't tell a renamed target from none. Null where the
-    /// context isn't one of these; the compile check catches a literal left behind (CS8123).
+    /// The unnamed tuple argument or anonymous object member that may get its name from this use ('(pair.first, ...)',
+    /// 'new { pair.first }'); null when the use is somewhere else.
     /// </summary>
-    private static ITypeSymbol? GetTargetType(TupleExpressionSyntax tuple, SemanticModel model, CancellationToken cancellationToken)
-    {
-        var operation = model.GetOperation(tuple, cancellationToken);
-        while (operation?.Parent is IConversionOperation or IParenthesizedOperation)
-        {
-            operation = operation.Parent;
-        }
-
-        return operation?.Parent switch
-        {
-            IConversionOperation conversion => conversion.Type,
-            ISimpleAssignmentOperation assignment => assignment.Target.Type,
-            IVariableInitializerOperation { Parent: IVariableDeclaratorOperation declarator } => declarator.Symbol.Type,
-            IFieldInitializerOperation field => field.InitializedFields.FirstOrDefault()?.Type,
-            IPropertyInitializerOperation property => property.InitializedProperties.FirstOrDefault()?.Type,
-            IArgumentOperation argument => argument.Parameter?.Type,
-            IReturnOperation => ReturnType(model.GetEnclosingSymbol(tuple.SpanStart, cancellationToken) as IMethodSymbol),
-            _ => null,
-        };
-    }
-
-    private static ITypeSymbol? ReturnType(IMethodSymbol? method) =>
-        method is { IsAsync: true, ReturnType: INamedTypeSymbol { TypeArguments.Length: 1 } task } ? task.TypeArguments[0] : method?.ReturnType;
-
-    /// <summary>
-    /// Where a tuple argument or anonymous object member gets its name from this use ('(pair.first, ...)', 'new {
-    /// pair.first }'), and what goes after the written-out name; null when the use doesn't name anything.
-    /// </summary>
-    private static (int Position, string Separator)? InferredNameStart(IdentifierNameSyntax name, SemanticModel model, CancellationToken cancellationToken)
+    private static SyntaxNode? GetInferredElement(IdentifierNameSyntax name)
     {
         SyntaxNode expression = name;
         while (expression.Parent is ExpressionSyntax parent and not TupleExpressionSyntax && parent.GetLastToken() == name.Identifier)
@@ -499,9 +521,8 @@ internal static class TupleElementRenamer
 
         return expression.Parent switch
         {
-            ArgumentSyntax { NameColon: null, Parent: TupleExpressionSyntax tuple } argument
-                when model.GetOperation(tuple, cancellationToken)?.Parent is not IConversionOperation { Type: INamedTypeSymbol { IsTupleType: true } } => (argument.SpanStart, ": "),
-            AnonymousObjectMemberDeclaratorSyntax { NameEquals: null } member => (member.SpanStart, " = "),
+            ArgumentSyntax { NameColon: null, Parent: TupleExpressionSyntax } argument => argument,
+            AnonymousObjectMemberDeclaratorSyntax { NameEquals: null } member => member,
             _ => null,
         };
     }
@@ -518,8 +539,9 @@ internal static class TupleElementRenamer
     private static string Key(Location location) => $"{location.SourceTree?.FilePath}|{location.SourceSpan.Start}";
 
     /// <summary>
-    /// Whether any project with a changed document has more compile errors afterwards, or more CS8123 warnings (a tuple
-    /// literal's name ignored because the type it converts to was renamed and the literal wasn't).
+    /// Whether any project with a changed document has more compile errors afterwards, or more CS8123 or CS8383 warnings
+    /// (a tuple literal's name ignored because the type it converts to, or is compared with, was renamed and the literal
+    /// wasn't, or the other way round).
     /// </summary>
     private static async Task<bool> AddsErrorsAsync(Solution before, Solution after, CancellationToken cancellationToken)
     {
@@ -537,5 +559,5 @@ internal static class TupleElementRenamer
     }
 
     private static int Errors(Compilation? compilation) =>
-        compilation?.GetDiagnostics().Count(d => d.Severity == DiagnosticSeverity.Error || d.Id == "CS8123") ?? 0;
+        compilation?.GetDiagnostics().Count(d => d.Severity == DiagnosticSeverity.Error || d.Id is "CS8123" or "CS8383") ?? 0;
 }
